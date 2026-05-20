@@ -1,0 +1,216 @@
+import React, { useState } from 'react';
+import InvoiceCard from '../components/InvoiceCard';
+import InvoicePreview from '../components/InvoicePreview';
+import { 
+  Search, 
+  Plus, 
+  FileSpreadsheet, 
+  X, 
+  Printer, 
+  Download, 
+  Edit,
+  ArrowDownWideNarrow,
+  FileDown
+} from 'lucide-react';
+import { formatCurrency } from '../utils/invoiceUtils';
+
+/**
+ * Invoice List and Manager Page
+ * @param {Array} invoices
+ * @param {Function} onEditInvoice
+ * @param {Function} onDeleteInvoice
+ * @param {Function} onDownloadPDF
+ * @param {Function} setCurrentTab
+ * @param {Object} businessSettings
+ */
+const Invoices = ({ 
+  invoices = [], 
+  onEditInvoice, 
+  onDeleteInvoice, 
+  onDownloadPDF, 
+  setCurrentTab,
+  businessSettings 
+}) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  
+  // Modal Preview State
+  const [viewingInvoice, setViewingInvoice] = useState(null);
+
+  const currencySymbol = businessSettings?.currency || '₹';
+
+  // --- FILTER LOGIC ---
+  const filteredInvoices = invoices.filter((inv) => {
+    const q = searchQuery.toLowerCase();
+    const matchSearch = (
+      inv.invoiceNumber.toLowerCase().includes(q) ||
+      inv.customerName.toLowerCase().includes(q) ||
+      inv.paymentStatus.toLowerCase().includes(q) ||
+      inv.date.includes(q)
+    );
+
+    const matchStatus = statusFilter === 'All' || inv.paymentStatus === statusFilter;
+
+    return matchSearch && matchStatus;
+  });
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="space-y-6">
+      
+      {/* Page Header Area */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-base font-extrabold text-slate-800 tracking-tight">Active Invoices</h2>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">MANAGE TRANSACTION HISTORY</p>
+        </div>
+
+        <button
+          onClick={() => {
+            onEditInvoice(null); // Clear editing state
+            setCurrentTab('create-invoice');
+          }}
+          className="flex items-center justify-center gap-2 bg-gradient-to-tr from-indigo-600 to-blue-500 text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Create New Invoice</span>
+        </button>
+      </div>
+
+      {/* SEARCH AND FILTERS */}
+      <div className="bg-white rounded-3xl p-4 md:p-5 border border-slate-100 shadow-premium flex flex-col md:flex-row gap-4 items-center justify-between">
+        
+        {/* Left Side: Filter Tabs */}
+        <div className="flex gap-1 bg-slate-50 p-1.5 rounded-2xl w-full md:w-auto overflow-x-auto no-scrollbar">
+          {['All', 'Paid', 'Pending', 'Unpaid'].map((status) => (
+            <button
+              key={status}
+              onClick={() => setStatusFilter(status)}
+              className={`text-xs font-bold px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
+                statusFilter === status
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-100/50'
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+
+        {/* Right Side: Search */}
+        <div className="relative w-full md:w-80">
+          <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
+            <Search className="w-4 h-4" />
+          </span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search invoice number, client..."
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
+          />
+        </div>
+      </div>
+
+      {/* INVOICE GRID LIST */}
+      <div className="space-y-3">
+        {filteredInvoices.map((invoice) => (
+          <InvoiceCard
+            key={invoice.id}
+            invoice={invoice}
+            currencySymbol={currencySymbol}
+            onView={(inv) => setViewingInvoice(inv)}
+            onEdit={(inv) => {
+              onEditInvoice(inv);
+              setCurrentTab('create-invoice');
+            }}
+            onDelete={onDeleteInvoice}
+            onDownload={onDownloadPDF}
+          />
+        ))}
+
+        {filteredInvoices.length === 0 && (
+          <div className="bg-white rounded-3xl p-12 border border-slate-100 text-center shadow-premium">
+            <FileSpreadsheet className="w-12 h-12 text-slate-200 mx-auto mb-3 animate-pulse" />
+            <h4 className="font-extrabold text-slate-700">No Invoices Found</h4>
+            <p className="text-xs text-slate-400 font-semibold mt-1 max-w-xs mx-auto">
+              We couldn't locate any records matching your active status filters or search term queries.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* DYNAMIC ELEVEN-STAR PREVIEW MODAL OVERLAY */}
+      {viewingInvoice && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 no-print">
+          <div className="bg-slate-50 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative animate-scaleUp border border-white/10 max-h-[92vh] flex flex-col">
+            
+            {/* Modal Top Actions Header Bar */}
+            <div className="bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <FileSpreadsheet className="w-5 h-5 text-indigo-500" />
+                <span className="font-extrabold text-slate-800 text-sm">{viewingInvoice.invoiceNumber} - Preview Mode</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handlePrint}
+                  className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-all"
+                  title="Print Invoice"
+                >
+                  <Printer className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onDownloadPDF(viewingInvoice)}
+                  className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-slate-50 rounded-xl transition-all"
+                  title="Download PDF"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    onEditInvoice(viewingInvoice);
+                    setViewingInvoice(null);
+                    setCurrentTab('create-invoice');
+                  }}
+                  className="p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-all"
+                  title="Edit Invoice"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+                <div className="w-px h-6 bg-slate-100 mx-1"></div>
+                <button
+                  onClick={() => setViewingInvoice(null)}
+                  className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable Preview Wrapper */}
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50">
+              <InvoicePreview 
+                invoice={viewingInvoice}
+                businessSettings={businessSettings}
+              />
+            </div>
+            
+            {/* Print Only Embedded Capture Zone */}
+            <div className="hidden print:block print:absolute print:inset-0 bg-white">
+              <InvoicePreview 
+                invoice={viewingInvoice}
+                businessSettings={businessSettings}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Invoices;
