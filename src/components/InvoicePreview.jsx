@@ -122,16 +122,31 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
             {invoice.items && invoice.items.map((item, idx) => (
               <tr key={idx} className="text-slate-700 hover:bg-slate-50/50">
                 <td className="py-4 font-semibold text-slate-800">
-                  {item.name}
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    {item.designNo && item.designNo !== 'N/A' && (
+                      <span className="inline-block px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[9px] font-black tracking-wider uppercase">
+                        {item.designNo}
+                      </span>
+                    )}
+                    {item.workType && (
+                      <span className="inline-block px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[9px] font-bold">
+                        {item.workType}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-slate-800 font-semibold">{item.description || item.name || 'Stitching Service'}</span>
+                  {item.size && item.size !== 'N/A' && (
+                    <span className="block text-[10px] text-slate-400 font-medium mt-0.5">Size: {item.size}</span>
+                  )}
                 </td>
                 <td className="py-4 text-center font-bold text-slate-600">
-                  {item.quantity}
+                  {item.qty !== undefined ? item.qty : item.quantity}
                 </td>
                 <td className="py-4 text-right font-semibold text-slate-600">
-                  {formatCurrency(item.price, currencySymbol)}
+                  {formatCurrency(item.rate !== undefined ? item.rate : item.price, currencySymbol)}
                 </td>
                 <td className="py-4 text-right font-extrabold text-slate-900">
-                  {formatCurrency(item.total, currencySymbol)}
+                  {formatCurrency(item.amount !== undefined ? item.amount : item.total, currencySymbol)}
                 </td>
               </tr>
             ))}

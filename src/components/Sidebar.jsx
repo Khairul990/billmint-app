@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, Shield, LogOut, ReceiptText } from 'lucide-react';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, Shield, LogOut, ReceiptText, TrendingDown, Sparkles } from 'lucide-react';
 import { logout } from '../utils/storage';
 
 /**
@@ -15,8 +15,10 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'invoices', label: 'Invoices', icon: FileSpreadsheet },
     { id: 'customers', label: 'Customers', icon: Users },
-    { id: 'products', label: 'Products & Services', icon: Layers },
-    { id: 'admin-panel', label: 'Admin Panel', icon: Shield },
+    { id: 'expenses', label: 'Overhead Expenses', icon: TrendingDown },
+    { id: 'products', label: 'Products & Catalog', icon: Layers },
+    { id: 'subscription', label: 'Subscription Plan', icon: Sparkles },
+    { id: 'admin-panel', label: 'Admin Settings', icon: Shield },
   ];
 
   return (

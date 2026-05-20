@@ -6,8 +6,10 @@ import CreateInvoice from './pages/CreateInvoice';
 import Customers from './pages/Customers';
 import Products from './pages/Products';
 import Settings from './pages/Settings';
+import Expenses from './pages/Expenses';
+import Subscription from './pages/Subscription';
+import MoreMenu from './pages/MoreMenu';
 import Layout from './components/Layout';
-import InvoicePreview from './components/InvoicePreview';
 
 import { 
   getAuthSession, 
@@ -24,7 +26,12 @@ import {
   getSettings, 
   saveSettings, 
   resetToDemoData,
-  initializeStorage 
+  initializeStorage,
+  getSubscriptionStatus,
+  saveSubscriptionStatus,
+  getExpenses,
+  saveExpense,
+  deleteExpense
 } from './utils/storage';
 import { downloadInvoicePDF } from './utils/pdfUtils';
 
@@ -43,12 +50,11 @@ function App() {
   const [customers, setCustomers] = useState(getCustomers());
   const [products, setProducts] = useState(getProducts());
   const [settings, setSettings] = useState(getSettings());
+  const [expenses, setExpenses] = useState(getExpenses());
+  const [subscription, setSubscription] = useState(getSubscriptionStatus());
 
   // Workspace Contexts
   const [editingInvoice, setEditingInvoice] = useState(null);
-  
-  // Hidden state for background PDF downloads
-  const [pdfInvoice, setPdfInvoice] = useState(null);
 
   // --- ROUTING SYSTEM ---
   // Listen for /admin and #/admin to route to admin panel automatically
@@ -93,6 +99,8 @@ function App() {
     setCustomers(getCustomers());
     setProducts(getProducts());
     setSettings(getSettings());
+    setExpenses(getExpenses());
+    setSubscription(getSubscriptionStatus());
     setCurrentTab('admin-panel');
   };
 
@@ -106,6 +114,12 @@ function App() {
   
   // Invoices
   const handleSaveInvoice = (payload) => {
+    const isNew = !payload.id || !invoices.some(inv => inv.id === payload.id);
+    if (isNew && subscription.status !== 'premium' && invoices.length >= 5) {
+      alert('⚠️ Free tier limit reached: You can create a maximum of 5 invoices. Please upgrade to the Premium Plan to unlock unlimited invoicing!');
+      setCurrentTab('subscription');
+      return;
+    }
     const updated = saveInvoice(payload);
     setInvoices(updated);
     setEditingInvoice(null);
@@ -140,6 +154,23 @@ function App() {
     setProducts(updated);
   };
 
+  // Expenses
+  const handleSaveExpense = (payload) => {
+    const updated = saveExpense(payload);
+    setExpenses(updated);
+  };
+
+  const handleDeleteExpense = (id) => {
+    const updated = deleteExpense(id);
+    setExpenses(updated);
+  };
+
+  // Subscription
+  const handleSaveSubscription = (status) => {
+    const updated = saveSubscriptionStatus(status);
+    setSubscription(updated);
+  };
+
   // Settings
   const handleSaveSettings = (payload) => {
     const updated = saveSettings(payload);
@@ -153,25 +184,20 @@ function App() {
     setCustomers(freshData.customers);
     setProducts(freshData.products);
     setInvoices(freshData.invoices);
+    setExpenses(freshData.expenses);
+    setSubscription(freshData.subscription);
     setCurrentTab('dashboard');
   };
 
   // --- PDF GENERATOR WORKER ---
   const handleDownloadPDF = (invoice) => {
-    // Set active invoice in background capture state
-    setPdfInvoice(invoice);
-    
-    // Allow React state to update the DOM, then capture
-    setTimeout(() => {
-      downloadInvoicePDF('invoice-pdf-hidden-capture', invoice.invoiceNumber)
-        .then((ok) => {
-          if (ok) {
-            console.log(`Successfully generated PDF for ${invoice.invoiceNumber}`);
-          }
-          // Clear background state
-          setPdfInvoice(null);
-        });
-    }, 100);
+    const isPremium = subscription.status === 'premium';
+    downloadInvoicePDF(invoice, settings, isPremium)
+      .then((ok) => {
+        if (ok) {
+          console.log(`Successfully generated vector PDF for ${invoice.invoiceNumber}`);
+        }
+      });
   };
 
   // --- TAB ROUTER SWITCHBOARD ---
@@ -239,6 +265,32 @@ function App() {
             businessSettings={settings}
           />
         );
+      case 'expenses':
+        return (
+          <Expenses
+            expenses={expenses}
+            onSaveExpense={handleSaveExpense}
+            onDeleteExpense={handleDeleteExpense}
+            businessSettings={settings}
+          />
+        );
+      case 'subscription':
+        return (
+          <Subscription
+            currentSubscription={subscription}
+            onUpgrade={handleSaveSubscription}
+            businessSettings={settings}
+          />
+        );
+      case 'more':
+        return (
+          <MoreMenu
+            setCurrentTab={setCurrentTab}
+            isAuthenticated={isAuthenticated}
+            onLoginSuccess={handleLoginSuccess}
+            businessSettings={settings}
+          />
+        );
       case 'admin-panel':
         if (!isAuthenticated) {
           return <Login onLoginSuccess={handleLoginSuccess} />;
@@ -271,18 +323,6 @@ function App() {
       isAuthenticated={isAuthenticated}
     >
       {renderTabContent()}
-
-      {/* BACKGROUND PDF RENDER ZONE */}
-      <div 
-        className="no-print" 
-        style={{ position: 'absolute', left: '-9999px', top: '-9999px', pointerEvents: 'none' }}
-      >
-        {pdfInvoice && (
-          <div id="invoice-pdf-hidden-capture" style={{ width: '800px', background: '#ffffff' }}>
-            <InvoicePreview invoice={pdfInvoice} businessSettings={settings} />
-          </div>
-        )}
-      </div>
     </Layout>
   );
 }

@@ -24,6 +24,12 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         return 'Client CRM';
       case 'products':
         return 'Product & Service Catalog';
+      case 'expenses':
+        return 'Overhead Expense Logger';
+      case 'subscription':
+        return 'SaaS Licensing Tiers';
+      case 'more':
+        return 'More Workspace Options';
       case 'admin-panel':
         return 'Admin Control Panel';
       case 'settings':

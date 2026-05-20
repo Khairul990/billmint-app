@@ -7,8 +7,8 @@
  */
 export const calculateTotals = (items = [], taxPercentage = 0, discountAmount = 0) => {
   const subtotal = items.reduce((acc, item) => {
-    const qty = parseFloat(item.quantity) || 0;
-    const price = parseFloat(item.price) || 0;
+    const qty = parseFloat(item.qty !== undefined ? item.qty : item.quantity) || 0;
+    const price = parseFloat(item.rate !== undefined ? item.rate : item.price) || 0;
     return acc + (qty * price);
   }, 0);
 
@@ -59,3 +59,30 @@ export const generateNextInvoiceNumber = (invoices = []) => {
 
   return `INV-${maxNum + 1}`;
 };
+
+/**
+ * Scans all invoices to find the highest SO-[number] design number and returns the next one.
+ * @param {Array} invoices
+ * @param {number} offset - row offset index
+ * @returns {string} e.g. SO-9
+ */
+export const getNextDesignNumber = (invoices = [], offset = 0) => {
+  let maxNum = 4; // Seeds have SO-5 to SO-8, so start at 4 if no items are found
+  
+  invoices.forEach(inv => {
+    if (inv.items && Array.isArray(inv.items)) {
+      inv.items.forEach(item => {
+        if (item.designNo && typeof item.designNo === 'string' && item.designNo.startsWith('SO-')) {
+          const numPart = item.designNo.replace('SO-', '');
+          const parsed = parseInt(numPart, 10);
+          if (!isNaN(parsed) && parsed > maxNum) {
+            maxNum = parsed;
+          }
+        }
+      });
+    }
+  });
+
+  return `SO-${maxNum + 1 + offset}`;
+};
+

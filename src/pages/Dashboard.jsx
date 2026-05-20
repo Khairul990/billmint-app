@@ -10,20 +10,15 @@ import {
   Users, 
   FileSpreadsheet, 
   ReceiptText, 
-  ArrowRight
+  ArrowRight,
+  Send,
+  MessageSquare,
+  AlertCircle
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 
 /**
- * Premium Dashboard page
- * @param {Array} invoices
- * @param {Array} customers
- * @param {Function} onViewInvoice
- * @param {Function} onEditInvoice
- * @param {Function} onDeleteInvoice
- * @param {Function} onDownloadPDF
- * @param {Function} setCurrentTab
- * @param {Object} businessSettings
+ * High-End SaaS Dashboard with SVG Charts & WhatsApp Reminders
  */
 const Dashboard = ({ 
   invoices = [], 
@@ -36,21 +31,18 @@ const Dashboard = ({
   businessSettings 
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
   
   const currencySymbol = businessSettings?.currency || '₹';
+  const businessName = businessSettings?.businessName || 'BillMint Embroidery';
 
-  // --- STATS CALCULATIONS ---
+  // --- STATS CALCULATIONS (Accurate SaaS Math) ---
   const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.grandTotal || 0), 0);
   
-  const paidRevenue = invoices
-    .filter(inv => inv.paymentStatus === 'Paid')
-    .reduce((sum, inv) => sum + (inv.grandTotal || 0), 0);
+  const totalPaid = invoices.reduce((sum, inv) => sum + (inv.amountPaid || 0), 0);
 
-  const pendingRevenue = invoices
-    .filter(inv => inv.paymentStatus === 'Pending')
-    .reduce((sum, inv) => sum + (inv.grandTotal || 0), 0);
+  const totalDue = invoices.reduce((sum, inv) => sum + (inv.balanceDue || 0), 0);
 
-  const totalInvoicesCount = invoices.length;
   const totalCustomersCount = customers.length;
 
   // Filter invoices for local dashboard search
@@ -59,12 +51,70 @@ const Dashboard = ({
     return (
       inv.invoiceNumber.toLowerCase().includes(q) ||
       inv.customerName.toLowerCase().includes(q) ||
-      inv.paymentStatus.toLowerCase().includes(q)
+      (inv.paymentStatus && inv.paymentStatus.toLowerCase().includes(q))
     );
   });
 
   // Recent invoices (Max 3)
   const recentInvoices = invoices.slice(-3).reverse();
+
+  // Outstanding unpaid invoices for WhatsApp reminders
+  const unpaidInvoices = invoices.filter(inv => inv.balanceDue > 0);
+
+  // --- 6-MONTH CHART DATA AGGREGATION ---
+  const getMonthlyData = () => {
+    const months = [];
+    const now = new Date();
+    // Get last 6 rolling months (chronological order)
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({
+        key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+        label: d.toLocaleString('default', { month: 'short' }),
+        total: 0
+      });
+    }
+
+    invoices.forEach(inv => {
+      if (!inv.date) return;
+      const invMonthKey = inv.date.substring(0, 7); // "YYYY-MM"
+      const match = months.find(m => m.key === invMonthKey);
+      if (match) {
+        match.total += (inv.grandTotal || 0);
+      }
+    });
+
+    return months;
+  };
+
+  const monthlyData = getMonthlyData();
+  const maxVal = Math.max(...monthlyData.map(m => m.total), 5000); // Floor scale of 5000 to keep it professional
+
+  // SVG Chart Layout
+  const chartWidth = 600;
+  const chartHeight = 220;
+  const paddingX = 40;
+  const paddingY = 30;
+  const graphWidth = chartWidth - paddingX * 2;
+  const graphHeight = chartHeight - paddingY * 2;
+  const barWidth = 40;
+  const gap = (graphWidth - barWidth * 6) / 5;
+
+  // --- WHATSAPP REMINDER DISPATCHER ---
+  const sendWhatsAppReminder = (invoice) => {
+    const phone = invoice.customerPhone || '';
+    if (!phone) {
+      alert('This customer does not have a saved phone number. Please edit their details in the CRM.');
+      return;
+    }
+
+    const msg = `Hello *${invoice.customerName}*,\n\nThis is a friendly payment reminder from *${businessName}* regarding Invoice *${invoice.invoiceNumber}* (issued on ${invoice.date}).\n\n* Invoice Total: ${currencySymbol}${invoice.grandTotal.toFixed(2)}\n* Amount Paid: ${currencySymbol}${invoice.amountPaid.toFixed(2)}\n* Outstanding Balance: *${currencySymbol}${invoice.balanceDue.toFixed(2)}*\n* Payment Due Date: *${invoice.dueDate || 'N/A'}*\n\nPlease complete payment at your earliest convenience. Thank you for your business!\n\nBest regards,\n${businessName}`;
+
+    // Clean phone number of spaces or symbols
+    const cleanPhone = phone.replace(/[^0-9+]/g, '');
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   return (
     <div className="space-y-6">
@@ -72,162 +122,360 @@ const Dashboard = ({
       {/* 1. STATS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         <StatCard
-          title="Total Invoiced"
+          title="Total Billed"
           value={formatCurrency(totalRevenue, currencySymbol)}
           icon={DollarSign}
-          trend="+18.4%"
+          trend="+12.4% MoM"
           trendUp={true}
           accentColor="bg-indigo-50 text-indigo-600"
         />
         <StatCard
-          title="Paid Revenue"
-          value={formatCurrency(paidRevenue, currencySymbol)}
+          title="Total Collected"
+          value={formatCurrency(totalPaid, currencySymbol)}
           icon={TrendingUp}
-          trend="+22.1%"
+          trend="+15.8% MoM"
           trendUp={true}
           accentColor="bg-emerald-50 text-emerald-600"
         />
         <StatCard
-          title="Pending Collection"
-          value={formatCurrency(pendingRevenue, currencySymbol)}
+          title="Outstanding Dues"
+          value={formatCurrency(totalDue, currencySymbol)}
           icon={Hourglass}
-          trend="-3.2%"
+          trend="-8.2% outstanding"
           trendUp={false}
           accentColor="bg-amber-50 text-amber-600"
         />
         <StatCard
-          title="Total Customers"
+          title="Active Clients"
           value={totalCustomersCount}
           icon={Users}
-          trend="+5 new"
+          trend="In SaaS CRM"
           trendUp={true}
           accentColor="bg-blue-50 text-blue-600"
         />
       </div>
 
-      {/* 2. DYNAMIC QUICK LAUNCH CTA CARD */}
-      <div className="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-md">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
-        <div className="max-w-xl relative z-10">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-300">
-            Speed Billing
-          </span>
-          <h2 className="text-xl md:text-2xl font-extrabold tracking-tight mt-1">
-            Instantly Generate a Professional Invoice
-          </h2>
-          <p className="text-xs md:text-sm text-slate-300 font-medium mt-1 leading-relaxed">
-            Prefill details by selecting saved inventory items and customers to compute GST/taxes, and print or download A4 sheets immediately.
-          </p>
+      {/* 2. ANALYTICS & QUICK LAUNCH ACTIONS */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* SVG Custom Revenue Chart */}
+        <div className="lg:col-span-2 bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-extrabold text-sm text-slate-800 tracking-tight">Revenue Analytics</h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ROLLING 6 MONTH HISTORY</p>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase">Gross Billing</span>
+            </div>
+          </div>
+
+          {/* Pure SVG Graph */}
+          <div className="relative">
+            <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-auto overflow-visible">
+              <defs>
+                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#6366f1" />
+                  <stop offset="100%" stopColor="#3b82f6" />
+                </linearGradient>
+                <linearGradient id="gridGradient" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#f8fafc" />
+                  <stop offset="100%" stopColor="#f1f5f9" />
+                </linearGradient>
+              </defs>
+
+              {/* Gridlines */}
+              <line x1={paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={paddingY} stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3" />
+              <line x1={paddingX} y1={paddingY + graphHeight / 2} x2={chartWidth - paddingX} y2={paddingY + graphHeight / 2} stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3" />
+              <line x1={paddingX} y1={chartHeight - paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke="#e2e8f0" strokeWidth="1" />
+
+              {/* Y Axis Reference Labels */}
+              <text x={paddingX - 8} y={paddingY + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400">{formatCurrency(maxVal, currencySymbol)}</text>
+              <text x={paddingX - 8} y={paddingY + graphHeight / 2 + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400">{formatCurrency(maxVal / 2, currencySymbol)}</text>
+              <text x={paddingX - 8} y={chartHeight - paddingY + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400">{currencySymbol}0</text>
+
+              {/* Bars rendering */}
+              {monthlyData.map((m, i) => {
+                const barHeight = (m.total / maxVal) * graphHeight;
+                const x = paddingX + i * (barWidth + gap) + gap / 2;
+                const y = chartHeight - paddingY - barHeight;
+
+                return (
+                  <g 
+                    key={m.key} 
+                    onMouseEnter={() => setHoveredBarIndex(i)}
+                    onMouseLeave={() => setHoveredBarIndex(null)}
+                    className="cursor-pointer"
+                  >
+                    {/* Hover Glow Behind */}
+                    {hoveredBarIndex === i && (
+                      <rect
+                        x={x - 6}
+                        y={paddingY - 5}
+                        width={barWidth + 12}
+                        height={graphHeight + 10}
+                        fill="#f8fafc"
+                        rx="12"
+                        className="transition-all duration-200"
+                      />
+                    )}
+
+                    {/* Main Bar */}
+                    <rect
+                      x={x}
+                      y={y}
+                      width={barWidth}
+                      height={Math.max(barHeight, 4)} // minimum height of 4px for visibility
+                      fill="url(#barGradient)"
+                      rx="6"
+                      className="transition-all duration-300 hover:opacity-90"
+                    />
+
+                    {/* Month Label */}
+                    <text
+                      x={x + barWidth / 2}
+                      y={chartHeight - paddingY + 16}
+                      textAnchor="middle"
+                      className={`text-[10px] font-bold transition-colors duration-200 ${
+                        hoveredBarIndex === i ? 'fill-indigo-600 font-extrabold' : 'fill-slate-400'
+                      }`}
+                    >
+                      {m.label}
+                    </text>
+
+                    {/* Value Popover Label on Hover */}
+                    {hoveredBarIndex === i && (
+                      <g>
+                        <rect
+                          x={x + barWidth / 2 - 50}
+                          y={y - 28}
+                          width="100"
+                          height="20"
+                          fill="#1e293b"
+                          rx="6"
+                        />
+                        <text
+                          x={x + barWidth / 2}
+                          y={y - 15}
+                          textAnchor="middle"
+                          fill="#ffffff"
+                          className="text-[9px] font-black"
+                        >
+                          {formatCurrency(m.total, currencySymbol)}
+                        </text>
+                        {/* Downward triangle arrow */}
+                        <polygon
+                          points={`${x + barWidth / 2 - 4},${y - 8} ${x + barWidth / 2 + 4},${y - 8} ${x + barWidth / 2},${y - 4}`}
+                          fill="#1e293b"
+                        />
+                      </g>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+        </div>
+
+        {/* Speed Invoicing Call-To-Action Card */}
+        <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-6 text-white relative overflow-hidden shadow-premium flex flex-col justify-between">
+          <div className="absolute -top-12 -right-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+          
+          <div className="space-y-3">
+            <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full w-fit">
+              Embroidery Billing OS
+            </span>
+            <h2 className="text-lg md:text-xl font-extrabold tracking-tight mt-1 leading-snug">
+              Instant Thread & Stitch Invoicing
+            </h2>
+            <p className="text-[11px] text-slate-400 font-bold leading-relaxed">
+              Auto-generate sequential SO design numbers, compile multi-composite rates with smart adders, and download premium PDF invoice sheets.
+            </p>
+          </div>
           
           <button
             onClick={() => setCurrentTab('create-invoice')}
-            className="flex items-center gap-2 mt-5 bg-white text-slate-900 font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="flex items-center justify-center gap-2 mt-6 bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-black text-xs px-5 py-4 rounded-2xl shadow-lg shadow-indigo-500/10 hover:from-indigo-600 hover:to-blue-600 transition-all w-full hover:scale-[1.01] active:scale-[0.99]"
           >
-            <Plus className="w-4 h-4 text-indigo-600" />
+            <Plus className="w-4 h-4" />
             <span>Create New Invoice</span>
           </button>
         </div>
       </div>
 
-      {/* 3. DOUBLE PANEL LAYOUT */}
+      {/* 3. DUES AND RECENT RECORDS ROW */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left Side: Dynamic Recent Invoices List */}
+        {/* Left Double-width: Unpaid WhatsApp Reminders Section */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-extrabold text-base text-slate-800 tracking-tight">Recent Invoices</h3>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">LATEST TRANSACTIONS</p>
+              <h3 className="font-extrabold text-sm text-slate-800 tracking-tight flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-indigo-500" />
+                <span>Pending Balance Reminders</span>
+              </h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                AUTO-PREFILLED WHATSAPP DUELISTS
+              </p>
             </div>
             
-            <button
-              onClick={() => setCurrentTab('invoices')}
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition-all"
-            >
-              <span>View All</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <span className="text-[10px] font-black text-slate-500 bg-slate-100 py-1 px-2.5 rounded-full">
+              {unpaidInvoices.length} unpaid total
+            </span>
           </div>
 
-          <div className="space-y-3">
-            {recentInvoices.map((invoice) => (
-              <InvoiceCard
-                key={invoice.id}
-                invoice={invoice}
-                currencySymbol={currencySymbol}
-                onView={onViewInvoice}
-                onEdit={onEditInvoice}
-                onDelete={onDeleteInvoice}
-                onDownload={onDownloadPDF}
-              />
+          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-premium space-y-3.5 max-h-[300px] overflow-y-auto no-scrollbar">
+            {unpaidInvoices.map((inv) => (
+              <div 
+                key={inv.id}
+                className="flex items-center justify-between p-3.5 bg-slate-50/50 hover:bg-slate-50 rounded-2xl border border-slate-100/50 transition-all"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black text-slate-800">{inv.invoiceNumber}</span>
+                    <span className="text-[9px] bg-amber-50 text-amber-600 font-extrabold px-2 py-0.5 rounded uppercase">
+                      Due: {inv.dueDate || 'N/A'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 font-bold">
+                    Client: <span className="text-slate-800 font-extrabold">{inv.customerName}</span> • Phone: {inv.customerPhone || 'N/A'}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3.5">
+                  <div className="text-right">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase block leading-none">Outstanding Balance</span>
+                    <span className="text-xs font-black text-rose-500 mt-1 block">
+                      {formatCurrency(inv.balanceDue, currencySymbol)}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => sendWhatsAppReminder(inv)}
+                    className="flex items-center gap-1 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-[10px] py-2 px-3.5 rounded-xl shadow-sm hover:shadow transition-all shrink-0 uppercase tracking-wider"
+                  >
+                    <Send className="w-3 h-3" />
+                    <span>Remind</span>
+                  </button>
+                </div>
+              </div>
             ))}
 
-            {recentInvoices.length === 0 && (
-              <div className="bg-white rounded-3xl p-8 border border-slate-100/80 text-center shadow-premium">
-                <FileSpreadsheet className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                <h4 className="font-bold text-slate-700">No Invoices Yet</h4>
-                <p className="text-xs text-slate-400 font-semibold mt-1">
-                  Start billing by creating your first transactional record!
+            {unpaidInvoices.length === 0 && (
+              <div className="text-center py-8 text-slate-400 space-y-2">
+                <AlertCircle className="w-8 h-8 text-emerald-400 mx-auto" />
+                <h4 className="font-extrabold text-xs text-slate-700">Perfect Billing Score!</h4>
+                <p className="text-[10px] text-slate-400 font-bold">
+                  All accounts settled. There are no pending outstanding balances.
                 </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Side: Global Invoice Lookup */}
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-extrabold text-base text-slate-800 tracking-tight">Global Search</h3>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">QUICK FILTER SEARCH</p>
-          </div>
-
-          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-premium space-y-4">
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
-                <Search className="w-4 h-4" />
-              </span>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search Invoice ID, status, client..."
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
-              />
+        {/* Right Single-width: Recent Invoices & Global Search */}
+        <div className="space-y-6">
+          
+          {/* Recent Invoices */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-extrabold text-sm text-slate-800 tracking-tight">Recent Logs</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">LATEST TRANSACTIONS</p>
+              </div>
+              
+              <button
+                onClick={() => setCurrentTab('invoices')}
+                className="text-[10px] font-black text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition-all uppercase tracking-wider"
+              >
+                <span>View All</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
 
-            {searchQuery && (
-              <div className="space-y-2 max-h-60 overflow-y-auto no-scrollbar pt-2 border-t border-slate-50">
-                {filteredInvoices.map((inv) => (
-                  <div 
-                    key={inv.id} 
-                    onClick={() => onViewInvoice(inv)}
-                    className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-xl cursor-pointer transition-all border border-transparent hover:border-slate-100"
-                  >
-                    <div>
-                      <p className="text-xs font-extrabold text-slate-800">{inv.invoiceNumber}</p>
-                      <p className="text-[10px] text-slate-400 font-bold">{inv.customerName}</p>
-                    </div>
-                    <span className="text-xs font-black text-slate-800">
-                      {formatCurrency(inv.grandTotal, currencySymbol)}
-                    </span>
-                  </div>
-                ))}
+            <div className="space-y-3">
+              {recentInvoices.map((invoice) => (
+                <InvoiceCard
+                  key={invoice.id}
+                  invoice={invoice}
+                  currencySymbol={currencySymbol}
+                  onView={onViewInvoice}
+                  onEdit={onEditInvoice}
+                  onDelete={onDeleteInvoice}
+                  onDownload={onDownloadPDF}
+                />
+              ))}
 
-                {filteredInvoices.length === 0 && (
-                  <p className="text-center text-slate-400 font-semibold text-xs py-4">
-                    No matching records found.
+              {recentInvoices.length === 0 && (
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 text-center shadow-premium">
+                  <FileSpreadsheet className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <h4 className="font-bold text-xs text-slate-700">No Invoices</h4>
+                  <p className="text-[10px] text-slate-400 font-semibold mt-1">
+                    Start billing by creating your first transactional record!
                   </p>
-                )}
-              </div>
-            )}
-            
-            {!searchQuery && (
-              <div className="text-center py-6 text-slate-400">
-                <ReceiptText className="w-8 h-8 mx-auto text-slate-200 mb-2" />
-                <p className="text-xs font-semibold">Search values persist instantly.</p>
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Global Search Panel */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-extrabold text-sm text-slate-800 tracking-tight">Global Invoices Filter</h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">FAST SEARCH SYSTEM</p>
+            </div>
+
+            <div className="bg-white rounded-3xl p-4.5 border border-slate-100 shadow-premium space-y-3.5">
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
+                  <Search className="w-3.5 h-3.5" />
+                </span>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search Invoice ID, client..."
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
+                />
+              </div>
+
+              {searchQuery && (
+                <div className="space-y-2 max-h-40 overflow-y-auto no-scrollbar pt-2 border-t border-slate-50">
+                  {filteredInvoices.map((inv) => (
+                    <div 
+                      key={inv.id} 
+                      onClick={() => onViewInvoice(inv)}
+                      className="flex justify-between items-center p-2 hover:bg-slate-50 rounded-lg cursor-pointer transition-all border border-transparent hover:border-slate-100"
+                    >
+                      <div>
+                        <p className="text-xs font-extrabold text-slate-800">{inv.invoiceNumber}</p>
+                        <p className="text-[9px] text-slate-400 font-bold">{inv.customerName}</p>
+                      </div>
+                      <span className="text-xs font-black text-slate-800">
+                        {formatCurrency(inv.grandTotal, currencySymbol)}
+                      </span>
+                    </div>
+                  ))}
+
+                  {filteredInvoices.length === 0 && (
+                    <p className="text-center text-slate-400 font-semibold text-[10px] py-4">
+                      No matching records found.
+                    </p>
+                  )}
+                </div>
+              )}
+              
+              {!searchQuery && (
+                <div className="text-center py-4 text-slate-400">
+                  <ReceiptText className="w-6 h-6 mx-auto text-slate-200 mb-1.5" />
+                  <p className="text-[10px] font-bold">Search results show instantly.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
         
       </div>
