@@ -188,9 +188,9 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
         {filteredCustomers.length === 0 && (
           <div className="md:col-span-2 lg:col-span-3 bg-white rounded-3xl p-12 border border-slate-100 text-center shadow-premium">
             <Users className="w-12 h-12 text-slate-200 mx-auto mb-3 animate-pulse" />
-            <h4 className="font-extrabold text-slate-700">No Customers Registered</h4>
+            <h4 className="font-extrabold text-slate-700">No customers added</h4>
             <p className="text-xs text-slate-400 font-semibold mt-1 max-w-xs mx-auto">
-              Get started by uploading and saving details of business client contacts to auto-fill during invoice calculations.
+              No customers found. Create invoices to register customers automatically or add them here!
             </p>
           </div>
         )}

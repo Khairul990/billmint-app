@@ -135,9 +135,9 @@ const Invoices = ({
         {filteredInvoices.length === 0 && (
           <div className="bg-white rounded-3xl p-12 border border-slate-100 text-center shadow-premium">
             <FileSpreadsheet className="w-12 h-12 text-slate-200 mx-auto mb-3 animate-pulse" />
-            <h4 className="font-extrabold text-slate-700">No Invoices Found</h4>
+            <h4 className="font-extrabold text-slate-700">No invoices yet</h4>
             <p className="text-xs text-slate-400 font-semibold mt-1 max-w-xs mx-auto">
-              We couldn't locate any records matching your active status filters or search term queries.
+              No invoices found. Create your first bill to see transaction records here!
             </p>
           </div>
         )}

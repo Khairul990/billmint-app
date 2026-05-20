@@ -25,6 +25,7 @@ import {
   Check
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
+import { isFirebaseEnabled } from '../utils/firebase';
 
 /**
  * High-End SaaS Dashboard with SVG Charts & WhatsApp Reminders
@@ -295,6 +296,40 @@ const Dashboard = ({
 
           <div className="grid grid-cols-1 gap-3">
             
+            {/* Firebase Status Card */}
+            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                  <Activity className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Firebase Database</span>
+              </div>
+              {(() => {
+                if (!isFirebaseEnabled) {
+                  return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-550"></span>
+                      <span>Firebase Not Configured</span>
+                    </span>
+                  );
+                }
+                if (!navigator.onLine) {
+                  return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-450 text-[9px] font-black uppercase animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                      <span>Offline Mode (Local Backup Active)</span>
+                    </span>
+                  );
+                }
+                return (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Firebase Connected</span>
+                  </span>
+                );
+              })()}
+            </div>
+
             <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
@@ -433,6 +468,13 @@ const Dashboard = ({
 
           {/* Pure SVG Graph */}
           <div className="relative">
+            {invoices.length === 0 && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs p-4 rounded-3xl text-center z-10">
+                <TrendingUp className="w-10 h-10 text-indigo-500 mb-2 animate-bounce" />
+                <h4 className="font-extrabold text-xs text-slate-700 dark:text-slate-350">Revenue will appear after invoices are created</h4>
+                <p className="text-[9px] text-slate-400 font-bold uppercase mt-1">NO REVENUE DATA FOUND</p>
+              </div>
+            )}
             <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-auto overflow-visible">
               <defs>
                 <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
@@ -665,11 +707,11 @@ const Dashboard = ({
               ))}
 
               {recentInvoices.length === 0 && (
-                <div className="bg-white rounded-3xl p-6 border border-slate-100 text-center shadow-premium">
-                  <FileSpreadsheet className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  <h4 className="font-bold text-xs text-slate-700">No Invoices</h4>
+                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800/80 text-center shadow-premium">
+                  <FileSpreadsheet className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2 animate-pulse" />
+                  <h4 className="font-bold text-xs text-slate-700 dark:text-slate-350">No invoices yet</h4>
                   <p className="text-[10px] text-slate-400 font-semibold mt-1">
-                    Start billing by creating your first transactional record!
+                    Start by creating your first bill to see recent transactions here!
                   </p>
                 </div>
               )}

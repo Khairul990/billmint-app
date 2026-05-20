@@ -12,9 +12,19 @@ import {
   Key,
   Database,
   Download,
-  Upload
+  Upload,
+  Wifi,
+  WifiOff,
+  ServerOff,
+  HardDrive,
+  BarChart3,
+  Users,
+  FileText,
+  CircleDollarSign,
+  Clock
 } from 'lucide-react';
 import { exportBackup } from '../utils/storage';
+import { isFirebaseEnabled } from '../utils/firebase';
 
 /**
  * Settings & Administrator Management Page
@@ -23,7 +33,48 @@ import { exportBackup } from '../utils/storage';
  * @param {Function} onResetDemo - resets database back to seeded mock assets
  * @param {Function} onLogout - clears active user session
  */
-const Settings = ({ settings, onSaveSettings, onResetDemo, onLogout, onImportBackup }) => {
+const Settings = ({ settings, invoices = [], customers = [], onSaveSettings, onResetDemo, onLogout, onImportBackup }) => {
+  // --- REAL-TIME ADMIN STATS (calculated from live data) ---
+  const totalInvoices   = invoices.length;
+  const totalCustomers  = customers.length;
+  const totalRevenue    = invoices.reduce((sum, inv) => sum + (parseFloat(inv.grandTotal) || 0), 0);
+  const paidRevenue     = invoices.reduce((sum, inv) => sum + (parseFloat(inv.amountPaid) || 0), 0);
+  const pendingPayments = invoices.reduce((sum, inv) => sum + (parseFloat(inv.balanceDue) || 0), 0);
+  const paidCount       = invoices.filter(inv => inv.paymentStatus === 'Paid').length;
+  const pendingCount    = invoices.filter(inv => inv.paymentStatus !== 'Paid').length;
+
+  // Firebase status detection
+  const isOnline = navigator.onLine;
+  const firebaseStatus = isFirebaseEnabled && isOnline
+    ? 'connected'
+    : isFirebaseEnabled && !isOnline
+      ? 'offline'
+      : 'not-configured';
+
+  const firebaseStatusLabel = {
+    connected: 'Firebase Connected',
+    offline: 'Offline Mode Active',
+    'not-configured': 'Firebase Not Configured',
+  }[firebaseStatus];
+
+  const firebaseStatusColor = {
+    connected: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    offline: 'bg-amber-50 text-amber-700 border-amber-200',
+    'not-configured': 'bg-slate-50 text-slate-500 border-slate-200',
+  }[firebaseStatus];
+
+  const firebaseStatusDot = {
+    connected: 'bg-emerald-500',
+    offline: 'bg-amber-400',
+    'not-configured': 'bg-slate-400',
+  }[firebaseStatus];
+
+  const FirebaseIcon = {
+    connected: Wifi,
+    offline: WifiOff,
+    'not-configured': ServerOff,
+  }[firebaseStatus];
+
   // --- FORM STATES ---
   const [businessName, setBusinessName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
@@ -125,6 +176,98 @@ const Settings = ({ settings, onSaveSettings, onResetDemo, onLogout, onImportBac
 
   return (
     <form onSubmit={handleSave} className="space-y-6">
+
+      {/* ═══════════════════════════════════════════════════════
+          ADMINISTRATION & SYSTEM STATUS PANEL (Real Data)
+          ═══════════════════════════════════════════════════════ */}
+      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 md:p-6 border border-indigo-800/40 shadow-xl">
+        {/* Panel Header */}
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h3 className="text-sm font-extrabold text-white tracking-tight">Administration Overview</h3>
+            <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-wider mt-0.5">REAL-TIME SYSTEM STATISTICS</p>
+          </div>
+          {/* Firebase Status Badge */}
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-extrabold uppercase tracking-wider ${firebaseStatusColor}`}>
+            <span className={`w-2 h-2 rounded-full ${firebaseStatusDot} ${firebaseStatus === 'connected' ? 'animate-pulse' : ''}`}></span>
+            <FirebaseIcon className="w-3 h-3" />
+            <span className="hidden sm:inline">{firebaseStatusLabel}</span>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          {/* Total Invoices */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 text-center backdrop-blur-sm">
+            <FileText className="w-5 h-5 text-indigo-300 mx-auto mb-1.5" />
+            <p className="text-2xl font-black text-white">{totalInvoices}</p>
+            <p className="text-[9px] text-indigo-300 font-bold uppercase tracking-wider mt-0.5">Total Invoices</p>
+          </div>
+
+          {/* Total Customers */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 text-center backdrop-blur-sm">
+            <Users className="w-5 h-5 text-cyan-300 mx-auto mb-1.5" />
+            <p className="text-2xl font-black text-white">{totalCustomers}</p>
+            <p className="text-[9px] text-cyan-300 font-bold uppercase tracking-wider mt-0.5">Clients</p>
+          </div>
+
+          {/* Total Revenue */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 text-center backdrop-blur-sm">
+            <CircleDollarSign className="w-5 h-5 text-emerald-300 mx-auto mb-1.5" />
+            <p className="text-lg font-black text-white truncate">{settings?.currency || '₹'}{totalRevenue.toLocaleString('en-IN')}</p>
+            <p className="text-[9px] text-emerald-300 font-bold uppercase tracking-wider mt-0.5">Total Revenue</p>
+          </div>
+
+          {/* Pending Payments */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 text-center backdrop-blur-sm">
+            <Clock className="w-5 h-5 text-amber-300 mx-auto mb-1.5" />
+            <p className="text-lg font-black text-white truncate">{settings?.currency || '₹'}{pendingPayments.toLocaleString('en-IN')}</p>
+            <p className="text-[9px] text-amber-300 font-bold uppercase tracking-wider mt-0.5">Pending Due</p>
+          </div>
+        </div>
+
+        {/* Status Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {/* Firebase Connection */}
+          <div className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border ${firebaseStatusColor}`}>
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${firebaseStatusDot}`}></span>
+            <div>
+              <p className="text-[10px] font-extrabold">{firebaseStatusLabel}</p>
+              <p className="text-[9px] opacity-70 font-medium">
+                {firebaseStatus === 'connected' ? 'Syncing data to cloud' :
+                 firebaseStatus === 'offline' ? 'Using local backup' :
+                 'Add .env Firebase keys'}
+              </p>
+            </div>
+          </div>
+
+          {/* Local Backup Status */}
+          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border bg-indigo-50 text-indigo-700 border-indigo-200">
+            <HardDrive className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+            <div>
+              <p className="text-[10px] font-extrabold">Local Backup Active</p>
+              <p className="text-[9px] opacity-70 font-medium">{totalInvoices} invoices stored</p>
+            </div>
+          </div>
+
+          {/* Payment Summary */}
+          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border bg-emerald-50 text-emerald-700 border-emerald-200">
+            <BarChart3 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+            <div>
+              <p className="text-[10px] font-extrabold">{paidCount} Paid · {pendingCount} Pending</p>
+              <p className="text-[9px] opacity-70 font-medium">{settings?.currency || '₹'}{paidRevenue.toLocaleString('en-IN')} collected</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Empty State */}
+        {totalInvoices === 0 && (
+          <div className="mt-4 flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+            <BarChart3 className="w-4 h-4 text-indigo-300 flex-shrink-0" />
+            <p className="text-[10px] text-indigo-200 font-medium">Revenue &amp; invoice statistics will appear here after you create your first bill.</p>
+          </div>
+        )}
+      </div>
       
       {/* Header Panel */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

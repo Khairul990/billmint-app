@@ -33,7 +33,8 @@ import {
   getExpenses,
   saveExpense,
   deleteExpense,
-  importRestore
+  importRestore,
+  syncFromFirestore
 } from './utils/storage';
 import { downloadInvoicePDF } from './utils/pdfUtils';
 
@@ -42,6 +43,28 @@ function App() {
   useEffect(() => {
     initializeStorage();
   }, []);
+
+  // Sync from Firebase Firestore when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const runSync = async () => {
+        try {
+          const synced = await syncFromFirestore();
+          if (synced) {
+            setInvoices(synced.invoices || []);
+            setCustomers(synced.customers || []);
+            setProducts(synced.products || []);
+            setSettings(synced.settings || synced.settings);
+            setExpenses(synced.expenses || []);
+            setSubscription(synced.subscription || synced.subscription);
+          }
+        } catch (e) {
+          console.warn("Could not sync Firestore on startup. Falling back to LocalStorage.", e);
+        }
+      };
+      runSync();
+    }
+  }, [isAuthenticated]);
 
   // --- STATE SYSTEM ---
   const [isAuthenticated, setIsAuthenticated] = useState(getAuthSession() !== null);
@@ -205,6 +228,11 @@ function App() {
 
   // --- PDF GENERATOR WORKER ---
   const handleDownloadPDF = (invoice) => {
+    if (!settings || !settings.businessName) {
+      alert('⚠️ Business settings are incomplete. Please complete your business settings first.');
+      setCurrentTab('admin-panel');
+      return;
+    }
     const isPremium = subscription.status === 'premium';
     downloadInvoicePDF(invoice, settings, isPremium)
       .then((ok) => {
@@ -312,6 +340,8 @@ function App() {
         return (
           <Settings
             settings={settings}
+            invoices={invoices}
+            customers={customers}
             onSaveSettings={handleSaveSettings}
             onResetDemo={handleResetDemo}
             onLogout={handleLogout}

@@ -1,3 +1,6 @@
+import { db, isFirebaseEnabled } from './firebase';
+import { doc, setDoc, deleteDoc, getDoc, collection, getDocs } from 'firebase/firestore';
+
 // LocalStorage Keys
 const KEYS = {
   AUTH: 'billqyro_auth',
@@ -9,21 +12,21 @@ const KEYS = {
   SUBSCRIPTION: 'billqyro_subscription',
 };
 
-// Default Settings
+// Default Settings (initialized empty as required to avoid fake business details)
 const DEFAULT_SETTINGS = {
-  businessName: 'BillQyro Embroidery & Services',
+  businessName: '',
   logoUrl: '',
-  ownerName: 'Admin Owner',
-  phone: '+91 98765 00000',
-  email: 'billing@billqyro.com',
-  address: '102, Design Market, Tech Park Phase-II, Bangalore, Karnataka - 560103',
-  gstNumber: '29AAAAA0000A1Z5',
+  ownerName: '',
+  phone: '',
+  email: '',
+  address: '',
+  gstNumber: '',
   currency: '₹',
   defaultTax: 18,
   adminPasscode: '1118', // Customizable administrative passcode
 };
 
-// Seed Data
+// Seed Data for Demo Mode (Quick Demo Start Only)
 const SEED_CUSTOMERS = [
   {
     id: 'c-1',
@@ -156,38 +159,118 @@ const DEFAULT_SUBSCRIPTION = {
   activatedAt: null,
 };
 
-// Initialize Storage with Demo Data if Empty
+// Safe Firebase User ID generator based on auth session email
+export const getFirebaseUserId = () => {
+  try {
+    const session = localStorage.getItem(KEYS.AUTH);
+    if (session) {
+      const data = JSON.parse(session);
+      if (data.userEmail) {
+        return data.userEmail.replace(/[^a-zA-Z0-9]/g, '_');
+      }
+    }
+  } catch (e) {
+    console.error("Error reading auth session for user ID:", e);
+  }
+  return 'demo-user';
+};
+
+// Background Firestore Save Helper
+const firestoreSave = async (collectionName, docId, data) => {
+  if (!isFirebaseEnabled) return;
+  try {
+    const userId = getFirebaseUserId();
+    let docRef;
+    if (collectionName === 'settings' || collectionName === 'businessProfiles' || collectionName === 'subscription' || collectionName === 'users') {
+      docRef = doc(db, collectionName, userId);
+    } else {
+      docRef = doc(db, collectionName, userId, 'items', docId);
+    }
+    await setDoc(docRef, data);
+    console.log(`Firestore successfully saved to ${collectionName} for user: ${userId}`);
+  } catch (error) {
+    console.error(`Firestore save failed for ${collectionName}:`, error);
+  }
+};
+
+// Background Firestore Delete Helper
+const firestoreDelete = async (collectionName, docId) => {
+  if (!isFirebaseEnabled) return;
+  try {
+    const userId = getFirebaseUserId();
+    let docRef;
+    if (collectionName === 'settings' || collectionName === 'businessProfiles' || collectionName === 'subscription' || collectionName === 'users') {
+      docRef = doc(db, collectionName, userId);
+    } else {
+      docRef = doc(db, collectionName, userId, 'items', docId);
+    }
+    await deleteDoc(docRef);
+    console.log(`Firestore successfully deleted from ${collectionName} for user: ${userId}`);
+  } catch (error) {
+    console.error(`Firestore delete failed for ${collectionName}:`, error);
+  }
+};
+
+// Initialize Storage as Empty (No Fake Seeds by Default)
 export const initializeStorage = () => {
   if (!localStorage.getItem(KEYS.SETTINGS)) {
     localStorage.setItem(KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
   }
   if (!localStorage.getItem(KEYS.CUSTOMERS)) {
-    localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(SEED_CUSTOMERS));
+    localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify([]));
   }
   if (!localStorage.getItem(KEYS.PRODUCTS)) {
-    localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(SEED_PRODUCTS));
+    localStorage.setItem(KEYS.PRODUCTS, JSON.stringify([]));
   }
   if (!localStorage.getItem(KEYS.INVOICES)) {
-    localStorage.setItem(KEYS.INVOICES, JSON.stringify(SEED_INVOICES));
+    localStorage.setItem(KEYS.INVOICES, JSON.stringify([]));
   }
   if (!localStorage.getItem(KEYS.EXPENSES)) {
-    localStorage.setItem(KEYS.EXPENSES, JSON.stringify(SEED_EXPENSES));
+    localStorage.setItem(KEYS.EXPENSES, JSON.stringify([]));
   }
   if (!localStorage.getItem(KEYS.SUBSCRIPTION)) {
     localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(DEFAULT_SUBSCRIPTION));
   }
 };
 
-// Reset System
+// Reset System & Load Demo Data (Used for evaluations/demo starts)
 export const resetToDemoData = () => {
-  localStorage.setItem(KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
+  const demoSettings = {
+    businessName: 'BillQyro Embroidery & Services',
+    logoUrl: '',
+    ownerName: 'Admin Owner',
+    phone: '+91 98765 00000',
+    email: 'billing@billqyro.com',
+    address: '102, Design Market, Tech Park Phase-II, Bangalore, Karnataka - 560103',
+    gstNumber: '29AAAAA0000A1Z5',
+    currency: '₹',
+    defaultTax: 18,
+    adminPasscode: '1118',
+  };
+
+  localStorage.setItem(KEYS.SETTINGS, JSON.stringify(demoSettings));
   localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(SEED_CUSTOMERS));
   localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(SEED_PRODUCTS));
   localStorage.setItem(KEYS.INVOICES, JSON.stringify(SEED_INVOICES));
   localStorage.setItem(KEYS.EXPENSES, JSON.stringify(SEED_EXPENSES));
   localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(DEFAULT_SUBSCRIPTION));
+
+  // If Firebase is enabled, also populate Firestore in the background for demo
+  if (isFirebaseEnabled) {
+    const userId = getFirebaseUserId();
+    firestoreSave('settings', userId, demoSettings);
+    firestoreSave('businessProfiles', userId, demoSettings);
+    SEED_CUSTOMERS.forEach(c => firestoreSave('customers', c.id, c));
+    SEED_PRODUCTS.forEach(p => firestoreSave('products', p.id, p));
+    SEED_INVOICES.forEach(i => {
+      firestoreSave('invoices', i.id, i);
+      firestoreSave('orders', i.id, i);
+    });
+    SEED_EXPENSES.forEach(e => firestoreSave('expenses', e.id, e));
+  }
+
   return {
-    settings: DEFAULT_SETTINGS,
+    settings: demoSettings,
     customers: SEED_CUSTOMERS,
     products: SEED_PRODUCTS,
     invoices: SEED_INVOICES,
@@ -217,8 +300,19 @@ export const login = (passcode) => {
   const activeSettings = getSettings() || DEFAULT_SETTINGS;
   const targetPasscode = activeSettings.adminPasscode || '1118';
   if (passcode === targetPasscode) {
-    const session = { timestamp: Date.now(), token: 'billqyro-secure-session' };
+    const session = { timestamp: Date.now(), token: 'billqyro-secure-session', userEmail: 'admin@billqyro.com' };
     localStorage.setItem(KEYS.AUTH, JSON.stringify(session));
+    
+    // Save login event to users/{userId}
+    if (isFirebaseEnabled) {
+      const userId = getFirebaseUserId();
+      firestoreSave('users', userId, {
+        userId,
+        email: 'admin@billqyro.com',
+        lastLogin: new Date().toISOString(),
+        role: 'administrator'
+      });
+    }
     return true;
   }
   return false;
@@ -244,6 +338,7 @@ export const saveSubscriptionStatus = (status) => {
     activatedAt: status === 'premium' ? Date.now() : null,
   };
   localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(sub));
+  firestoreSave('subscription', 'status', sub);
   return sub;
 };
 
@@ -255,6 +350,8 @@ export const getSettings = () => {
 
 export const saveSettings = (settings) => {
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
+  firestoreSave('settings', 'business', settings);
+  firestoreSave('businessProfiles', 'profile', settings);
   return settings;
 };
 
@@ -276,6 +373,7 @@ export const saveExpense = (expense) => {
     expenses.push(expense);
   }
   localStorage.setItem(KEYS.EXPENSES, JSON.stringify(expenses));
+  firestoreSave('expenses', expense.id, expense);
   return expenses;
 };
 
@@ -283,6 +381,7 @@ export const deleteExpense = (id) => {
   const expenses = getExpenses();
   const filtered = expenses.filter(e => e.id !== id);
   localStorage.setItem(KEYS.EXPENSES, JSON.stringify(filtered));
+  firestoreDelete('expenses', id);
   return filtered;
 };
 
@@ -304,6 +403,7 @@ export const saveCustomer = (customer) => {
     customers.push(customer);
   }
   localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(customers));
+  firestoreSave('customers', customer.id, customer);
   return customers;
 };
 
@@ -311,6 +411,7 @@ export const deleteCustomer = (id) => {
   const customers = getCustomers();
   const filtered = customers.filter(c => c.id !== id);
   localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(filtered));
+  firestoreDelete('customers', id);
   return filtered;
 };
 
@@ -332,6 +433,7 @@ export const saveProduct = (product) => {
     products.push(product);
   }
   localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(products));
+  firestoreSave('products', product.id, product);
   return products;
 };
 
@@ -339,6 +441,7 @@ export const deleteProduct = (id) => {
   const products = getProducts();
   const filtered = products.filter(p => p.id !== id);
   localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(filtered));
+  firestoreDelete('products', id);
   return filtered;
 };
 
@@ -350,15 +453,50 @@ export const getInvoices = () => {
 
 export const saveInvoice = (invoice) => {
   const invoices = getInvoices();
+  // Ensure createdAt / updatedAt are set
+  const timestamp = new Date().toISOString();
   if (invoice.id) {
     const index = invoices.findIndex(inv => inv.id === invoice.id);
     if (index !== -1) {
+      invoice.updatedAt = timestamp;
       invoices[index] = invoice;
     }
   } else {
+    invoice.id = 'inv-' + Date.now();
+    invoice.createdAt = timestamp;
+    invoice.updatedAt = timestamp;
     invoices.push(invoice);
   }
+
+  // Double-save corresponding Customer to DB as well
+  if (invoice.customerId) {
+    const savedCustomers = getCustomers();
+    const existing = savedCustomers.find(c => c.id === invoice.customerId);
+    const customerPayload = {
+      id: invoice.customerId,
+      name: invoice.customerName,
+      phone: invoice.customerPhone,
+      email: invoice.customerEmail,
+      address: invoice.customerAddress,
+    };
+    if (!existing) {
+      savedCustomers.push(customerPayload);
+      localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(savedCustomers));
+      firestoreSave('customers', customerPayload.id, customerPayload);
+    } else {
+      const index = savedCustomers.findIndex(c => c.id === invoice.customerId);
+      savedCustomers[index] = customerPayload;
+      localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(savedCustomers));
+      firestoreSave('customers', customerPayload.id, customerPayload);
+    }
+  }
+
   localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+  
+  // Asynchronously save to Firebase invoices collection and orders collection
+  firestoreSave('invoices', invoice.id, invoice);
+  firestoreSave('orders', invoice.id, invoice);
+
   return invoices;
 };
 
@@ -366,6 +504,10 @@ export const deleteInvoice = (id) => {
   const invoices = getInvoices();
   const filtered = invoices.filter(inv => inv.id !== id);
   localStorage.setItem(KEYS.INVOICES, JSON.stringify(filtered));
+  
+  firestoreDelete('invoices', id);
+  firestoreDelete('orders', id);
+  
   return filtered;
 };
 
@@ -386,7 +528,6 @@ export const importRestore = (backupData) => {
     throw new Error('Invalid backup file structure.');
   }
 
-  // Basic validation of fields to verify database structure integrity
   const requiredKeys = ['settings', 'customers', 'products', 'invoices', 'expenses', 'subscription'];
   for (const k of requiredKeys) {
     if (!backupData.hasOwnProperty(k)) {
@@ -394,7 +535,6 @@ export const importRestore = (backupData) => {
     }
   }
 
-  // Write variables straight into LocalStorage
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(backupData.settings));
   localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(backupData.customers));
   localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(backupData.products));
@@ -402,6 +542,96 @@ export const importRestore = (backupData) => {
   localStorage.setItem(KEYS.EXPENSES, JSON.stringify(backupData.expenses));
   localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(backupData.subscription));
 
+  // If Firebase is enabled, batch update Firestore as well
+  if (isFirebaseEnabled) {
+    const userId = getFirebaseUserId();
+    firestoreSave('settings', userId, backupData.settings);
+    firestoreSave('businessProfiles', userId, backupData.settings);
+    backupData.customers.forEach(c => firestoreSave('customers', c.id, c));
+    backupData.products.forEach(p => firestoreSave('products', p.id, p));
+    backupData.invoices.forEach(i => {
+      firestoreSave('invoices', i.id, i);
+      firestoreSave('orders', i.id, i);
+    });
+    backupData.expenses.forEach(e => firestoreSave('expenses', e.id, e));
+    firestoreSave('subscription', userId, backupData.subscription);
+  }
+
   return backupData;
 };
 
+// Real-Time Syncing on Authentication or Startup
+export const syncFromFirestore = async () => {
+  if (!isFirebaseEnabled) {
+    console.log("Firebase not enabled, skipping Firestore sync.");
+    return null;
+  }
+  try {
+    const userId = getFirebaseUserId();
+    console.log(`Syncing data from Firestore for user: ${userId}`);
+
+    // Sync settings
+    const settingsDoc = await getDoc(doc(db, 'settings', userId));
+    if (settingsDoc.exists()) {
+      localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settingsDoc.data()));
+    }
+
+    // Sync customers
+    const customersSnap = await getDocs(collection(db, 'customers', userId, 'items'));
+    const customers = [];
+    customersSnap.forEach(docSnap => {
+      customers.push(docSnap.data());
+    });
+    if (customers.length > 0) {
+      localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(customers));
+    }
+
+    // Sync invoices
+    const invoicesSnap = await getDocs(collection(db, 'invoices', userId, 'items'));
+    const invoices = [];
+    invoicesSnap.forEach(docSnap => {
+      invoices.push(docSnap.data());
+    });
+    if (invoices.length > 0) {
+      localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+    }
+
+    // Sync products
+    const productsSnap = await getDocs(collection(db, 'products', userId, 'items'));
+    const products = [];
+    productsSnap.forEach(docSnap => {
+      products.push(docSnap.data());
+    });
+    if (products.length > 0) {
+      localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(products));
+    }
+
+    // Sync expenses
+    const expensesSnap = await getDocs(collection(db, 'expenses', userId, 'items'));
+    const expenses = [];
+    expensesSnap.forEach(docSnap => {
+      expenses.push(docSnap.data());
+    });
+    if (expenses.length > 0) {
+      localStorage.setItem(KEYS.EXPENSES, JSON.stringify(expenses));
+    }
+
+    // Sync subscription
+    const subDoc = await getDoc(doc(db, 'subscription', userId));
+    if (subDoc.exists()) {
+      localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(subDoc.data()));
+    }
+
+    return {
+      settings: JSON.parse(localStorage.getItem(KEYS.SETTINGS)),
+      customers: JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [],
+      products: JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [],
+      invoices: JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [],
+      expenses: JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [],
+      subscription: JSON.parse(localStorage.getItem(KEYS.SUBSCRIPTION))
+    };
+  } catch (error) {
+    console.error("Error syncing from Firestore:", error);
+    throw error;
+  }
+};
