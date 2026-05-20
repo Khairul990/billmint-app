@@ -67,11 +67,46 @@ const Dashboard = ({
   };
 
   const checklistItems = [
-    { id: 'profile', label: 'Set Up Business Profile', tab: 'admin-panel', desc: 'Add address, tax credentials and logo.' },
-    { id: 'clients', label: 'Register CRM Clients', tab: 'customers', desc: 'Save contact details for quick invoice selection.' },
-    { id: 'catalog', label: 'Add Catalog Rates', tab: 'products', desc: 'Populate standard embroidery & punching services.' },
-    { id: 'invoice', label: 'Draft First Invoice', tab: 'create-invoice', desc: 'Add items and download dynamic vector PDF sheets.' },
-    { id: 'expenses', label: 'Log Business Expenses', tab: 'expenses', desc: 'Track raw thread reels, utilities, and needles.' },
+    { 
+      id: 'profile', 
+      label: 'Set Up Business Profile', 
+      tab: 'admin-panel', 
+      desc: 'Add your shop/company name, address, phone, logo & GST number. This info shows on every invoice PDF.',
+      emoji: '🏢',
+      tip: 'Go to Settings → Fill in your business details → Click Save',
+    },
+    { 
+      id: 'clients', 
+      label: 'Add Your First Customer', 
+      tab: 'customers', 
+      desc: 'Save customer names, phone numbers & addresses. Next time you make a bill, just select them — no need to type again!',
+      emoji: '👥',
+      tip: 'Go to Customers → Click + Add → Enter details → Save',
+    },
+    { 
+      id: 'catalog', 
+      label: 'Add Products / Services', 
+      tab: 'products', 
+      desc: 'Add your services (embroidery, punching, repair etc.) with default prices. When creating invoices, just pick from the list!',
+      emoji: '🧵',
+      tip: 'Go to Products → Click + Add → Enter name & price → Save',
+    },
+    { 
+      id: 'invoice', 
+      label: 'Create Your First Invoice', 
+      tab: 'create-invoice', 
+      desc: 'Select a customer, add items/services, set payment status, and download a professional PDF invoice instantly.',
+      emoji: '📄',
+      tip: 'Click Create Bill → Select Customer → Add Items → Save & Download PDF',
+    },
+    { 
+      id: 'expenses', 
+      label: 'Track Your Expenses', 
+      tab: 'expenses', 
+      desc: 'Record your daily expenses like thread, needles, electricity bills. See total profit = revenue minus expenses.',
+      emoji: '💰',
+      tip: 'Go to Expenses → Click + Add → Enter amount & category → Save',
+    },
   ];
 
   const completedCount = Object.values(checklist).filter(Boolean).length;
@@ -202,10 +237,10 @@ const Dashboard = ({
             <div>
               <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
                 <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500" />
-                <span>Micro-Business Setup Checklist</span>
+                <span>📖 How to Use BillQyro — Step by Step</span>
               </h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                GUIDED ONBOARDING SYSTEM
+                FOLLOW THESE 5 SIMPLE STEPS TO SET UP YOUR BILLING SYSTEM
               </p>
             </div>
             
@@ -224,58 +259,87 @@ const Dashboard = ({
             ></div>
           </div>
 
-          {/* Checklist Items */}
+          {/* Visual Guide Cards */}
           <div className="space-y-3">
-            {checklistItems.map((item) => {
+            {checklistItems.map((item, index) => {
               const isChecked = checklist[item.id];
               return (
                 <div 
                   key={item.id}
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-2xl border transition-all duration-300 ${
+                  className={`p-4 rounded-2xl border transition-all duration-300 ${
                     isChecked 
-                      ? 'bg-emerald-50/20 dark:bg-emerald-950/10 border-emerald-500/20 dark:border-emerald-500/10 opacity-75' 
-                      : 'bg-slate-50/50 dark:bg-slate-950/40 border-slate-100/50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-950/70 hover:border-slate-200 dark:hover:border-slate-700/80'
+                      ? 'bg-emerald-50/30 dark:bg-emerald-950/10 border-emerald-500/20 dark:border-emerald-500/10' 
+                      : 'bg-white dark:bg-slate-950/40 border-slate-100/80 dark:border-slate-800/50 hover:border-indigo-200 dark:hover:border-indigo-800/50 hover:shadow-sm'
                   }`}
                 >
-                  <div className="flex items-start gap-3.5">
-                    {/* Styled Checkbox Button */}
-                    <button
-                      onClick={() => toggleChecklistItem(item.id)}
-                      type="button"
-                      className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border transition-all duration-200 cursor-pointer ${
+                  <div className="flex gap-3.5">
+                    {/* Left: Emoji + Step Number */}
+                    <div className="flex flex-col items-center gap-1.5 shrink-0">
+                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl ${
                         isChecked 
-                          ? 'bg-emerald-500 border-emerald-500 text-white' 
-                          : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-transparent hover:border-indigo-500'
-                      }`}
-                      title={isChecked ? "Mark as Incomplete" : "Mark as Complete"}
-                    >
-                      <Check className="w-4 h-4 stroke-[3]" />
-                    </button>
-                    
-                    <div className="space-y-0.5">
-                      <h4 className={`text-xs font-extrabold transition-all duration-200 ${
-                        isChecked ? 'text-slate-500 dark:text-slate-400 line-through font-bold' : 'text-slate-800 dark:text-slate-200'
+                          ? 'bg-emerald-100 dark:bg-emerald-900/30' 
+                          : 'bg-indigo-50 dark:bg-indigo-950/50'
                       }`}>
-                        {item.label}
-                      </h4>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                        {isChecked ? '✅' : item.emoji}
+                      </div>
+                      <span className={`text-[9px] font-black uppercase tracking-wider ${
+                        isChecked ? 'text-emerald-500' : 'text-slate-400'
+                      }`}>
+                        Step {index + 1}
+                      </span>
+                    </div>
+
+                    {/* Right: Content */}
+                    <div className="flex-1 space-y-2 min-w-0">
+                      {/* Title Row */}
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className={`text-xs font-extrabold leading-snug ${
+                          isChecked ? 'text-emerald-600 dark:text-emerald-400 line-through' : 'text-slate-800 dark:text-slate-200'
+                        }`}>
+                          {item.label}
+                        </h4>
+                        {/* Checkbox */}
+                        <button
+                          onClick={() => toggleChecklistItem(item.id)}
+                          type="button"
+                          className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 border transition-all duration-200 cursor-pointer ${
+                            isChecked 
+                              ? 'bg-emerald-500 border-emerald-500 text-white' 
+                              : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-transparent hover:border-indigo-500'
+                          }`}
+                          title={isChecked ? "Mark incomplete" : "Mark complete"}
+                        >
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </button>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                         {item.desc}
                       </p>
+
+                      {/* How-to Tip */}
+                      {!isChecked && (
+                        <div className="flex items-start gap-2 bg-indigo-50/70 dark:bg-indigo-950/30 rounded-xl px-3 py-2 border border-indigo-100/50 dark:border-indigo-800/30">
+                          <span className="text-indigo-500 text-sm shrink-0 mt-0.5">💡</span>
+                          <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold leading-relaxed">
+                            {item.tip}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Action Button */}
+                      {!isChecked && (
+                        <button
+                          onClick={() => setCurrentTab(item.tab)}
+                          className="flex items-center gap-1.5 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-extrabold text-[10px] py-2 px-4 rounded-xl transition-all uppercase tracking-wider shadow-sm hover:shadow w-fit"
+                        >
+                          <span>Open & Configure</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
                   </div>
-
-                  <button
-                    onClick={() => setCurrentTab(item.tab)}
-                    className={`mt-3 sm:mt-0 flex items-center gap-1 font-extrabold text-[10px] py-2 px-3.5 rounded-xl transition-all w-fit uppercase tracking-wider ${
-                      isChecked
-                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-default'
-                        : 'bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 cursor-pointer'
-                    }`}
-                    disabled={isChecked}
-                  >
-                    <span>Configure</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
                 </div>
               );
             })}
