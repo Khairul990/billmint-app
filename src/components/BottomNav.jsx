@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, Settings } from 'lucide-react';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, Shield } from 'lucide-react';
 
 /**
  * Mobile Bottom Navigation Menu
@@ -12,8 +12,9 @@ const BottomNav = ({ currentTab, setCurrentTab }) => {
     { id: 'invoices', label: 'Invoices', icon: FileSpreadsheet },
     { id: 'customers', label: 'Clients', icon: Users },
     { id: 'products', label: 'Items', icon: Layers },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'admin-panel', label: 'Admin', icon: Shield },
   ];
+
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-100/80 shadow-lg px-2 py-1.5 flex items-center justify-around pb-safe-bottom">

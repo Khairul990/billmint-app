@@ -33,10 +33,10 @@ const Login = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden font-sans">
+    <div className="min-h-[60vh] flex items-center justify-center p-4 relative overflow-hidden font-sans w-full">
       {/* Visual background enhancements */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-200/30 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-200/20 rounded-full blur-3xl"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-200/30 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-200/20 rounded-full blur-3xl"></div>
 
       <div className="w-full max-w-md bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-premium relative z-10">
         

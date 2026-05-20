@@ -11,7 +11,7 @@ import { ReceiptText, LogOut, ShieldCheck } from 'lucide-react';
  * @param {Function} onLogout - logout event callback
  * @param {Object} businessSettings - current active business details
  */
-const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings }) => {
+const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated }) => {
   const getPageTitle = (tab) => {
     switch (tab) {
       case 'dashboard':
@@ -24,6 +24,8 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         return 'Client CRM';
       case 'products':
         return 'Product & Service Catalog';
+      case 'admin-panel':
+        return 'Admin Control Panel';
       case 'settings':
         return 'Business Settings';
       default:
@@ -39,6 +41,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         setCurrentTab={setCurrentTab}
         onLogout={onLogout}
         businessSettings={businessSettings}
+        isAuthenticated={isAuthenticated}
       />
 
       {/* Main Content Region */}

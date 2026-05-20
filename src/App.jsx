@@ -50,6 +50,41 @@ function App() {
   // Hidden state for background PDF downloads
   const [pdfInvoice, setPdfInvoice] = useState(null);
 
+  // --- ROUTING SYSTEM ---
+  // Listen for /admin and #/admin to route to admin panel automatically
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const path = window.location.pathname;
+      const hash = window.location.hash;
+      if (path === '/admin' || hash === '#/admin' || hash === '#admin') {
+        setCurrentTab('admin-panel');
+      }
+    };
+
+    // Run check on mount
+    handleLocationChange();
+
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, []);
+
+  // Sync current virtual tab with URL hash for bookmarks and back buttons
+  useEffect(() => {
+    if (currentTab === 'admin-panel') {
+      if (window.location.hash !== '#/admin' && window.location.pathname !== '/admin') {
+        window.location.hash = '#/admin';
+      }
+    } else {
+      if (window.location.hash === '#/admin' || window.location.hash === '#admin') {
+        window.location.hash = '';
+      }
+    }
+  }, [currentTab]);
+
   // --- AUTH BRIDGE ---
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
@@ -58,12 +93,13 @@ function App() {
     setCustomers(getCustomers());
     setProducts(getProducts());
     setSettings(getSettings());
-    setCurrentTab('dashboard');
+    setCurrentTab('admin-panel');
   };
 
   const handleLogout = () => {
     logout();
     setIsAuthenticated(false);
+    setCurrentTab('dashboard');
   };
 
   // --- DATA SYNCHRONIZERS ---
@@ -203,7 +239,10 @@ function App() {
             businessSettings={settings}
           />
         );
-      case 'settings':
+      case 'admin-panel':
+        if (!isAuthenticated) {
+          return <Login onLoginSuccess={handleLoginSuccess} />;
+        }
         return (
           <Settings
             settings={settings}
@@ -217,11 +256,6 @@ function App() {
     }
   };
 
-  // Guard: Login Check
-  if (!isAuthenticated) {
-    return <Login onLoginSuccess={handleLoginSuccess} />;
-  }
-
   return (
     <Layout
       currentTab={currentTab}
@@ -234,6 +268,7 @@ function App() {
       }}
       onLogout={handleLogout}
       businessSettings={settings}
+      isAuthenticated={isAuthenticated}
     >
       {renderTabContent()}
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, Settings, LogOut, ReceiptText } from 'lucide-react';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, Shield, LogOut, ReceiptText } from 'lucide-react';
 import { logout } from '../utils/storage';
 
 /**
@@ -8,14 +8,15 @@ import { logout } from '../utils/storage';
  * @param {Function} setCurrentTab - state update dispatcher
  * @param {Function} onLogout - logout event handler
  * @param {Object} businessSettings - current active company name & logo
+ * @param {boolean} isAuthenticated - whether currently logged in as admin
  */
-const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings }) => {
+const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'invoices', label: 'Invoices', icon: FileSpreadsheet },
     { id: 'customers', label: 'Customers', icon: Users },
     { id: 'products', label: 'Products & Services', icon: Layers },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'admin-panel', label: 'Admin Panel', icon: Shield },
   ];
 
   return (
@@ -78,13 +79,15 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings }) => {
           </div>
         </div>
 
-        <button
-          onClick={onLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition-all"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Log out</span>
-        </button>
+        {isAuthenticated && (
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition-all animate-fadeIn"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Log out</span>
+          </button>
+        )}
       </div>
     </aside>
   );
