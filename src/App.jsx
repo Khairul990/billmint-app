@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Login from './pages/Login';
+import WelcomeOnboarding from './pages/WelcomeOnboarding';
 import Dashboard from './pages/Dashboard';
 import Invoices from './pages/Invoices';
 import CreateInvoice from './pages/CreateInvoice';
@@ -102,7 +103,7 @@ function App() {
     setSettings(getSettings());
     setExpenses(getExpenses());
     setSubscription(getSubscriptionStatus());
-    setCurrentTab('admin-panel');
+    setCurrentTab('dashboard');
   };
 
   const handleLogout = () => {
@@ -321,6 +322,20 @@ function App() {
         return <div className="text-center font-bold text-slate-400 p-10">404 Tab Not Found</div>;
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <WelcomeOnboarding 
+        onLoginSuccess={handleLoginSuccess}
+        onQuickStart={() => {
+          initializeStorage();
+          const session = { timestamp: Date.now(), token: 'billqyro-secure-session', userEmail: 'demo@billqyro.com' };
+          localStorage.setItem('billqyro_auth', JSON.stringify(session));
+          handleLoginSuccess();
+        }}
+      />
+    );
+  }
 
   return (
     <Layout

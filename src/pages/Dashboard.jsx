@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StatCard from '../components/StatCard';
 import InvoiceCard from '../components/InvoiceCard';
 import { 
@@ -13,7 +13,16 @@ import {
   ArrowRight,
   Send,
   MessageSquare,
-  AlertCircle
+  AlertCircle,
+  CheckCircle2, 
+  Activity, 
+  Shield, 
+  HardDrive, 
+  FileDown, 
+  Clock, 
+  UserCheck, 
+  Sparkles, 
+  Check
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 
@@ -32,6 +41,41 @@ const Dashboard = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
+
+  // --- INTERACTIVE GETTING STARTED CHECKLIST STATE ---
+  const [checklist, setChecklist] = useState(() => {
+    const saved = localStorage.getItem('billqyro_checklist');
+    return saved ? JSON.parse(saved) : {
+      profile: false,
+      clients: false,
+      catalog: false,
+      invoice: false,
+      expenses: false,
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('billqyro_checklist', JSON.stringify(checklist));
+  }, [checklist]);
+
+  const toggleChecklistItem = (id) => {
+    setChecklist(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const checklistItems = [
+    { id: 'profile', label: 'Set Up Business Profile', tab: 'admin-panel', desc: 'Add address, tax credentials and logo.' },
+    { id: 'clients', label: 'Register CRM Clients', tab: 'customers', desc: 'Save contact details for quick invoice selection.' },
+    { id: 'catalog', label: 'Add Catalog Rates', tab: 'products', desc: 'Populate standard embroidery & punching services.' },
+    { id: 'invoice', label: 'Draft First Invoice', tab: 'create-invoice', desc: 'Add items and download dynamic vector PDF sheets.' },
+    { id: 'expenses', label: 'Log Business Expenses', tab: 'expenses', desc: 'Track raw thread reels, utilities, and needles.' },
+  ];
+
+  const completedCount = Object.values(checklist).filter(Boolean).length;
+  const progressPercent = Math.round((completedCount / checklistItems.length) * 100);
+
   
   const currencySymbol = businessSettings?.currency || '₹';
   const businessName = businessSettings?.businessName || 'BillQyro Embroidery';
@@ -117,8 +161,223 @@ const Dashboard = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       
+      {/* 0. WELCOME HERO BANNER */}
+      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white relative overflow-hidden shadow-premium border border-slate-800/80">
+        <div className="absolute -top-24 -right-24 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Workspace Authenticated</span>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+              Welcome back, <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">{businessName}</span>
+            </h1>
+            <p className="text-xs text-slate-400 font-medium">
+              Your professional invoicing workspace is loaded and ready. Let's make billing seamless today!
+            </p>
+          </div>
+          
+          <button
+            onClick={() => setCurrentTab('create-invoice')}
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs px-5 py-3.5 rounded-2xl shadow-md hover:shadow-lg active:scale-[0.99] transition-all cursor-pointer w-fit shrink-0 uppercase tracking-wider"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create Bill</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 0.1 ONBOARDING CHECKLIST & SYSTEM HEALTH */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Onboarding Checklist (Col Span 2) */}
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800/80 shadow-premium space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
+                <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500" />
+                <span>Micro-Business Setup Checklist</span>
+              </h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                GUIDED ONBOARDING SYSTEM
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-850 py-1 px-2.5 rounded-full">
+                {progressPercent}% Complete
+              </span>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="w-full bg-slate-100 dark:bg-slate-850 h-2.5 rounded-full overflow-hidden">
+            <div 
+              className="bg-gradient-to-r from-emerald-400 to-teal-400 h-full rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            ></div>
+          </div>
+
+          {/* Checklist Items */}
+          <div className="space-y-3">
+            {checklistItems.map((item) => {
+              const isChecked = checklist[item.id];
+              return (
+                <div 
+                  key={item.id}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-2xl border transition-all duration-300 ${
+                    isChecked 
+                      ? 'bg-emerald-50/20 dark:bg-emerald-950/10 border-emerald-500/20 dark:border-emerald-500/10 opacity-75' 
+                      : 'bg-slate-50/50 dark:bg-slate-950/40 border-slate-100/50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-950/70 hover:border-slate-200 dark:hover:border-slate-700/80'
+                  }`}
+                >
+                  <div className="flex items-start gap-3.5">
+                    {/* Styled Checkbox Button */}
+                    <button
+                      onClick={() => toggleChecklistItem(item.id)}
+                      type="button"
+                      className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border transition-all duration-200 cursor-pointer ${
+                        isChecked 
+                          ? 'bg-emerald-500 border-emerald-500 text-white' 
+                          : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-transparent hover:border-indigo-500'
+                      }`}
+                      title={isChecked ? "Mark as Incomplete" : "Mark as Complete"}
+                    >
+                      <Check className="w-4 h-4 stroke-[3]" />
+                    </button>
+                    
+                    <div className="space-y-0.5">
+                      <h4 className={`text-xs font-extrabold transition-all duration-200 ${
+                        isChecked ? 'text-slate-500 dark:text-slate-400 line-through font-bold' : 'text-slate-800 dark:text-slate-200'
+                      }`}>
+                        {item.label}
+                      </h4>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentTab(item.tab)}
+                    className={`mt-3 sm:mt-0 flex items-center gap-1 font-extrabold text-[10px] py-2 px-3.5 rounded-xl transition-all w-fit uppercase tracking-wider ${
+                      isChecked
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-default'
+                        : 'bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 cursor-pointer'
+                    }`}
+                    disabled={isChecked}
+                  >
+                    <span>Configure</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Real-Time System Services Status (Col Span 1) */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800/80 shadow-premium flex flex-col justify-between space-y-5">
+          <div>
+            <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
+              <Activity className="w-4.5 h-4.5 text-emerald-500" />
+              <span>Workspace Services Status</span>
+            </h3>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+              REAL-TIME STATUS METER
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            
+            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                  <ReceiptText className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Invoice System</span>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Ready</span>
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                  <FileDown className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">PDF Generator</span>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Active</span>
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                  <HardDrive className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Offline Storage</span>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Enabled</span>
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                  <Shield className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Security Shield</span>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Secure</span>
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                  <Users className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">CRM Records</span>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Active</span>
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                  <Clock className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Order Tracking</span>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Live</span>
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
       {/* 1. STATS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         <StatCard
