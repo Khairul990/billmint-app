@@ -57,10 +57,10 @@ const MoreMenu = ({
       <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-3xl p-6 text-white shadow-premium relative overflow-hidden">
         <div className="absolute top-0 right-0 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
         <span className="text-[9px] font-black tracking-widest text-indigo-100 bg-white/20 px-2.5 py-1 rounded-full uppercase">
-          BillMint Workspace Hub
+          BillQyro Workspace Hub
         </span>
         <h2 className="text-xl font-extrabold tracking-tight mt-2.5">
-          {businessSettings?.businessName || 'BillMint Embroidery'}
+          {businessSettings?.businessName || 'BillQyro Embroidery'}
         </h2>
         <p className="text-xs text-white/80 font-bold mt-1">
           Owner: {businessSettings?.ownerName || 'Administrator'} • Phone: {businessSettings?.phone || 'N/A'}

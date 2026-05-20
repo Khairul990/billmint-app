@@ -28,14 +28,14 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
   const freeBenefits = [
     'Create up to 5 invoices only',
     'Standard basic PDF template',
-    'Contains BillMint branding watermark',
+    'Contains BillQyro branding watermark',
     'Standard local offline dashboard',
   ];
 
   const premiumBenefits = [
     'Unlimited invoice generation',
     'Premium detailed invoice templates',
-    'Remove BillMint watermarks & branding',
+    'Remove BillQyro watermarks & branding',
     'Upload custom corporate logos',
     'Modify branding invoice colors',
     'Advanced operating expenses tracking',
@@ -55,7 +55,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
       onUpgrade('premium');
       setLoading(false);
       setShowCheckout(false);
-      alert('Congratulations! Your account has been upgraded to BillMint Premium!');
+      alert('Congratulations! Your account has been upgraded to BillQyro Premium!');
     }, 1500);
   };
 

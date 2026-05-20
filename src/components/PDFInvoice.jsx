@@ -220,7 +220,7 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
       {/* Centered Compact Header */}
       <View style={styles.compactHeader}>
         <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#0a1128' }}>
-          {businessSettings?.businessName || 'BillMint Store'}
+          {businessSettings?.businessName || 'BillQyro Store'}
         </Text>
         <Text style={{ fontSize: 7, color: '#64748b', marginTop: 2 }}>
           {businessSettings?.address || ''} | {businessSettings?.phone || ''}
@@ -293,7 +293,7 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
 
       {/* Small Watermark */}
       {!isPremium && (
-        <Text style={styles.watermark}>Powered by BillMint Invoicing SaaS</Text>
+        <Text style={styles.watermark}>Powered by BillQyro Invoicing SaaS</Text>
       )}
     </Page>
   );
@@ -304,7 +304,7 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
       <View style={styles.header}>
         <View style={styles.businessInfo}>
           <Text style={styles.businessName}>
-            {businessSettings?.businessName || 'BillMint Technologies'}
+            {businessSettings?.businessName || 'BillQyro Technologies'}
           </Text>
           <Text style={styles.businessSub}>
             Address: {businessSettings?.address || 'N/A'}
@@ -430,7 +430,7 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
 
       {/* Free tier watermark */}
       {!isPremium && (
-        <Text style={styles.watermark}>Powered by BillMint Invoicing SaaS</Text>
+        <Text style={styles.watermark}>Powered by BillQyro Invoicing SaaS</Text>
       )}
     </Page>
   );

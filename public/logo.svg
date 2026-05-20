@@ -57,7 +57,7 @@
   </g>
 
   <!-- 2. BRAND TYPOGRAPHY -->
-  <!-- "Bill" in Deep Navy, "Mint" in Mint Green -->
+  <!-- "Bill" in Deep Navy, "Qyro" in Mint Green -->
   <text 
     x="62" 
     y="33" 
@@ -66,10 +66,10 @@
     font-weight="900" 
     fill="#0f172a" 
     letter-spacing="-0.5px"
-  >Bill<tspan fill="#10b981">Mınt</tspan></text>
+  >Bill<tspan fill="#10b981">Qyro</tspan></text>
 
-  <!-- Custom Vector Mint Leaf dot placed precisely above the dotless 'ı' -->
-  <g transform="translate(125.5, 14.5) scale(1.1)">
+  <!-- Custom Vector Accent Leaf dot placed precisely after the 'o' -->
+  <g transform="translate(150, 15.5) scale(1.1)">
     <path d="M0,7 C1,3 4,1 6,0 C6,2 5,5 3,6 C2,7 0,7 0,7 Z" fill="#34d399" />
   </g>
 
@@ -78,9 +78,9 @@
     x="62" 
     y="46" 
     font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
-    font-size="6.5" 
+    font-size="6.2" 
     font-weight="900" 
     fill="#94a3b8" 
-    letter-spacing="1.8px"
-  >MODERN BILLING &amp; INVOICING</text>
+    letter-spacing="1.1px"
+  >SMART BILLING • PREMIUM INVOICES</text>
 </svg>

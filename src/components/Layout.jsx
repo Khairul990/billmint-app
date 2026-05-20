@@ -15,7 +15,7 @@ import Logo from './Logo';
 const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated }) => {
   // Theme state persisted in LocalStorage
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('billmint_theme') || 'light';
+    return localStorage.getItem('billqyro_theme') || 'light';
   });
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
     } else {
       document.documentElement.classList.remove('dark');
     }
-    localStorage.setItem('billmint_theme', theme);
+    localStorage.setItem('billqyro_theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
@@ -54,7 +54,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       case 'settings':
         return 'Business Settings';
       default:
-        return 'BillMint';
+        return 'BillQyro';
     }
   };
 

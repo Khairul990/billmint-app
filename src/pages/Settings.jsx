@@ -86,7 +86,7 @@ const Settings = ({ settings, onSaveSettings, onResetDemo, onLogout, onImportBac
       downloadAnchor.setAttribute('href', jsonString);
       
       const dateStr = new Date().toISOString().split('T')[0];
-      downloadAnchor.setAttribute('download', `billmint-backup-${dateStr}.json`);
+      downloadAnchor.setAttribute('download', `billqyro-backup-${dateStr}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -162,7 +162,7 @@ const Settings = ({ settings, onSaveSettings, onResetDemo, onLogout, onImportBac
                   required
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder="e.g. BillMint Technologies"
+                  placeholder="e.g. BillQyro Technologies"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
                 />
               </div>

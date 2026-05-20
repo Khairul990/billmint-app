@@ -111,7 +111,7 @@ const CreateInvoice = ({
       setTaxPercentage(businessSettings?.defaultTax !== undefined ? businessSettings.defaultTax : 18);
       setDiscountAmount(0);
       setAmountPaid(0);
-      setNotes('Thank you for choosing BillMint! Payment is expected within due date.');
+      setNotes('Thank you for choosing BillQyro! Payment is expected within due date.');
       setPaymentStatus('Pending');
       setOrderStatus('Pending');
 

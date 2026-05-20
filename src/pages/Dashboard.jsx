@@ -34,7 +34,7 @@ const Dashboard = ({
   const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
   
   const currencySymbol = businessSettings?.currency || '₹';
-  const businessName = businessSettings?.businessName || 'BillMint Embroidery';
+  const businessName = businessSettings?.businessName || 'BillQyro Embroidery';
 
   // --- STATS CALCULATIONS (Accurate SaaS Math) ---
   const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.grandTotal || 0), 0);

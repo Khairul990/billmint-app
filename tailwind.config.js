@@ -11,7 +11,7 @@ export default {
         sans: ['Inter', 'sans-serif'],
       },
       colors: {
-        // Redefining standard colors to map perfectly to the BillMint logo style
+        // Redefining standard colors to map perfectly to the BillQyro logo style
         slate: {
           50: '#f4f7f9',   // Cool soft white background
           100: '#e8edf2',  // Very soft border

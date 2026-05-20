@@ -1,21 +1,21 @@
 // LocalStorage Keys
 const KEYS = {
-  AUTH: 'billmint_auth',
-  SETTINGS: 'billmint_settings',
-  CUSTOMERS: 'billmint_customers',
-  PRODUCTS: 'billmint_products',
-  INVOICES: 'billmint_invoices',
-  EXPENSES: 'billmint_expenses',
-  SUBSCRIPTION: 'billmint_subscription',
+  AUTH: 'billqyro_auth',
+  SETTINGS: 'billqyro_settings',
+  CUSTOMERS: 'billqyro_customers',
+  PRODUCTS: 'billqyro_products',
+  INVOICES: 'billqyro_invoices',
+  EXPENSES: 'billqyro_expenses',
+  SUBSCRIPTION: 'billqyro_subscription',
 };
 
 // Default Settings
 const DEFAULT_SETTINGS = {
-  businessName: 'BillMint Embroidery & Services',
+  businessName: 'BillQyro Embroidery & Services',
   logoUrl: '',
   ownerName: 'Admin Owner',
   phone: '+91 98765 00000',
-  email: 'billing@billmint.com',
+  email: 'billing@billqyro.com',
   address: '102, Design Market, Tech Park Phase-II, Bangalore, Karnataka - 560103',
   gstNumber: '29AAAAA0000A1Z5',
   currency: '₹',
@@ -217,7 +217,7 @@ export const login = (passcode) => {
   const activeSettings = getSettings() || DEFAULT_SETTINGS;
   const targetPasscode = activeSettings.adminPasscode || '1118';
   if (passcode === targetPasscode) {
-    const session = { timestamp: Date.now(), token: 'billmint-secure-session' };
+    const session = { timestamp: Date.now(), token: 'billqyro-secure-session' };
     localStorage.setItem(KEYS.AUTH, JSON.stringify(session));
     return true;
   }

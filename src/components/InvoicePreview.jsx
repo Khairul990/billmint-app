@@ -128,7 +128,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
               </div>
             )}
             <div>
-              <h3 className="font-extrabold text-xl text-slate-900 dark:text-slate-100 tracking-tight">{businessSettings?.businessName || 'BillMint Client'}</h3>
+              <h3 className="font-extrabold text-xl text-slate-900 dark:text-slate-100 tracking-tight">{businessSettings?.businessName || 'BillQyro Client'}</h3>
               {businessSettings?.gstNumber && (
                 <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider mt-0.5">GSTIN: {businessSettings.gstNumber}</p>
               )}
@@ -285,7 +285,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       {/* 5. BRAND FOOTER SIGNATURE */}
       <div className="flex justify-center items-center gap-1.5 border-t border-slate-100/80 dark:border-slate-800/80 pt-8 mt-8 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
         <ShieldCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-        <span>Generated Securely via BillMint Invoicing SaaS</span>
+        <span>Generated Securely via BillQyro Invoicing SaaS</span>
       </div>
     </div>
   );

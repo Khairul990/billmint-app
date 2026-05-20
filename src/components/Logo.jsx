@@ -1,12 +1,12 @@
 import React from 'react';
 
 /**
- * High-fidelity Vector Logo and Brand Asset Component for BillMint
- * Matches the uploaded brand guidelines:
+ * High-fidelity Vector Logo and Brand Asset Component for BillQyro
+ * Matches the brand guidelines:
  * - Deep navy blue B spine & text
  * - Mint / teal gradient invoicing document sheet
  * - Curved top-right fold and curved bottom-right leaf curl
- * - "Bill" in Navy / "Mint" in brand green with leaf dot above 'i'
+ * - "Bill" in Navy / "Qyro" in brand green with superscript brand leaf accent
  * - Modern spaced sub-tagline
  * 
  * @param {string} type - 'icon' | 'horizontal' | 'app-icon'
@@ -100,8 +100,8 @@ const Logo = ({ type = 'horizontal', className = '' }) => {
       <div className={`aspect-square rounded-3xl bg-white flex flex-col items-center justify-center p-6 border border-slate-100 shadow-premium transition-all hover:shadow-premium-hover ${className}`}>
         <IconSVG sizeClass="w-3/5 h-3/5" />
         <div className="mt-4 flex flex-col items-center select-none text-center">
-          <span className="text-xl font-extrabold text-slate-800 tracking-tight">Bill<span className="text-emerald-500 font-extrabold">Mint</span></span>
-          <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest mt-1">INVOICING PLATFORM</span>
+          <span className="text-xl font-extrabold text-slate-800 tracking-tight">Bill<span className="text-emerald-500 font-extrabold">Qyro</span></span>
+          <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest mt-1">SMART BILLING &bull; PREMIUM INVOICES</span>
         </div>
       </div>
     );
@@ -117,14 +117,14 @@ const Logo = ({ type = 'horizontal', className = '' }) => {
           <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight transition-colors duration-300">
             Bill
           </span>
-          {/* Mint text with unicode dotless 'ı' to place the custom leaf dot */}
-          <span className="text-xl font-black text-emerald-500 dark:text-emerald-400 tracking-tight transition-colors duration-300 relative">
-            Mınt
-            {/* Custom vector mint leaf as 'i' dot */}
+          {/* Qyro text with custom superscript accent leaf */}
+          <span className="text-xl font-black text-emerald-500 dark:text-emerald-400 tracking-tight transition-colors duration-300 relative pr-3">
+            Qyro
+            {/* Custom vector brand accent leaf */}
             <svg 
               viewBox="0 0 10 10" 
               className="absolute w-2.5 h-2.5 text-emerald-400 dark:text-emerald-300 fill-current"
-              style={{ top: '-1.5px', left: '17px' }}
+              style={{ top: '1px', right: '0px' }}
             >
               <path d="M0,7 C1,3 4,1 6,0 C6,2 5,5 3,6 C2,7 0,7 0,7 Z" />
             </svg>
@@ -132,8 +132,8 @@ const Logo = ({ type = 'horizontal', className = '' }) => {
         </div>
         
         {/* Tagline under brand name */}
-        <span className="text-[7px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest mt-1">
-          Modern Billing & Invoicing
+        <span className="text-[6.5px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest mt-1">
+          Smart Billing &bull; Premium Invoices
         </span>
       </div>
     </div>

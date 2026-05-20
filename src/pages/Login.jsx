@@ -45,7 +45,7 @@ const Login = ({ onLoginSuccess }) => {
         <div className="flex flex-col items-center text-center">
           <Logo type="icon" className="w-16 h-16" />
           <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight mt-4">
-            BillMint
+            BillQyro
           </h1>
           <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-1">
             Secure Admin Workspace
