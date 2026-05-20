@@ -1,27 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import StatCard from '../components/StatCard';
 import InvoiceCard from '../components/InvoiceCard';
-import { 
-  Plus, 
-  Search, 
-  TrendingUp, 
-  DollarSign, 
-  Hourglass, 
-  Users, 
-  FileSpreadsheet, 
-  ReceiptText, 
+import NewUserGuide from '../components/NewUserGuide';
+import SetupProgress from '../components/SetupProgress';
+import {
+  Plus,
+  Search,
+  TrendingUp,
+  DollarSign,
+  Hourglass,
+  Users,
+  FileSpreadsheet,
+  ReceiptText,
   ArrowRight,
   Send,
   MessageSquare,
   AlertCircle,
-  CheckCircle2, 
-  Activity, 
-  Shield, 
-  HardDrive, 
-  FileDown, 
-  Clock, 
-  UserCheck, 
-  Sparkles, 
+  CheckCircle2,
+  Activity,
+  Shield,
+  HardDrive,
+  FileDown,
+  Clock,
+  UserCheck,
+  Sparkles,
+  FileText,
+  Rocket,
   Check
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -30,95 +34,26 @@ import { isFirebaseEnabled } from '../utils/firebase';
 /**
  * High-End SaaS Dashboard with SVG Charts & WhatsApp Reminders
  */
-const Dashboard = ({ 
-  invoices = [], 
-  customers = [], 
-  onViewInvoice, 
-  onEditInvoice, 
-  onDeleteInvoice, 
-  onDownloadPDF, 
+const Dashboard = ({
+  invoices = [],
+  customers = [],
+  onViewInvoice,
+  onEditInvoice,
+  onDeleteInvoice,
+  onDownloadPDF,
   setCurrentTab,
-  businessSettings 
+  businessSettings
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
 
-  // --- INTERACTIVE GETTING STARTED CHECKLIST STATE ---
-  const [checklist, setChecklist] = useState(() => {
-    const saved = localStorage.getItem('billqyro_checklist');
-    return saved ? JSON.parse(saved) : {
-      profile: false,
-      clients: false,
-      catalog: false,
-      invoice: false,
-      expenses: false,
-    };
-  });
-
-  useEffect(() => {
-    localStorage.setItem('billqyro_checklist', JSON.stringify(checklist));
-  }, [checklist]);
-
-  const toggleChecklistItem = (id) => {
-    setChecklist(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
-  };
-
-  const checklistItems = [
-    { 
-      id: 'profile', 
-      label: 'Set Up Business Profile', 
-      tab: 'admin-panel', 
-      desc: 'Add your shop/company name, address, phone, logo & GST number. This info shows on every invoice PDF.',
-      emoji: '🏢',
-      tip: 'Go to Settings → Fill in your business details → Click Save',
-    },
-    { 
-      id: 'clients', 
-      label: 'Add Your First Customer', 
-      tab: 'customers', 
-      desc: 'Save customer names, phone numbers & addresses. Next time you make a bill, just select them — no need to type again!',
-      emoji: '👥',
-      tip: 'Go to Customers → Click + Add → Enter details → Save',
-    },
-    { 
-      id: 'catalog', 
-      label: 'Add Products / Services', 
-      tab: 'products', 
-      desc: 'Add your services (embroidery, punching, repair etc.) with default prices. When creating invoices, just pick from the list!',
-      emoji: '🧵',
-      tip: 'Go to Products → Click + Add → Enter name & price → Save',
-    },
-    { 
-      id: 'invoice', 
-      label: 'Create Your First Invoice', 
-      tab: 'create-invoice', 
-      desc: 'Select a customer, add items/services, set payment status, and download a professional PDF invoice instantly.',
-      emoji: '📄',
-      tip: 'Click Create Bill → Select Customer → Add Items → Save & Download PDF',
-    },
-    { 
-      id: 'expenses', 
-      label: 'Track Your Expenses', 
-      tab: 'expenses', 
-      desc: 'Record your daily expenses like thread, needles, electricity bills. See total profit = revenue minus expenses.',
-      emoji: '💰',
-      tip: 'Go to Expenses → Click + Add → Enter amount & category → Save',
-    },
-  ];
-
-  const completedCount = Object.values(checklist).filter(Boolean).length;
-  const progressPercent = Math.round((completedCount / checklistItems.length) * 100);
-
-  
   const currencySymbol = businessSettings?.currency || '₹';
   const businessName = businessSettings?.businessName || 'BillQyro Embroidery';
+  const isNewUser = invoices.length === 0 && customers.length === 0 && !businessSettings?.businessName;
 
   // --- STATS CALCULATIONS (Accurate SaaS Math) ---
   const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.grandTotal || 0), 0);
-  
+
   const totalPaid = invoices.reduce((sum, inv) => sum + (inv.amountPaid || 0), 0);
 
   const totalDue = invoices.reduce((sum, inv) => sum + (inv.balanceDue || 0), 0);
@@ -198,12 +133,12 @@ const Dashboard = ({
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      
+
       {/* 0. WELCOME HERO BANNER */}
       <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white relative overflow-hidden shadow-premium border border-slate-800/80">
         <div className="absolute -top-24 -right-24 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
@@ -217,7 +152,7 @@ const Dashboard = ({
               Your professional invoicing workspace is loaded and ready. Let's make billing seamless today!
             </p>
           </div>
-          
+
           <button
             onClick={() => setCurrentTab('create-invoice')}
             className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs px-5 py-3.5 rounded-2xl shadow-md hover:shadow-lg active:scale-[0.99] transition-all cursor-pointer w-fit shrink-0 uppercase tracking-wider"
@@ -228,122 +163,48 @@ const Dashboard = ({
         </div>
       </div>
 
-      {/* 0.1 ONBOARDING CHECKLIST & SYSTEM HEALTH */}
+      {/* 0.1 EMPTY STATE — NEW USER WELCOME (Shown when zero invoices) */}
+      {isNewUser && (
+        <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 border border-emerald-200/60 dark:border-emerald-800/30 shadow-premium text-center relative overflow-hidden">
+          <div className="absolute -top-16 -right-16 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="relative z-10 max-w-lg mx-auto space-y-4">
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
+              <Rocket className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">
+              Welcome to BillMint
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+              Start by completing your business profile and creating your first bill.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => setCurrentTab('admin-panel')}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs px-6 py-3.5 rounded-2xl shadow-md hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Get Started</span>
+              </button>
+              <button
+                onClick={() => setCurrentTab('create-invoice')}
+                className="inline-flex items-center gap-2 bg-white dark:bg-slate-800 border-2 border-emerald-500/30 dark:border-emerald-500/20 hover:border-emerald-500 text-emerald-600 dark:text-emerald-400 font-black text-xs px-6 py-3.5 rounded-2xl shadow-sm hover:shadow-md active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
+              >
+                <FileText className="w-4 h-4" />
+                <span>Create First Bill</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 0.2 HOW TO USE BILLMINT GUIDE + SYSTEM HEALTH */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Onboarding Checklist (Col Span 2) */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800/80 shadow-premium space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
-                <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500" />
-                <span>📖 How to Use BillQyro — Step by Step</span>
-              </h3>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                FOLLOW THESE 5 SIMPLE STEPS TO SET UP YOUR BILLING SYSTEM
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-3 shrink-0">
-              <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-850 py-1 px-2.5 rounded-full">
-                {progressPercent}% Complete
-              </span>
-            </div>
-          </div>
 
-          {/* Progress Bar */}
-          <div className="w-full bg-slate-100 dark:bg-slate-850 h-2.5 rounded-full overflow-hidden">
-            <div 
-              className="bg-gradient-to-r from-emerald-400 to-teal-400 h-full rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progressPercent}%` }}
-            ></div>
-          </div>
-
-          {/* Visual Guide Cards */}
-          <div className="space-y-3">
-            {checklistItems.map((item, index) => {
-              const isChecked = checklist[item.id];
-              return (
-                <div 
-                  key={item.id}
-                  className={`p-4 rounded-2xl border transition-all duration-300 ${
-                    isChecked 
-                      ? 'bg-emerald-50/30 dark:bg-emerald-950/10 border-emerald-500/20 dark:border-emerald-500/10' 
-                      : 'bg-white dark:bg-slate-950/40 border-slate-100/80 dark:border-slate-800/50 hover:border-indigo-200 dark:hover:border-indigo-800/50 hover:shadow-sm'
-                  }`}
-                >
-                  <div className="flex gap-3.5">
-                    {/* Left: Emoji + Step Number */}
-                    <div className="flex flex-col items-center gap-1.5 shrink-0">
-                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl ${
-                        isChecked 
-                          ? 'bg-emerald-100 dark:bg-emerald-900/30' 
-                          : 'bg-indigo-50 dark:bg-indigo-950/50'
-                      }`}>
-                        {isChecked ? '✅' : item.emoji}
-                      </div>
-                      <span className={`text-[9px] font-black uppercase tracking-wider ${
-                        isChecked ? 'text-emerald-500' : 'text-slate-400'
-                      }`}>
-                        Step {index + 1}
-                      </span>
-                    </div>
-
-                    {/* Right: Content */}
-                    <div className="flex-1 space-y-2 min-w-0">
-                      {/* Title Row */}
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className={`text-xs font-extrabold leading-snug ${
-                          isChecked ? 'text-emerald-600 dark:text-emerald-400 line-through' : 'text-slate-800 dark:text-slate-200'
-                        }`}>
-                          {item.label}
-                        </h4>
-                        {/* Checkbox */}
-                        <button
-                          onClick={() => toggleChecklistItem(item.id)}
-                          type="button"
-                          className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 border transition-all duration-200 cursor-pointer ${
-                            isChecked 
-                              ? 'bg-emerald-500 border-emerald-500 text-white' 
-                              : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-transparent hover:border-indigo-500'
-                          }`}
-                          title={isChecked ? "Mark incomplete" : "Mark complete"}
-                        >
-                          <Check className="w-3 h-3 stroke-[3]" />
-                        </button>
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
-                        {item.desc}
-                      </p>
-
-                      {/* How-to Tip */}
-                      {!isChecked && (
-                        <div className="flex items-start gap-2 bg-indigo-50/70 dark:bg-indigo-950/30 rounded-xl px-3 py-2 border border-indigo-100/50 dark:border-indigo-800/30">
-                          <span className="text-indigo-500 text-sm shrink-0 mt-0.5">💡</span>
-                          <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold leading-relaxed">
-                            {item.tip}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Action Button */}
-                      {!isChecked && (
-                        <button
-                          onClick={() => setCurrentTab(item.tab)}
-                          className="flex items-center gap-1.5 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-extrabold text-[10px] py-2 px-4 rounded-xl transition-all uppercase tracking-wider shadow-sm hover:shadow w-fit"
-                        >
-                          <span>Open & Configure</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        {/* New "How to Use BillMint" Guide (Col Span 2) */}
+        <div className="lg:col-span-2">
+          <NewUserGuide setCurrentTab={setCurrentTab} isNewUser={isNewUser} />
         </div>
 
         {/* Real-Time System Services Status (Col Span 1) */}
@@ -359,7 +220,7 @@ const Dashboard = ({
           </div>
 
           <div className="grid grid-cols-1 gap-3">
-            
+
             {/* Firebase Status Card */}
             <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
               <div className="flex items-center gap-2.5">
@@ -477,6 +338,13 @@ const Dashboard = ({
 
       </div>
 
+      {/* 0.3 SETUP PROGRESS TRACKER */}
+      <SetupProgress
+        businessSettings={businessSettings}
+        customers={customers}
+        invoices={invoices}
+      />
+
       {/* 1. STATS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         <StatCard
@@ -515,7 +383,7 @@ const Dashboard = ({
 
       {/* 2. ANALYTICS & QUICK LAUNCH ACTIONS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* SVG Custom Revenue Chart */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800/80 shadow-premium space-y-4">
           <div className="flex items-center justify-between">
@@ -523,7 +391,7 @@ const Dashboard = ({
               <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight">Revenue Analytics</h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ROLLING 6 MONTH HISTORY</p>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
               <span className="text-[10px] font-bold text-slate-500 uppercase">Gross Billing</span>
@@ -553,7 +421,7 @@ const Dashboard = ({
               <line x1={paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={paddingY} stroke="#f1f5f9" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="1" strokeDasharray="3" />
               <line x1={paddingX} y1={paddingY + graphHeight / 2} x2={chartWidth - paddingX} y2={paddingY + graphHeight / 2} stroke="#f1f5f9" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="1" strokeDasharray="3" />
               <line x1={paddingX} y1={chartHeight - paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke="#e2e8f0" className="stroke-slate-200 dark:stroke-slate-700" strokeWidth="1" />
- 
+
               {/* Y Axis Reference Labels */}
               <text x={paddingX - 8} y={paddingY + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400 dark:fill-slate-500">{formatCurrency(maxVal, currencySymbol)}</text>
               <text x={paddingX - 8} y={paddingY + graphHeight / 2 + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400 dark:fill-slate-500">{formatCurrency(maxVal / 2, currencySymbol)}</text>
@@ -566,8 +434,8 @@ const Dashboard = ({
                 const y = chartHeight - paddingY - barHeight;
 
                 return (
-                  <g 
-                    key={m.key} 
+                  <g
+                    key={m.key}
                     onMouseEnter={() => setHoveredBarIndex(i)}
                     onMouseLeave={() => setHoveredBarIndex(null)}
                     className="cursor-pointer"
@@ -600,9 +468,8 @@ const Dashboard = ({
                       x={x + barWidth / 2}
                       y={chartHeight - paddingY + 16}
                       textAnchor="middle"
-                      className={`text-[10px] font-bold transition-colors duration-200 ${
-                        hoveredBarIndex === i ? 'fill-indigo-600 dark:fill-indigo-400 font-extrabold' : 'fill-slate-400 dark:fill-slate-550'
-                      }`}
+                      className={`text-[10px] font-bold transition-colors duration-200 ${hoveredBarIndex === i ? 'fill-indigo-600 dark:fill-indigo-400 font-extrabold' : 'fill-slate-400 dark:fill-slate-550'
+                        }`}
                     >
                       {m.label}
                     </text>
@@ -644,7 +511,7 @@ const Dashboard = ({
         {/* Speed Invoicing Call-To-Action Card */}
         <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-6 text-white relative overflow-hidden shadow-premium flex flex-col justify-between">
           <div className="absolute -top-12 -right-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
-          
+
           <div className="space-y-3">
             <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full w-fit">
               Embroidery Billing OS
@@ -656,7 +523,7 @@ const Dashboard = ({
               Auto-generate sequential SO design numbers, compile multi-composite rates with smart adders, and download premium PDF invoice sheets.
             </p>
           </div>
-          
+
           <button
             onClick={() => setCurrentTab('create-invoice')}
             className="flex items-center justify-center gap-2 mt-6 bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-black text-xs px-5 py-4 rounded-2xl shadow-lg shadow-indigo-500/10 hover:from-indigo-600 hover:to-blue-600 transition-all w-full hover:scale-[1.01] active:scale-[0.99]"
@@ -669,7 +536,7 @@ const Dashboard = ({
 
       {/* 3. DUES AND RECENT RECORDS ROW */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Left Double-width: Unpaid WhatsApp Reminders Section */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
@@ -682,7 +549,7 @@ const Dashboard = ({
                 AUTO-PREFILLED WHATSAPP DUELISTS
               </p>
             </div>
-            
+
             <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-850 py-1 px-2.5 rounded-full">
               {unpaidInvoices.length} unpaid total
             </span>
@@ -690,7 +557,7 @@ const Dashboard = ({
 
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800/80 shadow-premium space-y-3.5 max-h-[300px] overflow-y-auto no-scrollbar">
             {unpaidInvoices.map((inv) => (
-              <div 
+              <div
                 key={inv.id}
                 className="flex items-center justify-between p-3.5 bg-slate-50/50 dark:bg-slate-950/40 hover:bg-slate-50 dark:hover:bg-slate-950/70 rounded-2xl border border-slate-100/50 dark:border-slate-800/50 transition-all"
               >
@@ -739,7 +606,7 @@ const Dashboard = ({
 
         {/* Right Single-width: Recent Invoices & Global Search */}
         <div className="space-y-6">
-          
+
           {/* Recent Invoices */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -747,7 +614,7 @@ const Dashboard = ({
                 <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight">Recent Logs</h3>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">LATEST TRANSACTIONS</p>
               </div>
-              
+
               <button
                 onClick={() => setCurrentTab('invoices')}
                 className="text-[10px] font-black text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition-all uppercase tracking-wider"
@@ -806,8 +673,8 @@ const Dashboard = ({
               {searchQuery && (
                 <div className="space-y-2 max-h-40 overflow-y-auto no-scrollbar pt-2 border-t border-slate-50">
                   {filteredInvoices.map((inv) => (
-                    <div 
-                      key={inv.id} 
+                    <div
+                      key={inv.id}
                       onClick={() => onViewInvoice(inv)}
                       className="flex justify-between items-center p-2 hover:bg-slate-50 rounded-lg cursor-pointer transition-all border border-transparent hover:border-slate-100"
                     >
@@ -828,7 +695,7 @@ const Dashboard = ({
                   )}
                 </div>
               )}
-              
+
               {!searchQuery && (
                 <div className="text-center py-4 text-slate-400">
                   <ReceiptText className="w-6 h-6 mx-auto text-slate-200 mb-1.5" />
@@ -839,7 +706,7 @@ const Dashboard = ({
           </div>
 
         </div>
-        
+
       </div>
     </div>
   );
