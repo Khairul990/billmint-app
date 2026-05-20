@@ -20,6 +20,7 @@ const DEFAULT_SETTINGS = {
   gstNumber: '29AAAAA0000A1Z5',
   currency: '₹',
   defaultTax: 18,
+  adminPasscode: '1118', // Customizable administrative passcode
 };
 
 // Seed Data
@@ -87,6 +88,7 @@ const SEED_INVOICES = [
     discountAmount: 200,
     notes: 'Thank you for your business. Payment received via bank transfer.',
     paymentStatus: 'Paid',
+    orderStatus: 'Delivered', // Seeded order tracking status
     subtotal: 1700,
     taxAmount: 270,
     grandTotal: 1770,
@@ -110,6 +112,7 @@ const SEED_INVOICES = [
     discountAmount: 1000,
     notes: 'Please complete payment on or before the due date.',
     paymentStatus: 'Pending',
+    orderStatus: 'In Progress', // Seeded order tracking status
     subtotal: 15000,
     taxAmount: 2520,
     grandTotal: 16520,
@@ -133,6 +136,7 @@ const SEED_INVOICES = [
     discountAmount: 0,
     notes: 'Payment net 14 days.',
     paymentStatus: 'Unpaid',
+    orderStatus: 'Pending', // Seeded order tracking status
     subtotal: 8000,
     taxAmount: 960,
     grandTotal: 8960,
@@ -210,7 +214,9 @@ export const getAuthSession = () => {
 };
 
 export const login = (passcode) => {
-  if (passcode === '1118') {
+  const activeSettings = getSettings() || DEFAULT_SETTINGS;
+  const targetPasscode = activeSettings.adminPasscode || '1118';
+  if (passcode === targetPasscode) {
     const session = { timestamp: Date.now(), token: 'billmint-secure-session' };
     localStorage.setItem(KEYS.AUTH, JSON.stringify(session));
     return true;
@@ -362,3 +368,40 @@ export const deleteInvoice = (id) => {
   localStorage.setItem(KEYS.INVOICES, JSON.stringify(filtered));
   return filtered;
 };
+
+// --- BACKUP & RESTORE DATABASE ---
+export const exportBackup = () => {
+  return {
+    settings: getSettings(),
+    customers: getCustomers(),
+    products: getProducts(),
+    invoices: getInvoices(),
+    expenses: getExpenses(),
+    subscription: getSubscriptionStatus(),
+  };
+};
+
+export const importRestore = (backupData) => {
+  if (!backupData || typeof backupData !== 'object') {
+    throw new Error('Invalid backup file structure.');
+  }
+
+  // Basic validation of fields to verify database structure integrity
+  const requiredKeys = ['settings', 'customers', 'products', 'invoices', 'expenses', 'subscription'];
+  for (const k of requiredKeys) {
+    if (!backupData.hasOwnProperty(k)) {
+      throw new Error(`Missing database key: ${k}`);
+    }
+  }
+
+  // Write variables straight into LocalStorage
+  localStorage.setItem(KEYS.SETTINGS, JSON.stringify(backupData.settings));
+  localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(backupData.customers));
+  localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(backupData.products));
+  localStorage.setItem(KEYS.INVOICES, JSON.stringify(backupData.invoices));
+  localStorage.setItem(KEYS.EXPENSES, JSON.stringify(backupData.expenses));
+  localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(backupData.subscription));
+
+  return backupData;
+};
+

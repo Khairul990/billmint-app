@@ -8,8 +8,13 @@ import {
   User, 
   MapPin, 
   Coins, 
-  ShieldAlert 
+  ShieldAlert,
+  Key,
+  Database,
+  Download,
+  Upload
 } from 'lucide-react';
+import { exportBackup } from '../utils/storage';
 
 /**
  * Settings & Administrator Management Page
@@ -18,7 +23,7 @@ import {
  * @param {Function} onResetDemo - resets database back to seeded mock assets
  * @param {Function} onLogout - clears active user session
  */
-const Settings = ({ settings, onSaveSettings, onResetDemo, onLogout }) => {
+const Settings = ({ settings, onSaveSettings, onResetDemo, onLogout, onImportBackup }) => {
   // --- FORM STATES ---
   const [businessName, setBusinessName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
@@ -29,6 +34,7 @@ const Settings = ({ settings, onSaveSettings, onResetDemo, onLogout }) => {
   const [gstNumber, setGstNumber] = useState('');
   const [currency, setCurrency] = useState('₹');
   const [defaultTax, setDefaultTax] = useState(18);
+  const [adminPasscode, setAdminPasscode] = useState('1118');
 
   // Sync state with settings prop
   useEffect(() => {
@@ -42,6 +48,7 @@ const Settings = ({ settings, onSaveSettings, onResetDemo, onLogout }) => {
       setGstNumber(settings.gstNumber || '');
       setCurrency(settings.currency || '₹');
       setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 18);
+      setAdminPasscode(settings.adminPasscode || '1118');
     }
   }, [settings]);
 
@@ -62,10 +69,51 @@ const Settings = ({ settings, onSaveSettings, onResetDemo, onLogout }) => {
       gstNumber,
       currency,
       defaultTax: parseFloat(defaultTax) || 0,
+      adminPasscode,
     };
 
     onSaveSettings(payload);
     alert('Settings saved successfully!');
+  };
+
+  const handleExport = () => {
+    try {
+      const data = exportBackup();
+      const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+        JSON.stringify(data, null, 2)
+      )}`;
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', jsonString);
+      
+      const dateStr = new Date().toISOString().split('T')[0];
+      downloadAnchor.setAttribute('download', `billmint-backup-${dateStr}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    } catch (error) {
+      alert(`Export failed: ${error.message}`);
+    }
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsedData = JSON.parse(event.target.result);
+        if (onImportBackup) {
+          onImportBackup(parsedData);
+          alert('Database successfully restored from backup!');
+        } else {
+          alert('Import feature not properly wired in the system.');
+        }
+      } catch (error) {
+        alert(`Failed to import backup: ${error.message}`);
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleResetData = () => {
@@ -197,6 +245,73 @@ const Settings = ({ settings, onSaveSettings, onResetDemo, onLogout }) => {
               </div>
             </div>
           </div>
+
+          {/* Section: Security Vault */}
+          <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
+            <h3 className="text-sm font-extrabold text-slate-800 border-b border-slate-50 pb-3 flex items-center gap-2">
+              <Key className="w-4.5 h-4.5 text-indigo-500" />
+              <span>Security Vault & Passcode</span>
+            </h3>
+
+            <div className="space-y-4 text-xs font-semibold text-slate-500">
+              <div>
+                <label className="block mb-1 text-slate-400">Admin Passcode</label>
+                <input
+                  type="password"
+                  value={adminPasscode}
+                  onChange={(e) => setAdminPasscode(e.target.value)}
+                  placeholder="e.g. 1118"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                />
+                <p className="text-[10px] text-slate-400 mt-1 font-medium">Used to access this administrative console and secure areas of the app.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Section: Data Backup & Restore */}
+          <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
+            <h3 className="text-sm font-extrabold text-slate-800 border-b border-slate-50 pb-3 flex items-center gap-2">
+              <Database className="w-4.5 h-4.5 text-indigo-500" />
+              <span>Data Backup & Restore</span>
+            </h3>
+
+            <div className="space-y-4 text-xs font-semibold text-slate-500">
+              <p className="text-slate-400 font-medium leading-relaxed">
+                Export your entire workspace (invoices, customers, settings, and expenses) to a local JSON file, or restore a previous backup.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                {/* Export Button */}
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  className="flex items-center justify-center gap-2 py-3 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 font-bold text-xs rounded-2xl transition-all"
+                >
+                  <Download className="w-4 h-4 text-indigo-600" />
+                  <span>Export Backup (JSON)</span>
+                </button>
+
+                {/* Import Button / Trigger */}
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={handleImport}
+                    id="backup-upload"
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="backup-upload"
+                    className="flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-2xl cursor-pointer transition-all text-center"
+                  >
+                    <Upload className="w-4 h-4 text-white" />
+                    <span>Import Backup (JSON)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         {/* RIGHT COLUMN: TAX PARAMS & DANGER ZONE ACTIONS */}

@@ -56,6 +56,7 @@ const CreateInvoice = ({
   const [amountPaid, setAmountPaid] = useState(0);
   const [notes, setNotes] = useState('');
   const [paymentStatus, setPaymentStatus] = useState('Pending');
+  const [orderStatus, setOrderStatus] = useState('Pending');
 
   // --- STATE FOR SMART RATE MODAL ---
   const [showSmartRate, setShowSmartRate] = useState(false);
@@ -83,6 +84,7 @@ const CreateInvoice = ({
       setAmountPaid(editingInvoice.amountPaid || 0);
       setNotes(editingInvoice.notes || '');
       setPaymentStatus(editingInvoice.paymentStatus || 'Pending');
+      setOrderStatus(editingInvoice.orderStatus || 'Pending');
 
       // Populate items ensuring they have smartRate details
       const parsedItems = (editingInvoice.items || []).map((item, idx) => ({
@@ -111,6 +113,7 @@ const CreateInvoice = ({
       setAmountPaid(0);
       setNotes('Thank you for choosing BillMint! Payment is expected within due date.');
       setPaymentStatus('Pending');
+      setOrderStatus('Pending');
 
       // Prefill first row
       const firstDesignNo = getNextDesignNumber(invoices, 0);
@@ -302,6 +305,7 @@ const CreateInvoice = ({
       balanceDue: parseFloat(balanceDue) || 0,
       notes,
       paymentStatus,
+      orderStatus,
       subtotal,
       taxAmount,
       grandTotal,
@@ -680,11 +684,27 @@ const CreateInvoice = ({
                 <select
                   value={paymentStatus}
                   onChange={(e) => setPaymentStatus(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-extrabold"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-extrabold dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                 >
                   <option value="Paid">Paid</option>
                   <option value="Pending">Pending</option>
                   <option value="Unpaid">Unpaid</option>
+                </select>
+              </div>
+
+              {/* Order Status */}
+              <div>
+                <label className="block mb-1.5 text-slate-400">Order Status</label>
+                <select
+                  value={orderStatus}
+                  onChange={(e) => setOrderStatus(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-extrabold dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Ready">Ready</option>
+                  <option value="Delivered">Delivered</option>
+                  <option value="Cancelled">Cancelled</option>
                 </select>
               </div>
 

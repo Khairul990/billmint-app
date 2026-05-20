@@ -159,10 +159,10 @@ const Dashboard = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* SVG Custom Revenue Chart */}
-        <div className="lg:col-span-2 bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800/80 shadow-premium space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-extrabold text-sm text-slate-800 tracking-tight">Revenue Analytics</h3>
+              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight">Revenue Analytics</h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ROLLING 6 MONTH HISTORY</p>
             </div>
             
@@ -184,17 +184,15 @@ const Dashboard = ({
                   <stop offset="0%" stopColor="#f8fafc" />
                   <stop offset="100%" stopColor="#f1f5f9" />
                 </linearGradient>
-              </defs>
-
-              {/* Gridlines */}
-              <line x1={paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={paddingY} stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3" />
-              <line x1={paddingX} y1={paddingY + graphHeight / 2} x2={chartWidth - paddingX} y2={paddingY + graphHeight / 2} stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3" />
-              <line x1={paddingX} y1={chartHeight - paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke="#e2e8f0" strokeWidth="1" />
-
+              </defs>              {/* Gridlines */}
+              <line x1={paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={paddingY} stroke="#f1f5f9" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="1" strokeDasharray="3" />
+              <line x1={paddingX} y1={paddingY + graphHeight / 2} x2={chartWidth - paddingX} y2={paddingY + graphHeight / 2} stroke="#f1f5f9" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="1" strokeDasharray="3" />
+              <line x1={paddingX} y1={chartHeight - paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke="#e2e8f0" className="stroke-slate-200 dark:stroke-slate-700" strokeWidth="1" />
+ 
               {/* Y Axis Reference Labels */}
-              <text x={paddingX - 8} y={paddingY + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400">{formatCurrency(maxVal, currencySymbol)}</text>
-              <text x={paddingX - 8} y={paddingY + graphHeight / 2 + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400">{formatCurrency(maxVal / 2, currencySymbol)}</text>
-              <text x={paddingX - 8} y={chartHeight - paddingY + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400">{currencySymbol}0</text>
+              <text x={paddingX - 8} y={paddingY + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400 dark:fill-slate-500">{formatCurrency(maxVal, currencySymbol)}</text>
+              <text x={paddingX - 8} y={paddingY + graphHeight / 2 + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400 dark:fill-slate-500">{formatCurrency(maxVal / 2, currencySymbol)}</text>
+              <text x={paddingX - 8} y={chartHeight - paddingY + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400 dark:fill-slate-500">{currencySymbol}0</text>
 
               {/* Bars rendering */}
               {monthlyData.map((m, i) => {
@@ -216,9 +214,8 @@ const Dashboard = ({
                         y={paddingY - 5}
                         width={barWidth + 12}
                         height={graphHeight + 10}
-                        fill="#f8fafc"
                         rx="12"
-                        className="transition-all duration-200"
+                        className="transition-all duration-200 fill-slate-50 dark:fill-slate-800/40"
                       />
                     )}
 
@@ -239,7 +236,7 @@ const Dashboard = ({
                       y={chartHeight - paddingY + 16}
                       textAnchor="middle"
                       className={`text-[10px] font-bold transition-colors duration-200 ${
-                        hoveredBarIndex === i ? 'fill-indigo-600 font-extrabold' : 'fill-slate-400'
+                        hoveredBarIndex === i ? 'fill-indigo-600 dark:fill-indigo-400 font-extrabold' : 'fill-slate-400 dark:fill-slate-550'
                       }`}
                     >
                       {m.label}
@@ -312,7 +309,7 @@ const Dashboard = ({
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-extrabold text-sm text-slate-800 tracking-tight flex items-center gap-2">
+              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
                 <MessageSquare className="w-4 h-4 text-indigo-500" />
                 <span>Pending Balance Reminders</span>
               </h3>
@@ -321,26 +318,26 @@ const Dashboard = ({
               </p>
             </div>
             
-            <span className="text-[10px] font-black text-slate-500 bg-slate-100 py-1 px-2.5 rounded-full">
+            <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-850 py-1 px-2.5 rounded-full">
               {unpaidInvoices.length} unpaid total
             </span>
           </div>
 
-          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-premium space-y-3.5 max-h-[300px] overflow-y-auto no-scrollbar">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800/80 shadow-premium space-y-3.5 max-h-[300px] overflow-y-auto no-scrollbar">
             {unpaidInvoices.map((inv) => (
               <div 
                 key={inv.id}
-                className="flex items-center justify-between p-3.5 bg-slate-50/50 hover:bg-slate-50 rounded-2xl border border-slate-100/50 transition-all"
+                className="flex items-center justify-between p-3.5 bg-slate-50/50 dark:bg-slate-950/40 hover:bg-slate-50 dark:hover:bg-slate-950/70 rounded-2xl border border-slate-100/50 dark:border-slate-800/50 transition-all"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-slate-800">{inv.invoiceNumber}</span>
-                    <span className="text-[9px] bg-amber-50 text-amber-600 font-extrabold px-2 py-0.5 rounded uppercase">
+                    <span className="text-xs font-black text-slate-800 dark:text-slate-200">{inv.invoiceNumber}</span>
+                    <span className="text-[9px] bg-amber-50 dark:bg-amber-950/35 text-amber-600 dark:text-amber-400 font-extrabold px-2 py-0.5 rounded uppercase">
                       Due: {inv.dueDate || 'N/A'}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-500 font-bold">
-                    Client: <span className="text-slate-800 font-extrabold">{inv.customerName}</span> • Phone: {inv.customerPhone || 'N/A'}
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
+                    Client: <span className="text-slate-800 dark:text-slate-350 font-extrabold">{inv.customerName}</span> • Phone: {inv.customerPhone || 'N/A'}
                   </p>
                 </div>
 
@@ -366,8 +363,8 @@ const Dashboard = ({
             {unpaidInvoices.length === 0 && (
               <div className="text-center py-8 text-slate-400 space-y-2">
                 <AlertCircle className="w-8 h-8 text-emerald-400 mx-auto" />
-                <h4 className="font-extrabold text-xs text-slate-700">Perfect Billing Score!</h4>
-                <p className="text-[10px] text-slate-400 font-bold">
+                <h4 className="font-extrabold text-xs text-slate-700 dark:text-slate-300">Perfect Billing Score!</h4>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold">
                   All accounts settled. There are no pending outstanding balances.
                 </p>
               </div>
@@ -382,7 +379,7 @@ const Dashboard = ({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-extrabold text-sm text-slate-800 tracking-tight">Recent Logs</h3>
+                <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight">Recent Logs</h3>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">LATEST TRANSACTIONS</p>
               </div>
               
@@ -423,11 +420,11 @@ const Dashboard = ({
           {/* Global Search Panel */}
           <div className="space-y-4">
             <div>
-              <h3 className="font-extrabold text-sm text-slate-800 tracking-tight">Global Invoices Filter</h3>
+              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight">Global Invoices Filter</h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">FAST SEARCH SYSTEM</p>
             </div>
 
-            <div className="bg-white rounded-3xl p-4.5 border border-slate-100 shadow-premium space-y-3.5">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-100 dark:border-slate-800/80 shadow-premium space-y-3.5">
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
                   <Search className="w-3.5 h-3.5" />
@@ -437,7 +434,7 @@ const Dashboard = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search Invoice ID, client..."
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all text-slate-800 dark:text-slate-100"
                 />
               </div>
 

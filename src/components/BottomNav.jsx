@@ -16,7 +16,7 @@ const BottomNav = ({ currentTab, setCurrentTab }) => {
 
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-100/80 shadow-lg px-2 py-1.5 flex items-center justify-around pb-safe-bottom">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-100/80 dark:border-slate-800/80 shadow-lg px-2 py-1.5 flex items-center justify-around pb-safe-bottom transition-colors duration-300">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = 
@@ -28,17 +28,17 @@ const BottomNav = ({ currentTab, setCurrentTab }) => {
           <button
             key={tab.id}
             onClick={() => setCurrentTab(tab.id)}
-            className="flex flex-col items-center justify-center flex-1 py-1 px-2 rounded-xl transition-all"
+            className="flex flex-col items-center justify-center flex-1 py-1 px-2 rounded-xl transition-all cursor-pointer"
           >
             <div className={`p-1.5 rounded-xl transition-all duration-300 ${
               isActive 
-                ? 'bg-gradient-to-tr from-indigo-600 to-blue-500 text-white shadow-md shadow-indigo-100 scale-110' 
-                : 'text-slate-400 hover:text-slate-600'
+                ? 'bg-gradient-to-tr from-indigo-600 to-blue-500 text-white shadow-md shadow-indigo-100/50 dark:shadow-none scale-110' 
+                : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
             }`}>
               <Icon className="w-5 h-5" />
             </div>
             <span className={`text-[10px] font-semibold mt-1 tracking-tight ${
-              isActive ? 'text-indigo-600 font-bold' : 'text-slate-400 font-medium'
+              isActive ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-400 dark:text-slate-500 font-medium'
             }`}>
               {tab.label}
             </span>

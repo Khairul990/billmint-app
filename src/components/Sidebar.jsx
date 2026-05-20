@@ -22,17 +22,17 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-100 h-screen sticky top-0 left-0 z-30 shadow-sm">
+    <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 h-screen sticky top-0 left-0 z-30 shadow-sm transition-all duration-300">
       {/* Brand Header */}
-      <div className="p-6 border-b border-slate-50 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-md shadow-indigo-100">
+      <div className="p-6 border-b border-slate-50 dark:border-slate-800/80 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-md shadow-indigo-100 dark:shadow-none">
           <ReceiptText className="w-5.5 h-5.5" />
         </div>
         <div>
           <h1 className="font-extrabold text-xl bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent tracking-tight">
             BillMint
           </h1>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Billing SaaS</p>
+          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Billing SaaS</p>
         </div>
       </div>
 
@@ -46,14 +46,14 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
             <button
               key={item.id}
               onClick={() => setCurrentTab(item.id)}
-              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group ${
+              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group cursor-pointer ${
                 isActive 
-                  ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md shadow-indigo-100/50' 
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+                  ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md shadow-indigo-100/50 dark:shadow-none' 
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50'
               }`}
             >
               <Icon className={`w-5 h-5 transition-transform group-hover:scale-105 ${
-                isActive ? 'text-white' : 'text-slate-400 group-hover:text-indigo-500'
+                isActive ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-indigo-500'
               }`} />
               <span>{item.label}</span>
             </button>
@@ -62,8 +62,8 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
       </nav>
 
       {/* Sidebar Footer with Business Account Summary & Logout */}
-      <div className="p-4 border-t border-slate-50 flex flex-col gap-3">
-        <div className="flex items-center gap-3 p-2 bg-slate-50 rounded-xl">
+      <div className="p-4 border-t border-slate-50 dark:border-slate-800/80 flex flex-col gap-3">
+        <div className="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-950/40 border border-slate-100/10 rounded-xl">
           {businessSettings?.logoUrl ? (
             <img
               src={businessSettings.logoUrl}
@@ -71,20 +71,20 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
               className="w-9 h-9 rounded-lg object-cover shadow-sm bg-white"
             />
           ) : (
-            <div className="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm">
+            <div className="w-9 h-9 rounded-lg bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 font-bold flex items-center justify-center text-sm">
               {businessSettings?.businessName?.charAt(0) || 'B'}
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h4 className="text-xs font-bold text-slate-700 truncate">{businessSettings?.businessName || 'My Business'}</h4>
-            <p className="text-[10px] text-slate-400 font-medium truncate">{businessSettings?.email || 'billing@firm.com'}</p>
+            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{businessSettings?.businessName || 'My Business'}</h4>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium truncate">{businessSettings?.email || 'billing@firm.com'}</p>
           </div>
         </div>
 
         {isAuthenticated && (
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition-all animate-fadeIn"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-600 transition-all animate-fadeIn cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Log out</span>

@@ -31,7 +31,8 @@ import {
   saveSubscriptionStatus,
   getExpenses,
   saveExpense,
-  deleteExpense
+  deleteExpense,
+  importRestore
 } from './utils/storage';
 import { downloadInvoicePDF } from './utils/pdfUtils';
 
@@ -189,6 +190,18 @@ function App() {
     setCurrentTab('dashboard');
   };
 
+  // Import Backup Data and Sync React States
+  const handleImportBackup = (parsedData) => {
+    importRestore(parsedData);
+    setSettings(parsedData.settings);
+    setCustomers(parsedData.customers);
+    setProducts(parsedData.products);
+    setInvoices(parsedData.invoices);
+    setExpenses(parsedData.expenses);
+    setSubscription(parsedData.subscription);
+    setCurrentTab('dashboard');
+  };
+
   // --- PDF GENERATOR WORKER ---
   const handleDownloadPDF = (invoice) => {
     const isPremium = subscription.status === 'premium';
@@ -301,6 +314,7 @@ function App() {
             onSaveSettings={handleSaveSettings}
             onResetDemo={handleResetDemo}
             onLogout={handleLogout}
+            onImportBackup={handleImportBackup}
           />
         );
       default:
