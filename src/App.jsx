@@ -39,6 +39,24 @@ import {
 import { downloadInvoicePDF } from './utils/pdfUtils';
 
 function App() {
+
+  // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
+  const [isAuthenticated, setIsAuthenticated] = useState(getAuthSession() !== null);
+  const [currentTab, setCurrentTab] = useState('dashboard');
+
+  // Storage states
+  const [invoices, setInvoices] = useState(() => getInvoices());
+  const [customers, setCustomers] = useState(() => getCustomers());
+  const [products, setProducts] = useState(() => getProducts());
+  const [settings, setSettings] = useState(() => getSettings());
+  const [expenses, setExpenses] = useState(() => getExpenses());
+  const [subscription, setSubscription] = useState(() => getSubscriptionStatus());
+
+  // Workspace Contexts
+  const [editingInvoice, setEditingInvoice] = useState(null);
+
+  // --- EFFECTS ---
+
   // Initialize Database on App mount
   useEffect(() => {
     initializeStorage();
@@ -54,34 +72,18 @@ function App() {
             setInvoices(synced.invoices || []);
             setCustomers(synced.customers || []);
             setProducts(synced.products || []);
-            setSettings(synced.settings || synced.settings);
+            if (synced.settings) setSettings(synced.settings);
             setExpenses(synced.expenses || []);
-            setSubscription(synced.subscription || synced.subscription);
+            if (synced.subscription) setSubscription(synced.subscription);
           }
         } catch (e) {
-          console.warn("Could not sync Firestore on startup. Falling back to LocalStorage.", e);
+          console.warn('Could not sync Firestore on startup. Falling back to LocalStorage.', e);
         }
       };
       runSync();
     }
   }, [isAuthenticated]);
 
-  // --- STATE SYSTEM ---
-  const [isAuthenticated, setIsAuthenticated] = useState(getAuthSession() !== null);
-  const [currentTab, setCurrentTab] = useState('dashboard');
-  
-  // Storage states
-  const [invoices, setInvoices] = useState(getInvoices());
-  const [customers, setCustomers] = useState(getCustomers());
-  const [products, setProducts] = useState(getProducts());
-  const [settings, setSettings] = useState(getSettings());
-  const [expenses, setExpenses] = useState(getExpenses());
-  const [subscription, setSubscription] = useState(getSubscriptionStatus());
-
-  // Workspace Contexts
-  const [editingInvoice, setEditingInvoice] = useState(null);
-
-  // --- ROUTING SYSTEM ---
   // Listen for /admin and #/admin to route to admin panel automatically
   useEffect(() => {
     const handleLocationChange = () => {
@@ -92,9 +94,7 @@ function App() {
       }
     };
 
-    // Run check on mount
     handleLocationChange();
-
     window.addEventListener('popstate', handleLocationChange);
     window.addEventListener('hashchange', handleLocationChange);
     return () => {
@@ -103,7 +103,7 @@ function App() {
     };
   }, []);
 
-  // Sync current virtual tab with URL hash for bookmarks and back buttons
+  // Sync current virtual tab with URL hash
   useEffect(() => {
     if (currentTab === 'admin-panel') {
       if (window.location.hash !== '#/admin' && window.location.pathname !== '/admin') {
@@ -119,7 +119,6 @@ function App() {
   // --- AUTH BRIDGE ---
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
-    // Reload state after login
     setInvoices(getInvoices());
     setCustomers(getCustomers());
     setProducts(getProducts());
@@ -136,7 +135,7 @@ function App() {
   };
 
   // --- DATA SYNCHRONIZERS ---
-  
+
   // Invoices
   const handleSaveInvoice = (payload) => {
     const isNew = !payload.id || !invoices.some(inv => inv.id === payload.id);
@@ -251,9 +250,7 @@ function App() {
             invoices={invoices}
             customers={customers}
             onViewInvoice={(inv) => {
-              // Open modal preview inside invoices tab
               setEditingInvoice(inv);
-              // Simply route to invoices where viewing invoice is supported
               setCurrentTab('invoices');
             }}
             onEditInvoice={(inv) => {
@@ -353,6 +350,7 @@ function App() {
     }
   };
 
+  // Show onboarding/login if not authenticated
   if (!isAuthenticated) {
     return (
       <WelcomeOnboarding 
@@ -371,7 +369,6 @@ function App() {
     <Layout
       currentTab={currentTab}
       setCurrentTab={(tab) => {
-        // Clear editing context when switching tabs
         if (tab !== 'create-invoice') {
           setEditingInvoice(null);
         }
