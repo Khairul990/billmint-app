@@ -2,12 +2,12 @@ import React from 'react';
 
 /**
  * High-fidelity Vector Logo and Brand Asset Component for BillQyro
- * Matches the brand guidelines:
- * - Deep navy blue B spine & text
- * - Mint / teal gradient invoicing document sheet
- * - Curved top-right fold and curved bottom-right leaf curl
- * - "Bill" in Navy / "Qyro" in brand green with superscript brand leaf accent
- * - Modern spaced sub-tagline
+ * Matches the uploaded brand design exactly:
+ * - Stylized ribbon "B" (Back layer) in Emerald/Teal Gradient
+ * - Premium Invoicing Document Sheet (Front layer) in White (Light mode) / Slate-900 (Dark mode)
+ * - Top-Right Paper Fold corner and bottom-left leaf tail curl
+ * - "Bill" in Slate-900/White / "Qyro" in Emerald-500/Emerald-400
+ * - Spaced horizontal markers and Modern spaced sub-tagline
  * 
  * @param {string} type - 'icon' | 'horizontal' | 'app-icon'
  * @param {string} className - additional sizing / layout classes
@@ -16,7 +16,7 @@ const Logo = ({ type = 'horizontal', className = '' }) => {
   // Brand color gradients & assets definitions
   const defs = (
     <defs>
-      {/* Primary Mint to Teal gradient for invoice sheet */}
+      {/* Primary Mint to Teal gradient for the outer stylized "B" ribbon */}
       <linearGradient id="brandGradient" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0%" stopColor="#A7F3D0" /> {/* Soft Mint */}
         <stop offset="50%" stopColor="#10B981" /> {/* Brand Mint */}
@@ -28,16 +28,10 @@ const Logo = ({ type = 'horizontal', className = '' }) => {
         <stop offset="0%" stopColor="#D1FAE5" />
         <stop offset="100%" stopColor="#FFFFFF" />
       </linearGradient>
-
-      {/* Dark teal gradient for bottom curl */}
-      <linearGradient id="curlGradient" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor="#047857" />
-        <stop offset="100%" stopColor="#064E3B" />
-      </linearGradient>
     </defs>
   );
 
-  // Stylized B path + Overlaid Mint-to-Teal Invoicing Sheet
+  // Stylized B path + Overlaid Invoicing Sheet matching the user's design image
   const IconSVG = ({ sizeClass = 'w-10 h-10' }) => (
     <svg 
       viewBox="0 0 100 100" 
@@ -47,46 +41,39 @@ const Logo = ({ type = 'horizontal', className = '' }) => {
     >
       {defs}
       
-      {/* 1. Stylized Navy "B" (Back layer) - adapts to dark mode text color */}
+      {/* 1. Stylized Ribbon "B" (Back layer) in Emerald/Teal Gradient */}
       <path 
         fillRule="evenodd" 
         clipRule="evenodd"
-        d="M32 16h18c12 0 19 5.5 19 14.5c0 5-3.5 9-9.5 11c6.5 1.5 10.5 5.5 10.5 12.5c0 11-8.5 16-20 16H32c-2.2 0-4-1.8-4-4V20c0-2.2 1.8-4 4-4zm6.5 7.5v12.5h11.5c4 0 7-2 7-6.25s-3-6.25-7-6.25H38.5zm0 18.5V57h13.5c5.5 0 8.5-2.5 8.5-7s-3-7.5-8.5-7.5H38.5z"
-        className="fill-slate-900 dark:fill-white transition-colors duration-300"
+        d="M32 15C24 15 24 23 24 30V70C24 77 24 85 32 85H60C72 85 82 77 82 66C82 58 76 51 68 49C76 47 80 40 80 32C80 22 72 15 60 15Z"
+        fill="url(#brandGradient)"
+        className="transition-all duration-300 drop-shadow-sm"
       />
 
       {/* 2. Premium Invoicing Document Sheet (Front layer) */}
-      {/* Base sheet body with top-right corner cut and rounded bottom-left */}
+      {/* Base sheet body with top-right corner cut and rounded bottom-left leaf tail */}
       <path 
-        d="M24 28c0-4.4 3.6-8 8-8h16l8 8v34c0 4.4-3.6 8-8 8H32c-4.4 0-8-3.6-8-8V28z" 
-        fill="url(#brandGradient)"
-        className="drop-shadow-md"
+        d="M36 22H52L60 30V60C60 64.4 56.4 68 52 68H42C34 68 30 72 27 76C26 71 28 64 32 60V26C32 23.8 33.8 22 36 22Z" 
+        className="fill-white dark:fill-slate-900 stroke-slate-200/50 dark:stroke-slate-800 transition-colors duration-300 filter drop-shadow-md"
+        strokeWidth="1"
+      />
+
+      {/* Folded paper corner */}
+      <path 
+        d="M52 22V28C52 29.1 52.9 30 54 30H60L52 22Z" 
+        fill="url(#foldGradient)"
+        className="filter drop-shadow-sm"
       />
 
       {/* Three premium horizontal invoice lines */}
-      <rect x="30" y="30" width="12" height="2" rx="1" fill="#064E3B" fillOpacity="0.4" />
-      <rect x="30" y="36" width="18" height="2" rx="1" fill="#064E3B" fillOpacity="0.4" />
-      <rect x="30" y="42" width="10" height="2" rx="1" fill="#064E3B" fillOpacity="0.4" />
+      <rect x="38" y="32" width="12" height="2" rx="1" className="fill-emerald-600 dark:fill-emerald-400 transition-colors duration-300" />
+      <rect x="38" y="38" width="16" height="2" rx="1" className="fill-emerald-600 dark:fill-emerald-400 transition-colors duration-300" />
+      <rect x="38" y="44" width="10" height="2" rx="1" className="fill-emerald-600 dark:fill-emerald-400 transition-colors duration-300" />
 
       {/* Bold Dollar $ Symbol in bottom center */}
       <path 
-        d="M38 48.5c0-.6.4-1 1-1h1.5v-1c0-.3.2-.5.5-.5h1c.3 0 .5.2.5.5v1H44c.6 0 1 .4 1 1s-.4 1-1 1h-2.5v1.5h1.5c1.4 0 2.5 1.1 2.5 2.5s-1.1 2.5-2.5 2.5V59c0 .3-.2.5-.5.5h-1c-.3 0-.5-.2-.5-.5v-1H39c-.6 0-1-.4-1-1s.4-1 1-1h2.5v-1.5h-1.5c-1.4 0-2.5-1.1-2.5-2.5zm4 1.5c.3 0 .5-.2.5-.5s-.2-.5-.5-.5h-1.5c-.3 0-.5.2-.5.5s.2.5.5.5H42zm.5 5.5c-.3 0-.5.2-.5.5s.2.5.5.5H44c.3 0 .5-.2.5-.5s-.2-.5-.5-.5h-1.5z" 
-        fill="#064E3B"
-        fillOpacity="0.85"
-      />
-
-      {/* Top-Right Paper Fold corner */}
-      <path 
-        d="M48 20l8 8h-6c-1.1 0-2-.9-2-2v-6z" 
-        fill="url(#foldGradient)"
-        className="drop-shadow-sm"
-      />
-
-      {/* Bottom-Right Curved Roll Curl */}
-      <path 
-        d="M50 70c6 0 6-6 6-6H48c-1.1 0-2 .9-2 2v2c2 2 4 2 4 2z" 
-        fill="url(#curlGradient)"
-        className="drop-shadow-sm"
+        d="M41 50.5c0-.4.3-.8.8-.8h1.2v-.7c0-.2.2-.4.4-.4h.8c.2 0 .4.2.4.4v.7h1.2c.4 0 .8.4.8.8s-.4.8-.8.8h-2v1h1.5c1 0 1.8.8 1.8 1.8s-.8 1.8-1.8 1.8V57c0 .2-.2.4-.4.4h-.8c-.2 0-.4-.2-.4-.4v-.7H41c-.4 0-.8-.4-.8-.8s.4-.8.8-.8h2v-1H41.5c-1 0-1.8-.8-1.8-1.8zm3 1c.2 0 .3-.1.3-.3s-.1-.3-.3-.3h-1.2c-.2 0-.3.1-.3.3s.1.3.3.3H44zm.3 4c-.2 0-.3.1-.3.3s.1.3.3.3h1.2c.2 0 .3-.1.3-.3s-.1-.3-.3-.3h-1.2z" 
+        className="fill-emerald-600 dark:fill-emerald-400 transition-colors duration-300"
       />
     </svg>
   );
@@ -97,11 +84,17 @@ const Logo = ({ type = 'horizontal', className = '' }) => {
 
   if (type === 'app-icon') {
     return (
-      <div className={`aspect-square rounded-3xl bg-white flex flex-col items-center justify-center p-6 border border-slate-100 shadow-premium transition-all hover:shadow-premium-hover ${className}`}>
+      <div className={`aspect-square rounded-[2rem] bg-white dark:bg-slate-950 flex flex-col items-center justify-center p-6 border border-slate-100 dark:border-slate-900 shadow-premium transition-all duration-300 hover:shadow-premium-hover ${className}`}>
         <IconSVG sizeClass="w-3/5 h-3/5" />
         <div className="mt-4 flex flex-col items-center select-none text-center">
-          <span className="text-xl font-extrabold text-slate-800 tracking-tight">Bill<span className="text-emerald-500 font-extrabold">Qyro</span></span>
-          <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest mt-1">SMART BILLING &bull; PREMIUM INVOICES</span>
+          <span className="text-xl font-extrabold text-slate-800 dark:text-white tracking-tight transition-colors duration-300">
+            Bill<span className="text-emerald-500 dark:text-emerald-400 font-extrabold">Qyro</span>
+          </span>
+          <span className="text-[6.5px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest mt-1.5 flex items-center gap-1 leading-none">
+            <span className="h-[1px] w-1.5 bg-emerald-500/50 dark:bg-emerald-400/30"></span>
+            MODERN BILLING &amp; INVOICING
+            <span className="h-[1px] w-1.5 bg-emerald-500/50 dark:bg-emerald-400/30"></span>
+          </span>
         </div>
       </div>
     );
@@ -131,9 +124,11 @@ const Logo = ({ type = 'horizontal', className = '' }) => {
           </span>
         </div>
         
-        {/* Tagline under brand name */}
-        <span className="text-[6.5px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest mt-1">
-          Smart Billing &bull; Premium Invoices
+        {/* Tagline under brand name with elegant green horizontal lines */}
+        <span className="text-[6.5px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest mt-1.5 flex items-center gap-1.5 leading-none">
+          <span className="h-[1px] w-2 bg-emerald-500/50 dark:bg-emerald-400/30"></span>
+          MODERN BILLING &amp; INVOICING PLATFORM
+          <span className="h-[1px] w-2 bg-emerald-500/50 dark:bg-emerald-400/30"></span>
         </span>
       </div>
     </div>
