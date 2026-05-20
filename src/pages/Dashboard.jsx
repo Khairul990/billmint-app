@@ -127,7 +127,7 @@ const Dashboard = ({
           icon={DollarSign}
           trend="+12.4% MoM"
           trendUp={true}
-          accentColor="bg-indigo-50 text-indigo-600"
+          accentColor="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400"
         />
         <StatCard
           title="Total Collected"
@@ -135,7 +135,7 @@ const Dashboard = ({
           icon={TrendingUp}
           trend="+15.8% MoM"
           trendUp={true}
-          accentColor="bg-emerald-50 text-emerald-600"
+          accentColor="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
         />
         <StatCard
           title="Outstanding Dues"
@@ -143,7 +143,7 @@ const Dashboard = ({
           icon={Hourglass}
           trend="-8.2% outstanding"
           trendUp={false}
-          accentColor="bg-amber-50 text-amber-600"
+          accentColor="bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400"
         />
         <StatCard
           title="Active Clients"
@@ -151,7 +151,7 @@ const Dashboard = ({
           icon={Users}
           trend="In SaaS CRM"
           trendUp={true}
-          accentColor="bg-blue-50 text-blue-600"
+          accentColor="bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
         />
       </div>
 
@@ -177,8 +177,8 @@ const Dashboard = ({
             <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-auto overflow-visible">
               <defs>
                 <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#6366f1" />
-                  <stop offset="100%" stopColor="#3b82f6" />
+                  <stop offset="0%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#06b6d4" />
                 </linearGradient>
                 <linearGradient id="gridGradient" x1="0" y1="0" x2="1" y2="0">
                   <stop offset="0%" stopColor="#f8fafc" />

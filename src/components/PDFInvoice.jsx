@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   businessName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1e3a8a', // Dark blue corporate accent
+    color: '#0a1128', // Dark blue corporate accent
   },
   businessSub: {
     fontSize: 8,
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#1e3a8a',
+    backgroundColor: '#0a1128',
     color: '#ffffff',
     padding: 6,
     fontWeight: 'bold',
@@ -219,7 +219,7 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
     <Page size="A5" style={styles.compactPage}>
       {/* Centered Compact Header */}
       <View style={styles.compactHeader}>
-        <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#1e3a8a' }}>
+        <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#0a1128' }}>
           {businessSettings?.businessName || 'BillMint Store'}
         </Text>
         <Text style={{ fontSize: 7, color: '#64748b', marginTop: 2 }}>
@@ -313,7 +313,7 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
             Email: {businessSettings?.email || 'N/A'} | Phone: {businessSettings?.phone || 'N/A'}
           </Text>
           {businessSettings?.gstNumber && (
-            <Text style={[styles.businessSub, { fontWeight: 'bold', color: '#1e3a8a' }]}>
+            <Text style={[styles.businessSub, { fontWeight: 'bold', color: '#0a1128' }]}>
               Tax ID / GSTIN: {businessSettings.gstNumber}
             </Text>
           )}
