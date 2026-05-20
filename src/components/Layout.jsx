@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import { ReceiptText, LogOut, ShieldCheck, Sun, Moon } from 'lucide-react';
+import Logo from './Logo';
 
 /**
  * Global App Layout Shell
@@ -113,7 +114,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               {/* Mobile Header Brand & Fast Actions */}
               <div className="md:hidden flex items-center">
                 <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white">
-                  <ReceiptText className="w-5 h-5" />
+                  <Logo type="icon" className="w-6 h-6 text-white" />
                 </div>
               </div>
             </div>

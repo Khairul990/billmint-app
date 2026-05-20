@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { login } from '../utils/storage';
-import { ReceiptText, KeyRound, AlertCircle, ShieldAlert } from 'lucide-react';
+import { KeyRound, AlertCircle, ShieldAlert } from 'lucide-react';
+import Logo from '../components/Logo';
 
 /**
  * Premium Admin Login Page
@@ -42,9 +43,7 @@ const Login = ({ onLoginSuccess }) => {
         
         {/* Branding header */}
         <div className="flex flex-col items-center text-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-lg shadow-indigo-200 dark:shadow-none animate-pulse">
-            <ReceiptText className="w-7 h-7" />
-          </div>
+          <Logo type="icon" className="w-16 h-16" />
           <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight mt-4">
             BillMint
           </h1>

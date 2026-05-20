@@ -1,6 +1,7 @@
 import React from 'react';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, Shield, LogOut, ReceiptText, TrendingDown, Sparkles } from 'lucide-react';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, Shield, LogOut, TrendingDown, Sparkles } from 'lucide-react';
 import { logout } from '../utils/storage';
+import Logo from './Logo';
 
 /**
  * Desktop Sidebar Navigation
@@ -24,16 +25,8 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
   return (
     <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 h-screen sticky top-0 left-0 z-30 shadow-sm transition-all duration-300">
       {/* Brand Header */}
-      <div className="p-6 border-b border-slate-50 dark:border-slate-800/80 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-md shadow-indigo-100 dark:shadow-none">
-          <ReceiptText className="w-5.5 h-5.5" />
-        </div>
-        <div>
-          <h1 className="font-extrabold text-xl bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent tracking-tight">
-            BillMint
-          </h1>
-          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Billing SaaS</p>
-        </div>
+      <div className="p-6 border-b border-slate-50 dark:border-slate-800/80 flex items-center">
+        <Logo type="horizontal" />
       </div>
 
       {/* Nav Menu */}
