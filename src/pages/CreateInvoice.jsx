@@ -1648,8 +1648,8 @@ const CreateInvoice = ({
                   <button onClick={() => addQuickFillItem('Design Work', 'Custom Design', 0)} className="px-3.5 py-1.5 bg-white text-indigo-700 border border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50 shadow-sm rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">📝 Custom Design</button>
                 </div>
 
-                <div className="w-full overflow-x-auto pb-4">
-                  <div className="min-w-[1000px] flex flex-col">
+                <div className="w-full overflow-x-auto pb-4 scroll-smooth" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  <div className="min-w-max w-full flex flex-col px-1">
                     {/* Table Headers */}
                     <div className="hidden lg:grid gap-3 text-[11px] font-black text-slate-400 uppercase tracking-widest px-4 pb-3 border-b-2 border-slate-200" style={{ gridTemplateColumns: getExpandedGridCols() }}>
                   <div className="text-center">#</div>
