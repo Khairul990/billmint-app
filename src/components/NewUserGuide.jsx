@@ -11,16 +11,20 @@ import {
     ChevronUp,
     Sparkles,
     CheckCircle2,
+    Circle,
 } from 'lucide-react';
 
 /**
- * “How to Use BillMint” — Step-by-Step New User Guide
+ * “How to Use BillMint” — Step‑by‑Step Guide with pagination
  * @param {Function} setCurrentTab - navigation dispatcher
- * @param {boolean}  isNewUser - true => show full guide; false => collapsible compact
- * @param {boolean}  showCollapsible - override to force collapsible mode
+ * @param {boolean}  isNewUser - true ⇒ show full guide; false ⇒ collapsible compact
  */
 const NewUserGuide = ({ setCurrentTab, isNewUser = true }) => {
+    // If user is new → show guide expanded, otherwise collapsed by default
     const [collapsed, setCollapsed] = useState(!isNewUser);
+    // Pagination state – we show 2 steps per page (6 steps → 3 pages)
+    const stepsPerPage = 2;
+    const [pageIdx, setPageIdx] = useState(0);
 
     const steps = [
         {
@@ -91,9 +95,15 @@ const NewUserGuide = ({ setCurrentTab, isNewUser = true }) => {
         },
     ];
 
+    // --- Pagination helpers -------------------------------------------------
+    const pageCount = Math.ceil(steps.length / stepsPerPage);
+    const visibleSteps = steps.slice(pageIdx * stepsPerPage, (pageIdx + 1) * stepsPerPage);
+    const canPrev = pageIdx > 0;
+    const canNext = pageIdx < pageCount - 1;
+
     return (
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800/80 shadow-premium overflow-hidden transition-all duration-300">
-            {/* Collapsible Header — always visible */}
+            {/* Header – always visible */}
             <div className="flex items-center justify-between p-5 md:p-6">
                 <div className="flex items-center gap-2">
                     <div className="p-1.5 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-400 text-white shadow-sm">
@@ -108,11 +118,10 @@ const NewUserGuide = ({ setCurrentTab, isNewUser = true }) => {
                         </p>
                     </div>
                 </div>
-
                 {/* Collapse toggle for returning users */}
                 {!isNewUser && (
                     <button
-                        onClick={() => setCollapsed((c) => !c)}
+                        onClick={() => setCollapsed(c => !c)}
                         className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-xl transition-all cursor-pointer shrink-0"
                     >
                         {collapsed ? (
@@ -130,39 +139,33 @@ const NewUserGuide = ({ setCurrentTab, isNewUser = true }) => {
                 )}
             </div>
 
-            {/* Guide Cards — hidden when collapsed for returning users */}
+            {/* Guide cards – hidden when collapsed */}
             {!collapsed && (
                 <div className="px-5 md:px-6 pb-5 md:pb-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {steps.map((step) => {
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                        {visibleSteps.map(step => {
                             const IconComp = step.icon;
                             return (
                                 <div
                                     key={step.id}
                                     className="group relative p-5 rounded-2xl border border-slate-100 dark:border-slate-800/60 bg-white dark:bg-slate-950/40 hover:shadow-premium-hover hover:border-emerald-200 dark:hover:border-emerald-800/40 transition-all duration-300 flex flex-col"
                                 >
-                                    {/* Step Number Badge */}
+                                    {/* Step number badge */}
                                     <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black text-slate-400 dark:text-slate-500 flex items-center justify-center">
                                         {step.id}
                                     </div>
-
                                     {/* Icon */}
-                                    <div
-                                        className={`w-12 h-12 rounded-2xl flex items-center justify-center ${step.iconBg} dark:bg-slate-800 dark:text-emerald-400 mb-4 shadow-sm group-hover:scale-105 transition-transform duration-300`}
-                                    >
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${step.iconBg} dark:bg-slate-800 dark:text-emerald-400 mb-4 shadow-sm group-hover:scale-105 transition-transform duration-300`}>
                                         <IconComp className="w-6 h-6" />
                                     </div>
-
                                     {/* Title */}
                                     <h4 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 mb-1.5 leading-snug">
                                         {step.title}
                                     </h4>
-
                                     {/* Description */}
                                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-4 flex-1">
                                         {step.desc}
                                     </p>
-
                                     {/* Action Button */}
                                     <button
                                         onClick={() => setCurrentTab(step.tab)}
@@ -174,6 +177,28 @@ const NewUserGuide = ({ setCurrentTab, isNewUser = true }) => {
                                 </div>
                             );
                         })}
+                    </div>
+                    {/* Pagination controls */}
+                    <div className="flex justify-between items-center mt-4">
+                        <button
+                            onClick={() => setPageIdx(idx => Math.max(idx - 1, 0))}
+                            disabled={!canPrev}
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-sm font-medium ${canPrev ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                        >
+                            <ChevronDown className="w-3 h-3 transform rotate-90" />
+                            <span>Previous</span>
+                        </button>
+                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                            Page {pageIdx + 1} of {pageCount}
+                        </span>
+                        <button
+                            onClick={() => setPageIdx(idx => Math.min(idx + 1, pageCount - 1))}
+                            disabled={!canNext}
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-sm font-medium ${canNext ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                        >
+                            <span>Next</span>
+                            <ChevronDown className="w-3 h-3 transform -rotate-90" />
+                        </button>
                     </div>
                 </div>
             )}
