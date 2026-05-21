@@ -369,6 +369,8 @@ export const saveExpense = (expense) => {
     const index = expenses.findIndex(e => e.id === expense.id);
     if (index !== -1) {
       expenses[index] = expense;
+    } else {
+      expenses.push(expense);
     }
   } else {
     expense.id = 'exp-' + Date.now();
@@ -399,6 +401,8 @@ export const saveCustomer = (customer) => {
     const index = customers.findIndex(c => c.id === customer.id);
     if (index !== -1) {
       customers[index] = customer;
+    } else {
+      customers.push(customer);
     }
   } else {
     customer.id = 'c-' + Date.now();
@@ -429,6 +433,8 @@ export const saveProduct = (product) => {
     const index = products.findIndex(p => p.id === product.id);
     if (index !== -1) {
       products[index] = product;
+    } else {
+      products.push(product);
     }
   } else {
     product.id = 'p-' + Date.now();
