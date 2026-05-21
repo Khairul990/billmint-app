@@ -294,7 +294,18 @@ const CreateInvoice = ({
       return;
     }
 
-    const invalidItem = items.some(item => !item.description || item.qty <= 0 || item.rate < 0);
+    const cleanedItems = items.filter(item => 
+      item.description.trim() !== '' || 
+      item.designNo.trim() !== '' || 
+      item.rate > 0
+    );
+
+    if (cleanedItems.length === 0) {
+      alert('Please add at least one valid invoice item.');
+      return;
+    }
+
+    const invalidItem = cleanedItems.some(item => (!item.description && !item.designNo) || item.qty <= 0 || item.rate < 0);
     if (invalidItem) {
       alert('Please add at least one valid invoice item.');
       return;
@@ -310,7 +321,7 @@ const CreateInvoice = ({
       customerPhone,
       customerEmail,
       customerAddress,
-      items,
+      items: cleanedItems,
       taxPercentage: parseFloat(taxPercentage) || 0,
       discountAmount: parseFloat(discountAmount) || 0,
       amountPaid: parseFloat(amountPaid) || 0,
