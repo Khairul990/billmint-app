@@ -126,7 +126,15 @@ function App() {
     setSettings(getSettings());
     setExpenses(getExpenses());
     setSubscription(getSubscriptionStatus());
-    setCurrentTab('dashboard');
+    
+    // Check if new user
+    const hasSeenGuide = localStorage.getItem('billqyro_seen_guide');
+    if (!hasSeenGuide) {
+      localStorage.setItem('billqyro_seen_guide', 'true');
+      setCurrentTab('guide');
+    } else {
+      setCurrentTab('dashboard');
+    }
   };
 
   const handleLogout = () => {

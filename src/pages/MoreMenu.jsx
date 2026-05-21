@@ -8,7 +8,8 @@ import {
   AlertCircle, 
   ShieldCheck, 
   User, 
-  ExternalLink 
+  ExternalLink,
+  HelpCircle
 } from 'lucide-react';
 import { login } from '../utils/storage';
 
@@ -142,6 +143,25 @@ const MoreMenu = ({
             </h4>
             <p className="text-[11px] text-slate-400 font-semibold truncate">
               {isAuthenticated ? 'GSTIN tax codes, seed resets' : 'Unlock business settings console'}
+            </p>
+          </div>
+        </button>
+
+        {/* How to Use Guide page */}
+        <button
+          onClick={() => setCurrentTab('guide')}
+          className="bg-white hover:bg-slate-50 text-left p-5 rounded-3xl border border-slate-100 shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full sm:col-span-2"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-500 flex items-center justify-center group-hover:bg-teal-100 transition-colors shrink-0">
+            <HelpCircle className="w-6 h-6" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h4 className="font-extrabold text-sm text-slate-800 tracking-tight flex items-center gap-1.5">
+              <span>How to Use BillQyro</span>
+              <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity" />
+            </h4>
+            <p className="text-[11px] text-slate-400 font-semibold truncate">
+              Learn to create invoices and manage customers
             </p>
           </div>
         </button>
