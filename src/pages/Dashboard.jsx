@@ -135,7 +135,7 @@ const Dashboard = ({
     <div className="space-y-6 animate-fadeIn">
 
       {/* 0. WELCOME HERO BANNER */}
-      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white relative overflow-hidden shadow-premium border border-slate-800/80">
+      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-[#071B3A] to-[#19C3A3] text-white relative overflow-hidden shadow-premium border border-slate-800/80">
         <div className="absolute -top-24 -right-24 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
