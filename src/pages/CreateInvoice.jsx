@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
   Trash2, 
+  Settings, 
+  LayoutTemplate, 
   Save, 
   ArrowLeft, 
   Users, 
@@ -49,7 +51,18 @@ const CreateInvoice = ({
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [date, setDate] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [billType, setBillType] = useState('fashion');
+  const [billType, setBillType] = useState(businessSettings?.defaultBillingTemplate || 'custom');
+  const [pdfVisibleFields, setPdfVisibleFields] = useState(businessSettings?.pdfVisibleFields?.[businessSettings?.defaultBillingTemplate || 'custom'] || []);
+  const [showPdfSettings, setShowPdfSettings] = useState(false);
+
+  const getGridCols = () => {
+    if (billType === 'grocery')   return '50px minmax(220px, 2fr) 100px 90px 130px 130px 80px';
+    if (billType === 'repair')    return '50px minmax(160px, 1fr) minmax(160px, 1fr) 120px 120px 90px 130px 80px';
+    if (billType === 'retail')    return '50px minmax(170px, 1.5fr) 120px 100px 90px 110px 110px 130px 80px';
+    if (billType === 'custom')    return '50px minmax(160px, 1fr) minmax(200px, 2fr) 90px 120px 130px 80px';
+    // embroidery (default)
+    return '50px minmax(140px, 1fr) minmax(140px, 1fr) minmax(200px, 2fr) 85px 85px 120px 130px 80px';
+  };
   
   // Client details
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -99,7 +112,8 @@ const CreateInvoice = ({
       setTerms(editingInvoice.terms || '');
       setPaymentStatus(editingInvoice.paymentStatus || 'Pending');
       setOrderStatus(editingInvoice.orderStatus || 'Pending');
-      setBillType(editingInvoice.billType || 'fashion');
+      setBillType(editingInvoice.billType || businessSettings?.defaultBillingTemplate || 'custom');
+      if(editingInvoice.pdfVisibleFields) setPdfVisibleFields(editingInvoice.pdfVisibleFields);
 
       // Populate items ensuring they have smartRate details
       const parsedItems = (editingInvoice.items || []).map((item, idx) => ({
@@ -130,7 +144,8 @@ const CreateInvoice = ({
       setTerms(businessSettings?.terms || '');
       setPaymentStatus('Pending');
       setOrderStatus('Pending');
-      setBillType('fashion');
+      setBillType(businessSettings?.defaultBillingTemplate || 'custom');
+      setPdfVisibleFields(businessSettings?.pdfVisibleFields?.[businessSettings?.defaultBillingTemplate || 'custom'] || []);
 
       // Prefill first row
       setItems([
@@ -206,19 +221,29 @@ const CreateInvoice = ({
   };
 
   // --- ITEM ROW UPDATE ---
+  const calculateItemAmount = (item) => {
+    const qty = parseFloat(item.qty) || 0;
+    if (billType === 'retail') {
+      const price = parseFloat(item.price) || 0;
+      const discount = parseFloat(item.discount) || 0;
+      return Math.max(0, (qty * price) - discount);
+    } else if (billType === 'repair') {
+      const parts = parseFloat(item.partsCost) || 0;
+      const labour = parseFloat(item.labourCharge) || 0;
+      return qty * (parts + labour);
+    } else {
+      const rate = parseFloat(item.rate !== undefined ? item.rate : (item.unitPrice !== undefined ? item.unitPrice : item.price)) || 0;
+      return qty * rate;
+    }
+  };
+
   const handleItemChange = (index, field, value) => {
     const updated = [...items];
-    if (field === 'qty') {
-      const val = parseFloat(value) || 0;
-      updated[index].qty = val;
-      updated[index].amount = val * updated[index].rate;
-    } else if (field === 'rate') {
-      const val = parseFloat(value) || 0;
-      updated[index].rate = val;
-      updated[index].amount = updated[index].qty * val;
-    } else {
-      updated[index][field] = value;
-    }
+    const isNumField = ['qty', 'rate', 'price', 'unitPrice', 'discount', 'partsCost', 'labourCharge'].includes(field);
+    const val = isNumField ? (value === '' ? '' : (parseFloat(value) || 0)) : value;
+    
+    updated[index][field] = val;
+    updated[index].amount = calculateItemAmount(updated[index]);
     setItems(updated);
   };
 
@@ -235,6 +260,18 @@ const CreateInvoice = ({
         qty: 1,
         rate: 0,
         amount: 0,
+        productName: '',
+        unit: 'Piece',
+        unitPrice: 0,
+        category: '',
+        sizeVariant: '',
+        price: 0,
+        discount: 0,
+        serviceName: '',
+        problemDetails: '',
+        partsCost: 0,
+        labourCharge: 0,
+        itemService: '',
         smartRate: { repair: 0, punching: 0, embroidery: 0, other: 0 }
       }
     ]);
@@ -476,10 +513,10 @@ const CreateInvoice = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
         
         {/* COLUMN 1 & 2: INVOICE CONFIGURATION */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="w-full lg:w-[70%] space-y-6">
           
           {/* Bill Type / Business Type Selector */}
           <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
@@ -488,19 +525,25 @@ const CreateInvoice = ({
               <span>Bill Type / Business Type</span>
             </h3>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
               {[
-                { id: 'fashion', label: 'Fashion / Shopping' },
-                { id: 'grocery', label: 'Grocery / Mudi Shop' },
-                { id: 'service', label: 'Service / Repair' },
-                { id: 'custom', label: 'Custom' }
+                { id: 'embroidery', label: '🧵 Embroidery / Fashion' },
+                { id: 'grocery', label: '🛒 Grocery / Mudi Shop' },
+                { id: 'repair', label: '🔧 Repair / Service' },
+                { id: 'retail', label: '🛍️ Retail / Shopping' },
+                { id: 'custom', label: '📝 Custom Bill' }
               ].map(type => (
                 <button
                   key={type.id}
-                  onClick={() => setBillType(type.id)}
-                  className={`py-3 px-2 rounded-xl text-xs font-bold transition-all border ${
+                  onClick={() => {
+                    if (items.length > 1 || (items[0] && (items[0].amount > 0 || items[0].description)))
+                      if(!window.confirm('Changing template may reset some column data. Continue?')) return;
+                    setBillType(type.id);
+                    setPdfVisibleFields(businessSettings?.pdfVisibleFields?.[type.id] || []);
+                  }}
+                  className={`py-3 px-2 rounded-xl text-xs font-bold transition-all border text-center leading-tight ${
                     billType === type.id 
-                    ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm' 
+                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700 shadow-sm ring-2 ring-indigo-200' 
                     : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300'
                   }`}
                 >
@@ -508,13 +551,26 @@ const CreateInvoice = ({
                 </button>
               ))}
             </div>
+            <div className="flex items-center justify-between pt-3 mt-1 border-t border-slate-50">
+              <p className="text-[10px] text-slate-400 font-bold">
+                Template controls which columns appear in the bill form.
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowPdfSettings(true)}
+                className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl flex items-center gap-2 transition-colors shrink-0"
+              >
+                <LayoutTemplate className="w-3.5 h-3.5" />
+                Customize PDF Fields
+              </button>
+            </div>
 
             {/* Live Preview / Example */}
             <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 mt-2">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Template Live Preview</p>
               <div className="flex gap-4 text-xs font-semibold text-slate-600 bg-white p-3 rounded-lg border border-slate-100 overflow-x-auto">
                 <span className="shrink-0 text-slate-400">No. 1</span>
-                {billType === 'fashion' && (
+                {billType === 'embroidery' && (
                   <>
                     <span className="shrink-0 text-indigo-600">SO-5</span>
                     <span className="shrink-0 text-slate-500">Embroidery</span>
@@ -527,31 +583,41 @@ const CreateInvoice = ({
                 )}
                 {billType === 'grocery' && (
                   <>
-                    <span className="shrink-0 text-slate-800 font-bold">Premium Basmati Rice</span>
+                    <span className="shrink-0 text-slate-800 font-bold">Basmati Rice</span>
                     <span className="shrink-0 text-slate-500">Kg</span>
                     <span className="shrink-0 text-teal-600">Qty 5</span>
-                    <span className="shrink-0 text-amber-600">₹60</span>
+                    <span className="shrink-0 text-amber-600">₹60/Kg</span>
                     <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹300.00</span>
                   </>
                 )}
-                {billType === 'service' && (
+                {billType === 'repair' && (
                   <>
-                    <span className="shrink-0 text-indigo-600">Mobile Repair</span>
-                    <span className="shrink-0 text-slate-800 font-bold">Screen Replacement</span>
+                    <span className="shrink-0 text-indigo-600">Mobile Screen</span>
+                    <span className="shrink-0 text-slate-800 font-bold">Screen Cracked</span>
+                    <span className="shrink-0 text-amber-600">Parts ₹800</span>
+                    <span className="shrink-0 text-rose-600">Labour ₹300</span>
                     <span className="shrink-0 text-teal-600">Qty 1</span>
-                    <span className="shrink-0 text-amber-600">₹1200</span>
-                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹1200.00</span>
+                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹1100.00</span>
+                  </>
+                )}
+                {billType === 'retail' && (
+                  <>
+                    <span className="shrink-0 text-slate-800 font-bold">Denim Jeans</span>
+                    <span className="shrink-0 text-slate-500">Clothing</span>
+                    <span className="shrink-0 text-slate-500">32 inch</span>
+                    <span className="shrink-0 text-teal-600">Qty 2</span>
+                    <span className="shrink-0 text-amber-600">₹850</span>
+                    <span className="shrink-0 text-rose-500">-₹100</span>
+                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹1600.00</span>
                   </>
                 )}
                 {billType === 'custom' && (
                   <>
-                    <span className="shrink-0 text-indigo-600">ITEM-01</span>
-                    <span className="shrink-0 text-slate-500">Custom Work</span>
-                    <span className="shrink-0 text-slate-800 font-bold">Custom Service Description</span>
-                    <span className="shrink-0 text-slate-500">N/A</span>
+                    <span className="shrink-0 text-indigo-600">ITM-01</span>
+                    <span className="shrink-0 text-slate-800 font-bold">Custom Service</span>
                     <span className="shrink-0 text-teal-600">Qty 1</span>
-                    <span className="shrink-0 text-amber-600">₹100</span>
-                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹100.00</span>
+                    <span className="shrink-0 text-amber-600">₹500</span>
+                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹500.00</span>
                   </>
                 )}
               </div>
@@ -717,42 +783,62 @@ const CreateInvoice = ({
             </div>
 
             {/* Desktop Headers */}
-            <div className="hidden lg:grid grid-cols-12 gap-2 text-[10px] font-bold text-slate-400 uppercase px-2 mb-1">
-              <div className="col-span-1 text-center">No.</div>
-              {billType === 'grocery' ? (
-                <>
-                  <div className="col-span-4">Product Name</div>
-                  <div className="col-span-2 text-center">Unit</div>
-                  <div className="col-span-1 text-center">Quantity</div>
-                  <div className="col-span-2 text-right">Unit Price</div>
-                </>
-              ) : billType === 'service' ? (
-                <>
-                  <div className="col-span-3">Service Name</div>
-                  <div className="col-span-3">Description</div>
-                  <div className="col-span-1 text-center">Quantity</div>
-                  <div className="col-span-2 text-right">Rate</div>
-                </>
-              ) : (
-                <>
-                  <div className="col-span-2">Design / Item Code</div>
-                  <div className="col-span-2">Work Type / Service</div>
-                  <div className="col-span-2">Description</div>
-                  <div className="col-span-1 text-center">Size</div>
-                  <div className="col-span-1 text-center">Quantity</div>
-                  <div className="col-span-1 text-right">Rate</div>
-                </>
-              )}
-              <div className="col-span-1 text-right">Amount</div>
-              <div className="col-span-1 text-center">Actions</div>
-            </div>
+            <div className="w-full overflow-x-auto pb-4">
+              <div className="min-w-[1000px] lg:min-w-0 xl:min-w-[1000px] flex flex-col">
+                <div className="hidden lg:grid gap-2 text-[10px] font-bold text-slate-400 uppercase px-2 mb-1" style={{ gridTemplateColumns: getGridCols() }}>
+                  <div className="text-center">No.</div>
+                  {billType === 'grocery' ? (
+                    <>
+                      <div>Product Name</div>
+                      <div className="text-center">Unit</div>
+                      <div className="text-center">Qty</div>
+                      <div className="text-right">Unit Price</div>
+                    </>
+                  ) : billType === 'repair' ? (
+                    <>
+                      <div>Service / Item</div>
+                      <div>Problem / Details</div>
+                      <div className="text-right">Parts Cost</div>
+                      <div className="text-right">Labour</div>
+                      <div className="text-center">Qty</div>
+                    </>
+                  ) : billType === 'retail' ? (
+                    <>
+                      <div>Product Name</div>
+                      <div>Category</div>
+                      <div className="text-center">Size/Variant</div>
+                      <div className="text-center">Qty</div>
+                      <div className="text-right">Price</div>
+                      <div className="text-right">Discount</div>
+                    </>
+                  ) : billType === 'custom' ? (
+                    <>
+                      <div>Item / Service</div>
+                      <div>Description</div>
+                      <div className="text-center">Qty</div>
+                      <div className="text-right">Rate</div>
+                    </>
+                  ) : (
+                    <>
+                      <div>Design / Item Code</div>
+                      <div>Work Type</div>
+                      <div>Description</div>
+                      <div className="text-center">Size</div>
+                      <div className="text-center">Qty</div>
+                      <div className="text-right">Rate</div>
+                    </>
+                  )}
+                  <div className="text-right">Amount</div>
+                  <div className="text-center">Actions</div>
+                </div>
 
-            <div className="space-y-4 lg:space-y-3">
-              {items.map((item, index) => (
-                <div 
-                  key={index}
-                  className="flex flex-col lg:grid lg:grid-cols-12 gap-3 p-4 lg:p-2 bg-slate-50/50 lg:bg-transparent rounded-2xl lg:rounded-none border border-slate-100 lg:border-0 relative"
-                >
+                <div className="space-y-4 lg:space-y-3">
+                  {items.map((item, index) => (
+                    <div 
+                      key={index}
+                      className="flex flex-col lg:grid gap-3 p-4 lg:p-2 bg-slate-50/50 lg:bg-transparent rounded-2xl lg:rounded-none border border-slate-100 lg:border-0 relative"
+                      style={{ gridTemplateColumns: getGridCols() }}
+                    >
                   
                   {/* Serial Number & Floating Delete for Mobile */}
                   <div className="flex justify-between items-center lg:hidden">
@@ -768,92 +854,170 @@ const CreateInvoice = ({
                   </div>
 
                   {/* S.N. (Desktop only) */}
-                  <div className="hidden lg:flex items-center justify-center col-span-1 text-xs font-extrabold text-slate-400">
+                  <div className="hidden lg:flex items-center justify-center text-[14px] font-extrabold text-slate-400">
                     {index + 1}
                   </div>
 
-                  {/* Design No / Service Name */}
-                  {billType !== 'grocery' && (
-                    <div className={billType === 'service' ? "col-span-3 text-xs font-semibold text-slate-500" : "col-span-2 text-xs font-semibold text-slate-500"}>
-                      <label className="lg:hidden block mb-1 text-slate-400">
-                        {billType === 'service' ? 'Service Name' : 'Design / Item Code'}
-                      </label>
+                  {/* Design No / Service Name - embroidery only */}
+                  {(billType === 'embroidery') && (
+                    <div className="text-xs font-semibold text-slate-500">
+                      <label className="lg:hidden block mb-1 text-slate-400">Design / Item Code</label>
                       <input
                         type="text"
-                        value={item.designNo}
+                        value={item.designNo || ''}
                         onChange={(e) => handleItemChange(index, 'designNo', e.target.value)}
-                        placeholder={billType === 'service' ? "e.g. Mobile Repair" : "e.g. ITM-001"}
-                        className="w-full px-3 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold uppercase transition-colors"
+                        placeholder="e.g. SO-5"
+                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] uppercase transition-colors"
                       />
                     </div>
                   )}
 
-                  {/* Work Type */}
-                  {(billType === 'fashion' || billType === 'custom') && (
-                    <div className="col-span-2 text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">Work Type / Service</label>
+                  {/* Repair: Service Name */}
+                  {billType === 'repair' && (
+                    <div className="text-xs font-semibold text-slate-500">
+                      <label className="lg:hidden block mb-1 text-slate-400">Service / Item Name</label>
+                      <input
+                        type="text"
+                        value={item.serviceName || ''}
+                        onChange={(e) => handleItemChange(index, 'serviceName', e.target.value)}
+                        placeholder="e.g. Mobile Screen"
+                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                      />
+                    </div>
+                  )}
+
+                  {/* Retail: Product Name */}
+                  {billType === 'retail' && (
+                    <div className="text-xs font-semibold text-slate-500">
+                      <label className="lg:hidden block mb-1 text-slate-400">Product Name</label>
+                      <input
+                        type="text"
+                        value={item.productName || ''}
+                        onChange={(e) => handleItemChange(index, 'productName', e.target.value)}
+                        placeholder="e.g. Denim Jeans"
+                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                      />
+                    </div>
+                  )}
+
+                  {/* Custom: Item / Service */}
+                  {billType === 'custom' && (
+                    <div className="text-xs font-semibold text-slate-500">
+                      <label className="lg:hidden block mb-1 text-slate-400">Item / Service</label>
+                      <input
+                        type="text"
+                        value={item.itemService || ''}
+                        onChange={(e) => handleItemChange(index, 'itemService', e.target.value)}
+                        placeholder="e.g. Design Work"
+                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                      />
+                    </div>
+                  )}
+
+                  {/* Work Type - embroidery only */}
+                  {billType === 'embroidery' && (
+                    <div className="text-xs font-semibold text-slate-500">
+                      <label className="lg:hidden block mb-1 text-slate-400">Work Type</label>
                       <select
-                        value={item.workType}
+                        value={item.workType || 'Embroidery'}
                         onChange={(e) => handleItemChange(index, 'workType', e.target.value)}
-                        className="w-full px-2.5 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold transition-colors"
+                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold text-[14px] transition-colors"
                       >
                         <option value="Embroidery">Embroidery</option>
-                        <option value="Repair">Repair</option>
                         <option value="Stitching">Stitching</option>
                         <option value="Printing">Printing</option>
                         <option value="Design Work">Design Work</option>
+                        <option value="Repair">Repair</option>
                         <option value="Other Service">Other Service</option>
                       </select>
                     </div>
                   )}
 
-                  {/* Description / Product Name */}
-                  <div className={
-                    billType === 'grocery' ? "col-span-4 text-xs font-semibold text-slate-500 space-y-1" :
-                    billType === 'service' ? "col-span-3 text-xs font-semibold text-slate-500 space-y-1" :
-                    "col-span-2 text-xs font-semibold text-slate-500 space-y-1"
-                  }>
-                    <label className="lg:hidden block mb-1 text-slate-400">
-                      {billType === 'grocery' ? 'Product Name' : 'Description'}
-                    </label>
-                    <input
-                      type="text"
-                      value={item.description}
-                      onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                      placeholder={
-                        billType === 'grocery' ? "e.g. Premium Basmati Rice" :
-                        billType === 'service' ? "e.g. Screen Replacement" :
-                        "e.g. Embroidery Work on Suits"
-                      }
-                      className="w-full px-3 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-bold transition-colors"
-                    />
-                    
-                    {/* Catalog Helper link */}
-                    <div className="flex items-center gap-1">
-                      <select
-                        onChange={(e) => handleProductSelect(index, e.target.value)}
-                        defaultValue=""
-                        className="text-[9px] bg-slate-100 border-0 text-slate-500 py-0.5 px-1.5 rounded focus:outline-none cursor-pointer w-full hover:bg-slate-200"
-                      >
-                        <option value="">-- Quick Prefill Catalog --</option>
-                        {products.map((p) => (
-                          <option key={p.id} value={p.id}>{p.name} ({currencySymbol}{p.price})</option>
-                        ))}
-                      </select>
+                  {/* Retail: Category */}
+                  {billType === 'retail' && (
+                    <div className="text-xs font-semibold text-slate-500">
+                      <label className="lg:hidden block mb-1 text-slate-400">Category</label>
+                      <input
+                        type="text"
+                        value={item.category || ''}
+                        onChange={(e) => handleItemChange(index, 'category', e.target.value)}
+                        placeholder="e.g. Clothing"
+                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold text-[14px] transition-colors"
+                      />
                     </div>
-                  </div>
+                  )}
 
-                  {/* Size / Unit */}
-                  {billType !== 'service' && (
-                    <div className={billType === 'grocery' ? "col-span-2 text-xs font-semibold text-slate-500" : "col-span-1 text-xs font-semibold text-slate-500"}>
+                  {/* Repair: Problem / Details */}
+                  {billType === 'repair' && (
+                    <div className="text-xs font-semibold text-slate-500">
+                      <label className="lg:hidden block mb-1 text-slate-400">Problem / Details</label>
+                      <input
+                        type="text"
+                        value={item.problemDetails || ''}
+                        onChange={(e) => handleItemChange(index, 'problemDetails', e.target.value)}
+                        placeholder="e.g. Screen Cracked"
+                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold text-[14px] transition-colors"
+                      />
+                    </div>
+                  )}
+
+                  {/* Description / Product Name - grocery, embroidery, repair, custom, retail */}
+                  {(billType !== 'repair' && billType !== 'retail' && billType !== 'custom') && (
+                    <div className="text-xs font-semibold text-slate-500 space-y-1">
+                      <label className="lg:hidden block mb-1 text-slate-400">
+                        {billType === 'grocery' ? 'Product Name' : 'Description'}
+                      </label>
+                      <input
+                        type="text"
+                        value={item.description || ''}
+                        onChange={(e) => handleItemChange(index, 'description', e.target.value)}
+                        placeholder={
+                          billType === 'grocery' ? "e.g. Premium Basmati Rice" :
+                          "e.g. Embroidery Work on Suits"
+                        }
+                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-bold text-[14px] transition-colors"
+                      />
+                      {/* Catalog Helper link */}
+                      <div className="flex items-center gap-1">
+                        <select
+                          onChange={(e) => handleProductSelect(index, e.target.value)}
+                          defaultValue=""
+                          className="text-[9px] bg-slate-100 border-0 text-slate-500 py-0.5 px-1.5 rounded focus:outline-none cursor-pointer w-full hover:bg-slate-200"
+                        >
+                          <option value="">-- Quick Prefill Catalog --</option>
+                          {products.map((p) => (
+                            <option key={p.id} value={p.id}>{p.name} ({currencySymbol}{p.price})</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Custom: Description */}
+                  {billType === 'custom' && (
+                    <div className="text-xs font-semibold text-slate-500 space-y-1">
+                      <label className="lg:hidden block mb-1 text-slate-400">Description</label>
+                      <input
+                        type="text"
+                        value={item.description || ''}
+                        onChange={(e) => handleItemChange(index, 'description', e.target.value)}
+                        placeholder="e.g. Custom design on 4x4 cloth"
+                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-bold text-[14px] transition-colors"
+                      />
+                    </div>
+                  )}
+
+                  {/* Size / Unit - not for repair/retail/custom */}
+                  {(billType !== 'repair' && billType !== 'retail' && billType !== 'custom') && (
+                    <div className="text-xs font-semibold text-slate-500">
                       <label className="lg:hidden block mb-1 text-slate-400">
                         {billType === 'grocery' ? 'Unit' : 'Size'}
                       </label>
                       {billType === 'grocery' ? (
                         <select
-                          value={item.size}
+                          value={item.size || ''}
                           onChange={(e) => handleItemChange(index, 'size', e.target.value)}
-                          className="w-full px-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold transition-colors"
+                          className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold text-[14px] transition-colors"
                         >
                           <option value="">Select</option>
                           <option value="Kg">Kg</option>
@@ -867,81 +1031,163 @@ const CreateInvoice = ({
                       ) : (
                         <input
                           type="text"
-                          value={item.size}
+                          value={item.size || ''}
                           onChange={(e) => handleItemChange(index, 'size', e.target.value)}
                           placeholder="A4 / 4x4"
-                          className="w-full px-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold transition-colors"
+                          className="w-full px-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold text-[14px] transition-colors"
                         />
                       )}
                     </div>
                   )}
 
+                  {/* Retail: Size/Variant */}
+                  {billType === 'retail' && (
+                    <div className="text-xs font-semibold text-slate-500">
+                      <label className="lg:hidden block mb-1 text-slate-400">Size / Variant</label>
+                      <input
+                        type="text"
+                        value={item.sizeVariant || ''}
+                        onChange={(e) => handleItemChange(index, 'sizeVariant', e.target.value)}
+                        placeholder="e.g. 32 inch"
+                        className="w-full px-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold text-[14px] transition-colors"
+                      />
+                    </div>
+                  )}
+
+                  {/* Repair: Parts Cost */}
+                  {billType === 'repair' && (
+                    <div className="text-xs font-semibold text-slate-500">
+                      <label className="lg:hidden block mb-1 text-slate-400">Parts Cost ({currencySymbol})</label>
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
+                        <input
+                          type="number" min="0"
+                          value={item.partsCost ?? ''}
+                          onChange={(e) => handleItemChange(index, 'partsCost', e.target.value)}
+                          placeholder="0"
+                          className="w-full pl-6 pr-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Repair: Labour Charge */}
+                  {billType === 'repair' && (
+                    <div className="text-xs font-semibold text-slate-500">
+                      <label className="lg:hidden block mb-1 text-slate-400">Labour Charge ({currencySymbol})</label>
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
+                        <input
+                          type="number" min="0"
+                          value={item.labourCharge ?? ''}
+                          onChange={(e) => handleItemChange(index, 'labourCharge', e.target.value)}
+                          placeholder="0"
+                          className="w-full pl-6 pr-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {/* Qty */}
-                  <div className="col-span-1 text-xs font-semibold text-slate-500">
+                  <div className="text-xs font-semibold text-slate-500">
                     <label className="lg:hidden block mb-1 text-slate-400">Quantity</label>
                     <input
                       type="number"
                       min="1"
                       value={item.qty}
                       onChange={(e) => handleItemChange(index, 'qty', e.target.value)}
-                      className="w-full px-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold transition-colors"
+                      className="w-full px-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
                     />
                   </div>
 
-                  {/* Rate / Unit Price & Smart Rate button */}
-                  <div className={billType === 'grocery' || billType === 'service' ? "col-span-2 text-xs font-semibold text-slate-500" : "col-span-1 text-xs font-semibold text-slate-500"}>
-                    <label className="lg:hidden block mb-1 text-slate-400">
-                      {billType === 'grocery' ? 'Unit Price' : 'Rate'}
-                    </label>
-                    <div className="flex gap-1">
-                      <div className="relative w-full">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
-                        <input
-                          type="number"
-                          min="0"
-                          value={item.rate}
-                          onChange={(e) => handleItemChange(index, 'rate', e.target.value)}
-                          className="w-full pl-6 pr-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold transition-colors"
-                        />
+                  {/* Rate / Unit Price - not for repair or retail */}
+                  {(billType !== 'repair' && billType !== 'retail') && (
+                    <div className="text-xs font-semibold text-slate-500">
+                      <label className="lg:hidden block mb-1 text-slate-400">
+                        {billType === 'grocery' ? 'Unit Price' : 'Rate'}
+                      </label>
+                      <div className="flex gap-1">
+                        <div className="relative w-full">
+                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={item.rate ?? ''}
+                            onChange={(e) => handleItemChange(index, 'rate', e.target.value)}
+                            className="w-full pl-6 pr-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                          />
+                        </div>
+                        {billType !== 'grocery' && (
+                          <button
+                            type="button"
+                            onClick={() => openSmartRateCalculator(index)}
+                            title="Calculate using sub-charges"
+                            className="bg-teal-50 text-teal-600 hover:bg-teal-100 p-2 rounded-xl transition-colors shrink-0 hidden lg:block"
+                          >
+                            <Calculator className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => openSmartRateCalculator(index)}
-                        title="Calculate using sub-charges"
-                        className="bg-teal-50 text-teal-600 hover:bg-teal-100 p-2 rounded-xl transition-colors shrink-0 hidden lg:block"
-                      >
-                        <Calculator className="w-3.5 h-3.5" />
-                      </button>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Row Total & Action Buttons */}
-                  <div className="col-span-1 flex flex-col items-end justify-center text-xs font-black text-slate-700 py-3 lg:py-0 border-t lg:border-0 border-slate-100 mt-2 lg:mt-0">
+                  {/* Retail: Price & Discount */}
+                  {billType === 'retail' && (
+                    <>
+                      <div className="text-xs font-semibold text-slate-500">
+                        <label className="lg:hidden block mb-1 text-slate-400">Price ({currencySymbol})</label>
+                        <div className="relative">
+                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
+                          <input type="number" min="0"
+                            value={item.price ?? ''}
+                            onChange={(e) => handleItemChange(index, 'price', e.target.value)}
+                            placeholder="0"
+                            className="w-full pl-6 pr-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                          />
+                        </div>
+                      </div>
+                      <div className="text-xs font-semibold text-slate-500">
+                        <label className="lg:hidden block mb-1 text-rose-400">Discount ({currencySymbol})</label>
+                        <div className="relative">
+                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-rose-400 font-bold">-</span>
+                          <input type="number" min="0"
+                            value={item.discount ?? ''}
+                            onChange={(e) => handleItemChange(index, 'discount', e.target.value)}
+                            placeholder="0"
+                            className="w-full pl-6 pr-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-rose-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-rose-500/20 hover:border-rose-400 focus:border-rose-400 text-rose-600 font-extrabold text-[14px] transition-colors"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Row Total */}
+                  <div className="flex flex-col items-end justify-center text-xs font-black text-slate-700 py-3 lg:py-0 border-t lg:border-0 border-slate-100 mt-2 lg:mt-0">
                     <span className="lg:hidden text-slate-400 font-semibold mb-1 w-full text-left">Amount (Auto-calculated)</span>
-                    <span className="text-teal-600 font-extrabold text-sm whitespace-nowrap bg-teal-50/50 px-3 py-2 rounded-xl border border-teal-100/50 w-full text-right">
+                    <span className="text-teal-600 font-extrabold text-[15px] whitespace-nowrap bg-teal-50/50 px-3 min-h-[44px] flex items-center justify-end rounded-xl border border-teal-100/50 w-full text-right">
                       {currencySymbol}{item.amount ? item.amount.toFixed(2) : (item.qty * item.rate).toFixed(2)}
                     </span>
                   </div>
 
                   {/* Actions */}
-                  <div className="hidden lg:flex col-span-1 items-center justify-center gap-1.5 py-3 lg:py-0">
+                  <div className="hidden lg:flex items-center justify-center gap-2 py-3 lg:py-0">
                     <button
                       type="button"
                       onClick={() => handleDuplicateItem(index)}
-                      title="Duplicate Row"
-                      className="text-slate-400 hover:text-indigo-600 transition-colors p-1"
+                      title="Duplicate item"
+                      className="text-slate-400 hover:text-indigo-600 transition-colors p-2"
                     >
-                      <Copy className="w-3.5 h-3.5" />
+                      <Copy className="w-4 h-4" />
                     </button>
                     
                     {items.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeItemRow(index)}
-                        title="Delete Row"
-                        className="text-slate-300 hover:text-rose-500 transition-colors p-1"
+                        title="Remove item"
+                        className="text-slate-300 hover:text-rose-500 transition-colors p-2"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
@@ -968,6 +1214,8 @@ const CreateInvoice = ({
 
                 </div>
               ))}
+                </div>
+              </div>
             </div>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-4 pt-4 border-t border-slate-100 gap-4">
               <button
@@ -1005,7 +1253,7 @@ const CreateInvoice = ({
         </div>
 
         {/* COLUMN 3: TALLY, SUB-CHARGES & OVERRIDES */}
-        <div className="space-y-6">
+        <div className="w-full lg:w-[30%] space-y-6">
           
           {/* Overrides & Payment */}
           <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
@@ -1162,17 +1410,17 @@ const CreateInvoice = ({
               </div>
             </div>
 
-            <div className="pt-2 flex flex-col sm:grid sm:grid-cols-2 gap-3">
+            <div className="pt-2 flex flex-col gap-3">
               <button
                 onClick={() => handleSave('Draft')}
-                className="w-full py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 text-xs"
+                className="w-full py-4 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 text-[14px]"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Draft</span>
               </button>
               <button
                 onClick={() => {}}
-                className="w-full py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 text-xs"
+                className="w-full py-4 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 text-[14px]"
               >
                 <Eye className="w-4 h-4" />
                 <span>Preview PDF</span>
@@ -1185,14 +1433,14 @@ const CreateInvoice = ({
                   }
                   if(onDownloadPDF) onDownloadPDF({ id: editingInvoice.id, invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, terms, paymentStatus, orderStatus, subtotal, taxAmount, grandTotal, balanceDue }); 
                 }}
-                className="w-full py-3.5 bg-white border border-teal-500 text-teal-600 rounded-xl font-bold hover:bg-teal-50 transition-all flex items-center justify-center gap-2 text-xs sm:col-span-2 shadow-sm"
+                className="w-full py-4 bg-white border border-teal-500 text-teal-600 rounded-xl font-bold hover:bg-teal-50 transition-all flex items-center justify-center gap-2 text-[14px] shadow-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Download PDF</span>
               </button>
               <button
                 onClick={() => handleSave()}
-                className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-all flex items-center justify-center gap-2 text-xs sm:col-span-2"
+                className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-all flex items-center justify-center gap-2 text-[14px]"
               >
                 <Check className="w-4 h-4" />
                 <span>Save Invoice</span>
@@ -1202,7 +1450,7 @@ const CreateInvoice = ({
                   const msg = `Hi ${customerName},\nHere is your invoice ${invoiceNumber} for ${currencySymbol}${grandTotal.toFixed(2)}.`;
                   window.open(`https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
                 }}
-                className="w-full py-3.5 bg-[#25D366] text-white rounded-xl font-bold hover:bg-[#1ebd5a] shadow-md transition-all flex items-center justify-center gap-2 text-xs sm:col-span-2"
+                className="w-full py-4 bg-[#25D366] text-white rounded-xl font-bold hover:bg-[#1ebd5a] shadow-md transition-all flex items-center justify-center gap-2 text-[14px]"
               >
                 <Send className="w-4 h-4" />
                 <span>Send WhatsApp Reminder</span>
@@ -1334,6 +1582,115 @@ const CreateInvoice = ({
           </div>
         </div>
       )}
+
+      {/* Customize PDF Fields Modal */}
+      {showPdfSettings && (() => {
+        const ALL_FIELDS_BY_TEMPLATE = {
+          embroidery: [
+            { key: 'designNo', label: 'Design / Item Code' },
+            { key: 'workType', label: 'Work Type' },
+            { key: 'description', label: 'Description' },
+            { key: 'size', label: 'Size' },
+            { key: 'qty', label: 'Quantity' },
+            { key: 'rate', label: 'Rate' },
+            { key: 'amount', label: 'Amount' },
+          ],
+          grocery: [
+            { key: 'description', label: 'Product Name' },
+            { key: 'size', label: 'Unit' },
+            { key: 'qty', label: 'Quantity' },
+            { key: 'rate', label: 'Unit Price' },
+            { key: 'amount', label: 'Amount' },
+          ],
+          repair: [
+            { key: 'serviceName', label: 'Service / Item' },
+            { key: 'problemDetails', label: 'Problem / Details' },
+            { key: 'partsCost', label: 'Parts Cost' },
+            { key: 'labourCharge', label: 'Labour Charge' },
+            { key: 'qty', label: 'Quantity' },
+            { key: 'amount', label: 'Amount' },
+          ],
+          retail: [
+            { key: 'productName', label: 'Product Name' },
+            { key: 'category', label: 'Category' },
+            { key: 'sizeVariant', label: 'Size / Variant' },
+            { key: 'qty', label: 'Quantity' },
+            { key: 'price', label: 'Price' },
+            { key: 'discount', label: 'Discount' },
+            { key: 'amount', label: 'Amount' },
+          ],
+          custom: [
+            { key: 'itemService', label: 'Item / Service' },
+            { key: 'description', label: 'Description' },
+            { key: 'qty', label: 'Quantity' },
+            { key: 'rate', label: 'Rate' },
+            { key: 'amount', label: 'Amount' },
+          ],
+        };
+        const fields = ALL_FIELDS_BY_TEMPLATE[billType] || ALL_FIELDS_BY_TEMPLATE['custom'];
+        return (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-extrabold text-slate-800">Customize PDF Fields</h3>
+                  <p className="text-[11px] text-slate-400 font-bold mt-0.5 capitalize">Template: {billType}</p>
+                </div>
+                <button onClick={() => setShowPdfSettings(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
+                  <X className="w-5 h-5 text-slate-500" />
+                </button>
+              </div>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Select which columns will be <strong>visible in the PDF invoice</strong>. Uncheck to hide a column from the printed bill.
+              </p>
+              <div className="space-y-3">
+                {fields.map((field) => {
+                  const isChecked = pdfVisibleFields.length === 0 || pdfVisibleFields.includes(field.key);
+                  return (
+                    <label key={field.key} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 cursor-pointer border border-slate-100 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setPdfVisibleFields(prev => prev.length === 0
+                              ? fields.filter(f => f.key !== field.key).map(f => f.key).concat(field.key)
+                              : [...prev, field.key]
+                            );
+                          } else {
+                            const allKeys = fields.map(f => f.key);
+                            const currentVisible = pdfVisibleFields.length === 0 ? allKeys : pdfVisibleFields;
+                            setPdfVisibleFields(currentVisible.filter(k => k !== field.key));
+                          }
+                        }}
+                        className="w-4 h-4 rounded accent-teal-500 cursor-pointer"
+                      />
+                      <span className="text-sm font-semibold text-slate-700">{field.label}</span>
+                      {field.key === 'amount' && (
+                        <span className="ml-auto text-[9px] font-bold text-slate-300 uppercase">Always shown</span>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+              <div className="flex gap-3 pt-2 border-t border-slate-100">
+                <button
+                  onClick={() => setPdfVisibleFields(fields.map(f => f.key))}
+                  className="flex-1 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-colors"
+                >
+                  Show All
+                </button>
+                <button
+                  onClick={() => setShowPdfSettings(false)}
+                  className="flex-1 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-xs font-black rounded-xl shadow-md transition-all"
+                >
+                  Save & Close
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
     </div>
   );

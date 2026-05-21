@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Login from './pages/Login';
 import WelcomeOnboarding from './pages/WelcomeOnboarding';
+import SetupBilling from './pages/SetupBilling';
 import Dashboard from './pages/Dashboard';
 import Invoices from './pages/Invoices';
 import CreateInvoice from './pages/CreateInvoice';
@@ -37,7 +38,8 @@ import {
   saveExpense,
   deleteExpense,
   importRestore,
-  syncFromFirestore
+  syncFromFirestore,
+  enableRealTimeSync
 } from './utils/storage';
 import { downloadInvoicePDF } from './utils/pdfUtils';
 
@@ -83,6 +85,8 @@ function App() {
             setExpenses(synced.expenses || []);
             if (synced.subscription) setSubscription(synced.subscription);
           }
+          // Enable real-time multi-device sync
+          enableRealTimeSync();
         } catch (e) {
           console.warn('Could not sync Firestore on startup. Falling back to LocalStorage.', e);
         }
@@ -90,6 +94,21 @@ function App() {
       runSync();
     }
   }, [isAuthenticated]);
+
+  // Listen for Real-Time cloud updates triggered by storage.js
+  useEffect(() => {
+    const handleSync = () => {
+      setInvoices(getInvoices());
+      setCustomers(getCustomers());
+      setProducts(getProducts());
+      setSettings(getSettings());
+      setExpenses(getExpenses());
+      setSubscription(getSubscriptionStatus());
+    };
+
+    window.addEventListener('billqyro_sync', handleSync);
+    return () => window.removeEventListener('billqyro_sync', handleSync);
+  }, []);
 
   // Listen for /admin and #/admin to route to admin panel automatically
   useEffect(() => {
@@ -132,13 +151,16 @@ function App() {
     setInvoices(getInvoices());
     setCustomers(getCustomers());
     setProducts(getProducts());
-    setSettings(getSettings());
+    const currentSettings = getSettings();
+    setSettings(currentSettings);
     setExpenses(getExpenses());
     setSubscription(getSubscriptionStatus());
     
-    // Check if new user
+    // Setup & Onboarding Routing
     const hasSeenGuide = localStorage.getItem('billqyro_seen_guide');
-    if (!hasSeenGuide) {
+    if (!currentSettings.defaultBillingTemplate) {
+      setCurrentTab('setup-billing');
+    } else if (!hasSeenGuide) {
       localStorage.setItem('billqyro_seen_guide', 'true');
       setCurrentTab('guide');
     } else {
@@ -285,6 +307,18 @@ function App() {
 
   // --- TAB ROUTER SWITCHBOARD ---
   const renderTabContent = () => {
+    if (currentTab === 'setup-billing') {
+      return (
+        <SetupBilling 
+          businessSettings={settings}
+          onSaveSettings={(newSettings) => {
+            saveSettings(newSettings);
+            setSettings(newSettings);
+          }}
+          setCurrentTab={setCurrentTab}
+        />
+      );
+    }
     switch (currentTab) {
       case 'dashboard':
         return (

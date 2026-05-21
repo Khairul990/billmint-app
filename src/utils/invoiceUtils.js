@@ -7,9 +7,7 @@
  */
 export const calculateTotals = (items = [], taxPercentage = 0, discountAmount = 0) => {
   const subtotal = items.reduce((acc, item) => {
-    const qty = parseFloat(item.qty !== undefined ? item.qty : item.quantity) || 0;
-    const price = parseFloat(item.rate !== undefined ? item.rate : item.price) || 0;
-    return acc + (qty * price);
+    return acc + (parseFloat(item.amount) || 0);
   }, 0);
 
   const discount = parseFloat(discountAmount) || 0;

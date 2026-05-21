@@ -1,5 +1,5 @@
 import { db, isFirebaseEnabled } from './firebase';
-import { doc, setDoc, deleteDoc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot } from 'firebase/firestore';
 
 // LocalStorage Keys
 const KEYS = {
@@ -24,6 +24,14 @@ const DEFAULT_SETTINGS = {
   currency: '₹',
   defaultTax: 18,
   adminPasscode: '1118', // Customizable administrative passcode
+  defaultBillingTemplate: '',
+  pdfVisibleFields: {
+    embroidery: ['designNo', 'workType', 'description', 'size', 'quantity', 'rate', 'amount'],
+    grocery: ['productName', 'unit', 'quantity', 'unitPrice', 'amount'],
+    repair: ['serviceName', 'problemDetails', 'partsCost', 'labourCharge', 'quantity', 'amount'],
+    retail: ['productName', 'category', 'sizeVariant', 'quantity', 'price', 'discount', 'amount'],
+    custom: ['itemService', 'description', 'quantity', 'rate', 'amount']
+  }
 };
 
 // Seed Data for Demo Mode (Quick Demo Start Only)
@@ -161,18 +169,7 @@ const DEFAULT_SUBSCRIPTION = {
 
 // Safe Firebase User ID generator based on auth session email
 export const getFirebaseUserId = () => {
-  try {
-    const session = localStorage.getItem(KEYS.AUTH);
-    if (session) {
-      const data = JSON.parse(session);
-      if (data.userEmail) {
-        return data.userEmail.replace(/[^a-zA-Z0-9]/g, '_');
-      }
-    }
-  } catch (e) {
-    console.error("Error reading auth session for user ID:", e);
-  }
-  return 'demo-user';
+  return 'workspace_admin';
 };
 
 // Background Firestore Save Helper
@@ -576,7 +573,50 @@ export const importRestore = (backupData) => {
   return backupData;
 };
 
-// Real-Time Syncing on Authentication or Startup
+// --- REAL TIME SYNC LISTENER ---
+let unsubscribes = [];
+
+export const enableRealTimeSync = () => {
+  if (!isFirebaseEnabled) return;
+
+  const userId = getFirebaseUserId();
+  console.log('Enabling Real-Time Sync for workspace:', userId);
+
+  // Clear any existing listeners
+  unsubscribes.forEach(unsub => unsub());
+  unsubscribes = [];
+
+  const syncCollection = (collectionName, storageKey) => {
+    const colRef = collection(db, collectionName, userId, 'items');
+    const unsub = onSnapshot(colRef, (snapshot) => {
+      const items = [];
+      snapshot.forEach(doc => items.push(doc.data()));
+      localStorage.setItem(storageKey, JSON.stringify(items));
+      window.dispatchEvent(new CustomEvent('billqyro_sync'));
+    });
+    unsubscribes.push(unsub);
+  };
+
+  const syncDoc = (collectionName, storageKey) => {
+    const dRef = doc(db, collectionName, userId);
+    const unsub = onSnapshot(dRef, (snapshot) => {
+      if (snapshot.exists()) {
+        localStorage.setItem(storageKey, JSON.stringify(snapshot.data()));
+        window.dispatchEvent(new CustomEvent('billqyro_sync'));
+      }
+    });
+    unsubscribes.push(unsub);
+  };
+
+  syncCollection('invoices', KEYS.INVOICES);
+  syncCollection('customers', KEYS.CUSTOMERS);
+  syncCollection('products', KEYS.PRODUCTS);
+  syncCollection('expenses', KEYS.EXPENSES);
+  syncDoc('settings', KEYS.SETTINGS);
+  syncDoc('subscription', KEYS.SUBSCRIPTION);
+};
+
+// One-time Syncing on Authentication or Startup
 export const syncFromFirestore = async () => {
   if (!isFirebaseEnabled) {
     console.log("Firebase not enabled, skipping Firestore sync.");

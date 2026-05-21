@@ -121,6 +121,19 @@ const Dashboard = ({
     window.open(whatsappUrl, '_blank');
   };
 
+  // --- BILLING TEMPLATE INFO ---
+  const getTemplateInfo = (tpl) => {
+    switch (tpl) {
+      case 'embroidery': return { name: 'Embroidery / Fashion', fields: 'Design No, Work Type, Size, Quantity, Rate, Amount' };
+      case 'grocery': return { name: 'Grocery / Mudi Shop', fields: 'Product Name, Unit, Quantity, Unit Price, Amount' };
+      case 'repair': return { name: 'Repair / Service', fields: 'Service Name, Problem Details, Parts Cost, Labour Charge, Quantity, Amount' };
+      case 'retail': return { name: 'Retail / Shopping', fields: 'Product Name, Category, Size/Variant, Quantity, Price, Discount, Amount' };
+      case 'custom': return { name: 'Custom Bill', fields: 'Item/Service, Description, Quantity, Rate, Amount' };
+      default: return null;
+    }
+  };
+  const tplInfo = getTemplateInfo(businessSettings?.defaultBillingTemplate);
+
   return (
     <div className="space-y-6 animate-fadeIn">
 
@@ -188,6 +201,48 @@ const Dashboard = ({
           </div>
         </div>
       )}
+
+      {/* 0.15 CURRENT BILLING SETUP CARD */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800/80 shadow-premium flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20">
+            <LayoutDashboard className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Current Billing Setup</h3>
+            {tplInfo ? (
+              <>
+                <h4 className="text-xl font-black text-slate-800 dark:text-slate-100 mb-1">{tplInfo.name}</h4>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl">
+                  Your Create Bill form is prepared with <strong className="text-slate-700 dark:text-slate-300">{tplInfo.fields}</strong>.
+                </p>
+              </>
+            ) : (
+              <>
+                <h4 className="text-xl font-black text-slate-800 dark:text-slate-100 mb-1">Not Set</h4>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Choose your billing setup to create bills easily.
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+          <button
+            onClick={() => setCurrentTab('setup-billing')}
+            className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-colors whitespace-nowrap"
+          >
+            Change Template
+          </button>
+          <button
+            onClick={() => setCurrentTab('create-invoice')}
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xs rounded-xl shadow-md transition-all whitespace-nowrap"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create Bill</span>
+          </button>
+        </div>
+      </div>
 
       {/* 0.2 HOW TO USE BILLQYRO GUIDE + SYSTEM HEALTH */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

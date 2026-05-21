@@ -37,6 +37,14 @@ const Settings = ({ settings, onSaveSettings }) => {
   const [upiId, setUpiId] = useState('');
   const [brandColor, setBrandColor] = useState('#14b8a6'); // default teal
   const [invoiceTemplate, setInvoiceTemplate] = useState('modern');
+  const [defaultBillingTemplate, setDefaultBillingTemplate] = useState('custom');
+  const [pdfVisibleFields, setPdfVisibleFields] = useState({
+    embroidery: ['designNo', 'workType', 'description', 'size', 'quantity', 'rate', 'amount'],
+    grocery: ['productName', 'unit', 'quantity', 'unitPrice', 'amount'],
+    repair: ['serviceName', 'problemDetails', 'partsCost', 'labourCharge', 'quantity', 'amount'],
+    retail: ['productName', 'category', 'sizeVariant', 'quantity', 'price', 'discount', 'amount'],
+    custom: ['itemService', 'description', 'quantity', 'rate', 'amount']
+  });
   
   const [showToast, setShowToast] = useState(false);
 
@@ -59,6 +67,10 @@ const Settings = ({ settings, onSaveSettings }) => {
       setUpiId(settings.upiId || '');
       setBrandColor(settings.brandColor || '#14b8a6');
       setInvoiceTemplate(settings.invoiceTemplate || 'modern');
+      setDefaultBillingTemplate(settings.defaultBillingTemplate || 'custom');
+      if (settings.pdfVisibleFields) {
+        setPdfVisibleFields(settings.pdfVisibleFields);
+      }
     }
   }, [settings]);
 
@@ -87,7 +99,9 @@ const Settings = ({ settings, onSaveSettings }) => {
       pdfFooter,
       upiId,
       brandColor,
-      invoiceTemplate
+      invoiceTemplate,
+      defaultBillingTemplate,
+      pdfVisibleFields
     };
 
     onSaveSettings(payload);
