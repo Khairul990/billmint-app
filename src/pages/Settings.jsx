@@ -33,6 +33,7 @@ const Settings = ({ settings, onSaveSettings }) => {
   const [defaultTax, setDefaultTax] = useState(18);
   const [defaultNotes, setDefaultNotes] = useState('');
   const [terms, setTerms] = useState('');
+  const [pdfFooter, setPdfFooter] = useState('');
   const [upiId, setUpiId] = useState('');
   const [brandColor, setBrandColor] = useState('#14b8a6'); // default teal
   const [invoiceTemplate, setInvoiceTemplate] = useState('modern');
@@ -54,6 +55,7 @@ const Settings = ({ settings, onSaveSettings }) => {
       setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 18);
       setDefaultNotes(settings.defaultNotes || '');
       setTerms(settings.terms || '');
+      setPdfFooter(settings.pdfFooter || '');
       setUpiId(settings.upiId || '');
       setBrandColor(settings.brandColor || '#14b8a6');
       setInvoiceTemplate(settings.invoiceTemplate || 'modern');
@@ -82,6 +84,7 @@ const Settings = ({ settings, onSaveSettings }) => {
       defaultTax: parseFloat(defaultTax) || 0,
       defaultNotes,
       terms,
+      pdfFooter,
       upiId,
       brandColor,
       invoiceTemplate
@@ -346,6 +349,17 @@ const Settings = ({ settings, onSaveSettings }) => {
                 placeholder="1. Payment is due within 30 days.&#10;2. Goods once sold are not returnable."
                 rows="3"
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-medium resize-none"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">PDF Invoice Footer</label>
+              <input
+                type="text"
+                value={pdfFooter}
+                onChange={(e) => setPdfFooter(e.target.value)}
+                placeholder="e.g. This is a computer generated invoice and requires no signature."
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-medium"
               />
             </div>
           </div>

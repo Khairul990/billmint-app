@@ -251,7 +251,7 @@ function App() {
   const handleDownloadPDF = (invoice) => {
     if (!settings || !settings.businessName) {
       alert('⚠️ Business settings are incomplete. Please complete your business settings first.');
-      setCurrentTab('admin-panel');
+      setCurrentTab('settings');
       return;
     }
     const isPremium = subscription.status === 'premium';

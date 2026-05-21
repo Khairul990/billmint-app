@@ -20,6 +20,15 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     fontWeight: 'bold',
   },
+  footerText: {
+    position: 'absolute',
+    bottom: 35,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    fontSize: 7,
+    color: '#64748b',
+  },
   
   // COMMON HEADER
   header: {
@@ -295,6 +304,11 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
         </View>
       </View>
 
+      {/* Footer Text */}
+      {businessSettings?.pdfFooter && (
+        <Text style={styles.footerText}>{businessSettings.pdfFooter}</Text>
+      )}
+
       {/* Small Watermark */}
       {!isPremium && (
         <Text style={styles.watermark}>Powered by BillQyro Invoicing SaaS</Text>
@@ -442,6 +456,11 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
           )}
         </View>
       </View>
+
+      {/* Footer Text */}
+      {businessSettings?.pdfFooter && (
+        <Text style={styles.footerText}>{businessSettings.pdfFooter}</Text>
+      )}
 
       {/* Free tier watermark */}
       {!isPremium && (

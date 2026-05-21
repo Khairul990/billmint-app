@@ -171,11 +171,11 @@ const Dashboard = ({
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <button
-                onClick={() => setCurrentTab('admin-panel')}
+                onClick={() => setCurrentTab('settings')}
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs px-6 py-3.5 rounded-2xl shadow-md hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
               >
                 <Sparkles className="w-4 h-4" />
-                <span>Get Started</span>
+                <span>Open Settings</span>
               </button>
               <button
                 onClick={() => setCurrentTab('create-invoice')}
