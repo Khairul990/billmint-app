@@ -174,7 +174,7 @@ const Dashboard = ({
               <Rocket className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">
-              Welcome to BillMint
+               Welcome to BillQyro
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
               Start by completing your business profile and creating your first bill.
@@ -199,10 +199,10 @@ const Dashboard = ({
         </div>
       )}
 
-      {/* 0.2 HOW TO USE BILLMINT GUIDE + SYSTEM HEALTH */}
+      {/* 0.2 HOW TO USE BILLQYRO GUIDE + SYSTEM HEALTH */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* New "How to Use BillMint" Guide (Col Span 2) */}
+        {/* New "How to Use BillQyro" Guide (Col Span 2) */}
         <div className="lg:col-span-2">
           <NewUserGuide setCurrentTab={setCurrentTab} isNewUser={isNewUser} />
         </div>

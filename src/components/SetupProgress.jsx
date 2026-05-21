@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 /**
- * Setup Progress Tracker — shows how far along the user is in configuring BillMint
+ * Setup Progress Tracker — shows how far along the user is in configuring BillQyro
  * @param {Object}  businessSettings - current business profile settings
  * @param {Array}   customers        - list of saved customers
  * @param {Array}   invoices         - list of created invoices

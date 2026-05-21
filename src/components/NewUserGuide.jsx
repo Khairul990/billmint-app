@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 /**
- * “How to Use BillMint” — Step‑by‑Step Guide with pagination
+ * “How to Use BillQyro” — Step‑by‑Step Guide with pagination
  * @param {Function} setCurrentTab - navigation dispatcher
  * @param {boolean}  isNewUser - true ⇒ show full guide; false ⇒ collapsible compact
  */
@@ -111,7 +111,7 @@ const NewUserGuide = ({ setCurrentTab, isNewUser = true }) => {
                     </div>
                     <div>
                         <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight">
-                            How to Use BillMint
+                            How to Use BillQyro
                         </h3>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-tight">
                             Follow these simple steps to create bills, manage customers, and download professional invoices.
