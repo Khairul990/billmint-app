@@ -102,10 +102,10 @@ const CreateInvoice = ({
       // Populate items ensuring they have smartRate details
       const parsedItems = (editingInvoice.items || []).map((item, idx) => ({
         sn: item.sn || idx + 1,
-        designNo: item.designNo || `SO-${idx + 5}`,
+        designNo: item.designNo || '',
         workType: item.workType || 'Embroidery',
         description: item.description || item.name || '',
-        size: item.size || 'Standard',
+        size: item.size || '',
         qty: item.qty || item.quantity || 1,
         rate: item.rate || item.price || 0,
         amount: item.amount || (item.qty || 1) * (item.rate || 0),
@@ -130,14 +130,13 @@ const CreateInvoice = ({
       setOrderStatus('Pending');
 
       // Prefill first row
-      const firstDesignNo = getNextDesignNumber(invoices, 0);
       setItems([
         {
           sn: 1,
-          designNo: firstDesignNo,
+          designNo: '',
           workType: 'Embroidery',
           description: '',
-          size: 'Standard',
+          size: '',
           qty: 1,
           rate: 0,
           amount: 0,
@@ -222,15 +221,14 @@ const CreateInvoice = ({
 
   // --- ADD ITEM ROW ---
   const addItemRow = () => {
-    const nextSO = getNextDesignNumber(invoices, items.length);
     setItems([
       ...items,
       {
         sn: items.length + 1,
-        designNo: nextSO,
+        designNo: '',
         workType: 'Embroidery',
         description: '',
-        size: 'Standard',
+        size: '',
         qty: 1,
         rate: 0,
         amount: 0,
@@ -298,7 +296,7 @@ const CreateInvoice = ({
 
     const invalidItem = items.some(item => !item.description || item.qty <= 0 || item.rate < 0);
     if (invalidItem) {
-      alert('Please add customer name and at least one invoice item.');
+      alert('Please add at least one valid invoice item.');
       return;
     }
 
@@ -582,7 +580,7 @@ const CreateInvoice = ({
                   <Layers className="w-4 h-4 text-indigo-500" />
                   <span>Invoice Items Sheet</span>
                 </h3>
-                <p className="text-[10px] text-slate-500 font-bold mt-1">Add each product or service as a separate line.</p>
+                <p className="text-[10px] text-slate-500 font-bold mt-1">Add each product or service as a separate line. Quantity and rate will calculate the amount automatically.</p>
               </div>
               
               <span className="text-[10px] text-slate-400 font-bold hidden sm:block">
@@ -592,12 +590,12 @@ const CreateInvoice = ({
 
             {/* Desktop Headers */}
             <div className="hidden lg:grid grid-cols-12 gap-2 text-[10px] font-bold text-slate-400 uppercase px-2 mb-1">
-              <div className="col-span-1 text-center">S.N.</div>
-              <div className="col-span-2">Design No</div>
-              <div className="col-span-2">Work Type</div>
-              <div className="col-span-3">Description / Catalog</div>
+              <div className="col-span-1 text-center">No.</div>
+              <div className="col-span-2">Design / Item Code</div>
+              <div className="col-span-2">Work Type / Service</div>
+              <div className="col-span-3">Description</div>
               <div className="col-span-1 text-center">Size</div>
-              <div className="col-span-1 text-center">Qty</div>
+              <div className="col-span-1 text-center">Quantity</div>
               <div className="col-span-1.5 text-right">Rate</div>
               <div className="col-span-0.5"></div> {/* Action spacing */}
             </div>
@@ -629,23 +627,23 @@ const CreateInvoice = ({
 
                   {/* Design No */}
                   <div className="col-span-2 text-xs font-semibold text-slate-500">
-                    <label className="lg:hidden block mb-1 text-slate-400">Design No</label>
+                    <label className="lg:hidden block mb-1 text-slate-400">Design / Item Code</label>
                     <input
                       type="text"
                       value={item.designNo}
                       onChange={(e) => handleItemChange(index, 'designNo', e.target.value)}
-                      placeholder="SO-5"
-                      className="w-full px-3 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 font-extrabold uppercase"
+                      placeholder="e.g. ITM-001"
+                      className="w-full px-3 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold uppercase transition-colors"
                     />
                   </div>
 
                   {/* Work Type */}
                   <div className="col-span-2 text-xs font-semibold text-slate-500">
-                    <label className="lg:hidden block mb-1 text-slate-400">Work Type</label>
+                    <label className="lg:hidden block mb-1 text-slate-400">Work Type / Service</label>
                     <select
                       value={item.workType}
                       onChange={(e) => handleItemChange(index, 'workType', e.target.value)}
-                      className="w-full px-2.5 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-700 font-bold"
+                      className="w-full px-2.5 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold transition-colors"
                     >
                       <option value="Embroidery">Embroidery</option>
                       <option value="Punching">Punching</option>
@@ -656,13 +654,13 @@ const CreateInvoice = ({
 
                   {/* Description & Catalog lookup combined */}
                   <div className="col-span-3 text-xs font-semibold text-slate-500 space-y-1">
-                    <label className="lg:hidden block mb-1 text-slate-400">Description / Prefill</label>
+                    <label className="lg:hidden block mb-1 text-slate-400">Description</label>
                     <input
                       type="text"
                       value={item.description}
                       onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                      placeholder="Embroidery Work on Suits"
-                      className="w-full px-3 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 font-bold"
+                      placeholder="e.g. Embroidery Work on Suits"
+                      className="w-full px-3 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-bold transition-colors"
                     />
                     
                     {/* Catalog Helper link */}
@@ -670,7 +668,7 @@ const CreateInvoice = ({
                       <select
                         onChange={(e) => handleProductSelect(index, e.target.value)}
                         defaultValue=""
-                        className="text-[9px] bg-slate-100 border-0 text-slate-500 py-0.5 px-1.5 rounded focus:outline-none cursor-pointer w-full"
+                        className="text-[9px] bg-slate-100 border-0 text-slate-500 py-0.5 px-1.5 rounded focus:outline-none cursor-pointer w-full hover:bg-slate-200"
                       >
                         <option value="">-- Quick Prefill Catalog --</option>
                         {products.map((p) => (
@@ -688,38 +686,41 @@ const CreateInvoice = ({
                       value={item.size}
                       onChange={(e) => handleItemChange(index, 'size', e.target.value)}
                       placeholder="A4 / 4x4"
-                      className="w-full px-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-700 font-bold"
+                      className="w-full px-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold transition-colors"
                     />
                   </div>
 
                   {/* Qty */}
                   <div className="col-span-1 text-xs font-semibold text-slate-500">
-                    <label className="lg:hidden block mb-1 text-slate-400">Qty</label>
+                    <label className="lg:hidden block mb-1 text-slate-400">Quantity</label>
                     <input
                       type="number"
                       min="1"
                       value={item.qty}
                       onChange={(e) => handleItemChange(index, 'qty', e.target.value)}
-                      className="w-full px-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 font-extrabold"
+                      className="w-full px-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold transition-colors"
                     />
                   </div>
 
                   {/* Rate & Smart Rate button */}
                   <div className="col-span-1.5 text-xs font-semibold text-slate-500">
-                    <label className="lg:hidden block mb-1 text-slate-400">Rate ({currencySymbol})</label>
+                    <label className="lg:hidden block mb-1 text-slate-400">Rate</label>
                     <div className="flex gap-1">
-                      <input
-                        type="number"
-                        min="0"
-                        value={item.rate}
-                        onChange={(e) => handleItemChange(index, 'rate', e.target.value)}
-                        className="w-full px-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 font-extrabold"
-                      />
+                      <div className="relative w-full">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={item.rate}
+                          onChange={(e) => handleItemChange(index, 'rate', e.target.value)}
+                          className="w-full pl-6 pr-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold transition-colors"
+                        />
+                      </div>
                       <button
                         type="button"
                         onClick={() => openSmartRateCalculator(index)}
                         title="Calculate using sub-charges"
-                        className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 p-2 rounded-xl transition-colors shrink-0"
+                        className="bg-teal-50 text-teal-600 hover:bg-teal-100 p-2 rounded-xl transition-colors shrink-0"
                       >
                         <Calculator className="w-3.5 h-3.5" />
                       </button>
@@ -727,11 +728,13 @@ const CreateInvoice = ({
                   </div>
 
                   {/* Row Total & Action Buttons */}
-                  <div className="col-span-1 flex items-center justify-between lg:justify-end text-xs font-black text-slate-700 py-3 lg:py-0 border-t lg:border-0 border-slate-100 mt-2 lg:mt-0 gap-3">
-                    <span className="lg:hidden text-slate-400 font-semibold">Row Amount:</span>
-                    <span className="text-slate-800 font-extrabold">
-                      {currencySymbol}{item.amount ? item.amount.toFixed(2) : (item.qty * item.rate).toFixed(2)}
-                    </span>
+                  <div className="col-span-1 flex flex-row lg:flex-col items-center justify-between lg:justify-center text-xs font-black text-slate-700 py-3 lg:py-0 border-t lg:border-0 border-slate-100 mt-2 lg:mt-0 gap-3">
+                    <div className="flex flex-col lg:items-end w-full">
+                      <span className="lg:hidden text-slate-400 font-semibold mb-1">Amount</span>
+                      <span className="text-teal-600 font-extrabold text-sm whitespace-nowrap">
+                        {currencySymbol}{item.amount ? item.amount.toFixed(2) : (item.qty * item.rate).toFixed(2)}
+                      </span>
+                    </div>
 
                     {/* Desktop duplicate and delete actions */}
                     <div className="hidden lg:flex items-center gap-1.5 ml-2">
@@ -783,7 +786,7 @@ const CreateInvoice = ({
 
             <button
               onClick={addItemRow}
-              className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 mt-4 transition-all"
+              className="flex items-center gap-1.5 text-xs font-bold text-teal-600 hover:text-teal-700 mt-4 transition-all w-fit px-3 py-2 bg-teal-50 hover:bg-teal-100 rounded-xl"
             >
               <Plus className="w-4 h-4" />
               <span>Add Another Item Line</span>
