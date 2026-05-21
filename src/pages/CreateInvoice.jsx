@@ -1620,7 +1620,7 @@ const CreateInvoice = ({
       {/* Expand Sheet Modal */}
       {isSheetExpanded && (
         <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-0 md:p-6 overflow-hidden">
-          <div className="bg-white md:rounded-3xl shadow-2xl w-full h-full md:max-w-[95vw] lg:max-w-[1300px] md:max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white md:rounded-3xl shadow-2xl w-full h-full md:w-[92vw] md:max-w-[1300px] md:h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-[#071B3A] to-[#0d2b55] px-4 md:px-6 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
@@ -1648,8 +1648,10 @@ const CreateInvoice = ({
                   <button onClick={() => addQuickFillItem('Design Work', 'Custom Design', 0)} className="px-3.5 py-1.5 bg-white text-indigo-700 border border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50 shadow-sm rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">📝 Custom Design</button>
                 </div>
 
-                {/* Table Headers */}
-                <div className="hidden lg:grid gap-3 text-[11px] font-black text-slate-400 uppercase tracking-widest px-4 pb-3 border-b-2 border-slate-200" style={{ gridTemplateColumns: getExpandedGridCols() }}>
+                <div className="w-full overflow-x-auto pb-4">
+                  <div className="min-w-[1000px] flex flex-col">
+                    {/* Table Headers */}
+                    <div className="hidden lg:grid gap-3 text-[11px] font-black text-slate-400 uppercase tracking-widest px-4 pb-3 border-b-2 border-slate-200" style={{ gridTemplateColumns: getExpandedGridCols() }}>
                   <div className="text-center">#</div>
                   {billType === 'grocery' ? (
                     <>
@@ -1875,10 +1877,11 @@ const CreateInvoice = ({
                       Add Another Item Line
                     </button>
                   </div>
+                  </div>
                 </div>
-
               </div>
             </div>
+          </div>
 
             {/* Modal Footer */}
             <div className="bg-white border-t border-slate-200 px-4 md:px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 shrink-0 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
