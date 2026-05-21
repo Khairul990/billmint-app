@@ -13,6 +13,7 @@ import {
   Users,
   FileSpreadsheet,
   ReceiptText,
+  LayoutDashboard,
   ArrowRight,
   Send,
   MessageSquare,
