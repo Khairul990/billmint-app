@@ -17,7 +17,12 @@ import {
   MapPin,
   Phone,
   Mail,
-  Calendar
+  Calendar,
+  Eye,
+  Download,
+  Send,
+  BarChart3,
+  Search
 } from 'lucide-react';
 import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber } from '../utils/invoiceUtils';
 
@@ -31,7 +36,8 @@ const CreateInvoice = ({
   businessSettings,
   onSaveInvoice,
   setCurrentTab,
-  editingInvoice = null
+  editingInvoice = null,
+  onDownloadPDF
 }) => {
   const currencySymbol = businessSettings?.currency || '₹';
 
@@ -331,6 +337,50 @@ const CreateInvoice = ({
         <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">
           {editingInvoice ? 'Edit Billing Sheet' : 'Create Invoicing Sheet'}
         </h2>
+        
+        {/* Search Bar for Create Invoice Header */}
+        <div className="relative flex-1 max-w-sm hidden md:block">
+          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none">
+            <Search className="w-4 h-4" />
+          </span>
+          <input
+            type="text"
+            placeholder="Search items, customers..."
+            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 shadow-sm transition-all"
+          />
+        </div>
+      </div>
+
+      {/* Stats Cards Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-slate-500">
+            <BarChart3 className="w-4 h-4 text-teal-500" />
+            <span className="text-xs font-bold uppercase tracking-wider">Total Invoices</span>
+          </div>
+          <span className="text-xl font-black text-slate-800">{invoices.length}</span>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-slate-500">
+            <Check className="w-4 h-4 text-emerald-500" />
+            <span className="text-xs font-bold uppercase tracking-wider">Paid Invoices</span>
+          </div>
+          <span className="text-xl font-black text-slate-800">{invoices.filter(i => i.paymentStatus === 'Paid').length}</span>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-slate-500">
+            <HelpCircle className="w-4 h-4 text-amber-500" />
+            <span className="text-xs font-bold uppercase tracking-wider">Pending Dues</span>
+          </div>
+          <span className="text-xl font-black text-slate-800">{invoices.filter(i => i.balanceDue > 0).length}</span>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-slate-500">
+            <Users className="w-4 h-4 text-indigo-500" />
+            <span className="text-xs font-bold uppercase tracking-wider">Total Clients</span>
+          </div>
+          <span className="text-xl font-black text-slate-800">{customers.length}</span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -807,13 +857,34 @@ const CreateInvoice = ({
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 grid grid-cols-2 gap-3">
               <button
                 onClick={handleSave}
-                className="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-2xl font-bold hover:from-indigo-700 hover:to-blue-700 shadow-md shadow-indigo-100/50 hover:shadow-lg transition-all flex items-center justify-center gap-2 text-xs"
+                className="w-full py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 text-xs"
               >
                 <Save className="w-4 h-4" />
-                <span>Save Transaction</span>
+                <span>Save Draft</span>
+              </button>
+              <button
+                onClick={() => {}}
+                className="w-full py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 text-xs"
+              >
+                <Eye className="w-4 h-4" />
+                <span>Preview</span>
+              </button>
+              <button
+                onClick={() => { if(onDownloadPDF) onDownloadPDF({ id: Date.now().toString(), invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, paymentStatus, orderStatus, subtotal, taxAmount, grandTotal, balanceDue }); }}
+                className="w-full py-3.5 bg-white border border-teal-500 text-teal-600 rounded-xl font-bold hover:bg-teal-50 transition-all flex items-center justify-center gap-2 text-xs col-span-2 shadow-sm"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download PDF</span>
+              </button>
+              <button
+                onClick={handleSave}
+                className="w-full py-3.5 bg-[#071B3A] text-white rounded-xl font-bold hover:bg-[#0a2652] shadow-md shadow-[#071B3A]/20 transition-all flex items-center justify-center gap-2 text-xs col-span-2"
+              >
+                <Send className="w-4 h-4" />
+                <span>Save & Send Invoice</span>
               </button>
             </div>
           </div>

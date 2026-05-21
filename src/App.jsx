@@ -4,6 +4,7 @@ import WelcomeOnboarding from './pages/WelcomeOnboarding';
 import Dashboard from './pages/Dashboard';
 import Invoices from './pages/Invoices';
 import CreateInvoice from './pages/CreateInvoice';
+import Guide from './pages/Guide';
 import Customers from './pages/Customers';
 import Products from './pages/Products';
 import Settings from './pages/Settings';
@@ -286,6 +287,10 @@ function App() {
             editingInvoice={editingInvoice}
             onDownloadPDF={handleDownloadPDF}
           />
+        );
+      case 'guide':
+        return (
+          <Guide setCurrentTab={setCurrentTab} />
         );
       case 'customers':
         return (
