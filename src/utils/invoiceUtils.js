@@ -93,28 +93,47 @@ export const getNextDesignNumber = (invoices = [], offset = 0) => {
  */
 export const autoIncrementString = (str, items = []) => {
   if (!str) return '';
+  str = str.trim();
+  
+  let prefix = '';
+  let numLength = 0;
+  let currentNum = 0;
+
   const match = str.match(/^(.*?)(\d+)$/);
   if (match) {
-    const prefix = match[1];
-    let maxNum = parseInt(match[2], 10);
-    const numLength = match[2].length;
-    
-    // Check all current items to find the highest number for this prefix
-    items.forEach(item => {
-       if (item.designNo && typeof item.designNo === 'string' && item.designNo.startsWith(prefix)) {
-          const itemMatch = item.designNo.match(/^(.*?)(\d+)$/);
-          if (itemMatch && itemMatch[1] === prefix) {
-             const n = parseInt(itemMatch[2], 10);
-             if (!isNaN(n) && n > maxNum) {
-                maxNum = n;
-             }
-          }
-       }
-    });
-
-    const nextNum = maxNum + 1;
-    const nextNumStr = nextNum.toString().padStart(numLength, '0');
-    return `${prefix}${nextNumStr}`;
+    prefix = match[1];
+    currentNum = parseInt(match[2], 10);
+    numLength = match[2].length;
+  } else {
+    // If it doesn't end with a number, append '-' and start at 1
+    if (str.endsWith('-')) {
+      prefix = str;
+    } else {
+      prefix = str + '-';
+    }
+    currentNum = 0;
+    numLength = 1;
   }
-  return '';
+
+  let maxNum = currentNum;
+  
+  // Check all current items to find the highest number for this prefix
+  items.forEach(item => {
+     if (item.designNo && typeof item.designNo === 'string') {
+        const itemCode = item.designNo.trim();
+        if (itemCode.startsWith(prefix)) {
+           const itemMatch = itemCode.match(/^(.*?)(\d+)$/);
+           if (itemMatch && itemMatch[1] === prefix) {
+              const n = parseInt(itemMatch[2], 10);
+              if (!isNaN(n) && n > maxNum) {
+                 maxNum = n;
+              }
+           }
+        }
+     }
+  });
+
+  const nextNum = maxNum + 1;
+  const nextNumStr = nextNum.toString().padStart(numLength, '0');
+  return `${prefix}${nextNumStr}`;
 };
