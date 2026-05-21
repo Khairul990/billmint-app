@@ -177,7 +177,7 @@ export const getFirebaseUserId = () => {
 
 // Background Firestore Save Helper
 const firestoreSave = async (collectionName, docId, data) => {
-  if (!isFirebaseEnabled) return;
+  if (!isFirebaseEnabled) return { status: 'disabled' };
   try {
     const userId = getFirebaseUserId();
     let docRef;
@@ -188,8 +188,10 @@ const firestoreSave = async (collectionName, docId, data) => {
     }
     await setDoc(docRef, data);
     console.log(`Firestore successfully saved to ${collectionName} for user: ${userId}`);
+    return { status: 'success' };
   } catch (error) {
     console.error(`Firestore save failed for ${collectionName}:`, error);
+    return { status: 'failed', error };
   }
 };
 
@@ -451,17 +453,18 @@ export const getInvoices = () => {
   return JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
 };
 
-export const saveInvoice = (invoice) => {
+export const saveInvoice = async (invoice) => {
   const invoices = getInvoices();
   // Ensure createdAt / updatedAt are set
   const timestamp = new Date().toISOString();
-  if (invoice.id) {
+  if (invoice.id && invoice.id.startsWith('inv-')) {
     const index = invoices.findIndex(inv => inv.id === invoice.id);
     if (index !== -1) {
       invoice.updatedAt = timestamp;
       invoices[index] = invoice;
     }
   } else {
+    // Also if it's a temp ID like Date.now().toString(), override it
     invoice.id = 'inv-' + Date.now();
     invoice.createdAt = timestamp;
     invoice.updatedAt = timestamp;
@@ -482,22 +485,25 @@ export const saveInvoice = (invoice) => {
     if (!existing) {
       savedCustomers.push(customerPayload);
       localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(savedCustomers));
-      firestoreSave('customers', customerPayload.id, customerPayload);
+      await firestoreSave('customers', customerPayload.id, customerPayload);
     } else {
       const index = savedCustomers.findIndex(c => c.id === invoice.customerId);
       savedCustomers[index] = customerPayload;
       localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(savedCustomers));
-      firestoreSave('customers', customerPayload.id, customerPayload);
+      await firestoreSave('customers', customerPayload.id, customerPayload);
     }
   }
 
   localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
   
   // Asynchronously save to Firebase invoices collection and orders collection
-  firestoreSave('invoices', invoice.id, invoice);
-  firestoreSave('orders', invoice.id, invoice);
+  const res1 = await firestoreSave('invoices', invoice.id, invoice);
+  const res2 = await firestoreSave('orders', invoice.id, invoice);
 
-  return invoices;
+  return { 
+    updatedInvoices: invoices, 
+    firebaseStatus: (res1.status === 'failed' || res2.status === 'failed') ? 'failed' : res1.status 
+  };
 };
 
 export const deleteInvoice = (id) => {

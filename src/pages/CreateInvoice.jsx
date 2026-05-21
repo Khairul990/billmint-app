@@ -160,9 +160,9 @@ const CreateInvoice = ({
     if (amountPaid >= grandTotal && grandTotal > 0) {
       setPaymentStatus('Paid');
     } else if (amountPaid === 0) {
-      setPaymentStatus('Unpaid');
-    } else if (amountPaid > 0 && amountPaid < grandTotal) {
       setPaymentStatus('Pending');
+    } else if (amountPaid > 0 && amountPaid < grandTotal) {
+      setPaymentStatus('Partially Paid');
     }
   }, [amountPaid, grandTotal]);
 
@@ -288,7 +288,7 @@ const CreateInvoice = ({
   };
 
   // --- SAVE OPERATION ---
-  const handleSave = () => {
+  const handleSave = (statusOverride) => {
     if (!customerName) {
       alert('Please add customer name and at least one invoice item.');
       return;
@@ -301,13 +301,13 @@ const CreateInvoice = ({
     );
 
     if (cleanedItems.length === 0) {
-      alert('Please add at least one valid invoice item.');
+      alert('Please add customer name and at least one valid invoice item.');
       return;
     }
 
     const invalidItem = cleanedItems.some(item => (!item.description && !item.designNo) || item.qty <= 0 || item.rate < 0);
     if (invalidItem) {
-      alert('Please add at least one valid invoice item.');
+      alert('Please add customer name and at least one valid invoice item.');
       return;
     }
 
@@ -328,7 +328,7 @@ const CreateInvoice = ({
       balanceDue: parseFloat(balanceDue) || 0,
       notes,
       terms,
-      paymentStatus,
+      paymentStatus: typeof statusOverride === 'string' ? statusOverride : paymentStatus,
       orderStatus,
       subtotal,
       taxAmount,
@@ -337,7 +337,6 @@ const CreateInvoice = ({
 
     // Also pass saveCustomer flag so the parent can save the customer if requested
     onSaveInvoice(payload, saveCustomer && !selectedCustomerId);
-    setCurrentTab('invoices');
   };
 
   const [showBanner, setShowBanner] = useState(true);
@@ -965,7 +964,7 @@ const CreateInvoice = ({
 
             <div className="pt-2 flex flex-col sm:grid sm:grid-cols-2 gap-3">
               <button
-                onClick={handleSave}
+                onClick={() => handleSave('Draft')}
                 className="w-full py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 text-xs"
               >
                 <Save className="w-4 h-4" />
@@ -979,14 +978,20 @@ const CreateInvoice = ({
                 <span>Preview PDF</span>
               </button>
               <button
-                onClick={() => { if(onDownloadPDF) onDownloadPDF({ id: Date.now().toString(), invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, terms, paymentStatus, orderStatus, subtotal, taxAmount, grandTotal, balanceDue }); }}
+                onClick={() => { 
+                  if (!editingInvoice) {
+                    alert('Please save invoice before downloading PDF.');
+                    return;
+                  }
+                  if(onDownloadPDF) onDownloadPDF({ id: editingInvoice.id, invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, terms, paymentStatus, orderStatus, subtotal, taxAmount, grandTotal, balanceDue }); 
+                }}
                 className="w-full py-3.5 bg-white border border-teal-500 text-teal-600 rounded-xl font-bold hover:bg-teal-50 transition-all flex items-center justify-center gap-2 text-xs sm:col-span-2 shadow-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Download PDF</span>
               </button>
               <button
-                onClick={handleSave}
+                onClick={() => handleSave()}
                 className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-all flex items-center justify-center gap-2 text-xs sm:col-span-2"
               >
                 <Check className="w-4 h-4" />

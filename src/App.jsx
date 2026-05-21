@@ -159,15 +159,15 @@ function App() {
   // --- DATA SYNCHRONIZERS ---
 
   // Invoices
-  const handleSaveInvoice = (payload, saveCustomerAsNew = false) => {
+  const handleSaveInvoice = async (payload, saveCustomerAsNew = false) => {
     const isNew = !payload.id || !invoices.some(inv => inv.id === payload.id);
     if (isNew && subscription.status !== 'premium' && invoices.length >= 5) {
       alert('⚠️ Free tier limit reached: You can create a maximum of 5 invoices. Please upgrade to the Premium Plan to unlock unlimited invoicing!');
       setCurrentTab('subscription');
       return;
     }
-    const updated = saveInvoice(payload);
-    setInvoices(updated);
+    const { updatedInvoices, firebaseStatus } = await saveInvoice(payload);
+    setInvoices(updatedInvoices);
     
     if (saveCustomerAsNew && payload.customerName) {
       const newCustomer = {
@@ -181,7 +181,14 @@ function App() {
       setCustomers(updatedCustomers);
     }
     
+    if (firebaseStatus === 'failed') {
+      alert('Invoice created successfully. (Saved locally. Firebase sync pending.)');
+    } else {
+      alert('Invoice created successfully');
+    }
+    
     setEditingInvoice(null);
+    setCurrentTab('invoices');
   };
 
   const handleDeleteInvoice = (id) => {
