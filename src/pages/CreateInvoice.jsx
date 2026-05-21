@@ -49,6 +49,7 @@ const CreateInvoice = ({
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [date, setDate] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [billType, setBillType] = useState('fashion');
   
   // Client details
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -98,6 +99,7 @@ const CreateInvoice = ({
       setTerms(editingInvoice.terms || '');
       setPaymentStatus(editingInvoice.paymentStatus || 'Pending');
       setOrderStatus(editingInvoice.orderStatus || 'Pending');
+      setBillType(editingInvoice.billType || 'fashion');
 
       // Populate items ensuring they have smartRate details
       const parsedItems = (editingInvoice.items || []).map((item, idx) => ({
@@ -128,6 +130,7 @@ const CreateInvoice = ({
       setTerms(businessSettings?.terms || '');
       setPaymentStatus('Pending');
       setOrderStatus('Pending');
+      setBillType('fashion');
 
       // Prefill first row
       setItems([
@@ -346,6 +349,7 @@ const CreateInvoice = ({
       invoiceNumber,
       date,
       dueDate,
+      billType,
       customerId: selectedCustomerId || null,
       customerName,
       customerPhone,
@@ -477,6 +481,83 @@ const CreateInvoice = ({
         {/* COLUMN 1 & 2: INVOICE CONFIGURATION */}
         <div className="lg:col-span-2 space-y-6">
           
+          {/* Bill Type / Business Type Selector */}
+          <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
+            <h3 className="text-sm font-extrabold text-slate-800 border-b border-slate-50 pb-3 flex items-center gap-2">
+              <Layers className="w-4 h-4 text-indigo-500" />
+              <span>Bill Type / Business Type</span>
+            </h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { id: 'fashion', label: 'Fashion / Shopping' },
+                { id: 'grocery', label: 'Grocery / Mudi Shop' },
+                { id: 'service', label: 'Service / Repair' },
+                { id: 'custom', label: 'Custom' }
+              ].map(type => (
+                <button
+                  key={type.id}
+                  onClick={() => setBillType(type.id)}
+                  className={`py-3 px-2 rounded-xl text-xs font-bold transition-all border ${
+                    billType === type.id 
+                    ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm' 
+                    : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300'
+                  }`}
+                >
+                  {type.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Live Preview / Example */}
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 mt-2">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Template Live Preview</p>
+              <div className="flex gap-4 text-xs font-semibold text-slate-600 bg-white p-3 rounded-lg border border-slate-100 overflow-x-auto">
+                <span className="shrink-0 text-slate-400">No. 1</span>
+                {billType === 'fashion' && (
+                  <>
+                    <span className="shrink-0 text-indigo-600">SO-5</span>
+                    <span className="shrink-0 text-slate-500">Embroidery</span>
+                    <span className="shrink-0 text-slate-800 font-bold">Embroidery Work on Shirt</span>
+                    <span className="shrink-0 text-slate-500">L</span>
+                    <span className="shrink-0 text-teal-600">Qty 2</span>
+                    <span className="shrink-0 text-amber-600">₹250</span>
+                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹500.00</span>
+                  </>
+                )}
+                {billType === 'grocery' && (
+                  <>
+                    <span className="shrink-0 text-slate-800 font-bold">Premium Basmati Rice</span>
+                    <span className="shrink-0 text-slate-500">Kg</span>
+                    <span className="shrink-0 text-teal-600">Qty 5</span>
+                    <span className="shrink-0 text-amber-600">₹60</span>
+                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹300.00</span>
+                  </>
+                )}
+                {billType === 'service' && (
+                  <>
+                    <span className="shrink-0 text-indigo-600">Mobile Repair</span>
+                    <span className="shrink-0 text-slate-800 font-bold">Screen Replacement</span>
+                    <span className="shrink-0 text-teal-600">Qty 1</span>
+                    <span className="shrink-0 text-amber-600">₹1200</span>
+                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹1200.00</span>
+                  </>
+                )}
+                {billType === 'custom' && (
+                  <>
+                    <span className="shrink-0 text-indigo-600">ITEM-01</span>
+                    <span className="shrink-0 text-slate-500">Custom Work</span>
+                    <span className="shrink-0 text-slate-800 font-bold">Custom Service Description</span>
+                    <span className="shrink-0 text-slate-500">N/A</span>
+                    <span className="shrink-0 text-teal-600">Qty 1</span>
+                    <span className="shrink-0 text-amber-600">₹100</span>
+                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹100.00</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Metadata Grid */}
           <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
             <h3 className="text-sm font-extrabold text-slate-800 border-b border-slate-50 pb-3 flex items-center gap-2">
@@ -638,12 +719,30 @@ const CreateInvoice = ({
             {/* Desktop Headers */}
             <div className="hidden lg:grid grid-cols-12 gap-2 text-[10px] font-bold text-slate-400 uppercase px-2 mb-1">
               <div className="col-span-1 text-center">No.</div>
-              <div className="col-span-2">Design / Item Code</div>
-              <div className="col-span-2">Work Type / Service</div>
-              <div className="col-span-2">Description</div>
-              <div className="col-span-1 text-center">Size</div>
-              <div className="col-span-1 text-center">Quantity</div>
-              <div className="col-span-1 text-right">Rate</div>
+              {billType === 'grocery' ? (
+                <>
+                  <div className="col-span-4">Product Name</div>
+                  <div className="col-span-2 text-center">Unit</div>
+                  <div className="col-span-1 text-center">Quantity</div>
+                  <div className="col-span-2 text-right">Unit Price</div>
+                </>
+              ) : billType === 'service' ? (
+                <>
+                  <div className="col-span-3">Service Name</div>
+                  <div className="col-span-3">Description</div>
+                  <div className="col-span-1 text-center">Quantity</div>
+                  <div className="col-span-2 text-right">Rate</div>
+                </>
+              ) : (
+                <>
+                  <div className="col-span-2">Design / Item Code</div>
+                  <div className="col-span-2">Work Type / Service</div>
+                  <div className="col-span-2">Description</div>
+                  <div className="col-span-1 text-center">Size</div>
+                  <div className="col-span-1 text-center">Quantity</div>
+                  <div className="col-span-1 text-right">Rate</div>
+                </>
+              )}
               <div className="col-span-1 text-right">Amount</div>
               <div className="col-span-1 text-center">Actions</div>
             </div>
@@ -673,43 +772,59 @@ const CreateInvoice = ({
                     {index + 1}
                   </div>
 
-                  {/* Design No */}
-                  <div className="col-span-2 text-xs font-semibold text-slate-500">
-                    <label className="lg:hidden block mb-1 text-slate-400">Design / Item Code</label>
-                    <input
-                      type="text"
-                      value={item.designNo}
-                      onChange={(e) => handleItemChange(index, 'designNo', e.target.value)}
-                      placeholder="e.g. ITM-001"
-                      className="w-full px-3 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold uppercase transition-colors"
-                    />
-                  </div>
+                  {/* Design No / Service Name */}
+                  {billType !== 'grocery' && (
+                    <div className={billType === 'service' ? "col-span-3 text-xs font-semibold text-slate-500" : "col-span-2 text-xs font-semibold text-slate-500"}>
+                      <label className="lg:hidden block mb-1 text-slate-400">
+                        {billType === 'service' ? 'Service Name' : 'Design / Item Code'}
+                      </label>
+                      <input
+                        type="text"
+                        value={item.designNo}
+                        onChange={(e) => handleItemChange(index, 'designNo', e.target.value)}
+                        placeholder={billType === 'service' ? "e.g. Mobile Repair" : "e.g. ITM-001"}
+                        className="w-full px-3 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold uppercase transition-colors"
+                      />
+                    </div>
+                  )}
 
                   {/* Work Type */}
-                  <div className="col-span-2 text-xs font-semibold text-slate-500">
-                    <label className="lg:hidden block mb-1 text-slate-400">Work Type / Service</label>
-                    <select
-                      value={item.workType}
-                      onChange={(e) => handleItemChange(index, 'workType', e.target.value)}
-                      className="w-full px-2.5 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold transition-colors"
-                    >
-                      <option value="Embroidery">Embroidery</option>
-                      <option value="Repair">Repair</option>
-                      <option value="Stitching">Stitching</option>
-                      <option value="Printing">Printing</option>
-                      <option value="Design Work">Design Work</option>
-                      <option value="Other Service">Other Service</option>
-                    </select>
-                  </div>
+                  {(billType === 'fashion' || billType === 'custom') && (
+                    <div className="col-span-2 text-xs font-semibold text-slate-500">
+                      <label className="lg:hidden block mb-1 text-slate-400">Work Type / Service</label>
+                      <select
+                        value={item.workType}
+                        onChange={(e) => handleItemChange(index, 'workType', e.target.value)}
+                        className="w-full px-2.5 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold transition-colors"
+                      >
+                        <option value="Embroidery">Embroidery</option>
+                        <option value="Repair">Repair</option>
+                        <option value="Stitching">Stitching</option>
+                        <option value="Printing">Printing</option>
+                        <option value="Design Work">Design Work</option>
+                        <option value="Other Service">Other Service</option>
+                      </select>
+                    </div>
+                  )}
 
-                  {/* Description & Catalog lookup combined */}
-                  <div className="col-span-2 text-xs font-semibold text-slate-500 space-y-1">
-                    <label className="lg:hidden block mb-1 text-slate-400">Description</label>
+                  {/* Description / Product Name */}
+                  <div className={
+                    billType === 'grocery' ? "col-span-4 text-xs font-semibold text-slate-500 space-y-1" :
+                    billType === 'service' ? "col-span-3 text-xs font-semibold text-slate-500 space-y-1" :
+                    "col-span-2 text-xs font-semibold text-slate-500 space-y-1"
+                  }>
+                    <label className="lg:hidden block mb-1 text-slate-400">
+                      {billType === 'grocery' ? 'Product Name' : 'Description'}
+                    </label>
                     <input
                       type="text"
                       value={item.description}
                       onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                      placeholder="e.g. Embroidery Work on Suits"
+                      placeholder={
+                        billType === 'grocery' ? "e.g. Premium Basmati Rice" :
+                        billType === 'service' ? "e.g. Screen Replacement" :
+                        "e.g. Embroidery Work on Suits"
+                      }
                       className="w-full px-3 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-bold transition-colors"
                     />
                     
@@ -728,17 +843,38 @@ const CreateInvoice = ({
                     </div>
                   </div>
 
-                  {/* Size */}
-                  <div className="col-span-1 text-xs font-semibold text-slate-500">
-                    <label className="lg:hidden block mb-1 text-slate-400">Size</label>
-                    <input
-                      type="text"
-                      value={item.size}
-                      onChange={(e) => handleItemChange(index, 'size', e.target.value)}
-                      placeholder="A4 / 4x4"
-                      className="w-full px-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold transition-colors"
-                    />
-                  </div>
+                  {/* Size / Unit */}
+                  {billType !== 'service' && (
+                    <div className={billType === 'grocery' ? "col-span-2 text-xs font-semibold text-slate-500" : "col-span-1 text-xs font-semibold text-slate-500"}>
+                      <label className="lg:hidden block mb-1 text-slate-400">
+                        {billType === 'grocery' ? 'Unit' : 'Size'}
+                      </label>
+                      {billType === 'grocery' ? (
+                        <select
+                          value={item.size}
+                          onChange={(e) => handleItemChange(index, 'size', e.target.value)}
+                          className="w-full px-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold transition-colors"
+                        >
+                          <option value="">Select</option>
+                          <option value="Kg">Kg</option>
+                          <option value="Gram">Gram</option>
+                          <option value="Litre">Litre</option>
+                          <option value="Ml">Ml</option>
+                          <option value="Packet">Packet</option>
+                          <option value="Piece">Piece</option>
+                          <option value="Box">Box</option>
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          value={item.size}
+                          onChange={(e) => handleItemChange(index, 'size', e.target.value)}
+                          placeholder="A4 / 4x4"
+                          className="w-full px-2 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold transition-colors"
+                        />
+                      )}
+                    </div>
+                  )}
 
                   {/* Qty */}
                   <div className="col-span-1 text-xs font-semibold text-slate-500">
@@ -752,9 +888,11 @@ const CreateInvoice = ({
                     />
                   </div>
 
-                  {/* Rate & Smart Rate button */}
-                  <div className="col-span-1 text-xs font-semibold text-slate-500">
-                    <label className="lg:hidden block mb-1 text-slate-400">Rate</label>
+                  {/* Rate / Unit Price & Smart Rate button */}
+                  <div className={billType === 'grocery' || billType === 'service' ? "col-span-2 text-xs font-semibold text-slate-500" : "col-span-1 text-xs font-semibold text-slate-500"}>
+                    <label className="lg:hidden block mb-1 text-slate-400">
+                      {billType === 'grocery' ? 'Unit Price' : 'Rate'}
+                    </label>
                     <div className="flex gap-1">
                       <div className="relative w-full">
                         <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>

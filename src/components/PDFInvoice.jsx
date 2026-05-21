@@ -257,7 +257,19 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
       <View style={styles.table}>
         <View style={[styles.compactTableHeader, { backgroundColor: brandColor }]}>
           <Text style={styles.compactColSN}>S.N.</Text>
-          <Text style={styles.compactColDesc}>Item & Design Description</Text>
+          {invoice.billType === 'grocery' ? (
+            <>
+              <Text style={{ width: '40%' }}>Product Name</Text>
+              <Text style={{ width: '12%', textAlign: 'center' }}>Unit</Text>
+            </>
+          ) : invoice.billType === 'service' ? (
+            <>
+              <Text style={{ width: '25%' }}>Service</Text>
+              <Text style={{ width: '27%' }}>Description</Text>
+            </>
+          ) : (
+            <Text style={styles.compactColDesc}>Item & Design Description</Text>
+          )}
           <Text style={styles.compactColQty}>Qty</Text>
           <Text style={styles.compactColRate}>Rate</Text>
           <Text style={styles.compactColAmt}>Amount</Text>
@@ -266,11 +278,23 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
         {invoice.items.map((item, idx) => (
           <View key={idx} style={styles.tableRow}>
             <Text style={styles.compactColSN}>{idx + 1}</Text>
-            <Text style={styles.compactColDesc}>
-              {item.workType ? `[${item.workType}] ` : ''}
-              {item.description || 'Stitching Service'} 
-              {item.designNo && item.designNo !== 'N/A' ? ` (${item.designNo})` : ''}
-            </Text>
+            {invoice.billType === 'grocery' ? (
+              <>
+                <Text style={{ width: '40%' }}>{item.description || 'Product'}</Text>
+                <Text style={{ width: '12%', textAlign: 'center' }}>{item.size || 'N/A'}</Text>
+              </>
+            ) : invoice.billType === 'service' ? (
+              <>
+                <Text style={{ width: '25%' }}>{item.designNo || 'Service'}</Text>
+                <Text style={{ width: '27%' }}>{item.description || 'N/A'}</Text>
+              </>
+            ) : (
+              <Text style={styles.compactColDesc}>
+                {item.workType ? `[${item.workType}] ` : ''}
+                {item.description || 'Stitching Service'} 
+                {item.designNo && item.designNo !== 'N/A' ? ` (${item.designNo})` : ''}
+              </Text>
+            )}
             <Text style={styles.compactColQty}>{item.qty}</Text>
             <Text style={styles.compactColRate}>{parseFloat(item.rate).toFixed(2)}</Text>
             <Text style={styles.compactColAmt}>{parseFloat(item.amount).toFixed(2)}</Text>
@@ -370,28 +394,64 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
         </View>
       </View>
 
-      {/* smart item A4 table */}
+      {/* Item Table */}
       <View style={styles.table}>
         <View style={[styles.tableHeader, { backgroundColor: brandColor }]}>
           <Text style={styles.colSN}>S.N.</Text>
-          <Text style={styles.colDesign}>Design No</Text>
-          <Text style={styles.colWorkType}>Work Type</Text>
-          <Text style={styles.colDesc}>Description of Services</Text>
-          <Text style={styles.colSize}>Size</Text>
-          <Text style={styles.colQty}>Qty</Text>
-          <Text style={styles.colRate}>Rate</Text>
+          {invoice.billType === 'grocery' ? (
+            <>
+              <Text style={{ width: '43%' }}>Product Name</Text>
+              <Text style={{ width: '15%', textAlign: 'center' }}>Unit</Text>
+              <Text style={{ width: '10%', textAlign: 'center' }}>Qty</Text>
+              <Text style={{ width: '15%', textAlign: 'right' }}>Unit Price</Text>
+            </>
+          ) : invoice.billType === 'service' ? (
+            <>
+              <Text style={{ width: '25%' }}>Service Name</Text>
+              <Text style={{ width: '30%' }}>Description</Text>
+              <Text style={{ width: '10%', textAlign: 'center' }}>Qty</Text>
+              <Text style={{ width: '18%', textAlign: 'right' }}>Rate</Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.colDesign}>Design No</Text>
+              <Text style={styles.colWorkType}>Work Type</Text>
+              <Text style={styles.colDesc}>Description</Text>
+              <Text style={styles.colSize}>Size</Text>
+              <Text style={styles.colQty}>Qty</Text>
+              <Text style={styles.colRate}>Rate</Text>
+            </>
+          )}
           <Text style={styles.colAmt}>Amount</Text>
         </View>
 
         {invoice.items.map((item, idx) => (
           <View key={idx} style={styles.tableRow}>
             <Text style={styles.colSN}>{idx + 1}</Text>
-            <Text style={styles.colDesign}>{item.designNo || 'N/A'}</Text>
-            <Text style={styles.colWorkType}>{item.workType || 'Standard'}</Text>
-            <Text style={styles.colDesc}>{item.description || 'Stitching Work'}</Text>
-            <Text style={styles.colSize}>{item.size || 'N/A'}</Text>
-            <Text style={styles.colQty}>{item.qty}</Text>
-            <Text style={styles.colRate}>{parseFloat(item.rate).toFixed(2)}</Text>
+            {invoice.billType === 'grocery' ? (
+              <>
+                <Text style={{ width: '43%' }}>{item.description || 'Item'}</Text>
+                <Text style={{ width: '15%', textAlign: 'center' }}>{item.size || 'N/A'}</Text>
+                <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty}</Text>
+                <Text style={{ width: '15%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
+              </>
+            ) : invoice.billType === 'service' ? (
+              <>
+                <Text style={{ width: '25%' }}>{item.designNo || 'Service'}</Text>
+                <Text style={{ width: '30%' }}>{item.description || 'N/A'}</Text>
+                <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty}</Text>
+                <Text style={{ width: '18%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.colDesign}>{item.designNo || 'N/A'}</Text>
+                <Text style={styles.colWorkType}>{item.workType || 'Standard'}</Text>
+                <Text style={styles.colDesc}>{item.description || 'Stitching Work'}</Text>
+                <Text style={styles.colSize}>{item.size || 'N/A'}</Text>
+                <Text style={styles.colQty}>{item.qty}</Text>
+                <Text style={styles.colRate}>{parseFloat(item.rate).toFixed(2)}</Text>
+              </>
+            )}
             <Text style={styles.colAmt}>{parseFloat(item.amount).toFixed(2)}</Text>
           </View>
         ))}
