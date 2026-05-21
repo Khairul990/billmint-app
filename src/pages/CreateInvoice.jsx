@@ -60,15 +60,15 @@ const CreateInvoice = ({
 
   const getExpandedGridCols = () => {
     if (billType === 'grocery')
-      return '60px minmax(300px,2fr) 120px 100px 150px 160px 120px';
+      return '50px minmax(220px,2fr) 100px 90px 120px 140px 100px';
     if (billType === 'repair')
-      return '60px minmax(250px,1.5fr) minmax(250px,1.5fr) 140px 140px 100px 160px 120px';
+      return '50px minmax(180px,1.5fr) minmax(180px,1.5fr) 110px 110px 80px 140px 100px';
     if (billType === 'retail')
-      return '60px minmax(250px,1.5fr) 150px 130px 100px 150px 130px 160px 120px';
+      return '50px minmax(180px,1.5fr) 120px 100px 80px 120px 110px 140px 100px';
     if (billType === 'custom')
-      return '60px minmax(250px,1.5fr) minmax(300px,2fr) 100px 150px 160px 120px';
+      return '50px minmax(180px,1.5fr) minmax(220px,2fr) 90px 120px 140px 100px';
     // embroidery (default)
-    return '60px 170px 190px minmax(300px,2fr) 100px 100px 130px 140px 120px';
+    return '50px 140px 150px minmax(200px,2fr) 90px 80px 110px 130px 100px';
   };
 
   const getGridCols = () => {
@@ -1622,7 +1622,7 @@ const CreateInvoice = ({
       {/* Expand Sheet Modal */}
       {isSheetExpanded && (
         <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-0 md:p-6 overflow-hidden">
-          <div className="bg-white md:rounded-3xl shadow-2xl w-full h-full md:w-[92vw] md:max-w-[1300px] md:h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white md:rounded-3xl shadow-2xl w-full h-full md:w-[98vw] md:max-w-[1550px] md:h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-[#071B3A] to-[#0d2b55] px-4 md:px-6 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
