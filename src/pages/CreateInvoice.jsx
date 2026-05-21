@@ -31,7 +31,7 @@ import {
   Info,
   Maximize2
 } from 'lucide-react';
-import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber } from '../utils/invoiceUtils';
+import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber, autoIncrementString } from '../utils/invoiceUtils';
 
 /**
  * Premium Responsive Invoice Builder Page
@@ -275,11 +275,12 @@ const CreateInvoice = ({
 
   // --- ADD ITEM ROW ---
   const addItemRow = () => {
+    const nextDesignNo = items.length > 0 ? autoIncrementString(items[items.length - 1].designNo, items) : '';
     setItems([
       ...items,
       {
         sn: items.length + 1,
-        designNo: '',
+        designNo: nextDesignNo,
         workType: 'Embroidery',
         description: '',
         size: '',
@@ -316,11 +317,12 @@ const CreateInvoice = ({
       };
       setItems(updated);
     } else {
+      const nextDesignNo = items.length > 0 ? autoIncrementString(items[items.length - 1].designNo, items) : '';
       setItems([
         ...items,
         {
           sn: items.length + 1,
-          designNo: '',
+          designNo: nextDesignNo,
           workType,
           description,
           size: '',
@@ -336,11 +338,11 @@ const CreateInvoice = ({
   // --- DUPLICATE ROW ---
   const handleDuplicateItem = (index) => {
     const original = items[index];
-    const nextSO = getNextDesignNumber(invoices, items.length);
+    const nextDesignNo = autoIncrementString(original.designNo, items);
     const duplicated = {
       ...original,
       sn: items.length + 1,
-      designNo: nextSO,
+      designNo: nextDesignNo,
       // Deep copy smartRate
       smartRate: original.smartRate ? { ...original.smartRate } : { repair: 0, punching: 0, embroidery: 0, other: 0 }
     };

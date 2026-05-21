@@ -84,3 +84,37 @@ export const getNextDesignNumber = (invoices = [], offset = 0) => {
   return `SO-${maxNum + 1 + offset}`;
 };
 
+/**
+ * Auto-increments any string ending with a number (e.g. "KO-1" -> "KO-2", "sh-09" -> "sh-10")
+ * Prevents conflicts by scanning existing items for the same prefix.
+ * @param {string} str 
+ * @param {Array} items 
+ * @returns {string}
+ */
+export const autoIncrementString = (str, items = []) => {
+  if (!str) return '';
+  const match = str.match(/^(.*?)(\d+)$/);
+  if (match) {
+    const prefix = match[1];
+    let maxNum = parseInt(match[2], 10);
+    const numLength = match[2].length;
+    
+    // Check all current items to find the highest number for this prefix
+    items.forEach(item => {
+       if (item.designNo && typeof item.designNo === 'string' && item.designNo.startsWith(prefix)) {
+          const itemMatch = item.designNo.match(/^(.*?)(\d+)$/);
+          if (itemMatch && itemMatch[1] === prefix) {
+             const n = parseInt(itemMatch[2], 10);
+             if (!isNaN(n) && n > maxNum) {
+                maxNum = n;
+             }
+          }
+       }
+    });
+
+    const nextNum = maxNum + 1;
+    const nextNumStr = nextNum.toString().padStart(numLength, '0');
+    return `${prefix}${nextNumStr}`;
+  }
+  return '';
+};
