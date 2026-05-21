@@ -462,6 +462,10 @@ export const saveInvoice = async (invoice) => {
     if (index !== -1) {
       invoice.updatedAt = timestamp;
       invoices[index] = invoice;
+    } else {
+      invoice.createdAt = timestamp;
+      invoice.updatedAt = timestamp;
+      invoices.push(invoice);
     }
   } else {
     // Also if it's a temp ID like Date.now().toString(), override it
