@@ -237,6 +237,36 @@ const CreateInvoice = ({
     ]);
   };
 
+  const addQuickFillItem = (workType, description, rate) => {
+    const lastItem = items[items.length - 1];
+    if (items.length > 0 && !lastItem.description && !lastItem.designNo && lastItem.rate === 0) {
+      const updated = [...items];
+      updated[items.length - 1] = {
+        ...lastItem,
+        workType,
+        description,
+        rate,
+        amount: lastItem.qty * rate
+      };
+      setItems(updated);
+    } else {
+      setItems([
+        ...items,
+        {
+          sn: items.length + 1,
+          designNo: '',
+          workType,
+          description,
+          size: '',
+          qty: 1,
+          rate,
+          amount: 1 * rate,
+          smartRate: { repair: 0, punching: 0, embroidery: 0, other: 0 }
+        }
+      ]);
+    }
+  };
+
   // --- DUPLICATE ROW ---
   const handleDuplicateItem = (index) => {
     const original = items[index];
@@ -301,13 +331,13 @@ const CreateInvoice = ({
     );
 
     if (cleanedItems.length === 0) {
-      alert('Please add customer name and at least one valid invoice item.');
+      alert('Please add item description and rate before saving invoice.');
       return;
     }
 
     const invalidItem = cleanedItems.some(item => (!item.description && !item.designNo) || item.qty <= 0 || item.rate < 0);
     if (invalidItem) {
-      alert('Please add customer name and at least one valid invoice item.');
+      alert('Please add item description and rate before saving invoice.');
       return;
     }
 
@@ -590,7 +620,7 @@ const CreateInvoice = ({
                   <Layers className="w-4 h-4 text-indigo-500" />
                   <span>Invoice Items Sheet</span>
                 </h3>
-                <p className="text-[10px] text-slate-500 font-bold mt-1">Add each product or service as a separate line. Quantity and rate will calculate the amount automatically.</p>
+                <p className="text-[10px] text-slate-500 font-bold mt-1">Example: Quantity 2 × Rate ₹500 = Amount ₹1,000 automatically.</p>
               </div>
               
               <span className="text-[10px] text-slate-400 font-bold hidden sm:block">
@@ -598,16 +628,24 @@ const CreateInvoice = ({
               </span>
             </div>
 
+            <div className="flex gap-2 flex-wrap pb-3 mb-3 border-b border-slate-50">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider py-1.5 mr-2">Quick Fill:</span>
+              <button onClick={() => addQuickFillItem('Embroidery', 'Embroidery Work', 0)} className="px-3 py-1 bg-teal-50 text-teal-600 border border-teal-100 hover:bg-teal-100 rounded-lg text-[10px] font-bold transition-colors">Embroidery Work</button>
+              <button onClick={() => addQuickFillItem('Repair', 'Repair Work', 0)} className="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-100 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition-colors">Repair Work</button>
+              <button onClick={() => addQuickFillItem('Design Work', 'Custom Design', 0)} className="px-3 py-1 bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-100 rounded-lg text-[10px] font-bold transition-colors">Custom Design</button>
+            </div>
+
             {/* Desktop Headers */}
             <div className="hidden lg:grid grid-cols-12 gap-2 text-[10px] font-bold text-slate-400 uppercase px-2 mb-1">
               <div className="col-span-1 text-center">No.</div>
               <div className="col-span-2">Design / Item Code</div>
               <div className="col-span-2">Work Type / Service</div>
-              <div className="col-span-3">Description</div>
+              <div className="col-span-2">Description</div>
               <div className="col-span-1 text-center">Size</div>
               <div className="col-span-1 text-center">Quantity</div>
-              <div className="col-span-1.5 text-right">Rate</div>
-              <div className="col-span-0.5"></div> {/* Action spacing */}
+              <div className="col-span-1 text-right">Rate</div>
+              <div className="col-span-1 text-right">Amount</div>
+              <div className="col-span-1 text-center">Actions</div>
             </div>
 
             <div className="space-y-4 lg:space-y-3">
@@ -656,14 +694,16 @@ const CreateInvoice = ({
                       className="w-full px-2.5 py-2 bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold transition-colors"
                     >
                       <option value="Embroidery">Embroidery</option>
-                      <option value="Punching">Punching</option>
                       <option value="Repair">Repair</option>
-                      <option value="Custom">Custom</option>
+                      <option value="Stitching">Stitching</option>
+                      <option value="Printing">Printing</option>
+                      <option value="Design Work">Design Work</option>
+                      <option value="Other Service">Other Service</option>
                     </select>
                   </div>
 
                   {/* Description & Catalog lookup combined */}
-                  <div className="col-span-3 text-xs font-semibold text-slate-500 space-y-1">
+                  <div className="col-span-2 text-xs font-semibold text-slate-500 space-y-1">
                     <label className="lg:hidden block mb-1 text-slate-400">Description</label>
                     <input
                       type="text"
@@ -713,7 +753,7 @@ const CreateInvoice = ({
                   </div>
 
                   {/* Rate & Smart Rate button */}
-                  <div className="col-span-1.5 text-xs font-semibold text-slate-500">
+                  <div className="col-span-1 text-xs font-semibold text-slate-500">
                     <label className="lg:hidden block mb-1 text-slate-400">Rate</label>
                     <div className="flex gap-1">
                       <div className="relative w-full">
@@ -730,7 +770,7 @@ const CreateInvoice = ({
                         type="button"
                         onClick={() => openSmartRateCalculator(index)}
                         title="Calculate using sub-charges"
-                        className="bg-teal-50 text-teal-600 hover:bg-teal-100 p-2 rounded-xl transition-colors shrink-0"
+                        className="bg-teal-50 text-teal-600 hover:bg-teal-100 p-2 rounded-xl transition-colors shrink-0 hidden lg:block"
                       >
                         <Calculator className="w-3.5 h-3.5" />
                       </button>
@@ -738,36 +778,34 @@ const CreateInvoice = ({
                   </div>
 
                   {/* Row Total & Action Buttons */}
-                  <div className="col-span-1 flex flex-row lg:flex-col items-center justify-between lg:justify-center text-xs font-black text-slate-700 py-3 lg:py-0 border-t lg:border-0 border-slate-100 mt-2 lg:mt-0 gap-3">
-                    <div className="flex flex-col lg:items-end w-full">
-                      <span className="lg:hidden text-slate-400 font-semibold mb-1">Amount</span>
-                      <span className="text-teal-600 font-extrabold text-sm whitespace-nowrap">
-                        {currencySymbol}{item.amount ? item.amount.toFixed(2) : (item.qty * item.rate).toFixed(2)}
-                      </span>
-                    </div>
+                  <div className="col-span-1 flex flex-col items-end justify-center text-xs font-black text-slate-700 py-3 lg:py-0 border-t lg:border-0 border-slate-100 mt-2 lg:mt-0">
+                    <span className="lg:hidden text-slate-400 font-semibold mb-1 w-full text-left">Amount (Auto-calculated)</span>
+                    <span className="text-teal-600 font-extrabold text-sm whitespace-nowrap bg-teal-50/50 px-3 py-2 rounded-xl border border-teal-100/50 w-full text-right">
+                      {currencySymbol}{item.amount ? item.amount.toFixed(2) : (item.qty * item.rate).toFixed(2)}
+                    </span>
+                  </div>
 
-                    {/* Desktop duplicate and delete actions */}
-                    <div className="hidden lg:flex items-center gap-1.5 ml-2">
+                  {/* Actions */}
+                  <div className="hidden lg:flex col-span-1 items-center justify-center gap-1.5 py-3 lg:py-0">
+                    <button
+                      type="button"
+                      onClick={() => handleDuplicateItem(index)}
+                      title="Duplicate Row"
+                      className="text-slate-400 hover:text-indigo-600 transition-colors p-1"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                    
+                    {items.length > 1 && (
                       <button
                         type="button"
-                        onClick={() => handleDuplicateItem(index)}
-                        title="Duplicate Row"
-                        className="text-slate-400 hover:text-indigo-600 transition-colors p-1"
+                        onClick={() => removeItemRow(index)}
+                        title="Delete Row"
+                        className="text-slate-300 hover:text-rose-500 transition-colors p-1"
                       >
-                        <Copy className="w-3.5 h-3.5" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
-                      
-                      {items.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeItemRow(index)}
-                          title="Delete Row"
-                          className="text-slate-300 hover:text-rose-500 transition-colors p-1"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
+                    )}
                   </div>
 
                   {/* Mobile Actions helper */}
@@ -793,14 +831,38 @@ const CreateInvoice = ({
                 </div>
               ))}
             </div>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-4 pt-4 border-t border-slate-100 gap-4">
+              <button
+                onClick={addItemRow}
+                className="flex items-center gap-1.5 text-xs font-bold text-teal-600 hover:text-teal-700 transition-all w-fit px-4 py-2.5 bg-teal-50 hover:bg-teal-100 rounded-xl"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Another Item Line</span>
+              </button>
 
-            <button
-              onClick={addItemRow}
-              className="flex items-center gap-1.5 text-xs font-bold text-teal-600 hover:text-teal-700 mt-4 transition-all w-fit px-3 py-2 bg-teal-50 hover:bg-teal-100 rounded-xl"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Another Item Line</span>
-            </button>
+              <div className="bg-slate-50 p-3 rounded-xl w-full sm:w-64 space-y-1 shadow-sm border border-slate-100">
+                <div className="flex justify-between text-xs font-semibold text-slate-500">
+                  <span>Items Total:</span>
+                  <span>{currencySymbol}{subtotal.toFixed(2)}</span>
+                </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-[10px] font-semibold text-rose-500">
+                    <span>Discount:</span>
+                    <span>-{currencySymbol}{discountAmount}</span>
+                  </div>
+                )}
+                {taxAmount > 0 && (
+                  <div className="flex justify-between text-[10px] font-semibold text-slate-400">
+                    <span>Tax:</span>
+                    <span>+{currencySymbol}{taxAmount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm font-black text-slate-800 pt-1 border-t border-slate-200 mt-1">
+                  <span>Grand Total:</span>
+                  <span className="text-indigo-600">{currencySymbol}{grandTotal.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
