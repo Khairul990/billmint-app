@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 
 // Register a clean, premium font hierarchy if desired, otherwise use standard helvetica
 const styles = StyleSheet.create({
@@ -95,7 +95,6 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#0a1128',
     color: '#ffffff',
     padding: 6,
     fontWeight: 'bold',
@@ -209,11 +208,16 @@ const styles = StyleSheet.create({
 
 export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
   const currencySymbol = businessSettings?.currency || '₹';
-  const templateId = invoice.templateId || 'template-2';
+  const templateId = businessSettings?.invoiceTemplate || 'modern';
+  const brandColor = businessSettings?.brandColor || '#14b8a6';
 
   const formatVal = (num) => {
     return `${currencySymbol}${parseFloat(num || 0).toFixed(2)}`;
   };
+  
+  const qrCodeUrl = businessSettings?.upiId 
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${businessSettings.upiId}%26pn=${encodeURIComponent(businessSettings.businessName || 'Business')}%26am=${invoice.balanceDue || invoice.grandTotal}%26cu=INR`
+    : null;
 
   const renderTemplate1 = () => (
     <Page size="A5" style={styles.compactPage}>
@@ -242,7 +246,7 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
 
       {/* Compact Item Table */}
       <View style={styles.table}>
-        <View style={styles.compactTableHeader}>
+        <View style={[styles.compactTableHeader, { backgroundColor: brandColor }]}>
           <Text style={styles.compactColSN}>S.N.</Text>
           <Text style={styles.compactColDesc}>Item & Design Description</Text>
           <Text style={styles.compactColQty}>Qty</Text>
@@ -303,7 +307,7 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
       {/* Elegant Invoice Header */}
       <View style={styles.header}>
         <View style={styles.businessInfo}>
-          <Text style={styles.businessName}>
+          <Text style={[styles.businessName, { color: brandColor }]}>
             {businessSettings?.businessName || 'BillQyro Technologies'}
           </Text>
           <Text style={styles.businessSub}>
@@ -320,7 +324,7 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
         </View>
 
         <View style={styles.invoiceMeta}>
-          <Text style={styles.invoiceTitle}>INVOICE</Text>
+          <Text style={[styles.invoiceTitle, { color: brandColor }]}>INVOICE</Text>
           <Text style={[styles.metaText, { fontWeight: 'bold', marginTop: 5 }]}>
             Invoice No: {invoice.invoiceNumber}
           </Text>
@@ -354,7 +358,7 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
 
       {/* smart item A4 table */}
       <View style={styles.table}>
-        <View style={styles.tableHeader}>
+        <View style={[styles.tableHeader, { backgroundColor: brandColor }]}>
           <Text style={styles.colSN}>S.N.</Text>
           <Text style={styles.colDesign}>Design No</Text>
           <Text style={styles.colWorkType}>Work Type</Text>
@@ -382,11 +386,22 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
       {/* Totals segment */}
       <View style={styles.totalsContainer}>
         <View style={styles.notesBox}>
-          <Text style={styles.notesHeader}>Notes & Business Conditions:</Text>
-          <Text>• Please check all details before payment.</Text>
-          <Text>• No return or exchange after payment completion.</Text>
-          <Text>• Payment is due by the due date mentioned.</Text>
-          <Text>• Thank you for your embroidery and service business!</Text>
+          {qrCodeUrl ? (
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <Image src={qrCodeUrl} style={{ width: 60, height: 60, borderRadius: 4 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.notesHeader}>Scan to Pay via UPI</Text>
+                <Text>UPI ID: {businessSettings.upiId}</Text>
+                <Text style={{ marginTop: 4, color: '#94a3b8' }}>Please add Invoice #{invoice.invoiceNumber} in the payment notes.</Text>
+              </View>
+            </View>
+          ) : (
+            <View>
+              <Text style={styles.notesHeader}>Notes & Business Conditions:</Text>
+              <Text>{businessSettings?.defaultNotes || 'Thank you for your business!'}</Text>
+              <Text style={{ marginTop: 4 }}>{businessSettings?.terms || ''}</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.totalsBox}>
@@ -437,7 +452,7 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
 
   return (
     <Document>
-      {templateId === 'template-1' ? renderTemplate1() : renderTemplate2()}
+      {templateId === 'classic' ? renderTemplate1() : renderTemplate2()}
     </Document>
   );
 };

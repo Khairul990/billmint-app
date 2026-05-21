@@ -9,7 +9,10 @@ import {
   Mail,
   User,
   CheckCircle2,
-  Percent
+  Percent,
+  QrCode,
+  Palette,
+  LayoutTemplate
 } from 'lucide-react';
 
 /**
@@ -30,6 +33,9 @@ const Settings = ({ settings, onSaveSettings }) => {
   const [defaultTax, setDefaultTax] = useState(18);
   const [defaultNotes, setDefaultNotes] = useState('');
   const [terms, setTerms] = useState('');
+  const [upiId, setUpiId] = useState('');
+  const [brandColor, setBrandColor] = useState('#14b8a6'); // default teal
+  const [invoiceTemplate, setInvoiceTemplate] = useState('modern');
   
   const [showToast, setShowToast] = useState(false);
 
@@ -48,6 +54,9 @@ const Settings = ({ settings, onSaveSettings }) => {
       setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 18);
       setDefaultNotes(settings.defaultNotes || '');
       setTerms(settings.terms || '');
+      setUpiId(settings.upiId || '');
+      setBrandColor(settings.brandColor || '#14b8a6');
+      setInvoiceTemplate(settings.invoiceTemplate || 'modern');
     }
   }, [settings]);
 
@@ -72,7 +81,10 @@ const Settings = ({ settings, onSaveSettings }) => {
       invoicePrefix,
       defaultTax: parseFloat(defaultTax) || 0,
       defaultNotes,
-      terms
+      terms,
+      upiId,
+      brandColor,
+      invoiceTemplate
     };
 
     onSaveSettings(payload);
@@ -336,6 +348,78 @@ const Settings = ({ settings, onSaveSettings }) => {
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-medium resize-none"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Section 5: Payment & Advanced Branding */}
+        <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-premium">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <QrCode className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-extrabold text-slate-800">Payment & Aesthetics</h2>
+              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">UPI QR & Templates</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div>
+              <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Scan-to-Pay UPI ID</label>
+              <input
+                type="text"
+                value={upiId}
+                onChange={(e) => setUpiId(e.target.value)}
+                placeholder="e.g. name@okhdfcbank"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-bold"
+              />
+              <p className="text-[10px] text-slate-400 mt-1.5 font-semibold">Adding this will print a Scan-to-Pay QR code on your PDF invoices.</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Invoice Template Style</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><LayoutTemplate className="w-4 h-4"/></span>
+                <select
+                  value={invoiceTemplate}
+                  onChange={(e) => setInvoiceTemplate(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-extrabold"
+                >
+                  <option value="modern">Modern SaaS Style</option>
+                  <option value="classic">Classic Minimalist</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide flex items-center gap-2">
+                <Palette className="w-3.5 h-3.5" /> Brand Accent Color
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {[
+                  { name: 'Teal (Default)', hex: '#14b8a6' },
+                  { name: 'Indigo', hex: '#6366f1' },
+                  { name: 'Rose', hex: '#f43f5e' },
+                  { name: 'Blue', hex: '#3b82f6' },
+                  { name: 'Emerald', hex: '#10b981' },
+                  { name: 'Amber', hex: '#f59e0b' },
+                  { name: 'Slate', hex: '#475569' }
+                ].map((color) => (
+                  <button
+                    key={color.hex}
+                    type="button"
+                    onClick={() => setBrandColor(color.hex)}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${brandColor === color.hex ? 'ring-4 ring-offset-2 scale-110' : 'hover:scale-105'}`}
+                    style={{ backgroundColor: color.hex, ringColor: color.hex }}
+                    title={color.name}
+                  >
+                    {brandColor === color.hex && <CheckCircle2 className="w-5 h-5 text-white" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
 

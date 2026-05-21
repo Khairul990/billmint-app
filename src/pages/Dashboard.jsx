@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import StatCard from '../components/StatCard';
 import InvoiceCard from '../components/InvoiceCard';
 import NewUserGuide from '../components/NewUserGuide';
@@ -103,17 +104,6 @@ const Dashboard = ({
   };
 
   const monthlyData = getMonthlyData();
-  const maxVal = Math.max(...monthlyData.map(m => m.total), 5000); // Floor scale of 5000 to keep it professional
-
-  // SVG Chart Layout
-  const chartWidth = 600;
-  const chartHeight = 220;
-  const paddingX = 40;
-  const paddingY = 30;
-  const graphWidth = chartWidth - paddingX * 2;
-  const graphHeight = chartHeight - paddingY * 2;
-  const barWidth = 40;
-  const gap = (graphWidth - barWidth * 6) / 5;
 
   // --- WHATSAPP REMINDER DISPATCHER ---
   const sendWhatsAppReminder = (invoice) => {
@@ -398,8 +388,8 @@ const Dashboard = ({
             </div>
           </div>
 
-          {/* Pure SVG Graph */}
-          <div className="relative">
+          {/* Recharts Graph */}
+          <div className="relative h-64 w-full mt-4">
             {invoices.length === 0 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs p-4 rounded-3xl text-center z-10">
                 <TrendingUp className="w-10 h-10 text-indigo-500 mb-2 animate-bounce" />
@@ -407,104 +397,48 @@ const Dashboard = ({
                 <p className="text-[9px] text-slate-400 font-bold uppercase mt-1">NO REVENUE DATA FOUND</p>
               </div>
             )}
-            <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-auto overflow-visible">
-              <defs>
-                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" />
-                  <stop offset="100%" stopColor="#06b6d4" />
-                </linearGradient>
-                <linearGradient id="gridGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#f8fafc" />
-                  <stop offset="100%" stopColor="#f1f5f9" />
-                </linearGradient>
-              </defs>              {/* Gridlines */}
-              <line x1={paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={paddingY} stroke="#f1f5f9" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="1" strokeDasharray="3" />
-              <line x1={paddingX} y1={paddingY + graphHeight / 2} x2={chartWidth - paddingX} y2={paddingY + graphHeight / 2} stroke="#f1f5f9" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="1" strokeDasharray="3" />
-              <line x1={paddingX} y1={chartHeight - paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke="#e2e8f0" className="stroke-slate-200 dark:stroke-slate-700" strokeWidth="1" />
-
-              {/* Y Axis Reference Labels */}
-              <text x={paddingX - 8} y={paddingY + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400 dark:fill-slate-500">{formatCurrency(maxVal, currencySymbol)}</text>
-              <text x={paddingX - 8} y={paddingY + graphHeight / 2 + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400 dark:fill-slate-500">{formatCurrency(maxVal / 2, currencySymbol)}</text>
-              <text x={paddingX - 8} y={chartHeight - paddingY + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400 dark:fill-slate-500">{currencySymbol}0</text>
-
-              {/* Bars rendering */}
-              {monthlyData.map((m, i) => {
-                const barHeight = (m.total / maxVal) * graphHeight;
-                const x = paddingX + i * (barWidth + gap) + gap / 2;
-                const y = chartHeight - paddingY - barHeight;
-
-                return (
-                  <g
-                    key={m.key}
-                    onMouseEnter={() => setHoveredBarIndex(i)}
-                    onMouseLeave={() => setHoveredBarIndex(null)}
-                    className="cursor-pointer"
-                  >
-                    {/* Hover Glow Behind */}
-                    {hoveredBarIndex === i && (
-                      <rect
-                        x={x - 6}
-                        y={paddingY - 5}
-                        width={barWidth + 12}
-                        height={graphHeight + 10}
-                        rx="12"
-                        className="transition-all duration-200 fill-slate-50 dark:fill-slate-800/40"
-                      />
-                    )}
-
-                    {/* Main Bar */}
-                    <rect
-                      x={x}
-                      y={y}
-                      width={barWidth}
-                      height={Math.max(barHeight, 4)} // minimum height of 4px for visibility
-                      fill="url(#barGradient)"
-                      rx="6"
-                      className="transition-all duration-300 hover:opacity-90"
-                    />
-
-                    {/* Month Label */}
-                    <text
-                      x={x + barWidth / 2}
-                      y={chartHeight - paddingY + 16}
-                      textAnchor="middle"
-                      className={`text-[10px] font-bold transition-colors duration-200 ${hoveredBarIndex === i ? 'fill-indigo-600 dark:fill-indigo-400 font-extrabold' : 'fill-slate-400 dark:fill-slate-550'
-                        }`}
-                    >
-                      {m.label}
-                    </text>
-
-                    {/* Value Popover Label on Hover */}
-                    {hoveredBarIndex === i && (
-                      <g>
-                        <rect
-                          x={x + barWidth / 2 - 50}
-                          y={y - 28}
-                          width="100"
-                          height="20"
-                          fill="#1e293b"
-                          rx="6"
-                        />
-                        <text
-                          x={x + barWidth / 2}
-                          y={y - 15}
-                          textAnchor="middle"
-                          fill="#ffffff"
-                          className="text-[9px] font-black"
-                        >
-                          {formatCurrency(m.total, currencySymbol)}
-                        </text>
-                        {/* Downward triangle arrow */}
-                        <polygon
-                          points={`${x + barWidth / 2 - 4},${y - 8} ${x + barWidth / 2 + 4},${y - 8} ${x + barWidth / 2},${y - 4}`}
-                          fill="#1e293b"
-                        />
-                      </g>
-                    )}
-                  </g>
-                );
-              })}
-            </svg>
+            
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={monthlyData}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="label" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }} 
+                  dy={10}
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }} 
+                  tickFormatter={(val) => `${currencySymbol}${val}`}
+                />
+                <Tooltip 
+                  cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '3 3' }}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', fontSize: '12px', fontWeight: 800 }}
+                  formatter={(value) => [`${currencySymbol}${value}`, 'Revenue']}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="total" 
+                  stroke="#10b981" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorTotal)" 
+                  activeDot={{ r: 6, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
