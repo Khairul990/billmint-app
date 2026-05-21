@@ -86,23 +86,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
             </p>
           </div>
 
-          {/* Social / Trust Badges (optional placeholder for Google login, etc) */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="flex-1 h-12 rounded-xl border border-slate-200 flex items-center justify-center gap-2 text-sm font-bold text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors">
-              <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
-              <span>Google</span>
-            </div>
-            <div className="flex-1 h-12 rounded-xl border border-slate-200 flex items-center justify-center gap-2 text-sm font-bold text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors">
-              <svg className="w-5 h-5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-              <span>Facebook</span>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-3 mb-8">
-            <div className="h-px bg-slate-200 flex-1"></div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">OR</span>
-            <div className="h-px bg-slate-200 flex-1"></div>
-          </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
             {/* Email Field */}
@@ -163,7 +147,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-[#071B3A] text-white rounded-xl font-bold text-sm tracking-wide hover:bg-[#0a2652] focus:outline-none focus:ring-4 focus:ring-[#071B3A]/20 shadow-lg shadow-[#071B3A]/20 transition-all flex items-center justify-center gap-2 mt-2"
+              className="w-full py-4 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-xl font-bold text-sm tracking-wide hover:from-teal-600 hover:to-emerald-600 focus:outline-none focus:ring-4 focus:ring-teal-500/20 shadow-lg shadow-teal-500/20 transition-all flex items-center justify-center gap-2 mt-2"
             >
               {loading ? (
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -182,7 +166,25 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
             Skip to Demo
           </button>
           
-          <p className="text-center text-xs text-slate-400 font-medium mt-6">
+          {/* Three small feature blocks */}
+          <div className="flex items-center justify-between mt-8 gap-2 px-2">
+            <div className="flex flex-col items-center text-center gap-1.5">
+              <ShieldCheck className="w-5 h-5 text-slate-400" />
+              <span className="text-[10px] font-bold text-slate-500">Secure & Private</span>
+            </div>
+            <div className="w-px h-6 bg-slate-200"></div>
+            <div className="flex flex-col items-center text-center gap-1.5">
+              <ArrowRight className="w-5 h-5 text-slate-400" />
+              <span className="text-[10px] font-bold text-slate-500">Fast & Reliable</span>
+            </div>
+            <div className="w-px h-6 bg-slate-200"></div>
+            <div className="flex flex-col items-center text-center gap-1.5">
+              <Star className="w-5 h-5 text-slate-400" />
+              <span className="text-[10px] font-bold text-slate-500">Trusted by Businesses</span>
+            </div>
+          </div>
+          
+          <p className="text-center text-xs text-slate-400 font-medium mt-8">
             By logging in, you agree to our <a href="#" className="text-slate-600 font-bold hover:underline">Terms of Service</a> and <a href="#" className="text-slate-600 font-bold hover:underline">Privacy Policy</a>.
           </p>
         </div>
@@ -220,63 +222,100 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
             </div>
           </div>
 
-          {/* Abstract Dashboard Mockup Container */}
-          <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-slate-100 p-2 overflow-hidden aspect-[4/3] flex flex-col transform rotate-1 hover:rotate-0 transition-transform duration-500">
-            {/* Mock Header */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-50">
+          {/* Detailed Dashboard Mockup Container */}
+          <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-slate-100 p-2 overflow-visible aspect-[4/3] flex flex-col transform hover:scale-[1.02] transition-transform duration-500 relative mt-4">
+            {/* Mock Header (Browser dots) */}
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-50 bg-white rounded-t-[1.75rem] z-10">
               <div className="w-3 h-3 rounded-full bg-red-400"></div>
               <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
               <div className="w-3 h-3 rounded-full bg-green-400"></div>
             </div>
+            
             {/* Mock Content */}
-            <div className="flex-1 bg-slate-50/50 p-6 flex gap-6">
-              {/* Sidebar */}
-              <div className="w-32 rounded-xl bg-slate-100/50 flex flex-col gap-3 p-3">
-                <div className="h-4 w-16 bg-slate-200 rounded"></div>
-                <div className="h-2 w-full bg-slate-200 rounded mt-4"></div>
-                <div className="h-2 w-full bg-slate-200 rounded"></div>
-                <div className="h-2 w-3/4 bg-slate-200 rounded"></div>
-              </div>
-              {/* Main */}
-              <div className="flex-1 flex flex-col gap-4">
-                <div className="flex gap-4">
-                  <div className="flex-1 h-20 bg-white rounded-xl border border-slate-100 shadow-sm"></div>
-                  <div className="flex-1 h-20 bg-white rounded-xl border border-slate-100 shadow-sm"></div>
-                  <div className="flex-1 h-20 bg-white rounded-xl border border-slate-100 shadow-sm"></div>
+            <div className="flex-1 flex bg-slate-50 overflow-hidden relative rounded-b-[1.75rem]">
+              {/* Mock Sidebar */}
+              <div className="w-24 md:w-32 bg-[#071B3A] flex flex-col gap-3 p-3 shrink-0">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-6 h-6 rounded bg-teal-500/20"></div>
+                  <div className="h-3 w-12 bg-white/20 rounded"></div>
                 </div>
-                <div className="flex-1 bg-white rounded-xl border border-slate-100 shadow-sm p-4">
-                  <div className="h-3 w-1/4 bg-slate-200 rounded mb-4"></div>
-                  <div className="space-y-2">
-                    <div className="h-2 w-full bg-slate-100 rounded"></div>
-                    <div className="h-2 w-full bg-slate-100 rounded"></div>
-                    <div className="h-2 w-full bg-slate-100 rounded"></div>
-                    <div className="h-2 w-3/4 bg-slate-100 rounded"></div>
+                <div className="h-6 w-full bg-white/10 rounded"></div>
+                <div className="h-6 w-full bg-transparent border border-white/5 rounded"></div>
+                <div className="h-6 w-full bg-transparent border border-white/5 rounded"></div>
+                <div className="h-6 w-3/4 bg-transparent border border-white/5 rounded"></div>
+              </div>
+              
+              {/* Mock Main Area */}
+              <div className="flex-1 p-4 flex flex-col gap-4 overflow-hidden">
+                <div className="flex justify-between items-center">
+                  <div className="h-4 w-32 bg-slate-200 rounded"></div>
+                  <div className="h-6 w-20 bg-teal-500 text-white rounded-full flex items-center justify-center"><div className="h-2 w-10 bg-white/50 rounded"></div></div>
+                </div>
+                
+                {/* Revenue Cards */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col gap-2">
+                    <div className="h-2 w-12 bg-slate-200 rounded"></div>
+                    <div className="h-4 w-16 bg-slate-800 rounded"></div>
+                  </div>
+                  <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col gap-2">
+                    <div className="h-2 w-12 bg-slate-200 rounded"></div>
+                    <div className="h-4 w-16 bg-slate-800 rounded"></div>
+                  </div>
+                  <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col gap-2">
+                    <div className="h-2 w-12 bg-slate-200 rounded"></div>
+                    <div className="h-4 w-16 bg-slate-800 rounded"></div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-4 flex-1 overflow-hidden">
+                  {/* Chart Area */}
+                  <div className="flex-[2] bg-white rounded-xl border border-slate-100 shadow-sm p-3 flex flex-col gap-3">
+                    <div className="h-2 w-20 bg-slate-200 rounded"></div>
+                    <div className="flex-1 flex items-end gap-2 px-2">
+                      <div className="w-full bg-teal-500/20 rounded-t h-1/4"></div>
+                      <div className="w-full bg-teal-500/40 rounded-t h-2/4"></div>
+                      <div className="w-full bg-teal-500/60 rounded-t h-3/4"></div>
+                      <div className="w-full bg-teal-500/80 rounded-t h-full"></div>
+                      <div className="w-full bg-teal-500 rounded-t h-3/4"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Recent Invoices */}
+                  <div className="flex-1 bg-white rounded-xl border border-slate-100 shadow-sm p-3 flex flex-col gap-3">
+                    <div className="h-2 w-16 bg-slate-200 rounded"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-8 w-full bg-slate-50 rounded border border-slate-100"></div>
+                      <div className="h-8 w-full bg-slate-50 rounded border border-slate-100"></div>
+                      <div className="h-8 w-full bg-slate-50 rounded border border-slate-100"></div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Testimonial Card */}
-          <div className="bg-[#071B3A] text-white p-6 rounded-2xl shadow-xl flex gap-4 absolute -bottom-6 -left-6 max-w-sm">
-            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-              <Quote className="w-5 h-5 text-teal-400" />
-            </div>
-            <div>
-              <p className="text-sm font-medium leading-relaxed mb-3">
-                "BillQyro transformed our billing process. We now create and send invoices in seconds!"
-              </p>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-xs font-bold text-white">Sarah Jenkins</h4>
-                  <p className="text-[10px] text-slate-400">Owner, StyleStudio</p>
+            
+            {/* Absolute Testimonial Card placed over dashboard */}
+            <div className="absolute -bottom-8 -left-8 z-20">
+              <div className="bg-[#071B3A] text-white p-5 rounded-2xl shadow-xl flex gap-4 max-w-[280px] transform hover:-translate-y-1 transition-transform">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                  <Quote className="w-4 h-4 text-teal-400" />
                 </div>
-                <div className="flex text-yellow-400">
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <Star className="w-3.5 h-3.5 fill-current" />
+                <div>
+                  <p className="text-[11px] font-medium leading-relaxed mb-2">
+                    "BillQyro transformed our billing process. We now create and send invoices in seconds!"
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-[10px] font-bold text-white">Sarah Jenkins</h4>
+                    </div>
+                    <div className="flex text-yellow-400">
+                      <Star className="w-3 h-3 fill-current" />
+                      <Star className="w-3 h-3 fill-current" />
+                      <Star className="w-3 h-3 fill-current" />
+                      <Star className="w-3 h-3 fill-current" />
+                      <Star className="w-3 h-3 fill-current" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
