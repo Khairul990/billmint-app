@@ -22,7 +22,11 @@ import {
   Download,
   Send,
   BarChart3,
-  Search
+  Search,
+  X,
+  BookOpen,
+  UserPlus,
+  Info
 } from 'lucide-react';
 import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber } from '../utils/invoiceUtils';
 
@@ -61,6 +65,8 @@ const CreateInvoice = ({
   const [discountAmount, setDiscountAmount] = useState(0);
   const [amountPaid, setAmountPaid] = useState(0);
   const [notes, setNotes] = useState('');
+  const [terms, setTerms] = useState('');
+  const [saveCustomer, setSaveCustomer] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState('Pending');
   const [orderStatus, setOrderStatus] = useState('Pending');
 
@@ -89,6 +95,7 @@ const CreateInvoice = ({
       setDiscountAmount(editingInvoice.discountAmount || 0);
       setAmountPaid(editingInvoice.amountPaid || 0);
       setNotes(editingInvoice.notes || '');
+      setTerms(editingInvoice.terms || '');
       setPaymentStatus(editingInvoice.paymentStatus || 'Pending');
       setOrderStatus(editingInvoice.orderStatus || 'Pending');
 
@@ -117,7 +124,8 @@ const CreateInvoice = ({
       setTaxPercentage(businessSettings?.defaultTax !== undefined ? businessSettings.defaultTax : 18);
       setDiscountAmount(0);
       setAmountPaid(0);
-      setNotes('Thank you for choosing BillQyro! Payment is expected within due date.');
+      setNotes(businessSettings?.defaultNotes || 'Thank you for choosing BillQyro! Payment is expected within due date.');
+      setTerms(businessSettings?.terms || '');
       setPaymentStatus('Pending');
       setOrderStatus('Pending');
 
@@ -284,13 +292,13 @@ const CreateInvoice = ({
   // --- SAVE OPERATION ---
   const handleSave = () => {
     if (!customerName) {
-      alert('Please specify a customer name.');
+      alert('Please add customer name and at least one invoice item.');
       return;
     }
 
     const invalidItem = items.some(item => !item.description || item.qty <= 0 || item.rate < 0);
     if (invalidItem) {
-      alert('Please complete description, quantity, and rates for all items.');
+      alert('Please add customer name and at least one invoice item.');
       return;
     }
 
@@ -310,6 +318,7 @@ const CreateInvoice = ({
       amountPaid: parseFloat(amountPaid) || 0,
       balanceDue: parseFloat(balanceDue) || 0,
       notes,
+      terms,
       paymentStatus,
       orderStatus,
       subtotal,
@@ -317,13 +326,46 @@ const CreateInvoice = ({
       grandTotal,
     };
 
-    onSaveInvoice(payload);
+    // Also pass saveCustomer flag so the parent can save the customer if requested
+    onSaveInvoice(payload, saveCustomer && !selectedCustomerId);
     setCurrentTab('invoices');
   };
 
+  const [showBanner, setShowBanner] = useState(true);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       
+      {/* Help Banner */}
+      {showBanner && (
+        <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative shadow-sm">
+          <button onClick={() => setShowBanner(false)} className="absolute top-2 right-2 text-indigo-400 hover:text-indigo-600">
+            <X className="w-4 h-4" />
+          </button>
+          <div>
+            <h3 className="text-indigo-800 font-bold text-sm flex items-center gap-2">
+              <Info className="w-4 h-4" />
+              Create your bill in 3 simple steps
+            </h3>
+            <p className="text-indigo-600 text-xs mt-1 font-medium">Select or add customer, add invoice items, then save or download PDF.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 shrink-0 pr-6 sm:pr-0">
+            <button type="button" onClick={() => setCurrentTab('guide')} className="px-3 py-1.5 bg-white text-indigo-600 text-xs font-bold rounded-lg border border-indigo-200 hover:bg-indigo-50 shadow-sm transition-all flex items-center gap-1.5">
+              <BookOpen className="w-3.5 h-3.5" />
+              View Guide
+            </button>
+            <button type="button" onClick={() => document.getElementById('crm-section')?.scrollIntoView({behavior: 'smooth'})} className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 shadow-sm transition-all flex items-center gap-1.5">
+              <UserPlus className="w-3.5 h-3.5" />
+              Add Customer
+            </button>
+            <button type="button" onClick={() => document.getElementById('items-section')?.scrollIntoView({behavior: 'smooth'})} className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 shadow-sm transition-all flex items-center gap-1.5">
+              <Plus className="w-3.5 h-3.5" />
+              Add Item
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header Panel */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <button
@@ -334,9 +376,18 @@ const CreateInvoice = ({
           <span>Back to Invoices</span>
         </button>
         
-        <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">
-          {editingInvoice ? 'Edit Billing Sheet' : 'Create Invoicing Sheet'}
-        </h2>
+        <div className="flex flex-col">
+          <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">
+            {editingInvoice ? 'Edit Billing Sheet' : 'Create Invoicing Sheet'}
+          </h2>
+          <button 
+            onClick={() => setCurrentTab('guide')}
+            className="text-indigo-500 hover:text-indigo-700 text-xs font-bold flex items-center gap-1 mt-1 transition-colors w-fit"
+          >
+            <HelpCircle className="w-3.5 h-3.5" />
+            Need help? Learn how to create a bill
+          </button>
+        </div>
         
         {/* Search Bar for Create Invoice Header */}
         <div className="relative flex-1 max-w-sm hidden md:block">
@@ -404,6 +455,9 @@ const CreateInvoice = ({
                   onChange={(e) => setInvoiceNumber(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-extrabold uppercase"
                 />
+                <p className="text-[10px] text-slate-400 mt-1.5 leading-tight">
+                  Invoice number is generated automatically, but you can edit it if needed.
+                </p>
               </div>
               <div>
                 <label className="block mb-1.5 text-slate-400">Issue Date</label>
@@ -427,14 +481,17 @@ const CreateInvoice = ({
           </div>
 
           {/* Customer CRM Selector */}
-          <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
+          <div id="crm-section" className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4 relative scroll-mt-6">
             <div className="flex items-center justify-between border-b border-slate-50 pb-3">
-              <h3 className="text-sm font-extrabold text-slate-800 flex items-center gap-2">
-                <User className="w-4 h-4 text-indigo-500" />
-                <span>Client & Customer CRM</span>
-              </h3>
+              <div className="flex flex-col">
+                <h3 className="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                  <User className="w-4 h-4 text-indigo-500" />
+                  <span>Client & Customer CRM</span>
+                </h3>
+                <p className="text-[10px] text-slate-500 font-bold mt-1">Customer details will appear on the invoice PDF.</p>
+              </div>
               
-              <span className="text-[10px] bg-indigo-50 text-indigo-600 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+              <span className="text-[10px] bg-indigo-50 text-indigo-600 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider hidden sm:block">
                 SaaS CRM Integrated
               </span>
             </div>
@@ -449,9 +506,14 @@ const CreateInvoice = ({
                 >
                   <option value="">-- Manual Client Entry --</option>
                   {customers.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
+                {customers.length === 0 && (
+                  <p className="text-[10px] text-amber-500 mt-1.5 font-bold flex items-center gap-1">
+                    <Info className="w-3 h-3" /> No customers found. Add customer details manually below.
+                  </p>
+                )}
               </div>
 
               <div>
@@ -465,7 +527,7 @@ const CreateInvoice = ({
                 />
               </div>
               <div>
-                <label className="block mb-1.5 text-slate-400">Phone Number (WhatsApp Ready)</label>
+                <label className="block mb-1.5 text-slate-400">Phone Number * <span className="font-normal text-[10px]">(WhatsApp Ready)</span></label>
                 <input
                   type="text"
                   value={customerPhone}
@@ -485,7 +547,7 @@ const CreateInvoice = ({
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block mb-1.5 text-slate-400">Billing Address</label>
+                <label className="block mb-1.5 text-slate-400">Billing Address *</label>
                 <textarea
                   value={customerAddress}
                   onChange={(e) => setCustomerAddress(e.target.value)}
@@ -494,18 +556,36 @@ const CreateInvoice = ({
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 leading-relaxed text-xs"
                 />
               </div>
+
+              {!selectedCustomerId && (
+                <div className="sm:col-span-2 flex items-center gap-2 mt-1 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100/50">
+                  <input
+                    type="checkbox"
+                    id="saveCustomer"
+                    checked={saveCustomer}
+                    onChange={(e) => setSaveCustomer(e.target.checked)}
+                    className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <label htmlFor="saveCustomer" className="text-xs font-bold text-indigo-900 cursor-pointer select-none">
+                    Save this customer for future invoices
+                  </label>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Premium Smart Item Table */}
-          <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
+          <div id="items-section" className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4 relative scroll-mt-6">
             <div className="flex items-center justify-between border-b border-slate-50 pb-3">
-              <h3 className="text-sm font-extrabold text-slate-800 flex items-center gap-2">
-                <Layers className="w-4 h-4 text-indigo-500" />
-                <span>Invoice Items Sheet</span>
-              </h3>
+              <div className="flex flex-col">
+                <h3 className="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-indigo-500" />
+                  <span>Invoice Items Sheet</span>
+                </h3>
+                <p className="text-[10px] text-slate-500 font-bold mt-1">Add each product or service as a separate line.</p>
+              </div>
               
-              <span className="text-[10px] text-slate-400 font-bold">
+              <span className="text-[10px] text-slate-400 font-bold hidden sm:block">
                 Smart Rates Enabled
               </span>
             </div>
@@ -791,12 +871,24 @@ const CreateInvoice = ({
 
               {/* Notes */}
               <div>
-                <label className="block mb-1.5 text-slate-400">Notes / Conditions</label>
+                <label className="block mb-1.5 text-slate-400">Customer Notes</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Terms and conditions..."
-                  rows="3"
+                  placeholder="Thank you for your business!"
+                  rows="2"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 leading-relaxed text-xs"
+                />
+              </div>
+
+              {/* Terms */}
+              <div>
+                <label className="block mb-1.5 text-slate-400">Terms & Conditions</label>
+                <textarea
+                  value={terms}
+                  onChange={(e) => setTerms(e.target.value)}
+                  placeholder="1. Payment is due within 30 days..."
+                  rows="2"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 leading-relaxed text-xs"
                 />
               </div>
@@ -857,7 +949,7 @@ const CreateInvoice = ({
               </div>
             </div>
 
-            <div className="pt-2 grid grid-cols-2 gap-3">
+            <div className="pt-2 flex flex-col sm:grid sm:grid-cols-2 gap-3">
               <button
                 onClick={handleSave}
                 className="w-full py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 text-xs"
@@ -870,21 +962,31 @@ const CreateInvoice = ({
                 className="w-full py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 text-xs"
               >
                 <Eye className="w-4 h-4" />
-                <span>Preview</span>
+                <span>Preview PDF</span>
               </button>
               <button
-                onClick={() => { if(onDownloadPDF) onDownloadPDF({ id: Date.now().toString(), invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, paymentStatus, orderStatus, subtotal, taxAmount, grandTotal, balanceDue }); }}
-                className="w-full py-3.5 bg-white border border-teal-500 text-teal-600 rounded-xl font-bold hover:bg-teal-50 transition-all flex items-center justify-center gap-2 text-xs col-span-2 shadow-sm"
+                onClick={() => { if(onDownloadPDF) onDownloadPDF({ id: Date.now().toString(), invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, terms, paymentStatus, orderStatus, subtotal, taxAmount, grandTotal, balanceDue }); }}
+                className="w-full py-3.5 bg-white border border-teal-500 text-teal-600 rounded-xl font-bold hover:bg-teal-50 transition-all flex items-center justify-center gap-2 text-xs sm:col-span-2 shadow-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Download PDF</span>
               </button>
               <button
                 onClick={handleSave}
-                className="w-full py-3.5 bg-[#071B3A] text-white rounded-xl font-bold hover:bg-[#0a2652] shadow-md shadow-[#071B3A]/20 transition-all flex items-center justify-center gap-2 text-xs col-span-2"
+                className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-all flex items-center justify-center gap-2 text-xs sm:col-span-2"
+              >
+                <Check className="w-4 h-4" />
+                <span>Save Invoice</span>
+              </button>
+              <button
+                onClick={() => {
+                  const msg = `Hi ${customerName},\nHere is your invoice ${invoiceNumber} for ${currencySymbol}${grandTotal.toFixed(2)}.`;
+                  window.open(`https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+                }}
+                className="w-full py-3.5 bg-[#25D366] text-white rounded-xl font-bold hover:bg-[#1ebd5a] shadow-md transition-all flex items-center justify-center gap-2 text-xs sm:col-span-2"
               >
                 <Send className="w-4 h-4" />
-                <span>Save & Send Invoice</span>
+                <span>Send WhatsApp Reminder</span>
               </button>
             </div>
           </div>

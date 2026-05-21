@@ -159,7 +159,7 @@ function App() {
   // --- DATA SYNCHRONIZERS ---
 
   // Invoices
-  const handleSaveInvoice = (payload) => {
+  const handleSaveInvoice = (payload, saveCustomerAsNew = false) => {
     const isNew = !payload.id || !invoices.some(inv => inv.id === payload.id);
     if (isNew && subscription.status !== 'premium' && invoices.length >= 5) {
       alert('⚠️ Free tier limit reached: You can create a maximum of 5 invoices. Please upgrade to the Premium Plan to unlock unlimited invoicing!');
@@ -168,6 +168,19 @@ function App() {
     }
     const updated = saveInvoice(payload);
     setInvoices(updated);
+    
+    if (saveCustomerAsNew && payload.customerName) {
+      const newCustomer = {
+        id: 'cust-' + Date.now(),
+        name: payload.customerName,
+        phone: payload.customerPhone || '',
+        email: payload.customerEmail || '',
+        address: payload.customerAddress || ''
+      };
+      const updatedCustomers = saveCustomer(newCustomer);
+      setCustomers(updatedCustomers);
+    }
+    
     setEditingInvoice(null);
   };
 
