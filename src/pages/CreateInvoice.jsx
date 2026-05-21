@@ -1238,7 +1238,7 @@ const CreateInvoice = ({
                 )}
                 {taxAmount > 0 && (
                   <div className="flex justify-between text-[10px] font-semibold text-slate-400">
-                    <span>Tax ({taxPercentage}%):</span>
+                    <span>Tax:</span>
                     <span>+{currencySymbol}{taxAmount.toFixed(2)}</span>
                   </div>
                 )}
