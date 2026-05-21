@@ -20,35 +20,11 @@ const MoreMenu = ({
   setCurrentTab, 
   isAuthenticated, 
   onLoginSuccess,
-  businessSettings 
+  businessSettings,
+  userRole
 }) => {
-  const [passcode, setPasscode] = useState('');
-  const [error, setError] = useState('');
-  const [showUnlockConsole, setShowUnlockConsole] = useState(false);
-
-  const handleUnlock = (e) => {
-    e.preventDefault();
-    if (!passcode) {
-      setError('Please enter passcode.');
-      return;
-    }
-
-    const isOk = login(passcode);
-    if (isOk) {
-      onLoginSuccess();
-      setCurrentTab('admin-panel');
-    } else {
-      setError('Invalid passcode.');
-      setPasscode('');
-    }
-  };
-
   const navigateToAdmin = () => {
-    if (isAuthenticated) {
-      setCurrentTab('admin-panel');
-    } else {
-      setShowUnlockConsole(true);
-    }
+    setCurrentTab('admin-panel');
   };
 
   return (
@@ -128,9 +104,9 @@ const MoreMenu = ({
           </div>
         </button>
 
-        {/* Business Settings profile (Passcode locked) */}
+        {/* User Settings */}
         <button
-          onClick={navigateToAdmin}
+          onClick={() => setCurrentTab('settings')}
           className="bg-white hover:bg-slate-50 text-left p-5 rounded-3xl border border-slate-100 shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
         >
           <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center group-hover:bg-indigo-100 transition-colors shrink-0">
@@ -138,14 +114,35 @@ const MoreMenu = ({
           </div>
           <div className="min-w-0 flex-1">
             <h4 className="font-extrabold text-sm text-slate-800 tracking-tight flex items-center gap-1.5">
-              <span>Admin Settings</span>
+              <span>Business Settings</span>
               <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity" />
             </h4>
             <p className="text-[11px] text-slate-400 font-semibold truncate">
-              {isAuthenticated ? 'GSTIN tax codes, seed resets' : 'Unlock business settings console'}
+              Setup your company profile, logo, and taxes
             </p>
           </div>
         </button>
+
+        {/* Business Settings profile (Admin Only) */}
+        {userRole === 'admin' && (
+          <button
+            onClick={navigateToAdmin}
+            className="bg-white hover:bg-slate-50 text-left p-5 rounded-3xl border border-slate-100 shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center group-hover:bg-rose-100 transition-colors shrink-0">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h4 className="font-extrabold text-sm text-slate-800 tracking-tight flex items-center gap-1.5">
+                <span>Admin Settings</span>
+                <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity" />
+              </h4>
+              <p className="text-[11px] text-slate-400 font-semibold truncate">
+                GSTIN tax codes, seed resets
+              </p>
+            </div>
+          </button>
+        )}
 
         {/* How to Use Guide page */}
         <button
@@ -168,51 +165,9 @@ const MoreMenu = ({
 
       </div>
 
-      {/* Inline Unlock console for Administrative access */}
-      {showUnlockConsole && !isAuthenticated && (
-        <div className="bg-slate-50 border border-slate-200/50 rounded-3xl p-5 md:p-6 space-y-4 animate-in slide-in-from-bottom-5 duration-200">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <KeyRound className="w-4 h-4 text-indigo-500" />
-            <h3 className="text-xs font-black uppercase text-slate-700 tracking-wider">
-              Unlock Console Block
-            </h3>
-          </div>
-
-          <form onSubmit={handleUnlock} className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 relative">
-              <input
-                type="password"
-                maxLength="6"
-                placeholder="Enter Passcode (Default 1118)"
-                value={passcode}
-                onChange={(e) => {
-                  setError('');
-                  setPasscode(e.target.value.replace(/\D/g, ''));
-                }}
-                className="w-full px-4 py-3 bg-white border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-black text-center tracking-widest text-sm"
-              />
-            </div>
-            <button
-              type="submit"
-              className="py-3 px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-md shadow-indigo-100 flex items-center justify-center gap-1.5 transition-all"
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Unlock Admin Panel</span>
-            </button>
-          </form>
-
-          {error && (
-            <div className="flex items-center gap-2 text-rose-600 font-bold text-xs">
-              <AlertCircle className="w-3.5 h-3.5" />
-              <span>{error}</span>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Profile Details (Visible when unlocked) */}
-      {isAuthenticated && (
-        <div className="bg-emerald-50/50 border border-emerald-100/30 rounded-3xl p-5 flex items-center gap-3">
+      {userRole === 'admin' && (
+        <div className="bg-emerald-50/50 border border-emerald-100/30 rounded-3xl p-5 flex items-center gap-3 mt-6">
           <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center">
             <User className="w-5 h-5" />
           </div>

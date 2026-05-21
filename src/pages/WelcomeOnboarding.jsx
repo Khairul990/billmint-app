@@ -41,18 +41,24 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
 
     // Premium fake loading delay
     setTimeout(() => {
-      if (password === activePasscode) {
-        const session = { 
-          timestamp: Date.now(), 
-          token: 'billqyro-secure-session',
-          userEmail: email 
-        };
-        localStorage.setItem('billqyro_auth', JSON.stringify(session));
-        onLoginSuccess();
+      const isAdmin = (password === activePasscode);
+      
+      const session = { 
+        timestamp: Date.now(), 
+        token: 'billqyro-secure-session',
+        userEmail: email 
+      };
+      
+      localStorage.setItem('billqyro_auth', JSON.stringify(session));
+      localStorage.setItem('billqyro_user_role', isAdmin ? 'admin' : 'user');
+      
+      if (isAdmin) {
+        localStorage.setItem('billqyro_admin_unlocked', 'true');
       } else {
-        setError('Incorrect password. Password is your 4-digit admin passcode.');
-        setLoading(false);
+        localStorage.removeItem('billqyro_admin_unlocked');
       }
+      
+      onLoginSuccess();
     }, 600);
   };
 
@@ -126,7 +132,9 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
                     {showPassword ? 'Hide' : 'Show'}
                   </button>
                 </div>
-                <p className="text-xs text-slate-500 font-medium pt-1">Default passcode: <span className="font-bold text-teal-600">1118</span></p>
+                <p className="text-xs text-slate-500 font-medium pt-1">
+                  New user? Any password works. Admin? Enter <span className="font-bold text-teal-600">1118</span>
+                </p>
               </div>
 
               {error && (

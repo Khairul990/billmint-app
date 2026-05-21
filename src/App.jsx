@@ -11,6 +11,8 @@ import Settings from './pages/Settings';
 import Expenses from './pages/Expenses';
 import Subscription from './pages/Subscription';
 import MoreMenu from './pages/MoreMenu';
+import AdminSettings from './pages/AdminSettings';
+import AdminUnlock from './pages/AdminUnlock';
 import Layout from './components/Layout';
 
 import { 
@@ -44,6 +46,10 @@ function App() {
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
   const [isAuthenticated, setIsAuthenticated] = useState(getAuthSession() !== null);
   const [currentTab, setCurrentTab] = useState('dashboard');
+  
+  // Role & Admin State
+  const [userRole, setUserRole] = useState(localStorage.getItem('billqyro_user_role') || 'user');
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(localStorage.getItem('billqyro_admin_unlocked') === 'true');
 
   // Storage states
   const [invoices, setInvoices] = useState(() => getInvoices());
@@ -120,6 +126,9 @@ function App() {
   // --- AUTH BRIDGE ---
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
+    setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
+    setIsAdminUnlocked(localStorage.getItem('billqyro_admin_unlocked') === 'true');
+
     setInvoices(getInvoices());
     setCustomers(getCustomers());
     setProducts(getProducts());
@@ -139,7 +148,11 @@ function App() {
 
   const handleLogout = () => {
     logout();
+    localStorage.removeItem('billqyro_user_role');
+    localStorage.removeItem('billqyro_admin_unlocked');
     setIsAuthenticated(false);
+    setUserRole('user');
+    setIsAdminUnlocked(false);
     setCurrentTab('dashboard');
   };
 
@@ -341,14 +354,35 @@ function App() {
             isAuthenticated={isAuthenticated}
             onLoginSuccess={handleLoginSuccess}
             businessSettings={settings}
+            userRole={userRole}
+          />
+        );
+      case 'settings':
+        return (
+          <Settings
+            settings={settings}
+            onSaveSettings={handleSaveSettings}
           />
         );
       case 'admin-panel':
         if (!isAuthenticated) {
           return <Login onLoginSuccess={handleLoginSuccess} />;
         }
+        if (!isAdminUnlocked) {
+          return (
+            <AdminUnlock 
+              onUnlock={() => {
+                setIsAdminUnlocked(true);
+                setUserRole('admin');
+                localStorage.setItem('billqyro_user_role', 'admin');
+                localStorage.setItem('billqyro_admin_unlocked', 'true');
+              }} 
+              onCancel={() => setCurrentTab('dashboard')} 
+            />
+          );
+        }
         return (
-          <Settings
+          <AdminSettings
             settings={settings}
             invoices={invoices}
             customers={customers}
@@ -372,6 +406,8 @@ function App() {
           initializeStorage();
           const session = { timestamp: Date.now(), token: 'billqyro-secure-session', userEmail: 'demo@billqyro.com' };
           localStorage.setItem('billqyro_auth', JSON.stringify(session));
+          localStorage.setItem('billqyro_user_role', 'user');
+          localStorage.removeItem('billqyro_admin_unlocked');
           handleLoginSuccess();
         }}
       />
@@ -390,6 +426,7 @@ function App() {
       onLogout={handleLogout}
       businessSettings={settings}
       isAuthenticated={isAuthenticated}
+      userRole={userRole}
     >
       {renderTabContent()}
     </Layout>

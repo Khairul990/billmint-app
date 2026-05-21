@@ -33,7 +33,7 @@ const UIProfileMockup = () => (
         <div className="flex items-center gap-3 mb-2 border-b border-slate-200 pb-3">
             <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center"><Settings className="w-5 h-5 text-indigo-600"/></div>
             <div>
-                <div className="text-xs font-bold text-slate-800">Admin Settings</div>
+                <div className="text-xs font-bold text-slate-800">Business Settings</div>
                 <div className="text-[10px] text-slate-400">Business Profile</div>
             </div>
         </div>
@@ -189,9 +189,9 @@ const Guide = ({ setCurrentTab }) => {
             id: 1,
             title: 'Complete Business Profile',
             explanation: 'First add your business/shop name, phone number, WhatsApp, email, address, logo, currency, invoice prefix, and tax settings.',
-            whereToClick: 'Sidebar > Admin Settings or Settings',
+            whereToClick: 'Sidebar > Settings',
             buttonText: 'Open Settings',
-            tab: 'admin-panel',
+            tab: 'settings',
             tip: 'This information will appear on your invoice PDF.',
             Mockup: UIProfileMockup,
             color: 'text-indigo-600',
@@ -276,7 +276,7 @@ const Guide = ({ setCurrentTab }) => {
         { q: "How do I add customer details?", a: "Go to the Customers tab and click 'New Customer'. Fill out their contact information. This allows you to quickly select them later when making bills." },
         { q: "How do I download PDF?", a: "Once an invoice is created, go to the Invoices list or dashboard, and click the 'Download PDF' icon on the specific invoice card." },
         { q: "How do I mark payment as paid?", a: "Open the invoice from the Invoices tab and adjust the 'Amount Paid' field to match the 'Grand Total', or simply change the payment status badge." },
-        { q: "How do I change business name or logo?", a: "Navigate to the Admin Settings tab. There you can upload a new logo, change your business name, set GST details, and update your address." },
+        { q: "How do I change business name or logo?", a: "Navigate to the Settings tab. There you can upload a new logo, change your business name, set GST details, and update your address." },
         { q: "What happens if internet/Firebase is offline?", a: "BillQyro works completely offline! All data is securely stored in your browser's LocalStorage and will sync automatically when you reconnect if Firebase is enabled." },
     ];
 
@@ -323,7 +323,7 @@ const Guide = ({ setCurrentTab }) => {
                             <span>Start First Bill</span>
                         </button>
                         <button
-                            onClick={() => setCurrentTab('admin-panel')}
+                            onClick={() => setCurrentTab('settings')}
                             className="bg-white border-2 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50 px-6 py-3.5 rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
                         >
                             <Settings className="w-4 h-4" />
