@@ -59,19 +59,19 @@ const CreateInvoice = ({
     // Fixed widths: No(50) | ...fields... | Amount(140) | Actions(95)
     if (billType === 'grocery')
       // No | ProductName | Unit | Qty | UnitPrice | Amount | Actions
-      return '50px minmax(240px,2fr) 110px 95px 130px 140px 95px';
+      return '50px minmax(280px,2fr) 110px 95px 140px 150px 100px';
     if (billType === 'repair')
       // No | ServiceName | ProblemDetails | PartsCost | LabourCharge | Qty | Amount | Actions
-      return '50px minmax(160px,1.5fr) minmax(160px,1.5fr) 125px 125px 90px 140px 95px';
+      return '50px minmax(200px,1.5fr) minmax(200px,1.5fr) 130px 130px 95px 150px 100px';
     if (billType === 'retail')
       // No | ProductName | Category | SizeVariant | Qty | Price | Discount | Amount | Actions
-      return '50px minmax(160px,1.5fr) 120px 105px 85px 115px 110px 140px 95px';
+      return '50px minmax(200px,1.5fr) 130px 120px 95px 130px 120px 150px 100px';
     if (billType === 'custom')
       // No | ItemService | Description | Qty | Rate | Amount | Actions
-      return '50px minmax(160px,1fr) minmax(230px,2fr) 90px 130px 140px 95px';
+      return '50px minmax(200px,1.5fr) minmax(280px,2fr) 95px 140px 150px 100px';
     // embroidery (default)
     // No | DesignNo | WorkType | Description | Size | Qty | Rate | Amount | Actions
-    return '50px 150px 170px minmax(240px,2fr) 90px 90px 130px 140px 95px';
+    return '50px 160px 180px minmax(280px,2fr) 100px 95px 140px 150px 100px';
   };
   
   // Client details
@@ -909,7 +909,7 @@ const CreateInvoice = ({
                       <select
                         value={item.workType || 'Embroidery'}
                         onChange={(e) => handleItemChange(index, 'workType', e.target.value)}
-                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all appearance-auto"
+                        className="w-full px-3 py-3.5 min-h-[52px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-[13px] transition-all appearance-auto truncate"
                       >
                         <option value="Embroidery">Embroidery</option>
                         <option value="Stitching">Stitching</option>
@@ -930,7 +930,7 @@ const CreateInvoice = ({
                         value={item.category || ''}
                         onChange={(e) => handleItemChange(index, 'category', e.target.value)}
                         placeholder="e.g. Clothing"
-                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-3 py-3.5 min-h-[52px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
                     </div>
                   )}
@@ -944,7 +944,7 @@ const CreateInvoice = ({
                         value={item.problemDetails || ''}
                         onChange={(e) => handleItemChange(index, 'problemDetails', e.target.value)}
                         placeholder="e.g. Screen Cracked"
-                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-3 py-3.5 min-h-[52px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
                     </div>
                   )}
@@ -988,7 +988,7 @@ const CreateInvoice = ({
                         value={item.description || ''}
                         onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                         placeholder="e.g. Custom design on 4x4 cloth"
-                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-3 py-3.5 min-h-[52px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
                     </div>
                   )}
@@ -1003,7 +1003,7 @@ const CreateInvoice = ({
                         <select
                           value={item.size || ''}
                           onChange={(e) => handleItemChange(index, 'size', e.target.value)}
-                          className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all"
+                          className="w-full px-3 py-3.5 min-h-[52px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-[13px] transition-all"
                         >
                           <option value="">Select</option>
                           <option value="Kg">Kg</option>
@@ -1020,7 +1020,7 @@ const CreateInvoice = ({
                           value={item.size || ''}
                           onChange={(e) => handleItemChange(index, 'size', e.target.value)}
                           placeholder="e.g. L/XL"
-                          className="w-full px-2 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                          className="w-full px-2 py-3.5 min-h-[52px] bg-white border border-slate-200 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                         />
                       )}
                     </div>
@@ -1035,7 +1035,7 @@ const CreateInvoice = ({
                         value={item.sizeVariant || ''}
                         onChange={(e) => handleItemChange(index, 'sizeVariant', e.target.value)}
                         placeholder="e.g. 32 inch"
-                        className="w-full px-2 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-2 py-3.5 min-h-[52px] bg-white border border-slate-200 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
                     </div>
                   )}
@@ -1082,7 +1082,7 @@ const CreateInvoice = ({
                       min="0.01" step="any"
                       value={item.qty}
                       onChange={(e) => handleItemChange(index, 'qty', e.target.value)}
-                      className="w-full px-2 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all"
+                      className="w-full px-2 py-3.5 min-h-[52px] bg-white border border-slate-200 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all"
                     />
                   </div>
 
@@ -1101,7 +1101,7 @@ const CreateInvoice = ({
                             value={item.rate ?? ''}
                             onChange={(e) => handleItemChange(index, 'rate', e.target.value)}
                             placeholder="0.00"
-                            className="w-full pl-7 pr-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all placeholder:text-slate-300"
+                            className="w-full pl-8 pr-3 py-3.5 min-h-[52px] bg-white border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all placeholder:text-slate-300"
                           />
                         </div>
                         {billType !== 'grocery' && (
@@ -1129,7 +1129,7 @@ const CreateInvoice = ({
                             value={item.price ?? ''}
                             onChange={(e) => handleItemChange(index, 'price', e.target.value)}
                             placeholder="0.00"
-                            className="w-full pl-7 pr-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all placeholder:text-slate-300"
+                            className="w-full pl-8 pr-3 py-3.5 min-h-[52px] bg-white border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all placeholder:text-slate-300"
                           />
                         </div>
                       </div>
@@ -1141,7 +1141,7 @@ const CreateInvoice = ({
                             value={item.discount ?? ''}
                             onChange={(e) => handleItemChange(index, 'discount', e.target.value)}
                             placeholder="0.00"
-                            className="w-full pl-6 pr-3 py-3 min-h-[48px] bg-white border border-rose-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-rose-500/20 hover:border-rose-400 focus:border-rose-400 text-rose-600 font-extrabold text-sm transition-all placeholder:text-rose-200"
+                            className="w-full pl-6 pr-3 py-3.5 min-h-[52px] bg-white border border-rose-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-rose-500/20 hover:border-rose-400 focus:border-rose-400 text-rose-600 font-extrabold text-sm transition-all placeholder:text-rose-200"
                           />
                         </div>
                       </div>
@@ -1151,9 +1151,9 @@ const CreateInvoice = ({
                   {/* Row Total - Amount (auto-calculated, read-only) */}
                   <div className="flex flex-col justify-center">
                     <label className="lg:hidden block mb-1 text-[10px] font-bold text-teal-500 uppercase tracking-wide">Amount (auto-calculated)</label>
-                    <div className="min-h-[48px] flex items-center justify-end px-3 py-2 bg-teal-50 border-2 border-teal-100 rounded-xl w-full">
+                    <div className="min-h-[52px] flex items-center justify-end px-4 py-2 bg-gradient-to-r from-teal-50 to-emerald-50/30 border border-teal-200/60 shadow-inner rounded-xl w-full">
                       <div className="text-right">
-                        <span className="block text-teal-600 font-black text-base leading-tight tabular-nums">
+                        <span className="block text-teal-700 font-black text-[15px] leading-tight tabular-nums">
                           {currencySymbol}{(item.amount ?? (item.qty * (item.rate || 0))).toFixed(2)}
                         </span>
                         <span className="text-[9px] text-teal-400 font-bold uppercase tracking-wider hidden lg:block">
@@ -1169,15 +1169,15 @@ const CreateInvoice = ({
                   </div>
 
                   {/* Actions (Desktop) */}
-                  <div className="hidden lg:flex items-center justify-center gap-1 min-h-[48px]">
+                  <div className="hidden lg:flex items-center justify-center gap-1.5 min-h-[52px]">
                     <button
                       type="button"
                       onClick={() => handleDuplicateItem(index)}
                       title="Duplicate item"
-                      className="flex flex-col items-center gap-0.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all p-2 rounded-xl group"
+                      className="flex flex-col items-center gap-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/80 transition-all p-2 rounded-xl group"
                     >
                       <Copy className="w-4 h-4" />
-                      <span className="text-[8px] font-bold uppercase tracking-wide group-hover:text-indigo-500">Copy</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wide group-hover:text-indigo-600">Copy</span>
                     </button>
                     
                     {items.length > 1 ? (
@@ -1185,10 +1185,10 @@ const CreateInvoice = ({
                         type="button"
                         onClick={() => removeItemRow(index)}
                         title="Remove item"
-                        className="flex flex-col items-center gap-0.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all p-2 rounded-xl group"
+                        className="flex flex-col items-center gap-1 text-slate-300 hover:text-rose-500 hover:bg-rose-50/80 transition-all p-2 rounded-xl group"
                       >
                         <Trash2 className="w-4 h-4" />
-                        <span className="text-[8px] font-bold uppercase tracking-wide group-hover:text-rose-400">Del</span>
+                        <span className="text-[9px] font-bold uppercase tracking-wide group-hover:text-rose-500">Del</span>
                       </button>
                     ) : (
                       <div className="w-10 h-10" />

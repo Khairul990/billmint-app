@@ -16,6 +16,40 @@ import AdminSettings from './pages/AdminSettings';
 import AdminUnlock from './pages/AdminUnlock';
 import Layout from './components/Layout';
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+    this.setState({ errorInfo });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '20px', backgroundColor: '#fee2e2', color: '#991b1b', minHeight: '100vh', fontFamily: 'system-ui' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Something went wrong.</h1>
+          <p style={{ marginTop: '10px', fontWeight: 'bold' }}>Error: {this.state.error?.toString()}</p>
+          <pre style={{ marginTop: '20px', padding: '10px', backgroundColor: '#fecaca', overflowX: 'auto', fontSize: '12px' }}>
+            {this.state.errorInfo?.componentStack}
+          </pre>
+          <button onClick={() => window.location.reload()} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: '#dc2626', color: 'white', borderRadius: '5px', cursor: 'pointer' }}>
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 import { 
   getAuthSession, 
   logout, 
@@ -469,21 +503,23 @@ function App() {
   }
 
   return (
-    <Layout
-      currentTab={currentTab}
-      setCurrentTab={(tab) => {
-        if (tab !== 'create-invoice') {
-          setEditingInvoice(null);
-        }
-        setCurrentTab(tab);
-      }}
-      onLogout={handleLogout}
-      businessSettings={settings}
-      isAuthenticated={isAuthenticated}
-      userRole={userRole}
-    >
-      {renderTabContent()}
-    </Layout>
+    <ErrorBoundary>
+      <Layout
+        currentTab={currentTab}
+        setCurrentTab={(tab) => {
+          if (tab !== 'create-invoice') {
+            setEditingInvoice(null);
+          }
+          setCurrentTab(tab);
+        }}
+        onLogout={handleLogout}
+        businessSettings={settings}
+        isAuthenticated={isAuthenticated}
+        userRole={userRole}
+      >
+        {renderTabContent()}
+      </Layout>
+    </ErrorBoundary>
   );
 }
 
