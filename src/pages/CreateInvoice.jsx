@@ -56,12 +56,22 @@ const CreateInvoice = ({
   const [showPdfSettings, setShowPdfSettings] = useState(false);
 
   const getGridCols = () => {
-    if (billType === 'grocery')   return '50px minmax(220px, 2fr) 100px 90px 130px 130px 80px';
-    if (billType === 'repair')    return '50px minmax(160px, 1fr) minmax(160px, 1fr) 120px 120px 90px 130px 80px';
-    if (billType === 'retail')    return '50px minmax(170px, 1.5fr) 120px 100px 90px 110px 110px 130px 80px';
-    if (billType === 'custom')    return '50px minmax(160px, 1fr) minmax(200px, 2fr) 90px 120px 130px 80px';
+    // Fixed widths: No(50) | ...fields... | Amount(140) | Actions(95)
+    if (billType === 'grocery')
+      // No | ProductName | Unit | Qty | UnitPrice | Amount | Actions
+      return '50px minmax(240px,2fr) 110px 95px 130px 140px 95px';
+    if (billType === 'repair')
+      // No | ServiceName | ProblemDetails | PartsCost | LabourCharge | Qty | Amount | Actions
+      return '50px minmax(160px,1.5fr) minmax(160px,1.5fr) 125px 125px 90px 140px 95px';
+    if (billType === 'retail')
+      // No | ProductName | Category | SizeVariant | Qty | Price | Discount | Amount | Actions
+      return '50px minmax(160px,1.5fr) 120px 105px 85px 115px 110px 140px 95px';
+    if (billType === 'custom')
+      // No | ItemService | Description | Qty | Rate | Amount | Actions
+      return '50px minmax(160px,1fr) minmax(230px,2fr) 90px 130px 140px 95px';
     // embroidery (default)
-    return '50px minmax(140px, 1fr) minmax(140px, 1fr) minmax(200px, 2fr) 85px 85px 120px 130px 80px';
+    // No | DesignNo | WorkType | Description | Size | Qty | Rate | Amount | Actions
+    return '50px 150px 170px minmax(240px,2fr) 90px 90px 130px 140px 95px';
   };
   
   // Client details
@@ -519,19 +529,34 @@ const CreateInvoice = ({
         <div className="w-full lg:w-[70%] space-y-6">
           
           {/* Bill Type / Business Type Selector */}
-          <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
-            <h3 className="text-sm font-extrabold text-slate-800 border-b border-slate-50 pb-3 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-indigo-500" />
-              <span>Bill Type / Business Type</span>
-            </h3>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          <div className="bg-gradient-to-br from-slate-900 to-[#0f2349] rounded-3xl p-5 md:p-6 border border-slate-700/40 shadow-xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center shadow-lg">
+                  <Layers className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-white">Bill Type</h3>
+                  <p className="text-[10px] text-slate-400 font-bold">Select your business template</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPdfSettings(true)}
+                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white font-bold text-[10px] rounded-xl flex items-center gap-1.5 transition-all border border-white/10 shrink-0"
+              >
+                <LayoutTemplate className="w-3 h-3" />
+                PDF Fields
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
               {[
-                { id: 'embroidery', label: '🧵 Embroidery / Fashion' },
-                { id: 'grocery', label: '🛒 Grocery / Mudi Shop' },
-                { id: 'repair', label: '🔧 Repair / Service' },
-                { id: 'retail', label: '🛍️ Retail / Shopping' },
-                { id: 'custom', label: '📝 Custom Bill' }
+                { id: 'embroidery', emoji: '🧵', label: 'Embroidery', sub: 'Fashion' },
+                { id: 'grocery',   emoji: '🛒', label: 'Grocery',   sub: 'Mudi Shop' },
+                { id: 'repair',    emoji: '🔧', label: 'Repair',    sub: 'Service' },
+                { id: 'retail',    emoji: '🛍️', label: 'Retail',    sub: 'Shopping' },
+                { id: 'custom',    emoji: '📝', label: 'Custom',    sub: 'Bill' }
               ].map(type => (
                 <button
                   key={type.id}
@@ -541,86 +566,35 @@ const CreateInvoice = ({
                     setBillType(type.id);
                     setPdfVisibleFields(businessSettings?.pdfVisibleFields?.[type.id] || []);
                   }}
-                  className={`py-3 px-2 rounded-xl text-xs font-bold transition-all border text-center leading-tight ${
-                    billType === type.id 
-                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700 shadow-sm ring-2 ring-indigo-200' 
-                    : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300'
+                  className={`py-3 px-2 rounded-2xl text-center leading-tight transition-all border-2 ${
+                    billType === type.id
+                    ? 'bg-gradient-to-br from-teal-400 to-emerald-500 border-teal-400 text-white shadow-lg shadow-teal-500/30 scale-105'
+                    : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:border-white/20 hover:text-white hover:scale-102'
                   }`}
                 >
-                  {type.label}
+                  <div className="text-xl mb-0.5">{type.emoji}</div>
+                  <div className="text-[11px] font-extrabold">{type.label}</div>
+                  <div className={`text-[9px] font-bold ${ billType === type.id ? 'text-white/70' : 'text-slate-500'}`}>{type.sub}</div>
                 </button>
               ))}
             </div>
-            <div className="flex items-center justify-between pt-3 mt-1 border-t border-slate-50">
-              <p className="text-[10px] text-slate-400 font-bold">
-                Template controls which columns appear in the bill form.
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowPdfSettings(true)}
-                className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl flex items-center gap-2 transition-colors shrink-0"
-              >
-                <LayoutTemplate className="w-3.5 h-3.5" />
-                Customize PDF Fields
-              </button>
-            </div>
 
-            {/* Live Preview / Example */}
-            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 mt-2">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Template Live Preview</p>
-              <div className="flex gap-4 text-xs font-semibold text-slate-600 bg-white p-3 rounded-lg border border-slate-100 overflow-x-auto">
-                <span className="shrink-0 text-slate-400">No. 1</span>
-                {billType === 'embroidery' && (
-                  <>
-                    <span className="shrink-0 text-indigo-600">SO-5</span>
-                    <span className="shrink-0 text-slate-500">Embroidery</span>
-                    <span className="shrink-0 text-slate-800 font-bold">Embroidery Work on Shirt</span>
-                    <span className="shrink-0 text-slate-500">L</span>
-                    <span className="shrink-0 text-teal-600">Qty 2</span>
-                    <span className="shrink-0 text-amber-600">₹250</span>
-                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹500.00</span>
-                  </>
-                )}
-                {billType === 'grocery' && (
-                  <>
-                    <span className="shrink-0 text-slate-800 font-bold">Basmati Rice</span>
-                    <span className="shrink-0 text-slate-500">Kg</span>
-                    <span className="shrink-0 text-teal-600">Qty 5</span>
-                    <span className="shrink-0 text-amber-600">₹60/Kg</span>
-                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹300.00</span>
-                  </>
-                )}
-                {billType === 'repair' && (
-                  <>
-                    <span className="shrink-0 text-indigo-600">Mobile Screen</span>
-                    <span className="shrink-0 text-slate-800 font-bold">Screen Cracked</span>
-                    <span className="shrink-0 text-amber-600">Parts ₹800</span>
-                    <span className="shrink-0 text-rose-600">Labour ₹300</span>
-                    <span className="shrink-0 text-teal-600">Qty 1</span>
-                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹1100.00</span>
-                  </>
-                )}
-                {billType === 'retail' && (
-                  <>
-                    <span className="shrink-0 text-slate-800 font-bold">Denim Jeans</span>
-                    <span className="shrink-0 text-slate-500">Clothing</span>
-                    <span className="shrink-0 text-slate-500">32 inch</span>
-                    <span className="shrink-0 text-teal-600">Qty 2</span>
-                    <span className="shrink-0 text-amber-600">₹850</span>
-                    <span className="shrink-0 text-rose-500">-₹100</span>
-                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹1600.00</span>
-                  </>
-                )}
-                {billType === 'custom' && (
-                  <>
-                    <span className="shrink-0 text-indigo-600">ITM-01</span>
-                    <span className="shrink-0 text-slate-800 font-bold">Custom Service</span>
-                    <span className="shrink-0 text-teal-600">Qty 1</span>
-                    <span className="shrink-0 text-amber-600">₹500</span>
-                    <span className="shrink-0 font-extrabold text-slate-800 ml-auto">₹500.00</span>
-                  </>
-                )}
-              </div>
+            {/* Live column preview chips */}
+            <div className="flex flex-wrap gap-1.5 pt-2 border-t border-white/10">
+              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider py-1 mr-1">Columns:</span>
+              {(
+                billType === 'embroidery' ? ['Design No','Work Type','Description','Size','Qty','Rate','Amount'] :
+                billType === 'grocery'   ? ['Product Name','Unit','Qty','Unit Price','Amount'] :
+                billType === 'repair'    ? ['Service/Item','Problem Details','Parts Cost','Labour','Qty','Amount'] :
+                billType === 'retail'    ? ['Product Name','Category','Size/Variant','Qty','Price','Discount','Amount'] :
+                                          ['Item/Service','Description','Qty','Rate','Amount']
+              ).map((col, i) => (
+                <span key={i} className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                  col === 'Amount'
+                    ? 'bg-teal-500/20 text-teal-400 border border-teal-500/30'
+                    : 'bg-white/10 text-slate-400 border border-white/10'
+                }`}>{col}</span>
+              ))}
             </div>
           </div>
 
@@ -760,33 +734,36 @@ const CreateInvoice = ({
           </div>
 
           {/* Premium Smart Item Table */}
-          <div id="items-section" className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4 relative scroll-mt-6">
-            <div className="flex items-center justify-between border-b border-slate-50 pb-3">
-              <div className="flex flex-col">
-                <h3 className="text-sm font-extrabold text-slate-800 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-indigo-500" />
-                  <span>Invoice Items Sheet</span>
-                </h3>
-                <p className="text-[10px] text-slate-500 font-bold mt-1">Example: Quantity 2 × Rate ₹500 = Amount ₹1,000 automatically.</p>
+          <div id="items-section" className="bg-white rounded-3xl border border-slate-100 shadow-premium overflow-hidden scroll-mt-6">
+            {/* Table Header Bar */}
+            <div className="bg-gradient-to-r from-[#071B3A] to-[#0d2b55] px-5 md:px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center">
+                  <Layers className="w-4 h-4 text-teal-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-white">Invoice Items Sheet</h3>
+                  <p className="text-[10px] text-slate-400 font-bold">Qty × Rate = Amount (auto-calculated)</p>
+                </div>
               </div>
-              
-              <span className="text-[10px] text-slate-400 font-bold hidden sm:block">
-                Smart Rates Enabled
-              </span>
+              <span className="text-[9px] font-extrabold px-2.5 py-1 rounded-full bg-teal-500/20 text-teal-400 border border-teal-500/30 hidden sm:block">⚡ Smart Rates On</span>
             </div>
 
-            <div className="flex gap-2 flex-wrap pb-3 mb-3 border-b border-slate-50">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider py-1.5 mr-2">Quick Fill:</span>
-              <button onClick={() => addQuickFillItem('Embroidery', 'Embroidery Work', 0)} className="px-3 py-1 bg-teal-50 text-teal-600 border border-teal-100 hover:bg-teal-100 rounded-lg text-[10px] font-bold transition-colors">Embroidery Work</button>
-              <button onClick={() => addQuickFillItem('Repair', 'Repair Work', 0)} className="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-100 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition-colors">Repair Work</button>
-              <button onClick={() => addQuickFillItem('Design Work', 'Custom Design', 0)} className="px-3 py-1 bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-100 rounded-lg text-[10px] font-bold transition-colors">Custom Design</button>
+            <div className="p-5 md:p-6 space-y-4">
+
+            <div className="flex gap-2 flex-wrap pb-3 mb-1 border-b border-slate-100">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider py-1.5 mr-1">Quick Fill:</span>
+              <button onClick={() => addQuickFillItem('Embroidery', 'Embroidery Work', 0)} className="px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-100 hover:bg-teal-100 rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">🧵 Embroidery Work</button>
+              <button onClick={() => addQuickFillItem('Repair', 'Repair Work', 0)} className="px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-100 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">🔧 Repair Work</button>
+              <button onClick={() => addQuickFillItem('Design Work', 'Custom Design', 0)} className="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-100 rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">📝 Custom Design</button>
             </div>
 
-            {/* Desktop Headers */}
-            <div className="w-full overflow-x-auto pb-4">
-              <div className="min-w-[1000px] lg:min-w-0 xl:min-w-[1000px] flex flex-col">
-                <div className="hidden lg:grid gap-2 text-[10px] font-bold text-slate-400 uppercase px-2 mb-1" style={{ gridTemplateColumns: getGridCols() }}>
-                  <div className="text-center">No.</div>
+            {/* Desktop Headers + Items */}
+            <div className="w-full overflow-x-auto pb-4 -mx-1 px-1">
+              <div className="min-w-[900px] flex flex-col">
+                {/* Column headers - desktop only */}
+                <div className="hidden lg:grid gap-2 text-[10px] font-black text-slate-400 uppercase tracking-wider px-3 pb-2 mb-0 border-b-2 border-slate-100" style={{ gridTemplateColumns: getGridCols() }}>
+                  <div className="text-center">#</div>
                   {billType === 'grocery' ? (
                     <>
                       <div>Product Name</div>
@@ -832,96 +809,107 @@ const CreateInvoice = ({
                   <div className="text-center">Actions</div>
                 </div>
 
-                <div className="space-y-4 lg:space-y-3">
+                <div className="space-y-2 lg:space-y-1.5">
                   {items.map((item, index) => (
                     <div 
                       key={index}
-                      className="flex flex-col lg:grid gap-3 p-4 lg:p-2 bg-slate-50/50 lg:bg-transparent rounded-2xl lg:rounded-none border border-slate-100 lg:border-0 relative"
+                      className="flex flex-col lg:grid items-center gap-2 px-3 py-3 lg:py-2 bg-white lg:bg-slate-50/60 rounded-2xl border border-slate-100 lg:border-slate-100/80 shadow-sm lg:shadow-none"
                       style={{ gridTemplateColumns: getGridCols() }}
                     >
                   
-                  {/* Serial Number & Floating Delete for Mobile */}
-                  <div className="flex justify-between items-center lg:hidden">
-                    <span className="text-xs font-black text-slate-800">Item #{index + 1}</span>
-                    {items.length > 1 && (
+                  {/* Mobile: Item header with number + delete */}
+                  <div className="flex justify-between items-center lg:hidden mb-1">
+                    <span className="text-xs font-black text-slate-700 bg-slate-100 px-3 py-1 rounded-full">Item #{index + 1}</span>
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={() => removeItemRow(index)}
-                        className="text-rose-500 hover:text-rose-700 bg-rose-50 p-2 rounded-xl"
+                        type="button"
+                        onClick={() => handleDuplicateItem(index)}
+                        className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 py-1.5 px-3 rounded-lg"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Copy className="w-3 h-3" />
+                        <span>Duplicate</span>
                       </button>
-                    )}
+                      {items.length > 1 && (
+                        <button
+                          onClick={() => removeItemRow(index)}
+                          className="flex items-center gap-1 text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-100 py-1.5 px-3 rounded-lg"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>Remove</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* S.N. (Desktop only) */}
-                  <div className="hidden lg:flex items-center justify-center text-[14px] font-extrabold text-slate-400">
-                    {index + 1}
+                  <div className="hidden lg:flex items-center justify-center min-h-[48px]">
+                    <span className="text-[13px] font-extrabold text-slate-400 w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full">{index + 1}</span>
                   </div>
 
-                  {/* Design No / Service Name - embroidery only */}
+                  {/* Design No - embroidery only */}
                   {(billType === 'embroidery') && (
-                    <div className="text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">Design / Item Code</label>
+                    <div>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Design / Item Code</label>
                       <input
                         type="text"
                         value={item.designNo || ''}
                         onChange={(e) => handleItemChange(index, 'designNo', e.target.value)}
                         placeholder="e.g. SO-5"
-                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] uppercase transition-colors"
+                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm uppercase tracking-wide transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
                     </div>
                   )}
 
                   {/* Repair: Service Name */}
                   {billType === 'repair' && (
-                    <div className="text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">Service / Item Name</label>
+                    <div>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Service / Item Name</label>
                       <input
                         type="text"
                         value={item.serviceName || ''}
                         onChange={(e) => handleItemChange(index, 'serviceName', e.target.value)}
                         placeholder="e.g. Mobile Screen"
-                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
                     </div>
                   )}
 
                   {/* Retail: Product Name */}
                   {billType === 'retail' && (
-                    <div className="text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">Product Name</label>
+                    <div>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Product Name</label>
                       <input
                         type="text"
                         value={item.productName || ''}
                         onChange={(e) => handleItemChange(index, 'productName', e.target.value)}
                         placeholder="e.g. Denim Jeans"
-                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
                     </div>
                   )}
 
                   {/* Custom: Item / Service */}
                   {billType === 'custom' && (
-                    <div className="text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">Item / Service</label>
+                    <div>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Item / Service</label>
                       <input
                         type="text"
                         value={item.itemService || ''}
                         onChange={(e) => handleItemChange(index, 'itemService', e.target.value)}
                         placeholder="e.g. Design Work"
-                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
                     </div>
                   )}
 
                   {/* Work Type - embroidery only */}
                   {billType === 'embroidery' && (
-                    <div className="text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">Work Type</label>
+                    <div>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Work Type</label>
                       <select
                         value={item.workType || 'Embroidery'}
                         onChange={(e) => handleItemChange(index, 'workType', e.target.value)}
-                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold text-[14px] transition-colors"
+                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all appearance-auto"
                       >
                         <option value="Embroidery">Embroidery</option>
                         <option value="Stitching">Stitching</option>
@@ -935,36 +923,36 @@ const CreateInvoice = ({
 
                   {/* Retail: Category */}
                   {billType === 'retail' && (
-                    <div className="text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">Category</label>
+                    <div>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Category</label>
                       <input
                         type="text"
                         value={item.category || ''}
                         onChange={(e) => handleItemChange(index, 'category', e.target.value)}
                         placeholder="e.g. Clothing"
-                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold text-[14px] transition-colors"
+                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
                     </div>
                   )}
 
                   {/* Repair: Problem / Details */}
                   {billType === 'repair' && (
-                    <div className="text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">Problem / Details</label>
+                    <div>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Problem / Details</label>
                       <input
                         type="text"
                         value={item.problemDetails || ''}
                         onChange={(e) => handleItemChange(index, 'problemDetails', e.target.value)}
                         placeholder="e.g. Screen Cracked"
-                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold text-[14px] transition-colors"
+                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
                     </div>
                   )}
 
-                  {/* Description / Product Name - grocery, embroidery, repair, custom, retail */}
+                  {/* Description / Product Name - grocery, embroidery */}
                   {(billType !== 'repair' && billType !== 'retail' && billType !== 'custom') && (
-                    <div className="text-xs font-semibold text-slate-500 space-y-1">
-                      <label className="lg:hidden block mb-1 text-slate-400">
+                    <div className="space-y-1.5">
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">
                         {billType === 'grocery' ? 'Product Name' : 'Description'}
                       </label>
                       <input
@@ -972,52 +960,50 @@ const CreateInvoice = ({
                         value={item.description || ''}
                         onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                         placeholder={
-                          billType === 'grocery' ? "e.g. Premium Basmati Rice" :
-                          "e.g. Embroidery Work on Suits"
+                          billType === 'grocery' ? "e.g. Basmati Rice 1kg" :
+                          "e.g. Embroidery Work on Shirt"
                         }
-                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-bold text-[14px] transition-colors"
+                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
-                      {/* Catalog Helper link */}
-                      <div className="flex items-center gap-1">
-                        <select
-                          onChange={(e) => handleProductSelect(index, e.target.value)}
-                          defaultValue=""
-                          className="text-[9px] bg-slate-100 border-0 text-slate-500 py-0.5 px-1.5 rounded focus:outline-none cursor-pointer w-full hover:bg-slate-200"
-                        >
-                          <option value="">-- Quick Prefill Catalog --</option>
-                          {products.map((p) => (
-                            <option key={p.id} value={p.id}>{p.name} ({currencySymbol}{p.price})</option>
-                          ))}
-                        </select>
-                      </div>
+                      {/* Catalog Helper */}
+                      <select
+                        onChange={(e) => handleProductSelect(index, e.target.value)}
+                        defaultValue=""
+                        className="text-[9px] bg-slate-100 border-0 text-slate-500 py-1 px-2 rounded-lg focus:outline-none cursor-pointer w-full hover:bg-slate-200 transition-colors"
+                      >
+                        <option value="">📦 Quick Prefill from Catalog...</option>
+                        {products.map((p) => (
+                          <option key={p.id} value={p.id}>{p.name} ({currencySymbol}{p.price})</option>
+                        ))}
+                      </select>
                     </div>
                   )}
 
                   {/* Custom: Description */}
                   {billType === 'custom' && (
-                    <div className="text-xs font-semibold text-slate-500 space-y-1">
-                      <label className="lg:hidden block mb-1 text-slate-400">Description</label>
+                    <div className="space-y-1.5">
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Description</label>
                       <input
                         type="text"
                         value={item.description || ''}
                         onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                         placeholder="e.g. Custom design on 4x4 cloth"
-                        className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-bold text-[14px] transition-colors"
+                        className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
                     </div>
                   )}
 
                   {/* Size / Unit - not for repair/retail/custom */}
                   {(billType !== 'repair' && billType !== 'retail' && billType !== 'custom') && (
-                    <div className="text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">
+                    <div>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">
                         {billType === 'grocery' ? 'Unit' : 'Size'}
                       </label>
                       {billType === 'grocery' ? (
                         <select
                           value={item.size || ''}
                           onChange={(e) => handleItemChange(index, 'size', e.target.value)}
-                          className="w-full px-3 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold text-[14px] transition-colors"
+                          className="w-full px-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all"
                         >
                           <option value="">Select</option>
                           <option value="Kg">Kg</option>
@@ -1033,8 +1019,8 @@ const CreateInvoice = ({
                           type="text"
                           value={item.size || ''}
                           onChange={(e) => handleItemChange(index, 'size', e.target.value)}
-                          placeholder="A4 / 4x4"
-                          className="w-full px-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold text-[14px] transition-colors"
+                          placeholder="e.g. L/XL"
+                          className="w-full px-2 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                         />
                       )}
                     </div>
@@ -1042,30 +1028,30 @@ const CreateInvoice = ({
 
                   {/* Retail: Size/Variant */}
                   {billType === 'retail' && (
-                    <div className="text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">Size / Variant</label>
+                    <div>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Size / Variant</label>
                       <input
                         type="text"
                         value={item.sizeVariant || ''}
                         onChange={(e) => handleItemChange(index, 'sizeVariant', e.target.value)}
                         placeholder="e.g. 32 inch"
-                        className="w-full px-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-700 font-bold text-[14px] transition-colors"
+                        className="w-full px-2 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
                       />
                     </div>
                   )}
 
                   {/* Repair: Parts Cost */}
                   {billType === 'repair' && (
-                    <div className="text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">Parts Cost ({currencySymbol})</label>
+                    <div>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Parts Cost</label>
                       <div className="relative">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-sm">{currencySymbol}</span>
                         <input
                           type="number" min="0"
                           value={item.partsCost ?? ''}
                           onChange={(e) => handleItemChange(index, 'partsCost', e.target.value)}
-                          placeholder="0"
-                          className="w-full pl-6 pr-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                          placeholder="0.00"
+                          className="w-full pl-7 pr-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all placeholder:text-slate-300"
                         />
                       </div>
                     </div>
@@ -1073,48 +1059,49 @@ const CreateInvoice = ({
 
                   {/* Repair: Labour Charge */}
                   {billType === 'repair' && (
-                    <div className="text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">Labour Charge ({currencySymbol})</label>
+                    <div>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Labour Charge</label>
                       <div className="relative">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-sm">{currencySymbol}</span>
                         <input
                           type="number" min="0"
                           value={item.labourCharge ?? ''}
                           onChange={(e) => handleItemChange(index, 'labourCharge', e.target.value)}
-                          placeholder="0"
-                          className="w-full pl-6 pr-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                          placeholder="0.00"
+                          className="w-full pl-7 pr-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all placeholder:text-slate-300"
                         />
                       </div>
                     </div>
                   )}
 
                   {/* Qty */}
-                  <div className="text-xs font-semibold text-slate-500">
-                    <label className="lg:hidden block mb-1 text-slate-400">Quantity</label>
+                  <div>
+                    <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Quantity</label>
                     <input
                       type="number"
-                      min="1"
+                      min="0.01" step="any"
                       value={item.qty}
                       onChange={(e) => handleItemChange(index, 'qty', e.target.value)}
-                      className="w-full px-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                      className="w-full px-2 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all"
                     />
                   </div>
 
                   {/* Rate / Unit Price - not for repair or retail */}
                   {(billType !== 'repair' && billType !== 'retail') && (
-                    <div className="text-xs font-semibold text-slate-500">
-                      <label className="lg:hidden block mb-1 text-slate-400">
-                        {billType === 'grocery' ? 'Unit Price' : 'Rate'}
+                    <div>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+                        {billType === 'grocery' ? 'Unit Price' : 'Rate per item'}
                       </label>
-                      <div className="flex gap-1">
-                        <div className="relative w-full">
-                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
+                      <div className="flex gap-1 items-center">
+                        <div className="relative flex-1">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-extrabold text-sm select-none">{currencySymbol}</span>
                           <input
                             type="number"
-                            min="0"
+                            min="0" step="any"
                             value={item.rate ?? ''}
                             onChange={(e) => handleItemChange(index, 'rate', e.target.value)}
-                            className="w-full pl-6 pr-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                            placeholder="0.00"
+                            className="w-full pl-7 pr-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all placeholder:text-slate-300"
                           />
                         </div>
                         {billType !== 'grocery' && (
@@ -1122,9 +1109,9 @@ const CreateInvoice = ({
                             type="button"
                             onClick={() => openSmartRateCalculator(index)}
                             title="Calculate using sub-charges"
-                            className="bg-teal-50 text-teal-600 hover:bg-teal-100 p-2 rounded-xl transition-colors shrink-0 hidden lg:block"
+                            className="bg-teal-50 text-teal-600 hover:bg-teal-100 w-10 h-12 flex items-center justify-center rounded-xl transition-colors shrink-0 hidden lg:flex border border-teal-100"
                           >
-                            <Calculator className="w-3.5 h-3.5" />
+                            <Calculator className="w-4 h-4" />
                           </button>
                         )}
                       </div>
@@ -1134,102 +1121,114 @@ const CreateInvoice = ({
                   {/* Retail: Price & Discount */}
                   {billType === 'retail' && (
                     <>
-                      <div className="text-xs font-semibold text-slate-500">
-                        <label className="lg:hidden block mb-1 text-slate-400">Price ({currencySymbol})</label>
+                      <div>
+                        <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Price ({currencySymbol})</label>
                         <div className="relative">
-                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
-                          <input type="number" min="0"
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-sm">{currencySymbol}</span>
+                          <input type="number" min="0" step="any"
                             value={item.price ?? ''}
                             onChange={(e) => handleItemChange(index, 'price', e.target.value)}
-                            placeholder="0"
-                            className="w-full pl-6 pr-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-slate-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/20 hover:border-teal-500 focus:border-teal-500 text-slate-800 font-extrabold text-[14px] transition-colors"
+                            placeholder="0.00"
+                            className="w-full pl-7 pr-3 py-3 min-h-[48px] bg-white border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 font-extrabold text-sm transition-all placeholder:text-slate-300"
                           />
                         </div>
                       </div>
-                      <div className="text-xs font-semibold text-slate-500">
-                        <label className="lg:hidden block mb-1 text-rose-400">Discount ({currencySymbol})</label>
+                      <div>
+                        <label className="lg:hidden block mb-1 text-[10px] font-bold text-rose-400 uppercase tracking-wide">Discount ({currencySymbol})</label>
                         <div className="relative">
-                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-rose-400 font-bold">-</span>
-                          <input type="number" min="0"
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-rose-400 font-bold text-sm">-</span>
+                          <input type="number" min="0" step="any"
                             value={item.discount ?? ''}
                             onChange={(e) => handleItemChange(index, 'discount', e.target.value)}
-                            placeholder="0"
-                            className="w-full pl-6 pr-2 py-2.5 min-h-[44px] bg-white lg:bg-slate-50 border border-rose-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-rose-500/20 hover:border-rose-400 focus:border-rose-400 text-rose-600 font-extrabold text-[14px] transition-colors"
+                            placeholder="0.00"
+                            className="w-full pl-6 pr-3 py-3 min-h-[48px] bg-white border border-rose-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-rose-500/20 hover:border-rose-400 focus:border-rose-400 text-rose-600 font-extrabold text-sm transition-all placeholder:text-rose-200"
                           />
                         </div>
                       </div>
                     </>
                   )}
 
-                  {/* Row Total */}
-                  <div className="flex flex-col items-end justify-center text-xs font-black text-slate-700 py-3 lg:py-0 border-t lg:border-0 border-slate-100 mt-2 lg:mt-0">
-                    <span className="lg:hidden text-slate-400 font-semibold mb-1 w-full text-left">Amount (Auto-calculated)</span>
-                    <span className="text-teal-600 font-extrabold text-[15px] whitespace-nowrap bg-teal-50/50 px-3 min-h-[44px] flex items-center justify-end rounded-xl border border-teal-100/50 w-full text-right">
-                      {currencySymbol}{item.amount ? item.amount.toFixed(2) : (item.qty * item.rate).toFixed(2)}
-                    </span>
+                  {/* Row Total - Amount (auto-calculated, read-only) */}
+                  <div className="flex flex-col justify-center">
+                    <label className="lg:hidden block mb-1 text-[10px] font-bold text-teal-500 uppercase tracking-wide">Amount (auto-calculated)</label>
+                    <div className="min-h-[48px] flex items-center justify-end px-3 py-2 bg-teal-50 border-2 border-teal-100 rounded-xl w-full">
+                      <div className="text-right">
+                        <span className="block text-teal-600 font-black text-base leading-tight tabular-nums">
+                          {currencySymbol}{(item.amount ?? (item.qty * (item.rate || 0))).toFixed(2)}
+                        </span>
+                        <span className="text-[9px] text-teal-400 font-bold uppercase tracking-wider hidden lg:block">
+                          {billType === 'retail'
+                            ? `${item.qty || 0}×${currencySymbol}${item.price || 0}-${currencySymbol}${item.discount || 0}`
+                            : billType === 'repair'
+                            ? `${item.qty || 0}×(${currencySymbol}${item.partsCost || 0}+${currencySymbol}${item.labourCharge || 0})`
+                            : `${item.qty || 0}×${currencySymbol}${item.rate || 0}`
+                          }
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="hidden lg:flex items-center justify-center gap-2 py-3 lg:py-0">
+                  {/* Actions (Desktop) */}
+                  <div className="hidden lg:flex items-center justify-center gap-1 min-h-[48px]">
                     <button
                       type="button"
                       onClick={() => handleDuplicateItem(index)}
                       title="Duplicate item"
-                      className="text-slate-400 hover:text-indigo-600 transition-colors p-2"
+                      className="flex flex-col items-center gap-0.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all p-2 rounded-xl group"
                     >
                       <Copy className="w-4 h-4" />
+                      <span className="text-[8px] font-bold uppercase tracking-wide group-hover:text-indigo-500">Copy</span>
                     </button>
                     
-                    {items.length > 1 && (
+                    {items.length > 1 ? (
                       <button
                         type="button"
                         onClick={() => removeItemRow(index)}
                         title="Remove item"
-                        className="text-slate-300 hover:text-rose-500 transition-colors p-2"
+                        className="flex flex-col items-center gap-0.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all p-2 rounded-xl group"
                       >
                         <Trash2 className="w-4 h-4" />
+                        <span className="text-[8px] font-bold uppercase tracking-wide group-hover:text-rose-400">Del</span>
                       </button>
+                    ) : (
+                      <div className="w-10 h-10" />
                     )}
                   </div>
 
-                  {/* Mobile Actions helper */}
-                  <div className="lg:hidden flex items-center justify-end gap-2 border-t border-slate-100 pt-3 mt-1.5">
-                    <button
-                      type="button"
-                      onClick={() => handleDuplicateItem(index)}
-                      className="flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-100 py-1.5 px-3 rounded-lg"
-                    >
-                      <Copy className="w-3 h-3" />
-                      <span>Duplicate Item</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openSmartRateCalculator(index)}
-                      className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 py-1.5 px-3 rounded-lg"
-                    >
-                      <Calculator className="w-3 h-3" />
-                      <span>Smart Rate</span>
-                    </button>
-                  </div>
+                  {/* Mobile: Smart Rate button at bottom */}
+                  {billType !== 'grocery' && billType !== 'repair' && billType !== 'retail' && (
+                    <div className="lg:hidden pt-2 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => openSmartRateCalculator(index)}
+                        className="w-full flex items-center justify-center gap-2 text-[11px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 py-2 rounded-xl transition-colors"
+                      >
+                        <Calculator className="w-3.5 h-3.5" />
+                        <span>Open Smart Rate Calculator</span>
+                      </button>
+                    </div>
+                  )}
 
                 </div>
               ))}
                 </div>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-4 pt-4 border-t border-slate-100 gap-4">
+            </div>{/* end inner p-5 wrapper */}
+            {/* Items footer: Add Item + mini totals */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end px-5 md:px-6 py-4 border-t border-slate-100 gap-4 bg-slate-50/50">
               <button
                 onClick={addItemRow}
-                className="flex items-center gap-1.5 text-xs font-bold text-teal-600 hover:text-teal-700 transition-all w-fit px-4 py-2.5 bg-teal-50 hover:bg-teal-100 rounded-xl"
+                className="flex items-center gap-2 text-xs font-extrabold text-white transition-all w-fit px-5 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 rounded-xl shadow-md shadow-teal-500/20 hover:shadow-lg hover:shadow-teal-500/30 hover:-translate-y-0.5"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Another Item Line</span>
               </button>
 
-              <div className="bg-slate-50 p-3 rounded-xl w-full sm:w-64 space-y-1 shadow-sm border border-slate-100">
+              <div className="bg-white p-3 rounded-2xl w-full sm:w-64 space-y-1.5 shadow-sm border border-slate-100">
                 <div className="flex justify-between text-xs font-semibold text-slate-500">
                   <span>Items Total:</span>
-                  <span>{currencySymbol}{subtotal.toFixed(2)}</span>
+                  <span className="font-extrabold text-slate-700">{currencySymbol}{subtotal.toFixed(2)}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-[10px] font-semibold text-rose-500">
@@ -1239,13 +1238,13 @@ const CreateInvoice = ({
                 )}
                 {taxAmount > 0 && (
                   <div className="flex justify-between text-[10px] font-semibold text-slate-400">
-                    <span>Tax:</span>
+                    <span>Tax ({taxPercentage}%):</span>
                     <span>+{currencySymbol}{taxAmount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm font-black text-slate-800 pt-1 border-t border-slate-200 mt-1">
-                  <span>Grand Total:</span>
-                  <span className="text-indigo-600">{currencySymbol}{grandTotal.toFixed(2)}</span>
+                <div className="flex justify-between text-sm font-black text-white bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-xl px-3 py-2 mt-1">
+                  <span>Grand Total</span>
+                  <span>{currencySymbol}{grandTotal.toFixed(2)}</span>
                 </div>
               </div>
             </div>
