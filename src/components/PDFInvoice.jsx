@@ -224,8 +224,32 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
     return `${currencySymbol}${parseFloat(num || 0).toFixed(2)}`;
   };
   
-  const qrCodeUrl = businessSettings?.upiId 
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${businessSettings.upiId}%26pn=${encodeURIComponent(businessSettings.businessName || 'Business')}%26am=${invoice.balanceDue || invoice.grandTotal}%26cu=INR`
+  const qrEnabled = businessSettings?.paymentQrEnabled && businessSettings?.showQrInPdf;
+  const paymentMethod = businessSettings?.paymentMethod || 'UPI';
+  
+  const dueAmount = (invoice.balanceDue !== undefined && invoice.balanceDue !== null && invoice.balanceDue !== 0)
+    ? invoice.balanceDue
+    : invoice.grandTotal;
+
+  let qrText = '';
+  if (qrEnabled) {
+    if (paymentMethod === 'UPI') {
+      const upiId = businessSettings.upiId || '';
+      const payeeName = businessSettings.payeeName || businessSettings.businessName || '';
+      qrText = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${dueAmount}&cu=INR&tn=${invoice.invoiceNumber}`;
+    } else if (paymentMethod === 'bKash') {
+      const bkashNumber = businessSettings.bkashNumber || '';
+      qrText = `bKash Payment\nMerchant/Personal Number: ${bkashNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
+    } else if (paymentMethod === 'Nagad') {
+      const nagadNumber = businessSettings.nagadNumber || '';
+      qrText = `Nagad Payment\nNumber: ${nagadNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
+    } else if (paymentMethod === 'Manual') {
+      qrText = businessSettings.customPaymentLink || '';
+    }
+  }
+
+  const qrCodeUrl = qrEnabled && qrText
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrText)}`
     : null;
 
   const renderTemplate1 = () => (
@@ -302,9 +326,33 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
         ))}
       </View>
 
-      {/* Small Totals */}
-      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 5 }}>
-        <View style={{ width: '50%' }}>
+      {/* Small Totals & QR Section */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10, borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingTop: 5 }}>
+        <View style={{ width: '48%' }}>
+          {qrCodeUrl ? (
+            <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+              <Image src={qrCodeUrl} style={{ width: 45, height: 45, borderRadius: 3 }} />
+              <View style={{ flex: 1, fontSize: 6.5 }}>
+                <Text style={{ fontWeight: 'bold', color: '#0f172a', fontSize: 7 }}>Pay with {paymentMethod}</Text>
+                <Text style={{ fontSize: 5.5, color: '#64748b', marginTop: 1 }}>
+                  {paymentMethod === 'UPI' && `UPI: ${businessSettings.upiId}`}
+                  {paymentMethod === 'bKash' && `bKash: ${businessSettings.bkashNumber}`}
+                  {paymentMethod === 'Nagad' && `Nagad: ${businessSettings.nagadNumber}`}
+                  {paymentMethod === 'Manual' && `Custom Transfer`}
+                </Text>
+                {businessSettings.paymentNote && (
+                  <Text style={{ fontSize: 5, color: '#94a3b8', fontStyle: 'italic', marginTop: 2 }}>{businessSettings.paymentNote}</Text>
+                )}
+              </View>
+            </View>
+          ) : (
+            <View style={{ fontSize: 6.5, color: '#64748b' }}>
+              <Text style={{ fontWeight: 'bold', color: '#475569', fontSize: 7 }}>Notes:</Text>
+              <Text style={{ marginTop: 1 }}>{businessSettings?.defaultNotes || 'Thank you for your business!'}</Text>
+            </View>
+          )}
+        </View>
+        <View style={{ width: '48%' }}>
           <View style={styles.totalRow}>
             <Text style={{ fontSize: 7, color: '#64748b' }}>Subtotal</Text>
             <Text style={{ fontSize: 7 }}>{formatVal(invoice.subtotal)}</Text>
@@ -464,9 +512,33 @@ export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <Image src={qrCodeUrl} style={{ width: 60, height: 60, borderRadius: 4 }} />
               <View style={{ flex: 1 }}>
-                <Text style={styles.notesHeader}>Scan to Pay via UPI</Text>
-                <Text>UPI ID: {businessSettings.upiId}</Text>
-                <Text style={{ marginTop: 4, color: '#94a3b8' }}>Please add Invoice #{invoice.invoiceNumber} in the payment notes.</Text>
+                <Text style={styles.notesHeader}>Scan to Pay with {paymentMethod}</Text>
+                {paymentMethod === 'UPI' && businessSettings.upiId && (
+                  <Text>UPI ID: {businessSettings.upiId}</Text>
+                )}
+                {paymentMethod === 'bKash' && businessSettings.bkashNumber && (
+                  <Text>bKash: {businessSettings.bkashNumber}</Text>
+                )}
+                {paymentMethod === 'Nagad' && businessSettings.nagadNumber && (
+                  <Text>Nagad: {businessSettings.nagadNumber}</Text>
+                )}
+                {paymentMethod === 'Manual' && businessSettings.customPaymentLink && (
+                  <Text style={{ fontSize: 7.5 }}>Details: {businessSettings.customPaymentLink}</Text>
+                )}
+                
+                <Text style={{ marginTop: 2, fontWeight: 'bold', color: '#0f172a' }}>
+                  Payee: {businessSettings.payeeName || businessSettings.businessName}
+                </Text>
+
+                {businessSettings.paymentNote ? (
+                  <Text style={{ marginTop: 4, color: '#64748b', fontSize: 7, fontStyle: 'italic' }}>
+                    Note: {businessSettings.paymentNote}
+                  </Text>
+                ) : (
+                  <Text style={{ marginTop: 4, color: '#94a3b8', fontSize: 7 }}>
+                    Please complete your transfer securely using the QR code.
+                  </Text>
+                )}
               </View>
             </View>
           ) : (

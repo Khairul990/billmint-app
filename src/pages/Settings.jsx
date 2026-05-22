@@ -65,6 +65,15 @@ const Settings = ({
   const [terms, setTerms] = useState('');
   const [pdfFooter, setPdfFooter] = useState('');
   const [upiId, setUpiId] = useState('');
+  const [paymentQrEnabled, setPaymentQrEnabled] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('UPI');
+  const [bkashNumber, setBkashNumber] = useState('');
+  const [nagadNumber, setNagadNumber] = useState('');
+  const [payeeName, setPayeeName] = useState('');
+  const [paymentNote, setPaymentNote] = useState('');
+  const [showQrInPdf, setShowQrInPdf] = useState(true);
+  const [showQrInPreview, setShowQrInPreview] = useState(true);
+  const [customPaymentLink, setCustomPaymentLink] = useState('');
   const [brandColor, setBrandColor] = useState('#14b8a6'); // default teal
   const [invoiceTemplate, setInvoiceTemplate] = useState('modern');
   const [defaultBillingTemplate, setDefaultBillingTemplate] = useState('custom');
@@ -99,6 +108,15 @@ const Settings = ({
       setTerms(settings.terms || '');
       setPdfFooter(settings.pdfFooter || '');
       setUpiId(settings.upiId || '');
+      setPaymentQrEnabled(settings.paymentQrEnabled || false);
+      setPaymentMethod(settings.paymentMethod || 'UPI');
+      setBkashNumber(settings.bkashNumber || '');
+      setNagadNumber(settings.nagadNumber || '');
+      setPayeeName(settings.payeeName || '');
+      setPaymentNote(settings.paymentNote || '');
+      setShowQrInPdf(settings.showQrInPdf !== undefined ? settings.showQrInPdf : true);
+      setShowQrInPreview(settings.showQrInPreview !== undefined ? settings.showQrInPreview : true);
+      setCustomPaymentLink(settings.customPaymentLink || '');
       setBrandColor(settings.brandColor || '#14b8a6');
       setInvoiceTemplate(settings.invoiceTemplate || 'modern');
       setDefaultBillingTemplate(settings.defaultBillingTemplate || 'custom');
@@ -115,6 +133,25 @@ const Settings = ({
     if (!businessName) {
       alert('Please specify a Business Name.');
       return;
+    }
+
+    if (paymentQrEnabled) {
+      if (paymentMethod === 'UPI' && !upiId.trim()) {
+        alert('Please specify your UPI ID.');
+        return;
+      }
+      if (paymentMethod === 'bKash' && !bkashNumber.trim()) {
+        alert('Please specify your bKash Number.');
+        return;
+      }
+      if (paymentMethod === 'Nagad' && !nagadNumber.trim()) {
+        alert('Please specify your Nagad Number.');
+        return;
+      }
+      if (paymentMethod === 'Manual' && !customPaymentLink.trim()) {
+        alert('Please specify your Custom Payment Link / QR Text.');
+        return;
+      }
     }
 
     const payload = {
@@ -134,6 +171,15 @@ const Settings = ({
       terms,
       pdfFooter,
       upiId,
+      paymentQrEnabled,
+      paymentMethod,
+      bkashNumber,
+      nagadNumber,
+      payeeName,
+      paymentNote,
+      showQrInPdf,
+      showQrInPreview,
+      customPaymentLink,
       brandColor,
       invoiceTemplate,
       defaultBillingTemplate,
@@ -146,7 +192,7 @@ const Settings = ({
     
     // Show Toast
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+    setTimeout(() => setShowToast(false), 3500);
   };
 
   const handleExport = () => {
@@ -536,32 +582,179 @@ const Settings = ({
           </div>
         </div>
 
-        {/* Section 5: Payment & Advanced Branding */}
+        {/* Section 5: Payment QR Settings */}
         <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-premium">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
               <QrCode className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-extrabold text-slate-800">Payment & Aesthetics</h2>
-              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">UPI QR & Templates</p>
+              <h2 className="text-base font-extrabold text-slate-800">Payment QR Settings</h2>
+              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Dynamic Scan-to-Pay Configurations</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {/* Enable Toggle */}
+            <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+              <div>
+                <span className="text-xs font-bold text-slate-700 block">Enable Payment QR Code</span>
+                <span className="text-[10px] text-slate-400 font-medium">Render a premium Scan-to-Pay code automatically on bill previews and PDFs</span>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setPaymentQrEnabled(!paymentQrEnabled)}
+                className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${paymentQrEnabled ? 'bg-teal-500' : 'bg-slate-300'}`}
+              >
+                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-300 ${paymentQrEnabled ? 'left-7' : 'left-1'}`}></div>
+              </button>
+            </div>
+
+            {paymentQrEnabled && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                {/* Payment Method Select */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Payment Method</label>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-bold"
+                  >
+                    <option value="UPI">UPI (Unified Payments Interface - India)</option>
+                    <option value="bKash">bKash (Mobile Financial Service - Bangladesh)</option>
+                    <option value="Nagad">Nagad (Mobile Financial Service - Bangladesh)</option>
+                    <option value="Manual">Manual QR / Custom Payment Link</option>
+                  </select>
+                </div>
+
+                {/* Conditional Fields */}
+                {paymentMethod === 'UPI' && (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">UPI ID</label>
+                    <input
+                      type="text"
+                      value={upiId}
+                      onChange={(e) => setUpiId(e.target.value)}
+                      placeholder="e.g. business@okhdfcbank"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-bold"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1 font-semibold">Example: name@okaxis</p>
+                  </div>
+                )}
+
+                {paymentMethod === 'bKash' && (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">bKash Personal/Merchant Number</label>
+                    <input
+                      type="text"
+                      value={bkashNumber}
+                      onChange={(e) => setBkashNumber(e.target.value)}
+                      placeholder="e.g. 01XXXXXXXXX"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-bold"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1 font-semibold">11-digit Bangladeshi mobile number</p>
+                  </div>
+                )}
+
+                {paymentMethod === 'Nagad' && (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Nagad Account Number</label>
+                    <input
+                      type="text"
+                      value={nagadNumber}
+                      onChange={(e) => setNagadNumber(e.target.value)}
+                      placeholder="e.g. 01XXXXXXXXX"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-bold"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1 font-semibold">11-digit Bangladeshi mobile number</p>
+                  </div>
+                )}
+
+                {paymentMethod === 'Manual' && (
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Custom Payment Link / QR Text</label>
+                    <input
+                      type="text"
+                      value={customPaymentLink}
+                      onChange={(e) => setCustomPaymentLink(e.target.value)}
+                      placeholder="e.g. https://paypal.me/yourbusiness or any manual instructions"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-medium"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1 font-semibold">Custom text or URL to encode inside the QR code</p>
+                  </div>
+                )}
+
+                {/* Common Fields */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Payee / Business Name</label>
+                  <input
+                    type="text"
+                    value={payeeName}
+                    onChange={(e) => setPayeeName(e.target.value)}
+                    placeholder="e.g. BillQyro store"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-bold"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1 font-semibold">The name shown on the QR payment module</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Optional Payment Note</label>
+                  <input
+                    type="text"
+                    value={paymentNote}
+                    onChange={(e) => setPaymentNote(e.target.value)}
+                    placeholder="e.g. Please pay the due amount using the QR code."
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-medium"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1 font-semibold">Note shown under the QR code</p>
+                </div>
+
+                {/* PDF/Preview toggles */}
+                <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                  <div>
+                    <span className="text-xs font-bold text-slate-700 block">Show QR in PDF</span>
+                    <span className="text-[9px] text-slate-400 font-medium">Include payment QR code when downloading PDFs</span>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => setShowQrInPdf(!showQrInPdf)}
+                    className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${showQrInPdf ? 'bg-indigo-500' : 'bg-slate-300'}`}
+                  >
+                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-300 ${showQrInPdf ? 'left-7' : 'left-1'}`}></div>
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                  <div>
+                    <span className="text-xs font-bold text-slate-700 block">Show QR in Preview</span>
+                    <span className="text-[9px] text-slate-400 font-medium">Display payment QR code inside web invoice previews</span>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => setShowQrInPreview(!showQrInPreview)}
+                    className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${showQrInPreview ? 'bg-indigo-500' : 'bg-slate-300'}`}
+                  >
+                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-300 ${showQrInPreview ? 'left-7' : 'left-1'}`}></div>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Section 6: Appearance & Design */}
+        <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-premium">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <Palette className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-extrabold text-slate-800">Appearance & Branding</h2>
+              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Invoice templates & color schemes</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <div>
-              <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Scan-to-Pay UPI ID</label>
-              <input
-                type="text"
-                value={upiId}
-                onChange={(e) => setUpiId(e.target.value)}
-                placeholder="e.g. name@okhdfcbank"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-bold"
-              />
-              <p className="text-[10px] text-slate-400 mt-1.5 font-semibold">Adding this will print a Scan-to-Pay QR code on your PDF invoices.</p>
-            </div>
-
             <div>
               <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Invoice Template Style</label>
               <div className="relative">
@@ -571,8 +764,8 @@ const Settings = ({
                   onChange={(e) => setInvoiceTemplate(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 font-extrabold"
                 >
-                  <option value="modern">Modern SaaS Style</option>
-                  <option value="classic">Classic Minimalist</option>
+                  <option value="modern">Modern A4 Template</option>
+                  <option value="classic">Classic A5 Template</option>
                 </select>
               </div>
             </div>
@@ -604,7 +797,6 @@ const Settings = ({
                 ))}
               </div>
             </div>
-
           </div>
         </div>
 

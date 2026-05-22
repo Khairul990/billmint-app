@@ -282,6 +282,118 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
         </div>
       </div>
 
+      {/* 4.5. PREMIUM PAYMENT QR CARD (CLIENT VIEW) */}
+      {businessSettings?.paymentQrEnabled && businessSettings?.showQrInPreview && (
+        (() => {
+          const dueAmount = (invoice.balanceDue !== undefined && invoice.balanceDue !== null && invoice.balanceDue !== 0)
+            ? invoice.balanceDue
+            : invoice.grandTotal;
+          const paymentMethod = businessSettings.paymentMethod || 'UPI';
+          
+          let qrText = '';
+          if (paymentMethod === 'UPI') {
+            const upiId = businessSettings.upiId || '';
+            const payeeName = businessSettings.payeeName || businessSettings.businessName || '';
+            qrText = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${dueAmount}&cu=INR&tn=${invoice.invoiceNumber}`;
+          } else if (paymentMethod === 'bKash') {
+            const bkashNumber = businessSettings.bkashNumber || '';
+            qrText = `bKash Payment\nMerchant/Personal Number: ${bkashNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
+          } else if (paymentMethod === 'Nagad') {
+            const nagadNumber = businessSettings.nagadNumber || '';
+            qrText = `Nagad Payment\nNumber: ${nagadNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
+          } else if (paymentMethod === 'Manual') {
+            qrText = businessSettings.customPaymentLink || '';
+          }
+
+          if (!qrText) return null;
+
+          const encodedQrText = encodeURIComponent(qrText);
+          const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodedQrText}`;
+
+          return (
+            <div className="mt-8 p-6 md:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-teal-950 text-white shadow-xl relative overflow-hidden border border-slate-700/50 dark:border-slate-800/80">
+              {/* Subtle background glow */}
+              <div className="absolute -right-20 -bottom-20 w-60 h-60 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute -left-20 -top-20 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+              <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+                {/* QR Code Frame */}
+                <div className="p-3 bg-white rounded-2xl shadow-lg border border-white/10 shrink-0">
+                  <img 
+                    src={qrCodeUrl} 
+                    alt={`${paymentMethod} QR Code`} 
+                    className="w-32 h-32 object-contain rounded-lg"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/150x150?text=QR+Code";
+                    }}
+                  />
+                </div>
+
+                {/* Info details */}
+                <div className="flex-1 text-center md:text-left space-y-3 w-full">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-teal-350 bg-teal-500/10 px-2.5 py-1 rounded-full border border-teal-500/20">
+                      Scan to Pay with {paymentMethod}
+                    </span>
+                    <h4 className="text-xl font-extrabold tracking-tight mt-2 text-white">
+                      {businessSettings.payeeName || businessSettings.businessName || 'Business Payee'}
+                    </h4>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-xs">
+                    {paymentMethod === 'UPI' && businessSettings.upiId && (
+                      <div className="text-slate-300">
+                        <span className="font-bold text-[9px] uppercase tracking-wider block text-slate-500">UPI ID</span>
+                        <span className="font-mono text-slate-200 font-semibold break-all">{businessSettings.upiId}</span>
+                      </div>
+                    )}
+                    {paymentMethod === 'bKash' && businessSettings.bkashNumber && (
+                      <div className="text-slate-300">
+                        <span className="font-bold text-[9px] uppercase tracking-wider block text-slate-500">bKash Number</span>
+                        <span className="font-mono text-slate-200 font-semibold break-all">{businessSettings.bkashNumber}</span>
+                      </div>
+                    )}
+                    {paymentMethod === 'Nagad' && businessSettings.nagadNumber && (
+                      <div className="text-slate-300">
+                        <span className="font-bold text-[9px] uppercase tracking-wider block text-slate-500">Nagad Number</span>
+                        <span className="font-mono text-slate-200 font-semibold break-all">{businessSettings.nagadNumber}</span>
+                      </div>
+                    )}
+                    {paymentMethod === 'Manual' && businessSettings.customPaymentLink && (
+                      <div className="text-slate-300 col-span-2">
+                        <span className="font-bold text-[9px] uppercase tracking-wider block text-slate-500">Payment Details / Link</span>
+                        <span className="font-mono text-slate-200 font-semibold break-all truncate block max-w-md">{businessSettings.customPaymentLink}</span>
+                      </div>
+                    )}
+                    
+                    <div className="text-slate-300">
+                      <span className="font-bold text-[9px] uppercase tracking-wider block text-slate-500">Due Amount</span>
+                      <span className="font-extrabold text-sm text-teal-300">
+                        {formatCurrency(dueAmount, currencySymbol)}
+                      </span>
+                    </div>
+
+                    <div className="text-slate-300">
+                      <span className="font-bold text-[9px] uppercase tracking-wider block text-slate-500">Invoice Number</span>
+                      <span className="font-semibold text-slate-200">{invoice.invoiceNumber}</span>
+                    </div>
+                  </div>
+
+                  {businessSettings.paymentNote && (
+                    <div className="border-t border-white/10 pt-2.5 mt-1.5">
+                      <p className="text-[10px] text-slate-400 italic">
+                        Note: {businessSettings.paymentNote}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()
+      )}
+
       {/* 5. BRAND FOOTER SIGNATURE */}
       <div className="flex justify-center items-center gap-1.5 border-t border-slate-100/80 dark:border-slate-800/80 pt-8 mt-8 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
         <ShieldCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />

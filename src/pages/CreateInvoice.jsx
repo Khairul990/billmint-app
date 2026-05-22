@@ -30,9 +30,11 @@ import {
   BookOpen,
   UserPlus,
   Info,
-  Maximize2
+  Maximize2,
+  Printer
 } from 'lucide-react';
 import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber, autoIncrementString } from '../utils/invoiceUtils';
+import InvoicePreview from '../components/InvoicePreview';
 
 const ALL_FIELDS_BY_TEMPLATE = {
   embroidery: [
@@ -100,6 +102,7 @@ const CreateInvoice = ({
   const [pdfVisibleFields, setPdfVisibleFields] = useState(businessSettings?.pdfVisibleFields?.[businessSettings?.defaultBillingTemplate || 'custom'] || []);
   const [showPdfSettings, setShowPdfSettings] = useState(false);
   const [isSheetExpanded, setIsSheetExpanded] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
 
   const getExpandedGridCols = () => {
@@ -1526,7 +1529,7 @@ const CreateInvoice = ({
                 <span>Save Draft</span>
               </button>
               <button
-                onClick={() => {}}
+                onClick={() => setShowPreview(true)}
                 className="w-full py-4 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 text-[14px]"
               >
                 <Eye className="w-4 h-4" />
@@ -2089,6 +2092,135 @@ const CreateInvoice = ({
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* DYNAMIC ELEVEN-STAR PREVIEW MODAL OVERLAY */}
+      <AnimatePresence>
+        {showPreview && (
+          <div className="fixed inset-0 z-[110] overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 no-print">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="bg-slate-50 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative border border-white/10 max-h-[92vh] flex flex-col"
+            >
+              {/* Modal Top Actions Header Bar */}
+              <div className="bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-indigo-500" />
+                  <span className="font-extrabold text-slate-800 text-sm">
+                    {invoiceNumber || 'Draft'} - Live Preview Mode
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => window.print()}
+                    className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"
+                    title="Print Invoice"
+                  >
+                    <Printer className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (onDownloadPDF) {
+                        onDownloadPDF({
+                          invoiceNumber,
+                          date,
+                          dueDate,
+                          customerName: customerName || 'Client Name',
+                          customerPhone,
+                          customerEmail,
+                          customerAddress,
+                          items,
+                          taxPercentage,
+                          discountAmount,
+                          amountPaid,
+                          notes,
+                          terms,
+                          paymentStatus,
+                          orderStatus,
+                          subtotal,
+                          taxAmount,
+                          grandTotal,
+                          balanceDue
+                        });
+                      }
+                    }}
+                    className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"
+                    title="Download PDF"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
+                  <div className="w-px h-6 bg-slate-100 mx-1"></div>
+                  <button
+                    onClick={() => setShowPreview(false)}
+                    className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Scrollable Preview Wrapper */}
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50">
+                <InvoicePreview 
+                  invoice={{
+                    invoiceNumber,
+                    date,
+                    dueDate,
+                    customerName: customerName || 'Client Name',
+                    customerPhone,
+                    customerEmail,
+                    customerAddress,
+                    items,
+                    taxPercentage,
+                    discountAmount,
+                    amountPaid,
+                    notes,
+                    terms,
+                    paymentStatus,
+                    orderStatus,
+                    subtotal,
+                    taxAmount,
+                    grandTotal,
+                    balanceDue
+                  }}
+                  businessSettings={businessSettings}
+                />
+              </div>
+              
+              {/* Print Only Embedded Capture Zone */}
+              <div className="hidden print:block print:absolute print:inset-0 bg-white">
+                <InvoicePreview 
+                  invoice={{
+                    invoiceNumber,
+                    date,
+                    dueDate,
+                    customerName: customerName || 'Client Name',
+                    customerPhone,
+                    customerEmail,
+                    customerAddress,
+                    items,
+                    taxPercentage,
+                    discountAmount,
+                    amountPaid,
+                    notes,
+                    terms,
+                    paymentStatus,
+                    orderStatus,
+                    subtotal,
+                    taxAmount,
+                    grandTotal,
+                    balanceDue
+                  }}
+                  businessSettings={businessSettings}
+                />
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

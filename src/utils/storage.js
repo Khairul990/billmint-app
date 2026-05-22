@@ -33,7 +33,17 @@ const DEFAULT_SETTINGS = {
     repair: ['serviceName', 'problemDetails', 'partsCost', 'labourCharge', 'quantity', 'amount'],
     retail: ['productName', 'category', 'sizeVariant', 'quantity', 'price', 'discount', 'amount'],
     custom: ['itemService', 'description', 'quantity', 'rate', 'amount']
-  }
+  },
+  paymentQrEnabled: false,
+  paymentMethod: 'UPI',
+  upiId: '',
+  bkashNumber: '',
+  nagadNumber: '',
+  payeeName: '',
+  paymentNote: '',
+  showQrInPdf: true,
+  showQrInPreview: true,
+  customPaymentLink: ''
 };
 
 // Seed Data for Demo Mode (Quick Demo Start Only)
@@ -257,6 +267,16 @@ export const resetToDemoData = () => {
     defaultTax: 18,
     adminPasscode: '1118',
     adminEmail: getAdminEmail(),
+    paymentQrEnabled: true,
+    paymentMethod: 'UPI',
+    upiId: 'khairul2052007@okaxis',
+    bkashNumber: '01700000000',
+    nagadNumber: '01900000000',
+    payeeName: 'BillQyro Store',
+    paymentNote: 'Please scan using any UPI App to pay securely.',
+    showQrInPdf: true,
+    showQrInPreview: true,
+    customPaymentLink: 'https://pay.billqyro.com/direct-transfer'
   };
 
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(demoSettings));
