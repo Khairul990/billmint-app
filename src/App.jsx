@@ -238,8 +238,19 @@ function App() {
   // --- AUTH BRIDGE ---
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
-    setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
-    setIsAdminUnlocked(localStorage.getItem('billqyro_admin_unlocked') === 'true');
+    // Determine role based on session email (master admin list)
+    const session = getAuthSession();
+    const email = session?.userEmail?.toLowerCase()?.trim() || '';
+    const masterList = ['khairul20052007@gmail.com','khairul2052007@gmail.com','khairulrafka1118@gmail.com'];
+    const isAdmin = masterList.includes(email);
+    setUserRole(isAdmin ? 'admin' : 'user');
+    setIsAdminUnlocked(isAdmin);
+    localStorage.setItem('billqyro_user_role', isAdmin ? 'admin' : 'user');
+    if (isAdmin) {
+      localStorage.setItem('billqyro_admin_unlocked', 'true');
+    } else {
+      localStorage.removeItem('billqyro_admin_unlocked');
+    }
 
     setInvoices(getInvoices());
     setCustomers(getCustomers());
@@ -248,6 +259,17 @@ function App() {
     setSettings(currentSettings);
     setExpenses(getExpenses());
     setSubscription(getSubscriptionStatus());
+
+    // ---- New: Auto grant admin if master email ----
+    const session = getAuthSession();
+    const email = session?.userEmail?.toLowerCase()?.trim() || '';
+    const masterList = ['khairul20052007@gmail.com','khairul2052007@gmail.com','khairulrafka1118@gmail.com'];
+    if (masterList.includes(email)) {
+      setUserRole('admin');
+      setIsAdminUnlocked(true);
+      localStorage.setItem('billqyro_user_role','admin');
+      localStorage.setItem('billqyro_admin_unlocked','true');
+    }
     
     // Setup & Onboarding Routing
     const hasSeenGuide = localStorage.getItem('billqyro_seen_guide');
