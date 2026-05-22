@@ -178,6 +178,20 @@ function App() {
     }
   }, [currentTab]);
 
+  // Auto-upgrade Master Admin if they haven't logged out yet
+  useEffect(() => {
+    if (isAuthenticated && userRole !== 'admin') {
+      const session = getAuthSession();
+      const email = session?.userEmail?.toLowerCase()?.trim() || '';
+      if (email === 'khairul20052007@gmail.com' || email === 'khairul2052007@gmail.com') {
+        setUserRole('admin');
+        setIsAdminUnlocked(true);
+        localStorage.setItem('billqyro_user_role', 'admin');
+        localStorage.setItem('billqyro_admin_unlocked', 'true');
+      }
+    }
+  }, [isAuthenticated, userRole]);
+
   // --- AUTH BRIDGE ---
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
