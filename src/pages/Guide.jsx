@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
     Sparkles, ArrowRight, Settings, Users, Plus, ListChecks, FileDown, 
     BarChart3, CheckCircle2, Calculator, HelpCircle, FileText, LayoutDashboard, ChevronDown, MousePointer2
@@ -280,8 +281,26 @@ const Guide = ({ setCurrentTab }) => {
         { q: "What happens if internet/Firebase is offline?", a: "BillQyro works completely offline! All data is securely stored in your browser's LocalStorage and will sync automatically when you reconnect if Firebase is enabled." },
     ];
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: { staggerChildren: 0.1 }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
+    };
+
     return (
-        <div className="w-full bg-slate-50 min-h-screen py-8 px-4 md:px-8 font-sans antialiased">
+        <motion.div 
+            className="w-full bg-slate-50 min-h-screen py-8 px-4 md:px-8 font-sans antialiased"
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+        >
             <div className="max-w-5xl mx-auto space-y-12">
                 
                 {/* PAGE HEADER */}
@@ -299,7 +318,7 @@ const Guide = ({ setCurrentTab }) => {
                 </div>
 
                 {/* SECTION 1: Quick Start Overview */}
-                <div className="bg-white rounded-3xl p-6 md:p-10 shadow-premium border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+                <motion.div variants={itemVariants} className="bg-white rounded-3xl p-6 md:p-10 shadow-premium border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
                     
                     <div className="relative z-10 flex-1 space-y-4 text-center md:text-left">
@@ -330,10 +349,10 @@ const Guide = ({ setCurrentTab }) => {
                             <span>Complete Business Profile</span>
                         </button>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* NEW SECTION: Full First Bill Flow */}
-                <div className="space-y-6">
+                <motion.div variants={itemVariants} className="space-y-6">
                     <h2 className="text-2xl font-extrabold text-slate-900 px-2 text-center md:text-left">Full First Bill Flow</h2>
                     <div className="bg-white rounded-3xl p-6 md:p-10 shadow-premium border border-slate-100 overflow-x-auto">
                         <div className="flex items-center min-w-[700px] justify-between text-center gap-2">
@@ -391,18 +410,18 @@ const Guide = ({ setCurrentTab }) => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
 
                 {/* SECTION 2: Visual Step-by-Step Guide */}
-                <div className="space-y-8">
+                <motion.div variants={itemVariants} className="space-y-8">
                     <h2 className="text-2xl font-extrabold text-slate-900 px-2">Visual Step-by-Step Guide</h2>
                     
-                    <div className="space-y-6">
+                    <motion.div variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} className="space-y-6">
                         {steps.map((step, index) => {
                             const isEven = index % 2 !== 0;
                             return (
-                                <div key={step.id} className={`bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-slate-100 flex flex-col ${isEven ? 'md:flex-row-reverse' : 'md:flex-row'} items-stretch gap-8 hover:shadow-premium-hover hover:border-teal-100 transition-all duration-300`}>
+                                <motion.div variants={itemVariants} key={step.id} className={`bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-slate-100 flex flex-col ${isEven ? 'md:flex-row-reverse' : 'md:flex-row'} items-stretch gap-8 hover:shadow-premium-hover hover:border-teal-100 transition-all duration-300`}>
                                     
                                     {/* Text Content */}
                                     <div className="flex-1 flex flex-col justify-center space-y-5">
@@ -448,14 +467,14 @@ const Guide = ({ setCurrentTab }) => {
                                         </div>
                                     </div>
 
-                                </div>
+                                </motion.div>
                             );
                         })}
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
 
                 {/* SECTION 3: First Bill Example Calculation */}
-                <div className="bg-[#071B3A] rounded-[2rem] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
+                <motion.div variants={itemVariants} className="bg-[#071B3A] rounded-[2rem] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-teal-400/10 rounded-full blur-3xl pointer-events-none"></div>
                     
                     <div className="flex flex-col md:flex-row gap-8 items-center relative z-10">
@@ -502,20 +521,20 @@ const Guide = ({ setCurrentTab }) => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* SECTION 4: Common Questions */}
-                <div className="space-y-6">
+                <motion.div variants={itemVariants} className="space-y-6">
                     <h2 className="text-2xl font-extrabold text-slate-900 px-2 text-center md:text-left">Common Questions</h2>
                     <div className="max-w-3xl mx-auto md:mx-0">
                         {faqs.map((faq, idx) => (
                             <FAQItem key={idx} question={faq.q} answer={faq.a} />
                         ))}
                     </div>
-                </div>
+                </motion.div>
 
                 {/* SECTION 5: Final CTA */}
-                <div className="bg-gradient-to-r from-teal-500 to-emerald-500 rounded-[2rem] p-8 md:p-12 text-center text-white shadow-xl shadow-teal-500/20 relative overflow-hidden">
+                <motion.div variants={itemVariants} className="bg-gradient-to-r from-teal-500 to-emerald-500 rounded-[2rem] p-8 md:p-12 text-center text-white shadow-xl shadow-teal-500/20 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
 
@@ -543,10 +562,10 @@ const Guide = ({ setCurrentTab }) => {
                             </button>
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
             </div>
-        </div>
+        </motion.div>
     );
 };
 

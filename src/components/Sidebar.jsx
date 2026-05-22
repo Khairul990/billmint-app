@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { LayoutDashboard, FileSpreadsheet, Users, Layers, Shield, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
 import { logout } from '../utils/storage';
 import Logo from './Logo';
@@ -42,20 +43,22 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
           const isActive = currentTab === item.id || (item.id === 'invoices' && currentTab === 'create-invoice');
           
           return (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
               key={item.id}
               onClick={() => setCurrentTab(item.id)}
-              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group cursor-pointer ${
+              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group cursor-pointer ${
                 isActive 
-                  ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-md shadow-teal-500/20' 
+                  ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-[0_0_20px_rgba(20,184,166,0.4)]' 
                   : 'text-slate-400 hover:text-white hover:bg-[#14284B]'
               }`}
             >
-              <Icon className={`w-5 h-5 transition-transform group-hover:scale-105 ${
-                isActive ? 'text-white' : 'text-slate-500 group-hover:text-teal-400'
+              <Icon className={`w-5 h-5 transition-transform duration-300 ${
+                isActive ? 'text-white scale-110' : 'text-slate-500 group-hover:text-teal-400 group-hover:scale-110'
               }`} />
               <span>{item.label}</span>
-            </button>
+            </motion.button>
           );
         })}
       </nav>

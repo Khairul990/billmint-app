@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
   Trash2, 
@@ -440,8 +441,32 @@ const CreateInvoice = ({
 
   const [showBanner, setShowBanner] = useState(true);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
+  };
+
+  const modalVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    show: { opacity: 1, scale: 1, transition: { duration: 0.2, ease: 'easeOut' } },
+    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2, ease: 'easeIn' } }
+  };
+
   return (
-    <div className="space-y-6 pb-20">
+    <motion.div 
+      className="space-y-6 pb-20"
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+    >
       
       {/* Help Banner */}
       {showBanner && (
@@ -1618,11 +1643,16 @@ const CreateInvoice = ({
         </div>
       )}
 
-      
-      {/* Expand Sheet Modal */}
-      {isSheetExpanded && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-0 md:p-6 overflow-hidden">
-          <div className="bg-white md:rounded-3xl shadow-2xl w-full h-full md:w-[98vw] md:max-w-[1550px] md:h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      {/* --- MODAL 2: EXPANDED INVOICE ITEMS SHEET --- */}
+      <AnimatePresence>
+        {isSheetExpanded && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white md:rounded-3xl shadow-2xl w-full h-full md:w-[98vw] md:max-w-[1550px] md:h-[90vh] flex flex-col overflow-hidden"
+            >
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-[#071B3A] to-[#0d2b55] px-4 md:px-6 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
@@ -1883,8 +1913,8 @@ const CreateInvoice = ({
                 </div>
               </div>
             </div>
-          </div>
-
+            </div>
+            
             {/* Modal Footer */}
             <div className="bg-white border-t border-slate-200 px-4 md:px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 shrink-0 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
               <div className="flex gap-6 w-full md:w-auto justify-between md:justify-start">
@@ -1915,59 +1945,21 @@ const CreateInvoice = ({
                 </button>
               </div>
             </div>
-
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
-      {/* Customize PDF Fields Modal */}
-      {showPdfSettings && (() => {
-        const ALL_FIELDS_BY_TEMPLATE = {
-          embroidery: [
-            { key: 'designNo', label: 'Design / Item Code' },
-            { key: 'workType', label: 'Work Type' },
-            { key: 'description', label: 'Description' },
-            { key: 'size', label: 'Size' },
-            { key: 'qty', label: 'Quantity' },
-            { key: 'rate', label: 'Rate' },
-            { key: 'amount', label: 'Amount' },
-          ],
-          grocery: [
-            { key: 'description', label: 'Product Name' },
-            { key: 'size', label: 'Unit' },
-            { key: 'qty', label: 'Quantity' },
-            { key: 'rate', label: 'Unit Price' },
-            { key: 'amount', label: 'Amount' },
-          ],
-          repair: [
-            { key: 'serviceName', label: 'Service / Item' },
-            { key: 'problemDetails', label: 'Problem / Details' },
-            { key: 'partsCost', label: 'Parts Cost' },
-            { key: 'labourCharge', label: 'Labour Charge' },
-            { key: 'qty', label: 'Quantity' },
-            { key: 'amount', label: 'Amount' },
-          ],
-          retail: [
-            { key: 'productName', label: 'Product Name' },
-            { key: 'category', label: 'Category' },
-            { key: 'sizeVariant', label: 'Size / Variant' },
-            { key: 'qty', label: 'Quantity' },
-            { key: 'price', label: 'Price' },
-            { key: 'discount', label: 'Discount' },
-            { key: 'amount', label: 'Amount' },
-          ],
-          custom: [
-            { key: 'itemService', label: 'Item / Service' },
-            { key: 'description', label: 'Description' },
-            { key: 'qty', label: 'Quantity' },
-            { key: 'rate', label: 'Rate' },
-            { key: 'amount', label: 'Amount' },
-          ],
-        };
-        const fields = ALL_FIELDS_BY_TEMPLATE[billType] || ALL_FIELDS_BY_TEMPLATE['custom'];
-        return (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 space-y-5">
+      {/* --- MODAL 3: PDF VISIBLE FIELDS CUSTOMIZER --- */}
+      <AnimatePresence>
+        {showPdfSettings && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 space-y-5"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-extrabold text-slate-800">Customize PDF Fields</h3>
@@ -1981,34 +1973,79 @@ const CreateInvoice = ({
                 Select which columns will be <strong>visible in the PDF invoice</strong>. Uncheck to hide a column from the printed bill.
               </p>
               <div className="space-y-3">
-                {fields.map((field) => {
-                  const isChecked = pdfVisibleFields.length === 0 || pdfVisibleFields.includes(field.key);
-                  return (
-                    <label key={field.key} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 cursor-pointer border border-slate-100 transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setPdfVisibleFields(prev => prev.length === 0
-                              ? fields.filter(f => f.key !== field.key).map(f => f.key).concat(field.key)
-                              : [...prev, field.key]
-                            );
-                          } else {
-                            const allKeys = fields.map(f => f.key);
-                            const currentVisible = pdfVisibleFields.length === 0 ? allKeys : pdfVisibleFields;
-                            setPdfVisibleFields(currentVisible.filter(k => k !== field.key));
-                          }
-                        }}
-                        className="w-4 h-4 rounded accent-teal-500 cursor-pointer"
-                      />
-                      <span className="text-sm font-semibold text-slate-700">{field.label}</span>
-                      {field.key === 'amount' && (
-                        <span className="ml-auto text-[9px] font-bold text-slate-300 uppercase">Always shown</span>
-                      )}
-                    </label>
-                  );
-                })}
+                {(() => {
+                  const ALL_FIELDS_BY_TEMPLATE = {
+                    embroidery: [
+                      { key: 'designNo', label: 'Design / Item Code' },
+                      { key: 'workType', label: 'Work Type' },
+                      { key: 'description', label: 'Description' },
+                      { key: 'size', label: 'Size' },
+                      { key: 'qty', label: 'Quantity' },
+                      { key: 'rate', label: 'Rate' },
+                      { key: 'amount', label: 'Amount' },
+                    ],
+                    grocery: [
+                      { key: 'description', label: 'Product Name' },
+                      { key: 'size', label: 'Unit' },
+                      { key: 'qty', label: 'Quantity' },
+                      { key: 'rate', label: 'Unit Price' },
+                      { key: 'amount', label: 'Amount' },
+                    ],
+                    repair: [
+                      { key: 'serviceName', label: 'Service / Item' },
+                      { key: 'problemDetails', label: 'Problem / Details' },
+                      { key: 'partsCost', label: 'Parts Cost' },
+                      { key: 'labourCharge', label: 'Labour Charge' },
+                      { key: 'qty', label: 'Quantity' },
+                      { key: 'amount', label: 'Amount' },
+                    ],
+                    retail: [
+                      { key: 'productName', label: 'Product Name' },
+                      { key: 'category', label: 'Category' },
+                      { key: 'sizeVariant', label: 'Size / Variant' },
+                      { key: 'qty', label: 'Quantity' },
+                      { key: 'price', label: 'Price' },
+                      { key: 'discount', label: 'Discount' },
+                      { key: 'amount', label: 'Amount' },
+                    ],
+                    custom: [
+                      { key: 'itemService', label: 'Item / Service' },
+                      { key: 'description', label: 'Description' },
+                      { key: 'qty', label: 'Quantity' },
+                      { key: 'rate', label: 'Rate' },
+                      { key: 'amount', label: 'Amount' },
+                    ],
+                  };
+                  const fields = ALL_FIELDS_BY_TEMPLATE[billType] || ALL_FIELDS_BY_TEMPLATE['custom'];
+                  return fields.map((field) => {
+                    const isChecked = pdfVisibleFields.length === 0 || pdfVisibleFields.includes(field.key);
+                    return (
+                      <label key={field.key} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 cursor-pointer border border-slate-100 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setPdfVisibleFields(prev => prev.length === 0
+                                ? fields.filter(f => f.key !== field.key).map(f => f.key).concat(field.key)
+                                : [...prev, field.key]
+                              );
+                            } else {
+                              const allKeys = fields.map(f => f.key);
+                              const currentVisible = pdfVisibleFields.length === 0 ? allKeys : pdfVisibleFields;
+                              setPdfVisibleFields(currentVisible.filter(k => k !== field.key));
+                            }
+                          }}
+                          className="w-4 h-4 rounded accent-teal-500 cursor-pointer"
+                        />
+                        <span className="text-sm font-semibold text-slate-700">{field.label}</span>
+                        {field.key === 'amount' && (
+                          <span className="ml-auto text-[9px] font-bold text-slate-300 uppercase">Always shown</span>
+                        )}
+                      </label>
+                    );
+                  });
+                })()}
               </div>
               <div className="flex gap-3 pt-2 border-t border-slate-100">
                 <button
@@ -2024,12 +2061,12 @@ const CreateInvoice = ({
                   Save & Close
                 </button>
               </div>
-            </div>
+            </motion.div>
           </div>
-        );
-      })()}
+        )}
+      </AnimatePresence>
 
-    </div>
+    </motion.div>
   );
 };
 

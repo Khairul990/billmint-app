@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import StatCard from '../components/StatCard';
 import InvoiceCard from '../components/InvoiceCard';
@@ -135,11 +136,32 @@ const Dashboard = ({
   };
   const tplInfo = getTemplateInfo(businessSettings?.defaultBillingTemplate);
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
+  };
+
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <motion.div 
+      className="space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+    >
 
       {/* 0. WELCOME HERO BANNER */}
-      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-[#071B3A] to-[#19C3A3] text-white relative overflow-hidden shadow-premium border border-slate-800/80">
+      <motion.div variants={itemVariants} className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-[#071B3A] to-[#19C3A3] text-white relative overflow-hidden shadow-premium border border-slate-800/80">
         <div className="absolute -top-24 -right-24 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -165,11 +187,11 @@ const Dashboard = ({
             <span>Create Bill</span>
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* 0.1 EMPTY STATE — NEW USER WELCOME (Shown when zero invoices) */}
       {isNewUser && (
-        <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 border border-emerald-200/60 dark:border-emerald-800/30 shadow-premium text-center relative overflow-hidden">
+        <motion.div variants={itemVariants} className="p-6 md:p-8 rounded-3xl bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 border border-emerald-200/60 dark:border-emerald-800/30 shadow-premium text-center relative overflow-hidden">
           <div className="absolute -top-16 -right-16 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -200,11 +222,11 @@ const Dashboard = ({
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* 0.15 CURRENT BILLING SETUP CARD */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800/80 shadow-premium flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800/80 shadow-premium flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20">
             <LayoutDashboard className="w-6 h-6 text-white" />
@@ -243,10 +265,10 @@ const Dashboard = ({
             <span>Create Bill</span>
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* 0.2 HOW TO USE BILLQYRO GUIDE + SYSTEM HEALTH */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* New "How to Use BillQyro" Guide (Col Span 2) */}
         <div className="lg:col-span-2">
@@ -382,7 +404,7 @@ const Dashboard = ({
           </div>
         </div>
 
-      </div>
+      </motion.div>
 
       {/* 0.3 SETUP PROGRESS TRACKER */}
       <SetupProgress
@@ -698,7 +720,7 @@ const Dashboard = ({
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 };
 

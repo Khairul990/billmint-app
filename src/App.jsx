@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Toaster, toast } from 'react-hot-toast';
+import { AnimatePresence, motion } from 'framer-motion';
 import Login from './pages/Login';
 import WelcomeOnboarding from './pages/WelcomeOnboarding';
 import SetupBilling from './pages/SetupBilling';
@@ -218,7 +220,7 @@ function App() {
   const handleSaveInvoice = async (payload, saveCustomerAsNew = false) => {
     const isNew = !payload.id || !invoices.some(inv => inv.id === payload.id);
     if (isNew && subscription.status !== 'premium' && invoices.length >= 5) {
-      alert('⚠️ Free tier limit reached: You can create a maximum of 5 invoices. Please upgrade to the Premium Plan to unlock unlimited invoicing!');
+      toast.error('Free tier limit reached: You can create a maximum of 5 invoices. Please upgrade to the Premium Plan to unlock unlimited invoicing!', { duration: 5000 });
       setCurrentTab('subscription');
       return;
     }
@@ -238,37 +240,57 @@ function App() {
     }
     
     if (firebaseStatus === 'failed') {
-      alert('Invoice created successfully. (Saved locally. Firebase sync pending.)');
+      toast.success('Invoice created successfully. (Saved locally. Firebase sync pending.)');
     } else {
-      alert('Invoice created successfully');
+      toast.success('Invoice created successfully');
     }
     
     setEditingInvoice(null);
     setCurrentTab('invoices');
   };
 
-  const handleDeleteInvoice = (id) => {
-    if (confirm('Are you sure you want to delete this invoice? This action is permanent.')) {
-      const updated = deleteInvoice(id);
-      setInvoices(updated);
+  const handleDeleteInvoice = async (id) => {
+    if (window.confirm('Are you sure you want to delete this invoice? This action is permanent.')) {
+      const { updatedInvoices, firebaseStatus } = await deleteInvoice(id);
+      setInvoices(updatedInvoices);
+      if (firebaseStatus === 'failed') {
+        toast.success('Invoice deleted locally. Will sync with cloud when online.');
+      } else {
+        toast.success('Invoice deleted successfully');
+      }
     }
   };
 
   // Customers
-  const handleSaveCustomer = (payload) => {
-    const updated = saveCustomer(payload);
-    setCustomers(updated);
+  const handleSaveCustomer = async (payload) => {
+    try {
+      const updated = await saveCustomer(payload);
+      setCustomers(updated);
+      toast.success('Customer saved successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to save customer');
+    }
   };
 
-  const handleDeleteCustomer = (id) => {
-    const updated = deleteCustomer(id);
-    setCustomers(updated);
+  const handleDeleteCustomer = async (id) => {
+    if (window.confirm('Are you sure you want to delete this customer?')) {
+      const updatedCustomers = await deleteCustomer(id);
+      setCustomers(updatedCustomers);
+      toast.success('Customer deleted');
+    }
   };
 
   // Products
-  const handleSaveProduct = (payload) => {
-    const updated = saveProduct(payload);
-    setProducts(updated);
+  const handleSaveProduct = async (payload) => {
+    try {
+      const updatedProducts = await saveProduct(payload);
+      setProducts(updatedProducts);
+      toast.success('Product/Service saved successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to save product');
+    }
   };
 
   const handleDeleteProduct = (id) => {
@@ -277,9 +299,15 @@ function App() {
   };
 
   // Expenses
-  const handleSaveExpense = (payload) => {
-    const updated = saveExpense(payload);
-    setExpenses(updated);
+  const handleSaveExpense = async (payload) => {
+    try {
+      const updatedExpenses = await saveExpense(payload);
+      setExpenses(updatedExpenses);
+      toast.success('Expense saved successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to save expense');
+    }
   };
 
   const handleDeleteExpense = (id) => {
@@ -294,9 +322,15 @@ function App() {
   };
 
   // Settings
-  const handleSaveSettings = (payload) => {
-    const updated = saveSettings(payload);
-    setSettings(updated);
+  const handleSaveSettings = async (payload) => {
+    try {
+      const updatedSettings = await saveSettings(payload);
+      setSettings(updatedSettings);
+      toast.success('Settings saved successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to save settings');
+    }
   };
 
   // Reset System Data
@@ -308,6 +342,7 @@ function App() {
     setInvoices(freshData.invoices);
     setExpenses(freshData.expenses);
     setSubscription(freshData.subscription);
+    toast.success('Demo data has been reset!');
     setCurrentTab('dashboard');
   };
 
@@ -517,8 +552,26 @@ function App() {
         isAuthenticated={isAuthenticated}
         userRole={userRole}
       >
-        {renderTabContent()}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentTab}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="w-full h-full"
+          >
+            {renderTabContent()}
+          </motion.div>
+        </AnimatePresence>
       </Layout>
+      <Toaster 
+        position="bottom-right" 
+        toastOptions={{ 
+          className: 'text-sm font-bold',
+          style: { borderRadius: '12px', background: '#fff', color: '#1e293b' }
+        }} 
+      />
     </ErrorBoundary>
   );
 }
