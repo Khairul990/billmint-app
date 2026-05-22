@@ -122,7 +122,7 @@ function App() {
             const emailLower = email.toLowerCase().trim();
             const settings = getSettings() || {};
             const activeAdminEmail = settings.adminEmail || 'Khairul20052007@gmail.com';
-            const isMasterAdmin = emailLower === 'khairul20052007@gmail.com' || emailLower === 'khairul2052007@gmail.com';
+            const isMasterAdmin = emailLower === 'khairul20052007@gmail.com' || emailLower === 'khairul2052007@gmail.com' || emailLower === 'khairulrafka1118@gmail.com';
             const isAdmin = (emailLower === activeAdminEmail.toLowerCase()) || isMasterAdmin;
             
             const newSession = { 
@@ -226,7 +226,7 @@ function App() {
     if (isAuthenticated && userRole !== 'admin') {
       const session = getAuthSession();
       const email = session?.userEmail?.toLowerCase()?.trim() || '';
-      if (email === 'khairul20052007@gmail.com' || email === 'khairul2052007@gmail.com') {
+      if (email === 'khairul20052007@gmail.com' || email === 'khairul2052007@gmail.com' || email === 'khairulrafka1118@gmail.com') {
         setUserRole('admin');
         setIsAdminUnlocked(true);
         localStorage.setItem('billqyro_user_role', 'admin');

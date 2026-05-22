@@ -310,7 +310,7 @@ export const login = (passcodeOrEmail) => {
   const targetEmail = activeSettings.adminEmail || 'Khairul20052007@gmail.com';
 
   const inputStr = String(passcodeOrEmail).toLowerCase().trim();
-  const isMasterAdmin = inputStr === 'khairul20052007@gmail.com' || inputStr === 'khairul2052007@gmail.com';
+  const isMasterAdmin = inputStr === 'khairul20052007@gmail.com' || inputStr === 'khairul2052007@gmail.com' || inputStr === 'khairulrafka1118@gmail.com';
   const isEmailMatch = inputStr === targetEmail.toLowerCase();
   const isPasscodeMatch = String(passcodeOrEmail) === targetPasscode;
 

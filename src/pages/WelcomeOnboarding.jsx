@@ -74,7 +74,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
 
     setTimeout(() => {
       const emailLower = userEmail.toLowerCase().trim();
-      const isMasterAdmin = emailLower === 'khairul20052007@gmail.com' || emailLower === 'khairul2052007@gmail.com';
+      const isMasterAdmin = emailLower === 'khairul20052007@gmail.com' || emailLower === 'khairul2052007@gmail.com' || emailLower === 'khairulrafka1118@gmail.com';
       const isAdmin = (userPassword === activePasscode) || (emailLower === activeAdminEmail.toLowerCase()) || isMasterAdmin;
       
       const session = { 
