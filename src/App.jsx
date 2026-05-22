@@ -584,7 +584,22 @@ function App() {
           setCurrentTab('dashboard');
           return null;
         }
-        // Admin is authenticated; render admin UI.
+        // If admin panel not unlocked, show unlock dialog
+        if (!isAdminUnlocked) {
+          return (
+            <AdminUnlock
+              onUnlock={() => {
+                setIsAdminUnlocked(true);
+                localStorage.setItem('billqyro_admin_unlocked', 'true');
+                setCurrentTab('admin-panel');
+              }}
+              onCancel={() => {
+                setCurrentTab('dashboard');
+              }}
+            />
+          );
+        }
+        // Admin is authenticated and unlocked; render admin UI.
         return (
           <AdminSettings
             settings={settings}
