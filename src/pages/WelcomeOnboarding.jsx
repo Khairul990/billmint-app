@@ -3,6 +3,7 @@ import { Mail, Lock, ArrowRight, ShieldCheck, Globe, Star, Quote } from 'lucide-
 import { motion } from 'framer-motion';
 import Logo from '../components/Logo';
 import { getSettings } from '../utils/storage';
+import { isAdmin } from '../utils/adminAccess';
 import { auth, firebaseReady } from '../utils/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
@@ -70,12 +71,10 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
   const processLocalLogin = (userEmail, userPassword) => {
     const settings = getSettings();
     const activePasscode = settings?.adminPasscode || '1118';
-    const activeAdminEmail = settings?.adminEmail || 'Khairul20052007@gmail.com';
-
+    // activeAdminEmail removed; isAdmin will use env or fallback
     setTimeout(() => {
       const emailLower = userEmail.toLowerCase().trim();
-      const isMasterAdmin = emailLower === 'khairul20052007@gmail.com' || emailLower === 'khairul2052007@gmail.com' || emailLower === 'khairulrafka1118@gmail.com';
-      const isAdmin = (userPassword === activePasscode) || (emailLower === activeAdminEmail.toLowerCase()) || isMasterAdmin;
+      const isAdminUser = isAdmin(emailLower) || (userPassword === activePasscode);
       
       const session = { 
         timestamp: Date.now(), 
@@ -84,9 +83,9 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
       };
       
       localStorage.setItem('billqyro_auth', JSON.stringify(session));
-      localStorage.setItem('billqyro_user_role', isAdmin ? 'admin' : 'user');
+      localStorage.setItem('billqyro_user_role', isAdminUser ? 'admin' : 'user');
       
-      if (isAdmin) {
+      if (isAdminUser) {
         localStorage.setItem('billqyro_admin_unlocked', 'true');
       } else {
         localStorage.removeItem('billqyro_admin_unlocked');

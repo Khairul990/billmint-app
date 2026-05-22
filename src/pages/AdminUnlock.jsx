@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { KeyRound, ShieldAlert, AlertCircle } from 'lucide-react';
 import { getSettings } from '../utils/storage';
+import { isAdmin } from '../utils/adminAccess';
 
 const AdminUnlock = ({ onUnlock, onCancel }) => {
   const [passcode, setPasscode] = useState('');
@@ -10,12 +11,9 @@ const AdminUnlock = ({ onUnlock, onCancel }) => {
     e.preventDefault();
     const settings = getSettings();
     const activePasscode = settings?.adminPasscode || '1118';
-    const activeEmail = settings?.adminEmail || 'Khairul20052007@gmail.com';
-
-    const inputStr = String(passcode).toLowerCase().trim();
-    const isMasterAdmin = inputStr === 'khairul20052007@gmail.com' || inputStr === 'khairul2052007@gmail.com';
-
-    if (passcode === activePasscode || inputStr === activeEmail.toLowerCase() || isMasterAdmin) {
+    const trimmedInput = passcode.trim();
+    const isEmail = trimmedInput.includes('@');
+    if (trimmedInput === activePasscode || (isEmail && isAdmin(trimmedInput))) {
       onUnlock();
     } else {
       setError('Incorrect admin passcode or email.');

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { LayoutDashboard, FileSpreadsheet, Users, Layers, Shield, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
 import { logout } from '../utils/storage';
 import Logo from './Logo';
+import { isAdmin } from '../utils/adminAccess';
 
 /**
  * Desktop Sidebar Navigation
@@ -16,7 +17,7 @@ import Logo from './Logo';
 const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole }) => {
   const authData = JSON.parse(localStorage.getItem('billqyro_auth') || '{}');
   const loggedInEmail = authData?.userEmail || '';
-  const isOwner = loggedInEmail.toLowerCase() === 'khairul20052007@gmail.com' || loggedInEmail.toLowerCase() === 'khairul2052007@gmail.com' || loggedInEmail.toLowerCase() === 'khairulrafka1118@gmail.com';
+  const isOwner = isAdmin(loggedInEmail);
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },

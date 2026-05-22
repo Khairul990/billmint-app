@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ADMIN_EMAIL } from '../utils/adminAccess';
 import { 
   Settings as SettingsIcon, 
   Save, 
@@ -86,7 +87,7 @@ const AdminSettings = ({ settings, invoices = [], customers = [], onSaveSettings
   const [currency, setCurrency] = useState('₹');
   const [defaultTax, setDefaultTax] = useState(18);
   const [adminPasscode, setAdminPasscode] = useState('1118');
-  const [adminEmail, setAdminEmail] = useState('Khairul20052007@gmail.com');
+  const [adminEmail, setAdminEmail] = useState(ADMIN_EMAIL);
   // New admin control states
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [autoEmail, setAutoEmail] = useState(true);
@@ -104,7 +105,7 @@ const AdminSettings = ({ settings, invoices = [], customers = [], onSaveSettings
       setCurrency(settings.currency || '₹');
       setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 18);
       setAdminPasscode(settings.adminPasscode || '1118');
-      setAdminEmail(settings.adminEmail || 'Khairul20052007@gmail.com');
+      setAdminEmail(settings.adminEmail || ADMIN_EMAIL);
     }
   }, [settings]);
 
