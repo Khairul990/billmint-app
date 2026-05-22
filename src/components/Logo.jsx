@@ -12,7 +12,7 @@ import React from 'react';
  * @param {string} type - 'icon' | 'horizontal' | 'app-icon'
  * @param {string} className - additional sizing / layout classes
  */
-const Logo = ({ type = 'horizontal', className = '' }) => {
+const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false }) => {
   // Brand color gradients & assets definitions
   const defs = (
     <defs>
@@ -107,7 +107,7 @@ const Logo = ({ type = 'horizontal', className = '' }) => {
       <div className="flex flex-col select-none">
         <div className="flex items-baseline leading-none">
           {/* Bill text */}
-          <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight transition-colors duration-300">
+          <span className={`text-xl font-black ${forceWhiteText ? 'text-white' : 'text-slate-900 dark:text-white'} tracking-tight transition-colors duration-300`}>
             Bill
           </span>
           {/* Qyro text with custom superscript accent leaf */}
@@ -125,7 +125,7 @@ const Logo = ({ type = 'horizontal', className = '' }) => {
         </div>
         
         {/* Tagline under brand name with elegant green horizontal lines */}
-        <span className="text-[6.5px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest mt-1.5 flex items-center gap-1.5 leading-none">
+        <span className={`text-[6.5px] font-black uppercase ${forceWhiteText ? 'text-slate-300' : 'text-slate-400 dark:text-slate-500'} tracking-widest mt-1.5 flex items-center gap-1.5 leading-none`}>
           <span className="h-[1px] w-2 bg-emerald-500/50 dark:bg-emerald-400/30"></span>
           MODERN BILLING &amp; INVOICING PLATFORM
           <span className="h-[1px] w-2 bg-emerald-500/50 dark:bg-emerald-400/30"></span>

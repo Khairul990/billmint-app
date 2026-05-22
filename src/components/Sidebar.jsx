@@ -33,7 +33,7 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
     <aside className="hidden md:flex flex-col w-64 bg-[#071B3A] border-r border-slate-800 h-screen sticky top-0 left-0 z-30 shadow-2xl transition-all duration-300">
       {/* Brand Header */}
       <div className="p-6 border-b border-[#14284B] flex items-center">
-        <Logo type="horizontal" />
+        <Logo type="horizontal" forceWhiteText={true} />
       </div>
 
       {/* Nav Menu */}
