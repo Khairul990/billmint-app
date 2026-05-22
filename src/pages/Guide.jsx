@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Sparkles, ArrowRight, Settings, Users, Plus, ListChecks, FileDown, 
     BarChart3, CheckCircle2, Calculator, HelpCircle, FileText, LayoutDashboard, ChevronDown, MousePointer2
@@ -184,6 +184,7 @@ const UIDashboardMockup = () => (
  * Main Visual User Guide Component
  */
 const Guide = ({ setCurrentTab }) => {
+    const [activeStep, setActiveStep] = useState(1);
 
     const steps = [
         {
@@ -419,62 +420,105 @@ const Guide = ({ setCurrentTab }) => {
 
                 {/* SECTION 2: Visual Step-by-Step Guide */}
                 <motion.div variants={itemVariants} className="space-y-8">
-                    <h2 className="text-2xl font-extrabold text-slate-900 px-2">Visual Step-by-Step Guide</h2>
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
+                        <div>
+                            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Interactive Guide</h2>
+                            <p className="text-sm text-slate-500 font-medium mt-1">Click on the steps to see how each feature works.</p>
+                        </div>
+                        <div className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-400 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
+                            <MousePointer2 className="w-3.5 h-3.5" />
+                            Interactive Mode
+                        </div>
+                    </div>
                     
-                    <motion.div variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} className="space-y-6">
-                        {steps.map((step, index) => {
-                            const isEven = index % 2 !== 0;
-                            return (
-                                <motion.div variants={itemVariants} key={step.id} className={`bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-slate-100 flex flex-col ${isEven ? 'md:flex-row-reverse' : 'md:flex-row'} items-stretch gap-8 hover:shadow-premium-hover hover:border-teal-100 transition-all duration-300`}>
-                                    
-                                    {/* Text Content */}
-                                    <div className="flex-1 flex flex-col justify-center space-y-5">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-10 h-10 rounded-full ${step.bg} ${step.color} flex items-center justify-center font-black text-lg shadow-sm border border-white/50`}>
-                                                {step.id}
+                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch">
+                        {/* LEFT: Stepper List */}
+                        <div className="w-full lg:w-5/12 flex flex-col gap-2.5">
+                            {steps.map((step) => {
+                                const isActive = activeStep === step.id;
+                                
+                                return (
+                                    <div 
+                                        key={step.id}
+                                        onClick={() => setActiveStep(step.id)}
+                                        className={`p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200 flex items-center gap-4 group ${isActive ? 'bg-white shadow-md border-slate-200 scale-[1.02]' : 'border-transparent hover:bg-white/60 hover:border-slate-200/50'}`}
+                                    >
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm shrink-0 transition-colors ${isActive ? `${step.bg} ${step.color} shadow-sm border border-white/50` : 'bg-slate-200 text-slate-500 group-hover:bg-slate-300'}`}>
+                                            {step.id}
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className={`font-extrabold text-sm md:text-base ${isActive ? 'text-slate-900' : 'text-slate-600 group-hover:text-slate-800'}`}>
+                                                {step.title}
+                                            </h3>
+                                            {!isActive && (
+                                                <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">{step.explanation}</p>
+                                            )}
+                                        </div>
+                                        <ChevronDown className={`w-5 h-5 text-slate-300 transition-transform ${isActive ? '-rotate-90' : '-rotate-90 opacity-0 group-hover:opacity-100'}`} />
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* RIGHT: Active Content & Mockup */}
+                        <div className="w-full lg:w-7/12 bg-white rounded-[2rem] p-6 md:p-8 shadow-premium border border-slate-100 flex flex-col">
+                            <AnimatePresence mode="wait">
+                                {steps.map((step) => step.id === activeStep && (
+                                    <motion.div 
+                                        key={step.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="flex flex-col h-full gap-6"
+                                    >
+                                        {/* Info Box */}
+                                        <div className="flex-none space-y-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-12 h-12 rounded-xl ${step.bg} ${step.color} flex items-center justify-center font-black text-xl shadow-sm border border-white/50 shrink-0`}>
+                                                    {step.id}
+                                                </div>
+                                                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{step.title}</h3>
                                             </div>
-                                            <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">{step.title}</h3>
-                                        </div>
-                                        
-                                        <p className="text-sm text-slate-600 font-medium leading-relaxed">
-                                            {step.explanation}
-                                        </p>
-
-                                        {/* WHERE TO CLICK LINE */}
-                                        <div className="flex items-center gap-2 bg-slate-50 py-2 px-3 rounded-lg border border-slate-200 text-xs font-bold text-slate-700">
-                                            <MousePointer2 className="w-4 h-4 text-slate-400" />
-                                            <span>Where to click:</span>
-                                            <span className="text-[#071B3A]">{step.whereToClick}</span>
-                                        </div>
-                                        
-                                        <div className="flex items-start gap-2 bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
-                                            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                                            <p className="text-xs text-slate-600 font-semibold">
-                                                <span className="text-slate-800 font-bold">Tip: </span>{step.tip}
+                                            
+                                            <p className="text-sm text-slate-600 font-medium leading-relaxed max-w-lg">
+                                                {step.explanation}
                                             </p>
+
+                                            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                                                <div className="flex items-center gap-2 bg-slate-50 py-2 px-3 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 shrink-0">
+                                                    <MousePointer2 className="w-4 h-4 text-slate-400" />
+                                                    <span>Click:</span>
+                                                    <span className="text-[#071B3A]">{step.whereToClick}</span>
+                                                </div>
+                                                
+                                                <div className="flex items-center gap-2 bg-emerald-50 py-2 px-3 rounded-lg border border-emerald-100 text-xs text-slate-600 font-semibold">
+                                                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                                                    <span className="line-clamp-2">{step.tip}</span>
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                onClick={() => setCurrentTab(step.tab)}
+                                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#071B3A] text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-[#071B3A]/10 hover:bg-[#0a2652] transition-colors mt-2"
+                                            >
+                                                <span>{step.buttonText}</span>
+                                                <ArrowRight className="w-4 h-4" />
+                                            </button>
                                         </div>
 
-                                        <button
-                                            onClick={() => setCurrentTab(step.tab)}
-                                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#071B3A] text-white px-6 py-3.5 rounded-xl text-sm font-bold shadow-md shadow-[#071B3A]/10 hover:bg-[#0a2652] transition-colors mt-2"
-                                        >
-                                            <span>{step.buttonText}</span>
-                                            <ArrowRight className="w-4 h-4" />
-                                        </button>
-                                    </div>
-
-                                    {/* Image / Mockup Area */}
-                                    <div className="flex-1 min-h-[260px] md:min-h-[300px] rounded-2xl bg-slate-50 border border-slate-100 p-4 overflow-hidden flex items-center justify-center relative group">
-                                        <div className="absolute inset-0 bg-gradient-to-tr from-slate-100 to-white opacity-50 pointer-events-none"></div>
-                                        <div className="w-full max-w-[360px] h-[240px] md:h-[260px] relative z-10 transition-transform duration-500 group-hover:scale-105">
-                                            <step.Mockup />
+                                        {/* Mockup Area */}
+                                        <div className="flex-1 mt-2 rounded-2xl bg-slate-50 border border-slate-100 p-4 flex items-center justify-center relative overflow-hidden group min-h-[250px] md:min-h-[300px]">
+                                            <div className="absolute inset-0 bg-gradient-to-tr from-slate-100 to-white opacity-50 pointer-events-none"></div>
+                                            <div className="w-full max-w-[360px] h-[220px] md:h-[260px] relative z-10 transition-transform duration-500 group-hover:scale-105">
+                                                <step.Mockup />
+                                            </div>
                                         </div>
-                                    </div>
-
-                                </motion.div>
-                            );
-                        })}
-                    </motion.div>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                        </div>
+                    </div>
                 </motion.div>
 
                 {/* SECTION 3: First Bill Example Calculation */}
