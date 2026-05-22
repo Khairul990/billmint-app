@@ -48,16 +48,24 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
               whileTap={{ scale: 0.98 }}
               key={item.id}
               onClick={() => setCurrentTab(item.id)}
-              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group cursor-pointer ${
+              className={`relative w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors duration-300 group cursor-pointer ${
                 isActive 
-                  ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-[0_0_20px_rgba(20,184,166,0.4)]' 
-                  : 'text-slate-400 hover:text-white hover:bg-[#14284B]'
+                  ? 'text-white' 
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
               }`}
             >
-              <Icon className={`w-5 h-5 transition-transform duration-300 ${
+              {isActive && (
+                <motion.div
+                  layoutId="activeSidebar"
+                  className="absolute inset-0 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.4)]"
+                  initial={false}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
+              <Icon className={`relative z-10 w-5 h-5 transition-transform duration-300 ${
                 isActive ? 'text-white scale-110' : 'text-slate-500 group-hover:text-teal-400 group-hover:scale-110'
               }`} />
-              <span>{item.label}</span>
+              <span className="relative z-10">{item.label}</span>
             </motion.button>
           );
         })}

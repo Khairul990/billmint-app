@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, ArrowRight, ShieldCheck, Globe, Star, Quote } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Logo from '../components/Logo';
 import { getSettings } from '../utils/storage';
 
@@ -63,7 +64,13 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 md:p-6 lg:p-8 font-sans antialiased text-slate-900">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-screen bg-slate-100 flex items-center justify-center p-4 md:p-6 lg:p-8 font-sans antialiased text-slate-900"
+    >
       
       <div className="w-full max-w-[1400px] bg-white rounded-[32px] shadow-2xl overflow-hidden flex flex-col lg:flex-row relative">
         
@@ -72,8 +79,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
           
           {/* Top Header: Logo */}
           <div className="flex items-center gap-3 mb-16">
-            <Logo type="icon" className="w-10 h-10" />
-            <span className="text-2xl font-black tracking-tight text-slate-900">BillQyro</span>
+            <Logo type="horizontal" className="scale-125 origin-left" forceWhiteText={false} />
           </div>
 
           <div className="w-full max-w-[440px] mx-auto flex-1 flex flex-col justify-center">
@@ -348,7 +354,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 };
 

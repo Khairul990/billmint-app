@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 /**
  * How to Use BillQyro – Dashboard Card
@@ -35,13 +36,15 @@ const NewUserGuide = ({ setCurrentTab, isNewUser }) => {
                     </p>
                 </div>
 
-                <button
+                <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => setCurrentTab('guide')}
-                    className={`shrink-0 inline-flex items-center justify-center gap-2 font-bold text-sm px-6 py-4 rounded-xl transition-all shadow-md active:scale-[0.98] ${isNewUser ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white hover:from-teal-600 hover:to-emerald-600 shadow-teal-500/20' : 'bg-[#071B3A] text-white hover:bg-[#0a2652] shadow-[#071B3A]/10'}`}
+                    className={`shrink-0 inline-flex items-center justify-center gap-2 font-bold text-sm px-6 py-4 rounded-xl transition-all shadow-md active:scale-[0.98] cursor-pointer ${isNewUser ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white hover:from-teal-600 hover:to-emerald-600 shadow-teal-500/20' : 'bg-[#071B3A] text-white hover:bg-[#0a2652] shadow-[#071B3A]/10'}`}
                 >
                     <span>Open User Guide</span>
                     <ArrowRight className="w-4 h-4" />
-                </button>
+                </motion.button>
             </div>
         </div>
     );

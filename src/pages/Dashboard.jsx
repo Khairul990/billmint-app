@@ -179,13 +179,15 @@ const Dashboard = ({
             </p>
           </div>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setCurrentTab('create-invoice')}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs px-5 py-3.5 rounded-2xl shadow-md hover:shadow-lg active:scale-[0.99] transition-all cursor-pointer w-fit shrink-0 uppercase tracking-wider"
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-xs px-5 py-3.5 rounded-2xl shadow-md cursor-pointer w-fit shrink-0 uppercase tracking-wider"
           >
             <Plus className="w-4 h-4" />
             <span>Create Bill</span>
-          </button>
+          </motion.button>
         </div>
       </motion.div>
 

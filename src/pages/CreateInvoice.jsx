@@ -791,22 +791,26 @@ const CreateInvoice = ({
                 <span className="text-[9px] font-extrabold px-2.5 py-1 rounded-full bg-teal-500/20 text-teal-400 border border-teal-500/30 hidden md:block ml-2">⚡ Smart Rates On</span>
               </div>
               <div className="flex items-center gap-2">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={() => setShowPdfSettings(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold transition-colors border border-white/10"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold transition-colors border border-white/10 cursor-pointer"
                 >
                   <Settings className="w-3.5 h-3.5 text-slate-300" />
                   <span>Customize PDF</span>
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={() => setIsSheetExpanded(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-500 hover:bg-teal-400 text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-500 hover:bg-teal-400 text-white rounded-lg text-xs font-bold transition-colors shadow-sm cursor-pointer"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
                   <span>Expand Sheet</span>
-                </button>
+                </motion.button>
               </div>
             </div>
 
@@ -1646,11 +1650,18 @@ const CreateInvoice = ({
       {/* --- MODAL 2: EXPANDED INVOICE ITEMS SHEET --- */}
       <AnimatePresence>
         {isSheetExpanded && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+          >
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="bg-white md:rounded-3xl shadow-2xl w-full h-full md:w-[98vw] md:max-w-[1550px] md:h-[90vh] flex flex-col overflow-hidden"
             >
             {/* Modal Header */}
@@ -1900,14 +1911,16 @@ const CreateInvoice = ({
                   
                   {/* Add Row Button Inside Modal */}
                   <div className="pt-2">
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       type="button"
                       onClick={addItemRow}
-                      className="w-full lg:w-auto px-5 py-3.5 border-2 border-dashed border-teal-200 hover:border-teal-400 text-teal-600 hover:text-teal-700 bg-teal-50/50 hover:bg-teal-50 rounded-2xl flex items-center justify-center gap-2 text-sm font-black transition-all shadow-sm"
+                      className="w-full lg:w-auto px-5 py-3.5 border-2 border-dashed border-teal-200 hover:border-teal-400 text-teal-600 hover:text-teal-700 bg-teal-50/50 hover:bg-teal-50 rounded-2xl flex items-center justify-center gap-2 text-sm font-black transition-colors shadow-sm cursor-pointer"
                     >
                       <Plus className="w-5 h-5" />
                       Add Another Item Line
-                    </button>
+                    </motion.button>
                   </div>
                   </div>
                 </div>
@@ -1928,36 +1941,47 @@ const CreateInvoice = ({
                 </div>
               </div>
               <div className="flex gap-3 w-full md:w-auto">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={() => setIsSheetExpanded(false)}
-                  className="flex-1 md:flex-none px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-sm transition-colors"
+                  className="flex-1 md:flex-none px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-sm transition-colors cursor-pointer"
                 >
                   Cancel
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={() => setIsSheetExpanded(false)}
-                  className="flex-1 md:flex-none px-8 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white rounded-xl font-black text-sm transition-colors shadow-md flex items-center justify-center gap-2"
+                  className="flex-1 md:flex-none px-8 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white rounded-xl font-black text-sm transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Check className="w-4 h-4" />
                   Apply & Close
-                </button>
+                </motion.button>
               </div>
             </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
       {/* --- MODAL 3: PDF VISIBLE FIELDS CUSTOMIZER --- */}
       <AnimatePresence>
         {showPdfSettings && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+          >
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 space-y-5"
             >
               <div className="flex items-center justify-between">
@@ -2062,7 +2086,7 @@ const CreateInvoice = ({
                 </button>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
 

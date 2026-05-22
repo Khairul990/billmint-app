@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import InvoiceCard from '../components/InvoiceCard';
 import InvoicePreview from '../components/InvoicePreview';
 import { 
@@ -58,8 +59,23 @@ const Invoices = ({
     window.print();
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
+  };
+
   return (
-    <div className="space-y-6">
+    <motion.div 
+      className="space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+    >
       
       {/* Page Header Area */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -68,16 +84,18 @@ const Invoices = ({
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">MANAGE TRANSACTION HISTORY</p>
         </div>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => {
             onEditInvoice(null); // Clear editing state
             setCurrentTab('create-invoice');
           }}
-          className="flex items-center justify-center gap-2 bg-gradient-to-tr from-indigo-600 to-blue-500 text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+          className="flex items-center justify-center gap-2 bg-gradient-to-tr from-indigo-600 to-blue-500 text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md transition-shadow cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Create New Invoice</span>
-        </button>
+        </motion.button>
       </div>
 
       {/* SEARCH AND FILTERS */}
@@ -118,18 +136,19 @@ const Invoices = ({
       {/* INVOICE GRID LIST */}
       <div className="space-y-3">
         {filteredInvoices.map((invoice) => (
-          <InvoiceCard
-            key={invoice.id}
-            invoice={invoice}
-            currencySymbol={currencySymbol}
-            onView={(inv) => setViewingInvoice(inv)}
-            onEdit={(inv) => {
-              onEditInvoice(inv);
-              setCurrentTab('create-invoice');
-            }}
-            onDelete={onDeleteInvoice}
-            onDownload={onDownloadPDF}
-          />
+          <motion.div key={invoice.id} variants={itemVariants}>
+            <InvoiceCard
+              invoice={invoice}
+              currencySymbol={currencySymbol}
+              onView={(inv) => setViewingInvoice(inv)}
+              onEdit={(inv) => {
+                onEditInvoice(inv);
+                setCurrentTab('create-invoice');
+              }}
+              onDelete={onDeleteInvoice}
+              onDownload={onDownloadPDF}
+            />
+          </motion.div>
         ))}
 
         {filteredInvoices.length === 0 && (
@@ -209,7 +228,7 @@ const Invoices = ({
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
