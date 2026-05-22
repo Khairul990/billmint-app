@@ -187,7 +187,7 @@ const firestoreSave = async (collectionName, docId, data) => {
   try {
     const userId = getFirebaseUserId();
     let docRef;
-    if (collectionName === 'settings' || collectionName === 'businessProfiles' || collectionName === 'subscription' || collectionName === 'users') {
+    if (collectionName === 'settings' || collectionName === 'subscription' || collectionName === 'users') {
       docRef = doc(db, collectionName, userId);
     } else {
       docRef = doc(db, collectionName, userId, 'items', docId);
@@ -207,7 +207,7 @@ const firestoreDelete = async (collectionName, docId) => {
   try {
     const userId = getFirebaseUserId();
     let docRef;
-    if (collectionName === 'settings' || collectionName === 'businessProfiles' || collectionName === 'subscription' || collectionName === 'users') {
+    if (collectionName === 'settings' || collectionName === 'subscription' || collectionName === 'users') {
       docRef = doc(db, collectionName, userId);
     } else {
       docRef = doc(db, collectionName, userId, 'items', docId);
@@ -267,12 +267,10 @@ export const resetToDemoData = () => {
   if (firebaseReady) {
     const userId = getFirebaseUserId();
     firestoreSave('settings', userId, demoSettings);
-    firestoreSave('businessProfiles', userId, demoSettings);
     SEED_CUSTOMERS.forEach(c => firestoreSave('customers', c.id, c));
     SEED_PRODUCTS.forEach(p => firestoreSave('products', p.id, p));
     SEED_INVOICES.forEach(i => {
       firestoreSave('invoices', i.id, i);
-      firestoreSave('orders', i.id, i);
     });
     SEED_EXPENSES.forEach(e => firestoreSave('expenses', e.id, e));
   }
@@ -359,7 +357,6 @@ export const getSettings = () => {
 export const saveSettings = (settings) => {
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
   firestoreSave('settings', 'business', settings);
-  firestoreSave('businessProfiles', 'profile', settings);
   return settings;
 };
 
@@ -512,13 +509,12 @@ export const saveInvoice = async (invoice) => {
 
   localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
   
-  // Asynchronously save to Firebase invoices collection and orders collection
+  // Asynchronously save to Firebase invoices collection
   const res1 = await firestoreSave('invoices', invoice.id, invoice);
-  const res2 = await firestoreSave('orders', invoice.id, invoice);
 
   return { 
     updatedInvoices: invoices, 
-    firebaseStatus: (res1.status === 'failed' || res2.status === 'failed') ? 'failed' : res1.status 
+    firebaseStatus: res1.status 
   };
 };
 
@@ -528,7 +524,6 @@ export const deleteInvoice = (id) => {
   localStorage.setItem(KEYS.INVOICES, JSON.stringify(filtered));
   
   firestoreDelete('invoices', id);
-  firestoreDelete('orders', id);
   
   return filtered;
 };
@@ -568,12 +563,10 @@ export const importRestore = (backupData) => {
   if (firebaseReady) {
     const userId = getFirebaseUserId();
     firestoreSave('settings', userId, backupData.settings);
-    firestoreSave('businessProfiles', userId, backupData.settings);
     backupData.customers.forEach(c => firestoreSave('customers', c.id, c));
     backupData.products.forEach(p => firestoreSave('products', p.id, p));
     backupData.invoices.forEach(i => {
       firestoreSave('invoices', i.id, i);
-      firestoreSave('orders', i.id, i);
     });
     backupData.expenses.forEach(e => firestoreSave('expenses', e.id, e));
     firestoreSave('subscription', userId, backupData.subscription);
