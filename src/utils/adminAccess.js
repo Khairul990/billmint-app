@@ -1,20 +1,10 @@
-// src/utils/adminAccess.js
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'khairul2052007@gmail.com';
 
-/**
- * Centralized admin email configuration.
- * Uses environment variable VITE_ADMIN_EMAIL if defined, otherwise falls back
- * to the email specified by the user.
- */
-export const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'khairul2052007@gmail.com';
+export function isAdminUser(user) {
+  if (!user || !user.email) return false;
+  return user.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
+}
 
-/**
- * Checks whether a given email belongs to the admin.
- * Comparison is case‑insensitive and trims whitespace.
- *
- * @param {string} email - Email to check.
- * @returns {boolean} True if the email matches the admin email.
- */
-export const isAdmin = (email) => {
-  if (!email) return false;
-  return email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
-};
+export function getAdminEmail() {
+  return ADMIN_EMAIL;
+}

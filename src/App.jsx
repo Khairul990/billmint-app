@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { isAdmin, ADMIN_EMAIL } from './utils/adminAccess';
+import { isAdminUser } from './utils/adminAccess';
 import { Toaster, toast } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import Login from './pages/Login';
@@ -15,8 +15,6 @@ import Settings from './pages/Settings';
 import Expenses from './pages/Expenses';
 import Subscription from './pages/Subscription';
 import MoreMenu from './pages/MoreMenu';
-import AdminSettings from './pages/AdminSettings';
-import AdminUnlock from './pages/AdminUnlock';
 import Layout from './components/Layout';
 
 class ErrorBoundary extends React.Component {
@@ -87,10 +85,6 @@ function App() {
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
   const [isAuthenticated, setIsAuthenticated] = useState(getAuthSession() !== null);
   const [currentTab, setCurrentTab] = useState('dashboard');
-  
-  // Role & Admin State
-  const [userRole, setUserRole] = useState(localStorage.getItem('billqyro_user_role') || 'user');
-  const [isAdminUnlocked, setIsAdminUnlocked] = useState(localStorage.getItem('billqyro_admin_unlocked') === 'true');
 
   // Storage states
   const [invoices, setInvoices] = useState(() => getInvoices());
@@ -120,11 +114,7 @@ function App() {
           if (!session) {
             // Re-create the session in localStorage so the app works seamlessly
             const email = user.email || '';
-            const emailLower = email.toLowerCase().trim();
             const settings = getSettings() || {};
-            const activeAdminEmail = settings.adminEmail || ADMIN_EMAIL;
-            // Determine admin status using utility
-            const isAdminUser = isAdmin(emailLower);
             
             const newSession = { 
               timestamp: Date.now(), 
@@ -133,17 +123,8 @@ function App() {
             };
             
             localStorage.setItem('billqyro_auth', JSON.stringify(newSession));
-            localStorage.setItem('billqyro_user_role', isAdminUser ? 'admin' : 'user');
-            
-            if (isAdminUser) {
-              localStorage.setItem('billqyro_admin_unlocked', 'true');
-            } else {
-              localStorage.removeItem('billqyro_admin_unlocked');
-            }
             
             setIsAuthenticated(true);
-            setUserRole(isAdminUser ? 'admin' : 'user');
-            setIsAdminUnlocked(isAdminUser);
             }
         }
       });
@@ -190,78 +171,9 @@ function App() {
     return () => window.removeEventListener('billqyro_sync', handleSync);
   }, []);
 
-  // Listen for /admin and #/admin to route to admin panel automatically
-  useEffect(() => {
-    const handleLocationChange = () => {
-      const path = window.location.pathname;
-      const hash = window.location.hash;
-      if (path === '/admin' || hash === '#/admin' || hash === '#admin') {
-        // Verify admin access before routing
-        const session = getAuthSession();
-        const email = session?.userEmail?.toLowerCase?.() || '';
-        if (isAdmin(email)) {
-          setCurrentTab('admin-panel');
-        } else {
-          // redirect non‑admin to dashboard
-          setCurrentTab('dashboard');
-          if (path === '/admin') window.history.replaceState(null, '', '/');
-          if (hash.includes('admin')) window.location.hash = '';
-        }
-      }
-    };
-
-    handleLocationChange();
-    window.addEventListener('popstate', handleLocationChange);
-    window.addEventListener('hashchange', handleLocationChange);
-    return () => {
-      window.removeEventListener('popstate', handleLocationChange);
-      window.removeEventListener('hashchange', handleLocationChange);
-    };
-  }, []);
-
-  // Sync current virtual tab with URL hash
-  useEffect(() => {
-    if (currentTab === 'admin-panel') {
-      if (window.location.hash !== '#/admin' && window.location.pathname !== '/admin') {
-        window.location.hash = '#/admin';
-      }
-    } else {
-      if (window.location.hash === '#/admin' || window.location.hash === '#admin') {
-        window.location.hash = '';
-      }
-    }
-  }, [currentTab]);
-
-  // Auto-upgrade Master Admin if they haven't logged out yet
-  useEffect(() => {
-    if (isAuthenticated && userRole !== 'admin') {
-      const session = getAuthSession();
-      const email = session?.userEmail?.toLowerCase()?.trim() || '';
-      if (isAdmin(email)) {
-        setUserRole('admin');
-        setIsAdminUnlocked(true);
-        localStorage.setItem('billqyro_user_role', 'admin');
-        localStorage.setItem('billqyro_admin_unlocked', 'true');
-      }
-    }
-  }, [isAuthenticated, userRole]);
-
   // --- AUTH BRIDGE ---
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
-    // Determine role based on session email (master admin list)
-    const session = getAuthSession();
-    const email = session?.userEmail?.toLowerCase()?.trim() || '';
-    const isAdminUser = isAdmin(email);
-    
-    setUserRole(isAdminUser ? 'admin' : 'user');
-    setIsAdminUnlocked(isAdminUser);
-    localStorage.setItem('billqyro_user_role', isAdminUser ? 'admin' : 'user');
-    if (isAdminUser) {
-      localStorage.setItem('billqyro_admin_unlocked', 'true');
-    } else {
-      localStorage.removeItem('billqyro_admin_unlocked');
-    }
 
     setInvoices(getInvoices());
     setCustomers(getCustomers());
@@ -295,8 +207,6 @@ function App() {
     localStorage.removeItem('billqyro_user_role');
     localStorage.removeItem('billqyro_admin_unlocked');
     setIsAuthenticated(false);
-    setUserRole('user');
-    setIsAdminUnlocked(false);
     setCurrentTab('dashboard');
   };
 
@@ -566,51 +476,20 @@ function App() {
             userRole={userRole}
           />
         );
-      case 'settings':
+      case 'settings': {
+        const session = getAuthSession();
         return (
           <Settings
             settings={settings}
             onSaveSettings={handleSaveSettings}
-          />
-        );
-      case 'admin-panel':
-        if (!isAuthenticated) {
-          return <Login onLoginSuccess={handleLoginSuccess} />;
-        }
-        const session = getAuthSession();
-        const email = session?.userEmail?.toLowerCase?.() || '';
-        if (!isAdmin(email)) {
-          // Non‑admin user should not see admin panel; redirect to dashboard.
-          setCurrentTab('dashboard');
-          return null;
-        }
-        // If admin panel not unlocked, show unlock dialog
-        if (!isAdminUnlocked) {
-          return (
-            <AdminUnlock
-              onUnlock={() => {
-                setIsAdminUnlocked(true);
-                localStorage.setItem('billqyro_admin_unlocked', 'true');
-                setCurrentTab('admin-panel');
-              }}
-              onCancel={() => {
-                setCurrentTab('dashboard');
-              }}
-            />
-          );
-        }
-        // Admin is authenticated and unlocked; render admin UI.
-        return (
-          <AdminSettings
-            settings={settings}
+            isAdmin={isAdminUser(session)}
+            onResetDemo={handleResetDemo}
+            onImportBackup={handleImportBackup}
             invoices={invoices}
             customers={customers}
-            onSaveSettings={handleSaveSettings}
-            onResetDemo={handleResetDemo}
-            onLogout={handleLogout}
-            onImportBackup={handleImportBackup}
           />
         );
+      }
       default:
         return <div className="text-center font-bold text-slate-400 p-10">404 Tab Not Found</div>;
     }
@@ -646,7 +525,6 @@ function App() {
         onLogout={handleLogout}
         businessSettings={settings}
         isAuthenticated={isAuthenticated}
-        userRole={userRole}
       >
         <AnimatePresence mode="wait">
           <motion.div

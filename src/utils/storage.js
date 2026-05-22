@@ -1,6 +1,6 @@
 import { db, firebaseReady } from './firebase';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot } from 'firebase/firestore';
-import { ADMIN_EMAIL } from './adminAccess';
+import { getAdminEmail } from './adminAccess';
 
 // LocalStorage Keys
 const KEYS = {
@@ -25,7 +25,7 @@ const DEFAULT_SETTINGS = {
   currency: '₹',
   defaultTax: 18,
   adminPasscode: '1118', // Customizable administrative passcode
-  adminEmail: ADMIN_EMAIL, // Admin Email for auto-unlock
+  adminEmail: getAdminEmail(), // Admin Email for auto-unlock
   defaultBillingTemplate: '',
   pdfVisibleFields: {
     embroidery: ['designNo', 'workType', 'description', 'size', 'quantity', 'rate', 'amount'],
@@ -256,7 +256,7 @@ export const resetToDemoData = () => {
     currency: '₹',
     defaultTax: 18,
     adminPasscode: '1118',
-    adminEmail: ADMIN_EMAIL,
+    adminEmail: getAdminEmail(),
   };
 
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(demoSettings));
@@ -308,7 +308,7 @@ export const getAuthSession = () => {
 export const login = (passcodeOrEmail) => {
   const activeSettings = getSettings() || DEFAULT_SETTINGS;
   const targetPasscode = activeSettings.adminPasscode || '1118';
-  const targetEmail = activeSettings.adminEmail || ADMIN_EMAIL;
+  const targetEmail = activeSettings.adminEmail || getAdminEmail();
 
   const inputStr = String(passcodeOrEmail).toLowerCase().trim();
   const isEmailMatch = inputStr === targetEmail.toLowerCase();

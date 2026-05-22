@@ -12,14 +12,39 @@ import {
   Percent,
   QrCode,
   Palette,
-  LayoutTemplate
+  LayoutTemplate,
+  Database,
+  Download,
+  Upload,
+  Wifi,
+  WifiOff,
+  ServerOff,
+  ShieldAlert,
+  RotateCcw,
+  BarChart3,
+  Users,
+  CircleDollarSign,
+  Clock,
+  HardDrive
 } from 'lucide-react';
+
+import { exportBackup } from '../utils/storage';
+import { firebaseReady } from '../utils/firebase';
 
 /**
  * Normal User Business Settings Page
  * Allows standard users to configure their own firm's profile.
+ * If isAdmin is true, it also renders the Admin console section.
  */
-const Settings = ({ settings, onSaveSettings }) => {
+const Settings = ({ 
+  settings, 
+  onSaveSettings, 
+  isAdmin, 
+  onResetDemo, 
+  onImportBackup, 
+  invoices = [], 
+  customers = [] 
+}) => {
   const [businessName, setBusinessName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [ownerName, setOwnerName] = useState('');
@@ -106,10 +131,100 @@ const Settings = ({ settings, onSaveSettings }) => {
 
     onSaveSettings(payload);
     
+    onSaveSettings(payload);
+    
     // Show Toast
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
+
+  const handleExport = () => {
+    try {
+      const data = exportBackup();
+      const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+        JSON.stringify(data, null, 2)
+      )}`;
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', jsonString);
+      
+      const dateStr = new Date().toISOString().split('T')[0];
+      downloadAnchor.setAttribute('download', `billqyro-backup-${dateStr}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    } catch (error) {
+      alert(`Export failed: ${error.message}`);
+    }
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsedData = JSON.parse(event.target.result);
+        if (onImportBackup) {
+          onImportBackup(parsedData);
+          alert('Database successfully restored from backup!');
+        } else {
+          alert('Import feature not properly wired in the system.');
+        }
+      } catch (error) {
+        alert(`Failed to import backup: ${error.message}`);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleResetData = () => {
+    if (confirm('CAUTION: This will wipe out all invoices, customers, and catalog items, replacing them with default demo assets. Proceed?')) {
+      onResetDemo();
+      alert('Database successfully reset to demo data!');
+    }
+  };
+
+  // --- REAL-TIME ADMIN STATS (calculated from live data) ---
+  const totalInvoices   = invoices.length;
+  const totalCustomers  = customers.length;
+  const totalRevenue    = invoices.reduce((sum, inv) => sum + (parseFloat(inv.grandTotal) || 0), 0);
+  const paidRevenue     = invoices.reduce((sum, inv) => sum + (parseFloat(inv.amountPaid) || 0), 0);
+  const pendingPayments = invoices.reduce((sum, inv) => sum + (parseFloat(inv.balanceDue) || 0), 0);
+  const paidCount       = invoices.filter(inv => inv.paymentStatus === 'Paid').length;
+  const pendingCount    = invoices.filter(inv => inv.paymentStatus !== 'Paid').length;
+
+  // Firebase status detection
+  const isOnline = navigator.onLine;
+  const firebaseStatus = firebaseReady && isOnline
+    ? 'connected'
+    : firebaseReady && !isOnline
+      ? 'offline'
+      : 'not-configured';
+
+  const firebaseStatusLabel = {
+    connected: 'Firebase Connected',
+    offline: 'Offline Mode Active',
+    'not-configured': 'Firebase Not Configured',
+  }[firebaseStatus];
+
+  const firebaseStatusColor = {
+    connected: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    offline: 'bg-amber-50 text-amber-700 border-amber-200',
+    'not-configured': 'bg-slate-50 text-slate-500 border-slate-200',
+  }[firebaseStatus];
+
+  const firebaseStatusDot = {
+    connected: 'bg-emerald-500',
+    offline: 'bg-amber-400',
+    'not-configured': 'bg-slate-400',
+  }[firebaseStatus];
+
+  const FirebaseIcon = {
+    connected: Wifi,
+    offline: WifiOff,
+    'not-configured': ServerOff,
+  }[firebaseStatus];
 
   return (
     <div className="max-w-4xl mx-auto pb-12 relative">
@@ -452,6 +567,150 @@ const Settings = ({ settings, onSaveSettings }) => {
         </div>
 
       </div>
+
+      {/* --- ADMIN ONLY SECTION --- */}
+      {isAdmin && (
+        <div className="mt-12 space-y-6 pt-12 border-t-2 border-slate-100">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Administrative Console</h2>
+              <p className="text-sm text-slate-500 font-medium mt-1">Superuser controls and real-time statistics</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              {/* REAL-TIME ADMIN STATS */}
+              <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 md:p-6 border border-indigo-800/40 shadow-xl">
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h3 className="text-sm font-extrabold text-white tracking-tight">Administration Overview</h3>
+                    <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-wider mt-0.5">REAL-TIME SYSTEM STATISTICS</p>
+                  </div>
+                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-extrabold uppercase tracking-wider ${firebaseStatusColor}`}>
+                    <span className={`w-2 h-2 rounded-full ${firebaseStatusDot} ${firebaseStatus === 'connected' ? 'animate-pulse' : ''}`}></span>
+                    <FirebaseIcon className="w-3 h-3" />
+                    <span className="hidden sm:inline">{firebaseStatusLabel}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 text-center backdrop-blur-sm">
+                    <FileText className="w-5 h-5 text-indigo-300 mx-auto mb-1.5" />
+                    <p className="text-2xl font-black text-white">{totalInvoices}</p>
+                    <p className="text-[9px] text-indigo-300 font-bold uppercase tracking-wider mt-0.5">Total Invoices</p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 text-center backdrop-blur-sm">
+                    <Users className="w-5 h-5 text-cyan-300 mx-auto mb-1.5" />
+                    <p className="text-2xl font-black text-white">{totalCustomers}</p>
+                    <p className="text-[9px] text-cyan-300 font-bold uppercase tracking-wider mt-0.5">Clients</p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 text-center backdrop-blur-sm">
+                    <CircleDollarSign className="w-5 h-5 text-emerald-300 mx-auto mb-1.5" />
+                    <p className="text-lg font-black text-white truncate">{currency}{totalRevenue.toLocaleString('en-IN')}</p>
+                    <p className="text-[9px] text-emerald-300 font-bold uppercase tracking-wider mt-0.5">Total Revenue</p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 text-center backdrop-blur-sm">
+                    <Clock className="w-5 h-5 text-amber-300 mx-auto mb-1.5" />
+                    <p className="text-lg font-black text-white truncate">{currency}{pendingPayments.toLocaleString('en-IN')}</p>
+                    <p className="text-[9px] text-amber-300 font-bold uppercase tracking-wider mt-0.5">Pending Due</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border ${firebaseStatusColor}`}>
+                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${firebaseStatusDot}`}></span>
+                    <div>
+                      <p className="text-[10px] font-extrabold">{firebaseStatusLabel}</p>
+                      <p className="text-[9px] opacity-70 font-medium">
+                        {firebaseStatus === 'connected' ? 'Syncing data to cloud' :
+                         firebaseStatus === 'offline' ? 'Using local backup' :
+                         'Add .env Firebase keys'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border bg-indigo-50 text-indigo-700 border-indigo-200">
+                    <HardDrive className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-extrabold">Local Backup Active</p>
+                      <p className="text-[9px] opacity-70 font-medium">{totalInvoices} invoices stored</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border bg-emerald-50 text-emerald-700 border-emerald-200">
+                    <BarChart3 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-extrabold">{paidCount} Paid · {pendingCount} Pending</p>
+                      <p className="text-[9px] opacity-70 font-medium">{currency}{paidRevenue.toLocaleString('en-IN')} collected</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Backup & Restore */}
+              <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
+                <h3 className="text-sm font-extrabold text-slate-800 border-b border-slate-50 pb-3 flex items-center gap-2">
+                  <Database className="w-4.5 h-4.5 text-indigo-500" />
+                  <span>Data Backup & Restore</span>
+                </h3>
+                <div className="space-y-4 text-xs font-semibold text-slate-500">
+                  <p className="text-slate-400 font-medium leading-relaxed">
+                    Export your entire workspace (invoices, customers, settings, and expenses) to a local JSON file, or restore a previous backup.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={handleExport}
+                      className="flex items-center justify-center gap-2 py-3 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 font-bold text-xs rounded-2xl transition-all"
+                    >
+                      <Download className="w-4 h-4 text-indigo-600" />
+                      <span>Export Backup (JSON)</span>
+                    </button>
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept=".json"
+                        onChange={handleImport}
+                        id="backup-upload"
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="backup-upload"
+                        className="flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-2xl cursor-pointer transition-all text-center"
+                      >
+                        <Upload className="w-4 h-4 text-white" />
+                        <span>Import Backup (JSON)</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
+                <h3 className="text-sm font-extrabold text-rose-600 border-b border-slate-50 pb-3 flex items-center gap-2">
+                  <RotateCcw className="w-4.5 h-4.5 text-rose-500" />
+                  <span>Danger Zone</span>
+                </h3>
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={handleResetData}
+                    className="w-full flex items-center justify-center gap-2 py-3.5 border border-amber-200 bg-amber-50 hover:bg-amber-100/80 text-amber-800 font-bold text-xs rounded-2xl transition-all"
+                  >
+                    <RotateCcw className="w-4 h-4 text-amber-600" />
+                    <span>Reset System Database</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

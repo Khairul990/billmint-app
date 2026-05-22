@@ -1,9 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, Shield, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
 import { logout } from '../utils/storage';
 import Logo from './Logo';
-import { isAdmin } from '../utils/adminAccess';
 
 /**
  * Desktop Sidebar Navigation
@@ -12,13 +11,8 @@ import { isAdmin } from '../utils/adminAccess';
  * @param {Function} onLogout - logout event handler
  * @param {Object} businessSettings - current active company name & logo
  * @param {boolean} isAuthenticated - whether currently logged in as admin
- * @param {string} userRole - 'admin' or 'user'
  */
-const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole }) => {
-  const authData = JSON.parse(localStorage.getItem('billqyro_auth') || '{}');
-  const loggedInEmail = authData?.userEmail || '';
-  const isOwner = isAdmin(loggedInEmail);
-
+const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'invoices', label: 'Invoices', icon: FileSpreadsheet },
@@ -29,10 +23,6 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
     { id: 'settings', label: 'Settings', icon: SettingsIcon },
     { id: 'guide', label: 'How to Use', icon: HelpCircle },
   ];
-
-  if (userRole === 'admin') {
-    menuItems.push({ id: 'admin-panel', label: 'Admin Settings', icon: Shield });
-  }
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-[#071B3A] border-r border-slate-800 h-screen sticky top-0 left-0 z-30 shadow-2xl transition-all duration-300">

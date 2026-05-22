@@ -20,12 +20,8 @@ const MoreMenu = ({
   setCurrentTab, 
   isAuthenticated, 
   onLoginSuccess,
-  businessSettings,
-  userRole
+  businessSettings
 }) => {
-  const navigateToAdmin = () => {
-    setCurrentTab('admin-panel');
-  };
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -123,26 +119,6 @@ const MoreMenu = ({
           </div>
         </button>
 
-        {/* Business Settings profile (Admin Only) */}
-        {userRole === 'admin' && (
-          <button
-            onClick={navigateToAdmin}
-            className="bg-white hover:bg-slate-50 text-left p-5 rounded-3xl border border-slate-100 shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center group-hover:bg-rose-100 transition-colors shrink-0">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h4 className="font-extrabold text-sm text-slate-800 tracking-tight flex items-center gap-1.5">
-                <span>Admin Settings</span>
-                <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity" />
-              </h4>
-              <p className="text-[11px] text-slate-400 font-semibold truncate">
-                GSTIN tax codes, seed resets
-              </p>
-            </div>
-          </button>
-        )}
 
         {/* How to Use Guide page */}
         <button
@@ -165,22 +141,6 @@ const MoreMenu = ({
 
       </div>
 
-      {/* Profile Details (Visible when unlocked) */}
-      {userRole === 'admin' && (
-        <div className="bg-emerald-50/50 border border-emerald-100/30 rounded-3xl p-5 flex items-center gap-3 mt-6">
-          <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center">
-            <User className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
-              Secure Session Active
-            </h4>
-            <p className="text-[10px] text-slate-400 font-bold mt-0.5">
-              Full administrator credentials unlocked. Seeding & configs available.
-            </p>
-          </div>
-        </div>
-      )}
 
     </div>
   );
