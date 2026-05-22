@@ -28,7 +28,7 @@ import {
   HardDrive
 } from 'lucide-react';
 
-import { exportBackup } from '../utils/storage';
+import { exportBackup, getAuthSession } from '../utils/storage';
 import { firebaseReady } from '../utils/firebase';
 
 /**
@@ -226,8 +226,18 @@ const Settings = ({
     'not-configured': ServerOff,
   }[firebaseStatus];
 
+  const session = getAuthSession();
+  const loggedInEmail = session?.userEmail || 'unknown';
+
   return (
     <div className="max-w-4xl mx-auto pb-12 relative">
+      
+      {/* DEVELOPMENT DEBUG BLOCK (Temporarily added as requested) */}
+      <div className="bg-slate-800 text-[10px] text-green-400 p-2 mb-4 rounded font-mono break-all">
+        Logged in as: {loggedInEmail}
+        <br />
+        Admin access: {isAdmin ? 'true' : 'false'}
+      </div>
       
       {/* Toast Notification */}
       {showToast && (
