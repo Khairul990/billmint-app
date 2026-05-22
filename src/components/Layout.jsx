@@ -12,7 +12,7 @@ import Logo from './Logo';
  * @param {Function} onLogout - logout event callback
  * @param {Object} businessSettings - current active business details
  */
-const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated }) => {
+const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole }) => {
   // Theme state persisted in LocalStorage
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('billqyro_theme') || 'light';
@@ -67,6 +67,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         onLogout={onLogout}
         businessSettings={businessSettings}
         isAuthenticated={isAuthenticated}
+        userRole={userRole}
       />
 
       {/* Main Content Region */}

@@ -26,13 +26,9 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
     { id: 'expenses', label: 'Overhead Expenses', icon: TrendingDown },
     { id: 'products', label: 'Products & Catalog', icon: Layers },
     { id: 'subscription', label: 'Subscription Plan', icon: Sparkles },
+    { id: 'settings', label: 'Settings', icon: SettingsIcon },
     { id: 'guide', label: 'How to Use', icon: HelpCircle },
   ];
-
-  // Only show regular Settings if the user is the specific owner email
-  if (isOwner) {
-    menuItems.push({ id: 'settings', label: 'Settings', icon: SettingsIcon });
-  }
 
   if (userRole === 'admin') {
     menuItems.push({ id: 'admin-panel', label: 'Admin Settings', icon: Shield });
