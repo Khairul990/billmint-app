@@ -78,6 +78,8 @@ import {
   enableRealTimeSync
 } from './utils/storage';
 import { downloadInvoicePDF } from './utils/pdfUtils';
+import { auth, firebaseReady } from './utils/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 function App() {
 
@@ -105,6 +107,47 @@ function App() {
   // Initialize Database on App mount
   useEffect(() => {
     initializeStorage();
+  }, []);
+
+  // Listen to Firebase Auth state
+  useEffect(() => {
+    if (firebaseReady && auth) {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // Check if we already have a session, if not create one
+          const session = getAuthSession();
+          if (!session) {
+            // Re-create the session in localStorage so the app works seamlessly
+            const email = user.email || '';
+            const emailLower = email.toLowerCase().trim();
+            const settings = getSettings() || {};
+            const activeAdminEmail = settings.adminEmail || 'Khairul20052007@gmail.com';
+            const isMasterAdmin = emailLower === 'khairul20052007@gmail.com' || emailLower === 'khairul2052007@gmail.com';
+            const isAdmin = (emailLower === activeAdminEmail.toLowerCase()) || isMasterAdmin;
+            
+            const newSession = { 
+              timestamp: Date.now(), 
+              token: 'billqyro-secure-session',
+              userEmail: email 
+            };
+            
+            localStorage.setItem('billqyro_auth', JSON.stringify(newSession));
+            localStorage.setItem('billqyro_user_role', isAdmin ? 'admin' : 'user');
+            
+            if (isAdmin) {
+              localStorage.setItem('billqyro_admin_unlocked', 'true');
+            } else {
+              localStorage.removeItem('billqyro_admin_unlocked');
+            }
+            
+            setIsAuthenticated(true);
+            setUserRole(isAdmin ? 'admin' : 'user');
+            setIsAdminUnlocked(isAdmin);
+          }
+        }
+      });
+      return () => unsubscribe();
+    }
   }, []);
 
   // Sync from Firebase Firestore when authenticated
@@ -218,7 +261,14 @@ function App() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      if (firebaseReady && auth) {
+        await auth.signOut();
+      }
+    } catch (err) {
+      console.error('Firebase sign out error', err);
+    }
     logout();
     localStorage.removeItem('billqyro_user_role');
     localStorage.removeItem('billqyro_admin_unlocked');

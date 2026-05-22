@@ -3,6 +3,8 @@ import { Mail, Lock, ArrowRight, ShieldCheck, Globe, Star, Quote } from 'lucide-
 import { motion } from 'framer-motion';
 import Logo from '../components/Logo';
 import { getSettings } from '../utils/storage';
+import { auth, firebaseReady } from '../utils/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 /**
  * Premium Split-Pane Welcome Onboarding & Login Screen for BillQyro
@@ -14,8 +16,9 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(true);
 
-  const handleLogin = (e) => {
+  const handleAuthSubmit = async (e) => {
     e.preventDefault();
     if (!email) {
       setError('Please enter your email address.');
@@ -36,21 +39,48 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
     setLoading(true);
     setError('');
 
-    // Fetch the active settings passcode (default: 1118)
+    // If Firebase is ready, use real authentication
+    if (firebaseReady && auth) {
+      try {
+        if (isLoginMode) {
+          await signInWithEmailAndPassword(auth, email, password);
+        } else {
+          await createUserWithEmailAndPassword(auth, email, password);
+        }
+        processLocalLogin(email, password);
+      } catch (err) {
+        console.error('Firebase Auth Error:', err);
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+          setError('Invalid email or password. Please try again.');
+        } else if (err.code === 'auth/email-already-in-use') {
+          setError('This email is already registered. Please log in.');
+        } else if (err.code === 'auth/weak-password') {
+          setError('Password is too weak. Must be at least 6 characters.');
+        } else {
+          setError(err.message || 'Authentication failed. Please check your credentials.');
+        }
+        setLoading(false);
+      }
+    } else {
+      // Fallback to local auth if Firebase isn't configured
+      processLocalLogin(email, password);
+    }
+  };
+
+  const processLocalLogin = (userEmail, userPassword) => {
     const settings = getSettings();
     const activePasscode = settings?.adminPasscode || '1118';
     const activeAdminEmail = settings?.adminEmail || 'Khairul20052007@gmail.com';
 
-    // Premium fake loading delay
     setTimeout(() => {
-      const emailLower = email.toLowerCase().trim();
+      const emailLower = userEmail.toLowerCase().trim();
       const isMasterAdmin = emailLower === 'khairul20052007@gmail.com' || emailLower === 'khairul2052007@gmail.com';
-      const isAdmin = (password === activePasscode) || (emailLower === activeAdminEmail.toLowerCase()) || isMasterAdmin;
+      const isAdmin = (userPassword === activePasscode) || (emailLower === activeAdminEmail.toLowerCase()) || isMasterAdmin;
       
       const session = { 
         timestamp: Date.now(), 
         token: 'billqyro-secure-session',
-        userEmail: email 
+        userEmail: userEmail 
       };
       
       localStorage.setItem('billqyro_auth', JSON.stringify(session));
@@ -63,7 +93,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
       }
       
       onLoginSuccess();
-    }, 600);
+    }, 400);
   };
 
   return (
@@ -89,14 +119,32 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
             
             <div className="mb-10">
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
-                Welcome to BillQyro
+                {isLoginMode ? 'Welcome to BillQyro' : 'Create an Account'}
               </h1>
               <p className="text-slate-500 font-medium text-[17px] leading-relaxed">
-                Log in to access your professional billing and invoicing dashboard.
+                {isLoginMode 
+                  ? 'Log in to access your professional billing and invoicing dashboard.' 
+                  : 'Sign up to start creating professional invoices and managing clients.'}
               </p>
+              
+              {/* Toggle Login/Signup */}
+              <div className="flex bg-slate-100 p-1 rounded-xl mt-6">
+                <button 
+                  onClick={() => setIsLoginMode(true)}
+                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isLoginMode ? 'bg-white text-teal-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  Log In
+                </button>
+                <button 
+                  onClick={() => setIsLoginMode(false)}
+                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isLoginMode ? 'bg-white text-teal-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  Sign Up
+                </button>
+              </div>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-6">
+            <form onSubmit={handleAuthSubmit} className="space-y-6">
               {/* Email Field */}
               <div className="space-y-2">
                 <label className="block text-sm font-bold text-slate-700">Email Address</label>
@@ -141,9 +189,11 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
                     {showPassword ? 'Hide' : 'Show'}
                   </button>
                 </div>
-                <p className="text-xs text-slate-500 font-medium pt-1">
-                  New user? Any password works. Admin? Use your Admin Email or Passcode (<span className="font-bold text-teal-600">1118</span>)
-                </p>
+                {!isLoginMode && (
+                  <p className="text-xs text-slate-500 font-medium pt-1">
+                    Password must be at least 6 characters long.
+                  </p>
+                )}
               </div>
 
               {error && (
@@ -164,7 +214,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
                 ) : (
                   <>
                     <Lock className="w-5 h-5" />
-                    <span>Log in to BillQyro</span>
+                    <span>{isLoginMode ? 'Log in to BillQyro' : 'Create Account'}</span>
                   </>
                 )}
               </button>
