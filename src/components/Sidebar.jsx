@@ -14,6 +14,10 @@ import Logo from './Logo';
  * @param {string} userRole - 'admin' or 'user'
  */
 const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole }) => {
+  const authData = JSON.parse(localStorage.getItem('billqyro_auth') || '{}');
+  const loggedInEmail = authData?.userEmail || '';
+  const isOwner = loggedInEmail.toLowerCase() === 'khairul20052007@gmail.com' || loggedInEmail.toLowerCase() === 'khairul2052007@gmail.com';
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'invoices', label: 'Invoices', icon: FileSpreadsheet },
@@ -22,8 +26,12 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
     { id: 'products', label: 'Products & Catalog', icon: Layers },
     { id: 'subscription', label: 'Subscription Plan', icon: Sparkles },
     { id: 'guide', label: 'How to Use', icon: HelpCircle },
-    { id: 'settings', label: 'Settings', icon: SettingsIcon },
   ];
+
+  // Only show regular Settings if the user is the specific owner email
+  if (isOwner) {
+    menuItems.push({ id: 'settings', label: 'Settings', icon: SettingsIcon });
+  }
 
   if (userRole === 'admin') {
     menuItems.push({ id: 'admin-panel', label: 'Admin Settings', icon: Shield });
