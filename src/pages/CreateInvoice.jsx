@@ -34,6 +34,49 @@ import {
 } from 'lucide-react';
 import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber, autoIncrementString } from '../utils/invoiceUtils';
 
+const ALL_FIELDS_BY_TEMPLATE = {
+  embroidery: [
+    { key: 'designNo', label: 'Design / Item Code' },
+    { key: 'workType', label: 'Work Type' },
+    { key: 'description', label: 'Description' },
+    { key: 'size', label: 'Size' },
+    { key: 'qty', label: 'Quantity' },
+    { key: 'rate', label: 'Rate' },
+    { key: 'amount', label: 'Amount' },
+  ],
+  grocery: [
+    { key: 'description', label: 'Product Name' },
+    { key: 'size', label: 'Unit' },
+    { key: 'qty', label: 'Quantity' },
+    { key: 'rate', label: 'Unit Price' },
+    { key: 'amount', label: 'Amount' },
+  ],
+  repair: [
+    { key: 'serviceName', label: 'Service / Item' },
+    { key: 'problemDetails', label: 'Problem / Details' },
+    { key: 'partsCost', label: 'Parts Cost' },
+    { key: 'labourCharge', label: 'Labour Charge' },
+    { key: 'qty', label: 'Quantity' },
+    { key: 'amount', label: 'Amount' },
+  ],
+  retail: [
+    { key: 'productName', label: 'Product Name' },
+    { key: 'category', label: 'Category' },
+    { key: 'sizeVariant', label: 'Size / Variant' },
+    { key: 'qty', label: 'Quantity' },
+    { key: 'price', label: 'Price' },
+    { key: 'discount', label: 'Discount' },
+    { key: 'amount', label: 'Amount' },
+  ],
+  custom: [
+    { key: 'itemService', label: 'Item / Service' },
+    { key: 'description', label: 'Description' },
+    { key: 'qty', label: 'Quantity' },
+    { key: 'rate', label: 'Rate' },
+    { key: 'amount', label: 'Amount' },
+  ],
+};
+
 /**
  * Premium Responsive Invoice Builder Page
  */
@@ -1998,48 +2041,7 @@ const CreateInvoice = ({
               </p>
               <div className="space-y-3">
                 {(() => {
-                  const ALL_FIELDS_BY_TEMPLATE = {
-                    embroidery: [
-                      { key: 'designNo', label: 'Design / Item Code' },
-                      { key: 'workType', label: 'Work Type' },
-                      { key: 'description', label: 'Description' },
-                      { key: 'size', label: 'Size' },
-                      { key: 'qty', label: 'Quantity' },
-                      { key: 'rate', label: 'Rate' },
-                      { key: 'amount', label: 'Amount' },
-                    ],
-                    grocery: [
-                      { key: 'description', label: 'Product Name' },
-                      { key: 'size', label: 'Unit' },
-                      { key: 'qty', label: 'Quantity' },
-                      { key: 'rate', label: 'Unit Price' },
-                      { key: 'amount', label: 'Amount' },
-                    ],
-                    repair: [
-                      { key: 'serviceName', label: 'Service / Item' },
-                      { key: 'problemDetails', label: 'Problem / Details' },
-                      { key: 'partsCost', label: 'Parts Cost' },
-                      { key: 'labourCharge', label: 'Labour Charge' },
-                      { key: 'qty', label: 'Quantity' },
-                      { key: 'amount', label: 'Amount' },
-                    ],
-                    retail: [
-                      { key: 'productName', label: 'Product Name' },
-                      { key: 'category', label: 'Category' },
-                      { key: 'sizeVariant', label: 'Size / Variant' },
-                      { key: 'qty', label: 'Quantity' },
-                      { key: 'price', label: 'Price' },
-                      { key: 'discount', label: 'Discount' },
-                      { key: 'amount', label: 'Amount' },
-                    ],
-                    custom: [
-                      { key: 'itemService', label: 'Item / Service' },
-                      { key: 'description', label: 'Description' },
-                      { key: 'qty', label: 'Quantity' },
-                      { key: 'rate', label: 'Rate' },
-                      { key: 'amount', label: 'Amount' },
-                    ],
-                  };
+
                   const fields = ALL_FIELDS_BY_TEMPLATE[billType] || ALL_FIELDS_BY_TEMPLATE['custom'];
                   return fields.map((field) => {
                     const isChecked = pdfVisibleFields.length === 0 || pdfVisibleFields.includes(field.key);
@@ -2073,7 +2075,7 @@ const CreateInvoice = ({
               </div>
               <div className="flex gap-3 pt-2 border-t border-slate-100">
                 <button
-                  onClick={() => setPdfVisibleFields(fields.map(f => f.key))}
+                  onClick={() => setPdfVisibleFields((ALL_FIELDS_BY_TEMPLATE[billType] || ALL_FIELDS_BY_TEMPLATE['custom']).map(f => f.key))}
                   className="flex-1 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-colors"
                 >
                   Show All

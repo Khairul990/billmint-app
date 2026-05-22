@@ -543,7 +543,7 @@ export const importRestore = (backupData) => {
 
   const requiredKeys = ['settings', 'customers', 'products', 'invoices', 'expenses', 'subscription'];
   for (const k of requiredKeys) {
-    if (!backupData.hasOwnProperty(k)) {
+    if (!Object.prototype.hasOwnProperty.call(backupData, k)) {
       throw new Error(`Missing database key: ${k}`);
     }
   }

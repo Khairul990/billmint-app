@@ -96,8 +96,8 @@ export const autoIncrementString = (str, items = []) => {
   str = str.trim();
   
   let prefix = '';
-  let numLength = 0;
-  let currentNum = 0;
+  let numLength;
+  let currentNum;
 
   const match = str.match(/^(.*?)(\d+)$/);
   if (match) {
