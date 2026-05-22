@@ -1,5 +1,6 @@
 import { db, firebaseReady } from './firebase';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot } from 'firebase/firestore';
+import { ADMIN_EMAIL } from './adminAccess';
 
 // LocalStorage Keys
 const KEYS = {
