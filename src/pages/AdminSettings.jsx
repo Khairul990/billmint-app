@@ -24,7 +24,7 @@ import {
   Clock
 } from 'lucide-react';
 import { exportBackup } from '../utils/storage';
-import { isFirebaseEnabled } from '../utils/firebase';
+import { firebaseReady } from '../utils/firebase';
 
 /**
  * Settings & Administrator Management Page
@@ -45,9 +45,9 @@ const AdminSettings = ({ settings, invoices = [], customers = [], onSaveSettings
 
   // Firebase status detection
   const isOnline = navigator.onLine;
-  const firebaseStatus = isFirebaseEnabled && isOnline
+  const firebaseStatus = firebaseReady && isOnline
     ? 'connected'
-    : isFirebaseEnabled && !isOnline
+    : firebaseReady && !isOnline
       ? 'offline'
       : 'not-configured';
 

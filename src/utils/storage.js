@@ -1,4 +1,4 @@
-import { db, isFirebaseEnabled } from './firebase';
+import { db, firebaseReady } from './firebase';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot } from 'firebase/firestore';
 
 // LocalStorage Keys
@@ -169,12 +169,21 @@ const DEFAULT_SUBSCRIPTION = {
 
 // Safe Firebase User ID generator based on auth session email
 export const getFirebaseUserId = () => {
-  return 'workspace_admin';
+  const session = localStorage.getItem(KEYS.AUTH);
+  if (session) {
+    try {
+      const data = JSON.parse(session);
+      if (data && data.userEmail) {
+        return data.userEmail.replace(/[^a-zA-Z0-9]/g, '_');
+      }
+    } catch (e) {}
+  }
+  return 'demo-user';
 };
 
 // Background Firestore Save Helper
 const firestoreSave = async (collectionName, docId, data) => {
-  if (!isFirebaseEnabled) return { status: 'disabled' };
+  if (!firebaseReady) return { status: 'disabled' };
   try {
     const userId = getFirebaseUserId();
     let docRef;
@@ -194,7 +203,7 @@ const firestoreSave = async (collectionName, docId, data) => {
 
 // Background Firestore Delete Helper
 const firestoreDelete = async (collectionName, docId) => {
-  if (!isFirebaseEnabled) return;
+  if (!firebaseReady) return;
   try {
     const userId = getFirebaseUserId();
     let docRef;
@@ -255,7 +264,7 @@ export const resetToDemoData = () => {
   localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(DEFAULT_SUBSCRIPTION));
 
   // If Firebase is enabled, also populate Firestore in the background for demo
-  if (isFirebaseEnabled) {
+  if (firebaseReady) {
     const userId = getFirebaseUserId();
     firestoreSave('settings', userId, demoSettings);
     firestoreSave('businessProfiles', userId, demoSettings);
@@ -303,7 +312,7 @@ export const login = (passcode) => {
     localStorage.setItem(KEYS.AUTH, JSON.stringify(session));
     
     // Save login event to users/{userId}
-    if (isFirebaseEnabled) {
+    if (firebaseReady) {
       const userId = getFirebaseUserId();
       firestoreSave('users', userId, {
         userId,
@@ -556,7 +565,7 @@ export const importRestore = (backupData) => {
   localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(backupData.subscription));
 
   // If Firebase is enabled, batch update Firestore as well
-  if (isFirebaseEnabled) {
+  if (firebaseReady) {
     const userId = getFirebaseUserId();
     firestoreSave('settings', userId, backupData.settings);
     firestoreSave('businessProfiles', userId, backupData.settings);
@@ -577,7 +586,7 @@ export const importRestore = (backupData) => {
 let unsubscribes = [];
 
 export const enableRealTimeSync = () => {
-  if (!isFirebaseEnabled) return;
+  if (!firebaseReady) return;
 
   const userId = getFirebaseUserId();
   console.log('Enabling Real-Time Sync for workspace:', userId);
@@ -618,7 +627,7 @@ export const enableRealTimeSync = () => {
 
 // One-time Syncing on Authentication or Startup
 export const syncFromFirestore = async () => {
-  if (!isFirebaseEnabled) {
+  if (!firebaseReady) {
     console.log("Firebase not enabled, skipping Firestore sync.");
     return null;
   }

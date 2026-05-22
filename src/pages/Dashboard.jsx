@@ -32,7 +32,7 @@ import {
   Check
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
-import { isFirebaseEnabled } from '../utils/firebase';
+import { firebaseReady } from '../utils/firebase';
 
 /**
  * High-End SaaS Dashboard with SVG Charts & WhatsApp Reminders
@@ -300,7 +300,7 @@ const Dashboard = ({
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Firebase Database</span>
               </div>
               {(() => {
-                if (!isFirebaseEnabled) {
+                if (!firebaseReady) {
                   return (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-550"></span>
