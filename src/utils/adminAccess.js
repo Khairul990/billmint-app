@@ -1,12 +1,27 @@
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'khairul2052007@gmail.com';
+const DEFAULT_ADMIN_EMAIL = "khairul2052007@gmail.com";
 
-export function isAdminUser(user) {
-  if (!user) return false;
-  const emailToCheck = user.email || user.userEmail;
-  if (!emailToCheck) return false;
-  return emailToCheck.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
+export function getUserEmail(user) {
+  if (!user) return "";
+  return (
+    user.email ||
+    user.userEmail ||
+    user.providerData?.[0]?.email ||
+    ""
+  ).toLowerCase().trim();
 }
 
 export function getAdminEmail() {
-  return ADMIN_EMAIL;
+  return (
+    import.meta.env.VITE_ADMIN_EMAIL ||
+    import.meta.env.VITE_ADMIN_OWNER_EMAIL ||
+    DEFAULT_ADMIN_EMAIL
+  ).toLowerCase().trim();
+}
+
+export function isAdminUser(user) {
+  const userEmail = getUserEmail(user);
+  const adminEmail = getAdminEmail();
+  
+  if (!userEmail) return false;
+  return userEmail === adminEmail;
 }

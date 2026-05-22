@@ -69,12 +69,10 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
   };
 
   const processLocalLogin = (userEmail, userPassword) => {
-    const settings = getSettings();
-    const activePasscode = settings?.adminPasscode || '1118';
-    // activeAdminEmail removed; isAdmin will use env or fallback
+    // Admin unlock strictly relies on email matching
     setTimeout(() => {
       const emailLower = userEmail.toLowerCase().trim();
-      const isAdminResult = isAdminUser({ email: emailLower }) || (userPassword === activePasscode);
+      const isAdminResult = isAdminUser({ email: emailLower });
       
       const session = { 
         timestamp: Date.now(), 
