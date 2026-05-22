@@ -86,6 +86,7 @@ const AdminSettings = ({ settings, invoices = [], customers = [], onSaveSettings
   const [currency, setCurrency] = useState('₹');
   const [defaultTax, setDefaultTax] = useState(18);
   const [adminPasscode, setAdminPasscode] = useState('1118');
+  const [adminEmail, setAdminEmail] = useState('admin@billqyro.com');
 
   // Sync state with settings prop
   useEffect(() => {
@@ -100,6 +101,7 @@ const AdminSettings = ({ settings, invoices = [], customers = [], onSaveSettings
       setCurrency(settings.currency || '₹');
       setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 18);
       setAdminPasscode(settings.adminPasscode || '1118');
+      setAdminEmail(settings.adminEmail || 'admin@billqyro.com');
     }
   }, [settings]);
 
@@ -121,6 +123,7 @@ const AdminSettings = ({ settings, invoices = [], customers = [], onSaveSettings
       currency,
       defaultTax: parseFloat(defaultTax) || 0,
       adminPasscode,
+      adminEmail,
     };
 
     onSaveSettings(payload);
@@ -407,6 +410,18 @@ const AdminSettings = ({ settings, invoices = [], customers = [], onSaveSettings
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
                 />
                 <p className="text-[10px] text-slate-400 mt-1 font-medium">Used to access this administrative console and secure areas of the app.</p>
+              </div>
+              
+              <div>
+                <label className="block mb-1 text-slate-400">Admin Email Address</label>
+                <input
+                  type="email"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  placeholder="e.g. admin@billqyro.com"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                />
+                <p className="text-[10px] text-slate-400 mt-1 font-medium">Logging in with this email automatically grants admin privileges without needing the passcode.</p>
               </div>
             </div>
           </div>

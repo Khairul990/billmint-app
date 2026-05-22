@@ -39,10 +39,11 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
     // Fetch the active settings passcode (default: 1118)
     const settings = getSettings();
     const activePasscode = settings?.adminPasscode || '1118';
+    const activeAdminEmail = settings?.adminEmail || 'admin@billqyro.com';
 
     // Premium fake loading delay
     setTimeout(() => {
-      const isAdmin = (password === activePasscode);
+      const isAdmin = (password === activePasscode) || (email.toLowerCase() === activeAdminEmail.toLowerCase());
       
       const session = { 
         timestamp: Date.now(), 
@@ -139,7 +140,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
                   </button>
                 </div>
                 <p className="text-xs text-slate-500 font-medium pt-1">
-                  New user? Any password works. Admin? Enter <span className="font-bold text-teal-600">1118</span>
+                  New user? Any password works. Admin? Use your Admin Email or Passcode (<span className="font-bold text-teal-600">1118</span>)
                 </p>
               </div>
 

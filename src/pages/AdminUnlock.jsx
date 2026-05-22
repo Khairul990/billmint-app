@@ -10,11 +10,12 @@ const AdminUnlock = ({ onUnlock, onCancel }) => {
     e.preventDefault();
     const settings = getSettings();
     const activePasscode = settings?.adminPasscode || '1118';
+    const activeEmail = settings?.adminEmail || 'admin@billqyro.com';
 
-    if (passcode === activePasscode) {
+    if (passcode === activePasscode || String(passcode).toLowerCase().trim() === activeEmail.toLowerCase()) {
       onUnlock();
     } else {
-      setError('Incorrect admin passcode.');
+      setError('Incorrect admin passcode or email.');
       setPasscode('');
     }
   };
@@ -29,7 +30,7 @@ const AdminUnlock = ({ onUnlock, onCancel }) => {
             <ShieldAlert className="w-8 h-8" />
           </div>
           <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">Admin Protected</h2>
-          <p className="text-xs text-slate-500 font-medium mt-1">Please enter the master passcode to access the owner tools.</p>
+          <p className="text-xs text-slate-500 font-medium mt-1">Please enter the master passcode or admin email to access the owner tools.</p>
         </div>
 
         <form onSubmit={handleUnlock} className="space-y-4 relative z-10">
@@ -39,12 +40,11 @@ const AdminUnlock = ({ onUnlock, onCancel }) => {
                 <KeyRound className="w-5 h-5" />
               </span>
               <input
-                type="password"
-                maxLength="6"
+                type="text"
                 value={passcode}
-                onChange={(e) => { setError(''); setPasscode(e.target.value.replace(/\D/g, '')); }}
-                placeholder="••••"
-                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-center text-xl tracking-[0.5em] font-black text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                onChange={(e) => { setError(''); setPasscode(e.target.value); }}
+                placeholder="Passcode or Email"
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-center text-lg font-black text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
                 autoFocus
               />
             </div>

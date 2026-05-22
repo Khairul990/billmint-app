@@ -15,7 +15,7 @@ const Login = ({ onLoginSuccess }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!passcode) {
-      setError('Please enter your administrator passcode.');
+      setError('Please enter your administrator passcode or admin email.');
       return;
     }
 
@@ -24,9 +24,11 @@ const Login = ({ onLoginSuccess }) => {
     setTimeout(() => {
       const isOk = login(passcode);
       if (isOk) {
+        localStorage.setItem('billqyro_admin_unlocked', 'true');
+        localStorage.setItem('billqyro_user_role', 'admin');
         onLoginSuccess();
       } else {
-        setError('Invalid passcode. Hint: Check the default passcode.');
+        setError('Invalid passcode or email. Hint: Check the default passcode.');
         setPasscode('');
       }
       setLoading(false);
@@ -68,19 +70,18 @@ const Login = ({ onLoginSuccess }) => {
             <div className="relative">
               <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
-                type="password"
-                maxLength="6"
+                type="text"
                 value={passcode}
                 onChange={(e) => {
                   setError('');
-                  setPasscode(e.target.value.replace(/\D/g, ''));
+                  setPasscode(e.target.value);
                 }}
-                placeholder="••••"
+                placeholder="Passcode or Admin Email"
                 className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-[#19C3A3] transition-colors"
               />
             </div>
             <p className="text-xs text-center text-gray-500 dark:text-gray-400">
-              Default passcode: <strong className="text-[#19C3A3]">1118</strong>
+              Default passcode: <strong className="text-[#19C3A3]">1118</strong> or Admin Email
             </p>
             {error && (
               <div className="flex items-center gap-2 p-3 bg-rose-50 dark:bg-rose-900 rounded-xl text-sm text-rose-700">

@@ -24,6 +24,7 @@ const DEFAULT_SETTINGS = {
   currency: '₹',
   defaultTax: 18,
   adminPasscode: '1118', // Customizable administrative passcode
+  adminEmail: 'admin@billqyro.com', // Admin Email for auto-unlock
   defaultBillingTemplate: '',
   pdfVisibleFields: {
     embroidery: ['designNo', 'workType', 'description', 'size', 'quantity', 'rate', 'amount'],
@@ -254,6 +255,7 @@ export const resetToDemoData = () => {
     currency: '₹',
     defaultTax: 18,
     adminPasscode: '1118',
+    adminEmail: 'admin@billqyro.com',
   };
 
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(demoSettings));
@@ -302,11 +304,17 @@ export const getAuthSession = () => {
   }
 };
 
-export const login = (passcode) => {
+export const login = (passcodeOrEmail) => {
   const activeSettings = getSettings() || DEFAULT_SETTINGS;
   const targetPasscode = activeSettings.adminPasscode || '1118';
-  if (passcode === targetPasscode) {
-    const session = { timestamp: Date.now(), token: 'billqyro-secure-session', userEmail: 'admin@billqyro.com' };
+  const targetEmail = activeSettings.adminEmail || 'admin@billqyro.com';
+
+  const isEmailMatch = String(passcodeOrEmail).toLowerCase().trim() === targetEmail.toLowerCase();
+  const isPasscodeMatch = String(passcodeOrEmail) === targetPasscode;
+
+  if (isPasscodeMatch || isEmailMatch) {
+    const sessionEmail = isEmailMatch ? targetEmail : 'admin@billqyro.com';
+    const session = { timestamp: Date.now(), token: 'billqyro-secure-session', userEmail: sessionEmail };
     localStorage.setItem(KEYS.AUTH, JSON.stringify(session));
     
     // Save login event to users/{userId}
@@ -314,7 +322,7 @@ export const login = (passcode) => {
       const userId = getFirebaseUserId();
       firestoreSave('users', userId, {
         userId,
-        email: 'admin@billqyro.com',
+        email: sessionEmail,
         lastLogin: new Date().toISOString(),
         role: 'administrator'
       });
