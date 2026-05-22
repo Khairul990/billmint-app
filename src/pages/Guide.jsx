@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Sparkles, ArrowRight, Settings, Users, Plus, ListChecks, FileDown, 
-    BarChart3, CheckCircle2, Calculator, HelpCircle, FileText, LayoutDashboard, ChevronDown, MousePointer2
+    BarChart3, CheckCircle2, Calculator, HelpCircle, FileText, LayoutDashboard, ChevronDown, MousePointer2, Search
 } from 'lucide-react';
 
 /**
@@ -185,6 +185,7 @@ const UIDashboardMockup = () => (
  */
 const Guide = ({ setCurrentTab }) => {
     const [activeStep, setActiveStep] = useState(1);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const steps = [
         {
@@ -281,6 +282,28 @@ const Guide = ({ setCurrentTab }) => {
         { q: "How do I change business name or logo?", a: "Navigate to the Settings tab. There you can upload a new logo, change your business name, set GST details, and update your address." },
         { q: "What happens if internet/Firebase is offline?", a: "BillQyro works completely offline! All data is securely stored in your browser's LocalStorage and will sync automatically when you reconnect if Firebase is enabled." },
     ];
+
+    const filteredFaqs = faqs.filter(faq => 
+        faq.q.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        faq.a.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                setActiveStep(prev => prev < steps.length ? prev + 1 : prev);
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                setActiveStep(prev => prev > 1 ? prev - 1 : prev);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [steps.length]);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -421,11 +444,22 @@ const Guide = ({ setCurrentTab }) => {
                 {/* SECTION 2: Visual Step-by-Step Guide */}
                 <motion.div variants={itemVariants} className="space-y-8">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
-                        <div>
+                        <div className="flex-1">
                             <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Interactive Guide</h2>
-                            <p className="text-sm text-slate-500 font-medium mt-1">Click on the steps to see how each feature works.</p>
+                            <p className="text-sm text-slate-500 font-medium mt-1">Click on the steps or use Arrow Keys to navigate.</p>
+                            
+                            {/* PROGRESS BAR */}
+                            <div className="mt-4 flex items-center gap-4 max-w-md">
+                                <div className="h-2 flex-1 bg-slate-200 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full bg-teal-500 rounded-full transition-all duration-500 ease-out" 
+                                        style={{ width: `${(activeStep / steps.length) * 100}%` }}
+                                    ></div>
+                                </div>
+                                <span className="text-xs font-bold text-slate-500">{activeStep} / {steps.length} completed</span>
+                            </div>
                         </div>
-                        <div className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-400 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
+                        <div className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-400 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm shrink-0">
                             <MousePointer2 className="w-3.5 h-3.5" />
                             Interactive Mode
                         </div>
@@ -573,11 +607,42 @@ const Guide = ({ setCurrentTab }) => {
 
                 {/* SECTION 4: Common Questions */}
                 <motion.div variants={itemVariants} className="space-y-6">
-                    <h2 className="text-2xl font-extrabold text-slate-900 px-2 text-center md:text-left">Common Questions</h2>
-                    <div className="max-w-3xl mx-auto md:mx-0">
-                        {faqs.map((faq, idx) => (
-                            <FAQItem key={idx} question={faq.q} answer={faq.a} />
-                        ))}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
+                        <h2 className="text-2xl font-extrabold text-slate-900 text-center md:text-left">Common Questions</h2>
+                        
+                        <div className="relative max-w-sm w-full">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <Search className="w-4 h-4 text-slate-400" />
+                            </div>
+                            <input 
+                                type="text"
+                                placeholder="Search FAQs..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all shadow-sm"
+                            />
+                        </div>
+                    </div>
+                    <div className="max-w-3xl mx-auto md:mx-0 min-h-[300px]">
+                        <AnimatePresence>
+                            {filteredFaqs.length > 0 ? (
+                                filteredFaqs.map((faq) => (
+                                    <motion.div
+                                        key={faq.q}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        <FAQItem question={faq.q} answer={faq.a} />
+                                    </motion.div>
+                                ))
+                            ) : (
+                                <div className="text-center py-12 text-slate-500 text-sm font-medium">
+                                    No questions found for "{searchQuery}".
+                                </div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </motion.div>
 
