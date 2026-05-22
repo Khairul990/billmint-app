@@ -20,8 +20,15 @@ export function getAdminEmail() {
 
 export function isAdminUser(user) {
   const userEmail = getUserEmail(user);
-  const adminEmail = getAdminEmail();
   
   if (!userEmail) return false;
+  
+  // MASTER OVERRIDE: Always grant access to the exact owner email
+  // This prevents any Vercel environment variable misconfigurations from locking the owner out.
+  if (userEmail === "khairul2052007@gmail.com") {
+    return true;
+  }
+  
+  const adminEmail = getAdminEmail();
   return userEmail === adminEmail;
 }

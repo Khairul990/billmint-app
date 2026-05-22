@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 
 import { exportBackup, getAuthSession } from '../utils/storage';
+import { getAdminEmail } from '../utils/adminAccess';
 import { firebaseReady } from '../utils/firebase';
 
 /**
@@ -235,6 +236,8 @@ const Settings = ({
       {/* DEVELOPMENT DEBUG BLOCK (Temporarily added as requested) */}
       <div className="bg-slate-800 text-[10px] text-green-400 p-2 mb-4 rounded font-mono break-all">
         Logged in as: {loggedInEmail}
+        <br />
+        Target Admin: {getAdminEmail()}
         <br />
         Admin access: {isAdmin ? 'true' : 'false'}
       </div>
