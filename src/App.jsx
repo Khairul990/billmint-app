@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { isAdmin, ADMIN_EMAIL } from './utils/adminAccess';
 import { Toaster, toast } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import Login from './pages/Login';
@@ -121,9 +122,9 @@ function App() {
             const email = user.email || '';
             const emailLower = email.toLowerCase().trim();
             const settings = getSettings() || {};
-            const activeAdminEmail = settings.adminEmail || 'Khairul20052007@gmail.com';
-            const isMasterAdmin = emailLower === 'khairul20052007@gmail.com' || emailLower === 'khairul2052007@gmail.com' || emailLower === 'khairulrafka1118@gmail.com';
-            const isAdmin = (emailLower === activeAdminEmail.toLowerCase()) || isMasterAdmin;
+            const activeAdminEmail = settings.adminEmail || ADMIN_EMAIL;
+            // Determine admin status using utility
+            const isAdminUser = isAdmin(emailLower);
             
             const newSession = { 
               timestamp: Date.now(), 
@@ -132,18 +133,18 @@ function App() {
             };
             
             localStorage.setItem('billqyro_auth', JSON.stringify(newSession));
-            localStorage.setItem('billqyro_user_role', isAdmin ? 'admin' : 'user');
+            localStorage.setItem('billqyro_user_role', isAdminUser ? 'admin' : 'user');
             
-            if (isAdmin) {
+            if (isAdminUser) {
               localStorage.setItem('billqyro_admin_unlocked', 'true');
             } else {
               localStorage.removeItem('billqyro_admin_unlocked');
             }
             
             setIsAuthenticated(true);
-            setUserRole(isAdmin ? 'admin' : 'user');
-            setIsAdminUnlocked(isAdmin);
-          }
+            setUserRole(isAdminUser ? 'admin' : 'user');
+            setIsAdminUnlocked(isAdminUser);
+            }
         }
       });
       return () => unsubscribe();
@@ -195,7 +196,17 @@ function App() {
       const path = window.location.pathname;
       const hash = window.location.hash;
       if (path === '/admin' || hash === '#/admin' || hash === '#admin') {
-        setCurrentTab('admin-panel');
+        // Verify admin access before routing
+        const session = getAuthSession();
+        const email = session?.userEmail?.toLowerCase?.() || '';
+        if (isAdmin(email)) {
+          setCurrentTab('admin-panel');
+        } else {
+          // redirect non‑admin to dashboard
+          setCurrentTab('dashboard');
+          if (path === '/admin') window.history.replaceState(null, '', '/');
+          if (hash.includes('admin')) window.location.hash = '';
+        }
       }
     };
 
@@ -226,7 +237,7 @@ function App() {
     if (isAuthenticated && userRole !== 'admin') {
       const session = getAuthSession();
       const email = session?.userEmail?.toLowerCase()?.trim() || '';
-      if (email === 'khairul20052007@gmail.com' || email === 'khairul2052007@gmail.com' || email === 'khairulrafka1118@gmail.com') {
+      if (isAdmin(email)) {
         setUserRole('admin');
         setIsAdminUnlocked(true);
         localStorage.setItem('billqyro_user_role', 'admin');
@@ -241,12 +252,12 @@ function App() {
     // Determine role based on session email (master admin list)
     const session = getAuthSession();
     const email = session?.userEmail?.toLowerCase()?.trim() || '';
-    const masterList = ['khairul20052007@gmail.com','khairul2052007@gmail.com','khairulrafka1118@gmail.com'];
-    const isAdmin = masterList.includes(email);
-    setUserRole(isAdmin ? 'admin' : 'user');
-    setIsAdminUnlocked(isAdmin);
-    localStorage.setItem('billqyro_user_role', isAdmin ? 'admin' : 'user');
-    if (isAdmin) {
+    const isAdminUser = isAdmin(email);
+    
+    setUserRole(isAdminUser ? 'admin' : 'user');
+    setIsAdminUnlocked(isAdminUser);
+    localStorage.setItem('billqyro_user_role', isAdminUser ? 'admin' : 'user');
+    if (isAdminUser) {
       localStorage.setItem('billqyro_admin_unlocked', 'true');
     } else {
       localStorage.removeItem('billqyro_admin_unlocked');
@@ -259,17 +270,6 @@ function App() {
     setSettings(currentSettings);
     setExpenses(getExpenses());
     setSubscription(getSubscriptionStatus());
-
-    // ---- New: Auto grant admin if master email ----
-    const session = getAuthSession();
-    const email = session?.userEmail?.toLowerCase()?.trim() || '';
-    const masterList = ['khairul20052007@gmail.com','khairul2052007@gmail.com','khairulrafka1118@gmail.com'];
-    if (masterList.includes(email)) {
-      setUserRole('admin');
-      setIsAdminUnlocked(true);
-      localStorage.setItem('billqyro_user_role','admin');
-      localStorage.setItem('billqyro_admin_unlocked','true');
-    }
     
     // Setup & Onboarding Routing
     const hasSeenGuide = localStorage.getItem('billqyro_seen_guide');
@@ -577,19 +577,14 @@ function App() {
         if (!isAuthenticated) {
           return <Login onLoginSuccess={handleLoginSuccess} />;
         }
-        if (!isAdminUnlocked) {
-          return (
-            <AdminUnlock 
-              onUnlock={() => {
-                setIsAdminUnlocked(true);
-                setUserRole('admin');
-                localStorage.setItem('billqyro_user_role', 'admin');
-                localStorage.setItem('billqyro_admin_unlocked', 'true');
-              }} 
-              onCancel={() => setCurrentTab('dashboard')} 
-            />
-          );
+        const session = getAuthSession();
+        const email = session?.userEmail?.toLowerCase?.() || '';
+        if (!isAdmin(email)) {
+          // Non‑admin user should not see admin panel; redirect to dashboard.
+          setCurrentTab('dashboard');
+          return null;
         }
+        // Admin is authenticated; render admin UI.
         return (
           <AdminSettings
             settings={settings}
