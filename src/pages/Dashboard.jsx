@@ -29,7 +29,8 @@ import {
   Sparkles,
   FileText,
   Rocket,
-  Check
+  Check,
+  Megaphone
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { firebaseReady } from '../utils/firebase';
@@ -190,6 +191,19 @@ const Dashboard = ({
           </motion.button>
         </div>
       </motion.div>
+
+      {/* GLOBAL ANNOUNCEMENT BANNER */}
+      {businessSettings?.globalAnnouncement && (
+        <motion.div variants={itemVariants} className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-3xl p-4 shadow-sm flex items-start gap-3">
+          <div className="bg-white p-2 rounded-xl shadow-sm text-indigo-500 mt-0.5">
+            <Megaphone className="w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-xs font-black text-indigo-900 uppercase tracking-widest mb-1">Announcement</h3>
+            <p className="text-xs font-semibold text-slate-700 whitespace-pre-wrap leading-relaxed">{businessSettings.globalAnnouncement}</p>
+          </div>
+        </motion.div>
+      )}
 
       {/* 0.1 EMPTY STATE — NEW USER WELCOME (Shown when zero invoices) */}
       {isNewUser && (

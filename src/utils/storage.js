@@ -586,6 +586,52 @@ export const importRestore = (backupData) => {
   return backupData;
 };
 
+export const clearInvoices = () => {
+  localStorage.setItem(KEYS.INVOICES, JSON.stringify([]));
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  return { status: 'success' };
+};
+
+export const clearCustomers = () => {
+  localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify([]));
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  return { status: 'success' };
+};
+
+export const clearProducts = () => {
+  localStorage.setItem(KEYS.PRODUCTS, JSON.stringify([]));
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  return { status: 'success' };
+};
+
+export const clearExpenses = () => {
+  localStorage.setItem(KEYS.EXPENSES, JSON.stringify([]));
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  return { status: 'success' };
+};
+
+export const getStorageUsage = () => {
+  let totalBytes = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('billqyro_')) {
+      const value = localStorage.getItem(key);
+      totalBytes += key.length + value.length;
+    }
+  }
+  // Convert bytes to KB
+  const kb = totalBytes / 1024;
+  // Browser limit is typically 5000KB (5MB)
+  const limitKb = 5000;
+  const percentage = Math.min((kb / limitKb) * 100, 100);
+  
+  return {
+    kb: kb.toFixed(2),
+    limitKb,
+    percentage: percentage.toFixed(2)
+  };
+};
+
 // --- REAL TIME SYNC LISTENER ---
 let unsubscribes = [];
 
@@ -597,8 +643,6 @@ export const enableRealTimeSync = () => {
 
   // Clear any existing listeners
   unsubscribes.forEach(unsub => unsub());
-  unsubscribes = [];
-
   const syncCollection = (collectionName, storageKey) => {
     const colRef = collection(db, collectionName, userId, 'items');
     const unsub = onSnapshot(colRef, (snapshot) => {

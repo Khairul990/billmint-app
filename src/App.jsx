@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { isAdminUser } from './utils/adminAccess';
 import { Toaster, toast } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Lock } from 'lucide-react';
 import Login from './pages/Login';
 import WelcomeOnboarding from './pages/WelcomeOnboarding';
 import SetupBilling from './pages/SetupBilling';
@@ -510,6 +511,46 @@ function App() {
         }}
       />
     );
+  }
+
+  // --- Maintenance Mode Check ---
+  if (settings?.maintenanceMode) {
+    const session = getAuthSession();
+    if (!isAdminUser(session)) {
+      return (
+        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="max-w-md bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl"
+          >
+            <div className="w-16 h-16 bg-rose-500/20 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Lock className="w-8 h-8" />
+            </div>
+            <h1 className="text-2xl font-black text-white mb-3">App Under Maintenance</h1>
+            <p className="text-slate-400 font-medium leading-relaxed mb-8">
+              We are currently performing scheduled maintenance to bring you a better experience. Please check back later.
+            </p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors"
+            >
+              Refresh Page
+            </button>
+            
+            <button 
+              onClick={() => {
+                logout();
+                setIsAuthenticated(false);
+              }}
+              className="block w-full mt-4 text-xs font-bold text-slate-500 hover:text-slate-300"
+            >
+              Sign out
+            </button>
+          </motion.div>
+        </div>
+      );
+    }
   }
 
   return (

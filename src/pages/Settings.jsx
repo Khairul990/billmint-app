@@ -25,10 +25,14 @@ import {
   Users,
   CircleDollarSign,
   Clock,
-  HardDrive
+  HardDrive,
+  Megaphone,
+  Lock,
+  Trash2,
+  CloudLightning
 } from 'lucide-react';
 
-import { exportBackup, getAuthSession } from '../utils/storage';
+import { exportBackup, getAuthSession, clearInvoices, clearCustomers, clearProducts, clearExpenses, getStorageUsage } from '../utils/storage';
 import { getAdminEmail } from '../utils/adminAccess';
 import { firebaseReady } from '../utils/firebase';
 
@@ -72,6 +76,10 @@ const Settings = ({
     custom: ['itemService', 'description', 'quantity', 'rate', 'amount']
   });
   
+  // Premium Admin States
+  const [globalAnnouncement, setGlobalAnnouncement] = useState('');
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
@@ -97,6 +105,8 @@ const Settings = ({
       if (settings.pdfVisibleFields) {
         setPdfVisibleFields(settings.pdfVisibleFields);
       }
+      setGlobalAnnouncement(settings.globalAnnouncement || '');
+      setMaintenanceMode(settings.maintenanceMode || false);
     }
   }, [settings]);
 
@@ -127,11 +137,11 @@ const Settings = ({
       brandColor,
       invoiceTemplate,
       defaultBillingTemplate,
-      pdfVisibleFields
+      pdfVisibleFields,
+      globalAnnouncement,
+      maintenanceMode
     };
 
-    onSaveSettings(payload);
-    
     onSaveSettings(payload);
     
     // Show Toast
@@ -229,6 +239,25 @@ const Settings = ({
 
   const session = getAuthSession();
   const loggedInEmail = session?.userEmail || 'unknown';
+
+  const handleGranularWipe = (type) => {
+    const confirmText = `Are you SURE you want to delete ALL ${type}? This cannot be undone!`;
+    if (window.confirm(confirmText)) {
+      if (type === 'Invoices') clearInvoices();
+      if (type === 'Customers') clearCustomers();
+      if (type === 'Products') clearProducts();
+      if (type === 'Expenses') clearExpenses();
+      alert(`${type} have been completely wiped.`);
+      window.location.reload();
+    }
+  };
+
+  const handleForceSync = () => {
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+    alert('Forced local data to sync with Cloud (if configured).');
+  };
+  
+  const storageHealth = getStorageUsage();
 
   return (
     <div className="max-w-4xl mx-auto pb-12 relative">
@@ -584,18 +613,74 @@ const Settings = ({
       {/* --- ADMIN ONLY SECTION --- */}
       {isAdmin && (
         <div className="mt-12 space-y-6 pt-12 border-t-2 border-slate-100">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-              <ShieldAlert className="w-6 h-6" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <ShieldAlert className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Premium Admin Console</h2>
+                <p className="text-sm text-slate-500 font-medium mt-1">Superuser controls, real-time stats & global management</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Administrative Console</h2>
-              <p className="text-sm text-slate-500 font-medium mt-1">Superuser controls and real-time statistics</p>
+            {/* Storage Health Mini Indicator */}
+            <div className="flex flex-col sm:items-end">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Local Storage Quota</span>
+              <div className="flex items-center gap-2">
+                <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full transition-all duration-500 ${storageHealth.percentage > 80 ? 'bg-rose-500' : 'bg-emerald-500'}`} style={{ width: `${storageHealth.percentage}%` }}></div>
+                </div>
+                <span className="text-xs font-bold text-slate-700">{storageHealth.percentage}%</span>
+              </div>
+              <span className="text-[9px] text-slate-400 font-medium mt-0.5">{storageHealth.kb} KB / {storageHealth.limitKb} KB</span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
+              
+              {/* GLOBAL ANNOUNCEMENT & MAINTENANCE */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white rounded-3xl p-5 border border-indigo-100 shadow-premium flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xs font-extrabold text-indigo-900 mb-1 flex items-center gap-2 uppercase tracking-wide">
+                      <Megaphone className="w-4 h-4 text-indigo-500" /> Global Announcement
+                    </h3>
+                    <p className="text-[10px] text-slate-500 font-medium mb-3">Broadcast a message to all users on the dashboard.</p>
+                    <textarea 
+                      value={globalAnnouncement}
+                      onChange={(e) => setGlobalAnnouncement(e.target.value)}
+                      placeholder="Type announcement here..."
+                      className="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none h-20"
+                    />
+                  </div>
+                  <button onClick={handleSave} className="mt-3 w-full py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold text-xs rounded-xl transition-all">
+                    Publish Banner
+                  </button>
+                </div>
+
+                <div className="bg-white rounded-3xl p-5 border border-rose-100 shadow-premium flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xs font-extrabold text-rose-900 mb-1 flex items-center gap-2 uppercase tracking-wide">
+                      <Lock className="w-4 h-4 text-rose-500" /> App Maintenance Mode
+                    </h3>
+                    <p className="text-[10px] text-slate-500 font-medium mb-3">Lock the app for everyone except you. Show a maintenance screen.</p>
+                    <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl mt-2">
+                      <span className="text-xs font-bold text-slate-700">Maintenance Active</span>
+                      <button 
+                        onClick={() => setMaintenanceMode(!maintenanceMode)}
+                        className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${maintenanceMode ? 'bg-rose-500' : 'bg-slate-300'}`}
+                      >
+                        <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-300 ${maintenanceMode ? 'left-7' : 'left-1'}`}></div>
+                      </button>
+                    </div>
+                  </div>
+                  <button onClick={handleSave} className="mt-3 w-full py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold text-xs rounded-xl transition-all">
+                    Save Lock State
+                  </button>
+                </div>
+              </div>
+
               {/* REAL-TIME ADMIN STATS */}
               <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 md:p-6 border border-indigo-800/40 shadow-xl">
                 <div className="flex items-center justify-between mb-5">
@@ -703,20 +788,55 @@ const Settings = ({
             </div>
 
             <div className="space-y-6">
-              <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
-                <h3 className="text-sm font-extrabold text-rose-600 border-b border-slate-50 pb-3 flex items-center gap-2">
-                  <RotateCcw className="w-4.5 h-4.5 text-rose-500" />
-                  <span>Danger Zone</span>
+              
+              {/* Force Cloud Sync */}
+              <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl p-5 border border-indigo-500 shadow-xl text-white">
+                <h3 className="text-sm font-extrabold border-b border-indigo-400/30 pb-3 flex items-center gap-2">
+                  <CloudLightning className="w-4.5 h-4.5 text-indigo-200" />
+                  <span>Force Cloud Sync</span>
+                </h3>
+                <p className="text-[10px] text-indigo-100 font-medium mt-3 mb-4 leading-relaxed">
+                  Manually trigger a force push of all local databases up to Firebase Firestore to ensure cloud parity.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleForceSync}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-2xl transition-all"
+                >
+                  <CloudLightning className="w-4 h-4" />
+                  <span>Sync Now</span>
+                </button>
+              </div>
+
+              {/* Danger Zone */}
+              <div className="bg-white rounded-3xl p-5 md:p-6 border border-rose-100 shadow-premium space-y-4">
+                <h3 className="text-sm font-extrabold text-rose-600 border-b border-rose-50 pb-3 flex items-center gap-2">
+                  <Trash2 className="w-4.5 h-4.5 text-rose-500" />
+                  <span>Granular Data Wipe</span>
                 </h3>
                 <div className="space-y-2">
-                  <button
-                    type="button"
-                    onClick={handleResetData}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 border border-amber-200 bg-amber-50 hover:bg-amber-100/80 text-amber-800 font-bold text-xs rounded-2xl transition-all"
-                  >
-                    <RotateCcw className="w-4 h-4 text-amber-600" />
-                    <span>Reset System Database</span>
-                  </button>
+                  {['Invoices', 'Customers', 'Products', 'Expenses'].map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => handleGranularWipe(type)}
+                      className="w-full flex items-center justify-between px-4 py-2.5 border border-rose-100 bg-rose-50/30 hover:bg-rose-50 text-rose-700 font-bold text-xs rounded-xl transition-all"
+                    >
+                      <span>Clear All {type}</span>
+                      <Trash2 className="w-3.5 h-3.5 opacity-50" />
+                    </button>
+                  ))}
+                  
+                  <div className="pt-3 mt-3 border-t border-rose-100">
+                    <button
+                      type="button"
+                      onClick={handleResetData}
+                      className="w-full flex items-center justify-center gap-2 py-3 border border-amber-200 bg-amber-50 hover:bg-amber-100/80 text-amber-800 font-bold text-xs rounded-2xl transition-all"
+                    >
+                      <RotateCcw className="w-4 h-4 text-amber-600" />
+                      <span>Full Demo Factory Reset</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
