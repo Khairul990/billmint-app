@@ -87,6 +87,9 @@ const AdminSettings = ({ settings, invoices = [], customers = [], onSaveSettings
   const [defaultTax, setDefaultTax] = useState(18);
   const [adminPasscode, setAdminPasscode] = useState('1118');
   const [adminEmail, setAdminEmail] = useState('Khairul20052007@gmail.com');
+  // New admin control states
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [autoEmail, setAutoEmail] = useState(true);
 
   // Sync state with settings prop
   useEffect(() => {
@@ -124,6 +127,9 @@ const AdminSettings = ({ settings, invoices = [], customers = [], onSaveSettings
       defaultTax: parseFloat(defaultTax) || 0,
       adminPasscode,
       adminEmail,
+      // New fields
+      maintenanceMode,
+      autoEmail,
     };
 
     onSaveSettings(payload);
@@ -426,7 +432,34 @@ const AdminSettings = ({ settings, invoices = [], customers = [], onSaveSettings
             </div>
           </div>
 
-          {/* Section: Data Backup & Restore */}
+          {/* New Bengali Admin Settings */
+<div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4 mt-6">
+  <h3 className="text-sm font-extrabold text-slate-800 border-b border-slate-50 pb-3 flex items-center gap-2">
+    <ShieldAlert className="w-4.5 h-4.5 text-rose-500" />
+    <span>প্রশাসক সেটিংস (Admin Settings)</span>
+  </h3>
+  <div className="space-y-4 text-xs font-semibold text-slate-500">
+    <div className="flex items-center">
+      <input
+        type="checkbox"
+        checked={maintenanceMode}
+        onChange={(e) => setMaintenanceMode(e.target.checked)}
+        className="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500"
+      />
+      <label className="ml-2 text-slate-400">রক্ষণাবেক্ষণ মোড (Maintenance Mode)</label>
+    </div>
+    <div className="flex items-center">
+      <input
+        type="checkbox"
+        checked={autoEmail}
+        onChange={(e) => setAutoEmail(e.target.checked)}
+        className="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500"
+      />
+      <label className="ml-2 text-slate-400">স্বয়ংক্রিয় ইনভয়েস ইমেইল (Auto Email Invoices)</label>
+    </div>
+  </div>
+</div>
+/* Section: Data Backup & Restore */}
           <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-premium space-y-4">
             <h3 className="text-sm font-extrabold text-slate-800 border-b border-slate-50 pb-3 flex items-center gap-2">
               <Database className="w-4.5 h-4.5 text-indigo-500" />

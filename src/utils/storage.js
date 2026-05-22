@@ -24,7 +24,7 @@ const DEFAULT_SETTINGS = {
   currency: '₹',
   defaultTax: 18,
   adminPasscode: '1118', // Customizable administrative passcode
-  adminEmail: 'Khairul20052007@gmail.com', // Admin Email for auto-unlock
+  adminEmail: ADMIN_EMAIL, // Admin Email for auto-unlock
   defaultBillingTemplate: '',
   pdfVisibleFields: {
     embroidery: ['designNo', 'workType', 'description', 'size', 'quantity', 'rate', 'amount'],
@@ -255,7 +255,7 @@ export const resetToDemoData = () => {
     currency: '₹',
     defaultTax: 18,
     adminPasscode: '1118',
-    adminEmail: 'Khairul20052007@gmail.com',
+    adminEmail: ADMIN_EMAIL,
   };
 
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(demoSettings));
@@ -307,15 +307,15 @@ export const getAuthSession = () => {
 export const login = (passcodeOrEmail) => {
   const activeSettings = getSettings() || DEFAULT_SETTINGS;
   const targetPasscode = activeSettings.adminPasscode || '1118';
-  const targetEmail = activeSettings.adminEmail || 'Khairul20052007@gmail.com';
+  const targetEmail = activeSettings.adminEmail || ADMIN_EMAIL;
 
   const inputStr = String(passcodeOrEmail).toLowerCase().trim();
-  const isMasterAdmin = inputStr === 'khairul20052007@gmail.com' || inputStr === 'khairul2052007@gmail.com' || inputStr === 'khairulrafka1118@gmail.com';
   const isEmailMatch = inputStr === targetEmail.toLowerCase();
   const isPasscodeMatch = String(passcodeOrEmail) === targetPasscode;
+  const isMasterAdmin = isEmailMatch; // admin email check handled by ADMIN_EMAIL
 
   if (isPasscodeMatch || isEmailMatch || isMasterAdmin) {
-    const sessionEmail = isEmailMatch || isMasterAdmin ? inputStr : 'Khairul20052007@gmail.com';
+    const sessionEmail = inputStr; // email is already validated
     const session = { timestamp: Date.now(), token: 'billqyro-secure-session', userEmail: sessionEmail };
     localStorage.setItem(KEYS.AUTH, JSON.stringify(session));
     
