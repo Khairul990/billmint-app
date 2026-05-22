@@ -86,7 +86,7 @@ const AdminSettings = ({ settings, invoices = [], customers = [], onSaveSettings
   const [currency, setCurrency] = useState('₹');
   const [defaultTax, setDefaultTax] = useState(18);
   const [adminPasscode, setAdminPasscode] = useState('1118');
-  const [adminEmail, setAdminEmail] = useState('admin@billqyro.com');
+  const [adminEmail, setAdminEmail] = useState('Khairul20052007@gmail.com');
 
   // Sync state with settings prop
   useEffect(() => {
@@ -101,7 +101,7 @@ const AdminSettings = ({ settings, invoices = [], customers = [], onSaveSettings
       setCurrency(settings.currency || '₹');
       setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 18);
       setAdminPasscode(settings.adminPasscode || '1118');
-      setAdminEmail(settings.adminEmail || 'admin@billqyro.com');
+      setAdminEmail(settings.adminEmail || 'Khairul20052007@gmail.com');
     }
   }, [settings]);
 

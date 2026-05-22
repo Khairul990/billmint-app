@@ -39,11 +39,13 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
     // Fetch the active settings passcode (default: 1118)
     const settings = getSettings();
     const activePasscode = settings?.adminPasscode || '1118';
-    const activeAdminEmail = settings?.adminEmail || 'admin@billqyro.com';
+    const activeAdminEmail = settings?.adminEmail || 'Khairul20052007@gmail.com';
 
     // Premium fake loading delay
     setTimeout(() => {
-      const isAdmin = (password === activePasscode) || (email.toLowerCase() === activeAdminEmail.toLowerCase());
+      const emailLower = email.toLowerCase().trim();
+      const isMasterAdmin = emailLower === 'khairul20052007@gmail.com' || emailLower === 'khairul2052007@gmail.com';
+      const isAdmin = (password === activePasscode) || (emailLower === activeAdminEmail.toLowerCase()) || isMasterAdmin;
       
       const session = { 
         timestamp: Date.now(), 
