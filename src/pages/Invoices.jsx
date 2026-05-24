@@ -16,7 +16,8 @@ import {
   Copy,
   Check,
   Share2,
-  ShieldCheck
+  ShieldCheck,
+  Link
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
@@ -312,6 +313,22 @@ const Invoices = ({
                   title="Download PDF"
                 >
                   <Download className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
+                    if (!isLiveLinkEnabled) {
+                      toast.error('Live Link is disabled. Enable it from Settings.');
+                      return;
+                    }
+                    const liveLink = `${window.location.origin}/i/${viewingInvoice.publicToken}`;
+                    navigator.clipboard.writeText(liveLink);
+                    toast.success('Live Invoice Link copied to clipboard!');
+                  }}
+                  className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-all"
+                  title="Copy Live Link"
+                >
+                  <Link className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => {

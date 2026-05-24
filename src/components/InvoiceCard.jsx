@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FileText, Eye, Edit2, Trash2, Download, Share2, Mail, Copy, Check } from 'lucide-react';
+import { FileText, Eye, Edit2, Trash2, Download, Share2, Mail, Copy, Check, Link } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
 import { 
@@ -52,8 +52,17 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
     switch (status) {
       case 'Paid':
         return 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30';
+      case 'Payment Submitted':
+      case 'Payment Submitted / Pending Verification':
+        return 'bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-950/20 dark:text-purple-400 dark:border-purple-900/30';
+      case 'Partially Paid':
+        return 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30';
       case 'Pending':
         return 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
+      case 'Overdue':
+        return 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
+      case 'Cancelled':
+        return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700/30';
       case 'Unpaid':
       default:
         return 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
@@ -177,6 +186,24 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
                       <span>Email Invoice</span>
                     </a>
                     
+                    <button
+                      onClick={() => {
+                        const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
+                        if (!isLiveLinkEnabled) {
+                          toast.error('Live Link is disabled. Enable it from Settings.');
+                          return;
+                        }
+                        const liveLink = `${window.location.origin}/i/${invoice.publicToken}`;
+                        navigator.clipboard.writeText(liveLink);
+                        toast.success('Live Invoice Link copied to clipboard!');
+                        setShowShareMenu(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-700 dark:hover:text-indigo-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                    >
+                      <Link className="w-3.5 h-3.5 text-indigo-500" />
+                      <span>Copy Live Link</span>
+                    </button>
+
                     <button
                       onClick={() => {
                         const text = generateInvoiceShareText(invoice, currencySymbol, businessSettings);
