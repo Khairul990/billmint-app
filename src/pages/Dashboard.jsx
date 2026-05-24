@@ -24,6 +24,7 @@ import {
   Shield,
   HardDrive,
   FileDown,
+  Download,
   Clock,
   UserCheck,
   Sparkles,
@@ -46,7 +47,10 @@ const Dashboard = ({
   onDeleteInvoice,
   onDownloadPDF,
   setCurrentTab,
-  businessSettings
+  businessSettings,
+  installPromptEvent = null,
+  isAppInstalled = false,
+  onInstallApp
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
@@ -282,6 +286,47 @@ const Dashboard = ({
           </button>
         </div>
       </motion.div>
+
+      {/* PWA INSTALLATION PROMOTION BANNER */}
+      {installPromptEvent && !isAppInstalled && (
+        <motion.div 
+          variants={itemVariants} 
+          className="p-6 rounded-3xl bg-gradient-to-r from-teal-500/10 via-emerald-500/5 to-transparent border border-teal-500/30 shadow-premium flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-full blur-2xl pointer-events-none"></div>
+          
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-500 flex items-center justify-center shrink-0 shadow-lg shadow-teal-500/20">
+              <Download className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 text-[9px] font-black uppercase tracking-wider mb-1">
+                STANDALONE APPLICATION AVAILABLE
+              </div>
+              <h4 className="text-lg font-black text-slate-800 dark:text-slate-100 mb-1">Install BillQyro App</h4>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed max-w-xl">
+                Unlocks ultra-fast load speeds, robust offline workspace syncing, borderless layout window, and native system integration!
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 shrink-0">
+            <button
+              onClick={() => setCurrentTab('settings')}
+              className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 font-bold text-xs rounded-xl transition-colors whitespace-nowrap cursor-pointer"
+            >
+              Learn More
+            </button>
+            <button
+              onClick={onInstallApp}
+              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white font-black text-xs rounded-xl shadow-md transition-all whitespace-nowrap cursor-pointer uppercase tracking-wider animate-pulse"
+            >
+              <Download className="w-4 h-4" />
+              <span>Install App</span>
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       {/* 0.2 HOW TO USE BILLQYRO GUIDE + SYSTEM HEALTH */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">

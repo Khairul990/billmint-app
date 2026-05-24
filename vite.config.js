@@ -7,18 +7,21 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      injectRegister: 'auto',
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'logo.svg', 'app-icon.svg', 'offline.html'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         maximumFileSizeToCacheInBytes: 5000000 // 5MB limit
       },
       manifest: {
-        name: 'BillQyro - Billing Platform',
+        name: 'BillQyro',
         short_name: 'BillQyro',
         description: 'Modern Billing & Invoicing Platform',
         theme_color: '#071B3A',
         background_color: '#f8fafc',
         display: 'standalone',
+        start_url: '/',
+        scope: '/',
         icons: [
           {
             src: 'pwa-192x192.png',
@@ -29,6 +32,12 @@ export default defineConfig({
             src: 'pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png'
+          },
+          {
+            src: 'apple-touch-icon.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any'
           }
         ]
       }

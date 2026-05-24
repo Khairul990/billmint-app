@@ -15,6 +15,30 @@ const KEYS = {
 
 // Default Settings (initialized empty as required to avoid fake business details)
 const DEFAULT_SETTINGS = {
+  country: 'India',
+  language: 'English',
+  taxLabel: 'GSTIN',
+  rocketNumber: '',
+  vatTax: '',
+  customerLiveLinkSettings: {
+    enableLiveInvoiceLink: true,
+    showPaymentQr: true,
+    allowCustomerPdfDownload: true,
+    allowPaymentProofSubmit: true,
+    showPaidDueAmount: true,
+    showContactButton: true,
+    requireTransactionId: true,
+    requirePaymentScreenshot: false
+  },
+  freeInvoiceLimit: 15,
+  feature_liveInvoiceLink: 'Premium',
+  feature_paymentProof: 'Premium',
+  feature_customLogo: 'Premium',
+  feature_premiumPdfThemes: 'Premium',
+  feature_whatsappShare: 'Premium',
+  feature_cloudSync: 'Premium',
+  feature_reports: 'Premium',
+  feature_customerDatabase: 'Premium',
   businessName: '',
   logoUrl: '',
   ownerName: '',
@@ -117,6 +141,9 @@ const SEED_INVOICES = [
     grandTotal: 1770,
     amountPaid: 1770,
     balanceDue: 0,
+    publicToken: 'a8X92LmQ_1001',
+    paymentHistory: [],
+    paymentProofs: []
   },
   {
     id: 'inv-1002',
@@ -141,6 +168,9 @@ const SEED_INVOICES = [
     grandTotal: 16520,
     amountPaid: 10000,
     balanceDue: 6520,
+    publicToken: 'a8X92LmQ_1002',
+    paymentHistory: [],
+    paymentProofs: []
   },
   {
     id: 'inv-1003',
@@ -165,6 +195,9 @@ const SEED_INVOICES = [
     grandTotal: 8960,
     amountPaid: 0,
     balanceDue: 8960,
+    publicToken: 'a8X92LmQ_1003',
+    paymentHistory: [],
+    paymentProofs: []
   },
 ];
 
@@ -201,6 +234,8 @@ const firestoreSave = async (collectionName, docId, data) => {
     let docRef;
     if (collectionName === 'settings' || collectionName === 'subscription' || collectionName === 'users') {
       docRef = doc(db, collectionName, userId);
+    } else if (collectionName === 'public_invoices') {
+      docRef = doc(db, collectionName, docId);
     } else {
       docRef = doc(db, collectionName, userId, 'items', docId);
     }
@@ -221,6 +256,8 @@ const firestoreDelete = async (collectionName, docId) => {
     let docRef;
     if (collectionName === 'settings' || collectionName === 'subscription' || collectionName === 'users') {
       docRef = doc(db, collectionName, userId);
+    } else if (collectionName === 'public_invoices') {
+      docRef = doc(db, collectionName, docId);
     } else {
       docRef = doc(db, collectionName, userId, 'items', docId);
     }
@@ -493,9 +530,69 @@ export const getInvoices = () => {
   return JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
 };
 
+const generateSecureToken = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let token = '';
+  for (let i = 0; i < 16; i++) {
+    token += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return token;
+};
+
 export const saveInvoice = async (invoice) => {
   const invoices = getInvoices();
-  // Ensure createdAt / updatedAt are set
+  
+  // 1. Ensure secure publicToken is generated
+  if (!invoice.publicToken) {
+    invoice.publicToken = generateSecureToken();
+  }
+
+  // 2. Ensure snapshots are taken
+  const activeSettings = getSettings() || DEFAULT_SETTINGS;
+  if (!invoice.businessSnapshot) {
+    invoice.businessSnapshot = {
+      businessName: activeSettings.businessName || '',
+      logoUrl: activeSettings.logoUrl || '',
+      ownerName: activeSettings.ownerName || '',
+      phone: activeSettings.phone || '',
+      whatsapp: activeSettings.whatsapp || '',
+      email: activeSettings.email || '',
+      address: activeSettings.address || '',
+      gstNumber: activeSettings.gstNumber || '',
+      currency: activeSettings.currency || '₹',
+      taxLabel: activeSettings.taxLabel || 'Tax'
+    };
+  }
+  if (!invoice.paymentSettingsSnapshot) {
+    invoice.paymentSettingsSnapshot = {
+      paymentQrEnabled: activeSettings.paymentQrEnabled || false,
+      paymentMethod: activeSettings.paymentMethod || 'Manual',
+      upiId: activeSettings.upiId || '',
+      bkashNumber: activeSettings.bkashNumber || '',
+      nagadNumber: activeSettings.nagadNumber || '',
+      rocketNumber: activeSettings.rocketNumber || '',
+      payeeName: activeSettings.payeeName || '',
+      paymentNote: activeSettings.paymentNote || '',
+      customPaymentLink: activeSettings.customPaymentLink || '',
+      customerLiveLinkSettings: activeSettings.customerLiveLinkSettings || {
+        enableLiveInvoiceLink: true,
+        showPaymentQr: true,
+        allowCustomerPdfDownload: true,
+        allowPaymentProofSubmit: true,
+        showPaidDueAmount: true,
+        showContactButton: true,
+        requireTransactionId: true,
+        requirePaymentScreenshot: false
+      }
+    };
+  }
+
+  // 3. Ensure arrays exist
+  if (!invoice.paymentHistory) invoice.paymentHistory = [];
+  if (!invoice.paymentProofs) invoice.paymentProofs = [];
+  
+  invoice.userId = getFirebaseUserId();
+
   const timestamp = new Date().toISOString();
   if (invoice.id && invoice.id.startsWith('inv-')) {
     const index = invoices.findIndex(inv => inv.id === invoice.id);
@@ -543,10 +640,58 @@ export const saveInvoice = async (invoice) => {
   // Asynchronously save to Firebase invoices collection
   const res1 = await firestoreSave('invoices', invoice.id, invoice);
 
+  // Save to public root collection public_invoices for easy customer lookups
+  if (firebaseReady) {
+    await firestoreSave('public_invoices', invoice.publicToken, invoice);
+  }
+
   return { 
     updatedInvoices: invoices, 
     firebaseStatus: res1.status 
   };
+};
+
+export const getInvoiceByPublicToken = async (token) => {
+  const invoices = getInvoices();
+  const localMatch = invoices.find(inv => inv.publicToken === token);
+  if (localMatch) return localMatch;
+
+  if (firebaseReady) {
+    try {
+      const docRef = doc(db, 'public_invoices', token);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        return snap.data();
+      }
+    } catch (e) {
+      console.error('Failed to fetch public invoice from Firestore:', e);
+    }
+  }
+  return null;
+};
+
+export const saveInvoicePublicly = async (invoice) => {
+  const invoices = getInvoices();
+  const index = invoices.findIndex(inv => inv.id === invoice.id || inv.publicToken === invoice.publicToken);
+  if (index !== -1) {
+    invoices[index] = invoice;
+    localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  }
+
+  if (firebaseReady) {
+    try {
+      await setDoc(doc(db, 'public_invoices', invoice.publicToken), invoice);
+      if (invoice.userId && invoice.id) {
+        await setDoc(doc(db, 'invoices', invoice.userId, 'items', invoice.id), invoice);
+      }
+      return { status: 'success' };
+    } catch (e) {
+      console.error('Failed to save invoice publicly to Firestore:', e);
+      return { status: 'failed', error: e };
+    }
+  }
+  return { status: 'success' };
 };
 
 export const deleteInvoice = (id) => {

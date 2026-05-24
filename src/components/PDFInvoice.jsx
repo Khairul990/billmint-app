@@ -215,7 +215,15 @@ const styles = StyleSheet.create({
   compactColAmt: { width: '14%', textAlign: 'right' },
 });
 
-export const PDFInvoice = ({ invoice, businessSettings, isPremium }) => {
+export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, isPremium }) => {
+  const activeSettings = invoice?.businessSnapshot || liveBusinessSettings;
+  const activePaymentSettings = invoice?.paymentSettingsSnapshot || activeSettings;
+  
+  const businessSettings = {
+    ...activeSettings,
+    ...activePaymentSettings
+  };
+
   const currencySymbol = businessSettings?.currency || '₹';
   const templateId = businessSettings?.invoiceTemplate || 'modern';
   const brandColor = businessSettings?.brandColor || '#14b8a6';

@@ -17,6 +17,7 @@ import Expenses from './pages/Expenses';
 import Subscription from './pages/Subscription';
 import MoreMenu from './pages/MoreMenu';
 import Layout from './components/Layout';
+import PublicInvoice from './pages/PublicInvoice';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -86,6 +87,31 @@ function App() {
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
   const [isAuthenticated, setIsAuthenticated] = useState(getAuthSession() !== null);
   const [currentTab, setCurrentTab] = useState('dashboard');
+  const [userRole, setUserRole] = useState(() => localStorage.getItem('billqyro_user_role') || 'user');
+
+  // Boot Interceptor for Public Invoice
+  const [publicInvoice, setPublicInvoice] = useState(null);
+  const [loadingPublicInvoice, setLoadingPublicInvoice] = useState(false);
+  const [publicToken, setPublicToken] = useState(null);
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    const publicTokenMatch = path.match(/^\/i\/([a-zA-Z0-9_-]+)/);
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenFromQuery = urlParams.get('i');
+    const token = (publicTokenMatch ? publicTokenMatch[1] : null) || tokenFromQuery;
+
+    if (token) {
+      setPublicToken(token);
+      setLoadingPublicInvoice(true);
+      import('./utils/storage').then(({ getInvoiceByPublicToken }) => {
+        getInvoiceByPublicToken(token).then((inv) => {
+          setPublicInvoice(inv);
+          setLoadingPublicInvoice(false);
+        });
+      });
+    }
+  }, []);
 
   // Storage states
   const [invoices, setInvoices] = useState(() => getInvoices());
@@ -97,6 +123,44 @@ function App() {
 
   // Workspace Contexts
   const [editingInvoice, setEditingInvoice] = useState(null);
+
+  // PWA Installer States
+  const [installPromptEvent, setInstallPromptEvent] = useState(null);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setInstallPromptEvent(e);
+      console.log('beforeinstallprompt event stashed successfully');
+    };
+
+    const handleAppInstalled = () => {
+      setInstallPromptEvent(null);
+      setIsAppInstalled(true);
+      toast.success('🎉 BillQyro App installed successfully!');
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      setIsAppInstalled(true);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (!installPromptEvent) return;
+    installPromptEvent.prompt();
+    const { outcome } = await installPromptEvent.userChoice;
+    console.log(`User installation choice: ${outcome}`);
+    setInstallPromptEvent(null);
+  };
 
   // --- EFFECTS ---
 
@@ -126,6 +190,7 @@ function App() {
             localStorage.setItem('billqyro_auth', JSON.stringify(newSession));
             
             setIsAuthenticated(true);
+            setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
             }
         }
       });
@@ -175,6 +240,7 @@ function App() {
   // --- AUTH BRIDGE ---
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
+    setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
 
     setInvoices(getInvoices());
     setCustomers(getCustomers());
@@ -207,6 +273,7 @@ function App() {
     logout();
     localStorage.removeItem('billqyro_user_role');
     localStorage.removeItem('billqyro_admin_unlocked');
+    setUserRole('user');
     setIsAuthenticated(false);
     setCurrentTab('dashboard');
   };
@@ -216,8 +283,9 @@ function App() {
   // Invoices
   const handleSaveInvoice = async (payload, saveCustomerAsNew = false) => {
     const isNew = !payload.id || !invoices.some(inv => inv.id === payload.id);
-    if (isNew && subscription.status !== 'premium' && invoices.length >= 5) {
-      toast.error('Free tier limit reached: You can create a maximum of 5 invoices. Please upgrade to the Premium Plan to unlock unlimited invoicing!', { duration: 5000 });
+    const freeLimit = settings?.freeInvoiceLimit !== undefined ? settings.freeInvoiceLimit : 15;
+    if (isNew && subscription.status !== 'premium' && invoices.length >= freeLimit) {
+      toast.error(`Free tier limit reached: You can create a maximum of ${freeLimit} invoices. Please upgrade to the Premium Plan to unlock unlimited invoicing!`, { duration: 5050 });
       setCurrentTab('subscription');
       return;
     }
@@ -403,12 +471,16 @@ function App() {
             onDownloadPDF={handleDownloadPDF}
             setCurrentTab={setCurrentTab}
             businessSettings={settings}
+            installPromptEvent={installPromptEvent}
+            isAppInstalled={isAppInstalled}
+            onInstallApp={handleInstallApp}
           />
         );
       case 'invoices':
         return (
           <Invoices
             invoices={invoices}
+            editingInvoice={editingInvoice}
             onEditInvoice={setEditingInvoice}
             onDeleteInvoice={handleDeleteInvoice}
             onDownloadPDF={handleDownloadPDF}
@@ -488,6 +560,9 @@ function App() {
             onImportBackup={handleImportBackup}
             invoices={invoices}
             customers={customers}
+            installPromptEvent={installPromptEvent}
+            isAppInstalled={isAppInstalled}
+            onInstallApp={handleInstallApp}
           />
         );
       }
@@ -495,6 +570,20 @@ function App() {
         return <div className="text-center font-bold text-slate-400 p-10">404 Tab Not Found</div>;
     }
   };
+
+  // Intercept for Public Invoice Loading/Display (No Auth Route Interceptor)
+  if (loadingPublicInvoice) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center text-white font-sans">
+        <span className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></span>
+        <p className="text-slate-400 text-xs font-bold uppercase mt-4 tracking-widest animate-pulse">Loading secure digital invoice...</p>
+      </div>
+    );
+  }
+
+  if (publicToken) {
+    return <PublicInvoice initialInvoice={publicInvoice} />;
+  }
 
   // Show onboarding/login if not authenticated
   if (!isAuthenticated) {
@@ -566,6 +655,7 @@ function App() {
         onLogout={handleLogout}
         businessSettings={settings}
         isAuthenticated={isAuthenticated}
+        userRole={userRole}
       >
         <AnimatePresence mode="wait">
           <motion.div

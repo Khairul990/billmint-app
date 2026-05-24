@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import InvoiceCard from '../components/InvoiceCard';
 import InvoicePreview from '../components/InvoicePreview';
@@ -15,7 +15,8 @@ import {
   Mail,
   Copy,
   Check,
-  Share2
+  Share2,
+  ShieldCheck
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
@@ -47,6 +48,7 @@ const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
  */
 const Invoices = ({ 
   invoices = [], 
+  editingInvoice = null,
   onEditInvoice, 
   onDeleteInvoice, 
   onDownloadPDF, 
@@ -58,8 +60,99 @@ const Invoices = ({
   
   // Modal Preview State
   const [viewingInvoice, setViewingInvoice] = useState(null);
-
   const currencySymbol = businessSettings?.currency || '₹';
+
+  useEffect(() => {
+    if (editingInvoice) {
+      setViewingInvoice(editingInvoice);
+    }
+  }, [editingInvoice]);
+
+  const handleApproveProof = async (proof) => {
+    if (!window.confirm(`Are you sure you want to APPROVE this payment proof of ${currencySymbol}${proof.amount}?`)) return;
+
+    // 1. Calculate new figures
+    const totalPaid = (viewingInvoice.amountPaid || 0) + proof.amount;
+    const balanceDue = Math.max(0, viewingInvoice.grandTotal - totalPaid);
+    
+    let newStatus = viewingInvoice.paymentStatus;
+    if (balanceDue <= 0) {
+      newStatus = 'Paid';
+    } else if (totalPaid > 0) {
+      newStatus = 'Partially Paid';
+    }
+
+    // 2. Map new payment history item
+    const historyItem = {
+      date: new Date().toISOString().split('T')[0],
+      amount: proof.amount,
+      method: proof.method,
+      transactionId: proof.transactionId || 'N/A',
+      verified: true
+    };
+
+    // 3. Update the matching proof status to Approved
+    const updatedProofs = (viewingInvoice.paymentProofs || []).map(p => {
+      if (p.id === proof.id) {
+        return { ...p, status: 'Approved' };
+      }
+      return p;
+    });
+
+    const updatedInvoice = {
+      ...viewingInvoice,
+      amountPaid: totalPaid,
+      balanceDue,
+      paymentStatus: newStatus,
+      paymentHistory: [...(viewingInvoice.paymentHistory || []), historyItem],
+      paymentProofs: updatedProofs
+    };
+
+    // 4. Save
+    const { saveInvoice } = await import('../utils/storage');
+    await saveInvoice(updatedInvoice);
+    
+    setViewingInvoice(updatedInvoice);
+    toast.success('Payment proof successfully APPROVED!');
+  };
+
+  const handleRejectProof = async (proof) => {
+    if (!window.confirm(`Are you sure you want to REJECT this payment proof of ${currencySymbol}${proof.amount}?`)) return;
+
+    // Update matching proof status to Rejected
+    const updatedProofs = (viewingInvoice.paymentProofs || []).map(p => {
+      if (p.id === proof.id) {
+        return { ...p, status: 'Rejected' };
+      }
+      return p;
+    });
+
+    // Re-verify if there are other pending proofs, otherwise restore to Partially Paid or Pending
+    const hasOtherPending = updatedProofs.some(p => p.status === 'Pending');
+    let revertedStatus = viewingInvoice.paymentStatus;
+    if (!hasOtherPending) {
+      if (viewingInvoice.amountPaid >= viewingInvoice.grandTotal) {
+        revertedStatus = 'Paid';
+      } else if (viewingInvoice.amountPaid > 0) {
+        revertedStatus = 'Partially Paid';
+      } else {
+        revertedStatus = 'Pending';
+      }
+    }
+
+    const updatedInvoice = {
+      ...viewingInvoice,
+      paymentStatus: revertedStatus,
+      paymentProofs: updatedProofs
+    };
+
+    // Save
+    const { saveInvoice } = await import('../utils/storage');
+    await saveInvoice(updatedInvoice);
+    
+    setViewingInvoice(updatedInvoice);
+    toast.error('Payment proof REJECTED.');
+  };
 
   // --- FILTER LOGIC ---
   const filteredInvoices = invoices.filter((inv) => {
@@ -186,8 +279,17 @@ const Invoices = ({
 
       {/* DYNAMIC ELEVEN-STAR PREVIEW MODAL OVERLAY */}
       {viewingInvoice && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 no-print">
-          <div className="bg-slate-50 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative animate-scaleUp border border-white/10 max-h-[92vh] flex flex-col">
+        <div 
+          onClick={() => {
+            setViewingInvoice(null);
+            onEditInvoice(null);
+          }}
+          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 no-print"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-slate-50 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative animate-scaleUp border border-white/10 max-h-[92vh] flex flex-col"
+          >
             
             {/* Modal Top Actions Header Bar */}
             <div className="bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between shrink-0">
@@ -255,7 +357,10 @@ const Invoices = ({
 
                 <div className="w-px h-6 bg-slate-100 mx-1"></div>
                 <button
-                  onClick={() => setViewingInvoice(null)}
+                  onClick={() => {
+                    setViewingInvoice(null);
+                    onEditInvoice(null);
+                  }}
                   className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all"
                 >
                   <X className="w-4 h-4" />
@@ -265,6 +370,83 @@ const Invoices = ({
 
             {/* Scrollable Preview Wrapper */}
             <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50">
+              {/* Pending Payment Verification Panel */}
+              {viewingInvoice && (viewingInvoice.paymentProofs || []).filter(p => p.status === 'Pending').length > 0 && (
+                <div className="mb-6 p-5 bg-gradient-to-tr from-indigo-50 to-indigo-100/50 border border-indigo-200/50 rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2 text-indigo-900 font-extrabold mb-4">
+                    <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                    <span className="text-sm">Pending Payment Verification ({(viewingInvoice.paymentProofs || []).filter(p => p.status === 'Pending').length})</span>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {(viewingInvoice.paymentProofs || []).filter(p => p.status === 'Pending').map((proof) => (
+                      <div key={proof.id} className="bg-white border border-indigo-100 rounded-xl p-4 flex flex-col md:flex-row justify-between gap-4 shadow-sm">
+                        <div className="space-y-2 text-xs">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-slate-500">Method:</span>
+                            <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md font-bold uppercase">{proof.method}</span>
+                            <span className="font-bold text-slate-500 ml-2">Amount:</span>
+                            <span className="font-extrabold text-slate-800">{currencySymbol}{proof.amount}</span>
+                          </div>
+                          
+                          {proof.transactionId && (
+                            <div>
+                              <span className="font-bold text-slate-500">Transaction ID:</span>{' '}
+                              <span className="font-mono text-slate-800 select-all font-semibold bg-slate-50 px-1.5 py-0.5 rounded">{proof.transactionId}</span>
+                            </div>
+                          )}
+                          
+                          {proof.notes && (
+                            <div>
+                              <span className="font-bold text-slate-500">Customer Note:</span>{' '}
+                              <span className="text-slate-600 italic">"{proof.notes}"</span>
+                            </div>
+                          )}
+                          
+                          {proof.screenshot && (
+                            <div className="mt-2">
+                              <span className="font-bold text-slate-500 block mb-1">Receipt Screenshot:</span>
+                              <a 
+                                href={proof.screenshot} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="inline-block relative rounded-lg overflow-hidden border border-slate-200 hover:border-indigo-300 transition-all max-w-[200px]"
+                              >
+                                <img 
+                                  src={proof.screenshot} 
+                                  alt="Payment receipt proof" 
+                                  className="max-h-32 object-cover object-center"
+                                />
+                                <div className="absolute inset-0 bg-slate-900/10 hover:bg-slate-900/30 flex items-center justify-center transition-all opacity-0 hover:opacity-100 text-white font-bold text-[10px]">
+                                  Click to View Full
+                                </div>
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex sm:flex-row md:flex-col justify-end gap-2 md:w-48 shrink-0">
+                          <button
+                            onClick={() => handleApproveProof(proof)}
+                            className="flex items-center justify-center gap-1.5 bg-gradient-to-tr from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all cursor-pointer w-full text-center"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Approve & Verify</span>
+                          </button>
+                          <button
+                            onClick={() => handleRejectProof(proof)}
+                            className="flex items-center justify-center gap-1.5 bg-gradient-to-tr from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all cursor-pointer w-full text-center"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                            <span>Reject Proof</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <InvoicePreview 
                 invoice={viewingInvoice}
                 businessSettings={businessSettings}

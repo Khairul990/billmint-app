@@ -41,50 +41,28 @@ export function generateInvoiceShareText(invoice, currencySymbol = '₹', busine
 
   const businessName = businessSettings?.businessName || 'Our Business';
   const invoiceNo = invoice.invoiceNumber || 'N/A';
-  const date = invoice.date || 'N/A';
-  const dueDate = invoice.dueDate || 'N/A';
   const grandTotal = formatCurrency(invoice.grandTotal, currencySymbol);
+  const amountPaid = formatCurrency(invoice.amountPaid || 0, currencySymbol);
   const balanceDue = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), currencySymbol);
   const paymentStatus = invoice.paymentStatus || 'Pending';
   
-  let itemDetails = '';
-  if (invoice.items && invoice.items.length > 0) {
-    itemDetails = '\n📄 *Item Details:*';
-    invoice.items.slice(0, 5).forEach(item => {
-      const desc = item.description || item.name || 'Service';
-      const qty = item.qty !== undefined ? item.qty : (item.quantity || 1);
-      const rate = formatCurrency(item.rate !== undefined ? item.rate : (item.price || 0), currencySymbol);
-      const itemTotal = formatCurrency(item.amount !== undefined ? item.amount : (item.total || 0), currencySymbol);
-      itemDetails += `\n  - ${desc} (Qty: ${qty} x ${rate}) = ${itemTotal}`;
-    });
-    if (invoice.items.length > 5) {
-      itemDetails += `\n  - ...and ${invoice.items.length - 5} more items.`;
-    }
+  // Construct the secure live link automatically
+  const liveLink = invoice.publicToken ? `${window.location.origin}/i/${invoice.publicToken}` : '';
+
+  let message = `Your invoice is ready.
+Invoice No: ${invoiceNo}
+Total: ${grandTotal}
+Paid: ${amountPaid}
+Balance Due: ${balanceDue}
+Status: ${paymentStatus}`;
+
+  if (liveLink) {
+    message += `\nView & Pay: ${liveLink}`;
   }
 
-  return `Hello *${invoice.customerName || 'Customer'}*,
-
-Hope you are doing well! 
-
-Here is the invoice summary from *${businessName}* for your recent purchase:
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-🧾 *INVOICE DETAILS*
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔢 *Invoice Number:* ${invoiceNo}
-📅 *Issue Date:* ${date}
-⏰ *Due Date:* ${dueDate}
-💰 *Total Amount:* ${grandTotal}
-💸 *Amount Paid:* ${formatCurrency(invoice.amountPaid || 0, currencySymbol)}
-⚠️ *Balance Due:* ${balanceDue}
-🏷️ *Payment Status:* _${paymentStatus}_
-${itemDetails}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-Please clear any outstanding balance by the due date. Thank you for your continued business and trust! Let us know if you have any questions.
-
-Best regards,
-*${businessName}*`;
+  message += `\n\nThank you for your business!\n*${businessName}*`;
+  
+  return message;
 }
 
 /**
