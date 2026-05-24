@@ -667,11 +667,17 @@ const syncLocalInvoice = (cloudData) => {
 };
 
 export const getInvoiceByPublicToken = async (token) => {
+  console.log('[DEBUG] getInvoiceByPublicToken - Requested publicToken:', token);
+  console.log('[DEBUG] getInvoiceByPublicToken - Firestore path checked: publicInvoices/' + token);
+  
   if (firebaseReady) {
     try {
       // 1. Try publicInvoices first
       let docRef = doc(db, 'publicInvoices', token);
       let snap = await getDoc(docRef);
+      
+      console.log('[DEBUG] getInvoiceByPublicToken - Checked publicInvoices/' + token + ' - Document exists:', snap.exists());
+      
       if (snap.exists()) {
         const cloudData = snap.data();
         syncLocalInvoice(cloudData);
@@ -679,35 +685,45 @@ export const getInvoiceByPublicToken = async (token) => {
       }
       
       // 2. Try legacy public_invoices for compatibility with older links
+      console.log('[DEBUG] getInvoiceByPublicToken - Firestore path checked: public_invoices/' + token);
       docRef = doc(db, 'public_invoices', token);
       snap = await getDoc(docRef);
+      
+      console.log('[DEBUG] getInvoiceByPublicToken - Checked legacy public_invoices/' + token + ' - Document exists:', snap.exists());
+      
       if (snap.exists()) {
         const cloudData = snap.data();
         syncLocalInvoice(cloudData);
         return cloudData;
       }
     } catch (e) {
-      console.warn('Failed to fetch public invoice from Firestore, trying local fallback:', e);
+      console.error('[ERROR] getInvoiceByPublicToken - Firestore permission denied or query failed:', e);
+      if (e.code) console.error('[ERROR] getInvoiceByPublicToken - Code:', e.code);
+      if (e.message) console.error('[ERROR] getInvoiceByPublicToken - Message:', e.message);
+      if (e.stack) console.error('[ERROR] getInvoiceByPublicToken - Stack:', e.stack);
     }
+  } else {
+    console.warn('[WARN] getInvoiceByPublicToken - firebaseReady is false');
   }
 
   // Local storage fallback
+  console.log('[DEBUG] getInvoiceByPublicToken - Document not found in Firestore. Trying local localStorage fallback...');
   const invoices = getInvoices();
   const localMatch = invoices.find(inv => inv.publicToken === token);
+  console.log('[DEBUG] getInvoiceByPublicToken - Local localStorage match found:', !!localMatch);
   return localMatch || null;
 };
 
 export const ensureInvoicePublicToken = async (invoice) => {
   if (!invoice) return null;
-  if (invoice.publicToken && invoice.publicToken !== 'undefined' && invoice.publicToken !== 'null' && invoice.publicToken !== '') {
-    return invoice.publicToken;
+  
+  // 1. Generate secure token if missing
+  if (!invoice.publicToken || invoice.publicToken === 'undefined' || invoice.publicToken === 'null' || invoice.publicToken === '') {
+    invoice.publicToken = generateSecureToken();
   }
+  const token = invoice.publicToken;
   
-  // Generate secure token
-  const token = generateSecureToken();
-  invoice.publicToken = token;
-  
-  // Save back to storage and firestore
+  // 2. Save back to local storage invoices list
   const invoices = getInvoices();
   const idx = invoices.findIndex(inv => inv.id === invoice.id);
   if (idx !== -1) {
@@ -715,14 +731,19 @@ export const ensureInvoicePublicToken = async (invoice) => {
     localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
   }
   
+  // 3. Force save/create public-safe copy and private copy in Firestore
   if (firebaseReady) {
     try {
+      console.log('[DEBUG] ensureInvoicePublicToken - Force writing public copy to publicInvoices/' + token);
       await firestoreSave('publicInvoices', token, invoice);
-      if (invoice.userId && invoice.id) {
-        await setDoc(doc(db, 'users', invoice.userId, 'invoices', invoice.id), invoice);
+      
+      const userId = getFirebaseUserId();
+      if (userId && invoice.id) {
+        console.log('[DEBUG] ensureInvoicePublicToken - Force writing private copy to users/' + userId + '/invoices/' + invoice.id);
+        await setDoc(doc(db, 'users', userId, 'invoices', invoice.id), invoice);
       }
     } catch (e) {
-      console.error('Failed to sync publicToken to firestore:', e);
+      console.error('[ERROR] Failed to sync publicToken to Firestore in ensureInvoicePublicToken:', e);
     }
   }
   

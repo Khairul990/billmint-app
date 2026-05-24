@@ -28,6 +28,12 @@ const PublicInvoice = ({ initialInvoice }) => {
   const [invoice, setInvoice] = useState(initialInvoice);
   const [copiedText, setCopiedText] = useState('');
   
+  // Sync state if initialInvoice resolves later (async)
+  useEffect(() => {
+    console.log('[DEBUG] PublicInvoice - initialInvoice updated:', initialInvoice);
+    setInvoice(initialInvoice);
+  }, [initialInvoice]);
+  
   // "I Have Paid" Form states
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [payMethod, setPayMethod] = useState('');
