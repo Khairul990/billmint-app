@@ -70,6 +70,7 @@ const Settings = ({
   const [whatsapp, setWhatsapp] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
+  const [gstNumber, setGstNumber] = useState('');
 
   // Regional Settings States
   const [country, setCountry] = useState('India');
@@ -145,6 +146,7 @@ const Settings = ({
       setWhatsapp(settings.whatsapp || '');
       setEmail(settings.email || '');
       setAddress(settings.address || '');
+      setGstNumber(settings.gstNumber || '');
 
       setCountry(settings.country || 'India');
       setLanguage(settings.language || 'English');
@@ -240,6 +242,7 @@ const Settings = ({
       whatsapp,
       email,
       address,
+      gstNumber,
 
       country,
       language,
