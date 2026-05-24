@@ -234,8 +234,10 @@ const firestoreSave = async (collectionName, docId, data) => {
     let docRef;
     if (collectionName === 'settings' || collectionName === 'subscription' || collectionName === 'users') {
       docRef = doc(db, collectionName, userId);
-    } else if (collectionName === 'public_invoices') {
-      docRef = doc(db, collectionName, docId);
+    } else if (collectionName === 'publicInvoices') {
+      docRef = doc(db, 'publicInvoices', docId);
+    } else if (collectionName === 'invoices') {
+      docRef = doc(db, 'users', userId, 'invoices', docId);
     } else {
       docRef = doc(db, collectionName, userId, 'items', docId);
     }
@@ -256,8 +258,10 @@ const firestoreDelete = async (collectionName, docId) => {
     let docRef;
     if (collectionName === 'settings' || collectionName === 'subscription' || collectionName === 'users') {
       docRef = doc(db, collectionName, userId);
-    } else if (collectionName === 'public_invoices') {
-      docRef = doc(db, collectionName, docId);
+    } else if (collectionName === 'publicInvoices') {
+      docRef = doc(db, 'publicInvoices', docId);
+    } else if (collectionName === 'invoices') {
+      docRef = doc(db, 'users', userId, 'invoices', docId);
     } else {
       docRef = doc(db, collectionName, userId, 'items', docId);
     }
@@ -641,9 +645,9 @@ export const saveInvoice = async (invoice) => {
   // Asynchronously save to Firebase invoices collection
   const res1 = await firestoreSave('invoices', invoice.id, invoice);
 
-  // Save to public root collection public_invoices for easy customer lookups
+  // Save to public root collection publicInvoices for easy customer lookups
   if (firebaseReady) {
-    await firestoreSave('public_invoices', invoice.publicToken, invoice);
+    await firestoreSave('publicInvoices', invoice.publicToken, invoice);
   }
 
   return { 
@@ -655,7 +659,7 @@ export const saveInvoice = async (invoice) => {
 export const getInvoiceByPublicToken = async (token) => {
   if (firebaseReady) {
     try {
-      const docRef = doc(db, 'public_invoices', token);
+      const docRef = doc(db, 'publicInvoices', token);
       const snap = await getDoc(docRef);
       if (snap.exists()) {
         const cloudData = snap.data();
@@ -700,9 +704,9 @@ export const ensureInvoicePublicToken = async (invoice) => {
   
   if (firebaseReady) {
     try {
-      await firestoreSave('public_invoices', token, invoice);
+      await firestoreSave('publicInvoices', token, invoice);
       if (invoice.userId && invoice.id) {
-        await setDoc(doc(db, 'invoices', invoice.userId, 'items', invoice.id), invoice);
+        await setDoc(doc(db, 'users', invoice.userId, 'invoices', invoice.id), invoice);
       }
     } catch (e) {
       console.error('Failed to sync publicToken to firestore:', e);
@@ -726,8 +730,8 @@ export const saveInvoicePublicly = async (invoice) => {
 
   if (firebaseReady) {
     try {
-      // Unauthenticated customer ONLY writes to public_invoices to avoid private write permission failure!
-      await setDoc(doc(db, 'public_invoices', invoice.publicToken), invoice);
+      // Unauthenticated customer ONLY writes to publicInvoices to avoid private write permission failure!
+      await setDoc(doc(db, 'publicInvoices', invoice.publicToken), invoice);
       return { status: 'success' };
     } catch (e) {
       console.error('Failed to save invoice publicly to Firestore:', e);
@@ -852,7 +856,9 @@ export const enableRealTimeSync = () => {
   // Clear any existing listeners
   unsubscribes.forEach(unsub => unsub());
   const syncCollection = (collectionName, storageKey) => {
-    const colRef = collection(db, collectionName, userId, 'items');
+    const colRef = collectionName === 'invoices' 
+      ? collection(db, 'users', userId, 'invoices')
+      : collection(db, collectionName, userId, 'items');
     const unsub = onSnapshot(colRef, (snapshot) => {
       const items = [];
       snapshot.forEach(doc => items.push(doc.data()));
@@ -908,7 +914,7 @@ export const syncFromFirestore = async () => {
     }
 
     // Sync invoices
-    const invoicesSnap = await getDocs(collection(db, 'invoices', userId, 'items'));
+    const invoicesSnap = await getDocs(collection(db, 'users', userId, 'invoices'));
     const invoices = [];
     invoicesSnap.forEach(docSnap => {
       invoices.push(docSnap.data());

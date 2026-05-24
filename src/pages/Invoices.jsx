@@ -82,7 +82,7 @@ const Invoices = ({
           const inv = updatedInvoices[i];
           if (inv.publicToken) {
             try {
-              const docRef = doc(db, 'public_invoices', inv.publicToken);
+              const docRef = doc(db, 'publicInvoices', inv.publicToken);
               const snap = await getDoc(docRef);
               if (snap.exists()) {
                 const pubData = snap.data();
@@ -124,7 +124,7 @@ const Invoices = ({
     if (viewingInvoice && viewingInvoice.publicToken && firebaseReady) {
       const fetchLatestFromPublic = async () => {
         try {
-          const docRef = doc(db, 'public_invoices', viewingInvoice.publicToken);
+          const docRef = doc(db, 'publicInvoices', viewingInvoice.publicToken);
           const snap = await getDoc(docRef);
           if (snap.exists()) {
             const pubData = snap.data();

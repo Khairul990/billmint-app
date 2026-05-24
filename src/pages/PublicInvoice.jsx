@@ -178,8 +178,10 @@ const PublicInvoice = ({ initialInvoice }) => {
       method: payMethod,
       amount: parseFloat(payAmount),
       transactionId: txnId.trim(),
+      screenshot: screenshot,
       screenshotUrl: screenshot,
       note: customerNote.trim(),
+      notes: customerNote.trim(),
       status: 'Pending',
       submittedAt: new Date().toISOString()
     };
