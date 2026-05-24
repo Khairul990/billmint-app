@@ -57,13 +57,38 @@ const PublicInvoice = ({ initialInvoice }) => {
   }, [invoice]);
 
   if (!invoice) {
+    const requestedToken = window.location.pathname.split('/').pop() || 'N/A';
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center text-white font-sans">
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center text-white font-sans">
         <AlertCircle className="w-16 h-16 text-rose-500 mb-4 animate-bounce" />
-        <h1 className="text-2xl font-black mb-2">Invoice Not Found</h1>
-        <p className="text-slate-400 text-sm max-w-md">
+        <h1 className="text-2xl font-black mb-2 text-white">Invoice Not Found</h1>
+        <p className="text-slate-400 text-sm max-w-md mb-8">
           The invoice link you followed may have expired, been deleted, or contains an incorrect public token.
         </p>
+        
+        {/* Dynamic Diagnostics Box for Developer Debugging */}
+        <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-5 text-left font-mono text-[11px] text-slate-400 space-y-2.5 shadow-2xl">
+          <div className="font-extrabold text-indigo-400 border-b border-slate-800 pb-2 uppercase text-[10px] tracking-wider flex items-center justify-between">
+            <span>System Diagnostics (DEBUG)</span>
+            <span className="bg-indigo-950 text-indigo-400 px-2 py-0.5 rounded-full text-[8px] font-black">Live</span>
+          </div>
+          <div>
+            <span className="text-slate-500">Requested Token:</span>{' '}
+            <span className="text-teal-400 select-all font-bold">{requestedToken}</span>
+          </div>
+          <div>
+            <span className="text-slate-500">Firebase Ready:</span>{' '}
+            <span className={window.billqyro_firebaseReady ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+              {window.billqyro_firebaseReady ? 'TRUE (Connected)' : 'FALSE (Offline fallback mode)'}
+            </span>
+          </div>
+          {window.billqyro_lastError && (
+            <div className="border-t border-slate-800 pt-2.5 mt-2.5">
+              <span className="text-rose-400 font-bold block mb-1">Query Error / Status:</span>
+              <pre className="whitespace-pre-wrap bg-slate-950 p-3 rounded-xl border border-rose-950/40 text-rose-300 select-all font-semibold max-h-40 overflow-y-auto leading-relaxed">{window.billqyro_lastError}</pre>
+            </div>
+          )}
+        </div>
       </div>
     );
   }

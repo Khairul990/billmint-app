@@ -670,6 +670,9 @@ export const getInvoiceByPublicToken = async (token) => {
   console.log('[DEBUG] getInvoiceByPublicToken - Requested publicToken:', token);
   console.log('[DEBUG] getInvoiceByPublicToken - Firestore path checked: publicInvoices/' + token);
   
+  // Reset last error
+  window.billqyro_lastError = null;
+  
   if (firebaseReady) {
     try {
       // 1. Try publicInvoices first
@@ -696,14 +699,19 @@ export const getInvoiceByPublicToken = async (token) => {
         syncLocalInvoice(cloudData);
         return cloudData;
       }
+      
+      // Document does not exist in either collection
+      window.billqyro_lastError = `Document '${token}' does not exist in collections 'publicInvoices' or 'public_invoices'.`;
     } catch (e) {
       console.error('[ERROR] getInvoiceByPublicToken - Firestore permission denied or query failed:', e);
+      window.billqyro_lastError = `Firestore Error [${e.code || 'UNKNOWN_CODE'}]: ${e.message || e.toString()}`;
       if (e.code) console.error('[ERROR] getInvoiceByPublicToken - Code:', e.code);
       if (e.message) console.error('[ERROR] getInvoiceByPublicToken - Message:', e.message);
       if (e.stack) console.error('[ERROR] getInvoiceByPublicToken - Stack:', e.stack);
     }
   } else {
     console.warn('[WARN] getInvoiceByPublicToken - firebaseReady is false');
+    window.billqyro_lastError = 'Firebase is not initialized (credentials missing or connection failed).';
   }
 
   // Local storage fallback
