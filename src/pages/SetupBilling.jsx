@@ -47,13 +47,13 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [upiId, setUpiId] = useState('');
   const [payeeName, setPayeeName] = useState('');
-  const [gstNumber, setGstNumber] = useState(''); // GSTIN for India
+  const [gstNumber, setGstNumber] = useState(''); // India GSTIN
   const [bkashNumber, setBkashNumber] = useState('');
   const [nagadNumber, setNagadNumber] = useState('');
-  const [rocketNumber, setRocketNumber] = useState(''); // Bangladesh optional
-  const [vatTax, setVatTax] = useState(''); // Bangladesh optional
-  const [customCurrency, setCustomCurrency] = useState('$'); // Other manual select
-  const [customPaymentLink, setCustomPaymentLink] = useState(''); // Other custom link
+  const [rocketNumber, setRocketNumber] = useState(''); // Bangladesh MFS Rocket
+  const [vatTax, setVatTax] = useState(''); // Bangladesh VAT rate %
+  const [customCurrency, setCustomCurrency] = useState('$'); // Other Currency Symbol
+  const [customPaymentLink, setCustomPaymentLink] = useState(''); // Other Custom Bank link
   const [paymentNote, setPaymentNote] = useState('');
 
   const [isDragging, setIsDragging] = useState(false);
@@ -102,12 +102,15 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
     if (selectedCountry === 'India') {
       setPaymentMethod('UPI');
       setPaymentNote('Scan QR using any UPI app to pay securely.');
+      setCustomCurrency('₹');
     } else if (selectedCountry === 'Bangladesh') {
       setPaymentMethod('bKash');
       setPaymentNote('Transfer the due amount using bKash/Nagad.');
+      setCustomCurrency('৳');
     } else {
       setPaymentMethod('Manual');
       setPaymentNote('Please complete the bank transfer using details above.');
+      setCustomCurrency('$');
     }
   };
 
@@ -158,20 +161,38 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
     
     // Formulate final configuration
     let currencySymbol = '₹';
-    let taxLabel = 'GSTIN';
+    let currencyCode = 'INR';
+    let taxLabel = 'GST';
     let computedTax = 18;
-    if (country === 'Bangladesh') {
+    let dateFormat = 'DD/MM/YYYY';
+    let numberFormat = 'Indian';
+
+    if (country === 'India') {
+      currencySymbol = '₹';
+      currencyCode = 'INR';
+      taxLabel = 'GST';
+      computedTax = 18;
+      dateFormat = 'DD/MM/YYYY';
+      numberFormat = 'Indian';
+    } else if (country === 'Bangladesh') {
       currencySymbol = '৳';
+      currencyCode = 'BDT';
       taxLabel = 'VAT';
       computedTax = parseFloat(vatTax) || 0;
-    } else if (country === 'Other') {
-      currencySymbol = customCurrency;
+      dateFormat = 'DD/MM/YYYY';
+      numberFormat = 'Standard';
+    } else {
+      currencySymbol = customCurrency || '$';
+      currencyCode = customCurrency === '$' ? 'USD' : (customCurrency === '€' ? 'EUR' : 'USD');
       taxLabel = 'Tax';
       computedTax = 0;
+      dateFormat = 'DD/MM/YYYY';
+      numberFormat = 'Standard';
     }
 
     const payload = {
       ...businessSettings,
+      setupCompleted: true,
       country,
       language,
       businessName,
@@ -182,9 +203,11 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
       logoUrl,
       defaultBillingTemplate: selectedTemplate,
       currency: currencySymbol,
+      currencyCode,
       taxLabel,
       defaultTax: computedTax,
       gstNumber: gstNumber || '',
+      vatTax: vatTax || '',
       paymentQrEnabled,
       paymentMethod,
       upiId,
@@ -196,6 +219,8 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
       customPaymentLink,
       brandColor: country === 'India' ? '#14b8a6' : (country === 'Bangladesh' ? '#e11d48' : '#6366f1'),
       invoiceTemplate: 'modern',
+      dateFormat,
+      numberFormat,
       customerLiveLinkSettings: {
         enableLiveInvoiceLink: true,
         showPaymentQr: true,
@@ -245,10 +270,10 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                 {step === 4 && 'Complete Setup & Launch'}
               </h1>
               <p className="text-xs text-slate-400 font-medium mt-1">
-                {step === 1 && 'Select your country and default workspace details.'}
-                {step === 2 && 'Personalize the invoices with your company details.'}
+                {step === 1 && 'Select your country to set localization defaults.'}
+                {step === 2 && 'Personalize invoices with your company details.'}
                 {step === 3 && 'Enable Scan-to-Pay code options for your clients.'}
-                {step === 4 && 'Double check your workspace profile.'}
+                {step === 4 && 'Double check your workspace profile and language.'}
               </p>
             </div>
             
@@ -264,18 +289,18 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
         {/* Core Wizard Body */}
         <div className="flex-1 p-6 md:p-8 flex flex-col justify-between">
           
-          {/* STEP 1: Select Country & Language */}
+          {/* STEP 1: Select Country */}
           {step === 1 && (
             <div className="space-y-6 animate-fadeIn">
               <div>
                 <label className="block text-xs font-black text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider">
-                  Select Country
+                  Choose your Country
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {[
-                    { id: 'India', flag: '🇮🇳', label: 'India', desc: 'UPI ID, INR ₹ Currency, GSTIN options' },
-                    { id: 'Bangladesh', flag: '🇧🇩', label: 'Bangladesh', desc: 'bKash, Nagad, BDT ৳ Currency' },
-                    { id: 'Other', flag: '🌐', label: 'Other', desc: 'Manual currency selection & transfers' }
+                    { id: 'India', flag: '🇮🇳', label: 'India', desc: 'UPI, INR ₹ Currency, GST tax defaults' },
+                    { id: 'Bangladesh', flag: '🇧🇩', label: 'Bangladesh', desc: 'bKash, Nagad, Rocket, BDT ৳ Currency, VAT defaults' },
+                    { id: 'Other', flag: '🌐', label: 'Other', desc: 'Manual currency selection & bank transfers' }
                   ].map((item) => (
                     <button
                       key={item.id}
@@ -284,35 +309,20 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                       className={`p-5 rounded-2xl border-2 text-left transition-all ${
                         country === item.id 
                           ? 'border-indigo-600 bg-indigo-50/20 dark:bg-indigo-950/20' 
-                          : 'border-slate-100 hover:border-slate-300 dark:border-slate-800'
+                          : 'border-slate-100 hover:border-slate-300 dark:border-slate-800 bg-slate-50/50 hover:bg-slate-100/40 dark:bg-slate-900/30'
                       }`}
                     >
                       <div className="text-3xl mb-2">{item.flag}</div>
-                      <h3 className="font-extrabold text-sm text-slate-850 dark:text-slate-100">{item.label}</h3>
+                      <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100">{item.label}</h3>
                       <p className="text-[10px] text-slate-400 font-semibold mt-1 leading-snug">{item.desc}</p>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-black text-slate-500 dark:text-slate-400 mb-2.5 uppercase tracking-wider">
-                  Language Preference
-                </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
-                    <Languages className="w-4 h-4" />
-                  </span>
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 dark:text-slate-200 font-bold"
-                  >
-                    <option value="English">English (Global standard)</option>
-                  </select>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-2 font-medium">
-                  Default language is English. Changing your country automatically pre-configures taxes, currencies, and QR buttons, but controls only billing calculations. Language controls only the interface label text.
+              <div className="p-4 bg-indigo-50/50 dark:bg-indigo-950/10 border border-indigo-150/40 dark:border-indigo-900/40 rounded-2xl">
+                <p className="text-[10px] text-slate-400 leading-relaxed font-bold">
+                  “Choose your country to automatically set currency, payment methods, and tax labels.”
                 </p>
               </div>
             </div>
@@ -352,8 +362,8 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+91 98765 XXXXX"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-850 dark:text-slate-200"
+                    placeholder="e.g. +91 98765 XXXXX"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-200 font-semibold"
                   />
                 </div>
 
@@ -364,7 +374,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="contact@company.com"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-850 dark:text-slate-200"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-200 font-semibold"
                   />
                 </div>
 
@@ -373,10 +383,63 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                   <textarea
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Full business office details..."
+                    placeholder="Full business office address details..."
                     rows="2"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-850 dark:text-slate-200 resize-none text-xs"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-200 resize-none text-xs"
                   />
+                </div>
+
+                {/* Base64 Logo Upload integration */}
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase">Corporate Logo (Optional)</label>
+                  <div
+                    className={`relative border-2 border-dashed rounded-xl p-4.5 text-center transition-all ${
+                      isDragging ? 'border-indigo-500 bg-indigo-50/30 dark:bg-indigo-950/20' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:bg-slate-850'
+                    }`}
+                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragging(false);
+                      const file = e.dataTransfer.files[0];
+                      if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => setLogoUrl(event.target.result);
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file && file.type.startsWith('image/')) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => setLogoUrl(event.target.result);
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div className="flex flex-col items-center justify-center gap-1.5 pointer-events-none">
+                      <Upload className="w-5 h-5 text-slate-400" />
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Drag & drop logo file, or click to upload</span>
+                    </div>
+                  </div>
+                  {logoUrl && (
+                    <div className="mt-3 flex items-center gap-3.5 bg-slate-50 dark:bg-slate-850 p-2.5 rounded-xl border border-slate-150/40 dark:border-slate-800">
+                      <img src={logoUrl} alt="Logo" className="h-10 w-auto object-contain rounded-lg border bg-white p-0.5" />
+                      <span className="text-[10px] text-slate-400 font-bold uppercase truncate max-w-xs flex-1">Logo image uploaded</span>
+                      <button
+                        type="button"
+                        onClick={() => setLogoUrl('')}
+                        className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -411,7 +474,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
             </div>
           )}
 
-          {/* STEP 3: Payment Configuration */}
+          {/* STEP 3: Payment Configuration (DYNAMICS) */}
           {step === 3 && (
             <div className="space-y-4 animate-fadeIn">
               {/* Payment Enable toggle */}
@@ -442,7 +505,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                           required
                           value={upiId}
                           onChange={(e) => setUpiId(e.target.value)}
-                          placeholder="yourbusiness@okaxis"
+                          placeholder="e.g. yourbusiness@okaxis"
                           className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
                         />
                       </div>
@@ -454,7 +517,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                           required
                           value={payeeName}
                           onChange={(e) => setPayeeName(e.target.value)}
-                          placeholder="e.g. BillQyro store"
+                          placeholder="e.g. BillQyro Store"
                           className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
                         />
                       </div>
@@ -478,6 +541,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                         <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">bKash Account Number *</label>
                         <input
                           type="text"
+                          required
                           value={bkashNumber}
                           onChange={(e) => setBkashNumber(e.target.value)}
                           placeholder="e.g. 017XXXXXXXX"
@@ -497,7 +561,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">Rocket Account Number (Optional)</label>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase">Rocket Account Number (Optional)</label>
                         <input
                           type="text"
                           value={rocketNumber}
@@ -545,8 +609,8 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                           required
                           value={customPaymentLink}
                           onChange={(e) => setCustomPaymentLink(e.target.value)}
-                          placeholder="e.g. https://paypal.me/yourbusiness or Bank details"
-                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-850 dark:text-slate-200"
+                          placeholder="e.g. https://paypal.me/yourbusiness or bank details"
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-850 dark:text-slate-250"
                         />
                       </div>
                     </>
@@ -569,9 +633,52 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
             </div>
           )}
 
-          {/* STEP 4: Review Summary & English Confirmation */}
+          {/* STEP 4: Review Summary & Language Selection */}
           {step === 4 && (
-            <div className="space-y-6 animate-fadeIn text-xs font-semibold text-slate-500">
+            <div className="space-y-5 animate-fadeIn text-xs font-semibold text-slate-500">
+              
+              {/* Language selection with dynamic suggests */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4.5 space-y-3.5 shadow-sm">
+                <label className="block text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Choose UI Language
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                    <Languages className="w-4 h-4" />
+                  </span>
+                  <select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 dark:text-slate-200 font-bold"
+                  >
+                    <option value="English">English (Global standard)</option>
+                    <option value="Bengali">Bengali (বাংলা)</option>
+                    <option value="Hindi">Hindi (हिंदी)</option>
+                  </select>
+                </div>
+
+                {/* Country recommendations */}
+                <div className="flex flex-wrap items-center gap-2 pt-1.5">
+                  <span className="text-[9px] text-slate-400 font-extrabold uppercase mr-1">Suggested for you:</span>
+                  {country === 'India' && (
+                    <>
+                      <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>English</button>
+                      <button type="button" onClick={() => setLanguage('Hindi')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Hindi' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>Hindi</button>
+                      <button type="button" onClick={() => setLanguage('Bengali')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Bengali' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>Bengali</button>
+                    </>
+                  )}
+                  {country === 'Bangladesh' && (
+                    <>
+                      <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>English</button>
+                      <button type="button" onClick={() => setLanguage('Bengali')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Bengali' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>Bengali</button>
+                    </>
+                  )}
+                  {country === 'Other' && (
+                    <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>English</button>
+                  )}
+                </div>
+              </div>
+
               <div className="bg-slate-50 dark:bg-slate-850 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 space-y-4">
                 <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-1.5 uppercase">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Confirm Profile Summary
@@ -592,7 +699,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 block uppercase">Tax Parameter</span>
-                    <span>{country === 'India' ? 'GSTIN' : (country === 'Bangladesh' ? 'VAT' : 'Standard Tax')}</span>
+                    <span>{country === 'India' ? 'GST' : (country === 'Bangladesh' ? 'VAT' : 'Tax')}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 block uppercase">Invoicing Layout</span>
@@ -600,18 +707,8 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 block uppercase">UI Language</span>
-                    <span>{language} (English)</span>
+                    <span>{language}</span>
                   </div>
-                </div>
-              </div>
-
-              <div className="p-4 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900 rounded-2xl flex items-start gap-3">
-                <span className="p-1.5 bg-white dark:bg-slate-800 rounded-lg text-indigo-600 shadow-xs mt-0.5"><Languages className="w-4 h-4" /></span>
-                <div>
-                  <h4 className="font-black text-slate-850 dark:text-white uppercase text-[10px] tracking-wide">Language Settings Information</h4>
-                  <p className="text-[10px] text-slate-400 font-bold mt-0.5 leading-relaxed">
-                    By default, your UI language is configured as English. Choosing your country controls only currency symbols, taxation labels, and smart scan payment gateways on client bills.
-                  </p>
                 </div>
               </div>
             </div>

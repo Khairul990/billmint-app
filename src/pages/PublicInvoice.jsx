@@ -23,6 +23,7 @@ import {
 import { downloadInvoicePDF } from '../utils/pdfUtils';
 import { saveInvoicePublicly } from '../utils/storage';
 import { toast } from 'react-hot-toast';
+import { formatCurrency } from '../utils/invoiceUtils';
 
 const PublicInvoice = ({ initialInvoice }) => {
   const [invoice, setInvoice] = useState(initialInvoice);
@@ -140,12 +141,22 @@ const PublicInvoice = ({ initialInvoice }) => {
     requirePaymentScreenshot: false
   };
 
-  const currencySymbol = business.currency || '₹';
-  const taxLabelText = business.taxLabel || 'Tax';
-  const country = business.country || 'India';
+  const regionalPrefs = invoice.regionalSettingsSnapshot || {
+    country: business.country || 'India',
+    currency: business.currency || '₹',
+    currencyCode: 'INR',
+    language: 'English',
+    taxLabel: business.taxLabel || 'Tax',
+    dateFormat: 'DD/MM/YYYY',
+    numberFormat: 'Indian'
+  };
 
-  // Format currency helpers
-  const formatVal = (val) => `${currencySymbol}${parseFloat(val || 0).toFixed(2)}`;
+  const currencySymbol = regionalPrefs.currency || '₹';
+  const taxLabelText = regionalPrefs.taxLabel || 'Tax';
+  const country = regionalPrefs.country || 'India';
+
+  // Format currency helpers using active numberFormat
+  const formatVal = (val) => formatCurrency(val, currencySymbol, regionalPrefs.numberFormat || 'Indian');
 
   const handleCopy = (text, label) => {
     navigator.clipboard.writeText(text);
@@ -498,7 +509,7 @@ const PublicInvoice = ({ initialInvoice }) => {
 
               {invoice.taxAmount > 0 && (
                 <div className="flex justify-between py-1.5 border-b border-slate-50 dark:border-slate-850">
-                  <span className="text-slate-400">Tax ({invoice.taxPercentage}%)</span>
+                  <span className="text-slate-400">{taxLabelText} ({invoice.taxPercentage}%)</span>
                   <span className="text-slate-850 dark:text-slate-200">{formatVal(invoice.taxAmount)}</span>
                 </div>
               )}

@@ -30,9 +30,15 @@ export const calculateTotals = (items = [], taxPercentage = 0, discountAmount = 
  * @param {number} amount
  * @param {string} symbol - currency sign (e.g. ₹, $)
  */
-export const formatCurrency = (amount, symbol = '₹') => {
+export const formatCurrency = (amount, symbol = '₹', formatOption = 'Indian') => {
   const numericAmount = parseFloat(amount) || 0;
-  return `${symbol}${numericAmount.toLocaleString('en-IN', {
+  let locale = 'en-IN';
+  if (formatOption === 'Standard') {
+    locale = 'en-US';
+  } else if (formatOption === 'European') {
+    locale = 'de-DE';
+  }
+  return `${symbol}${numericAmount.toLocaleString(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;

@@ -120,7 +120,21 @@ const Dashboard = ({
       return;
     }
 
-    const msg = `Hello *${invoice.customerName}*,\n\nThis is a friendly payment reminder from *${businessName}* regarding Invoice *${invoice.invoiceNumber}* (issued on ${invoice.date}).\n\n* Invoice Total: ${currencySymbol}${invoice.grandTotal.toFixed(2)}\n* Amount Paid: ${currencySymbol}${invoice.amountPaid.toFixed(2)}\n* Outstanding Balance: *${currencySymbol}${invoice.balanceDue.toFixed(2)}*\n* Payment Due Date: *${invoice.dueDate || 'N/A'}*\n\nPlease complete payment at your earliest convenience. Thank you for your business!\n\nBest regards,\n${businessName}`;
+    const businessPrefs = invoice.businessSnapshot || { businessName };
+    const regionalPrefs = invoice.regionalSettingsSnapshot || {
+      currency: currencySymbol,
+      numberFormat: businessSettings?.numberFormat || 'Indian'
+    };
+
+    const activeSymbol = regionalPrefs.currency || currencySymbol;
+    const activeNumberFormat = regionalPrefs.numberFormat || 'Indian';
+    const activeBusinessName = businessPrefs.businessName || businessName;
+
+    const totalStr = formatCurrency(invoice.grandTotal, activeSymbol, activeNumberFormat);
+    const paidStr = formatCurrency(invoice.amountPaid || 0, activeSymbol, activeNumberFormat);
+    const dueStr = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), activeSymbol, activeNumberFormat);
+
+    const msg = `Hello *${invoice.customerName}*,\n\nThis is a friendly payment reminder from *${activeBusinessName}* regarding Invoice *${invoice.invoiceNumber}* (issued on ${invoice.date}).\n\n* Invoice Total: ${totalStr}\n* Amount Paid: ${paidStr}\n* Outstanding Balance: *${dueStr}*\n* Payment Due Date: *${invoice.dueDate || 'N/A'}*\n\nPlease complete payment at your earliest convenience. Thank you for your business!\n\nBest regards,\n${activeBusinessName}`;
 
     // Clean phone number of spaces or symbols
     const cleanPhone = phone.replace(/[^0-9+]/g, '');

@@ -1,6 +1,108 @@
 import { db, firebaseReady } from './firebase';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot } from 'firebase/firestore';
 import { getAdminEmail } from './adminAccess';
+import { BillQyroDB } from './indexedDb';
+
+// --- OFFLINE SYNC QUEUE ENGINE & MIGRATOR ---
+export const migrateLocalStorageToIndexedDB = async () => {
+  try {
+    const isMigrated = localStorage.getItem('billqyro_indexeddb_migrated') === 'true';
+    if (isMigrated) return;
+
+    console.log('[MIGRATION] Starting LocalStorage to IndexedDB migration...');
+
+    // Invoices
+    const localInvoices = JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
+    for (const inv of localInvoices) {
+      await BillQyroDB.put('invoices', inv);
+    }
+
+    // Customers
+    const localCustomers = JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [];
+    for (const c of localCustomers) {
+      await BillQyroDB.put('customers', c);
+    }
+
+    // Products
+    const localProducts = JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [];
+    for (const p of localProducts) {
+      await BillQyroDB.put('products', p);
+    }
+
+    // Expenses
+    const localExpenses = JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [];
+    for (const e of localExpenses) {
+      await BillQyroDB.put('expenses', e);
+    }
+
+    localStorage.setItem('billqyro_indexeddb_migrated', 'true');
+    console.log('[MIGRATION] LocalStorage to IndexedDB migration completed successfully!');
+  } catch (error) {
+    console.error('[MIGRATION] LocalStorage to IndexedDB migration failed:', error);
+  }
+};
+
+export const queueSyncTransaction = async (action, storeName, docId, data) => {
+  const transactionId = 'tx-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  const tx = {
+    id: transactionId,
+    action, // 'save' or 'delete'
+    storeName, // 'invoices', 'customers', 'products', 'expenses'
+    docId,
+    data,
+    createdAt: Date.now()
+  };
+  await BillQyroDB.put('syncQueue', tx);
+  console.log('[SYNC QUEUE] Queued transaction offline:', tx);
+};
+
+export const syncOfflineTransactions = async () => {
+  if (!firebaseReady || !navigator.onLine) return;
+  
+  try {
+    const queue = await BillQyroDB.getAll('syncQueue');
+    if (queue.length === 0) return;
+    
+    console.log(`[SYNC QUEUE] Syncing ${queue.length} offline transactions...`);
+    
+    // Sort by createdAt so we sync in order
+    const sortedQueue = queue.sort((a, b) => a.createdAt - b.createdAt);
+    
+    for (const tx of sortedQueue) {
+      try {
+        if (tx.action === 'save') {
+          await firestoreSave(tx.storeName, tx.docId, tx.data);
+          
+          if (tx.storeName === 'invoices') {
+            // Also save to publicInvoices
+            await firestoreSave('publicInvoices', tx.data.publicToken, tx.data);
+          }
+        } else if (tx.action === 'delete') {
+          await firestoreDelete(tx.storeName, tx.docId);
+        }
+        
+        // Remove from queue after successful sync
+        await BillQyroDB.delete('syncQueue', tx.id);
+        console.log('[SYNC QUEUE] Successfully synced transaction:', tx.id);
+      } catch (err) {
+        console.error('[SYNC QUEUE] Failed to sync transaction:', tx.id, err);
+      }
+    }
+    
+    // Dispatch a sync event so that the app updates state
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  } catch (error) {
+    console.error('[SYNC QUEUE] Error in syncOfflineTransactions:', error);
+  }
+};
+
+// Listen for network reconnection
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    console.log('[NETWORK] Connection restored. Flushing sync queue...');
+    syncOfflineTransactions();
+  });
+}
 
 // LocalStorage Keys
 const KEYS = {
@@ -292,6 +394,10 @@ export const initializeStorage = () => {
   if (!localStorage.getItem(KEYS.SUBSCRIPTION)) {
     localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(DEFAULT_SUBSCRIPTION));
   }
+  
+  // Trigger IndexedDB offline-first synchronization and migrations asynchronously
+  migrateLocalStorageToIndexedDB();
+  syncOfflineTransactions();
 };
 
 // Reset System & Load Demo Data (Used for evaluations/demo starts)
@@ -404,7 +510,26 @@ export const logout = () => {
 export const getSubscriptionStatus = () => {
   initializeStorage();
   try {
-    return JSON.parse(localStorage.getItem(KEYS.SUBSCRIPTION)) || DEFAULT_SUBSCRIPTION;
+    const sub = JSON.parse(localStorage.getItem(KEYS.SUBSCRIPTION)) || DEFAULT_SUBSCRIPTION;
+    if (sub.status === 'premium' && sub.expiresAt && Date.now() > sub.expiresAt) {
+      // Plan has expired, update storage silently
+      const expiredSub = {
+        ...sub,
+        status: 'free',
+        expired: true
+      };
+      localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(expiredSub));
+      
+      // Silently update Firestore to free/expired as well
+      if (firebaseReady) {
+        const userId = getFirebaseUserId();
+        setDoc(doc(db, 'subscription', userId), expiredSub, { merge: true });
+        setDoc(doc(db, 'usersList', userId), { planStatus: 'free' }, { merge: true });
+        setDoc(doc(db, 'settings', userId), { planStatus: 'free' }, { merge: true });
+      }
+      return expiredSub;
+    }
+    return sub;
   } catch (e) {
     return DEFAULT_SUBSCRIPTION;
   }
@@ -420,6 +545,146 @@ export const saveSubscriptionStatus = (status) => {
   return sub;
 };
 
+// --- USER REGISTRY & PREMIUM PIPELINE ---
+export const registerOrUpdateUserList = async (activeSettings) => {
+  if (!firebaseReady) return;
+  const userId = getFirebaseUserId();
+  if (!userId) return;
+  
+  const authSession = getAuthSession();
+  const email = authSession?.email || '';
+  
+  const subscription = getSubscriptionStatus();
+  
+  const userRecord = {
+    userId,
+    email,
+    businessName: activeSettings?.businessName || '',
+    country: activeSettings?.country || 'India',
+    planStatus: subscription?.status || 'free',
+    blocked: activeSettings?.blocked || false,
+    updatedAt: new Date().toISOString()
+  };
+  
+  try {
+    await setDoc(doc(db, 'usersList', userId), userRecord);
+    console.log('[DEBUG] Successfully registered/updated userList for:', email);
+  } catch (e) {
+    console.error('[ERROR] Failed to update usersList:', e);
+  }
+};
+
+export const submitPremiumRequest = async (plan, paidAmount, paymentMethod, transactionId, screenshotBase64 = '') => {
+  if (!firebaseReady) {
+    throw new Error('You must be connected to the internet to submit a premium activation request.');
+  }
+  const userId = getFirebaseUserId();
+  if (!userId) throw new Error('User session not found.');
+  
+  const authSession = getAuthSession();
+  const userEmail = authSession?.email || '';
+  
+  const requestId = 'req-' + Date.now();
+  const payload = {
+    requestId,
+    userId,
+    userEmail,
+    plan,
+    paidAmount,
+    paymentMethod,
+    transactionId,
+    screenshotBase64,
+    status: 'Pending',
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  
+  await setDoc(doc(db, 'premiumRequests', requestId), payload);
+  return payload;
+};
+
+// Admin Helpers for SaaS Operations
+export const getAdminUsersList = async () => {
+  if (!firebaseReady) return [];
+  try {
+    const snap = await getDocs(collection(db, 'usersList'));
+    const list = [];
+    snap.forEach(d => list.push(d.data()));
+    return list;
+  } catch (e) {
+    console.error('Failed to getAdminUsersList:', e);
+    return [];
+  }
+};
+
+export const getAdminPremiumRequests = async () => {
+  if (!firebaseReady) return [];
+  try {
+    const snap = await getDocs(collection(db, 'premiumRequests'));
+    const list = [];
+    snap.forEach(d => list.push(d.data()));
+    return list;
+  } catch (e) {
+    console.error('Failed to getAdminPremiumRequests:', e);
+    return [];
+  }
+};
+
+export const updatePremiumRequestStatus = async (requestId, status, targetUserId, plan, rejectionReason = '') => {
+  if (!firebaseReady) return false;
+  try {
+    const reqRef = doc(db, 'premiumRequests', requestId);
+    await setDoc(reqRef, { 
+      status, 
+      rejectionReason, 
+      approvedAt: status === 'Approved' ? Date.now() : null,
+      updatedAt: Date.now()
+    }, { merge: true });
+    
+    if (status === 'Approved') {
+      const activatedAt = Date.now();
+      const durationMs = plan === 'Yearly' ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+      const expiresAt = activatedAt + durationMs;
+      
+      const sub = {
+        status: 'premium',
+        activatedAt,
+        expiresAt,
+        plan
+      };
+      
+      await setDoc(doc(db, 'subscription', targetUserId), sub);
+      await setDoc(doc(db, 'usersList', targetUserId), { planStatus: 'premium' }, { merge: true });
+      await setDoc(doc(db, 'settings', targetUserId), { planStatus: 'premium' }, { merge: true });
+    } else if (status === 'Rejected') {
+      const sub = {
+        status: 'free',
+        activatedAt: null,
+        expiresAt: null
+      };
+      await setDoc(doc(db, 'subscription', targetUserId), sub);
+      await setDoc(doc(db, 'usersList', targetUserId), { planStatus: 'free' }, { merge: true });
+      await setDoc(doc(db, 'settings', targetUserId), { planStatus: 'free' }, { merge: true });
+    }
+    return true;
+  } catch (e) {
+    console.error('Failed to updatePremiumRequestStatus:', e);
+    return false;
+  }
+};
+
+export const updateUserBlockStatus = async (targetUserId, blocked) => {
+  if (!firebaseReady) return false;
+  try {
+    await setDoc(doc(db, 'usersList', targetUserId), { blocked }, { merge: true });
+    await setDoc(doc(db, 'settings', targetUserId), { blocked }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Failed to updateUserBlockStatus:', e);
+    return false;
+  }
+};
+
 // --- SETTINGS ---
 export const getSettings = () => {
   initializeStorage();
@@ -429,6 +694,7 @@ export const getSettings = () => {
 export const saveSettings = (settings) => {
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
   firestoreSave('settings', 'business', settings);
+  registerOrUpdateUserList(settings);
   return settings;
 };
 
@@ -438,7 +704,7 @@ export const getExpenses = () => {
   return JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [];
 };
 
-export const saveExpense = (expense) => {
+export const saveExpense = async (expense) => {
   const expenses = getExpenses();
   if (expense.id) {
     const index = expenses.findIndex(e => e.id === expense.id);
@@ -452,15 +718,37 @@ export const saveExpense = (expense) => {
     expenses.push(expense);
   }
   localStorage.setItem(KEYS.EXPENSES, JSON.stringify(expenses));
-  firestoreSave('expenses', expense.id, expense);
+  
+  // Save to IndexedDB
+  await BillQyroDB.put('expenses', expense);
+
+  // Sync / queue
+  if (firebaseReady) {
+    if (navigator.onLine) {
+      await firestoreSave('expenses', expense.id, expense);
+    } else {
+      await queueSyncTransaction('save', 'expenses', expense.id, expense);
+    }
+  }
   return expenses;
 };
 
-export const deleteExpense = (id) => {
+export const deleteExpense = async (id) => {
   const expenses = getExpenses();
   const filtered = expenses.filter(e => e.id !== id);
   localStorage.setItem(KEYS.EXPENSES, JSON.stringify(filtered));
-  firestoreDelete('expenses', id);
+  
+  // Delete from IndexedDB
+  await BillQyroDB.delete('expenses', id);
+
+  // Sync / queue
+  if (firebaseReady) {
+    if (navigator.onLine) {
+      await firestoreDelete('expenses', id);
+    } else {
+      await queueSyncTransaction('delete', 'expenses', id);
+    }
+  }
   return filtered;
 };
 
@@ -470,7 +758,7 @@ export const getCustomers = () => {
   return JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [];
 };
 
-export const saveCustomer = (customer) => {
+export const saveCustomer = async (customer) => {
   const customers = getCustomers();
   if (customer.id) {
     const index = customers.findIndex(c => c.id === customer.id);
@@ -484,15 +772,37 @@ export const saveCustomer = (customer) => {
     customers.push(customer);
   }
   localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(customers));
-  firestoreSave('customers', customer.id, customer);
+  
+  // Save to IndexedDB
+  await BillQyroDB.put('customers', customer);
+
+  // Sync / queue
+  if (firebaseReady) {
+    if (navigator.onLine) {
+      await firestoreSave('customers', customer.id, customer);
+    } else {
+      await queueSyncTransaction('save', 'customers', customer.id, customer);
+    }
+  }
   return customers;
 };
 
-export const deleteCustomer = (id) => {
+export const deleteCustomer = async (id) => {
   const customers = getCustomers();
   const filtered = customers.filter(c => c.id !== id);
   localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(filtered));
-  firestoreDelete('customers', id);
+  
+  // Delete from IndexedDB
+  await BillQyroDB.delete('customers', id);
+
+  // Sync / queue
+  if (firebaseReady) {
+    if (navigator.onLine) {
+      await firestoreDelete('customers', id);
+    } else {
+      await queueSyncTransaction('delete', 'customers', id);
+    }
+  }
   return filtered;
 };
 
@@ -502,7 +812,7 @@ export const getProducts = () => {
   return JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [];
 };
 
-export const saveProduct = (product) => {
+export const saveProduct = async (product) => {
   const products = getProducts();
   if (product.id) {
     const index = products.findIndex(p => p.id === product.id);
@@ -516,15 +826,37 @@ export const saveProduct = (product) => {
     products.push(product);
   }
   localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(products));
-  firestoreSave('products', product.id, product);
+  
+  // Save to IndexedDB
+  await BillQyroDB.put('products', product);
+
+  // Sync / queue
+  if (firebaseReady) {
+    if (navigator.onLine) {
+      await firestoreSave('products', product.id, product);
+    } else {
+      await queueSyncTransaction('save', 'products', product.id, product);
+    }
+  }
   return products;
 };
 
-export const deleteProduct = (id) => {
+export const deleteProduct = async (id) => {
   const products = getProducts();
   const filtered = products.filter(p => p.id !== id);
   localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(filtered));
-  firestoreDelete('products', id);
+  
+  // Delete from IndexedDB
+  await BillQyroDB.delete('products', id);
+
+  // Sync / queue
+  if (firebaseReady) {
+    if (navigator.onLine) {
+      await firestoreDelete('products', id);
+    } else {
+      await queueSyncTransaction('delete', 'products', id);
+    }
+  }
   return filtered;
 };
 
@@ -619,40 +951,36 @@ export const saveInvoice = async (invoice) => {
 
   // Double-save corresponding Customer to DB as well
   if (invoice.customerId) {
-    const savedCustomers = getCustomers();
-    const existing = savedCustomers.find(c => c.id === invoice.customerId);
     const customerPayload = {
       id: invoice.customerId,
       name: invoice.customerName,
-      phone: invoice.customerPhone,
-      email: invoice.customerEmail,
-      address: invoice.customerAddress,
+      phone: invoice.customerPhone || '',
+      email: invoice.customerEmail || '',
+      address: invoice.customerAddress || '',
     };
-    if (!existing) {
-      savedCustomers.push(customerPayload);
-      localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(savedCustomers));
-      await firestoreSave('customers', customerPayload.id, customerPayload);
-    } else {
-      const index = savedCustomers.findIndex(c => c.id === invoice.customerId);
-      savedCustomers[index] = customerPayload;
-      localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(savedCustomers));
-      await firestoreSave('customers', customerPayload.id, customerPayload);
-    }
+    await saveCustomer(customerPayload);
   }
 
   localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
   
-  // Asynchronously save to Firebase invoices collection
-  const res1 = await firestoreSave('invoices', invoice.id, invoice);
+  // Save to IndexedDB
+  await BillQyroDB.put('invoices', invoice);
 
-  // Save to public root collection publicInvoices for easy customer lookups
+  // Sync / queue
+  let firebaseStatus = 'success';
   if (firebaseReady) {
-    await firestoreSave('publicInvoices', invoice.publicToken, invoice);
+    if (navigator.onLine) {
+      await firestoreSave('invoices', invoice.id, invoice);
+      await firestoreSave('publicInvoices', invoice.publicToken, invoice);
+    } else {
+      await queueSyncTransaction('save', 'invoices', invoice.id, invoice);
+      firebaseStatus = 'failed';
+    }
   }
 
   return { 
     updatedInvoices: invoices, 
-    firebaseStatus: res1.status 
+    firebaseStatus 
   };
 };
 
@@ -783,14 +1111,30 @@ export const saveInvoicePublicly = async (invoice) => {
   return { status: 'success' };
 };
 
-export const deleteInvoice = (id) => {
+export const deleteInvoice = async (id) => {
   const invoices = getInvoices();
   const filtered = invoices.filter(inv => inv.id !== id);
   localStorage.setItem(KEYS.INVOICES, JSON.stringify(filtered));
   
-  firestoreDelete('invoices', id);
-  
-  return filtered;
+  // Delete from IndexedDB
+  await BillQyroDB.delete('invoices', id);
+
+  // Sync / queue
+  let firebaseStatus = 'success';
+  if (firebaseReady) {
+    if (navigator.onLine) {
+      await firestoreDelete('invoices', id);
+      await firestoreDelete('publicInvoices', id);
+    } else {
+      await queueSyncTransaction('delete', 'invoices', id);
+      firebaseStatus = 'failed';
+    }
+  }
+
+  return { 
+    updatedInvoices: filtered, 
+    firebaseStatus 
+  };
 };
 
 // --- BACKUP & RESTORE DATABASE ---

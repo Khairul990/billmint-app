@@ -35,7 +35,7 @@ import {
   Link
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber, autoIncrementString } from '../utils/invoiceUtils';
+import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber, autoIncrementString, formatCurrency } from '../utils/invoiceUtils';
 import InvoicePreview from '../components/InvoicePreview';
 import { ensureInvoicePublicToken } from '../utils/storage';
 
@@ -459,6 +459,49 @@ const CreateInvoice = ({
       return;
     }
 
+    const businessSnapshot = editingInvoice?.businessSnapshot || {
+      businessName: businessSettings.businessName || '',
+      logoUrl: businessSettings.logoUrl || '',
+      ownerName: businessSettings.ownerName || '',
+      phone: businessSettings.phone || '',
+      whatsapp: businessSettings.whatsapp || '',
+      email: businessSettings.email || '',
+      address: businessSettings.address || '',
+      gstNumber: businessSettings.gstNumber || ''
+    };
+
+    const paymentSettingsSnapshot = editingInvoice?.paymentSettingsSnapshot || {
+      paymentQrEnabled: businessSettings.paymentQrEnabled || false,
+      paymentMethod: businessSettings.paymentMethod || 'Manual',
+      upiId: businessSettings.upiId || '',
+      bkashNumber: businessSettings.bkashNumber || '',
+      nagadNumber: businessSettings.nagadNumber || '',
+      rocketNumber: businessSettings.rocketNumber || '',
+      payeeName: businessSettings.payeeName || businessSettings.businessName || '',
+      paymentNote: businessSettings.paymentNote || '',
+      customPaymentLink: businessSettings.customPaymentLink || '',
+      customerLiveLinkSettings: businessSettings.customerLiveLinkSettings || {
+        enableLiveInvoiceLink: true,
+        showPaymentQr: true,
+        allowCustomerPdfDownload: true,
+        allowPaymentProofSubmit: true,
+        showPaidDueAmount: true,
+        showContactButton: true,
+        requireTransactionId: true,
+        requirePaymentScreenshot: false
+      }
+    };
+
+    const regionalSettingsSnapshot = editingInvoice?.regionalSettingsSnapshot || {
+      country: businessSettings.country || 'India',
+      currency: businessSettings.currency || '₹',
+      currencyCode: businessSettings.currencyCode || (businessSettings.country === 'Bangladesh' ? 'BDT' : businessSettings.country === 'Other' ? 'USD' : 'INR'),
+      language: businessSettings.language || 'English',
+      taxLabel: businessSettings.taxLabel || (businessSettings.country === 'Bangladesh' ? 'VAT' : businessSettings.country === 'Other' ? 'Tax' : 'GST'),
+      dateFormat: businessSettings.dateFormat || 'DD/MM/YYYY',
+      numberFormat: businessSettings.numberFormat || 'Indian'
+    };
+
     const payload = {
       id: editingInvoice ? editingInvoice.id : 'inv-' + Date.now(),
       invoiceNumber,
@@ -485,8 +528,9 @@ const CreateInvoice = ({
       publicToken: editingInvoice?.publicToken || null,
       paymentHistory: editingInvoice?.paymentHistory || [],
       paymentProofs: editingInvoice?.paymentProofs || [],
-      businessSnapshot: editingInvoice?.businessSnapshot || null,
-      paymentSettingsSnapshot: editingInvoice?.paymentSettingsSnapshot || null,
+      businessSnapshot,
+      paymentSettingsSnapshot,
+      regionalSettingsSnapshot
     };
 
     // Also pass saveCustomer flag so the parent can save the customer if requested
@@ -1495,7 +1539,7 @@ const CreateInvoice = ({
               )}
               
               <div className="flex justify-between">
-                <span>Tax ({taxPercentage}%)</span>
+                <span>{businessSettings?.taxLabel || 'Tax'} ({taxPercentage}%)</span>
                 <span className="text-slate-800 font-bold">{currencySymbol}{taxAmount.toFixed(2)}</span>
               </div>
 
@@ -1607,7 +1651,14 @@ const CreateInvoice = ({
                           return;
                         }
                         const liveLink = `${window.location.origin}/i/${token}`;
-                        const msg = `Your invoice is ready.\nInvoice No: ${invoiceNumber}\nTotal: ${currencySymbol}${grandTotal.toFixed(2)}\nPaid: ${currencySymbol}${amountPaid.toFixed(2)}\nBalance Due: ${currencySymbol}${balanceDue.toFixed(2)}\nView & Pay: ${liveLink}`;
+                        const regionalPrefs = editingInvoice?.regionalSettingsSnapshot || {
+                          currency: currencySymbol,
+                          numberFormat: businessSettings?.numberFormat || 'Indian'
+                        };
+                        const totalStr = formatCurrency(grandTotal, regionalPrefs.currency || currencySymbol, regionalPrefs.numberFormat);
+                        const paidStr = formatCurrency(amountPaid, regionalPrefs.currency || currencySymbol, regionalPrefs.numberFormat);
+                        const dueStr = formatCurrency(balanceDue, regionalPrefs.currency || currencySymbol, regionalPrefs.numberFormat);
+                        const msg = `Your invoice is ready.\nInvoice No: ${invoiceNumber}\nTotal: ${totalStr}\nPaid: ${paidStr}\nBalance Due: ${dueStr}\nView & Pay: ${liveLink}`;
                         window.open(`https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
                       } catch (err) {
                         toast.error('Could not create live link. Please save invoice and try again.');
@@ -1636,7 +1687,12 @@ const CreateInvoice = ({
 
               <button
                 onClick={() => {
-                  const msg = `Hi ${customerName},\nHere is your invoice ${invoiceNumber} for ${currencySymbol}${grandTotal.toFixed(2)}.`;
+                  const regionalPrefs = editingInvoice?.regionalSettingsSnapshot || {
+                    currency: currencySymbol,
+                    numberFormat: businessSettings?.numberFormat || 'Indian'
+                  };
+                  const totalStr = formatCurrency(grandTotal, regionalPrefs.currency || currencySymbol, regionalPrefs.numberFormat);
+                  const msg = `Hi ${customerName},\nHere is your invoice ${invoiceNumber} for ${totalStr}.`;
                   window.open(`https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
                 }}
                 className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-[14px]"

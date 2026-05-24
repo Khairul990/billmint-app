@@ -10,7 +10,44 @@ import { ShieldCheck, Calendar, Hash, FileText } from 'lucide-react';
 const InvoicePreview = ({ invoice, businessSettings }) => {
   if (!invoice) return null;
 
-  const currencySymbol = businessSettings?.currency || '₹';
+  // Destructure Snapshots with Fallbacks
+  const regionalPrefs = invoice.regionalSettingsSnapshot || {
+    country: businessSettings?.country || 'India',
+    currency: businessSettings?.currency || '₹',
+    currencyCode: businessSettings?.currencyCode || 'INR',
+    language: businessSettings?.language || 'English',
+    taxLabel: businessSettings?.taxLabel || 'GST',
+    dateFormat: businessSettings?.dateFormat || 'DD/MM/YYYY',
+    numberFormat: businessSettings?.numberFormat || 'Indian'
+  };
+
+  const paymentPrefs = invoice.paymentSettingsSnapshot || {
+    paymentQrEnabled: businessSettings?.paymentQrEnabled || false,
+    paymentMethod: businessSettings?.paymentMethod || 'Manual',
+    upiId: businessSettings?.upiId || '',
+    bkashNumber: businessSettings?.bkashNumber || '',
+    nagadNumber: businessSettings?.nagadNumber || '',
+    rocketNumber: businessSettings?.rocketNumber || '',
+    payeeName: businessSettings?.payeeName || businessSettings?.businessName || '',
+    paymentNote: businessSettings?.paymentNote || '',
+    customPaymentLink: businessSettings?.customPaymentLink || '',
+    showQrInPreview: businessSettings?.showQrInPreview !== undefined ? businessSettings?.showQrInPreview : true
+  };
+
+  const businessPrefs = invoice.businessSnapshot || {
+    businessName: businessSettings?.businessName || 'BillQyro Store',
+    logoUrl: businessSettings?.logoUrl || '',
+    ownerName: businessSettings?.ownerName || 'Manager',
+    phone: businessSettings?.phone || '',
+    whatsapp: businessSettings?.whatsapp || '',
+    email: businessSettings?.email || '',
+    address: businessSettings?.address || '',
+    gstNumber: businessSettings?.gstNumber || '',
+    currency: businessSettings?.currency || '₹',
+    taxLabel: businessSettings?.taxLabel || 'GST'
+  };
+
+  const currencySymbol = regionalPrefs.currency || '₹';
 
   const getStatusBadgeStyle = (status) => {
     switch (status) {
@@ -116,29 +153,29 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
         {/* Left Side: Business logo & details */}
         <div>
           <div className="flex items-center gap-3">
-            {businessSettings?.logoUrl ? (
+            {businessPrefs?.logoUrl ? (
               <img
-                src={businessSettings.logoUrl}
+                src={businessPrefs.logoUrl}
                 alt="Business Logo"
                 className="w-12 h-12 rounded-xl object-cover shadow-sm bg-slate-50 border border-slate-100 dark:border-slate-800"
               />
             ) : (
               <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white font-extrabold text-lg">
-                {businessSettings?.businessName?.charAt(0) || 'B'}
+                {businessPrefs?.businessName?.charAt(0) || 'B'}
               </div>
             )}
             <div>
-              <h3 className="font-extrabold text-xl text-slate-900 dark:text-slate-100 tracking-tight">{businessSettings?.businessName || 'BillQyro Client'}</h3>
-              {businessSettings?.gstNumber && (
-                <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider mt-0.5">GSTIN: {businessSettings.gstNumber}</p>
+              <h3 className="font-extrabold text-xl text-slate-900 dark:text-slate-100 tracking-tight">{businessPrefs?.businessName || 'BillQyro Client'}</h3>
+              {businessPrefs?.gstNumber && (
+                <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider mt-0.5">{regionalPrefs.taxLabel || 'GST'}: {businessPrefs.gstNumber}</p>
               )}
             </div>
           </div>
           
           <div className="mt-4 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium max-w-sm leading-relaxed">
-            <p>{businessSettings?.address || 'Company Address Not Set'}</p>
-            <p>Phone: {businessSettings?.phone}</p>
-            <p>Email: {businessSettings?.email}</p>
+            <p>{businessPrefs?.address || 'Company Address Not Set'}</p>
+            <p>Phone: {businessPrefs?.phone}</p>
+            <p>Email: {businessPrefs?.email}</p>
           </div>
         </div>
 
@@ -224,10 +261,10 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
                   {item.qty !== undefined ? item.qty : item.quantity}
                 </td>
                 <td className="py-4 text-right font-semibold text-slate-600 dark:text-slate-400">
-                  {formatCurrency(item.rate !== undefined ? item.rate : item.price, currencySymbol)}
+                  {formatCurrency(item.rate !== undefined ? item.rate : item.price, currencySymbol, regionalPrefs.numberFormat)}
                 </td>
                 <td className="py-4 text-right font-extrabold text-slate-900 dark:text-slate-100">
-                  {formatCurrency(item.amount !== undefined ? item.amount : item.total, currencySymbol)}
+                  {formatCurrency(item.amount !== undefined ? item.amount : item.total, currencySymbol, regionalPrefs.numberFormat)}
                 </td>
               </tr>
             ))}
@@ -260,49 +297,49 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
         <div className="w-full sm:w-64 space-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span className="text-slate-800 dark:text-slate-200 font-bold">{formatCurrency(invoice.subtotal, currencySymbol)}</span>
+            <span className="text-slate-800 dark:text-slate-200 font-bold">{formatCurrency(invoice.subtotal, currencySymbol, regionalPrefs.numberFormat)}</span>
           </div>
           {invoice.discountAmount > 0 && (
             <div className="flex justify-between text-rose-500 dark:text-rose-450 font-bold">
               <span>Discount</span>
-              <span>-{formatCurrency(invoice.discountAmount, currencySymbol)}</span>
+              <span>-{formatCurrency(invoice.discountAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
           <div className="flex justify-between">
-            <span>Tax ({invoice.taxPercentage}%)</span>
-            <span className="text-slate-800 dark:text-slate-200 font-bold">{formatCurrency(invoice.taxAmount, currencySymbol)}</span>
+            <span>{regionalPrefs.taxLabel || 'Tax'} ({invoice.taxPercentage}%)</span>
+            <span className="text-slate-800 dark:text-slate-200 font-bold">{formatCurrency(invoice.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
           </div>
           
           <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-3 text-slate-900 dark:text-slate-100">
             <span className="text-sm font-extrabold text-slate-800 dark:text-slate-200">Grand Total</span>
             <span className="text-lg font-black text-indigo-600 dark:text-indigo-400">
-              {formatCurrency(invoice.grandTotal, currencySymbol)}
+              {formatCurrency(invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}
             </span>
           </div>
         </div>
       </div>
 
       {/* 4.5. PREMIUM PAYMENT QR CARD (CLIENT VIEW) */}
-      {businessSettings?.paymentQrEnabled && businessSettings?.showQrInPreview && (
+      {paymentPrefs?.paymentQrEnabled && paymentPrefs?.showQrInPreview && (
         (() => {
           const dueAmount = (invoice.balanceDue !== undefined && invoice.balanceDue !== null && invoice.balanceDue !== 0)
             ? invoice.balanceDue
             : invoice.grandTotal;
-          const paymentMethod = businessSettings.paymentMethod || 'UPI';
+          const paymentMethod = paymentPrefs.paymentMethod || 'UPI';
           
           let qrText = '';
           if (paymentMethod === 'UPI') {
-            const upiId = businessSettings.upiId || '';
-            const payeeName = businessSettings.payeeName || businessSettings.businessName || '';
-            qrText = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${dueAmount}&cu=INR&tn=${invoice.invoiceNumber}`;
+            const upiId = paymentPrefs.upiId || '';
+            const payeeName = paymentPrefs.payeeName || businessPrefs.businessName || '';
+            qrText = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${dueAmount}&cu=${regionalPrefs.currencyCode || 'INR'}&tn=${invoice.invoiceNumber}`;
           } else if (paymentMethod === 'bKash') {
-            const bkashNumber = businessSettings.bkashNumber || '';
+            const bkashNumber = paymentPrefs.bkashNumber || '';
             qrText = `bKash Payment\nMerchant/Personal Number: ${bkashNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
           } else if (paymentMethod === 'Nagad') {
-            const nagadNumber = businessSettings.nagadNumber || '';
+            const nagadNumber = paymentPrefs.nagadNumber || '';
             qrText = `Nagad Payment\nNumber: ${nagadNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
           } else if (paymentMethod === 'Manual') {
-            qrText = businessSettings.customPaymentLink || '';
+            qrText = paymentPrefs.customPaymentLink || '';
           }
 
           if (!qrText) return null;
@@ -337,40 +374,40 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
                       Scan to Pay with {paymentMethod}
                     </span>
                     <h4 className="text-xl font-extrabold tracking-tight mt-2 text-white">
-                      {businessSettings.payeeName || businessSettings.businessName || 'Business Payee'}
+                      {paymentPrefs.payeeName || businessPrefs.businessName || 'Business Payee'}
                     </h4>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-xs">
-                    {paymentMethod === 'UPI' && businessSettings.upiId && (
+                    {paymentMethod === 'UPI' && paymentPrefs.upiId && (
                       <div className="text-slate-300">
                         <span className="font-bold text-[9px] uppercase tracking-wider block text-slate-500">UPI ID</span>
-                        <span className="font-mono text-slate-200 font-semibold break-all">{businessSettings.upiId}</span>
+                        <span className="font-mono text-slate-200 font-semibold break-all">{paymentPrefs.upiId}</span>
                       </div>
                     )}
-                    {paymentMethod === 'bKash' && businessSettings.bkashNumber && (
+                    {paymentMethod === 'bKash' && paymentPrefs.bkashNumber && (
                       <div className="text-slate-300">
                         <span className="font-bold text-[9px] uppercase tracking-wider block text-slate-500">bKash Number</span>
-                        <span className="font-mono text-slate-200 font-semibold break-all">{businessSettings.bkashNumber}</span>
+                        <span className="font-mono text-slate-200 font-semibold break-all">{paymentPrefs.bkashNumber}</span>
                       </div>
                     )}
-                    {paymentMethod === 'Nagad' && businessSettings.nagadNumber && (
+                    {paymentMethod === 'Nagad' && paymentPrefs.nagadNumber && (
                       <div className="text-slate-300">
                         <span className="font-bold text-[9px] uppercase tracking-wider block text-slate-500">Nagad Number</span>
-                        <span className="font-mono text-slate-200 font-semibold break-all">{businessSettings.nagadNumber}</span>
+                        <span className="font-mono text-slate-200 font-semibold break-all">{paymentPrefs.nagadNumber}</span>
                       </div>
                     )}
-                    {paymentMethod === 'Manual' && businessSettings.customPaymentLink && (
+                    {paymentMethod === 'Manual' && paymentPrefs.customPaymentLink && (
                       <div className="text-slate-300 col-span-2">
                         <span className="font-bold text-[9px] uppercase tracking-wider block text-slate-500">Payment Details / Link</span>
-                        <span className="font-mono text-slate-200 font-semibold break-all truncate block max-w-md">{businessSettings.customPaymentLink}</span>
+                        <span className="font-mono text-slate-200 font-semibold break-all truncate block max-w-md">{paymentPrefs.customPaymentLink}</span>
                       </div>
                     )}
                     
                     <div className="text-slate-300">
                       <span className="font-bold text-[9px] uppercase tracking-wider block text-slate-500">Due Amount</span>
                       <span className="font-extrabold text-sm text-teal-300">
-                        {formatCurrency(dueAmount, currencySymbol)}
+                        {formatCurrency(dueAmount, currencySymbol, regionalPrefs.numberFormat)}
                       </span>
                     </div>
 
@@ -380,10 +417,10 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
                     </div>
                   </div>
 
-                  {businessSettings.paymentNote && (
+                  {paymentPrefs.paymentNote && (
                     <div className="border-t border-white/10 pt-2.5 mt-1.5">
                       <p className="text-[10px] text-slate-400 italic">
-                        Note: {businessSettings.paymentNote}
+                        Note: {paymentPrefs.paymentNote}
                       </p>
                     </div>
                   )}

@@ -56,5 +56,14 @@ service cloud.firestore {
     match /expenses/{userId}/items/{expenseId} {
       allow read, write: if isAuth();
     }
+    match /premiumRequests/{requestId} {
+      allow read, write: if isAuth();
+    }
+    match /usersList/{userId} {
+      allow read, write: if isAuth();
+    }
+    match /platformConfig/{configId} {
+      allow read, write: if isAuth();
+    }
   }
 }

@@ -1,0 +1,155 @@
+BillQyro Remaining Work Plan
+Antigravity/AI Code Editor-এর জন্য ধাপে ধাপে বাকি কাজের ডকুমেন্ট
+উদ্দেশ্য: এই ফাইলটি BillQyro project folder-এ রেখে Antigravity-কে বলবে—“এই ডকুমেন্ট পড়ে বাকি কাজগুলো ধাপে ধাপে implement করো, existing working features break করবে না।”
+১. বর্তমান Status
+Feature
+Status
+Note
+PWA / Install App
+Complete
+Website phone/desktop app-এর মতো install করা যাবে।
+Live Invoice Link
+Complete
+Public link অন্য Gmail/device/incognito-তে কাজ করছে।
+Public Invoice Page
+Complete
+Read-only customer invoice page আছে।
+Payment Proof
+Complete/Test Needed
+I Have Paid, proof submit, approve/reject test করতে হবে।
+Smart Country Setup
+Pending
+India/Bangladesh/Other auto regional setup।
+Admin Premium Control
+Pending
+Simple admin plan & feature control।
+Manual Premium Activation
+Pending
+User payment request -> admin approve premium।
+PDF Currency Font Fix
+Pending
+₹/৳ symbol ঠিকভাবে render করতে হবে।
+IndexedDB Offline Upgrade
+Later
+LocalStorage main database না রেখে bigger offline storage।
+Final QA & Launch
+Pending
+সব feature end-to-end test।
+২. Antigravity-এর জন্য Master Rules
+Brand name সব জায়গায় BillQyro থাকবে। পুরোনো BillMint নাম ব্যবহার করা যাবে না।
+Existing PWA, PDF download, Live Invoice Link, publicInvoices, payment proof, dashboard, settings, admin panel—কিছু break করা যাবে না।
+User dashboard সহজ রাখতে হবে; normal shop owner যেন বুঝে use করতে পারে।
+Admin panel heavy করা যাবে না। Admin panel শুধু platform, users, free/premium plan, limit, feature access control করবে।
+Customer public invoice page সবসময় read-only থাকবে। Customer edit করতে পারবে না; শুধু view, pay, proof submit করতে পারবে।
+Existing invoice snapshots change করা যাবে না। New settings শুধু new invoice-এ apply হবে।
+Default language English থাকবে। Country শুধু currency/payment/tax control করবে; language শুধু UI labels control করবে।
+Production build অবশ্যই শেষে run করতে হবে এবং zero errors হতে হবে।
+৩. Priority Order
+Smart Country Setup + Regional Settings
+Admin Premium Control
+Manual Premium Activation System
+PDF Currency Font Fix
+IndexedDB Offline Storage Upgrade
+Final QA, polish, and launch checklist
+৪. Task 1 - Smart Country Setup + Regional Settings
+লক্ষ্য: নতুন user প্রথম login-এর পর country select করবে। Country অনুযায়ী currency, payment method, tax label, invoice defaults auto set হবে।
+First login setup wizard দেখাবে যদি setupCompleted false/missing থাকে।
+Step 1: Country select - India, Bangladesh, Other।
+Step 2: Business Profile - business name, owner name, phone, email, address, optional logo।
+Step 3: Payment Setup - country অনুযায়ী fields auto change।
+Step 4: Language - default English; options English, Bengali, Hindi।
+India হলে INR ₹, UPI, Manual, GST, UPI ID, Payee Name, optional GSTIN।
+Bangladesh হলে BDT ৳, bKash, Nagad, Rocket, Manual, VAT, wallet number fields।
+Other হলে manual currency, Manual/Bank Transfer/Custom Payment Link, Tax।
+Settings page-এ Regional Settings section থাকবে।
+Invoice create করার সময় regionalSettingsSnapshot, businessSnapshot, paymentSettingsSnapshot save করতে হবে।
+Live invoice link এবং PDF snapshot data use করবে, current changed settings নয়।
+Task 1 Testing
+New user login করলে setup wizard আসে।
+India select করলে ₹/UPI/GST আসে, bKash/Nagad hide থাকে।
+Bangladesh select করলে ৳/bKash/Nagad/Rocket/VAT আসে, UPI hide থাকে।
+Invoice PDF এবং Live Link correct currency/payment দেখায়।
+Country পরে change করলে old invoice change হয় না।
+৫. Task 2 - Simple Admin Premium Control
+লক্ষ্য: Admin panel simple থাকবে। সব user/invoice edit করার জায়গা হবে না। Admin শুধু platform-level plan/feature control করবে।
+Admin dashboard summary: total users, active users, free users, premium users।
+User management: block/unblock user, plan view।
+Plan & Feature Control section add করতে হবে।
+Free monthly invoice limit default 15।
+Feature access control: Live Invoice Link, Payment Proof, Custom Logo, Premium PDF Themes, WhatsApp Share, Cloud Sync, Reports, Customer Database।
+Feature access option: Free / Premium / Disabled।
+Upgrade prompt শুধু user limit cross করলে বা premium feature use করতে চাইলে দেখাবে।
+Admin panel design clean এবং mobile-friendly রাখতে হবে।
+Recommended Plan Rules
+Free Plan: 15 invoices/month, basic PDF, basic customer list, manual payment details, limited invoice theme।
+Premium Plan: unlimited invoices, live invoice link, payment proof verification, multiple invoice themes, WhatsApp share, business logo, customer database, reports, cloud sync।
+৬. Task 3 - Manual Premium Activation System
+লক্ষ্য: শুরুতে automatic payment gateway না দিয়ে manual premium system রাখা সহজ ও safe।
+User Upgrade page/button থাকবে।
+User premium request submit করবে: plan, paid amount, payment method, transaction ID, screenshot optional।
+Admin panel-এ Premium Requests list থাকবে।
+Admin approve করলে user premium active হবে।
+Premium expiry date থাকবে; monthly/yearly later add করা যাবে।
+Admin reject করলে reason save হবে।
+User dashboard-এ plan badge দেখাবে: Free / Premium / Expired।
+Manual Premium Testing
+Free user premium request submit করতে পারে।
+Admin request দেখতে পারে।
+Approve করলে feature unlock হয়।
+Expiry date পেরোলে plan Free/Expired হয়।
+৭. Task 4 - PDF Currency Font Fix
+লক্ষ্য: PDF-এ ₹ বা ৳ ভুল glyph হিসেবে যেন না দেখায়। আগে ₹ symbol ¹2510.00 হিসেবে দেখা গিয়েছিল।
+PDF renderer-এ rupee/taka supported font use করতে হবে।
+Recommended fonts: Noto Sans, Noto Sans Bengali, DejaVu Sans, Inter with currency support।
+@react-pdf/renderer Font.register ঠিকভাবে configure করতে হবে।
+Currency formatting helper centralize করতে হবে।
+PDF, web invoice, public invoice, WhatsApp message—সব জায়গায় same formatter use করা ভালো।
+Old invoices snapshot currency symbol অনুযায়ী render করবে।
+PDF Font Testing
+India invoice PDF: ₹2510.00 ঠিক দেখায়।
+Bangladesh invoice PDF: ৳2510.00 ঠিক দেখায়।
+No broken glyph, no ¹ symbol।
+A4/A5 PDF layout ভাঙে না।
+৮. Task 5 - IndexedDB Offline Storage Upgrade
+লক্ষ্য: LocalStorage unlimited নয়। তাই LocalStorage-কে main database না রেখে IndexedDB ব্যবহার করতে হবে।
+LocalStorage থাকবে small settings, theme, language, quick flags, draft state-এর জন্য।
+IndexedDB থাকবে invoices, customers, payment history, offline drafts, sync queue-এর জন্য।
+Firebase/Firestore থাকবে cloud sync, cross-device data, public live invoice links-এর জন্য।
+Existing localStorage invoices first-load migration করে IndexedDB-তে copy করতে হবে।
+Migration successful না হওয়া পর্যন্ত old localStorage data delete করা যাবে না।
+Sync status add করতে হবে: Synced, Offline Saved, Sync Pending, Sync Failed।
+Online হলে save to IndexedDB + Firestore। Offline হলে save to IndexedDB + syncPending।
+Internet ফিরে এলে pending invoices Firestore/publicInvoices sync হবে।
+PDF files বা large base64 screenshots LocalStorage-এ রাখা যাবে না।
+IndexedDB Testing
+Internet off করে invoice save করলে Offline Saved/Synced Pending দেখায়।
+Internet ফিরে এলে sync হয়।
+LocalStorage quota error আসে না।
+Existing invoices migrate হয়।
+৯. Task 6 - Final QA & Launch Checklist
+New user signup/login।
+First login setup wizard।
+India/Bangladesh/Other settings।
+Invoice create, edit, save।
+PDF preview/download/print।
+Currency symbol in PDF।
+Live invoice link from same browser, incognito, other Gmail, phone।
+Public page read-only verification।
+Payment proof submit from public page।
+Owner approve/reject payment।
+Paid amount, balance due, status update।
+WhatsApp share message।
+PWA install on Android, Chrome/Edge desktop, iOS manual guide।
+Firebase env variables in Vercel Production।
+Firestore rules for publicInvoices read and private invoice protection।
+Admin premium feature lock/unlock।
+Free invoice limit।
+Vercel production redeploy।
+১০. Antigravity-কে কী বলবে
+এই ফাইলটি project folder-এ রাখার পরে Antigravity-কে নিচের নির্দেশনা দেবে:
+Please read the document file named “BillQyro_Remaining_Work_Plan.docx” in this project folder.Follow the remaining work plan step by step. Do not break completed features: PWA install, PDF generation, Live Invoice Link, publicInvoices, payment proof, dashboard, settings, and admin panel.Start with Task 1: Smart Country Setup + Regional Settings. After each task, run production build and summarize changed files, created files, testing steps, and any issues found.
+১১. Important Final Notes
+একসাথে সব task implement না করে এক task করে build/test করা ভালো।
+প্রতিটি বড় change-এর পরে Git commit করা উচিত।
+Live link এবং Firebase publicInvoices feature working আছে—এটা কোনোভাবেই break করা যাবে না।
+Admin panel simple রাখাই BillQyro-এর জন্য best।

@@ -38,7 +38,19 @@ import {
   Info
 } from 'lucide-react';
 
-import { exportBackup, getAuthSession, clearInvoices, clearCustomers, clearProducts, clearExpenses, getStorageUsage } from '../utils/storage';
+import { 
+  exportBackup, 
+  getAuthSession, 
+  clearInvoices, 
+  clearCustomers, 
+  clearProducts, 
+  clearExpenses, 
+  getStorageUsage,
+  getAdminUsersList,
+  getAdminPremiumRequests,
+  updatePremiumRequestStatus,
+  updateUserBlockStatus
+} from '../utils/storage';
 import { getAdminEmail } from '../utils/adminAccess';
 import { firebaseReady } from '../utils/firebase';
 import { toast } from 'react-hot-toast';
@@ -76,8 +88,11 @@ const Settings = ({
   const [country, setCountry] = useState('India');
   const [language, setLanguage] = useState('English');
   const [currency, setCurrency] = useState('₹');
-  const [taxLabel, setTaxLabel] = useState('GSTIN');
+  const [currencyCode, setCurrencyCode] = useState('INR');
+  const [taxLabel, setTaxLabel] = useState('GST');
   const [vatTax, setVatTax] = useState('');
+  const [dateFormat, setDateFormat] = useState('DD/MM/YYYY');
+  const [numberFormat, setNumberFormat] = useState('Indian');
 
   // Payment Settings States
   const [upiId, setUpiId] = useState('');
@@ -134,6 +149,97 @@ const Settings = ({
   const [globalAnnouncement, setGlobalAnnouncement] = useState('');
   const [maintenanceMode, setMaintenanceMode] = useState(false);
 
+  // Admin Panel Tab & Data States
+  const [adminSubTab, setAdminSubTab] = useState('features');
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [adminRequests, setAdminRequests] = useState([]);
+  const [loadingAdminData, setLoadingAdminData] = useState(false);
+  const [selectedScreenshot, setSelectedScreenshot] = useState(null);
+  const [showRejectionModalFor, setShowRejectionModalFor] = useState(null);
+  const [rejectionReasonInput, setRejectionReasonInput] = useState('');
+
+  const fetchAdminData = async () => {
+    if (!isAdmin) return;
+    setLoadingAdminData(true);
+    try {
+      const [users, requests] = await Promise.all([
+        getAdminUsersList(),
+        getAdminPremiumRequests()
+      ]);
+      setAdminUsers(users || []);
+      // Sort requests by createdAt desc
+      const sortedRequests = (requests || []).sort((a, b) => b.createdAt - a.createdAt);
+      setAdminRequests(sortedRequests);
+    } catch (error) {
+      console.error('Error fetching admin data:', error);
+      toast.error('Failed to load admin directories.');
+    } finally {
+      setLoadingAdminData(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAdminData();
+    }
+  }, [isAdmin]);
+
+  const handleToggleBlock = async (targetUserId, currentBlocked) => {
+    const action = currentBlocked ? 'Unblock' : 'Block';
+    if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+    
+    const success = await updateUserBlockStatus(targetUserId, !currentBlocked);
+    if (success) {
+      toast.success(`User successfully ${currentBlocked ? 'unblocked' : 'blocked'}.`);
+      fetchAdminData();
+    } else {
+      toast.error(`Failed to update user block status.`);
+    }
+  };
+
+  const handleApproveRequest = async (request) => {
+    if (!confirm(`Approve premium upgrade request for ${request.userEmail}?`)) return;
+    
+    toast.loading('Processing approval...', { id: 'approve' });
+    const success = await updatePremiumRequestStatus(request.requestId, 'Approved', request.userId, request.plan);
+    toast.dismiss('approve');
+    
+    if (success) {
+      toast.success('Premium plan successfully approved and activated.');
+      fetchAdminData();
+    } else {
+      toast.error('Failed to approve request.');
+    }
+  };
+
+  const handleOpenRejectModal = (requestId) => {
+    setShowRejectionModalFor(requestId);
+    setRejectionReasonInput('');
+  };
+
+  const handleConfirmRejectRequest = async () => {
+    if (!rejectionReasonInput.trim()) {
+      alert('Please specify a rejection reason.');
+      return;
+    }
+    const requestId = showRejectionModalFor;
+    const request = adminRequests.find(r => r.requestId === requestId);
+    if (!request) return;
+    
+    toast.loading('Processing rejection...', { id: 'reject' });
+    const success = await updatePremiumRequestStatus(requestId, 'Rejected', request.userId, request.plan, rejectionReasonInput);
+    toast.dismiss('reject');
+    
+    if (success) {
+      toast.success('Request rejected and user notified.');
+      setShowRejectionModalFor(null);
+      setRejectionReasonInput('');
+      fetchAdminData();
+    } else {
+      toast.error('Failed to reject request.');
+    }
+  };
+
   const [showToast, setShowToast] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -151,8 +257,11 @@ const Settings = ({
       setCountry(settings.country || 'India');
       setLanguage(settings.language || 'English');
       setCurrency(settings.currency || '₹');
-      setTaxLabel(settings.taxLabel || 'GSTIN');
+      setCurrencyCode(settings.currencyCode || (settings.country === 'Bangladesh' ? 'BDT' : settings.country === 'Other' ? 'USD' : 'INR'));
+      setTaxLabel(settings.taxLabel || (settings.country === 'Bangladesh' ? 'VAT' : settings.country === 'Other' ? 'Tax' : 'GST'));
       setVatTax(settings.vatTax || '');
+      setDateFormat(settings.dateFormat || 'DD/MM/YYYY');
+      setNumberFormat(settings.numberFormat || 'Indian');
 
       setInvoicePrefix(settings.invoicePrefix || 'INV-');
       setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 18);
@@ -247,8 +356,11 @@ const Settings = ({
       country,
       language,
       currency,
+      currencyCode,
       taxLabel,
       vatTax,
+      dateFormat,
+      numberFormat,
 
       invoicePrefix,
       defaultTax: parseFloat(defaultTax) || 0,
@@ -353,19 +465,39 @@ const Settings = ({
   };
 
   const handleCountryAutoConfigure = (selectedCountry) => {
+    const confirmChange = window.confirm(
+      "Changing country will update default currency, payment methods, and tax labels. Existing saved invoices will keep their original invoice snapshot."
+    );
+    if (!confirmChange) {
+      return;
+    }
+    
     setCountry(selectedCountry);
     if (selectedCountry === 'India') {
       setCurrency('₹');
-      setTaxLabel('GSTIN');
+      setCurrencyCode('INR');
+      setTaxLabel('GST');
       setPaymentMethod('UPI');
+      setDateFormat('DD/MM/YYYY');
+      setNumberFormat('Indian');
+      setDefaultTax(18);
     } else if (selectedCountry === 'Bangladesh') {
       setCurrency('৳');
+      setCurrencyCode('BDT');
       setTaxLabel('VAT');
       setPaymentMethod('bKash');
+      setDateFormat('DD/MM/YYYY');
+      setNumberFormat('Standard');
+      setDefaultTax(0);
+      setVatTax('');
     } else {
       setCurrency('$');
+      setCurrencyCode('USD');
       setTaxLabel('Tax');
       setPaymentMethod('Manual');
+      setDateFormat('DD/MM/YYYY');
+      setNumberFormat('Standard');
+      setDefaultTax(0);
     }
   };
 
@@ -686,6 +818,8 @@ const Settings = ({
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
                 >
                   <option value="English">English</option>
+                  <option value="Bengali">Bengali (বাংলা)</option>
+                  <option value="Hindi">Hindi (हिंदी)</option>
                 </select>
                 <p className="text-[9px] text-slate-400 mt-1 font-semibold">Language controls interface UI labels. Country controls calculations/payment options.</p>
               </div>
@@ -702,14 +836,68 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Tax label text</label>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Currency Code</label>
                 <input
                   type="text"
-                  value={taxLabel}
-                  onChange={(e) => setTaxLabel(e.target.value)}
-                  placeholder="e.g. GSTIN, VAT, Tax"
+                  value={currencyCode}
+                  onChange={(e) => setCurrencyCode(e.target.value)}
+                  placeholder="e.g. INR, BDT, USD"
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Tax Label text</label>
+                <select
+                  value={['GST', 'VAT', 'Tax', 'None'].includes(taxLabel) ? taxLabel : 'Custom'}
+                  onChange={(e) => {
+                    if (e.target.value !== 'Custom') {
+                      setTaxLabel(e.target.value);
+                    }
+                  }}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold mb-2"
+                >
+                  <option value="GST">GST</option>
+                  <option value="VAT">VAT</option>
+                  <option value="Tax">Tax</option>
+                  <option value="None">None</option>
+                  <option value="Custom">Custom (Type below)</option>
+                </select>
+                {(!['GST', 'VAT', 'Tax', 'None'].includes(taxLabel) || taxLabel === 'Custom') && (
+                  <input
+                    type="text"
+                    value={taxLabel === 'Custom' ? '' : taxLabel}
+                    onChange={(e) => setTaxLabel(e.target.value)}
+                    placeholder="Enter custom tax label..."
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                  />
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Date Format</label>
+                <select
+                  value={dateFormat}
+                  onChange={(e) => setDateFormat(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                >
+                  <option value="DD/MM/YYYY">DD/MM/YYYY (e.g. 24/05/2026)</option>
+                  <option value="MM/DD/YYYY">MM/DD/YYYY (e.g. 05/24/2026)</option>
+                  <option value="YYYY-MM-DD">YYYY-MM-DD (e.g. 2026-05-24)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Number Format</label>
+                <select
+                  value={numberFormat}
+                  onChange={(e) => setNumberFormat(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                >
+                  <option value="Indian">12,34,567.89 (Indian lakh/crore)</option>
+                  <option value="Standard">1,234,567.89 (Standard international)</option>
+                  <option value="European">1.234.567,89 (European standard)</option>
+                </select>
               </div>
 
               {country === 'Bangladesh' && (
@@ -757,7 +945,8 @@ const Settings = ({
             </div>
 
             {paymentQrEnabled && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
                 <div>
                   <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Primary Payment Gateway Method</label>
                   <select
@@ -773,12 +962,12 @@ const Settings = ({
                         <option value="Rocket">Rocket (Mobile Wallet - Bangladesh)</option>
                       </>
                     )}
-                    <option value="Manual">Manual QR / Custom Bank Details</option>
+                    <option value="Manual">Manual QR / Custom Bank Details / instructions</option>
                   </select>
                 </div>
 
                 {/* Country based options */}
-                {paymentMethod === 'UPI' && (
+                {country === 'India' && (
                   <div>
                     <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">UPI ID</label>
                     <input
@@ -791,7 +980,7 @@ const Settings = ({
                   </div>
                 )}
 
-                {paymentMethod === 'bKash' && (
+                {country === 'Bangladesh' && paymentMethod === 'bKash' && (
                   <div>
                     <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">bKash Wallet Number</label>
                     <input
@@ -804,7 +993,7 @@ const Settings = ({
                   </div>
                 )}
 
-                {paymentMethod === 'Nagad' && (
+                {country === 'Bangladesh' && paymentMethod === 'Nagad' && (
                   <div>
                     <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Nagad Account Number</label>
                     <input
@@ -817,7 +1006,7 @@ const Settings = ({
                   </div>
                 )}
 
-                {paymentMethod === 'Rocket' && (
+                {country === 'Bangladesh' && paymentMethod === 'Rocket' && (
                   <div>
                     <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Rocket Account Number (Optional)</label>
                     <input
@@ -830,7 +1019,7 @@ const Settings = ({
                   </div>
                 )}
 
-                {paymentMethod === 'Manual' && (
+                {country === 'Other' && (
                   <div className="md:col-span-2">
                     <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Manual / Bank Instructions / Custom QR link</label>
                     <input
@@ -855,7 +1044,7 @@ const Settings = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">QR payment footnote note</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-455 mb-1.5 uppercase tracking-wide">QR payment footnote note</label>
                   <input
                     type="text"
                     value={paymentNote}
@@ -864,6 +1053,7 @@ const Settings = ({
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-855 dark:text-white font-medium"
                   />
                 </div>
+              </div>
 
                 {/* PDF/Preview checks */}
                 <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl">
@@ -893,7 +1083,7 @@ const Settings = ({
                     <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-300 ${showQrInPreview ? 'left-7' : 'left-1'}`}></div>
                   </button>
                 </div>
-              </div>
+              </>
             )}
           </div>
         )}
@@ -1198,153 +1388,382 @@ const Settings = ({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Main Admin Config column */}
             <div className="lg:col-span-2 space-y-6">
               
-              {/* PLAN & FEATURE CONTROL SECTION */}
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-5">
-                <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-250 border-b border-slate-50 dark:border-slate-800 pb-3 flex items-center gap-2">
-                  <Sliders className="w-4.5 h-4.5 text-indigo-500" />
-                  <span>SaaS Plan & Feature control</span>
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-slate-550 dark:text-slate-300">
-                  <div>
-                    <label className="block mb-1.5 text-slate-400 uppercase text-[9px] font-black tracking-wider">Free Monthly Invoice Limit</label>
-                    <input 
-                      type="number"
-                      value={freeInvoiceLimit}
-                      onChange={(e) => setFreeInvoiceLimit(Math.max(1, parseInt(e.target.value) || 15))}
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-white font-extrabold"
-                    />
-                  </div>
-
-                  {/* Feature Dropdowns */}
-                  {[
-                    { state: feature_liveInvoiceLink, setter: setFeature_liveInvoiceLink, id: 'liveInvoiceLink', label: 'Live Public Links Tier' },
-                    { state: feature_paymentProof, setter: setFeature_paymentProof, id: 'paymentProof', label: 'UPI/Mobile payment verification Tier' },
-                    { state: feature_customLogo, setter: setFeature_customLogo, id: 'customLogo', label: 'Custom Corporate Logo Tier' },
-                    { state: feature_whatsappShare, setter: setFeature_whatsappShare, id: 'whatsappShare', label: 'WhatsApp direct sharing Tier' },
-                    { state: feature_cloudSync, setter: setFeature_cloudSync, id: 'cloudSync', label: 'Dedicated cloud Syncing Tier' },
-                    { state: feature_reports, setter: setFeature_reports, id: 'reports', label: 'Financial reports & charts Tier' },
-                    { state: feature_customerDatabase, setter: setFeature_customerDatabase, id: 'customerDatabase', label: 'CRM Client Database Tier' },
-                  ].map((feat) => (
-                    <div key={feat.id}>
-                      <label className="block mb-1.5 text-slate-400 uppercase text-[9px] font-black tracking-wider">{feat.label}</label>
-                      <select
-                        value={feat.state}
-                        onChange={(e) => feat.setter(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-805 dark:text-white font-bold"
-                      >
-                        <option value="Free">Free (Standard tier allowed)</option>
-                        <option value="Premium">Premium Only (Requires Growth upgrade)</option>
-                      </select>
-                    </div>
-                  ))}
-
-                  {/* Premium PDF Themes: locked to premium only */}
-                  <div>
-                    <label className="block mb-1.5 text-slate-400 uppercase text-[9px] font-black tracking-wider">Premium PDF Themes Tier</label>
-                    <select
-                      disabled
-                      value="Premium"
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 font-bold cursor-not-allowed"
+              {/* SUB TAB SELECTOR PILLS */}
+              <div className="flex bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl mb-2 gap-1.5 w-fit border border-slate-200 dark:border-slate-700/50">
+                {[
+                  { id: 'features', label: 'Feature Policies' },
+                  { id: 'users', label: 'Users Directory' },
+                  { id: 'requests', label: 'Manual Requests' }
+                ].map((subTab) => {
+                  const isSelected = adminSubTab === subTab.id;
+                  const pendingCount = subTab.id === 'requests' 
+                    ? adminRequests.filter(r => r.status === 'Pending').length 
+                    : 0;
+                  return (
+                    <button
+                      key={subTab.id}
+                      type="button"
+                      onClick={() => setAdminSubTab(subTab.id)}
+                      className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                        isSelected
+                          ? 'bg-white dark:bg-slate-700 text-indigo-650 dark:text-indigo-300 shadow-sm border border-slate-100 dark:border-slate-650'
+                          : 'text-slate-505 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                      }`}
                     >
-                      <option value="Premium">Premium Only (Strict Lock)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="pt-2 flex justify-end">
-                  <button 
-                    onClick={handleSave} 
-                    className="px-6 py-2.5 bg-indigo-650 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1.5"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>Save Feature Policies</span>
-                  </button>
-                </div>
+                      <span>{subTab.label}</span>
+                      {pendingCount > 0 && (
+                        <span className="px-1.5 py-0.5 text-[9px] bg-rose-500 text-white rounded-full font-black animate-pulse">
+                          {pendingCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* BANNERS & ANNOUNCEMENTS */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800 shadow-premium flex flex-col justify-between space-y-3">
-                  <div>
-                    <h3 className="text-xs font-black text-indigo-900 dark:text-indigo-300 mb-1 flex items-center gap-2 uppercase tracking-wide">
-                      <Megaphone className="w-4 h-4 text-indigo-500" /> Global Announcement
+              {adminSubTab === 'features' && (
+                <div className="space-y-6">
+                  {/* PLAN & FEATURE CONTROL SECTION */}
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-5">
+                    <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-250 border-b border-slate-50 dark:border-slate-800 pb-3 flex items-center gap-2">
+                      <Sliders className="w-4.5 h-4.5 text-indigo-500" />
+                      <span>SaaS Plan & Feature control</span>
                     </h3>
-                    <p className="text-[9px] text-slate-400 font-medium mb-3">Broadcast platform messages to all user dashboards.</p>
-                    <textarea 
-                      value={globalAnnouncement}
-                      onChange={(e) => setGlobalAnnouncement(e.target.value)}
-                      placeholder="Type announcement text..."
-                      className="w-full text-xs p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none h-20 text-slate-800 dark:text-white"
-                    />
-                  </div>
-                  <button onClick={handleSave} className="w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-indigo-400">
-                    Publish Banner
-                  </button>
-                </div>
 
-                <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800 shadow-premium flex flex-col justify-between space-y-3">
-                  <div>
-                    <h3 className="text-xs font-black text-rose-900 dark:text-rose-300 mb-1 flex items-center gap-2 uppercase tracking-wide">
-                      <Lock className="w-4 h-4 text-rose-500" /> Maintenance Mode Lock
-                    </h3>
-                    <p className="text-[9px] text-slate-400 font-medium mb-3">Shut down standard users workspace, presenting lock screen.</p>
-                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-250">Maintenance Lockout</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-slate-550 dark:text-slate-300">
+                      <div>
+                        <label className="block mb-1.5 text-slate-400 uppercase text-[9px] font-black tracking-wider">Free Monthly Invoice Limit</label>
+                        <input 
+                          type="number"
+                          value={freeInvoiceLimit}
+                          onChange={(e) => setFreeInvoiceLimit(Math.max(1, parseInt(e.target.value) || 15))}
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-white font-extrabold"
+                        />
+                      </div>
+
+                      {/* Feature Dropdowns */}
+                      {[
+                        { state: feature_liveInvoiceLink, setter: setFeature_liveInvoiceLink, id: 'liveInvoiceLink', label: 'Live Public Links Tier' },
+                        { state: feature_paymentProof, setter: setFeature_paymentProof, id: 'paymentProof', label: 'UPI/Mobile payment verification Tier' },
+                        { state: feature_customLogo, setter: setFeature_customLogo, id: 'customLogo', label: 'Custom Corporate Logo Tier' },
+                        { state: feature_whatsappShare, setter: setFeature_whatsappShare, id: 'whatsappShare', label: 'WhatsApp direct sharing Tier' },
+                        { state: feature_cloudSync, setter: setFeature_cloudSync, id: 'cloudSync', label: 'Dedicated cloud Syncing Tier' },
+                        { state: feature_reports, setter: setFeature_reports, id: 'reports', label: 'Financial reports & charts Tier' },
+                        { state: feature_customerDatabase, setter: setFeature_customerDatabase, id: 'customerDatabase', label: 'CRM Client Database Tier' },
+                      ].map((feat) => (
+                        <div key={feat.id}>
+                          <label className="block mb-1.5 text-slate-400 uppercase text-[9px] font-black tracking-wider">{feat.label}</label>
+                          <select
+                            value={feat.state}
+                            onChange={(e) => feat.setter(e.target.value)}
+                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-805 dark:text-white font-bold"
+                          >
+                            <option value="Free">Free (Standard tier allowed)</option>
+                            <option value="Premium">Premium Only (Requires Growth upgrade)</option>
+                          </select>
+                        </div>
+                      ))}
+
+                      {/* Premium PDF Themes: locked to premium only */}
+                      <div>
+                        <label className="block mb-1.5 text-slate-400 uppercase text-[9px] font-black tracking-wider">Premium PDF Themes Tier</label>
+                        <select
+                          disabled
+                          value="Premium"
+                          className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 font-bold cursor-not-allowed"
+                        >
+                          <option value="Premium">Premium Only (Strict Lock)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 flex justify-end">
                       <button 
-                        onClick={() => setMaintenanceMode(!maintenanceMode)}
-                        className={`w-10 h-5 rounded-full relative transition-colors duration-300 focus:outline-none ${maintenanceMode ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                        onClick={handleSave} 
+                        className="px-6 py-2.5 bg-indigo-650 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1.5"
                       >
-                        <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 transition-all duration-300 ${maintenanceMode ? 'left-6' : 'left-0.5'}`}></div>
+                        <Save className="w-4 h-4" />
+                        <span>Save Feature Policies</span>
                       </button>
                     </div>
                   </div>
-                  <button onClick={handleSave} className="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-rose-950/20 dark:text-rose-450">
-                    Apply lockout state
-                  </button>
-                </div>
-              </div>
 
-              {/* DATABASE BACKUP AND RESTORE */}
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-4">
-                <h3 className="text-sm font-extrabold text-slate-850 dark:text-slate-200 border-b border-slate-50 dark:border-slate-800 pb-3 flex items-center gap-2">
-                  <Database className="w-4.5 h-4.5 text-indigo-500" />
-                  <span>Platform Data Backup & Restore</span>
-                </h3>
-                <p className="text-xs text-slate-400 font-medium leading-relaxed">
-                  Export your entire workspace (invoices, clients CRM catalog, overhead expenses, preferences) to a single local JSON file.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={handleExport}
-                    className="flex items-center justify-center gap-2 py-3 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 font-bold text-xs rounded-2xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-indigo-400"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Export Database (JSON)</span>
-                  </button>
-                  <div className="relative">
-                    <input
-                      type="file"
-                      accept=".json"
-                      onChange={handleImport}
-                      id="backup-upload"
-                      className="hidden"
-                    />
-                    <label
-                      htmlFor="backup-upload"
-                      className="flex items-center justify-center gap-2 py-3 bg-indigo-650 hover:bg-indigo-700 text-white font-bold text-xs rounded-2xl cursor-pointer transition-all text-center"
-                    >
-                      <Upload className="w-4 h-4" />
-                      <span>Import Database (JSON)</span>
-                    </label>
+                  {/* BANNERS & ANNOUNCEMENTS */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800 shadow-premium flex flex-col justify-between space-y-3">
+                      <div>
+                        <h3 className="text-xs font-black text-indigo-900 dark:text-indigo-300 mb-1 flex items-center gap-2 uppercase tracking-wide">
+                          <Megaphone className="w-4 h-4 text-indigo-500" /> Global Announcement
+                        </h3>
+                        <p className="text-[9px] text-slate-400 font-medium mb-3">Broadcast platform messages to all user dashboards.</p>
+                        <textarea 
+                          value={globalAnnouncement}
+                          onChange={(e) => setGlobalAnnouncement(e.target.value)}
+                          placeholder="Type announcement text..."
+                          className="w-full text-xs p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none h-20 text-slate-800 dark:text-white"
+                        />
+                      </div>
+                      <button onClick={handleSave} className="w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-indigo-400">
+                        Publish Banner
+                      </button>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800 shadow-premium flex flex-col justify-between space-y-3">
+                      <div>
+                        <h3 className="text-xs font-black text-rose-900 dark:text-rose-300 mb-1 flex items-center gap-2 uppercase tracking-wide">
+                          <Lock className="w-4 h-4 text-rose-500" /> Maintenance Mode Lock
+                        </h3>
+                        <p className="text-[9px] text-slate-400 font-medium mb-3">Shut down standard users workspace, presenting lock screen.</p>
+                        <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-250">Maintenance Lockout</span>
+                          <button 
+                            onClick={() => setMaintenanceMode(!maintenanceMode)}
+                            className={`w-10 h-5 rounded-full relative transition-colors duration-300 focus:outline-none ${maintenanceMode ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                          >
+                            <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 transition-all duration-300 ${maintenanceMode ? 'left-6' : 'left-0.5'}`}></div>
+                          </button>
+                        </div>
+                      </div>
+                      <button onClick={handleSave} className="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-rose-950/20 dark:text-rose-450">
+                        Apply lockout state
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* DATABASE BACKUP AND RESTORE */}
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-4">
+                    <h3 className="text-sm font-extrabold text-slate-850 dark:text-slate-200 border-b border-slate-50 dark:border-slate-800 pb-3 flex items-center gap-2">
+                      <Database className="w-4.5 h-4.5 text-indigo-500" />
+                      <span>Platform Data Backup & Restore</span>
+                    </h3>
+                    <p className="text-xs text-slate-400 font-medium leading-relaxed">
+                      Export your entire workspace (invoices, clients CRM catalog, overhead expenses, preferences) to a single local JSON file.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={handleExport}
+                        className="flex items-center justify-center gap-2 py-3 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 font-bold text-xs rounded-2xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-indigo-400"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Export Database (JSON)</span>
+                      </button>
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept=".json"
+                          onChange={handleImport}
+                          id="backup-upload"
+                          className="hidden"
+                        />
+                        <label
+                          htmlFor="backup-upload"
+                          className="flex items-center justify-center gap-2 py-3 bg-indigo-650 hover:bg-indigo-700 text-white font-bold text-xs rounded-2xl cursor-pointer transition-all text-center"
+                        >
+                          <Upload className="w-4 h-4" />
+                          <span>Import Database (JSON)</span>
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {adminSubTab === 'users' && (
+                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-5">
+                  <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-250 border-b border-slate-50 dark:border-slate-800 pb-3 flex items-center gap-2">
+                    <Users className="w-4.5 h-4.5 text-indigo-500" />
+                    <span>Registered Users Directory</span>
+                  </h3>
+                  
+                  {loadingAdminData ? (
+                    <div className="py-12 flex flex-col items-center justify-center gap-3">
+                      <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-xs text-slate-400 font-bold">Querying users list...</span>
+                    </div>
+                  ) : adminUsers.length === 0 ? (
+                    <div className="py-12 text-center text-xs text-slate-450 dark:text-slate-500 font-bold">
+                      No users registered in this directory.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-800">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="bg-slate-50 dark:bg-slate-850/60 text-slate-550 dark:text-slate-400 font-black uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
+                            <th className="p-3.5">User Email</th>
+                            <th className="p-3.5">Business Name</th>
+                            <th className="p-3.5">Country</th>
+                            <th className="p-3.5">Current Plan</th>
+                            <th className="p-3.5 text-center">Status</th>
+                            <th className="p-3.5 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50 font-medium">
+                          {adminUsers.map((user) => (
+                            <tr key={user.userId} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20 transition-all">
+                              <td className="p-3.5 font-bold text-slate-800 dark:text-slate-200">{user.email}</td>
+                              <td className="p-3.5 text-slate-500 dark:text-slate-400">{user.businessName || '—'}</td>
+                              <td className="p-3.5 text-slate-500 dark:text-slate-400">{user.country || 'India'}</td>
+                              <td className="p-3.5">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                                  user.planStatus === 'premium'
+                                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/25 dark:text-emerald-450'
+                                    : 'bg-slate-105 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                                }`}>
+                                  {user.planStatus || 'free'}
+                                </span>
+                              </td>
+                              <td className="p-3.5 text-center">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                                  user.blocked
+                                    ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/25 dark:text-rose-455'
+                                    : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/25 dark:text-emerald-450'
+                                }`}>
+                                  {user.blocked ? 'Blocked' : 'Active'}
+                                </span>
+                              </td>
+                              <td className="p-3.5 text-right">
+                                <button
+                                  onClick={() => handleToggleBlock(user.userId, user.blocked)}
+                                  className={`px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider cursor-pointer active:scale-95 transition-all ${
+                                    user.blocked
+                                      ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/10'
+                                      : 'bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/10'
+                                  }`}
+                                >
+                                  {user.blocked ? 'Unblock' : 'Block'}
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {adminSubTab === 'requests' && (
+                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-5">
+                  <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-250 border-b border-slate-50 dark:border-slate-800 pb-3 flex items-center gap-2">
+                    <CircleDollarSign className="w-4.5 h-4.5 text-indigo-500" />
+                    <span>Manual Premium Upgrade Requests Queue</span>
+                  </h3>
+                  
+                  {loadingAdminData ? (
+                    <div className="py-12 flex flex-col items-center justify-center gap-3">
+                      <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-xs text-slate-400 font-bold">Querying request logs...</span>
+                    </div>
+                  ) : adminRequests.length === 0 ? (
+                    <div className="py-12 text-center text-xs text-slate-450 dark:text-slate-500 font-bold">
+                      No manual premium requests submitted.
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {adminRequests.map((req) => (
+                        <div 
+                          key={req.requestId}
+                          className="p-5 border border-slate-100 dark:border-slate-800 rounded-3xl bg-slate-50/50 dark:bg-slate-850/10 hover:shadow-md transition-all space-y-4"
+                        >
+                          {/* Top Row: User details & status */}
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-3">
+                            <div>
+                              <span className="text-xs font-black text-slate-800 dark:text-slate-200 block">{req.userEmail}</span>
+                              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                                Request ID: {req.requestId} • {new Date(req.createdAt).toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                                req.status === 'Approved'
+                                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/25 dark:text-emerald-450'
+                                  : req.status === 'Rejected'
+                                    ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/25 dark:text-rose-455'
+                                    : 'bg-amber-50 text-amber-700 dark:bg-amber-950/25 dark:text-amber-450 animate-pulse'
+                              }`}>
+                                {req.status}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Middle Section: Request specifics */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold">
+                            <div>
+                              <span className="text-[9px] text-slate-400 uppercase tracking-widest block mb-0.5">Upgrade Plan</span>
+                              <span className="text-slate-800 dark:text-slate-200 font-black">{req.plan}</span>
+                            </div>
+                            <div>
+                              <span className="text-[9px] text-slate-400 uppercase tracking-widest block mb-0.5">Amount Paid</span>
+                              <span className="text-indigo-600 dark:text-indigo-400 font-black">{currency}{req.paidAmount}</span>
+                            </div>
+                            <div>
+                              <span className="text-[9px] text-slate-400 uppercase tracking-widest block mb-0.5">Method</span>
+                              <span className="text-slate-800 dark:text-slate-200 font-bold">{req.paymentMethod}</span>
+                            </div>
+                            <div>
+                              <span className="text-[9px] text-slate-400 uppercase tracking-widest block mb-0.5">TXN Reference ID</span>
+                              <span className="text-slate-805 dark:text-slate-200 font-mono font-bold select-all">{req.transactionId}</span>
+                            </div>
+                          </div>
+
+                          {/* Screenshots & Rejection Reason */}
+                          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pt-1">
+                            {req.screenshotBase64 ? (
+                              <div className="flex items-center gap-3">
+                                <img 
+                                  src={req.screenshotBase64} 
+                                  alt="Thumbnail" 
+                                  className="w-16 h-16 object-cover rounded-xl border border-slate-200 dark:border-slate-700 p-1 bg-white cursor-pointer hover:scale-105 transition-all"
+                                  onClick={() => setSelectedScreenshot(req.screenshotBase64)}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedScreenshot(req.screenshotBase64)}
+                                  className="text-[10px] text-teal-650 dark:text-teal-400 font-black hover:underline cursor-pointer flex items-center gap-1"
+                                >
+                                  <ImageIcon className="w-3.5 h-3.5" />
+                                  <span>View Receipt Proof</span>
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="text-[10px] text-slate-400 font-bold italic py-2">
+                                No attachment proof uploaded.
+                              </div>
+                            )}
+
+                            {req.status === 'Rejected' && req.rejectionReason && (
+                              <div className="text-[10px] text-rose-600 dark:text-rose-450 font-bold bg-rose-50/30 dark:bg-rose-950/10 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/20 max-w-md w-full">
+                                <span className="uppercase tracking-widest block text-[8px] text-rose-500 mb-1">Rejection Reason</span>
+                                "{req.rejectionReason}"
+                              </div>
+                            )}
+
+                            {req.status === 'Pending' && (
+                              <div className="flex gap-2 w-full sm:w-auto sm:self-end">
+                                <button
+                                  onClick={() => handleOpenRejectModal(req.requestId)}
+                                  className="flex-1 sm:flex-initial px-4 py-2 border border-rose-250 hover:bg-rose-50 text-rose-700 font-black text-[10px] rounded-xl uppercase tracking-wider cursor-pointer active:scale-95 transition-all"
+                                >
+                                  Reject
+                                </button>
+                                <button
+                                  onClick={() => handleApproveRequest(req)}
+                                  className="flex-1 sm:flex-initial px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[10px] rounded-xl shadow-md shadow-emerald-500/10 uppercase tracking-wider cursor-pointer active:scale-95 transition-all"
+                                >
+                                  Approve
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
             </div>
 
@@ -1395,7 +1814,7 @@ const Settings = ({
 
               {/* DANGER ZONE GRANULAR WIPES */}
               <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-rose-100 dark:border-rose-950/20 shadow-premium space-y-3.5">
-                <h3 className="text-xs font-black text-rose-600 dark:text-rose-450 border-b border-rose-50 dark:border-rose-950/20 pb-3 flex items-center gap-2 uppercase tracking-wide">
+                <h3 className="text-xs font-black text-rose-600 dark:text-rose-455 border-b border-rose-50 dark:border-rose-950/20 pb-3 flex items-center gap-2 uppercase tracking-wide">
                   <Trash2 className="w-4.5 h-4.5 text-rose-500" />
                   <span>Granular Data Wipes</span>
                 </h3>
@@ -1431,6 +1850,62 @@ const Settings = ({
         </div>
       )}
 
+      {/* Lightbox for screenshots */}
+      {selectedScreenshot && (
+        <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="relative max-w-3xl max-h-[85vh] w-full flex flex-col items-center bg-slate-900 rounded-3xl p-4 overflow-hidden border border-slate-800">
+            <button
+              onClick={() => setSelectedScreenshot(null)}
+              className="absolute top-4 right-4 bg-slate-800/80 hover:bg-slate-700 text-white font-bold p-2.5 rounded-full cursor-pointer hover:scale-105 active:scale-95 transition-all"
+            >
+              ✕
+            </button>
+            <div className="flex-1 overflow-auto flex items-center justify-center p-2">
+              <img 
+                src={selectedScreenshot} 
+                alt="Payment Proof Receipt" 
+                className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl" 
+              />
+            </div>
+            <p className="text-slate-400 text-xs font-semibold mt-4 tracking-wide">Click close or press ✕ to exit preview</p>
+          </div>
+        </div>
+      )}
+
+      {/* Rejection Reason Modal */}
+      {showRejectionModalFor && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-slate-100 dark:border-slate-800 shadow-2xl space-y-4">
+            <h3 className="text-sm font-black text-rose-600 dark:text-rose-455 uppercase tracking-widest">Reject Upgrade Request</h3>
+            <p className="text-xs text-slate-505 dark:text-slate-400 font-semibold leading-relaxed">
+              Please specify the exact reason for rejecting this upgrade request. This reason will be stored in the request log for user visibility.
+            </p>
+            <textarea
+              value={rejectionReasonInput}
+              onChange={(e) => setRejectionReasonInput(e.target.value)}
+              placeholder="e.g. Transaction ID could not be verified on bank records..."
+              className="w-full text-xs p-3 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 text-slate-800 dark:text-white"
+              rows={3}
+            />
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowRejectionModalFor(null)}
+                className="px-4 py-2 border border-slate-200 dark:border-slate-750 text-slate-505 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850 text-xs font-bold rounded-xl cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmRejectRequest}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md cursor-pointer"
+              >
+                Reject Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -245,22 +245,53 @@ function App() {
     setInvoices(getInvoices());
     setCustomers(getCustomers());
     setProducts(getProducts());
-    const currentSettings = getSettings();
+    const currentSettings = getSettings() || {};
     setSettings(currentSettings);
     setExpenses(getExpenses());
     setSubscription(getSubscriptionStatus());
     
     // Setup & Onboarding Routing
     const hasSeenGuide = localStorage.getItem('billqyro_seen_guide');
-    if (!currentSettings.defaultBillingTemplate) {
-      setCurrentTab('setup-billing');
-    } else if (!hasSeenGuide) {
-      localStorage.setItem('billqyro_seen_guide', 'true');
-      setCurrentTab('guide');
+    const isLegacyConfigured = !!(currentSettings.businessName && currentSettings.businessName.trim());
+    
+    if (currentSettings.setupCompleted) {
+      if (!hasSeenGuide) {
+        localStorage.setItem('billqyro_seen_guide', 'true');
+        setCurrentTab('guide');
+      } else {
+        setCurrentTab('dashboard');
+      }
+    } else if (isLegacyConfigured) {
+      // Legacy user already has settings, silently mark setupCompleted: true to not block them
+      const updated = { ...currentSettings, setupCompleted: true };
+      saveSettings(updated);
+      setSettings(updated);
+      if (!hasSeenGuide) {
+        localStorage.setItem('billqyro_seen_guide', 'true');
+        setCurrentTab('guide');
+      } else {
+        setCurrentTab('dashboard');
+      }
     } else {
-      setCurrentTab('dashboard');
+      setCurrentTab('setup-billing');
     }
   };
+
+  // Onboarding Interceptor for Authenticated Session Boot
+  useEffect(() => {
+    if (isAuthenticated && settings) {
+      const isLegacyConfigured = !!(settings.businessName && settings.businessName.trim());
+      if (!settings.setupCompleted) {
+        if (isLegacyConfigured) {
+          const updated = { ...settings, setupCompleted: true };
+          saveSettings(updated);
+          setSettings(updated);
+        } else {
+          setCurrentTab('setup-billing');
+        }
+      }
+    }
+  }, [isAuthenticated, settings]);
 
   const handleLogout = async () => {
     try {
@@ -600,6 +631,45 @@ function App() {
         }}
       />
     );
+  }
+
+  // --- Account Blocked Interceptor ---
+  if (settings?.blocked === true) {
+    const session = getAuthSession();
+    if (!isAdminUser(session)) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center font-sans text-white">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="max-w-md bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6"
+          >
+            <div className="w-16 h-16 bg-rose-500/20 text-rose-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-rose-500/10">
+              <Lock className="w-8 h-8" />
+            </div>
+            <h1 className="text-2xl font-black tracking-tight text-white">Account Deactivated</h1>
+            <p className="text-slate-400 text-xs font-semibold leading-relaxed">
+              Your BillQyro workspace has been temporarily blocked by the platform administrator due to policy guidelines or outstanding billing concerns.
+            </p>
+            <div className="p-4 bg-slate-850/50 rounded-2xl border border-slate-800/80 text-left space-y-2">
+              <span className="text-[10px] text-slate-500 uppercase font-black block tracking-widest">Administrator Notice</span>
+              <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">
+                If you believe this is an error or wish to request immediate reactivation, please contact support at <strong className="text-indigo-400 select-all">{settings.email || 'support@billqyro.com'}</strong> or email your account manager directly.
+              </p>
+            </div>
+            <button 
+              onClick={() => {
+                logout();
+                setIsAuthenticated(false);
+              }}
+              className="w-full py-3 bg-slate-800 hover:bg-slate-750 text-white font-bold text-xs rounded-xl shadow-lg active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
+            >
+              Sign Out of Account
+            </button>
+          </motion.div>
+        </div>
+      );
+    }
   }
 
   // --- Maintenance Mode Check ---

@@ -1,5 +1,16 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
+
+// Register Google Fonts to support regional currency symbols and scripts
+Font.register({
+  family: 'Noto Sans',
+  src: 'https://fonts.gstatic.com/s/notosans/v30/o-0IIpQli3j_HsGDy8g1254L.ttf'
+});
+
+Font.register({
+  family: 'Noto Sans Bengali',
+  src: 'https://fonts.gstatic.com/s/notosansbengali/v19/FeV-df232upI3c5zSrv4yVqX9z5L1m7487Q.ttf'
+});
 
 // Register a clean, premium font hierarchy if desired, otherwise use standard helvetica
 const styles = StyleSheet.create({
@@ -224,12 +235,34 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
     ...activePaymentSettings
   };
 
-  const currencySymbol = businessSettings?.currency || '₹';
+  // Resolve snapshotted regional settings with proper fallbacks
+  const regionalPrefs = invoice?.regionalSettingsSnapshot || {
+    country: businessSettings?.country || 'India',
+    currency: businessSettings?.currency || '₹',
+    currencyCode: businessSettings?.currencyCode || (businessSettings?.country === 'Bangladesh' ? 'BDT' : businessSettings?.country === 'Other' ? 'USD' : 'INR'),
+    language: businessSettings?.language || 'English',
+    taxLabel: businessSettings?.taxLabel || (businessSettings?.country === 'Bangladesh' ? 'VAT' : businessSettings?.country === 'Other' ? 'Tax' : 'GST'),
+    dateFormat: businessSettings?.dateFormat || 'DD/MM/YYYY',
+    numberFormat: businessSettings?.numberFormat || 'Indian'
+  };
+
+  const currencySymbol = regionalPrefs.currency || '₹';
   const templateId = businessSettings?.invoiceTemplate || 'modern';
   const brandColor = businessSettings?.brandColor || '#14b8a6';
+  const dynamicFont = regionalPrefs.country === 'Bangladesh' ? 'Noto Sans Bengali' : 'Noto Sans';
 
   const formatVal = (num) => {
-    return `${currencySymbol}${parseFloat(num || 0).toFixed(2)}`;
+    const numericAmount = parseFloat(num || 0);
+    let locale = 'en-IN';
+    if (regionalPrefs.numberFormat === 'Standard') {
+      locale = 'en-US';
+    } else if (regionalPrefs.numberFormat === 'European') {
+      locale = 'de-DE';
+    }
+    return `${currencySymbol}${numericAmount.toLocaleString(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   };
   
   const qrEnabled = businessSettings?.paymentQrEnabled && businessSettings?.showQrInPdf;
@@ -244,7 +277,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
     if (paymentMethod === 'UPI') {
       const upiId = businessSettings.upiId || '';
       const payeeName = businessSettings.payeeName || businessSettings.businessName || '';
-      qrText = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${dueAmount}&cu=INR&tn=${invoice.invoiceNumber}`;
+      qrText = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${dueAmount}&cu=${regionalPrefs.currencyCode || 'INR'}&tn=${invoice.invoiceNumber}`;
     } else if (paymentMethod === 'bKash') {
       const bkashNumber = businessSettings.bkashNumber || '';
       qrText = `bKash Payment\nMerchant/Personal Number: ${bkashNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
@@ -261,7 +294,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
     : null;
 
   const renderTemplate1 = () => (
-    <Page size="A5" style={styles.compactPage}>
+    <Page size="A5" style={[styles.compactPage, { fontFamily: dynamicFont }]}>
       {/* Centered Compact Header */}
       <View style={styles.compactHeader}>
         <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#0a1128' }}>
@@ -371,6 +404,12 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
               <Text style={{ fontSize: 7 }}>-{formatVal(invoice.discountAmount)}</Text>
             </View>
           )}
+          {invoice.taxAmount > 0 && (
+            <View style={styles.totalRow}>
+              <Text style={{ fontSize: 7, color: '#64748b' }}>{regionalPrefs.taxLabel || 'Tax'} ({invoice.taxPercentage}%)</Text>
+              <Text style={{ fontSize: 7 }}>{formatVal(invoice.taxAmount)}</Text>
+            </View>
+          )}
           <View style={styles.grandTotalRow}>
             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>Grand Total</Text>
             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>{formatVal(invoice.grandTotal)}</Text>
@@ -397,7 +436,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
   );
 
   const renderTemplate2 = () => (
-    <Page size="A4" style={styles.page}>
+    <Page size="A4" style={[styles.page, { fontFamily: dynamicFont }]}>
       {/* Elegant Invoice Header */}
       <View style={styles.header}>
         <View style={styles.businessInfo}>
@@ -412,7 +451,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
           </Text>
           {businessSettings?.gstNumber && (
             <Text style={[styles.businessSub, { fontWeight: 'bold', color: '#0a1128' }]}>
-              Tax ID / GSTIN: {businessSettings.gstNumber}
+              {regionalPrefs.taxLabel || 'Tax ID / GSTIN'}: {businessSettings.gstNumber}
             </Text>
           )}
         </View>
@@ -573,7 +612,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
 
           {invoice.taxAmount > 0 && (
             <View style={styles.totalRow}>
-              <Text style={{ color: '#64748b' }}>Tax ({invoice.taxPercentage}%)</Text>
+              <Text style={{ color: '#64748b' }}>{regionalPrefs.taxLabel || 'Tax'} ({invoice.taxPercentage}%)</Text>
               <Text>{formatVal(invoice.taxAmount)}</Text>
             </View>
           )}

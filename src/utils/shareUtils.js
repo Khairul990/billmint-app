@@ -39,11 +39,20 @@ export function cleanPhoneNumber(phone, currencySymbol = '₹') {
 export function generateInvoiceShareText(invoice, currencySymbol = '₹', businessSettings = {}) {
   if (!invoice) return '';
 
-  const businessName = businessSettings?.businessName || 'Our Business';
+  const businessPrefs = invoice.businessSnapshot || businessSettings || {};
+  const regionalPrefs = invoice.regionalSettingsSnapshot || {
+    currency: currencySymbol,
+    numberFormat: businessSettings?.numberFormat || 'Indian'
+  };
+
+  const activeSymbol = regionalPrefs.currency || currencySymbol;
+  const activeNumberFormat = regionalPrefs.numberFormat || 'Indian';
+
+  const businessName = businessPrefs?.businessName || 'Our Business';
   const invoiceNo = invoice.invoiceNumber || 'N/A';
-  const grandTotal = formatCurrency(invoice.grandTotal, currencySymbol);
-  const amountPaid = formatCurrency(invoice.amountPaid || 0, currencySymbol);
-  const balanceDue = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), currencySymbol);
+  const grandTotal = formatCurrency(invoice.grandTotal, activeSymbol, activeNumberFormat);
+  const amountPaid = formatCurrency(invoice.amountPaid || 0, activeSymbol, activeNumberFormat);
+  const balanceDue = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), activeSymbol, activeNumberFormat);
   const paymentStatus = invoice.paymentStatus || 'Pending';
   
   // Construct the secure live link automatically
@@ -73,8 +82,12 @@ Status: ${paymentStatus}`;
  * @returns {string} WhatsApp link
  */
 export function generateWhatsAppShareLink(invoice, currencySymbol = '₹', businessSettings = {}) {
-  const phone = cleanPhoneNumber(invoice?.customerPhone || '', currencySymbol);
-  const text = generateInvoiceShareText(invoice, currencySymbol, businessSettings);
+  const regionalPrefs = invoice?.regionalSettingsSnapshot || {
+    currency: currencySymbol
+  };
+  const activeSymbol = regionalPrefs.currency || currencySymbol;
+  const phone = cleanPhoneNumber(invoice?.customerPhone || '', activeSymbol);
+  const text = generateInvoiceShareText(invoice, activeSymbol, businessSettings);
   return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
 }
 
@@ -87,11 +100,16 @@ export function generateWhatsAppShareLink(invoice, currencySymbol = '₹', busin
  */
 export function generateEmailShareLink(invoice, currencySymbol = '₹', businessSettings = {}) {
   const email = invoice?.customerEmail || '';
-  const businessName = businessSettings?.businessName || 'Our Business';
+  const businessPrefs = invoice?.businessSnapshot || businessSettings || {};
+  const regionalPrefs = invoice?.regionalSettingsSnapshot || {
+    currency: currencySymbol
+  };
+  const activeSymbol = regionalPrefs.currency || currencySymbol;
+  const businessName = businessPrefs?.businessName || 'Our Business';
   const invoiceNo = invoice?.invoiceNumber || 'N/A';
   
   const subject = `Invoice ${invoiceNo} from ${businessName}`;
-  const text = generateInvoiceShareText(invoice, currencySymbol, businessSettings);
+  const text = generateInvoiceShareText(invoice, activeSymbol, businessSettings);
   
   // Format body for email (replace some markdown markup if desired, or keep it clean)
   // Email clients don't parse markdown stars so we clean them up slightly for body
