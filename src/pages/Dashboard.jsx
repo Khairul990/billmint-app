@@ -50,7 +50,8 @@ const Dashboard = ({
   businessSettings,
   installPromptEvent = null,
   isAppInstalled = false,
-  onInstallApp
+  onInstallApp,
+  subscription = {}
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
@@ -172,7 +173,7 @@ const Dashboard = ({
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="space-y-6"
       variants={containerVariants}
       initial="hidden"
@@ -186,9 +187,19 @@ const Dashboard = ({
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Workspace Authenticated</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Workspace Authenticated</span>
+              </div>
+              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${subscription?.status === 'premium'
+                  ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+                  : subscription?.expired
+                    ? 'bg-rose-500/15 border-rose-500/30 text-rose-400'
+                    : 'bg-slate-500/15 border-slate-500/30 text-slate-400'
+                }`}>
+                {subscription?.status === 'premium' ? 'Premium' : subscription?.expired ? 'Expired' : 'Free'}
+              </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
               Welcome back, <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">{businessName}</span>
@@ -234,7 +245,7 @@ const Dashboard = ({
               <Rocket className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">
-               Welcome to BillQyro
+              Welcome to BillQyro
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
               Start by completing your business profile and creating your first bill.
@@ -303,12 +314,12 @@ const Dashboard = ({
 
       {/* PWA INSTALLATION PROMOTION BANNER */}
       {installPromptEvent && !isAppInstalled && (
-        <motion.div 
-          variants={itemVariants} 
+        <motion.div
+          variants={itemVariants}
           className="p-6 rounded-3xl bg-gradient-to-r from-teal-500/10 via-emerald-500/5 to-transparent border border-teal-500/30 shadow-premium flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-full blur-2xl pointer-events-none"></div>
-          
+
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-500 flex items-center justify-center shrink-0 shadow-lg shadow-teal-500/20">
               <Download className="w-6 h-6 text-white" />
@@ -550,7 +561,7 @@ const Dashboard = ({
                 <p className="text-[9px] text-slate-400 font-bold uppercase mt-1">NO REVENUE DATA FOUND</p>
               </div>
             )}
-            
+
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={monthlyData}
@@ -563,31 +574,31 @@ const Dashboard = ({
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis 
-                  dataKey="label" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }} 
+                <XAxis
+                  dataKey="label"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }}
                   dy={10}
                 />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }} 
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }}
                   tickFormatter={(val) => `${currencySymbol}${val}`}
                 />
-                <Tooltip 
+                <Tooltip
                   cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '3 3' }}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', fontSize: '12px', fontWeight: 800 }}
                   formatter={(value) => [`${currencySymbol}${value}`, 'Revenue']}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="total" 
-                  stroke="#10b981" 
+                <Area
+                  type="monotone"
+                  dataKey="total"
+                  stroke="#10b981"
                   strokeWidth={3}
-                  fillOpacity={1} 
-                  fill="url(#colorTotal)" 
+                  fillOpacity={1}
+                  fill="url(#colorTotal)"
                   activeDot={{ r: 6, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }}
                 />
               </AreaChart>

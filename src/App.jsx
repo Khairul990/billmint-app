@@ -53,20 +53,20 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-import { 
-  getAuthSession, 
-  logout, 
-  getInvoices, 
-  saveInvoice, 
-  deleteInvoice, 
-  getCustomers, 
-  saveCustomer, 
-  deleteCustomer, 
-  getProducts, 
-  saveProduct, 
-  deleteProduct, 
-  getSettings, 
-  saveSettings, 
+import {
+  getAuthSession,
+  logout,
+  getInvoices,
+  saveInvoice,
+  deleteInvoice,
+  getCustomers,
+  saveCustomer,
+  deleteCustomer,
+  getProducts,
+  saveProduct,
+  deleteProduct,
+  getSettings,
+  saveSettings,
   resetToDemoData,
   initializeStorage,
   getSubscriptionStatus,
@@ -180,18 +180,18 @@ function App() {
             // Re-create the session in localStorage so the app works seamlessly
             const email = user.email || '';
             const settings = getSettings() || {};
-            
-            const newSession = { 
-              timestamp: Date.now(), 
+
+            const newSession = {
+              timestamp: Date.now(),
               token: 'billqyro-secure-session',
-              userEmail: email 
+              userEmail: email
             };
-            
+
             localStorage.setItem('billqyro_auth', JSON.stringify(newSession));
-            
+
             setIsAuthenticated(true);
             setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
-            }
+          }
         }
       });
       return () => unsubscribe();
@@ -249,11 +249,11 @@ function App() {
     setSettings(currentSettings);
     setExpenses(getExpenses());
     setSubscription(getSubscriptionStatus());
-    
+
     // Setup & Onboarding Routing
     const hasSeenGuide = localStorage.getItem('billqyro_seen_guide');
     const isLegacyConfigured = !!(currentSettings.businessName && currentSettings.businessName.trim());
-    
+
     if (currentSettings.setupCompleted) {
       if (!hasSeenGuide) {
         localStorage.setItem('billqyro_seen_guide', 'true');
@@ -322,7 +322,7 @@ function App() {
     }
     const { updatedInvoices, firebaseStatus } = await saveInvoice(payload);
     setInvoices(updatedInvoices);
-    
+
     if (saveCustomerAsNew && payload.customerName) {
       const newCustomer = {
         id: 'cust-' + Date.now(),
@@ -334,13 +334,13 @@ function App() {
       const updatedCustomers = saveCustomer(newCustomer);
       setCustomers(updatedCustomers);
     }
-    
+
     if (firebaseStatus === 'failed') {
       toast.success('Invoice created successfully. (Saved locally. Firebase sync pending.)');
     } else {
       toast.success('Invoice created successfully');
     }
-    
+
     setEditingInvoice(null);
     setCurrentTab('invoices');
   };
@@ -474,7 +474,7 @@ function App() {
   const renderTabContent = () => {
     if (currentTab === 'setup-billing') {
       return (
-        <SetupBilling 
+        <SetupBilling
           businessSettings={settings}
           onSaveSettings={(newSettings) => {
             saveSettings(newSettings);
@@ -505,6 +505,7 @@ function App() {
             installPromptEvent={installPromptEvent}
             isAppInstalled={isAppInstalled}
             onInstallApp={handleInstallApp}
+            subscription={subscription}
           />
         );
       case 'invoices':
@@ -619,7 +620,7 @@ function App() {
   // Show onboarding/login if not authenticated
   if (!isAuthenticated) {
     return (
-      <WelcomeOnboarding 
+      <WelcomeOnboarding
         onLoginSuccess={handleLoginSuccess}
         onQuickStart={() => {
           initializeStorage();
@@ -657,7 +658,7 @@ function App() {
                 If you believe this is an error or wish to request immediate reactivation, please contact support at <strong className="text-indigo-400 select-all">{settings.email || 'support@billqyro.com'}</strong> or email your account manager directly.
               </p>
             </div>
-            <button 
+            <button
               onClick={() => {
                 logout();
                 setIsAuthenticated(false);
@@ -690,14 +691,14 @@ function App() {
             <p className="text-slate-400 font-medium leading-relaxed mb-8">
               We are currently performing scheduled maintenance to bring you a better experience. Please check back later.
             </p>
-            <button 
+            <button
               onClick={() => window.location.reload()}
               className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors"
             >
               Refresh Page
             </button>
-            
-            <button 
+
+            <button
               onClick={() => {
                 logout();
                 setIsAuthenticated(false);
@@ -740,12 +741,12 @@ function App() {
           </motion.div>
         </AnimatePresence>
       </Layout>
-      <Toaster 
-        position="bottom-right" 
-        toastOptions={{ 
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
           className: 'text-sm font-bold',
           style: { borderRadius: '12px', background: '#fff', color: '#1e293b' }
-        }} 
+        }}
       />
     </ErrorBoundary>
   );

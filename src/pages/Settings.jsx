@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Building2, 
-  MapPin, 
-  FileText, 
-  Save, 
+import {
+  Building2,
+  MapPin,
+  FileText,
+  Save,
   Image as ImageIcon,
   Phone,
   Mail,
@@ -38,13 +38,13 @@ import {
   Info
 } from 'lucide-react';
 
-import { 
-  exportBackup, 
-  getAuthSession, 
-  clearInvoices, 
-  clearCustomers, 
-  clearProducts, 
-  clearExpenses, 
+import {
+  exportBackup,
+  getAuthSession,
+  clearInvoices,
+  clearCustomers,
+  clearProducts,
+  clearExpenses,
   getStorageUsage,
   getAdminUsersList,
   getAdminPremiumRequests,
@@ -60,13 +60,13 @@ import { toast } from 'react-hot-toast';
  * Allows standard users to configure their own firm's profile.
  * If isAdmin is true, it also renders the Admin console section with simple Plan & Feature Control.
  */
-const Settings = ({ 
-  settings, 
-  onSaveSettings, 
-  isAdmin, 
-  onResetDemo, 
-  onImportBackup, 
-  invoices = [], 
+const Settings = ({
+  settings,
+  onSaveSettings,
+  isAdmin,
+  onResetDemo,
+  onImportBackup,
+  invoices = [],
   customers = [],
   installPromptEvent = null,
   isAppInstalled = false,
@@ -187,7 +187,7 @@ const Settings = ({
   const handleToggleBlock = async (targetUserId, currentBlocked) => {
     const action = currentBlocked ? 'Unblock' : 'Block';
     if (!confirm(`Are you sure you want to ${action} this user?`)) return;
-    
+
     const success = await updateUserBlockStatus(targetUserId, !currentBlocked);
     if (success) {
       toast.success(`User successfully ${currentBlocked ? 'unblocked' : 'blocked'}.`);
@@ -199,11 +199,11 @@ const Settings = ({
 
   const handleApproveRequest = async (request) => {
     if (!confirm(`Approve premium upgrade request for ${request.userEmail}?`)) return;
-    
+
     toast.loading('Processing approval...', { id: 'approve' });
     const success = await updatePremiumRequestStatus(request.requestId, 'Approved', request.userId, request.plan);
     toast.dismiss('approve');
-    
+
     if (success) {
       toast.success('Premium plan successfully approved and activated.');
       fetchAdminData();
@@ -225,11 +225,11 @@ const Settings = ({
     const requestId = showRejectionModalFor;
     const request = adminRequests.find(r => r.requestId === requestId);
     if (!request) return;
-    
+
     toast.loading('Processing rejection...', { id: 'reject' });
     const success = await updatePremiumRequestStatus(requestId, 'Rejected', request.userId, request.plan, rejectionReasonInput);
     toast.dismiss('reject');
-    
+
     if (success) {
       toast.success('Request rejected and user notified.');
       setShowRejectionModalFor(null);
@@ -284,7 +284,7 @@ const Settings = ({
       setBrandColor(settings.brandColor || '#14b8a6');
       setInvoiceTemplate(settings.invoiceTemplate || 'modern');
       setDefaultBillingTemplate(settings.defaultBillingTemplate || 'custom');
-      
+
       if (settings.pdfVisibleFields) {
         setPdfVisibleFields(settings.pdfVisibleFields);
       }
@@ -411,7 +411,7 @@ const Settings = ({
     };
 
     onSaveSettings(payload);
-    
+
     // Show Toast
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3500);
@@ -425,7 +425,7 @@ const Settings = ({
       )}`;
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute('href', jsonString);
-      
+
       const dateStr = new Date().toISOString().split('T')[0];
       downloadAnchor.setAttribute('download', `billqyro-backup-${dateStr}.json`);
       document.body.appendChild(downloadAnchor);
@@ -471,7 +471,7 @@ const Settings = ({
     if (!confirmChange) {
       return;
     }
-    
+
     setCountry(selectedCountry);
     if (selectedCountry === 'India') {
       setCurrency('₹');
@@ -502,13 +502,13 @@ const Settings = ({
   };
 
   // Stats for Admin Panel
-  const totalInvoices   = invoices.length;
-  const totalCustomers  = customers.length;
-  const totalRevenue    = invoices.reduce((sum, inv) => sum + (parseFloat(inv.grandTotal) || 0), 0);
-  const paidRevenue     = invoices.reduce((sum, inv) => sum + (parseFloat(inv.amountPaid) || 0), 0);
+  const totalInvoices = invoices.length;
+  const totalCustomers = customers.length;
+  const totalRevenue = invoices.reduce((sum, inv) => sum + (parseFloat(inv.grandTotal) || 0), 0);
+  const paidRevenue = invoices.reduce((sum, inv) => sum + (parseFloat(inv.amountPaid) || 0), 0);
   const pendingPayments = invoices.reduce((sum, inv) => sum + (parseFloat(inv.balanceDue) || 0), 0);
-  const paidCount       = invoices.filter(inv => inv.paymentStatus === 'Paid').length;
-  const pendingCount    = invoices.filter(inv => inv.paymentStatus !== 'Paid').length;
+  const paidCount = invoices.filter(inv => inv.paymentStatus === 'Paid').length;
+  const pendingCount = invoices.filter(inv => inv.paymentStatus !== 'Paid').length;
 
   const storageHealth = getStorageUsage();
   const session = getAuthSession();
@@ -565,13 +565,13 @@ const Settings = ({
 
   return (
     <div className="max-w-4xl mx-auto pb-12 relative font-sans text-slate-800 dark:text-slate-200">
-      
+
       {/* DEVELOPMENT DEBUG BLOCK */}
       <div className="bg-slate-800 text-[10px] text-green-400 p-2 mb-4 rounded font-mono break-all dark:bg-slate-900 dark:border dark:border-slate-800 flex justify-between">
         <span>Logged in as: {loggedInEmail} | Admin access: {isAdmin ? 'true' : 'false'}</span>
         <span>Target Admin: {getAdminEmail()}</span>
       </div>
-      
+
       {/* Toast Notification */}
       {showToast && (
         <div className="fixed top-6 right-6 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
@@ -611,11 +611,10 @@ const Settings = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
-                isSelected 
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm border border-slate-100/50 dark:border-slate-700/50' 
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${isSelected
+                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm border border-slate-100/50 dark:border-slate-700/50'
                   : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-              }`}
+                }`}
             >
               <Icon className={`w-4 h-4 ${isSelected ? 'text-teal-500' : 'text-slate-400'}`} />
               <span>{tab.label}</span>
@@ -656,7 +655,7 @@ const Settings = ({
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Owner Full Name</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><User className="w-4 h-4"/></span>
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><User className="w-4 h-4" /></span>
                   <input
                     type="text"
                     value={ownerName}
@@ -670,9 +669,8 @@ const Settings = ({
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Business Logo URL</label>
                 <div
-                  className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${
-                    isDragging ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/20' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:bg-slate-850'
-                  }`}
+                  className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${isDragging ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/20' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:bg-slate-850'
+                    }`}
                   onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                   onDragLeave={() => setIsDragging(false)}
                   onDrop={(e) => {
@@ -704,9 +702,9 @@ const Settings = ({
                     <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Drag & drop logo, or click to browse</span>
                   </div>
                 </div>
-                
+
                 <div className="mt-3 relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><ImageIcon className="w-3.5 h-3.5"/></span>
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><ImageIcon className="w-3.5 h-3.5" /></span>
                   <input
                     type="url"
                     value={logoUrl}
@@ -755,7 +753,7 @@ const Settings = ({
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Contact Email</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><Mail className="w-4 h-4"/></span>
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><Mail className="w-4 h-4" /></span>
                   <input
                     type="email"
                     value={email}
@@ -769,7 +767,7 @@ const Settings = ({
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Corporate Address</label>
                 <div className="relative">
-                  <span className="absolute top-3.5 left-3.5 text-slate-400"><MapPin className="w-4 h-4"/></span>
+                  <span className="absolute top-3.5 left-3.5 text-slate-400"><MapPin className="w-4 h-4" /></span>
                   <textarea
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
@@ -935,7 +933,7 @@ const Settings = ({
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">Enable Automated Scan-to-Pay QR Code</span>
                 <span className="text-[10px] text-slate-400 font-medium">Embed automated scanning codes on bills and invoice pages</span>
               </div>
-              <button 
+              <button
                 type="button"
                 onClick={() => setPaymentQrEnabled(!paymentQrEnabled)}
                 className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${paymentQrEnabled ? 'bg-teal-500' : 'bg-slate-300 dark:bg-slate-700'}`}
@@ -947,113 +945,113 @@ const Settings = ({
             {paymentQrEnabled && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Primary Payment Gateway Method</label>
-                  <select
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
-                  >
-                    {country === 'India' && <option value="UPI">UPI (Unified Payments Interface - India)</option>}
-                    {country === 'Bangladesh' && (
-                      <>
-                        <option value="bKash">bKash (Mobile Wallet - Bangladesh)</option>
-                        <option value="Nagad">Nagad (Mobile Wallet - Bangladesh)</option>
-                        <option value="Rocket">Rocket (Mobile Wallet - Bangladesh)</option>
-                      </>
-                    )}
-                    <option value="Manual">Manual QR / Custom Bank Details / instructions</option>
-                  </select>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Primary Payment Gateway Method</label>
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                    >
+                      {country === 'India' && <option value="UPI">UPI (Unified Payments Interface - India)</option>}
+                      {country === 'Bangladesh' && (
+                        <>
+                          <option value="bKash">bKash (Mobile Wallet - Bangladesh)</option>
+                          <option value="Nagad">Nagad (Mobile Wallet - Bangladesh)</option>
+                          <option value="Rocket">Rocket (Mobile Wallet - Bangladesh)</option>
+                        </>
+                      )}
+                      <option value="Manual">Manual QR / Custom Bank Details / instructions</option>
+                    </select>
+                  </div>
+
+                  {/* Country based options */}
+                  {country === 'India' && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">UPI ID</label>
+                      <input
+                        type="text"
+                        value={upiId}
+                        onChange={(e) => setUpiId(e.target.value)}
+                        placeholder="e.g. business@okaxis"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                      />
+                    </div>
+                  )}
+
+                  {country === 'Bangladesh' && paymentMethod === 'bKash' && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">bKash Wallet Number</label>
+                      <input
+                        type="text"
+                        value={bkashNumber}
+                        onChange={(e) => setBkashNumber(e.target.value)}
+                        placeholder="e.g. 017XXXXXXXX"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                      />
+                    </div>
+                  )}
+
+                  {country === 'Bangladesh' && paymentMethod === 'Nagad' && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Nagad Account Number</label>
+                      <input
+                        type="text"
+                        value={nagadNumber}
+                        onChange={(e) => setNagadNumber(e.target.value)}
+                        placeholder="e.g. 019XXXXXXXX"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                      />
+                    </div>
+                  )}
+
+                  {country === 'Bangladesh' && paymentMethod === 'Rocket' && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Rocket Account Number (Optional)</label>
+                      <input
+                        type="text"
+                        value={rocketNumber}
+                        onChange={(e) => setRocketNumber(e.target.value)}
+                        placeholder="e.g. 018XXXXXXXX"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                      />
+                    </div>
+                  )}
+
+                  {country === 'Other' && (
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Manual / Bank Instructions / Custom QR link</label>
+                      <input
+                        type="text"
+                        value={customPaymentLink}
+                        onChange={(e) => setCustomPaymentLink(e.target.value)}
+                        placeholder="e.g. Bank name: X, A/C: Y, IFSC: Z or PayPal link..."
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-medium"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Payee / Account Name</label>
+                    <input
+                      type="text"
+                      value={payeeName}
+                      onChange={(e) => setPayeeName(e.target.value)}
+                      placeholder="e.g. BillQyro store"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-455 mb-1.5 uppercase tracking-wide">QR payment footnote note</label>
+                    <input
+                      type="text"
+                      value={paymentNote}
+                      onChange={(e) => setPaymentNote(e.target.value)}
+                      placeholder="e.g. Please scan to complete payment."
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-855 dark:text-white font-medium"
+                    />
+                  </div>
                 </div>
-
-                {/* Country based options */}
-                {country === 'India' && (
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">UPI ID</label>
-                    <input
-                      type="text"
-                      value={upiId}
-                      onChange={(e) => setUpiId(e.target.value)}
-                      placeholder="e.g. business@okaxis"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
-                    />
-                  </div>
-                )}
-
-                {country === 'Bangladesh' && paymentMethod === 'bKash' && (
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">bKash Wallet Number</label>
-                    <input
-                      type="text"
-                      value={bkashNumber}
-                      onChange={(e) => setBkashNumber(e.target.value)}
-                      placeholder="e.g. 017XXXXXXXX"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
-                    />
-                  </div>
-                )}
-
-                {country === 'Bangladesh' && paymentMethod === 'Nagad' && (
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Nagad Account Number</label>
-                    <input
-                      type="text"
-                      value={nagadNumber}
-                      onChange={(e) => setNagadNumber(e.target.value)}
-                      placeholder="e.g. 019XXXXXXXX"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
-                    />
-                  </div>
-                )}
-
-                {country === 'Bangladesh' && paymentMethod === 'Rocket' && (
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Rocket Account Number (Optional)</label>
-                    <input
-                      type="text"
-                      value={rocketNumber}
-                      onChange={(e) => setRocketNumber(e.target.value)}
-                      placeholder="e.g. 018XXXXXXXX"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
-                    />
-                  </div>
-                )}
-
-                {country === 'Other' && (
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Manual / Bank Instructions / Custom QR link</label>
-                    <input
-                      type="text"
-                      value={customPaymentLink}
-                      onChange={(e) => setCustomPaymentLink(e.target.value)}
-                      placeholder="e.g. Bank name: X, A/C: Y, IFSC: Z or PayPal link..."
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-medium"
-                    />
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Payee / Account Name</label>
-                  <input
-                    type="text"
-                    value={payeeName}
-                    onChange={(e) => setPayeeName(e.target.value)}
-                    placeholder="e.g. BillQyro store"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-455 mb-1.5 uppercase tracking-wide">QR payment footnote note</label>
-                  <input
-                    type="text"
-                    value={paymentNote}
-                    onChange={(e) => setPaymentNote(e.target.value)}
-                    placeholder="e.g. Please scan to complete payment."
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-855 dark:text-white font-medium"
-                  />
-                </div>
-              </div>
 
                 {/* PDF/Preview checks */}
                 <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl">
@@ -1061,7 +1059,7 @@ const Settings = ({
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">Show QR in PDF Invoice</span>
                     <span className="text-[9px] text-slate-400 font-medium">Render the QR code on generated PDF documents</span>
                   </div>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setShowQrInPdf(!showQrInPdf)}
                     className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${showQrInPdf ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}
@@ -1075,7 +1073,7 @@ const Settings = ({
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">Show QR on Local Preview</span>
                     <span className="text-[9px] text-slate-400 font-medium">Render the QR code on invoice previews inside dashboard</span>
                   </div>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setShowQrInPreview(!showQrInPreview)}
                     className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${showQrInPreview ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}
@@ -1229,7 +1227,7 @@ const Settings = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
+
               {/* Checkboxes */}
               {[
                 { state: enableLiveLink, setter: setEnableLiveLink, label: 'Enable Secure Live Link', desc: 'Generate unique public url endpoints for customers' },
@@ -1246,7 +1244,7 @@ const Settings = ({
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-250 block">{item.label}</span>
                     <span className="text-[9px] text-slate-450 dark:text-slate-400 font-semibold">{item.desc}</span>
                   </div>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => item.setter(!item.state)}
                     className={`w-9 h-5 rounded-full relative transition-colors duration-300 shrink-0 mt-0.5 focus:outline-none ${item.state ? 'bg-teal-500' : 'bg-slate-350 dark:bg-slate-700'}`}
@@ -1389,7 +1387,7 @@ const Settings = ({
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              
+
               {/* SUB TAB SELECTOR PILLS */}
               <div className="flex bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl mb-2 gap-1.5 w-fit border border-slate-200 dark:border-slate-700/50">
                 {[
@@ -1398,19 +1396,18 @@ const Settings = ({
                   { id: 'requests', label: 'Manual Requests' }
                 ].map((subTab) => {
                   const isSelected = adminSubTab === subTab.id;
-                  const pendingCount = subTab.id === 'requests' 
-                    ? adminRequests.filter(r => r.status === 'Pending').length 
+                  const pendingCount = subTab.id === 'requests'
+                    ? adminRequests.filter(r => r.status === 'Pending').length
                     : 0;
                   return (
                     <button
                       key={subTab.id}
                       type="button"
                       onClick={() => setAdminSubTab(subTab.id)}
-                      className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                        isSelected
+                      className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${isSelected
                           ? 'bg-white dark:bg-slate-700 text-indigo-650 dark:text-indigo-300 shadow-sm border border-slate-100 dark:border-slate-650'
                           : 'text-slate-505 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                      }`}
+                        }`}
                     >
                       <span>{subTab.label}</span>
                       {pendingCount > 0 && (
@@ -1435,7 +1432,7 @@ const Settings = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-slate-550 dark:text-slate-300">
                       <div>
                         <label className="block mb-1.5 text-slate-400 uppercase text-[9px] font-black tracking-wider">Free Monthly Invoice Limit</label>
-                        <input 
+                        <input
                           type="number"
                           value={freeInvoiceLimit}
                           onChange={(e) => setFreeInvoiceLimit(Math.max(1, parseInt(e.target.value) || 15))}
@@ -1480,8 +1477,8 @@ const Settings = ({
                     </div>
 
                     <div className="pt-2 flex justify-end">
-                      <button 
-                        onClick={handleSave} 
+                      <button
+                        onClick={handleSave}
                         className="px-6 py-2.5 bg-indigo-650 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1.5"
                       >
                         <Save className="w-4 h-4" />
@@ -1498,7 +1495,7 @@ const Settings = ({
                           <Megaphone className="w-4 h-4 text-indigo-500" /> Global Announcement
                         </h3>
                         <p className="text-[9px] text-slate-400 font-medium mb-3">Broadcast platform messages to all user dashboards.</p>
-                        <textarea 
+                        <textarea
                           value={globalAnnouncement}
                           onChange={(e) => setGlobalAnnouncement(e.target.value)}
                           placeholder="Type announcement text..."
@@ -1518,7 +1515,7 @@ const Settings = ({
                         <p className="text-[9px] text-slate-400 font-medium mb-3">Shut down standard users workspace, presenting lock screen.</p>
                         <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
                           <span className="text-xs font-bold text-slate-700 dark:text-slate-250">Maintenance Lockout</span>
-                          <button 
+                          <button
                             onClick={() => setMaintenanceMode(!maintenanceMode)}
                             className={`w-10 h-5 rounded-full relative transition-colors duration-300 focus:outline-none ${maintenanceMode ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`}
                           >
@@ -1577,7 +1574,7 @@ const Settings = ({
                     <Users className="w-4.5 h-4.5 text-indigo-500" />
                     <span>Registered Users Directory</span>
                   </h3>
-                  
+
                   {loadingAdminData ? (
                     <div className="py-12 flex flex-col items-center justify-center gap-3">
                       <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
@@ -1607,31 +1604,28 @@ const Settings = ({
                               <td className="p-3.5 text-slate-500 dark:text-slate-400">{user.businessName || '—'}</td>
                               <td className="p-3.5 text-slate-500 dark:text-slate-400">{user.country || 'India'}</td>
                               <td className="p-3.5">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                                  user.planStatus === 'premium'
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${user.planStatus === 'premium'
                                     ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/25 dark:text-emerald-450'
                                     : 'bg-slate-105 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                                }`}>
+                                  }`}>
                                   {user.planStatus || 'free'}
                                 </span>
                               </td>
                               <td className="p-3.5 text-center">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                                  user.blocked
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${user.blocked
                                     ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/25 dark:text-rose-455'
                                     : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/25 dark:text-emerald-450'
-                                }`}>
+                                  }`}>
                                   {user.blocked ? 'Blocked' : 'Active'}
                                 </span>
                               </td>
                               <td className="p-3.5 text-right">
                                 <button
                                   onClick={() => handleToggleBlock(user.userId, user.blocked)}
-                                  className={`px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider cursor-pointer active:scale-95 transition-all ${
-                                    user.blocked
+                                  className={`px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider cursor-pointer active:scale-95 transition-all ${user.blocked
                                       ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/10'
                                       : 'bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/10'
-                                  }`}
+                                    }`}
                                 >
                                   {user.blocked ? 'Unblock' : 'Block'}
                                 </button>
@@ -1651,7 +1645,7 @@ const Settings = ({
                     <CircleDollarSign className="w-4.5 h-4.5 text-indigo-500" />
                     <span>Manual Premium Upgrade Requests Queue</span>
                   </h3>
-                  
+
                   {loadingAdminData ? (
                     <div className="py-12 flex flex-col items-center justify-center gap-3">
                       <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
@@ -1664,7 +1658,7 @@ const Settings = ({
                   ) : (
                     <div className="space-y-4">
                       {adminRequests.map((req) => (
-                        <div 
+                        <div
                           key={req.requestId}
                           className="p-5 border border-slate-100 dark:border-slate-800 rounded-3xl bg-slate-50/50 dark:bg-slate-850/10 hover:shadow-md transition-all space-y-4"
                         >
@@ -1677,13 +1671,12 @@ const Settings = ({
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                                req.status === 'Approved'
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${req.status === 'Approved'
                                   ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/25 dark:text-emerald-450'
                                   : req.status === 'Rejected'
                                     ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/25 dark:text-rose-455'
                                     : 'bg-amber-50 text-amber-700 dark:bg-amber-950/25 dark:text-amber-450 animate-pulse'
-                              }`}>
+                                }`}>
                                 {req.status}
                               </span>
                             </div>
@@ -1713,9 +1706,9 @@ const Settings = ({
                           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pt-1">
                             {req.screenshotBase64 ? (
                               <div className="flex items-center gap-3">
-                                <img 
-                                  src={req.screenshotBase64} 
-                                  alt="Thumbnail" 
+                                <img
+                                  src={req.screenshotBase64}
+                                  alt="Thumbnail"
                                   className="w-16 h-16 object-cover rounded-xl border border-slate-200 dark:border-slate-700 p-1 bg-white cursor-pointer hover:scale-105 transition-all"
                                   onClick={() => setSelectedScreenshot(req.screenshotBase64)}
                                 />
@@ -1769,7 +1762,7 @@ const Settings = ({
 
             {/* Side column: Real-Time Stats Overview & Wipes */}
             <div className="space-y-6">
-              
+
               {/* REAL-TIME SYSTEM STATISTICS CARD */}
               <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 border border-slate-850 shadow-xl text-white">
                 <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
@@ -1793,6 +1786,19 @@ const Settings = ({
                     <Users className="w-4 h-4 text-cyan-300 mx-auto mb-1" />
                     <p className="text-lg font-black text-white">{totalCustomers}</p>
                     <span className="text-[8px] text-slate-400 uppercase font-black block">CRM Clients</span>
+                  </div>
+                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5">
+                    <Users className="w-4 h-4 text-indigo-300 mx-auto mb-1" />
+                    <p className="text-lg font-black text-white">{adminUsers.length}</p>
+                    <span className="text-[8px] text-slate-400 uppercase font-black block">Total Users</span>
+                  </div>
+                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5 flex flex-col items-center justify-center">
+                    <div className="flex items-center gap-1 text-[10px] font-bold mt-1">
+                      <span className="text-emerald-400">{adminUsers.filter(u => u.planStatus === 'premium').length}</span>
+                      <span className="text-slate-500">/</span>
+                      <span className="text-slate-400">{adminUsers.filter(u => u.planStatus !== 'premium').length}</span>
+                    </div>
+                    <span className="text-[7px] text-slate-500 uppercase font-black block mt-0.5">Premium / Free</span>
                   </div>
                   <div className="bg-white/5 border border-white/5 rounded-xl p-2.5 md:col-span-2">
                     <span className="text-[8px] text-slate-400 uppercase font-black block">Outstanding Dues</span>
@@ -1830,7 +1836,7 @@ const Settings = ({
                       <Trash2 className="w-3 h-3 opacity-60" />
                     </button>
                   ))}
-                  
+
                   <div className="pt-3 mt-3 border-t border-rose-100 dark:border-rose-900/30">
                     <button
                       type="button"
@@ -1861,10 +1867,10 @@ const Settings = ({
               ✕
             </button>
             <div className="flex-1 overflow-auto flex items-center justify-center p-2">
-              <img 
-                src={selectedScreenshot} 
-                alt="Payment Proof Receipt" 
-                className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl" 
+              <img
+                src={selectedScreenshot}
+                alt="Payment Proof Receipt"
+                className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl"
               />
             </div>
             <p className="text-slate-400 text-xs font-semibold mt-4 tracking-wide">Click close or press ✕ to exit preview</p>

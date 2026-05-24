@@ -3,10 +3,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { FileText, Eye, Edit2, Trash2, Download, Share2, Mail, Copy, Check, Link } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
-import { 
-  generateWhatsAppShareLink, 
-  generateEmailShareLink, 
-  generateInvoiceShareText 
+import {
+  generateWhatsAppShareLink,
+  generateEmailShareLink,
+  generateInvoiceShareText
 } from '../utils/shareUtils';
 import { ensureInvoicePublicToken } from '../utils/storage';
 
@@ -48,6 +48,31 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showShareMenu]);
+
+  const getSyncStatusStyle = (status) => {
+    switch (status) {
+      case 'synced':
+        return 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30';
+      case 'pending':
+        return 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
+      case 'failed':
+        return 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
+      case 'offline':
+        return 'bg-sky-50 text-sky-600 border-sky-100 dark:bg-sky-950/20 dark:text-sky-400 dark:border-sky-900/30';
+      default:
+        return 'bg-slate-50 text-slate-500 border-slate-100 dark:bg-slate-950/20 dark:text-slate-400 dark:border-slate-800/30';
+    }
+  };
+
+  const getSyncStatusLabel = (status) => {
+    switch (status) {
+      case 'synced': return 'Synced';
+      case 'pending': return 'Sync Pending';
+      case 'failed': return 'Sync Failed';
+      case 'offline': return 'Offline Saved';
+      default: return '';
+    }
+  };
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -105,6 +130,11 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
                   {invoice.orderStatus}
                 </span>
               )}
+              {invoice.syncStatus && getSyncStatusLabel(invoice.syncStatus) && (
+                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getSyncStatusStyle(invoice.syncStatus)}`}>
+                  {getSyncStatusLabel(invoice.syncStatus)}
+                </span>
+              )}
             </div>
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mt-1">{invoice.customerName}</p>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Due: {invoice.dueDate}</p>
@@ -116,7 +146,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
           <span className="text-lg font-extrabold text-slate-800 dark:text-slate-150 sm:text-right">
             {formatCurrency(invoice.grandTotal, currencySymbol)}
           </span>
-          
+
           <div className="flex items-center gap-2 mt-2">
             <button
               onClick={() => onView(invoice)}
@@ -145,15 +175,14 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
               <button
                 onClick={() => setShowShareMenu(!showShareMenu)}
                 title="Share Invoice"
-                className={`p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center ${
-                  showShareMenu
-                    ? 'text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/30'
-                    : 'text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30'
-                }`}
+                className={`p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center ${showShareMenu
+                  ? 'text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/30'
+                  : 'text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30'
+                  }`}
               >
                 <Share2 className="w-4 h-4" />
               </button>
-              
+
               <AnimatePresence>
                 {showShareMenu && (
                   <motion.div
@@ -166,100 +195,100 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
                     <div className="px-3 py-1 font-black text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-wider border-b border-slate-50 dark:border-slate-800/60 mb-1">
                       Quick Share
                     </div>
-                    
+
                     <button
-                       onClick={async () => {
-                         try {
-                           const token = await ensureInvoicePublicToken(invoice);
-                           if (!token) {
-                             toast.error('Could not create live link. Please try again.');
-                             return;
-                           }
-                           const updatedInvoice = { ...invoice, publicToken: token };
-                           const link = generateWhatsAppShareLink(updatedInvoice, currencySymbol, businessSettings);
-                           window.open(link, '_blank');
-                           setShowShareMenu(false);
-                         } catch (err) {
-                           toast.error('Could not create live link. Please try again.');
-                         }
-                       }}
-                       className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 hover:text-emerald-700 dark:hover:text-emerald-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
-                     >
-                       <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-500" />
-                       <span>WhatsApp Share</span>
-                     </button>
-                     
-                     <button
-                       onClick={async () => {
-                         try {
-                           const token = await ensureInvoicePublicToken(invoice);
-                           if (!token) {
-                             toast.error('Could not create live link. Please try again.');
-                             return;
-                           }
-                           const updatedInvoice = { ...invoice, publicToken: token };
-                           const { mailto } = generateEmailShareLink(updatedInvoice, currencySymbol, businessSettings);
-                           window.open(mailto, '_blank');
-                           setShowShareMenu(false);
-                         } catch (err) {
-                           toast.error('Could not create live link. Please try again.');
-                         }
-                       }}
-                       className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-sky-950/20 hover:text-sky-700 dark:hover:text-sky-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
-                     >
-                       <Mail className="w-3.5 h-3.5 text-sky-500" />
-                       <span>Email Invoice</span>
-                     </button>
-                     
-                     <button
-                       onClick={async () => {
-                         const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
-                         if (!isLiveLinkEnabled) {
-                           toast.error('Live Link is disabled. Enable it from Settings.');
-                           return;
-                         }
-                         try {
-                           const token = await ensureInvoicePublicToken(invoice);
-                           if (!token) {
-                             toast.error('Could not create live link. Please try again.');
-                             return;
-                           }
-                           const liveLink = `${window.location.origin}/i/${token}`;
-                           await navigator.clipboard.writeText(liveLink);
-                           toast.success('Live Invoice Link copied to clipboard!');
-                           setShowShareMenu(false);
-                         } catch (err) {
-                           toast.error('Could not create live link. Please try again.');
-                         }
-                       }}
-                       className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-700 dark:hover:text-indigo-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
-                     >
-                       <Link className="w-3.5 h-3.5 text-indigo-500" />
-                       <span>Copy Live Link</span>
-                     </button>
- 
-                     <button
-                       onClick={async () => {
-                         try {
-                           const token = await ensureInvoicePublicToken(invoice);
-                           if (!token) {
-                             toast.error('Could not create live link. Please try again.');
-                             return;
-                           }
-                           const updatedInvoice = { ...invoice, publicToken: token };
-                           const text = generateInvoiceShareText(updatedInvoice, currencySymbol, businessSettings);
-                           await navigator.clipboard.writeText(text);
-                           toast.success('Invoicing summary copied to clipboard!');
-                           setShowShareMenu(false);
-                         } catch (err) {
-                           toast.error('Could not create live link. Please try again.');
-                         }
-                       }}
-                       className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/20 hover:text-amber-700 dark:hover:text-amber-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
-                     >
-                       <Copy className="w-3.5 h-3.5 text-amber-500" />
-                       <span>Copy Summary</span>
-                     </button>
+                      onClick={async () => {
+                        try {
+                          const token = await ensureInvoicePublicToken(invoice);
+                          if (!token) {
+                            toast.error('Could not create live link. Please try again.');
+                            return;
+                          }
+                          const updatedInvoice = { ...invoice, publicToken: token };
+                          const link = generateWhatsAppShareLink(updatedInvoice, currencySymbol, businessSettings);
+                          window.open(link, '_blank');
+                          setShowShareMenu(false);
+                        } catch (err) {
+                          toast.error('Could not create live link. Please try again.');
+                        }
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 hover:text-emerald-700 dark:hover:text-emerald-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                    >
+                      <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>WhatsApp Share</span>
+                    </button>
+
+                    <button
+                      onClick={async () => {
+                        try {
+                          const token = await ensureInvoicePublicToken(invoice);
+                          if (!token) {
+                            toast.error('Could not create live link. Please try again.');
+                            return;
+                          }
+                          const updatedInvoice = { ...invoice, publicToken: token };
+                          const { mailto } = generateEmailShareLink(updatedInvoice, currencySymbol, businessSettings);
+                          window.open(mailto, '_blank');
+                          setShowShareMenu(false);
+                        } catch (err) {
+                          toast.error('Could not create live link. Please try again.');
+                        }
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-sky-950/20 hover:text-sky-700 dark:hover:text-sky-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                    >
+                      <Mail className="w-3.5 h-3.5 text-sky-500" />
+                      <span>Email Invoice</span>
+                    </button>
+
+                    <button
+                      onClick={async () => {
+                        const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
+                        if (!isLiveLinkEnabled) {
+                          toast.error('Live Link is disabled. Enable it from Settings.');
+                          return;
+                        }
+                        try {
+                          const token = await ensureInvoicePublicToken(invoice);
+                          if (!token) {
+                            toast.error('Could not create live link. Please try again.');
+                            return;
+                          }
+                          const liveLink = `${window.location.origin}/i/${token}`;
+                          await navigator.clipboard.writeText(liveLink);
+                          toast.success('Live Invoice Link copied to clipboard!');
+                          setShowShareMenu(false);
+                        } catch (err) {
+                          toast.error('Could not create live link. Please try again.');
+                        }
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-700 dark:hover:text-indigo-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                    >
+                      <Link className="w-3.5 h-3.5 text-indigo-500" />
+                      <span>Copy Live Link</span>
+                    </button>
+
+                    <button
+                      onClick={async () => {
+                        try {
+                          const token = await ensureInvoicePublicToken(invoice);
+                          if (!token) {
+                            toast.error('Could not create live link. Please try again.');
+                            return;
+                          }
+                          const updatedInvoice = { ...invoice, publicToken: token };
+                          const text = generateInvoiceShareText(updatedInvoice, currencySymbol, businessSettings);
+                          await navigator.clipboard.writeText(text);
+                          toast.success('Invoicing summary copied to clipboard!');
+                          setShowShareMenu(false);
+                        } catch (err) {
+                          toast.error('Could not create live link. Please try again.');
+                        }
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/20 hover:text-amber-700 dark:hover:text-amber-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                    >
+                      <Copy className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Copy Summary</span>
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>

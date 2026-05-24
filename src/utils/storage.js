@@ -58,37 +58,55 @@ export const queueSyncTransaction = async (action, storeName, docId, data) => {
 
 export const syncOfflineTransactions = async () => {
   if (!firebaseReady || !navigator.onLine) return;
-  
+
   try {
     const queue = await BillQyroDB.getAll('syncQueue');
     if (queue.length === 0) return;
-    
+
     console.log(`[SYNC QUEUE] Syncing ${queue.length} offline transactions...`);
-    
+
     // Sort by createdAt so we sync in order
     const sortedQueue = queue.sort((a, b) => a.createdAt - b.createdAt);
-    
+
     for (const tx of sortedQueue) {
       try {
+        let syncSuccess = false;
         if (tx.action === 'save') {
-          await firestoreSave(tx.storeName, tx.docId, tx.data);
-          
+          const r1 = await firestoreSave(tx.storeName, tx.docId, tx.data);
+          syncSuccess = r1?.status === 'success';
+
           if (tx.storeName === 'invoices') {
             // Also save to publicInvoices
-            await firestoreSave('publicInvoices', tx.data.publicToken, tx.data);
+            const r2 = await firestoreSave('publicInvoices', tx.data.publicToken, tx.data);
+            syncSuccess = syncSuccess && r2?.status === 'success';
+          }
+
+          // Update local invoice syncStatus to 'synced' on success
+          if (syncSuccess && tx.data && tx.data.id) {
+            const invoices = JSON.parse(localStorage.getItem(KEYS.INVOICES) || '[]');
+            const localIdx = invoices.findIndex(inv => inv.id === tx.data.id);
+            if (localIdx !== -1) {
+              invoices[localIdx].syncStatus = 'synced';
+              invoices[localIdx].updatedAt = new Date().toISOString();
+              localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+              await BillQyroDB.put('invoices', invoices[localIdx]);
+            }
           }
         } else if (tx.action === 'delete') {
           await firestoreDelete(tx.storeName, tx.docId);
+          syncSuccess = true;
         }
-        
+
         // Remove from queue after successful sync
-        await BillQyroDB.delete('syncQueue', tx.id);
-        console.log('[SYNC QUEUE] Successfully synced transaction:', tx.id);
+        if (syncSuccess) {
+          await BillQyroDB.delete('syncQueue', tx.id);
+          console.log('[SYNC QUEUE] Successfully synced transaction:', tx.id);
+        }
       } catch (err) {
         console.error('[SYNC QUEUE] Failed to sync transaction:', tx.id, err);
       }
     }
-    
+
     // Dispatch a sync event so that the app updates state
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
   } catch (error) {
@@ -118,7 +136,11 @@ const KEYS = {
 // Default Settings (initialized empty as required to avoid fake business details)
 const DEFAULT_SETTINGS = {
   country: 'India',
+  countryCode: '',
   language: 'English',
+  currencyCode: 'INR',
+  dateFormat: 'DD/MM/YYYY',
+  numberFormat: 'Indian',
   taxLabel: 'GSTIN',
   rocketNumber: '',
   vatTax: '',
@@ -323,7 +345,7 @@ export const getFirebaseUserId = () => {
       if (data && data.userEmail) {
         return data.userEmail.replace(/[^a-zA-Z0-9]/g, '_');
       }
-    } catch (e) {}
+    } catch (e) { }
   }
   return 'demo-user';
 };
@@ -394,7 +416,7 @@ export const initializeStorage = () => {
   if (!localStorage.getItem(KEYS.SUBSCRIPTION)) {
     localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(DEFAULT_SUBSCRIPTION));
   }
-  
+
   // Trigger IndexedDB offline-first synchronization and migrations asynchronously
   migrateLocalStorageToIndexedDB();
   syncOfflineTransactions();
@@ -410,7 +432,12 @@ export const resetToDemoData = () => {
     email: 'billing@billqyro.com',
     address: '102, Design Market, Tech Park Phase-II, Bangalore, Karnataka - 560103',
     gstNumber: '29AAAAA0000A1Z5',
+    country: 'India',
     currency: '₹',
+    currencyCode: 'INR',
+    dateFormat: 'DD/MM/YYYY',
+    numberFormat: 'Indian',
+    language: 'English',
     defaultTax: 18,
     adminPasscode: '1118',
     adminEmail: getAdminEmail(),
@@ -423,7 +450,8 @@ export const resetToDemoData = () => {
     paymentNote: 'Please scan using any UPI App to pay securely.',
     showQrInPdf: true,
     showQrInPreview: true,
-    customPaymentLink: 'https://pay.billqyro.com/direct-transfer'
+    customPaymentLink: 'https://pay.billqyro.com/direct-transfer',
+    setupCompleted: true
   };
 
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(demoSettings));
@@ -486,7 +514,7 @@ export const login = (passcodeOrEmail) => {
     const sessionEmail = inputStr; // email is already validated
     const session = { timestamp: Date.now(), token: 'billqyro-secure-session', userEmail: sessionEmail };
     localStorage.setItem(KEYS.AUTH, JSON.stringify(session));
-    
+
     // Save login event to users/{userId}
     if (firebaseReady) {
       const userId = getFirebaseUserId();
@@ -519,7 +547,7 @@ export const getSubscriptionStatus = () => {
         expired: true
       };
       localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(expiredSub));
-      
+
       // Silently update Firestore to free/expired as well
       if (firebaseReady) {
         const userId = getFirebaseUserId();
@@ -550,12 +578,12 @@ export const registerOrUpdateUserList = async (activeSettings) => {
   if (!firebaseReady) return;
   const userId = getFirebaseUserId();
   if (!userId) return;
-  
+
   const authSession = getAuthSession();
   const email = authSession?.email || '';
-  
+
   const subscription = getSubscriptionStatus();
-  
+
   const userRecord = {
     userId,
     email,
@@ -565,7 +593,7 @@ export const registerOrUpdateUserList = async (activeSettings) => {
     blocked: activeSettings?.blocked || false,
     updatedAt: new Date().toISOString()
   };
-  
+
   try {
     await setDoc(doc(db, 'usersList', userId), userRecord);
     console.log('[DEBUG] Successfully registered/updated userList for:', email);
@@ -580,10 +608,10 @@ export const submitPremiumRequest = async (plan, paidAmount, paymentMethod, tran
   }
   const userId = getFirebaseUserId();
   if (!userId) throw new Error('User session not found.');
-  
+
   const authSession = getAuthSession();
   const userEmail = authSession?.email || '';
-  
+
   const requestId = 'req-' + Date.now();
   const payload = {
     requestId,
@@ -598,7 +626,7 @@ export const submitPremiumRequest = async (plan, paidAmount, paymentMethod, tran
     createdAt: Date.now(),
     updatedAt: Date.now()
   };
-  
+
   await setDoc(doc(db, 'premiumRequests', requestId), payload);
   return payload;
 };
@@ -634,25 +662,25 @@ export const updatePremiumRequestStatus = async (requestId, status, targetUserId
   if (!firebaseReady) return false;
   try {
     const reqRef = doc(db, 'premiumRequests', requestId);
-    await setDoc(reqRef, { 
-      status, 
-      rejectionReason, 
+    await setDoc(reqRef, {
+      status,
+      rejectionReason,
       approvedAt: status === 'Approved' ? Date.now() : null,
       updatedAt: Date.now()
     }, { merge: true });
-    
+
     if (status === 'Approved') {
       const activatedAt = Date.now();
       const durationMs = plan === 'Yearly' ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
       const expiresAt = activatedAt + durationMs;
-      
+
       const sub = {
         status: 'premium',
         activatedAt,
         expiresAt,
         plan
       };
-      
+
       await setDoc(doc(db, 'subscription', targetUserId), sub);
       await setDoc(doc(db, 'usersList', targetUserId), { planStatus: 'premium' }, { merge: true });
       await setDoc(doc(db, 'settings', targetUserId), { planStatus: 'premium' }, { merge: true });
@@ -718,7 +746,7 @@ export const saveExpense = async (expense) => {
     expenses.push(expense);
   }
   localStorage.setItem(KEYS.EXPENSES, JSON.stringify(expenses));
-  
+
   // Save to IndexedDB
   await BillQyroDB.put('expenses', expense);
 
@@ -737,7 +765,7 @@ export const deleteExpense = async (id) => {
   const expenses = getExpenses();
   const filtered = expenses.filter(e => e.id !== id);
   localStorage.setItem(KEYS.EXPENSES, JSON.stringify(filtered));
-  
+
   // Delete from IndexedDB
   await BillQyroDB.delete('expenses', id);
 
@@ -772,7 +800,7 @@ export const saveCustomer = async (customer) => {
     customers.push(customer);
   }
   localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(customers));
-  
+
   // Save to IndexedDB
   await BillQyroDB.put('customers', customer);
 
@@ -791,7 +819,7 @@ export const deleteCustomer = async (id) => {
   const customers = getCustomers();
   const filtered = customers.filter(c => c.id !== id);
   localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(filtered));
-  
+
   // Delete from IndexedDB
   await BillQyroDB.delete('customers', id);
 
@@ -826,7 +854,7 @@ export const saveProduct = async (product) => {
     products.push(product);
   }
   localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(products));
-  
+
   // Save to IndexedDB
   await BillQyroDB.put('products', product);
 
@@ -845,7 +873,7 @@ export const deleteProduct = async (id) => {
   const products = getProducts();
   const filtered = products.filter(p => p.id !== id);
   localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(filtered));
-  
+
   // Delete from IndexedDB
   await BillQyroDB.delete('products', id);
 
@@ -877,7 +905,7 @@ const generateSecureToken = () => {
 
 export const saveInvoice = async (invoice) => {
   const invoices = getInvoices();
-  
+
   // 1. Ensure secure publicToken is generated
   if (!invoice.publicToken || invoice.publicToken === 'undefined' || invoice.publicToken === 'null' || invoice.publicToken === '') {
     invoice.publicToken = generateSecureToken();
@@ -923,11 +951,22 @@ export const saveInvoice = async (invoice) => {
       }
     };
   }
+  if (!invoice.regionalSettingsSnapshot) {
+    invoice.regionalSettingsSnapshot = {
+      country: activeSettings.country || 'India',
+      currency: activeSettings.currency || '₹',
+      currencyCode: activeSettings.currencyCode || (activeSettings.country === 'Bangladesh' ? 'BDT' : activeSettings.country === 'Other' ? 'USD' : 'INR'),
+      language: activeSettings.language || 'English',
+      taxLabel: activeSettings.taxLabel || (activeSettings.country === 'Bangladesh' ? 'VAT' : activeSettings.country === 'Other' ? 'Tax' : 'GST'),
+      dateFormat: activeSettings.dateFormat || 'DD/MM/YYYY',
+      numberFormat: activeSettings.numberFormat || 'Indian'
+    };
+  }
 
   // 3. Ensure arrays exist
   if (!invoice.paymentHistory) invoice.paymentHistory = [];
   if (!invoice.paymentProofs) invoice.paymentProofs = [];
-  
+
   invoice.userId = getFirebaseUserId();
 
   const timestamp = new Date().toISOString();
@@ -962,25 +1001,50 @@ export const saveInvoice = async (invoice) => {
   }
 
   localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
-  
+
   // Save to IndexedDB
   await BillQyroDB.put('invoices', invoice);
 
-  // Sync / queue
+  // Sync / queue + syncStatus tracking
   let firebaseStatus = 'success';
   if (firebaseReady) {
     if (navigator.onLine) {
-      await firestoreSave('invoices', invoice.id, invoice);
-      await firestoreSave('publicInvoices', invoice.publicToken, invoice);
+      const r1 = await firestoreSave('invoices', invoice.id, invoice);
+      const r2 = await firestoreSave('publicInvoices', invoice.publicToken, invoice);
+      if (r1?.status === 'success' && r2?.status === 'success') {
+        invoice.syncStatus = 'synced';
+        firebaseStatus = 'success';
+      } else {
+        invoice.syncStatus = 'failed';
+        firebaseStatus = 'failed';
+      }
+      // Persist syncStatus back to localStorage + IndexedDB
+      const idx = invoices.findIndex(inv => inv.id === invoice.id);
+      if (idx !== -1) invoices[idx] = invoice;
+      localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+      await BillQyroDB.put('invoices', invoice);
     } else {
+      invoice.syncStatus = 'pending';
       await queueSyncTransaction('save', 'invoices', invoice.id, invoice);
       firebaseStatus = 'failed';
+      // Persist syncStatus back to localStorage + IndexedDB
+      const idx = invoices.findIndex(inv => inv.id === invoice.id);
+      if (idx !== -1) invoices[idx] = invoice;
+      localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+      await BillQyroDB.put('invoices', invoice);
     }
+  } else {
+    invoice.syncStatus = 'offline';
+    // Persist syncStatus back to localStorage + IndexedDB
+    const idx = invoices.findIndex(inv => inv.id === invoice.id);
+    if (idx !== -1) invoices[idx] = invoice;
+    localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+    await BillQyroDB.put('invoices', invoice);
   }
 
-  return { 
-    updatedInvoices: invoices, 
-    firebaseStatus 
+  return {
+    updatedInvoices: invoices,
+    firebaseStatus
   };
 };
 
@@ -997,37 +1061,37 @@ const syncLocalInvoice = (cloudData) => {
 export const getInvoiceByPublicToken = async (token) => {
   console.log('[DEBUG] getInvoiceByPublicToken - Requested publicToken:', token);
   console.log('[DEBUG] getInvoiceByPublicToken - Firestore path checked: publicInvoices/' + token);
-  
+
   // Reset last error
   window.billqyro_lastError = null;
-  
+
   if (firebaseReady) {
     try {
       // 1. Try publicInvoices first
       let docRef = doc(db, 'publicInvoices', token);
       let snap = await getDoc(docRef);
-      
+
       console.log('[DEBUG] getInvoiceByPublicToken - Checked publicInvoices/' + token + ' - Document exists:', snap.exists());
-      
+
       if (snap.exists()) {
         const cloudData = snap.data();
         syncLocalInvoice(cloudData);
         return cloudData;
       }
-      
+
       // 2. Try legacy public_invoices for compatibility with older links
       console.log('[DEBUG] getInvoiceByPublicToken - Firestore path checked: public_invoices/' + token);
       docRef = doc(db, 'public_invoices', token);
       snap = await getDoc(docRef);
-      
+
       console.log('[DEBUG] getInvoiceByPublicToken - Checked legacy public_invoices/' + token + ' - Document exists:', snap.exists());
-      
+
       if (snap.exists()) {
         const cloudData = snap.data();
         syncLocalInvoice(cloudData);
         return cloudData;
       }
-      
+
       // Document does not exist in either collection
       window.billqyro_lastError = `Document '${token}' does not exist in collections 'publicInvoices' or 'public_invoices'.`;
     } catch (e) {
@@ -1052,13 +1116,13 @@ export const getInvoiceByPublicToken = async (token) => {
 
 export const ensureInvoicePublicToken = async (invoice) => {
   if (!invoice) return null;
-  
+
   // 1. Generate secure token if missing
   if (!invoice.publicToken || invoice.publicToken === 'undefined' || invoice.publicToken === 'null' || invoice.publicToken === '') {
     invoice.publicToken = generateSecureToken();
   }
   const token = invoice.publicToken;
-  
+
   // 2. Save back to local storage invoices list
   const invoices = getInvoices();
   const idx = invoices.findIndex(inv => inv.id === invoice.id);
@@ -1066,13 +1130,13 @@ export const ensureInvoicePublicToken = async (invoice) => {
     invoices[idx] = invoice;
     localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
   }
-  
+
   // 3. Force save/create public-safe copy and private copy in Firestore
   if (firebaseReady) {
     try {
       console.log('[DEBUG] ensureInvoicePublicToken - Force writing public copy to publicInvoices/' + token);
       await firestoreSave('publicInvoices', token, invoice);
-      
+
       const userId = getFirebaseUserId();
       if (userId && invoice.id) {
         console.log('[DEBUG] ensureInvoicePublicToken - Force writing private copy to users/' + userId + '/invoices/' + invoice.id);
@@ -1082,10 +1146,10 @@ export const ensureInvoicePublicToken = async (invoice) => {
       console.error('[ERROR] Failed to sync publicToken to Firestore in ensureInvoicePublicToken:', e);
     }
   }
-  
+
   // Dispatch sync event
   window.dispatchEvent(new CustomEvent('billqyro_sync'));
-  
+
   return token;
 };
 
@@ -1115,7 +1179,7 @@ export const deleteInvoice = async (id) => {
   const invoices = getInvoices();
   const filtered = invoices.filter(inv => inv.id !== id);
   localStorage.setItem(KEYS.INVOICES, JSON.stringify(filtered));
-  
+
   // Delete from IndexedDB
   await BillQyroDB.delete('invoices', id);
 
@@ -1131,9 +1195,9 @@ export const deleteInvoice = async (id) => {
     }
   }
 
-  return { 
-    updatedInvoices: filtered, 
-    firebaseStatus 
+  return {
+    updatedInvoices: filtered,
+    firebaseStatus
   };
 };
 
@@ -1222,7 +1286,7 @@ export const getStorageUsage = () => {
   // Browser limit is typically 5000KB (5MB)
   const limitKb = 5000;
   const percentage = Math.min((kb / limitKb) * 100, 100);
-  
+
   return {
     kb: kb.toFixed(2),
     limitKb,
@@ -1242,7 +1306,7 @@ export const enableRealTimeSync = () => {
   // Clear any existing listeners
   unsubscribes.forEach(unsub => unsub());
   const syncCollection = (collectionName, storageKey) => {
-    const colRef = collectionName === 'invoices' 
+    const colRef = collectionName === 'invoices'
       ? collection(db, 'users', userId, 'invoices')
       : collection(db, collectionName, userId, 'items');
     const unsub = onSnapshot(colRef, (snapshot) => {
