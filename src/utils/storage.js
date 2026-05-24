@@ -656,21 +656,34 @@ export const saveInvoice = async (invoice) => {
   };
 };
 
+const syncLocalInvoice = (cloudData) => {
+  const invoices = getInvoices();
+  const localIdx = invoices.findIndex(inv => inv.id === cloudData.id);
+  if (localIdx !== -1) {
+    invoices[localIdx] = cloudData;
+    localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  }
+};
+
 export const getInvoiceByPublicToken = async (token) => {
   if (firebaseReady) {
     try {
-      const docRef = doc(db, 'publicInvoices', token);
-      const snap = await getDoc(docRef);
+      // 1. Try publicInvoices first
+      let docRef = doc(db, 'publicInvoices', token);
+      let snap = await getDoc(docRef);
       if (snap.exists()) {
         const cloudData = snap.data();
-        // Sync locally if it exists in local invoices list
-        const invoices = getInvoices();
-        const localIdx = invoices.findIndex(inv => inv.id === cloudData.id);
-        if (localIdx !== -1) {
-          invoices[localIdx] = cloudData;
-          localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
-          window.dispatchEvent(new CustomEvent('billqyro_sync'));
-        }
+        syncLocalInvoice(cloudData);
+        return cloudData;
+      }
+      
+      // 2. Try legacy public_invoices for compatibility with older links
+      docRef = doc(db, 'public_invoices', token);
+      snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const cloudData = snap.data();
+        syncLocalInvoice(cloudData);
         return cloudData;
       }
     } catch (e) {
