@@ -543,7 +543,7 @@ export const saveInvoice = async (invoice) => {
   const invoices = getInvoices();
   
   // 1. Ensure secure publicToken is generated
-  if (!invoice.publicToken) {
+  if (!invoice.publicToken || invoice.publicToken === 'undefined' || invoice.publicToken === 'null' || invoice.publicToken === '') {
     invoice.publicToken = generateSecureToken();
   }
 
@@ -560,7 +560,8 @@ export const saveInvoice = async (invoice) => {
       address: activeSettings.address || '',
       gstNumber: activeSettings.gstNumber || '',
       currency: activeSettings.currency || '₹',
-      taxLabel: activeSettings.taxLabel || 'Tax'
+      taxLabel: activeSettings.taxLabel || 'Tax',
+      country: activeSettings.country || 'India'
     };
   }
   if (!invoice.paymentSettingsSnapshot) {
@@ -668,6 +669,41 @@ export const getInvoiceByPublicToken = async (token) => {
     }
   }
   return null;
+};
+
+export const ensureInvoicePublicToken = async (invoice) => {
+  if (!invoice) return null;
+  if (invoice.publicToken && invoice.publicToken !== 'undefined' && invoice.publicToken !== 'null' && invoice.publicToken !== '') {
+    return invoice.publicToken;
+  }
+  
+  // Generate secure token
+  const token = generateSecureToken();
+  invoice.publicToken = token;
+  
+  // Save back to storage and firestore
+  const invoices = getInvoices();
+  const idx = invoices.findIndex(inv => inv.id === invoice.id);
+  if (idx !== -1) {
+    invoices[idx] = invoice;
+    localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+  }
+  
+  if (firebaseReady) {
+    try {
+      await firestoreSave('public_invoices', token, invoice);
+      if (invoice.userId && invoice.id) {
+        await setDoc(doc(db, 'invoices', invoice.userId, 'items', invoice.id), invoice);
+      }
+    } catch (e) {
+      console.error('Failed to sync publicToken to firestore:', e);
+    }
+  }
+  
+  // Dispatch sync event
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  
+  return token;
 };
 
 export const saveInvoicePublicly = async (invoice) => {

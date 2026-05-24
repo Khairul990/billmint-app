@@ -31,10 +31,13 @@ import {
   UserPlus,
   Info,
   Maximize2,
-  Printer
+  Printer,
+  Link
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber, autoIncrementString } from '../utils/invoiceUtils';
 import InvoicePreview from '../components/InvoicePreview';
+import { ensureInvoicePublicToken } from '../utils/storage';
 
 const ALL_FIELDS_BY_TEMPLATE = {
   embroidery: [
@@ -479,6 +482,11 @@ const CreateInvoice = ({
       subtotal,
       taxAmount,
       grandTotal,
+      publicToken: editingInvoice?.publicToken || null,
+      paymentHistory: editingInvoice?.paymentHistory || [],
+      paymentProofs: editingInvoice?.paymentProofs || [],
+      businessSnapshot: editingInvoice?.businessSnapshot || null,
+      paymentSettingsSnapshot: editingInvoice?.paymentSettingsSnapshot || null,
     };
 
     // Also pass saveCustomer flag so the parent can save the customer if requested
@@ -1550,17 +1558,88 @@ const CreateInvoice = ({
               </button>
               <button
                 onClick={() => handleSave()}
-                className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-all flex items-center justify-center gap-2 text-[14px]"
+                className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-all flex items-center justify-center gap-2 text-[14px] cursor-pointer"
               >
                 <Check className="w-4 h-4" />
                 <span>Save Invoice</span>
               </button>
+
+              {/* Copy Live Link Option */}
+              {editingInvoice ? (
+                <>
+                  <button
+                    onClick={async () => {
+                      const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
+                      if (!isLiveLinkEnabled) {
+                        toast.error('Live Link is disabled. Enable it from Settings.');
+                        return;
+                      }
+                      try {
+                        const token = await ensureInvoicePublicToken(editingInvoice);
+                        if (!token) {
+                          toast.error('Could not create live link. Please save invoice and try again.');
+                          return;
+                        }
+                        const liveLink = `${window.location.origin}/i/${token}`;
+                        await navigator.clipboard.writeText(liveLink);
+                        toast.success('Live invoice link copied!');
+                      } catch (err) {
+                        toast.error('Could not create live link. Please save invoice and try again.');
+                      }
+                    }}
+                    className="w-full py-4 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-xl font-bold hover:from-teal-655 hover:to-emerald-655 shadow-md transition-all flex items-center justify-center gap-2 text-[14px] cursor-pointer"
+                  >
+                    <Link className="w-4 h-4" />
+                    <span>Copy Live Link</span>
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
+                      if (!isLiveLinkEnabled) {
+                        toast.error('Live Link is disabled. Enable it from Settings.');
+                        return;
+                      }
+                      try {
+                        const token = await ensureInvoicePublicToken(editingInvoice);
+                        if (!token) {
+                          toast.error('Could not create live link. Please save invoice and try again.');
+                          return;
+                        }
+                        const liveLink = `${window.location.origin}/i/${token}`;
+                        const msg = `Your invoice is ready.\nInvoice No: ${invoiceNumber}\nTotal: ${currencySymbol}${grandTotal.toFixed(2)}\nPaid: ${currencySymbol}${amountPaid.toFixed(2)}\nBalance Due: ${currencySymbol}${balanceDue.toFixed(2)}\nView & Pay: ${liveLink}`;
+                        window.open(`https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+                      } catch (err) {
+                        toast.error('Could not create live link. Please save invoice and try again.');
+                      }
+                    }}
+                    className="w-full py-4 bg-[#25D366] text-white rounded-xl font-bold hover:bg-[#1ebd5a] shadow-md transition-all flex items-center justify-center gap-2 text-[14px] cursor-pointer"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>Share Live Link on WhatsApp</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  title="Save invoice first to create live link"
+                  className="w-full py-4 bg-slate-100 text-slate-400 rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1 text-[14px] cursor-not-allowed border border-slate-200/40"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <Link className="w-4 h-4 text-slate-350" />
+                    <span>Copy Live Link</span>
+                  </div>
+                  <span className="text-[10px] text-slate-450 font-medium">Save invoice first to create live link</span>
+                </button>
+              )}
+
               <button
                 onClick={() => {
                   const msg = `Hi ${customerName},\nHere is your invoice ${invoiceNumber} for ${currencySymbol}${grandTotal.toFixed(2)}.`;
                   window.open(`https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
                 }}
-                className="w-full py-4 bg-[#25D366] text-white rounded-xl font-bold hover:bg-[#1ebd5a] shadow-md transition-all flex items-center justify-center gap-2 text-[14px]"
+                className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-[14px]"
               >
                 <Send className="w-4 h-4" />
                 <span>Send WhatsApp Reminder</span>

@@ -111,6 +111,7 @@ const PublicInvoice = ({ initialInvoice }) => {
 
   const currencySymbol = business.currency || '₹';
   const taxLabelText = business.taxLabel || 'Tax';
+  const country = business.country || 'India';
 
   // Format currency helpers
   const formatVal = (val) => `${currencySymbol}${parseFloat(val || 0).toFixed(2)}`;
@@ -127,8 +128,8 @@ const PublicInvoice = ({ initialInvoice }) => {
   const upiLink = `upi://pay?pa=${paymentPrefs.upiId}&pn=${encodeURIComponent(paymentPrefs.payeeName || business.businessName)}&am=${dueAmount}&cu=INR&tn=Invoice%20${invoice.invoiceNumber}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
     paymentPrefs.paymentMethod === 'UPI' ? upiLink : (
-      paymentMethod === 'bKash' ? `bKash: ${paymentPrefs.bkashNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}` : (
-        paymentMethod === 'Nagad' ? `Nagad: ${paymentPrefs.nagadNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}` :
+      paymentPrefs.paymentMethod === 'bKash' ? `bKash: ${paymentPrefs.bkashNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}` : (
+        paymentPrefs.paymentMethod === 'Nagad' ? `Nagad: ${paymentPrefs.nagadNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}` :
         paymentPrefs.customPaymentLink || 'Manual QR'
       )
     )
