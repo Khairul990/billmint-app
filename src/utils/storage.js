@@ -653,22 +653,31 @@ export const saveInvoice = async (invoice) => {
 };
 
 export const getInvoiceByPublicToken = async (token) => {
-  const invoices = getInvoices();
-  const localMatch = invoices.find(inv => inv.publicToken === token);
-  if (localMatch) return localMatch;
-
   if (firebaseReady) {
     try {
       const docRef = doc(db, 'public_invoices', token);
       const snap = await getDoc(docRef);
       if (snap.exists()) {
-        return snap.data();
+        const cloudData = snap.data();
+        // Sync locally if it exists in local invoices list
+        const invoices = getInvoices();
+        const localIdx = invoices.findIndex(inv => inv.id === cloudData.id);
+        if (localIdx !== -1) {
+          invoices[localIdx] = cloudData;
+          localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+          window.dispatchEvent(new CustomEvent('billqyro_sync'));
+        }
+        return cloudData;
       }
     } catch (e) {
-      console.error('Failed to fetch public invoice from Firestore:', e);
+      console.warn('Failed to fetch public invoice from Firestore, trying local fallback:', e);
     }
   }
-  return null;
+
+  // Local storage fallback
+  const invoices = getInvoices();
+  const localMatch = invoices.find(inv => inv.publicToken === token);
+  return localMatch || null;
 };
 
 export const ensureInvoicePublicToken = async (invoice) => {
@@ -717,10 +726,8 @@ export const saveInvoicePublicly = async (invoice) => {
 
   if (firebaseReady) {
     try {
+      // Unauthenticated customer ONLY writes to public_invoices to avoid private write permission failure!
       await setDoc(doc(db, 'public_invoices', invoice.publicToken), invoice);
-      if (invoice.userId && invoice.id) {
-        await setDoc(doc(db, 'invoices', invoice.userId, 'items', invoice.id), invoice);
-      }
       return { status: 'success' };
     } catch (e) {
       console.error('Failed to save invoice publicly to Firestore:', e);

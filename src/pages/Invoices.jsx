@@ -26,7 +26,9 @@ import {
   generateEmailShareLink, 
   generateInvoiceShareText 
 } from '../utils/shareUtils';
-import { ensureInvoicePublicToken } from '../utils/storage';
+import { ensureInvoicePublicToken, saveInvoice } from '../utils/storage';
+import { db, firebaseReady } from '../utils/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
@@ -70,6 +72,94 @@ const Invoices = ({
     }
   }, [editingInvoice]);
 
+  // Background Firestore public proofs sweeping & syncing
+  useEffect(() => {
+    if (firebaseReady && invoices.length > 0) {
+      const sweepAndSync = async () => {
+        let changed = false;
+        const updatedInvoices = [...invoices];
+        for (let i = 0; i < updatedInvoices.length; i++) {
+          const inv = updatedInvoices[i];
+          if (inv.publicToken) {
+            try {
+              const docRef = doc(db, 'public_invoices', inv.publicToken);
+              const snap = await getDoc(docRef);
+              if (snap.exists()) {
+                const pubData = snap.data();
+                // Compare paymentProofs or status to detect changes
+                const localProofsStr = JSON.stringify(inv.paymentProofs || []);
+                const pubProofsStr = JSON.stringify(pubData.paymentProofs || []);
+                if (localProofsStr !== pubProofsStr || inv.paymentStatus !== pubData.paymentStatus) {
+                  updatedInvoices[i] = {
+                    ...inv,
+                    paymentStatus: pubData.paymentStatus,
+                    paymentProofs: pubData.paymentProofs || [],
+                    paymentHistory: pubData.paymentHistory || [],
+                    amountPaid: pubData.amountPaid || inv.amountPaid,
+                    balanceDue: pubData.balanceDue !== undefined ? pubData.balanceDue : inv.balanceDue
+                  };
+                  changed = true;
+                  // Persist to private collection
+                  await saveInvoice(updatedInvoices[i]);
+                }
+              }
+            } catch (err) {
+              console.warn('Failed to background sweep public invoice:', inv.publicToken, err);
+            }
+          }
+        }
+        if (changed) {
+          localStorage.setItem('billqyro_invoices', JSON.stringify(updatedInvoices));
+          window.dispatchEvent(new CustomEvent('billqyro_sync'));
+        }
+      };
+      // Run sweep after a short delay to prioritize initial page load
+      const delay = setTimeout(sweepAndSync, 1000);
+      return () => clearTimeout(delay);
+    }
+  }, [firebaseReady]);
+
+  // On-demand real-time public proof syncer when viewing an invoice
+  useEffect(() => {
+    if (viewingInvoice && viewingInvoice.publicToken && firebaseReady) {
+      const fetchLatestFromPublic = async () => {
+        try {
+          const docRef = doc(db, 'public_invoices', viewingInvoice.publicToken);
+          const snap = await getDoc(docRef);
+          if (snap.exists()) {
+            const pubData = snap.data();
+            const localProofsStr = JSON.stringify(viewingInvoice.paymentProofs || []);
+            const pubProofsStr = JSON.stringify(pubData.paymentProofs || []);
+            if (localProofsStr !== pubProofsStr || viewingInvoice.paymentStatus !== pubData.paymentStatus) {
+              const updated = {
+                ...viewingInvoice,
+                paymentStatus: pubData.paymentStatus,
+                paymentProofs: pubData.paymentProofs || [],
+                paymentHistory: pubData.paymentHistory || [],
+                amountPaid: pubData.amountPaid || viewingInvoice.amountPaid,
+                balanceDue: pubData.balanceDue !== undefined ? pubData.balanceDue : viewingInvoice.balanceDue
+              };
+              
+              // Save to Firestore collections (both private and public)
+              await saveInvoice(updated);
+              
+              // Update state locally
+              const updatedInvoices = invoices.map(inv => inv.id === viewingInvoice.id ? updated : inv);
+              localStorage.setItem('billqyro_invoices', JSON.stringify(updatedInvoices));
+              setViewingInvoice(updated);
+              
+              // Sync components
+              window.dispatchEvent(new CustomEvent('billqyro_sync'));
+            }
+          }
+        } catch (err) {
+          console.warn('Failed to sync viewingInvoice with public doc:', err);
+        }
+      };
+      fetchLatestFromPublic();
+    }
+  }, [viewingInvoice?.id, firebaseReady]);
+
   const handleApproveProof = async (proof) => {
     if (!window.confirm(`Are you sure you want to APPROVE this payment proof of ${currencySymbol}${proof.amount}?`)) return;
 
@@ -111,7 +201,6 @@ const Invoices = ({
     };
 
     // 4. Save
-    const { saveInvoice } = await import('../utils/storage');
     await saveInvoice(updatedInvoice);
     
     setViewingInvoice(updatedInvoice);
@@ -149,7 +238,6 @@ const Invoices = ({
     };
 
     // Save
-    const { saveInvoice } = await import('../utils/storage');
     await saveInvoice(updatedInvoice);
     
     setViewingInvoice(updatedInvoice);
