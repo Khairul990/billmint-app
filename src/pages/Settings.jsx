@@ -90,6 +90,7 @@ const Settings = ({
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   
   const [showToast, setShowToast] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     if (settings) {
@@ -382,20 +383,66 @@ const Settings = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Business Logo URL</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><ImageIcon className="w-4 h-4"/></span>
+              <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Business Logo</label>
+              
+              <div
+                className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${
+                  isDragging ? 'border-teal-500 bg-teal-50' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
+                }`}
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                  const file = e.dataTransfer.files[0];
+                  if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => setLogoUrl(event.target.result);
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                      const reader = new FileReader();
+                      reader.onload = (event) => setLogoUrl(event.target.result);
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div className="flex flex-col items-center justify-center gap-2 pointer-events-none">
+                  <Upload className="w-5 h-5 text-slate-400" />
+                  <span className="text-xs font-bold text-slate-600">Drag & drop logo, or click to browse</span>
+                </div>
+              </div>
+              
+              <div className="mt-3 relative">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><ImageIcon className="w-3.5 h-3.5"/></span>
                 <input
                   type="url"
                   value={logoUrl}
                   onChange={(e) => setLogoUrl(e.target.value)}
-                  placeholder="https://example.com/logo.png"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-indigo-600 font-medium"
+                  placeholder="Or paste logo image URL here..."
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-indigo-600 font-medium text-xs"
                 />
               </div>
+
               {logoUrl && (
-                <div className="mt-3">
+                <div className="mt-3 relative inline-block group">
                   <img src={logoUrl} alt="Logo" className="h-12 w-auto object-contain rounded-lg border border-slate-200 p-1 bg-white" onError={(e) => e.target.style.display = 'none'} />
+                  <button
+                    type="button"
+                    onClick={() => setLogoUrl('')}
+                    className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    title="Remove Logo"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
                 </div>
               )}
             </div>
