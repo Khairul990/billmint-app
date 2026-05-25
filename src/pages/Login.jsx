@@ -231,7 +231,7 @@ const Login = ({ onLoginSuccess }) => {
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-2">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-teal-500" />
                 <input
                   type="email"
                   value={email}
@@ -257,7 +257,7 @@ const Login = ({ onLoginSuccess }) => {
                 )}
               </div>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-teal-500" />
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
