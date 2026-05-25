@@ -31,7 +31,62 @@
     </script>
   </head>
   <body class="bg-slate-50 dark:bg-[#070c18] transition-colors duration-300">
-    <div id="root"></div>
+    <div id="root">
+      <!-- BillQyro Native Splash Screen -->
+      <style>
+        .splash-container {
+          position: fixed;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background-color: #f8fafc;
+          z-index: 9999;
+          transition: opacity 0.5s ease-out;
+        }
+        html.dark .splash-container {
+          background-color: #070c18;
+        }
+        .splash-logo {
+          width: 80px;
+          height: 80px;
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .splash-text {
+          margin-top: 1.5rem;
+          font-family: 'Inter', system-ui, sans-serif;
+          font-size: 1.5rem;
+          font-weight: 900;
+          letter-spacing: -0.025em;
+          color: #0f172a;
+        }
+        html.dark .splash-text {
+          color: #ffffff;
+        }
+        .splash-text-qyro {
+          color: #10b981;
+        }
+        .splash-subtitle {
+          margin-top: 0.5rem;
+          font-family: 'Inter', system-ui, sans-serif;
+          font-size: 0.65rem;
+          font-weight: 900;
+          letter-spacing: 0.15em;
+          color: #64748b;
+          text-transform: uppercase;
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: .7; transform: scale(0.95); }
+        }
+      </style>
+      <div class="splash-container">
+        <img src="/logo.svg" alt="BillQyro" class="splash-logo" />
+        <div class="splash-text">Bill<span class="splash-text-qyro">Qyro</span></div>
+        <div class="splash-subtitle">Loading Platform...</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
