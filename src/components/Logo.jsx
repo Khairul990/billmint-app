@@ -46,10 +46,12 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false }) =
     >
       {defs}
       
-      {/* 1. Solid Teal Circle Background (Back layer) */}
+      {/* 1. Thick Teal Ring (Q body - Back layer) */}
       <motion.circle 
-        cx="50" cy="50" r="42" 
-        fill="url(#brandGradient)" 
+        cx="45" cy="45" r="32" 
+        fill="none" 
+        stroke="url(#brandGradient)" 
+        strokeWidth="16" 
         className="transition-all duration-300 drop-shadow-md"
         animate={{ filter: ['drop-shadow(0px 0px 0px rgba(5, 150, 105, 0))', 'drop-shadow(0px 0px 8px rgba(5, 150, 105, 0.5))', 'drop-shadow(0px 0px 0px rgba(5, 150, 105, 0))'] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -57,31 +59,45 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false }) =
 
       {/* 2. Premium White Invoicing Document Sheet (Middle layer) */}
       <path 
-        d="M34 20 H58 L72 34 V76 C72 79 69 82 66 82 H34 C31 82 28 79 28 76 V26 C28 23 31 20 34 20 Z" 
+        d="M 28 15 H 52 L 68 31 V 70 C 68 74 65 77 61 77 H 28 C 24 77 21 74 21 70 V 22 C 21 18 24 15 28 15 Z" 
         className="fill-white drop-shadow-xl"
       />
 
       {/* Folded paper corner */}
       <path 
-        d="M58 20 V34 H72 Z" 
+        d="M 52 15 V 31 H 68 Z" 
         fill="url(#foldGradient)"
         className="drop-shadow-sm"
       />
 
-      {/* Four premium horizontal invoice lines */}
-      <motion.rect initial={{ width: 0 }} animate={{ width: 24 }} transition={{ delay: 0.3, duration: 0.4 }} x="38" y="36" width="24" height="4" rx="2" className="fill-teal-600" />
-      <motion.rect initial={{ width: 0 }} animate={{ width: 24 }} transition={{ delay: 0.4, duration: 0.4 }} x="38" y="46" width="24" height="4" rx="2" className="fill-teal-600" />
-      <motion.rect initial={{ width: 0 }} animate={{ width: 24 }} transition={{ delay: 0.5, duration: 0.4 }} x="38" y="56" width="24" height="4" rx="2" className="fill-teal-600" />
-      <motion.rect initial={{ width: 0 }} animate={{ width: 16 }} transition={{ delay: 0.6, duration: 0.4 }} x="38" y="66" width="16" height="4" rx="2" className="fill-teal-600" />
+      {/* Three premium horizontal invoice lines */}
+      <motion.rect initial={{ width: 0 }} animate={{ width: 24 }} transition={{ delay: 0.3, duration: 0.4 }} x="32" y="32" width="24" height="4" rx="2" className="fill-teal-600" />
+      <motion.rect initial={{ width: 0 }} animate={{ width: 30 }} transition={{ delay: 0.4, duration: 0.4 }} x="32" y="42" width="30" height="4" rx="2" className="fill-teal-600" />
+      <motion.rect initial={{ width: 0 }} animate={{ width: 18 }} transition={{ delay: 0.5, duration: 0.4 }} x="32" y="52" width="18" height="4" rx="2" className="fill-teal-600" />
+
+      {/* Bold Dollar $ Symbol in bottom left */}
+      <motion.text 
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
+        x="36" y="70" 
+        fill="#0d9488" 
+        fontFamily="system-ui, sans-serif" 
+        fontWeight="900" 
+        fontSize="18" 
+        textAnchor="middle"
+      >
+        $
+      </motion.text>
 
       {/* 3. The Teal Q Tail (Front layer) */}
       <motion.g 
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.7, duration: 0.4 }}
-        transform="translate(52, 52) rotate(-45)"
+        transform="translate(48, 52) rotate(-45)"
       >
-        <rect x="-8" y="-5" width="18" height="48" rx="6" fill="url(#brandGradient)" className="drop-shadow-lg" />
+        <rect x="-8" y="0" width="16" height="40" rx="3" fill="url(#brandGradient)" className="drop-shadow-lg" />
       </motion.g>
     </motion.svg>
   );
