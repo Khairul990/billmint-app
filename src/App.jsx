@@ -795,6 +795,8 @@ function App() {
         businessSettings={settings}
         isAuthenticated={isAuthenticated}
         userRole={userRole}
+        invoices={invoices}
+        subscription={subscription}
       >
         <AnimatePresence mode="wait">
           <motion.div

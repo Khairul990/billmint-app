@@ -12,11 +12,18 @@ import Logo from './Logo';
  * @param {Function} onLogout - logout event callback
  * @param {Object} businessSettings - current active business details
  */
-const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole }) => {
+const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {} }) => {
   // Theme state persisted in LocalStorage
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('billqyro_theme') || 'light';
   });
+
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+
+  // Close dropdown on outside click or tab change
+  useEffect(() => {
+    setIsAccountMenuOpen(false);
+  }, [currentTab]);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -112,15 +119,87 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 )}
               </button>
 
-              {/* Mobile Header Account Action */}
-              <div className="md:hidden flex items-center">
+              {/* Account Dropdown Container */}
+              <div className="relative flex items-center">
                 <button
-                  onClick={() => setCurrentTab('settings')}
+                  onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
                   className="w-10 h-10 rounded-2xl bg-white/10 dark:bg-slate-800/40 backdrop-blur-md border border-white/20 dark:border-slate-700/30 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
                   title="Account Settings"
                 >
                   <User className="w-5 h-5 text-indigo-100" />
                 </button>
+
+                {/* Dropdown Menu */}
+                {isAccountMenuOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setIsAccountMenuOpen(false)}
+                    />
+                    <div className="absolute top-14 right-0 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 z-50 overflow-hidden flex flex-col animate-fadeIn">
+                      <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                        <p className="text-sm font-bold text-slate-800 dark:text-white truncate">
+                          {businessSettings?.businessName || 'My Business'}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                          {businessSettings?.email || 'billing@firm.com'}
+                        </p>
+                      </div>
+                      
+                      <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Monthly Invoices</span>
+                          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                            {invoices.length} / {subscription?.plan === 'premium' ? '∞' : '5'}
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mb-3">
+                          <div 
+                            className="bg-gradient-to-r from-indigo-500 to-teal-400 h-1.5 rounded-full" 
+                            style={{ width: `${Math.min((invoices.length / (subscription?.plan === 'premium' ? 100 : 5)) * 100, 100)}%` }}
+                          ></div>
+                        </div>
+                        {subscription?.plan !== 'premium' && (
+                          <button
+                            onClick={() => {
+                              setCurrentTab('subscription');
+                              setIsAccountMenuOpen(false);
+                            }}
+                            className="w-full py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                          >
+                            Upgrade Plan
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="p-2">
+                        {isAuthenticated ? (
+                          <button
+                            onClick={() => {
+                              setIsAccountMenuOpen(false);
+                              if(onLogout) onLogout();
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors cursor-pointer"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            Log Out
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setCurrentTab('login');
+                              setIsAccountMenuOpen(false);
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-colors cursor-pointer"
+                          >
+                            <User className="w-4 h-4" />
+                            Log In
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
