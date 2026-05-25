@@ -25,9 +25,9 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-[#071B3A] border-r border-slate-800 h-screen sticky top-0 left-0 z-30 shadow-2xl transition-all duration-300">
+    <aside className="hidden md:flex flex-col w-64 bg-[#071B3A] dark:bg-[#070c18]/90 dark:backdrop-blur-xl border-r border-slate-800 dark:border-white/5 h-screen sticky top-0 left-0 z-30 shadow-2xl transition-all duration-300">
       {/* Brand Header */}
-      <div className="p-6 border-b border-[#14284B] flex items-center">
+      <div className="p-6 border-b border-[#14284B] dark:border-white/5 flex items-center">
         <Logo type="horizontal" forceWhiteText={true} />
       </div>
 
@@ -67,8 +67,8 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
       </nav>
 
       {/* Sidebar Footer with Business Account Summary & Logout */}
-      <div className="p-4 border-t border-[#14284B] flex flex-col gap-3">
-        <div className="flex items-center gap-3 p-3 bg-[#14284B] border border-slate-800/50 rounded-xl">
+      <div className="p-4 border-t border-[#14284B] dark:border-white/5 flex flex-col gap-3">
+        <div className="flex items-center gap-3 p-3 bg-[#14284B] dark:bg-white/5 border border-slate-800/50 dark:border-white/5 rounded-xl">
           {businessSettings?.logoUrl ? (
             <img
               src={businessSettings.logoUrl}

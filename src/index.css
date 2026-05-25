@@ -6,8 +6,11 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased overflow-x-hidden;
+    @apply bg-slate-50 text-slate-900 font-sans antialiased overflow-x-hidden transition-colors duration-500;
     -webkit-tap-highlight-color: transparent;
+  }
+  .dark body {
+    @apply text-slate-200;
   }
 }
 
@@ -27,6 +30,14 @@
   background: #94a3b8;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #1b273b;
+  border-radius: 10px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #324663;
+}
+
 /* No-scrollbar utility */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -39,6 +50,17 @@
 /* Clean glassmorphism styling card */
 .glass-card {
   @apply bg-white/80 backdrop-blur-md border border-slate-100/50 shadow-premium;
+}
+.dark .glass-card {
+  @apply bg-[#0b1221]/70 backdrop-blur-xl border border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.5)];
+}
+
+/* Premium Dark Mode Box Utilities */
+.dark-premium-surface {
+  @apply bg-gradient-to-b from-[#101828] to-[#0b1221] border border-white/[0.05] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05),0_8px_30px_rgb(0,0,0,0.4)];
+}
+.dark-premium-input {
+  @apply bg-[#0d1424] border border-white/[0.08] focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)];
 }
 
 /* Print Specific Overrides */

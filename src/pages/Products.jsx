@@ -31,6 +31,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
   const [stockQty, setStockQty] = useState(0);
   const [lowStockThreshold, setLowStockThreshold] = useState(5);
 
@@ -42,6 +43,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
     setName('');
     setPrice('');
     setDescription('');
+    setCategory('');
     setStockQty(0);
     setLowStockThreshold(5);
     setIsModalOpen(true);
@@ -50,8 +52,9 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
   const openEditModal = (prod) => {
     setEditingProduct(prod);
     setName(prod.name);
-    setPrice(prod.price);
+    setPrice(prod.price !== undefined ? prod.price : (prod.rate !== undefined ? prod.rate : ''));
     setDescription(prod.description || '');
+    setCategory(prod.category || '');
     setStockQty(prod.stockQty !== undefined ? prod.stockQty : 0);
     setLowStockThreshold(prod.lowStockThreshold !== undefined ? prod.lowStockThreshold : 5);
     setIsModalOpen(true);
@@ -70,8 +73,11 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
 
     const payload = {
       id: editingProduct ? editingProduct.id : null,
+      productId: editingProduct ? (editingProduct.productId || editingProduct.id) : null,
       name,
       price: parseFloat(price) || 0,
+      rate: parseFloat(price) || 0,
+      category,
       description,
       stockQty: parseInt(stockQty) || 0,
       lowStockThreshold: parseInt(lowStockThreshold) || 5,
@@ -172,7 +178,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
 
               {/* Stock Status Badge */}
               {prod.stockQty !== undefined && (
-                <div className="mt-3">
+                <div className="mt-3 flex items-center gap-2 flex-wrap">
                   <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
                     prod.stockQty <= (prod.lowStockThreshold || 5) 
                       ? 'bg-rose-50 text-rose-600 border border-rose-100' 
@@ -180,6 +186,18 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   }`}>
                     {prod.stockQty <= (prod.lowStockThreshold || 5) && <BadgeAlert className="w-3 h-3" />}
                     Stock: {prod.stockQty} {prod.stockQty <= (prod.lowStockThreshold || 5) && '(Low)'}
+                  </span>
+                  {prod.category && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100">
+                      {prod.category}
+                    </span>
+                  )}
+                </div>
+              )}
+              {prod.stockQty === undefined && prod.category && (
+                <div className="mt-3 flex items-center gap-2 flex-wrap">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100">
+                    {prod.category}
                   </span>
                 </div>
               )}
@@ -244,7 +262,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
               </div>
 
               <div>
-                <label className="block mb-1 text-slate-400">Standard Pricing ({currencySymbol})</label>
+                <label className="block mb-1 text-slate-400">Standard Pricing / Rate ({currencySymbol})</label>
                 <input
                   type="number"
                   min="0"
@@ -253,6 +271,17 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="e.g. 8500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 text-slate-400">Category (Optional)</label>
+                <input
+                  type="text"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  placeholder="e.g. Shirts, Pants, etc."
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
                 />
               </div>
