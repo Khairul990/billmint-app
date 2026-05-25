@@ -1,4 +1,4 @@
-import { db, firebaseReady } from './firebase';
+import { db, firebaseReady, auth } from './firebase';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot } from 'firebase/firestore';
 import { getAdminEmail } from './adminAccess';
 import { BillQyroDB } from './indexedDb';
@@ -338,11 +338,15 @@ const DEFAULT_SUBSCRIPTION = {
 
 // Safe Firebase User ID generator based on auth session email
 export const getFirebaseUserId = () => {
+  if (firebaseReady && auth?.currentUser?.uid) {
+    return auth.currentUser.uid;
+  }
   const session = localStorage.getItem(KEYS.AUTH);
   if (session) {
     try {
       const data = JSON.parse(session);
       if (data && data.userEmail) {
+        if (data.userEmail === 'demo@billqyro.com') return 'demo-user';
         return data.userEmail.replace(/[^a-zA-Z0-9]/g, '_');
       }
     } catch (e) { }
@@ -360,8 +364,6 @@ const firestoreSave = async (collectionName, docId, data) => {
       docRef = doc(db, collectionName, userId);
     } else if (collectionName === 'publicInvoices') {
       docRef = doc(db, 'publicInvoices', docId);
-    } else if (collectionName === 'invoices') {
-      docRef = doc(db, 'users', userId, 'invoices', docId);
     } else {
       docRef = doc(db, collectionName, userId, 'items', docId);
     }
@@ -384,8 +386,6 @@ const firestoreDelete = async (collectionName, docId) => {
       docRef = doc(db, collectionName, userId);
     } else if (collectionName === 'publicInvoices') {
       docRef = doc(db, 'publicInvoices', docId);
-    } else if (collectionName === 'invoices') {
-      docRef = doc(db, 'users', userId, 'invoices', docId);
     } else {
       docRef = doc(db, collectionName, userId, 'items', docId);
     }
@@ -407,6 +407,41 @@ export const initializeStorage = () => {
   if (!localStorage.getItem(KEYS.PRODUCTS)) {
     localStorage.setItem(KEYS.PRODUCTS, JSON.stringify([]));
   }
+  
+  if (!localStorage.getItem(KEYS.AUTH)) {
+    // Session is handled by App.jsx now
+  }
+  
+  let currentInvoices = [];
+  try {
+    const stored = localStorage.getItem(KEYS.INVOICES);
+    if (stored) currentInvoices = JSON.parse(stored);
+  } catch(e) {}
+  
+  if (!Array.isArray(currentInvoices)) {
+    currentInvoices = [];
+  }
+
+  // Migrate from old local storage keys
+  ['invoice', 'invoices'].forEach(oldKey => {
+    try {
+      const oldData = JSON.parse(localStorage.getItem(oldKey));
+      if (Array.isArray(oldData) && oldData.length > 0) {
+        let added = false;
+        oldData.forEach(inv => {
+          if (!currentInvoices.some(existing => existing.id === inv.id)) {
+            currentInvoices.push(inv);
+            added = true;
+          }
+        });
+        if (added) {
+          localStorage.setItem(KEYS.INVOICES, JSON.stringify(currentInvoices));
+        }
+        localStorage.removeItem(oldKey);
+      }
+    } catch (e) {}
+  });
+
   if (!localStorage.getItem(KEYS.INVOICES)) {
     localStorage.setItem(KEYS.INVOICES, JSON.stringify([]));
   }
@@ -1139,8 +1174,8 @@ export const ensureInvoicePublicToken = async (invoice) => {
 
       const userId = getFirebaseUserId();
       if (userId && invoice.id) {
-        console.log('[DEBUG] ensureInvoicePublicToken - Force writing private copy to users/' + userId + '/invoices/' + invoice.id);
-        await setDoc(doc(db, 'users', userId, 'invoices', invoice.id), invoice);
+        console.log('[DEBUG] ensureInvoicePublicToken - Force writing private copy to invoices/' + userId + '/items/' + invoice.id);
+        await setDoc(doc(db, 'invoices', userId, 'items', invoice.id), invoice);
       }
     } catch (e) {
       console.error('[ERROR] Failed to sync publicToken to Firestore in ensureInvoicePublicToken:', e);
@@ -1306,9 +1341,7 @@ export const enableRealTimeSync = () => {
   // Clear any existing listeners
   unsubscribes.forEach(unsub => unsub());
   const syncCollection = (collectionName, storageKey) => {
-    const colRef = collectionName === 'invoices'
-      ? collection(db, 'users', userId, 'invoices')
-      : collection(db, collectionName, userId, 'items');
+    const colRef = collection(db, collectionName, userId, 'items');
     const unsub = onSnapshot(colRef, (snapshot) => {
       const items = [];
       snapshot.forEach(doc => items.push(doc.data()));
@@ -1364,11 +1397,24 @@ export const syncFromFirestore = async () => {
     }
 
     // Sync invoices
-    const invoicesSnap = await getDocs(collection(db, 'users', userId, 'invoices'));
-    const invoices = [];
-    invoicesSnap.forEach(docSnap => {
-      invoices.push(docSnap.data());
-    });
+    const invoicesMap = new Map();
+    
+    try {
+      const snap1 = await getDocs(collection(db, 'invoices', userId, 'items'));
+      snap1.forEach(docSnap => invoicesMap.set(docSnap.id, docSnap.data()));
+    } catch(e) {}
+    
+    try {
+      const snap2 = await getDocs(collection(db, 'invoice', userId, 'items'));
+      snap2.forEach(docSnap => invoicesMap.set(docSnap.id, docSnap.data()));
+    } catch(e) {}
+    
+    try {
+      const snap3 = await getDocs(collection(db, 'users', userId, 'invoices'));
+      snap3.forEach(docSnap => invoicesMap.set(docSnap.id, docSnap.data()));
+    } catch(e) {}
+
+    const invoices = Array.from(invoicesMap.values());
     if (invoices.length > 0) {
       localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
     }
