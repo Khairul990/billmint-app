@@ -345,6 +345,9 @@ export const getFirebaseUserId = () => {
   if (session) {
     try {
       const data = JSON.parse(session);
+      if (data && data.uid) {
+        return data.uid;
+      }
       if (data && data.userEmail) {
         if (data.userEmail === 'demo@billqyro.com') return 'demo-user';
         return data.userEmail.replace(/[^a-zA-Z0-9]/g, '_');

@@ -184,13 +184,32 @@ function App() {
             const newSession = {
               timestamp: Date.now(),
               token: 'billqyro-secure-session',
-              userEmail: email
+              userEmail: email,
+              uid: user.uid
             };
 
             localStorage.setItem('billqyro_auth', JSON.stringify(newSession));
 
             setIsAuthenticated(true);
             setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
+          } else if (session.uid !== user.uid) {
+            // Upgrade existing session with UID
+            session.uid = user.uid;
+            localStorage.setItem('billqyro_auth', JSON.stringify(session));
+            
+            // Re-sync with correct UID
+            import('./utils/storage').then(({ syncFromFirestore }) => {
+              syncFromFirestore().then((synced) => {
+                if (synced) {
+                  setInvoices(synced.invoices || []);
+                  setCustomers(synced.customers || []);
+                  setProducts(synced.products || []);
+                  if (synced.settings) setSettings(synced.settings);
+                  setExpenses(synced.expenses || []);
+                  if (synced.subscription) setSubscription(synced.subscription);
+                }
+              });
+            });
           }
         }
       });

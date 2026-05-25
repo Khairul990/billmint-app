@@ -77,7 +77,8 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
       const session = { 
         timestamp: Date.now(), 
         token: 'billqyro-secure-session',
-        userEmail: userEmail 
+        userEmail: userEmail,
+        uid: auth?.currentUser?.uid || null
       };
       
       localStorage.setItem('billqyro_auth', JSON.stringify(session));
