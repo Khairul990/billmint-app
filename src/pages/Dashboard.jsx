@@ -42,6 +42,7 @@ import { firebaseReady } from '../utils/firebase';
 const Dashboard = ({
   invoices = [],
   customers = [],
+  products = [],
   onViewInvoice,
   onEditInvoice,
   onDeleteInvoice,
@@ -636,13 +637,61 @@ const Dashboard = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Left Double-width: Unpaid WhatsApp Reminders Section */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-indigo-500" />
-                <span>Pending Balance Reminders</span>
-              </h3>
+        <div className="lg:col-span-2 space-y-6">
+          
+          {/* Low Stock Alert Widget */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-500" />
+                  <span>Low Stock Alerts</span>
+                </h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                  INVENTORY WARNINGS
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800/80 shadow-premium">
+              {(() => {
+                const lowStockProducts = (products || []).filter(p => p.stockQty !== undefined && p.stockQty <= (p.lowStockThreshold || 5));
+                if (lowStockProducts.length === 0) {
+                  return (
+                    <div className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-100 dark:border-emerald-900/50">
+                      <div className="p-2 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                        <CheckCircle2 className="w-4 h-4" />
+                      </div>
+                      <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">All stock levels look good.</p>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="space-y-3">
+                    {lowStockProducts.map(prod => (
+                      <div key={prod.id} className="flex items-center justify-between p-3 bg-rose-50 dark:bg-rose-950/30 rounded-2xl border border-rose-100 dark:border-rose-900/50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{prod.name}</span>
+                        </div>
+                        <span className="text-[10px] font-black bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 px-2 py-1 rounded-lg border border-rose-100 dark:border-rose-900 shadow-sm">
+                          {prod.stockQty} left
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-indigo-500" />
+                  <span>Pending Balance Reminders</span>
+                </h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                 AUTO-PREFILLED WHATSAPP DUELISTS
               </p>
@@ -700,6 +749,7 @@ const Dashboard = ({
               </div>
             )}
           </div>
+        </div>
         </div>
 
         {/* Right Single-width: Recent Invoices & Global Search */}

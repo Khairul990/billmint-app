@@ -81,6 +81,7 @@ import {
 import { downloadInvoicePDF } from './utils/pdfUtils';
 import { auth, firebaseReady } from './utils/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { triggerSuccessFeedback } from './utils/feedback';
 
 function App() {
 
@@ -339,6 +340,43 @@ function App() {
       setCurrentTab('subscription');
       return;
     }
+    let unlinkedItems = false;
+    let lowStockWarning = false;
+
+    if (isNew) {
+      let productsUpdated = false;
+      const currentProducts = [...products];
+
+      for (const item of payload.items) {
+        const itemName = (item.description || item.productName || item.serviceName || item.itemService || '').trim().toLowerCase();
+        if (!itemName) continue;
+
+        const matchedProduct = currentProducts.find(p => p.name.trim().toLowerCase() === itemName);
+        
+        if (matchedProduct) {
+          const requestedQty = parseFloat(item.qty) || 1;
+          const currentStock = matchedProduct.stockQty !== undefined ? matchedProduct.stockQty : 0;
+          if (currentStock < requestedQty) {
+            lowStockWarning = true;
+            matchedProduct.stockQty = 0; // Prevent going below 0 without confirmation
+          } else {
+            matchedProduct.stockQty = currentStock - requestedQty;
+          }
+          productsUpdated = true;
+        } else {
+          unlinkedItems = true;
+        }
+      }
+
+      if (productsUpdated) {
+        // Save updated products one by one
+        for (const p of currentProducts) {
+          await saveProduct(p);
+        }
+        setProducts(currentProducts);
+      }
+    }
+
     const { updatedInvoices, firebaseStatus } = await saveInvoice(payload);
     setInvoices(updatedInvoices);
 
@@ -350,7 +388,7 @@ function App() {
         email: payload.customerEmail || '',
         address: payload.customerAddress || ''
       };
-      const updatedCustomers = saveCustomer(newCustomer);
+      const updatedCustomers = await saveCustomer(newCustomer);
       setCustomers(updatedCustomers);
     }
 
@@ -358,6 +396,16 @@ function App() {
       toast.success('Invoice created successfully. (Saved locally. Firebase sync pending.)');
     } else {
       toast.success('Invoice created successfully');
+    }
+
+    // Trigger haptic & audio feedback
+    triggerSuccessFeedback();
+
+    if (unlinkedItems) {
+      toast.error('Some items were not linked to inventory, so stock was not updated for them.', { icon: '⚠️', duration: 4000 });
+    }
+    if (lowStockWarning) {
+      toast.error('Low stock or insufficient stock for some products.', { duration: 4000 });
     }
 
     setEditingInvoice(null);
@@ -509,6 +557,7 @@ function App() {
           <Dashboard
             invoices={invoices}
             customers={customers}
+            products={products}
             onViewInvoice={(inv) => {
               setEditingInvoice(inv);
               setCurrentTab('invoices');

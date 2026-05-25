@@ -10,29 +10,42 @@ const BottomNav = ({ currentTab, setCurrentTab }) => {
   const tabs = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
     { id: 'invoices', label: 'Invoices', icon: FileSpreadsheet },
+    { id: 'create', isAction: true },
     { id: 'customers', label: 'Clients', icon: Users },
     { id: 'more', label: 'More', icon: MoreHorizontal },
   ];
 
-
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-100/80 dark:border-slate-800/80 shadow-lg px-2 py-1.5 flex items-center justify-around pb-safe-bottom transition-colors duration-300">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-100/80 dark:border-slate-800/80 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] px-2 py-1.5 flex items-center justify-around pb-safe-bottom transition-colors duration-300">
       {tabs.map((tab) => {
+        if (tab.isAction) {
+          return (
+            <div key="action" className="relative -top-5 flex-1 flex justify-center">
+              <button
+                onClick={() => setCurrentTab('create-invoice')}
+                className="w-12 h-12 bg-gradient-to-tr from-teal-500 to-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-teal-500/40 border-[3px] border-white dark:border-slate-900 transform active:scale-95 transition-all"
+              >
+                <div className="w-6 h-6 font-bold text-2xl leading-none flex items-center justify-center -mt-1">+</div>
+              </button>
+            </div>
+          );
+        }
+
         const Icon = tab.icon;
         const isActive = 
           currentTab === tab.id || 
           (tab.id === 'invoices' && currentTab === 'create-invoice') ||
-          (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel'].includes(currentTab));
+          (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings'].includes(currentTab));
         
         return (
           <button
             key={tab.id}
             onClick={() => setCurrentTab(tab.id)}
-            className="flex flex-col items-center justify-center flex-1 py-1 px-2 rounded-xl transition-all cursor-pointer"
+            className="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition-all cursor-pointer"
           >
-            <div className={`p-1.5 rounded-xl transition-all duration-300 ${
+            <div className={`p-1 rounded-xl transition-all duration-300 ${
               isActive 
-                ? 'bg-gradient-to-tr from-indigo-600 to-blue-500 text-white shadow-md shadow-indigo-100/50 dark:shadow-none scale-110' 
+                ? 'bg-gradient-to-tr from-indigo-600 to-blue-500 text-white shadow-md shadow-indigo-100/50 dark:shadow-none scale-105' 
                 : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
             }`}>
               <Icon className="w-5 h-5" />

@@ -31,6 +31,8 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
+  const [stockQty, setStockQty] = useState(0);
+  const [lowStockThreshold, setLowStockThreshold] = useState(5);
 
   const currencySymbol = businessSettings?.currency || '₹';
 
@@ -40,6 +42,8 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
     setName('');
     setPrice('');
     setDescription('');
+    setStockQty(0);
+    setLowStockThreshold(5);
     setIsModalOpen(true);
   };
 
@@ -48,6 +52,8 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
     setName(prod.name);
     setPrice(prod.price);
     setDescription(prod.description || '');
+    setStockQty(prod.stockQty !== undefined ? prod.stockQty : 0);
+    setLowStockThreshold(prod.lowStockThreshold !== undefined ? prod.lowStockThreshold : 5);
     setIsModalOpen(true);
   };
 
@@ -67,6 +73,9 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
       name,
       price: parseFloat(price) || 0,
       description,
+      stockQty: parseInt(stockQty) || 0,
+      lowStockThreshold: parseInt(lowStockThreshold) || 5,
+      updatedAt: new Date().toISOString()
     };
 
     onSaveProduct(payload);
@@ -161,8 +170,22 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                 </div>
               </div>
 
+              {/* Stock Status Badge */}
+              {prod.stockQty !== undefined && (
+                <div className="mt-3">
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
+                    prod.stockQty <= (prod.lowStockThreshold || 5) 
+                      ? 'bg-rose-50 text-rose-600 border border-rose-100' 
+                      : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                  }`}>
+                    {prod.stockQty <= (prod.lowStockThreshold || 5) && <BadgeAlert className="w-3 h-3" />}
+                    Stock: {prod.stockQty} {prod.stockQty <= (prod.lowStockThreshold || 5) && '(Low)'}
+                  </span>
+                </div>
+              )}
+
               {/* Description Body */}
-              <div className="mt-4 min-h-12 leading-relaxed text-xs text-slate-400 font-semibold line-clamp-3">
+              <div className="mt-3 min-h-12 leading-relaxed text-xs text-slate-400 font-semibold line-clamp-2">
                 {prod.description || 'No detailed specifications added.'}
               </div>
             </div>
@@ -243,6 +266,31 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   rows="3"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 leading-relaxed font-semibold"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-1 text-slate-400">Stock Quantity</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={stockQty}
+                    onChange={(e) => setStockQty(e.target.value)}
+                    placeholder="0"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 text-slate-400">Low Stock Alert at</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={lowStockThreshold}
+                    onChange={(e) => setLowStockThreshold(e.target.value)}
+                    placeholder="5"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                  />
+                </div>
               </div>
 
               <div className="pt-4">
