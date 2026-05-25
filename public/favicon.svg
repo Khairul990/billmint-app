@@ -1,38 +1,47 @@
-<svg viewBox="0 0 100 100" width="512" height="512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 100 100" width="1024" height="1024" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
+    <!-- Vibrant Teal Gradient for brand elements -->
     <linearGradient id="brandGradient" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stopColor="#00d2ff" />
-      <stop offset="50%" stopColor="#059669" />
-      <stop offset="100%" stopColor="#0f766e" />
+      <stop offset="0%" stopColor="#14b8a6" /> <!-- Teal 400 -->
+      <stop offset="100%" stopColor="#0f766e" /> <!-- Teal 700 -->
     </linearGradient>
-    <linearGradient id="foldGradient" x1="0" y1="1" x2="1" y2="0">
-      <stop offset="0%" stopColor="#cbd5e1" />
-      <stop offset="100%" stopColor="#ffffff" />
-    </linearGradient>
-    <filter id="shadow1" x="-10%" y="-10%" width="130%" height="130%">
-      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.3" />
+    
+    <!-- White background shadow to lift the app icon -->
+    <filter id="bgShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0f172a" flood-opacity="0.08" />
+    </filter>
+
+    <!-- Document shadow to contrast white-on-white -->
+    <filter id="docShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.12" />
+    </filter>
+
+    <!-- Fold shadow -->
+    <filter id="foldShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="-2" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.15" />
+    </filter>
+    
+    <!-- Diagonal block shadow -->
+    <filter id="tailShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="-2" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.15" />
     </filter>
   </defs>
 
-  <!-- Thick Teal Ring (Q body) -->
-  <circle cx="45" cy="45" r="32" fill="none" stroke="url(#brandGradient)" strokeWidth="16" filter="url(#shadow1)" />
+  <!-- 1. White rounded square background -->
+  <rect x="6" y="6" width="88" height="88" rx="22" fill="#ffffff" filter="url(#bgShadow)" stroke="#f8fafc" stroke-width="1" />
 
-  <!-- Document -->
-  <path d="M 28 15 H 52 L 68 31 V 70 C 68 74 65 77 61 77 H 28 C 24 77 21 74 21 70 V 22 C 21 18 24 15 28 15 Z" fill="#ffffff" filter="url(#shadow1)" />
-  
-  <!-- Fold -->
-  <path d="M 52 15 V 31 H 68 Z" fill="url(#foldGradient)" />
+  <!-- 2. White Invoice Paper Shape -->
+  <path d="M 27 24 C 27 21 29 19 32 19 H 58 L 73 34 V 76 C 73 79 71 81 68 81 H 32 C 29 81 27 79 27 76 Z" fill="#ffffff" filter="url(#docShadow)" />
 
-  <!-- Three horizontal lines -->
-  <rect x="32" y="32" width="24" height="4" rx="2" fill="#0d9488" />
-  <rect x="32" y="42" width="30" height="4" rx="2" fill="#0d9488" />
-  <rect x="32" y="52" width="18" height="4" rx="2" fill="#0d9488" />
+  <!-- 3. Green/teal folded corner -->
+  <path d="M 58 19 V 31 C 58 33 60 35 62 35 H 73 Z" fill="url(#brandGradient)" filter="url(#foldShadow)" />
 
-  <!-- Dollar symbol $ -->
-  <text x="36" y="70" fill="#0d9488" font-family="system-ui, sans-serif" font-weight="900" font-size="18" text-anchor="middle">$</text>
+  <!-- 4. Green/teal document lines -->
+  <rect x="35" y="38" width="28" height="4" rx="2" fill="url(#brandGradient)" />
+  <rect x="35" y="48" width="28" height="4" rx="2" fill="url(#brandGradient)" />
+  <rect x="35" y="58" width="16" height="4" rx="2" fill="url(#brandGradient)" />
 
-  <!-- Q Tail -->
-  <g transform="translate(48, 52) rotate(-45)">
-    <rect x="-8" y="0" width="16" height="40" rx="3" fill="url(#brandGradient)" filter="url(#shadow1)" />
-  </g>
+  <!-- 5. Green/teal diagonal Q-style block -->
+  <!-- Diagonal tail of the Q overlapping the bottom right -->
+  <path d="M 50 63 L 64 49 L 88 73 C 90 75 88 78 86 78 H 68 C 65 78 63 77 62 75 Z" fill="url(#brandGradient)" filter="url(#tailShadow)" />
 </svg>
