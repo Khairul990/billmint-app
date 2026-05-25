@@ -66,7 +66,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070c18] dark:bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] dark:from-[#0d1627] dark:via-[#070c18] dark:to-[#040810] flex flex-col md:flex-row w-full font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-800/50 dark:bg-[#070c18] dark:bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] dark:from-[#0d1627] dark:via-[#070c18] dark:to-[#040810] flex flex-col md:flex-row w-full font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-300">
       {/* Desktop Sidebar (Hidden on Mobile) */}
       <Sidebar
         currentTab={currentTab}
@@ -85,7 +85,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         <header className="relative bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-600 dark:from-[#0d1627]/80 dark:via-[#111c33]/80 dark:to-[#0a1122]/80 dark:backdrop-blur-xl dark:border-b dark:border-white/5 px-6 py-8 md:py-10 text-white shadow-md transition-all duration-300 z-30">
           {/* Subtle Ambient Background Gradients wrapped to prevent overflow spill */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white dark:bg-slate-900/5 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
             <div className="absolute -bottom-10 left-10 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl"></div>
           </div>
 
@@ -112,7 +112,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <button
                 onClick={toggleTheme}
                 type="button"
-                className="w-10 h-10 rounded-2xl bg-white/10 dark:bg-slate-800/40 backdrop-blur-md border border-white/20 dark:border-slate-700/30 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+                className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-900/10 dark:bg-slate-800/40 backdrop-blur-md border border-white/20 dark:border-slate-700/30 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
                 title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
               >
                 {theme === 'light' ? (
@@ -126,7 +126,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div className="relative flex items-center">
                 <button
                   onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
-                  className="w-10 h-10 rounded-2xl bg-white/10 dark:bg-slate-800/40 backdrop-blur-md border border-white/20 dark:border-slate-700/30 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+                  className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-900/10 dark:bg-slate-800/40 backdrop-blur-md border border-white/20 dark:border-slate-700/30 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
                   title="Account Settings"
                 >
                   <User className="w-5 h-5 text-indigo-100" />
@@ -141,7 +141,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                     />
                     <div className="absolute top-14 right-0 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 z-50 overflow-hidden flex flex-col animate-fadeIn">
                       <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
-                        <p className="text-sm font-bold text-slate-800 dark:text-white truncate">
+                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100 dark:text-white truncate">
                           {businessSettings?.businessName || 'My Business'}
                         </p>
                         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">

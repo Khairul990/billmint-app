@@ -292,7 +292,7 @@ const Invoices = ({
       {/* Page Header Area */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-extrabold text-slate-800 tracking-tight">Active Invoices</h2>
+          <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Active Invoices</h2>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">MANAGE TRANSACTION HISTORY</p>
         </div>
 
@@ -311,17 +311,17 @@ const Invoices = ({
       </div>
 
       {/* SEARCH AND FILTERS */}
-      <div className="bg-white rounded-3xl p-4 md:p-5 border border-slate-100 shadow-premium flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 md:p-5 border border-slate-100 dark:border-slate-800 shadow-premium flex flex-col md:flex-row gap-4 items-center justify-between">
         
         {/* Left Side: Filter Tabs */}
-        <div className="flex gap-1 bg-slate-50 p-1.5 rounded-2xl w-full md:w-auto overflow-x-auto no-scrollbar">
+        <div className="flex gap-1 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-2xl w-full md:w-auto overflow-x-auto no-scrollbar">
           {['All', 'Paid', 'Pending', 'Unpaid'].map((status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`text-xs font-bold px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
                 statusFilter === status
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-100/50'
+                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm border border-slate-100 dark:border-slate-800/50'
                   : 'text-slate-400 hover:text-slate-600'
               }`}
             >
@@ -340,7 +340,7 @@ const Invoices = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search invoice number, client..."
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white dark:bg-slate-900 transition-all text-slate-800 dark:text-slate-100"
           />
         </div>
       </div>
@@ -365,9 +365,9 @@ const Invoices = ({
         ))}
 
         {filteredInvoices.length === 0 && (
-          <div className="bg-white rounded-3xl p-12 border border-slate-100 text-center shadow-premium">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 border border-slate-100 dark:border-slate-800 text-center shadow-premium">
             <FileSpreadsheet className="w-12 h-12 text-slate-200 mx-auto mb-3 animate-pulse" />
-            <h4 className="font-extrabold text-slate-700">No invoices yet</h4>
+            <h4 className="font-extrabold text-slate-700 dark:text-slate-300">No invoices yet</h4>
             <p className="text-xs text-slate-400 font-semibold mt-1 max-w-xs mx-auto">
               No invoices found. Create your first bill to see transaction records here!
             </p>
@@ -386,27 +386,27 @@ const Invoices = ({
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-slate-50 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative animate-scaleUp border border-white/10 max-h-[92vh] flex flex-col"
+            className="bg-slate-50 dark:bg-slate-800/50 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative animate-scaleUp border border-white/10 max-h-[92vh] flex flex-col"
           >
             
             {/* Modal Top Actions Header Bar */}
-            <div className="bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between shrink-0">
+            <div className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 px-6 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <FileSpreadsheet className="w-5 h-5 text-indigo-500" />
-                <span className="font-extrabold text-slate-800 text-sm">{viewingInvoice.invoiceNumber} - Preview Mode</span>
+                <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">{viewingInvoice.invoiceNumber} - Preview Mode</span>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={handlePrint}
-                  className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-all"
+                  className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 dark:bg-slate-800/50 rounded-xl transition-all"
                   title="Print Invoice"
                 >
                   <Printer className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => onDownloadPDF(viewingInvoice)}
-                  className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-slate-50 rounded-xl transition-all"
+                  className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-slate-50 dark:bg-slate-800/50 rounded-xl transition-all"
                   title="Download PDF"
                 >
                   <Download className="w-4 h-4" />
@@ -431,7 +431,7 @@ const Invoices = ({
                       toast.error('Could not create live link. Please try again.');
                     }
                   }}
-                  className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"
+                  className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 dark:bg-slate-800/50 rounded-xl transition-all cursor-pointer"
                   title="Copy Live Link"
                 >
                   <Link className="w-4 h-4" />
@@ -442,12 +442,12 @@ const Invoices = ({
                     setViewingInvoice(null);
                     setCurrentTab('create-invoice');
                   }}
-                  className="p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-all"
+                  className="p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-50 dark:bg-slate-800/50 rounded-xl transition-all"
                   title="Edit Invoice"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
-                <div className="w-px h-6 bg-slate-100 mx-1"></div>
+                <div className="w-px h-6 bg-slate-100 dark:bg-slate-800 mx-1"></div>
 
                 {/* SaaS Invoice Sharing Suite */}
                 <button
@@ -534,13 +534,13 @@ const Invoices = ({
                   <Copy className="w-4 h-4 text-amber-500" />
                 </button>
 
-                <div className="w-px h-6 bg-slate-100 mx-1"></div>
+                <div className="w-px h-6 bg-slate-100 dark:bg-slate-800 mx-1"></div>
                 <button
                   onClick={() => {
                     setViewingInvoice(null);
                     onEditInvoice(null);
                   }}
-                  className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all"
+                  className="p-2 text-slate-400 hover:text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:bg-slate-800 rounded-xl transition-all"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -548,7 +548,7 @@ const Invoices = ({
             </div>
 
             {/* Scrollable Preview Wrapper */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50 dark:bg-slate-800/50">
               {/* Pending Payment Verification Panel */}
               {viewingInvoice && (viewingInvoice.paymentProofs || []).filter(p => p.status === 'Pending').length > 0 && (
                 <div className="mb-6 p-5 bg-gradient-to-tr from-indigo-50 to-indigo-100/50 border border-indigo-200/50 rounded-2xl shadow-sm">
@@ -559,19 +559,19 @@ const Invoices = ({
                   
                   <div className="space-y-4">
                     {(viewingInvoice.paymentProofs || []).filter(p => p.status === 'Pending').map((proof) => (
-                      <div key={proof.id} className="bg-white border border-indigo-100 rounded-xl p-4 flex flex-col md:flex-row justify-between gap-4 shadow-sm">
+                      <div key={proof.id} className="bg-white dark:bg-slate-900 border border-indigo-100 rounded-xl p-4 flex flex-col md:flex-row justify-between gap-4 shadow-sm">
                         <div className="space-y-2 text-xs">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-bold text-slate-500">Method:</span>
                             <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md font-bold uppercase">{proof.method}</span>
                             <span className="font-bold text-slate-500 ml-2">Amount:</span>
-                            <span className="font-extrabold text-slate-800">{currencySymbol}{proof.amount}</span>
+                            <span className="font-extrabold text-slate-800 dark:text-slate-100">{currencySymbol}{proof.amount}</span>
                           </div>
                           
                           {proof.transactionId && (
                             <div>
                               <span className="font-bold text-slate-500">Transaction ID:</span>{' '}
-                              <span className="font-mono text-slate-800 select-all font-semibold bg-slate-50 px-1.5 py-0.5 rounded">{proof.transactionId}</span>
+                              <span className="font-mono text-slate-800 dark:text-slate-100 select-all font-semibold bg-slate-50 dark:bg-slate-800/50 px-1.5 py-0.5 rounded">{proof.transactionId}</span>
                             </div>
                           )}
                           
@@ -633,7 +633,7 @@ const Invoices = ({
             </div>
             
             {/* Print Only Embedded Capture Zone */}
-            <div className="hidden print:block print:absolute print:inset-0 bg-white">
+            <div className="hidden print:block print:absolute print:inset-0 bg-white dark:bg-slate-900">
               <InvoicePreview 
                 invoice={viewingInvoice}
                 businessSettings={businessSettings}

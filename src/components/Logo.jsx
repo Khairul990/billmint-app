@@ -103,10 +103,10 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false }) =
 
   if (type === 'app-icon') {
     return (
-      <div className={`aspect-square rounded-[2rem] bg-white dark:bg-slate-950 flex flex-col items-center justify-center p-6 border border-slate-100 dark:border-slate-900 shadow-premium transition-all duration-300 hover:shadow-premium-hover ${className}`}>
+      <div className={`aspect-square rounded-[2rem] bg-white dark:bg-slate-900 dark:bg-slate-950 flex flex-col items-center justify-center p-6 border border-slate-100 dark:border-slate-800 dark:border-slate-900 shadow-premium transition-all duration-300 hover:shadow-premium-hover ${className}`}>
         <IconSVG sizeClass="w-3/5 h-3/5" />
         <div className="mt-4 flex flex-col items-center select-none text-center">
-          <span className="text-xl font-extrabold text-slate-800 dark:text-white tracking-tight transition-colors duration-300">
+          <span className="text-xl font-extrabold text-slate-800 dark:text-slate-100 dark:text-white tracking-tight transition-colors duration-300">
             Bill<span className="text-emerald-500 dark:text-emerald-400 font-extrabold">Qyro</span>
           </span>
           <span className="text-[6.5px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest mt-1.5 flex items-center gap-1 leading-none">

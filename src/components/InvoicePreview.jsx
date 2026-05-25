@@ -84,7 +84,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
     >
       {/* 0. ORDER TRACKING TIMELINE STEPPER */}
       {invoice.orderStatus && (
-        <div className="mb-8 p-4 md:p-5 bg-slate-50 dark:bg-slate-950/40 border border-slate-100/80 dark:border-slate-800/80 rounded-2xl">
+        <div className="mb-8 p-4 md:p-5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 dark:border-slate-800/80 rounded-2xl">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500">Order Dispatch Progress</span>
             {isCancelled ? (
@@ -157,7 +157,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
               <img
                 src={businessPrefs.logoUrl}
                 alt="Business Logo"
-                className="w-12 h-12 rounded-xl object-cover shadow-sm bg-slate-50 border border-slate-100 dark:border-slate-800"
+                className="w-12 h-12 rounded-xl object-cover shadow-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800"
               />
             ) : (
               <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white font-extrabold text-lg">
@@ -165,7 +165,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
               </div>
             )}
             <div>
-              <h3 className="font-extrabold text-xl text-slate-900 dark:text-slate-100 tracking-tight">{businessPrefs?.businessName || 'BillQyro Client'}</h3>
+              <h3 className="font-extrabold text-xl text-slate-900 dark:text-white dark:text-slate-100 tracking-tight">{businessPrefs?.businessName || 'BillQyro Client'}</h3>
               {businessPrefs?.gstNumber && (
                 <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider mt-0.5">{regionalPrefs.taxLabel || 'GST'}: {businessPrefs.gstNumber}</p>
               )}
@@ -208,7 +208,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-8 border-b border-slate-100 dark:border-slate-800 text-xs">
         <div>
           <span className="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Billed To</span>
-          <h4 className="font-extrabold text-sm text-slate-800 dark:text-slate-250">{invoice.customerName}</h4>
+          <h4 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 dark:text-slate-250">{invoice.customerName}</h4>
           <div className="text-slate-500 dark:text-slate-400 space-y-1 mt-2 max-w-xs leading-relaxed font-medium">
             <p>{invoice.customerAddress || 'No address provided'}</p>
             <p>Phone: {invoice.customerPhone || 'N/A'}</p>
@@ -218,7 +218,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
         
         <div className="md:text-right">
           <span className="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Payment Terms</span>
-          <p className="font-semibold text-slate-700 dark:text-slate-350 leading-relaxed">
+          <p className="font-semibold text-slate-700 dark:text-slate-300 dark:text-slate-350 leading-relaxed">
             Please pay online on or before the due date.<br />
             Amounts are calculated in <strong className="text-indigo-600 dark:text-indigo-400 font-extrabold">{currencySymbol}</strong>.
           </p>
@@ -238,8 +238,8 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40">
             {invoice.items && invoice.items.map((item, idx) => (
-              <tr key={idx} className="text-slate-700 dark:text-slate-300 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
-                <td className="py-4 font-semibold text-slate-800 dark:text-slate-200">
+              <tr key={idx} className="text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:bg-slate-800/50/50 dark:hover:bg-slate-800/20">
+                <td className="py-4 font-semibold text-slate-800 dark:text-slate-100 dark:text-slate-200">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     {item.designNo && item.designNo !== 'N/A' && (
                       <span className="inline-block px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 rounded text-[9px] font-black tracking-wider uppercase border border-indigo-100/10">
@@ -252,7 +252,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
                       </span>
                     )}
                   </div>
-                  <span className="text-xs text-slate-800 dark:text-slate-200 font-semibold">{item.description || item.name || 'Stitching Service'}</span>
+                  <span className="text-xs text-slate-800 dark:text-slate-100 dark:text-slate-200 font-semibold">{item.description || item.name || 'Stitching Service'}</span>
                   {item.size && item.size !== 'N/A' && (
                     <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Size: {item.size}</span>
                   )}
@@ -263,7 +263,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
                 <td className="py-4 text-right font-semibold text-slate-600 dark:text-slate-400">
                   {formatCurrency(item.rate !== undefined ? item.rate : item.price, currencySymbol, regionalPrefs.numberFormat)}
                 </td>
-                <td className="py-4 text-right font-extrabold text-slate-900 dark:text-slate-100">
+                <td className="py-4 text-right font-extrabold text-slate-900 dark:text-white dark:text-slate-100">
                   {formatCurrency(item.amount !== undefined ? item.amount : item.total, currencySymbol, regionalPrefs.numberFormat)}
                 </td>
               </tr>
@@ -286,7 +286,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
           {invoice.notes && (
             <>
               <span className="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block text-[10px] mb-1.5">Notes & Terms</span>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed bg-slate-50/50 dark:bg-slate-950/20 rounded-2xl p-4 border border-slate-100/50 dark:border-slate-800/40 italic">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/20 rounded-2xl p-4 border border-slate-100 dark:border-slate-800/50 dark:border-slate-800/40 italic">
                 "{invoice.notes}"
               </p>
             </>
@@ -297,7 +297,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
         <div className="w-full sm:w-64 space-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span className="text-slate-800 dark:text-slate-200 font-bold">{formatCurrency(invoice.subtotal, currencySymbol, regionalPrefs.numberFormat)}</span>
+            <span className="text-slate-800 dark:text-slate-100 dark:text-slate-200 font-bold">{formatCurrency(invoice.subtotal, currencySymbol, regionalPrefs.numberFormat)}</span>
           </div>
           {invoice.discountAmount > 0 && (
             <div className="flex justify-between text-rose-500 dark:text-rose-450 font-bold">
@@ -307,11 +307,11 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
           )}
           <div className="flex justify-between">
             <span>{regionalPrefs.taxLabel || 'Tax'} ({invoice.taxPercentage}%)</span>
-            <span className="text-slate-800 dark:text-slate-200 font-bold">{formatCurrency(invoice.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
+            <span className="text-slate-800 dark:text-slate-100 dark:text-slate-200 font-bold">{formatCurrency(invoice.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
           </div>
           
-          <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-3 text-slate-900 dark:text-slate-100">
-            <span className="text-sm font-extrabold text-slate-800 dark:text-slate-200">Grand Total</span>
+          <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-3 text-slate-900 dark:text-white dark:text-slate-100">
+            <span className="text-sm font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-200">Grand Total</span>
             <span className="text-lg font-black text-indigo-600 dark:text-indigo-400">
               {formatCurrency(invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}
             </span>
@@ -355,7 +355,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
 
               <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
                 {/* QR Code Frame */}
-                <div className="p-3 bg-white rounded-2xl shadow-lg border border-white/10 shrink-0">
+                <div className="p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-white/10 shrink-0">
                   <img 
                     src={qrCodeUrl} 
                     alt={`${paymentMethod} QR Code`} 
@@ -432,7 +432,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       )}
 
       {/* 5. BRAND FOOTER SIGNATURE */}
-      <div className="flex justify-center items-center gap-1.5 border-t border-slate-100/80 dark:border-slate-800/80 pt-8 mt-8 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+      <div className="flex justify-center items-center gap-1.5 border-t border-slate-100 dark:border-slate-800/80 dark:border-slate-800/80 pt-8 mt-8 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
         <ShieldCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
         <span>Generated Securely via BillQyro Invoicing SaaS</span>
       </div>

@@ -11,16 +11,16 @@ import {
 const FAQItem = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-        <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white mb-3 shadow-sm hover:border-teal-200 transition-colors">
+        <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 mb-3 shadow-sm hover:border-teal-200 transition-colors">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full px-5 py-4 text-left flex items-center justify-between focus:outline-none hover:bg-slate-50 transition-colors"
+                className="w-full px-5 py-4 text-left flex items-center justify-between focus:outline-none hover:bg-slate-50 dark:bg-slate-800/50 transition-colors"
             >
-                <span className="font-bold text-slate-800 text-sm">{question}</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100 text-sm">{question}</span>
                 <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
             {isOpen && (
-                <div className="px-5 pb-4 text-xs font-medium text-slate-500 leading-relaxed border-t border-slate-100 pt-3 bg-slate-50">
+                <div className="px-5 pb-4 text-xs font-medium text-slate-500 leading-relaxed border-t border-slate-100 dark:border-slate-800 pt-3 bg-slate-50 dark:bg-slate-800/50">
                     {answer}
                 </div>
             )}
@@ -30,18 +30,18 @@ const FAQItem = ({ question, answer }) => {
 
 // --- MINI UI ILLUSTRATIONS (HTML/CSS ONLY) - MADE BIGGER & CLEARER ---
 const UIProfileMockup = () => (
-    <div className="w-full h-full bg-slate-50 rounded-xl border-2 border-slate-200 p-5 flex flex-col gap-4 shadow-inner">
+    <div className="w-full h-full bg-slate-50 dark:bg-slate-800/50 rounded-xl border-2 border-slate-200 p-5 flex flex-col gap-4 shadow-inner">
         <div className="flex items-center gap-3 mb-2 border-b border-slate-200 pb-3">
             <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center"><Settings className="w-5 h-5 text-indigo-600"/></div>
             <div>
-                <div className="text-xs font-bold text-slate-800">Business Settings</div>
+                <div className="text-xs font-bold text-slate-800 dark:text-slate-100">Business Settings</div>
                 <div className="text-[10px] text-slate-400">Business Profile</div>
             </div>
         </div>
         <div className="space-y-3">
-            <div className="h-8 w-full bg-white border border-slate-200 rounded-md flex items-center px-3 text-[10px] text-slate-400">Shop Name...</div>
-            <div className="h-8 w-full bg-white border border-slate-200 rounded-md flex items-center px-3 text-[10px] text-slate-400">Phone Number...</div>
-            <div className="h-8 w-2/3 bg-white border border-slate-200 rounded-md flex items-center px-3 text-[10px] text-slate-400">GST/Tax details...</div>
+            <div className="h-8 w-full bg-white dark:bg-slate-900 border border-slate-200 rounded-md flex items-center px-3 text-[10px] text-slate-400">Shop Name...</div>
+            <div className="h-8 w-full bg-white dark:bg-slate-900 border border-slate-200 rounded-md flex items-center px-3 text-[10px] text-slate-400">Phone Number...</div>
+            <div className="h-8 w-2/3 bg-white dark:bg-slate-900 border border-slate-200 rounded-md flex items-center px-3 text-[10px] text-slate-400">GST/Tax details...</div>
         </div>
         <div className="mt-auto h-9 w-full bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center justify-center text-white text-[11px] font-bold shadow-md">
             Save Profile
@@ -50,88 +50,88 @@ const UIProfileMockup = () => (
 );
 
 const UICustomerMockup = () => (
-    <div className="w-full h-full bg-slate-50 rounded-xl border-2 border-slate-200 p-5 flex flex-col gap-4 shadow-inner">
+    <div className="w-full h-full bg-slate-50 dark:bg-slate-800/50 rounded-xl border-2 border-slate-200 p-5 flex flex-col gap-4 shadow-inner">
         <div className="flex items-center justify-between mb-2">
-            <div className="text-xs font-bold text-slate-800">Customers</div>
+            <div className="text-xs font-bold text-slate-800 dark:text-slate-100">Customers</div>
             <div className="bg-blue-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-1 text-[10px] font-bold shadow-sm">
                 <Plus className="w-3 h-3"/> Add New
             </div>
         </div>
-        <div className="flex-1 bg-white border border-slate-200 rounded-lg p-4 space-y-4 shadow-sm">
-            <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+        <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 rounded-lg p-4 space-y-4 shadow-sm">
+            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">RA</div>
                 <div>
-                    <div className="text-xs font-bold text-slate-800">Rahim Ahmed</div>
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-100">Rahim Ahmed</div>
                     <div className="text-[10px] text-slate-500">+91 98765 43210</div>
                 </div>
             </div>
             <div className="space-y-2">
-                <div className="h-2 w-3/4 bg-slate-100 rounded"></div>
-                <div className="h-2 w-1/2 bg-slate-100 rounded"></div>
+                <div className="h-2 w-3/4 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                <div className="h-2 w-1/2 bg-slate-100 dark:bg-slate-800 rounded"></div>
             </div>
         </div>
     </div>
 );
 
 const UIInvoiceMockup = () => (
-    <div className="w-full h-full bg-slate-50 rounded-xl border-2 border-slate-200 p-5 flex flex-col gap-4 shadow-inner">
+    <div className="w-full h-full bg-slate-50 dark:bg-slate-800/50 rounded-xl border-2 border-slate-200 p-5 flex flex-col gap-4 shadow-inner">
         <div className="flex justify-between items-center border-b border-slate-200 pb-3">
             <div className="text-sm font-black text-teal-600">Create Bill</div>
             <div className="text-[10px] font-bold text-slate-400">INV-1001</div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between shadow-sm">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 rounded-lg p-3 flex items-center justify-between shadow-sm">
             <div className="text-[11px] font-bold text-slate-600">Select Customer...</div>
             <ChevronDown className="w-4 h-4 text-slate-400"/>
         </div>
         <div className="flex gap-3">
-            <div className="flex-1 bg-white border border-slate-200 rounded-lg h-20 p-3 flex flex-col justify-center shadow-sm">
+            <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 rounded-lg h-20 p-3 flex flex-col justify-center shadow-sm">
                 <div className="text-[10px] text-slate-400 mb-1">Issue Date</div>
-                <div className="text-xs font-bold text-slate-700">Today</div>
+                <div className="text-xs font-bold text-slate-700 dark:text-slate-300">Today</div>
             </div>
-            <div className="flex-1 bg-white border border-slate-200 rounded-lg h-20 p-3 flex flex-col justify-center shadow-sm">
+            <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 rounded-lg h-20 p-3 flex flex-col justify-center shadow-sm">
                 <div className="text-[10px] text-slate-400 mb-1">Due Date</div>
-                <div className="text-xs font-bold text-slate-700">Next Week</div>
+                <div className="text-xs font-bold text-slate-700 dark:text-slate-300">Next Week</div>
             </div>
         </div>
     </div>
 );
 
 const UIItemsMockup = () => (
-    <div className="w-full h-full bg-slate-50 rounded-xl border-2 border-slate-200 p-4 flex flex-col shadow-inner">
+    <div className="w-full h-full bg-slate-50 dark:bg-slate-800/50 rounded-xl border-2 border-slate-200 p-4 flex flex-col shadow-inner">
         <div className="flex border-b border-slate-200 pb-2 mb-3 text-[9px] font-black text-slate-400 uppercase tracking-wider">
             <div className="flex-[2]">Item / Service</div>
             <div className="flex-1 text-center">Qty</div>
             <div className="flex-1 text-center">Price</div>
             <div className="flex-1 text-right">Total</div>
         </div>
-        <div className="flex items-center mb-3 text-[10px] font-bold text-slate-700">
-            <div className="flex-[2] bg-white border border-slate-200 rounded px-2 py-1.5 truncate">Embroidery</div>
-            <div className="flex-1 bg-white border border-slate-200 rounded mx-1 px-2 py-1.5 text-center">2</div>
-            <div className="flex-1 bg-white border border-slate-200 rounded mx-1 px-2 py-1.5 text-center">500</div>
-            <div className="flex-1 text-right text-slate-800">1000</div>
+        <div className="flex items-center mb-3 text-[10px] font-bold text-slate-700 dark:text-slate-300">
+            <div className="flex-[2] bg-white dark:bg-slate-900 border border-slate-200 rounded px-2 py-1.5 truncate">Embroidery</div>
+            <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 rounded mx-1 px-2 py-1.5 text-center">2</div>
+            <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 rounded mx-1 px-2 py-1.5 text-center">500</div>
+            <div className="flex-1 text-right text-slate-800 dark:text-slate-100">1000</div>
         </div>
         <div className="mt-auto flex justify-end">
-            <div className="w-2/3 bg-white border border-slate-200 rounded-lg p-3 shadow-sm space-y-2">
+            <div className="w-2/3 bg-white dark:bg-slate-900 border border-slate-200 rounded-lg p-3 shadow-sm space-y-2">
                 <div className="flex justify-between text-[10px]"><span className="text-slate-500">Subtotal</span><span className="font-bold">₹1000</span></div>
                 <div className="flex justify-between text-[10px]"><span className="text-slate-500">Paid</span><span className="font-bold text-emerald-600">₹500</span></div>
-                <div className="flex justify-between text-xs border-t border-slate-100 pt-1 mt-1"><span className="font-black">Due</span><span className="font-black text-rose-500">₹500</span></div>
+                <div className="flex justify-between text-xs border-t border-slate-100 dark:border-slate-800 pt-1 mt-1"><span className="font-black">Due</span><span className="font-black text-rose-500">₹500</span></div>
             </div>
         </div>
     </div>
 );
 
 const UIStatusMockup = () => (
-    <div className="w-full h-full bg-slate-50 rounded-xl border-2 border-slate-200 p-5 flex flex-col gap-4 shadow-inner justify-center">
-        <div className="flex items-center justify-between w-full bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
-            <div className="text-xs font-bold text-slate-700">Invoice #1001</div>
+    <div className="w-full h-full bg-slate-50 dark:bg-slate-800/50 rounded-xl border-2 border-slate-200 p-5 flex flex-col gap-4 shadow-inner justify-center">
+        <div className="flex items-center justify-between w-full bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 shadow-sm">
+            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">Invoice #1001</div>
             <div className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black tracking-wide">PAID</div>
         </div>
-        <div className="flex items-center justify-between w-full bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
-            <div className="text-xs font-bold text-slate-700">Invoice #1002</div>
+        <div className="flex items-center justify-between w-full bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 shadow-sm">
+            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">Invoice #1002</div>
             <div className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-black tracking-wide">PENDING</div>
         </div>
-        <div className="flex items-center justify-between w-full bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
-            <div className="text-xs font-bold text-slate-700">Order #205</div>
+        <div className="flex items-center justify-between w-full bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 shadow-sm">
+            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">Order #205</div>
             <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black tracking-wide">IN PROGRESS</div>
         </div>
     </div>
@@ -140,10 +140,10 @@ const UIStatusMockup = () => (
 const UIPDFMockup = () => (
     <div className="w-full h-full bg-slate-200 rounded-xl p-5 flex items-center justify-center shadow-inner relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-50"></div>
-        <div className="w-[140px] h-full bg-white shadow-xl border border-slate-300 flex flex-col p-3 relative z-10">
+        <div className="w-[140px] h-full bg-white dark:bg-slate-900 shadow-xl border border-slate-300 flex flex-col p-3 relative z-10">
             <div className="flex justify-between items-start mb-4 border-b border-slate-200 pb-3">
-                <div className="w-10 h-10 bg-slate-100 flex items-center justify-center rounded"><Settings className="w-5 h-5 text-slate-300"/></div>
-                <div className="text-[8px] font-black text-slate-800 text-right uppercase">INVOICE<br/><span className="text-slate-400 font-medium">#1001</span></div>
+                <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 flex items-center justify-center rounded"><Settings className="w-5 h-5 text-slate-300"/></div>
+                <div className="text-[8px] font-black text-slate-800 dark:text-slate-100 text-right uppercase">INVOICE<br/><span className="text-slate-400 font-medium">#1001</span></div>
             </div>
             <div className="space-y-1.5 mb-4">
                 <div className="h-1.5 w-full bg-slate-200 rounded"></div>
@@ -158,18 +158,18 @@ const UIPDFMockup = () => (
 );
 
 const UIDashboardMockup = () => (
-    <div className="w-full h-full bg-slate-50 rounded-xl border-2 border-slate-200 p-5 flex flex-col gap-4 shadow-inner">
+    <div className="w-full h-full bg-slate-50 dark:bg-slate-800/50 rounded-xl border-2 border-slate-200 p-5 flex flex-col gap-4 shadow-inner">
         <div className="flex gap-3">
-            <div className="flex-1 bg-white border border-slate-200 rounded-lg p-3 shadow-sm">
+            <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 rounded-lg p-3 shadow-sm">
                 <div className="text-[9px] text-slate-400 font-bold mb-1 uppercase tracking-wide">Revenue</div>
-                <div className="text-sm font-black text-slate-800">₹24,500</div>
+                <div className="text-sm font-black text-slate-800 dark:text-slate-100">₹24,500</div>
             </div>
-            <div className="flex-1 bg-white border border-slate-200 rounded-lg p-3 shadow-sm">
+            <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 rounded-lg p-3 shadow-sm">
                 <div className="text-[9px] text-slate-400 font-bold mb-1 uppercase tracking-wide">Pending</div>
                 <div className="text-sm font-black text-rose-500">₹3,200</div>
             </div>
         </div>
-        <div className="flex-1 bg-white border border-slate-200 rounded-lg p-4 flex items-end justify-between gap-2 shadow-sm">
+        <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 rounded-lg p-4 flex items-end justify-between gap-2 shadow-sm">
             <div className="w-full bg-teal-100 rounded-t h-1/4"></div>
             <div className="w-full bg-teal-200 rounded-t h-2/4"></div>
             <div className="w-full bg-teal-300 rounded-t h-3/4"></div>
@@ -334,7 +334,7 @@ const Guide = ({ setCurrentTab }) => {
 
     return (
         <motion.div 
-            className="w-full bg-slate-50 min-h-screen py-8 px-4 md:px-8 font-sans antialiased"
+            className="w-full bg-slate-50 dark:bg-slate-800/50 min-h-screen py-8 px-4 md:px-8 font-sans antialiased"
             variants={containerVariants}
             initial="hidden"
             animate="show"
@@ -347,7 +347,7 @@ const Guide = ({ setCurrentTab }) => {
                         <HelpCircle className="w-4 h-4" />
                         <span>Official User Guide</span>
                     </div>
-                    <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+                    <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                         How to Use BillQyro
                     </h1>
                     <p className="text-sm md:text-base text-slate-500 font-medium max-w-3xl leading-relaxed">
@@ -356,14 +356,14 @@ const Guide = ({ setCurrentTab }) => {
                 </div>
 
                 {/* SECTION 1: Quick Start Overview */}
-                <motion.div variants={itemVariants} className="bg-white rounded-3xl p-6 md:p-10 shadow-premium border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+                <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-10 shadow-premium border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
                     
                     <div className="relative z-10 flex-1 space-y-4 text-center md:text-left">
                         <div className="w-12 h-12 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto md:mx-0">
                             <Sparkles className="w-6 h-6 text-teal-500" />
                         </div>
-                        <h2 className="text-xl md:text-2xl font-extrabold text-slate-900">
+                        <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white">
                             New to BillQyro?
                         </h2>
                         <p className="text-sm text-slate-600 font-medium">
@@ -385,7 +385,7 @@ const Guide = ({ setCurrentTab }) => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setCurrentTab('settings')}
-                            className="bg-white border-2 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50 px-6 py-3.5 rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+                            className="bg-white dark:bg-slate-900 border-2 border-slate-200 text-slate-700 dark:text-slate-300 hover:border-slate-300 hover:bg-slate-50 dark:bg-slate-800/50 px-6 py-3.5 rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
                         >
                             <Settings className="w-4 h-4" />
                             <span>Complete Business Profile</span>
@@ -395,15 +395,15 @@ const Guide = ({ setCurrentTab }) => {
 
                 {/* NEW SECTION: Full First Bill Flow */}
                 <motion.div variants={itemVariants} className="space-y-6">
-                    <h2 className="text-2xl font-extrabold text-slate-900 px-2 text-center md:text-left">Full First Bill Flow</h2>
-                    <div className="bg-white rounded-3xl p-6 md:p-10 shadow-premium border border-slate-100 overflow-x-auto">
+                    <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white px-2 text-center md:text-left">Full First Bill Flow</h2>
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-10 shadow-premium border border-slate-100 dark:border-slate-800 overflow-x-auto">
                         <div className="flex items-center min-w-[700px] justify-between text-center gap-2">
                             {/* Flow Step 1 */}
                             <div className="flex flex-col items-center gap-3 w-24">
                                 <div className="w-12 h-12 rounded-full bg-indigo-50 border-2 border-indigo-200 text-indigo-600 flex items-center justify-center shadow-sm">
                                     <Settings className="w-5 h-5" />
                                 </div>
-                                <span className="text-[10px] font-black uppercase text-slate-700 tracking-tight leading-tight">Complete Profile</span>
+                                <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 tracking-tight leading-tight">Complete Profile</span>
                             </div>
                             <ArrowRight className="w-5 h-5 text-slate-300 shrink-0 mb-6" />
                             
@@ -412,7 +412,7 @@ const Guide = ({ setCurrentTab }) => {
                                 <div className="w-12 h-12 rounded-full bg-blue-50 border-2 border-blue-200 text-blue-600 flex items-center justify-center shadow-sm">
                                     <Users className="w-5 h-5" />
                                 </div>
-                                <span className="text-[10px] font-black uppercase text-slate-700 tracking-tight leading-tight">Add Customer</span>
+                                <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 tracking-tight leading-tight">Add Customer</span>
                             </div>
                             <ArrowRight className="w-5 h-5 text-slate-300 shrink-0 mb-6" />
                             
@@ -421,7 +421,7 @@ const Guide = ({ setCurrentTab }) => {
                                 <div className="w-12 h-12 rounded-full bg-teal-50 border-2 border-teal-200 text-teal-600 flex items-center justify-center shadow-sm">
                                     <FileText className="w-5 h-5" />
                                 </div>
-                                <span className="text-[10px] font-black uppercase text-slate-700 tracking-tight leading-tight">Create Bill</span>
+                                <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 tracking-tight leading-tight">Create Bill</span>
                             </div>
                             <ArrowRight className="w-5 h-5 text-slate-300 shrink-0 mb-6" />
 
@@ -430,7 +430,7 @@ const Guide = ({ setCurrentTab }) => {
                                 <div className="w-12 h-12 rounded-full bg-emerald-50 border-2 border-emerald-200 text-emerald-600 flex items-center justify-center shadow-sm">
                                     <ListChecks className="w-5 h-5" />
                                 </div>
-                                <span className="text-[10px] font-black uppercase text-slate-700 tracking-tight leading-tight">Add Items</span>
+                                <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 tracking-tight leading-tight">Add Items</span>
                             </div>
                             <ArrowRight className="w-5 h-5 text-slate-300 shrink-0 mb-6" />
 
@@ -439,7 +439,7 @@ const Guide = ({ setCurrentTab }) => {
                                 <div className="w-12 h-12 rounded-full bg-amber-50 border-2 border-amber-200 text-amber-600 flex items-center justify-center shadow-sm">
                                     <CheckCircle2 className="w-5 h-5" />
                                 </div>
-                                <span className="text-[10px] font-black uppercase text-slate-700 tracking-tight leading-tight">Save Invoice</span>
+                                <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 tracking-tight leading-tight">Save Invoice</span>
                             </div>
                             <ArrowRight className="w-5 h-5 text-slate-300 shrink-0 mb-6" />
 
@@ -448,7 +448,7 @@ const Guide = ({ setCurrentTab }) => {
                                 <div className="w-12 h-12 rounded-full bg-rose-50 border-2 border-rose-200 text-rose-600 flex items-center justify-center shadow-sm">
                                     <FileDown className="w-5 h-5" />
                                 </div>
-                                <span className="text-[10px] font-black uppercase text-slate-700 tracking-tight leading-tight">Download PDF</span>
+                                <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 tracking-tight leading-tight">Download PDF</span>
                             </div>
                         </div>
                     </div>
@@ -459,7 +459,7 @@ const Guide = ({ setCurrentTab }) => {
                 <motion.div variants={itemVariants} className="space-y-8">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
                         <div className="flex-1">
-                            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Interactive Guide</h2>
+                            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Interactive Guide</h2>
                             <p className="text-sm text-slate-500 font-medium mt-1">Click on the steps or use Arrow Keys to navigate.</p>
                             
                             {/* PROGRESS BAR */}
@@ -473,7 +473,7 @@ const Guide = ({ setCurrentTab }) => {
                                 <span className="text-xs font-bold text-slate-500">{activeStep} / {steps.length} completed</span>
                             </div>
                         </div>
-                        <div className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-400 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm shrink-0">
+                        <div className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm shrink-0">
                             <MousePointer2 className="w-3.5 h-3.5" />
                             Interactive Mode
                         </div>
@@ -489,13 +489,13 @@ const Guide = ({ setCurrentTab }) => {
                                     <div 
                                         key={step.id}
                                         onClick={() => setActiveStep(step.id)}
-                                        className={`p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200 flex items-center gap-4 group ${isActive ? 'bg-white shadow-md border-slate-200 scale-[1.02]' : 'border-transparent hover:bg-white/60 hover:border-slate-200/50'}`}
+                                        className={`p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200 flex items-center gap-4 group ${isActive ? 'bg-white dark:bg-slate-900 shadow-md border-slate-200 scale-[1.02]' : 'border-transparent hover:bg-white dark:bg-slate-900/60 hover:border-slate-200/50'}`}
                                     >
                                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm shrink-0 transition-colors ${isActive ? `${step.bg} ${step.color} shadow-sm border border-white/50` : 'bg-slate-200 text-slate-500 group-hover:bg-slate-300'}`}>
                                             {step.id}
                                         </div>
                                         <div className="flex-1">
-                                            <h3 className={`font-extrabold text-sm md:text-base ${isActive ? 'text-slate-900' : 'text-slate-600 group-hover:text-slate-800'}`}>
+                                            <h3 className={`font-extrabold text-sm md:text-base ${isActive ? 'text-slate-900 dark:text-white' : 'text-slate-600 group-hover:text-slate-800 dark:text-slate-100'}`}>
                                                 {step.title}
                                             </h3>
                                             {!isActive && (
@@ -509,7 +509,7 @@ const Guide = ({ setCurrentTab }) => {
                         </div>
 
                         {/* RIGHT: Active Content & Mockup */}
-                        <div className="w-full lg:w-7/12 bg-white rounded-[2rem] p-6 md:p-8 shadow-premium border border-slate-100 flex flex-col">
+                        <div className="w-full lg:w-7/12 bg-white dark:bg-slate-900 rounded-[2rem] p-6 md:p-8 shadow-premium border border-slate-100 dark:border-slate-800 flex flex-col">
                             <AnimatePresence mode="wait">
                                 {steps.map((step) => step.id === activeStep && (
                                     <motion.div 
@@ -526,7 +526,7 @@ const Guide = ({ setCurrentTab }) => {
                                                 <div className={`w-12 h-12 rounded-xl ${step.bg} ${step.color} flex items-center justify-center font-black text-xl shadow-sm border border-white/50 shrink-0`}>
                                                     {step.id}
                                                 </div>
-                                                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{step.title}</h3>
+                                                <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">{step.title}</h3>
                                             </div>
                                             
                                             <p className="text-sm text-slate-600 font-medium leading-relaxed max-w-lg">
@@ -534,7 +534,7 @@ const Guide = ({ setCurrentTab }) => {
                                             </p>
 
                                             <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                                                <div className="flex items-center gap-2 bg-slate-50 py-2 px-3 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 shrink-0">
+                                                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 py-2 px-3 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 dark:text-slate-300 shrink-0">
                                                     <MousePointer2 className="w-4 h-4 text-slate-400" />
                                                     <span>Click:</span>
                                                     <span className="text-[#071B3A]">{step.whereToClick}</span>
@@ -556,7 +556,7 @@ const Guide = ({ setCurrentTab }) => {
                                         </div>
 
                                         {/* Mockup Area */}
-                                        <div className="flex-1 mt-2 rounded-2xl bg-slate-50 border border-slate-100 p-4 flex items-center justify-center relative overflow-hidden group min-h-[250px] md:min-h-[300px]">
+                                        <div className="flex-1 mt-2 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 p-4 flex items-center justify-center relative overflow-hidden group min-h-[250px] md:min-h-[300px]">
                                             <div className="absolute inset-0 bg-gradient-to-tr from-slate-100 to-white opacity-50 pointer-events-none"></div>
                                             <div className="w-full max-w-[360px] h-[220px] md:h-[260px] relative z-10 transition-transform duration-500 group-hover:scale-105">
                                                 <step.Mockup />
@@ -584,29 +584,29 @@ const Guide = ({ setCurrentTab }) => {
                             </p>
                         </div>
 
-                        <div className="flex-[1.5] w-full bg-white text-slate-800 rounded-2xl p-6 shadow-xl border border-slate-100">
+                        <div className="flex-[1.5] w-full bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-2xl p-6 shadow-xl border border-slate-100 dark:border-slate-800">
                             <div className="space-y-3 text-sm font-semibold">
-                                <div className="flex justify-between border-b border-slate-100 pb-2">
+                                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                                     <span className="text-slate-500">Customer:</span>
-                                    <span className="font-extrabold text-slate-900">Rahim Ahmed</span>
+                                    <span className="font-extrabold text-slate-900 dark:text-white">Rahim Ahmed</span>
                                 </div>
-                                <div className="flex justify-between border-b border-slate-100 pb-2">
+                                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                                     <span className="text-slate-500">Service:</span>
                                     <span>Embroidery Work</span>
                                 </div>
-                                <div className="flex justify-between border-b border-slate-100 pb-2">
+                                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                                     <span className="text-slate-500">Qty:</span>
                                     <span>2</span>
                                 </div>
-                                <div className="flex justify-between border-b border-slate-100 pb-2">
+                                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                                     <span className="text-slate-500">Price:</span>
                                     <span>₹500</span>
                                 </div>
-                                <div className="flex justify-between border-b border-slate-100 pb-2">
+                                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                                     <span className="text-slate-500">Paid:</span>
                                     <span className="text-emerald-600 font-bold">₹500</span>
                                 </div>
-                                <div className="flex justify-between border-b border-slate-100 pb-2">
+                                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                                     <span className="text-slate-500">Due:</span>
                                     <span className="text-rose-500 font-bold">₹500</span>
                                 </div>
@@ -622,7 +622,7 @@ const Guide = ({ setCurrentTab }) => {
                 {/* SECTION 4: Common Questions */}
                 <motion.div variants={itemVariants} className="space-y-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
-                        <h2 className="text-2xl font-extrabold text-slate-900 text-center md:text-left">Common Questions</h2>
+                        <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white text-center md:text-left">Common Questions</h2>
                         
                         <div className="relative max-w-sm w-full">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -633,7 +633,7 @@ const Guide = ({ setCurrentTab }) => {
                                 placeholder="Search FAQs..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all shadow-sm"
+                                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all shadow-sm"
                             />
                         </div>
                     </div>
@@ -662,8 +662,8 @@ const Guide = ({ setCurrentTab }) => {
 
                 {/* SECTION 5: Final CTA */}
                 <motion.div variants={itemVariants} className="bg-gradient-to-r from-teal-500 to-emerald-500 rounded-[2rem] p-8 md:p-12 text-center text-white shadow-xl shadow-teal-500/20 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white dark:bg-slate-900/10 rounded-full blur-2xl pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-white dark:bg-slate-900/10 rounded-full blur-2xl pointer-events-none"></div>
 
                     <div className="relative z-10">
                         <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight mb-4 text-white">
@@ -675,7 +675,7 @@ const Guide = ({ setCurrentTab }) => {
                         <div className="flex flex-col sm:flex-row justify-center gap-4">
                             <button
                                 onClick={() => setCurrentTab('create-invoice')}
-                                className="bg-white text-teal-600 px-8 py-4 rounded-xl font-black text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                className="bg-white dark:bg-slate-900 text-teal-600 px-8 py-4 rounded-xl font-black text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                             >
                                 <FileText className="w-5 h-5" />
                                 <span>Create First Bill</span>

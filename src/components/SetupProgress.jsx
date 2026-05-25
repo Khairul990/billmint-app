@@ -73,7 +73,7 @@ const SetupProgress = ({ businessSettings = {}, customers = [], invoices = [] })
                         <Activity className="w-4 h-4" />
                     </div>
                     <div>
-                        <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
+                        <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 dark:text-slate-200 tracking-tight flex items-center gap-2">
                             <span>Setup Progress</span>
                             {progressPercent === 100 && (
                                 <Sparkles className="w-4 h-4 text-emerald-500" />
@@ -95,7 +95,7 @@ const SetupProgress = ({ businessSettings = {}, customers = [], invoices = [] })
                             r="16"
                             fill="none"
                             stroke="currentColor"
-                            className="text-slate-100 dark:text-slate-800"
+                            className="text-slate-100 dark:text-slate-800 dark:text-slate-100"
                             strokeWidth="3"
                         />
                         {/* Progress arc */}
@@ -137,7 +137,7 @@ const SetupProgress = ({ businessSettings = {}, customers = [], invoices = [] })
                     return (
                         <div
                             key={item.id}
-                            className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50/50 dark:bg-slate-950/40 border border-slate-100/50 dark:border-slate-800/50 transition-all"
+                            className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/50 dark:border-slate-800/50 transition-all"
                         >
                             <div className="flex items-center gap-2.5">
                                 {/* Status icon */}

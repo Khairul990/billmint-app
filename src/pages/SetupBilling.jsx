@@ -91,7 +91,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
       id: 'custom',
       title: 'Custom Bill',
       icon: <PenTool className="w-5 h-5 text-slate-500" />,
-      color: 'bg-slate-50 border-slate-200 hover:border-slate-500 dark:bg-slate-800/40 dark:border-slate-700',
+      color: 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 hover:border-slate-500 dark:bg-slate-800/40 dark:border-slate-700',
       description: 'Item/Service, Description, Quantity, Rate, Amount'
     }
   ];
@@ -242,7 +242,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4 md:px-6 flex items-center justify-center font-sans antialiased">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-950 py-10 px-4 md:px-6 flex items-center justify-center font-sans antialiased">
       <div className="max-w-3xl w-full bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800/80 overflow-hidden flex flex-col min-h-[580px] transition-all">
         
         {/* Top Progress bar Indicator */}
@@ -277,7 +277,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
               </p>
             </div>
             
-            <div className="w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center font-bold text-white text-lg">
+            <div className="w-12 h-12 bg-white dark:bg-slate-900/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center font-bold text-white text-lg">
               {step === 1 && <Globe className="w-6 h-6 text-indigo-300" />}
               {step === 2 && <Building2 className="w-6 h-6 text-emerald-300" />}
               {step === 3 && <QrCode className="w-6 h-6 text-rose-300" />}
@@ -309,7 +309,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                       className={`p-5 rounded-2xl border-2 text-left transition-all ${
                         country === item.id 
                           ? 'border-indigo-600 bg-indigo-50/20 dark:bg-indigo-950/20' 
-                          : 'border-slate-100 hover:border-slate-300 dark:border-slate-800 bg-slate-50/50 hover:bg-slate-100/40 dark:bg-slate-900/30'
+                          : 'border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50/50 hover:bg-slate-100 dark:bg-slate-800/40 dark:bg-slate-900/30'
                       }`}
                     >
                       <div className="text-3xl mb-2">{item.flag}</div>
@@ -340,7 +340,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
                     placeholder="e.g. BillQyro Embroidery"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
                   />
                 </div>
                 
@@ -352,7 +352,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                     value={ownerName}
                     onChange={(e) => setOwnerName(e.target.value)}
                     placeholder="e.g. John Doe"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
                   />
                 </div>
 
@@ -363,7 +363,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="e.g. +91 98765 XXXXX"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-200 font-semibold"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 dark:text-slate-200 font-semibold"
                   />
                 </div>
 
@@ -374,7 +374,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="contact@company.com"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-200 font-semibold"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 dark:text-slate-200 font-semibold"
                   />
                 </div>
 
@@ -385,7 +385,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Full business office address details..."
                     rows="2"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-200 resize-none text-xs"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 dark:text-slate-200 resize-none text-xs"
                   />
                 </div>
 
@@ -394,7 +394,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                   <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase">Corporate Logo (Optional)</label>
                   <div
                     className={`relative border-2 border-dashed rounded-xl p-4.5 text-center transition-all ${
-                      isDragging ? 'border-indigo-500 bg-indigo-50/30 dark:bg-indigo-950/20' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:bg-slate-850'
+                      isDragging ? 'border-indigo-500 bg-indigo-50/30 dark:bg-indigo-950/20' : 'border-slate-200 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:bg-slate-850'
                     }`}
                     onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                     onDragLeave={() => setIsDragging(false)}
@@ -428,8 +428,8 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                     </div>
                   </div>
                   {logoUrl && (
-                    <div className="mt-3 flex items-center gap-3.5 bg-slate-50 dark:bg-slate-850 p-2.5 rounded-xl border border-slate-150/40 dark:border-slate-800">
-                      <img src={logoUrl} alt="Logo" className="h-10 w-auto object-contain rounded-lg border bg-white p-0.5" />
+                    <div className="mt-3 flex items-center gap-3.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850 p-2.5 rounded-xl border border-slate-150/40 dark:border-slate-800">
+                      <img src={logoUrl} alt="Logo" className="h-10 w-auto object-contain rounded-lg border bg-white dark:bg-slate-900 p-0.5" />
                       <span className="text-[10px] text-slate-400 font-bold uppercase truncate max-w-xs flex-1">Logo image uploaded</span>
                       <button
                         type="button"
@@ -459,10 +459,10 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                         className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center justify-between min-h-[90px] ${
                           isSelected 
                             ? 'border-indigo-600 bg-indigo-50/30 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 shadow-sm scale-102 font-bold' 
-                            : 'border-slate-100 bg-slate-50/50 hover:bg-slate-100 text-slate-500 dark:border-slate-800 dark:bg-slate-800/30'
+                            : 'border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50/50 hover:bg-slate-100 dark:bg-slate-800 text-slate-500 dark:border-slate-800 dark:bg-slate-800/30'
                         }`}
                       >
-                        <div className="p-1.5 bg-white dark:bg-slate-850 rounded-lg shadow-xs mb-1.5">
+                        <div className="p-1.5 bg-white dark:bg-slate-900 dark:bg-slate-850 rounded-lg shadow-xs mb-1.5">
                           {tpl.icon}
                         </div>
                         <h4 className="text-[10px] leading-tight font-extrabold">{tpl.title}</h4>
@@ -478,9 +478,9 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
           {step === 3 && (
             <div className="space-y-4 animate-fadeIn">
               {/* Payment Enable toggle */}
-              <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 rounded-xl">
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 rounded-xl">
                 <div>
-                  <span className="text-xs font-black text-slate-700 dark:text-slate-250 block">Enable Automated Scan-to-Pay QR Codes</span>
+                  <span className="text-xs font-black text-slate-700 dark:text-slate-300 dark:text-slate-250 block">Enable Automated Scan-to-Pay QR Codes</span>
                   <span className="text-[9px] text-slate-400 font-bold">Embed a QR payment code and deep link inside digital invoices for immediate payment.</span>
                 </div>
                 <button 
@@ -488,7 +488,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                   onClick={() => setPaymentQrEnabled(!paymentQrEnabled)}
                   className={`w-10 h-5.5 rounded-full relative transition-colors duration-300 focus:outline-none ${paymentQrEnabled ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}`}
                 >
-                  <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-1 transition-all duration-300 ${paymentQrEnabled ? 'left-5.5' : 'left-1'}`}></div>
+                  <div className={`w-3.5 h-3.5 bg-white dark:bg-slate-900 rounded-full absolute top-1 transition-all duration-300 ${paymentQrEnabled ? 'left-5.5' : 'left-1'}`}></div>
                 </button>
               </div>
 
@@ -506,7 +506,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                           value={upiId}
                           onChange={(e) => setUpiId(e.target.value)}
                           placeholder="e.g. yourbusiness@okaxis"
-                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
                         />
                       </div>
 
@@ -518,7 +518,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                           value={payeeName}
                           onChange={(e) => setPayeeName(e.target.value)}
                           placeholder="e.g. BillQyro Store"
-                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
                         />
                       </div>
 
@@ -529,7 +529,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                           value={gstNumber}
                           onChange={(e) => setGstNumber(e.target.value)}
                           placeholder="e.g. 29AAAAA0000A1Z5"
-                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold uppercase"
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold uppercase"
                         />
                       </div>
                     </>
@@ -545,7 +545,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                           value={bkashNumber}
                           onChange={(e) => setBkashNumber(e.target.value)}
                           placeholder="e.g. 017XXXXXXXX"
-                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
                         />
                       </div>
 
@@ -556,7 +556,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                           value={nagadNumber}
                           onChange={(e) => setNagadNumber(e.target.value)}
                           placeholder="e.g. 019XXXXXXXX"
-                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
                         />
                       </div>
 
@@ -567,7 +567,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                           value={rocketNumber}
                           onChange={(e) => setRocketNumber(e.target.value)}
                           placeholder="e.g. 018XXXXXXXX"
-                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
                         />
                       </div>
 
@@ -578,7 +578,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                           value={vatTax}
                           onChange={(e) => setVatTax(e.target.value)}
                           placeholder="e.g. 7.5"
-                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
                         />
                       </div>
                     </>
@@ -591,7 +591,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                         <select
                           value={customCurrency}
                           onChange={(e) => setCustomCurrency(e.target.value)}
-                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-bold"
                         >
                           <option value="$">USD $ (US Dollar)</option>
                           <option value="€">EUR € (Euro)</option>
@@ -610,7 +610,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                           value={customPaymentLink}
                           onChange={(e) => setCustomPaymentLink(e.target.value)}
                           placeholder="e.g. https://paypal.me/yourbusiness or bank details"
-                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-850 dark:text-slate-250"
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-850 dark:text-slate-250"
                         />
                       </div>
                     </>
@@ -624,7 +624,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                       value={paymentNote}
                       onChange={(e) => setPaymentNote(e.target.value)}
                       placeholder="Showed beneath the payment QR code module."
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-850 dark:text-slate-200 text-xs"
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-850 dark:text-slate-200 text-xs"
                     />
                   </div>
 
@@ -649,7 +649,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                   <select
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 dark:text-slate-200 font-bold"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 dark:text-slate-300 dark:text-slate-200 font-bold"
                   >
                     <option value="English">English (Global standard)</option>
                     <option value="Bengali">Bengali (বাংলা)</option>
@@ -662,24 +662,24 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                   <span className="text-[9px] text-slate-400 font-extrabold uppercase mr-1">Suggested for you:</span>
                   {country === 'India' && (
                     <>
-                      <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>English</button>
-                      <button type="button" onClick={() => setLanguage('Hindi')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Hindi' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>Hindi</button>
-                      <button type="button" onClick={() => setLanguage('Bengali')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Bengali' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>Bengali</button>
+                      <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>English</button>
+                      <button type="button" onClick={() => setLanguage('Hindi')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Hindi' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>Hindi</button>
+                      <button type="button" onClick={() => setLanguage('Bengali')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Bengali' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>Bengali</button>
                     </>
                   )}
                   {country === 'Bangladesh' && (
                     <>
-                      <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>English</button>
-                      <button type="button" onClick={() => setLanguage('Bengali')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Bengali' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>Bengali</button>
+                      <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>English</button>
+                      <button type="button" onClick={() => setLanguage('Bengali')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Bengali' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>Bengali</button>
                     </>
                   )}
                   {country === 'Other' && (
-                    <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>English</button>
+                    <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-750'}`}>English</button>
                   )}
                 </div>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-850 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 space-y-4">
+              <div className="bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 space-y-4">
                 <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-1.5 uppercase">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Confirm Profile Summary
                 </h3>
@@ -721,8 +721,8 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
               disabled={step === 1 || isSaving}
               className={`flex items-center gap-1.5 px-4.5 py-2.5 rounded-xl text-xs font-extrabold border transition-all cursor-pointer ${
                 step === 1 
-                  ? 'border-transparent text-slate-300 dark:text-slate-700 cursor-default' 
-                  : 'bg-white hover:bg-slate-50 border-slate-200 dark:border-slate-800 dark:bg-slate-900 text-slate-600 dark:text-slate-350 active:scale-95'
+                  ? 'border-transparent text-slate-300 dark:text-slate-700 dark:text-slate-300 cursor-default' 
+                  : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 dark:bg-slate-900 text-slate-600 dark:text-slate-350 active:scale-95'
               }`}
             >
               <ChevronLeft className="w-4 h-4" />

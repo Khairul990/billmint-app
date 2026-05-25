@@ -12,7 +12,7 @@ const NewUserGuide = ({ setCurrentTab, isNewUser }) => {
     // We'll give it a prominent gradient if they are a new user.
     
     return (
-        <div className={`rounded-3xl p-6 md:p-8 border shadow-premium relative overflow-hidden transition-all duration-300 ${isNewUser ? 'bg-gradient-to-br from-slate-900 to-[#071B3A] text-white border-slate-800' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-100 dark:border-slate-800/80'}`}>
+        <div className={`rounded-3xl p-6 md:p-8 border shadow-premium relative overflow-hidden transition-all duration-300 ${isNewUser ? 'bg-gradient-to-br from-slate-900 to-[#071B3A] text-white border-slate-800' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 dark:text-slate-200 border-slate-100 dark:border-slate-800/80'}`}>
             
             {isNewUser && (
                 <>
@@ -27,7 +27,7 @@ const NewUserGuide = ({ setCurrentTab, isNewUser }) => {
                         <div className={`p-1.5 rounded-xl ${isNewUser ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-50 text-teal-600'} shadow-sm`}>
                             <Sparkles className="w-5 h-5" />
                         </div>
-                        <h3 className={`font-extrabold text-lg md:text-xl tracking-tight ${isNewUser ? 'text-white' : 'text-slate-900'}`}>
+                        <h3 className={`font-extrabold text-lg md:text-xl tracking-tight ${isNewUser ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
                             How to Use BillQyro
                         </h3>
                     </div>

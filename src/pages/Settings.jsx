@@ -559,7 +559,7 @@ const Settings = ({
   const firebaseStatusColor = {
     connected: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900',
     offline: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900',
-    'not-configured': 'bg-slate-50 text-slate-500 border-slate-200 dark:bg-slate-800/40 dark:text-slate-400 dark:border-slate-700',
+    'not-configured': 'bg-slate-50 dark:bg-slate-800/50 text-slate-500 border-slate-200 dark:bg-slate-800/40 dark:text-slate-400 dark:border-slate-700',
   }[firebaseStatus];
 
   const firebaseStatusDot = {
@@ -575,7 +575,7 @@ const Settings = ({
   }[firebaseStatus];
 
   return (
-    <div className="max-w-4xl mx-auto pb-12 relative font-sans text-slate-800 dark:text-slate-200">
+    <div className="max-w-4xl mx-auto pb-12 relative font-sans text-slate-800 dark:text-slate-100 dark:text-slate-200">
 
       {/* DEVELOPMENT DEBUG BLOCK */}
       <div className="bg-slate-800 text-[10px] text-green-400 p-2 mb-4 rounded font-mono break-all dark:bg-slate-900 dark:border dark:border-slate-800 flex justify-between">
@@ -607,7 +607,7 @@ const Settings = ({
       </div>
 
       {/* Modern 5-Tab Selection Menu */}
-      <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1.5 rounded-2xl mb-6 overflow-x-auto no-scrollbar gap-1">
+      <div className="flex bg-slate-100 dark:bg-slate-800 dark:bg-slate-900/60 p-1.5 rounded-2xl mb-6 overflow-x-auto no-scrollbar gap-1">
         {[
           { id: 'profile', label: 'Profile', icon: Building2 },
           { id: 'regional', label: 'Regional', icon: Globe },
@@ -625,7 +625,7 @@ const Settings = ({
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${isSelected
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm border border-slate-100/50 dark:border-slate-700/50'
+                  ? 'bg-white dark:bg-slate-900 dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm border border-slate-100 dark:border-slate-800/50 dark:border-slate-700/50'
                   : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
                 }`}
             >
@@ -647,7 +647,7 @@ const Settings = ({
                 <Building2 className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-200">Business Profile</h2>
+                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-200">Business Profile</h2>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Public Company Details</p>
               </div>
             </div>
@@ -661,7 +661,7 @@ const Settings = ({
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder="e.g. BillQyro Technologies"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-805 dark:text-white font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-805 dark:text-white font-bold"
                 />
               </div>
 
@@ -674,7 +674,7 @@ const Settings = ({
                     value={ownerName}
                     onChange={(e) => setOwnerName(e.target.value)}
                     placeholder="e.g. John Doe"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-medium"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-medium"
                   />
                 </div>
               </div>
@@ -682,7 +682,7 @@ const Settings = ({
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-450 mb-1.5 uppercase tracking-wide">Business Logo URL</label>
                 <div
-                  className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${isDragging ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/20' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:bg-slate-850'
+                  className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${isDragging ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/20' : 'border-slate-200 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:bg-slate-850'
                     }`}
                   onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                   onDragLeave={() => setIsDragging(false)}
@@ -723,13 +723,13 @@ const Settings = ({
                     value={logoUrl}
                     onChange={(e) => setLogoUrl(e.target.value)}
                     placeholder="Or paste logo image URL..."
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-indigo-600 dark:text-indigo-400 font-medium text-xs"
+                    className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-indigo-600 dark:text-indigo-400 font-medium text-xs"
                   />
                 </div>
 
                 {logoUrl && (
                   <div className="mt-3 relative inline-block group">
-                    <img src={logoUrl} alt="Logo" className="h-12 w-auto object-contain rounded-lg border border-slate-200 dark:border-slate-750 p-1 bg-white" onError={(e) => e.target.style.display = 'none'} />
+                    <img src={logoUrl} alt="Logo" className="h-12 w-auto object-contain rounded-lg border border-slate-200 dark:border-slate-750 p-1 bg-white dark:bg-slate-900" onError={(e) => e.target.style.display = 'none'} />
                     <button
                       type="button"
                       onClick={() => setLogoUrl('')}
@@ -748,7 +748,7 @@ const Settings = ({
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+91 98765 00000"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-medium"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-medium"
                 />
               </div>
 
@@ -759,7 +759,7 @@ const Settings = ({
                   value={whatsapp}
                   onChange={(e) => setWhatsapp(e.target.value)}
                   placeholder="+91 98765 00000"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-medium"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-medium"
                 />
               </div>
 
@@ -772,7 +772,7 @@ const Settings = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="billing@firm.com"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-medium"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-medium"
                   />
                 </div>
               </div>
@@ -786,7 +786,7 @@ const Settings = ({
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Full office address details..."
                     rows="2"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-medium resize-none text-xs"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-medium resize-none text-xs"
                   />
                 </div>
               </div>
@@ -802,7 +802,7 @@ const Settings = ({
                 <Globe className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-200">Regional Settings</h2>
+                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-200">Regional Settings</h2>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Localization, currency, and language</p>
               </div>
             </div>
@@ -813,7 +813,7 @@ const Settings = ({
                 <select
                   value={country}
                   onChange={(e) => handleCountryAutoConfigure(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                 >
                   <option value="India">🇮🇳 India</option>
                   <option value="Bangladesh">🇧🇩 Bangladesh</option>
@@ -826,7 +826,7 @@ const Settings = ({
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                 >
                   <option value="English">English</option>
                   <option value="Bengali">Bengali (বাংলা)</option>
@@ -842,7 +842,7 @@ const Settings = ({
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
                   placeholder="e.g. ₹, ৳, $, €"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                 />
               </div>
 
@@ -853,7 +853,7 @@ const Settings = ({
                   value={currencyCode}
                   onChange={(e) => setCurrencyCode(e.target.value)}
                   placeholder="e.g. INR, BDT, USD"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                 />
               </div>
 
@@ -866,7 +866,7 @@ const Settings = ({
                       setTaxLabel(e.target.value);
                     }
                   }}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold mb-2"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold mb-2"
                 >
                   <option value="GST">GST</option>
                   <option value="VAT">VAT</option>
@@ -880,7 +880,7 @@ const Settings = ({
                     value={taxLabel === 'Custom' ? '' : taxLabel}
                     onChange={(e) => setTaxLabel(e.target.value)}
                     placeholder="Enter custom tax label..."
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                   />
                 )}
               </div>
@@ -890,7 +890,7 @@ const Settings = ({
                 <select
                   value={dateFormat}
                   onChange={(e) => setDateFormat(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                 >
                   <option value="DD/MM/YYYY">DD/MM/YYYY (e.g. 24/05/2026)</option>
                   <option value="MM/DD/YYYY">MM/DD/YYYY (e.g. 05/24/2026)</option>
@@ -903,7 +903,7 @@ const Settings = ({
                 <select
                   value={numberFormat}
                   onChange={(e) => setNumberFormat(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                 >
                   <option value="Indian">12,34,567.89 (Indian lakh/crore)</option>
                   <option value="Standard">1,234,567.89 (Standard international)</option>
@@ -919,7 +919,7 @@ const Settings = ({
                     value={vatTax}
                     onChange={(e) => setVatTax(e.target.value)}
                     placeholder="e.g. 7.5"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                   />
                 </div>
               )}
@@ -935,15 +935,15 @@ const Settings = ({
                 <QrCode className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-200">Payment Settings</h2>
+                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-200">Payment Settings</h2>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Automated billing QR configuration</p>
               </div>
             </div>
 
             {/* Enable switch */}
-            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl">
+            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl">
               <div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">Enable Automated Scan-to-Pay QR Code</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-200 block">Enable Automated Scan-to-Pay QR Code</span>
                 <span className="text-[10px] text-slate-400 font-medium">Embed automated scanning codes on bills and invoice pages</span>
               </div>
               <button
@@ -951,7 +951,7 @@ const Settings = ({
                 onClick={() => setPaymentQrEnabled(!paymentQrEnabled)}
                 className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${paymentQrEnabled ? 'bg-teal-500' : 'bg-slate-300 dark:bg-slate-700'}`}
               >
-                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-300 ${paymentQrEnabled ? 'left-7' : 'left-1'}`}></div>
+                <div className={`w-4 h-4 bg-white dark:bg-slate-900 rounded-full absolute top-1 transition-all duration-300 ${paymentQrEnabled ? 'left-7' : 'left-1'}`}></div>
               </button>
             </div>
 
@@ -963,7 +963,7 @@ const Settings = ({
                     <select
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                     >
                       {country === 'India' && <option value="UPI">UPI (Unified Payments Interface - India)</option>}
                       {country === 'Bangladesh' && (
@@ -986,7 +986,7 @@ const Settings = ({
                         value={upiId}
                         onChange={(e) => setUpiId(e.target.value)}
                         placeholder="e.g. business@okaxis"
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                       />
                     </div>
                   )}
@@ -999,7 +999,7 @@ const Settings = ({
                         value={bkashNumber}
                         onChange={(e) => setBkashNumber(e.target.value)}
                         placeholder="e.g. 017XXXXXXXX"
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                       />
                     </div>
                   )}
@@ -1012,7 +1012,7 @@ const Settings = ({
                         value={nagadNumber}
                         onChange={(e) => setNagadNumber(e.target.value)}
                         placeholder="e.g. 019XXXXXXXX"
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                       />
                     </div>
                   )}
@@ -1025,7 +1025,7 @@ const Settings = ({
                         value={rocketNumber}
                         onChange={(e) => setRocketNumber(e.target.value)}
                         placeholder="e.g. 018XXXXXXXX"
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                       />
                     </div>
                   )}
@@ -1038,7 +1038,7 @@ const Settings = ({
                         value={customPaymentLink}
                         onChange={(e) => setCustomPaymentLink(e.target.value)}
                         placeholder="e.g. Bank name: X, A/C: Y, IFSC: Z or PayPal link..."
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-medium"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-medium"
                       />
                     </div>
                   )}
@@ -1050,7 +1050,7 @@ const Settings = ({
                       value={payeeName}
                       onChange={(e) => setPayeeName(e.target.value)}
                       placeholder="e.g. BillQyro store"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                     />
                   </div>
 
@@ -1061,15 +1061,15 @@ const Settings = ({
                       value={paymentNote}
                       onChange={(e) => setPaymentNote(e.target.value)}
                       placeholder="e.g. Please scan to complete payment."
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-855 dark:text-white font-medium"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-855 dark:text-white font-medium"
                     />
                   </div>
                 </div>
 
                 {/* PDF/Preview checks */}
-                <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl">
+                <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl">
                   <div>
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">Show QR in PDF Invoice</span>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-200 block">Show QR in PDF Invoice</span>
                     <span className="text-[9px] text-slate-400 font-medium">Render the QR code on generated PDF documents</span>
                   </div>
                   <button
@@ -1077,13 +1077,13 @@ const Settings = ({
                     onClick={() => setShowQrInPdf(!showQrInPdf)}
                     className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${showQrInPdf ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}
                   >
-                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-300 ${showQrInPdf ? 'left-7' : 'left-1'}`}></div>
+                    <div className={`w-4 h-4 bg-white dark:bg-slate-900 rounded-full absolute top-1 transition-all duration-300 ${showQrInPdf ? 'left-7' : 'left-1'}`}></div>
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl">
+                <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl">
                   <div>
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">Show QR on Local Preview</span>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-200 block">Show QR on Local Preview</span>
                     <span className="text-[9px] text-slate-400 font-medium">Render the QR code on invoice previews inside dashboard</span>
                   </div>
                   <button
@@ -1091,7 +1091,7 @@ const Settings = ({
                     onClick={() => setShowQrInPreview(!showQrInPreview)}
                     className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${showQrInPreview ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}
                   >
-                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-300 ${showQrInPreview ? 'left-7' : 'left-1'}`}></div>
+                    <div className={`w-4 h-4 bg-white dark:bg-slate-900 rounded-full absolute top-1 transition-all duration-300 ${showQrInPreview ? 'left-7' : 'left-1'}`}></div>
                   </button>
                 </div>
               </>
@@ -1107,7 +1107,7 @@ const Settings = ({
                 <Palette className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-200">Invoice Preferences</h2>
+                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-200">Invoice Preferences</h2>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Invoice templates, numbering, and color accents</p>
               </div>
             </div>
@@ -1118,7 +1118,7 @@ const Settings = ({
                 <select
                   value={invoiceTemplate}
                   onChange={(e) => setInvoiceTemplate(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                 >
                   <option value="modern">Modern A4 Template Layout</option>
                   <option value="classic">Classic A5 Template Layout</option>
@@ -1130,7 +1130,7 @@ const Settings = ({
                 <select
                   value={defaultBillingTemplate}
                   onChange={(e) => setDefaultBillingTemplate(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                 >
                   <option value="embroidery">Embroidery / Sewing / Fashion</option>
                   <option value="grocery">Grocery / Kirana Shop</option>
@@ -1147,7 +1147,7 @@ const Settings = ({
                   value={invoicePrefix}
                   onChange={(e) => setInvoicePrefix(e.target.value)}
                   placeholder="e.g. INV-"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                 />
               </div>
 
@@ -1158,7 +1158,7 @@ const Settings = ({
                   value={gstNumber}
                   onChange={(e) => setGstNumber(e.target.value)}
                   placeholder="e.g. 29AAAAA0000A1Z5"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-bold uppercase"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-bold uppercase"
                 />
               </div>
 
@@ -1197,7 +1197,7 @@ const Settings = ({
                   onChange={(e) => setDefaultNotes(e.target.value)}
                   placeholder="Thank you for your business!"
                   rows="2"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-medium resize-none text-xs"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-medium resize-none text-xs"
                 />
               </div>
 
@@ -1208,7 +1208,7 @@ const Settings = ({
                   onChange={(e) => setTerms(e.target.value)}
                   placeholder="1. Payment is expected within due date."
                   rows="2"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-medium resize-none text-xs"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-medium resize-none text-xs"
                 />
               </div>
 
@@ -1219,7 +1219,7 @@ const Settings = ({
                   value={pdfFooter}
                   onChange={(e) => setPdfFooter(e.target.value)}
                   placeholder="e.g. This is a computer generated invoice."
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-white font-medium"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-medium"
                 />
               </div>
             </div>
@@ -1234,7 +1234,7 @@ const Settings = ({
                 <Link className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-200">Customer Live Link Settings</h2>
+                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-200">Customer Live Link Settings</h2>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Configure what public customers see and interact with</p>
               </div>
             </div>
@@ -1252,9 +1252,9 @@ const Settings = ({
                 { state: requireTransactionId, setter: setRequireTransactionId, label: 'Require Transaction Reference ID', desc: 'Make Transaction ID mandatory in the proof verification flow' },
                 { state: requirePaymentScreenshot, setter: setRequirePaymentScreenshot, label: 'Require Payment Screenshot Proof', desc: 'Make file upload mandatory to submit "I Have Paid"' }
               ].map((item, idx) => (
-                <div key={idx} className="flex items-start justify-between p-3.5 bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 rounded-xl">
+                <div key={idx} className="flex items-start justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 rounded-xl">
                   <div className="mr-3">
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-250 block">{item.label}</span>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-250 block">{item.label}</span>
                     <span className="text-[9px] text-slate-450 dark:text-slate-400 font-semibold">{item.desc}</span>
                   </div>
                   <button
@@ -1262,7 +1262,7 @@ const Settings = ({
                     onClick={() => item.setter(!item.state)}
                     className={`w-9 h-5 rounded-full relative transition-colors duration-300 shrink-0 mt-0.5 focus:outline-none ${item.state ? 'bg-teal-500' : 'bg-slate-350 dark:bg-slate-700'}`}
                   >
-                    <div className={`w-3 h-3 bg-white rounded-full absolute top-1 transition-all duration-300 ${item.state ? 'left-5' : 'left-1'}`}></div>
+                    <div className={`w-3 h-3 bg-white dark:bg-slate-900 rounded-full absolute top-1 transition-all duration-300 ${item.state ? 'left-5' : 'left-1'}`}></div>
                   </button>
                 </div>
               ))}
@@ -1279,7 +1279,7 @@ const Settings = ({
                 <Smartphone className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-200">Premium Mobile UX</h2>
+                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-200">Premium Mobile UX</h2>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Configure haptic vibrations and premium sounds</p>
               </div>
             </div>
@@ -1289,9 +1289,9 @@ const Settings = ({
                 { state: enableHaptics, setter: setEnableHaptics, label: 'Enable Haptic Feedback', desc: 'Vibrate on success, errors, and key actions' },
                 { state: enableSounds, setter: setEnableSounds, label: 'Enable Premium Sounds', desc: 'Play satisfying audio cues when bills are saved' }
               ].map((item, idx) => (
-                <div key={idx} className="flex items-start justify-between p-3.5 bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 rounded-xl">
+                <div key={idx} className="flex items-start justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 rounded-xl">
                   <div className="mr-3">
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-250 block">{item.label}</span>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-250 block">{item.label}</span>
                     <span className="text-[9px] text-slate-450 dark:text-slate-400 font-semibold">{item.desc}</span>
                   </div>
                   <button
@@ -1299,7 +1299,7 @@ const Settings = ({
                     onClick={() => item.setter(!item.state)}
                     className={`w-9 h-5 rounded-full relative transition-colors duration-300 shrink-0 mt-0.5 focus:outline-none ${item.state ? 'bg-teal-500' : 'bg-slate-350 dark:bg-slate-700'}`}
                   >
-                    <div className={`w-3 h-3 bg-white rounded-full absolute top-1 transition-all duration-300 ${item.state ? 'left-5' : 'left-1'}`}></div>
+                    <div className={`w-3 h-3 bg-white dark:bg-slate-900 rounded-full absolute top-1 transition-all duration-300 ${item.state ? 'left-5' : 'left-1'}`}></div>
                   </button>
                 </div>
               ))}
@@ -1315,7 +1315,7 @@ const Settings = ({
                 <Download className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-200">Install BillQyro App</h2>
+                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-200">Install BillQyro App</h2>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Run BillQyro as a premium standalone software</p>
               </div>
             </div>
@@ -1331,7 +1331,7 @@ const Settings = ({
                 </p>
               </div>
             ) : installPromptEvent ? (
-              <div className="p-6 bg-slate-50 dark:bg-slate-850/50 border border-slate-200 dark:border-slate-850 rounded-3xl text-center space-y-4">
+              <div className="p-6 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850/50 border border-slate-200 dark:border-slate-850 rounded-3xl text-center space-y-4">
                 <div className="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/20 text-white flex items-center justify-center font-black text-xl">
                   BQ
                 </div>
@@ -1364,40 +1364,40 @@ const Settings = ({
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Apple iOS */}
-                  <div className="bg-slate-50 dark:bg-slate-850/40 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850/40 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black text-slate-650 dark:text-slate-400 uppercase">
                       🍎 Apple iOS (iPhone/iPad)
                     </div>
                     <ol className="text-xs text-slate-500 dark:text-slate-400 font-semibold space-y-2 list-decimal list-inside">
-                      <li>Open BillQyro in <strong className="text-slate-700 dark:text-slate-200">Safari</strong> browser.</li>
-                      <li>Tap the <strong className="text-slate-700 dark:text-slate-200">Share</strong> button (box with an up-arrow).</li>
-                      <li>Scroll and select <strong className="text-slate-700 dark:text-slate-200">Add to Home Screen</strong>.</li>
+                      <li>Open BillQyro in <strong className="text-slate-700 dark:text-slate-300 dark:text-slate-200">Safari</strong> browser.</li>
+                      <li>Tap the <strong className="text-slate-700 dark:text-slate-300 dark:text-slate-200">Share</strong> button (box with an up-arrow).</li>
+                      <li>Scroll and select <strong className="text-slate-700 dark:text-slate-300 dark:text-slate-200">Add to Home Screen</strong>.</li>
                       <li>Tap <strong className="text-teal-650 dark:text-teal-400 font-black">Add</strong> in the top-right corner.</li>
                     </ol>
                   </div>
 
                   {/* Android Chrome */}
-                  <div className="bg-slate-50 dark:bg-slate-850/40 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850/40 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black text-slate-650 dark:text-slate-400 uppercase">
                       🤖 Android Mobile (Chrome)
                     </div>
                     <ol className="text-xs text-slate-500 dark:text-slate-450 font-semibold space-y-2 list-decimal list-inside">
-                      <li>Open BillQyro in <strong className="text-slate-700 dark:text-slate-200">Chrome</strong>.</li>
-                      <li>Tap the <strong className="text-slate-700 dark:text-slate-200">Menu</strong> icon (three vertical dots).</li>
-                      <li>Select <strong className="text-slate-700 dark:text-slate-200">Add to Home screen</strong> or <strong className="text-slate-700 dark:text-slate-200">Install app</strong>.</li>
+                      <li>Open BillQyro in <strong className="text-slate-700 dark:text-slate-300 dark:text-slate-200">Chrome</strong>.</li>
+                      <li>Tap the <strong className="text-slate-700 dark:text-slate-300 dark:text-slate-200">Menu</strong> icon (three vertical dots).</li>
+                      <li>Select <strong className="text-slate-700 dark:text-slate-300 dark:text-slate-200">Add to Home screen</strong> or <strong className="text-slate-700 dark:text-slate-300 dark:text-slate-200">Install app</strong>.</li>
                       <li>Confirm by tapping <strong className="text-teal-650 dark:text-teal-400 font-black">Install</strong>.</li>
                     </ol>
                   </div>
 
                   {/* Desktop PCs */}
-                  <div className="bg-slate-50 dark:bg-slate-850/40 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850/40 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black text-slate-655 dark:text-slate-400 uppercase">
                       💻 Desktop Computers
                     </div>
                     <ol className="text-xs text-slate-500 dark:text-slate-400 font-semibold space-y-2 list-decimal list-inside">
-                      <li>Open BillQyro in <strong className="text-slate-700 dark:text-slate-200">Chrome</strong> or <strong className="text-slate-700 dark:text-slate-200">Edge</strong>.</li>
+                      <li>Open BillQyro in <strong className="text-slate-700 dark:text-slate-300 dark:text-slate-200">Chrome</strong> or <strong className="text-slate-700 dark:text-slate-300 dark:text-slate-200">Edge</strong>.</li>
                       <li>Look at the right side of the browser's address bar.</li>
-                      <li>Click the <strong className="text-slate-700 dark:text-slate-200">Install App</strong> icon (square with overlapping shapes).</li>
+                      <li>Click the <strong className="text-slate-700 dark:text-slate-300 dark:text-slate-200">Install App</strong> icon (square with overlapping shapes).</li>
                       <li>Click <strong className="text-teal-655 dark:text-teal-400 font-black">Install</strong> in the confirmation box.</li>
                     </ol>
                   </div>
@@ -1429,7 +1429,7 @@ const Settings = ({
                 <div className="w-24 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                   <div className={`h-full rounded-full transition-all duration-500 ${storageHealth.percentage > 80 ? 'bg-rose-500' : 'bg-emerald-500'}`} style={{ width: `${storageHealth.percentage}%` }}></div>
                 </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">{storageHealth.percentage}%</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-350">{storageHealth.percentage}%</span>
               </div>
             </div>
           </div>
@@ -1454,8 +1454,8 @@ const Settings = ({
                       type="button"
                       onClick={() => setAdminSubTab(subTab.id)}
                       className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${isSelected
-                          ? 'bg-white dark:bg-slate-700 text-indigo-650 dark:text-indigo-300 shadow-sm border border-slate-100 dark:border-slate-650'
-                          : 'text-slate-505 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                          ? 'bg-white dark:bg-slate-900 dark:bg-slate-700 text-indigo-650 dark:text-indigo-300 shadow-sm border border-slate-100 dark:border-slate-800 dark:border-slate-650'
+                          : 'text-slate-505 hover:text-slate-700 dark:text-slate-300 dark:text-slate-400 dark:hover:text-slate-200'
                         }`}
                     >
                       <span>{subTab.label}</span>
@@ -1473,7 +1473,7 @@ const Settings = ({
                 <div className="space-y-6">
                   {/* PLAN & FEATURE CONTROL SECTION */}
                   <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-5">
-                    <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-250 border-b border-slate-50 dark:border-slate-800 pb-3 flex items-center gap-2">
+                    <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-250 border-b border-slate-50 dark:border-slate-800 pb-3 flex items-center gap-2">
                       <Sliders className="w-4.5 h-4.5 text-indigo-500" />
                       <span>SaaS Plan & Feature control</span>
                     </h3>
@@ -1485,7 +1485,7 @@ const Settings = ({
                           type="number"
                           value={freeInvoiceLimit}
                           onChange={(e) => setFreeInvoiceLimit(Math.max(1, parseInt(e.target.value) || 15))}
-                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-white font-extrabold"
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-white font-extrabold"
                         />
                       </div>
 
@@ -1504,7 +1504,7 @@ const Settings = ({
                           <select
                             value={feat.state}
                             onChange={(e) => feat.setter(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-805 dark:text-white font-bold"
+                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-805 dark:text-white font-bold"
                           >
                             <option value="Free">Free (Standard tier allowed)</option>
                             <option value="Premium">Premium Only (Requires Growth upgrade)</option>
@@ -1548,7 +1548,7 @@ const Settings = ({
                           value={globalAnnouncement}
                           onChange={(e) => setGlobalAnnouncement(e.target.value)}
                           placeholder="Type announcement text..."
-                          className="w-full text-xs p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none h-20 text-slate-800 dark:text-white"
+                          className="w-full text-xs p-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none h-20 text-slate-800 dark:text-slate-100 dark:text-white"
                         />
                       </div>
                       <button onClick={handleSave} className="w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-indigo-400">
@@ -1562,13 +1562,13 @@ const Settings = ({
                           <Lock className="w-4 h-4 text-rose-500" /> Maintenance Mode Lock
                         </h3>
                         <p className="text-[9px] text-slate-400 font-medium mb-3">Shut down standard users workspace, presenting lock screen.</p>
-                        <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-250">Maintenance Lockout</span>
+                        <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-250">Maintenance Lockout</span>
                           <button
                             onClick={() => setMaintenanceMode(!maintenanceMode)}
                             className={`w-10 h-5 rounded-full relative transition-colors duration-300 focus:outline-none ${maintenanceMode ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`}
                           >
-                            <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 transition-all duration-300 ${maintenanceMode ? 'left-6' : 'left-0.5'}`}></div>
+                            <div className={`w-3.5 h-3.5 bg-white dark:bg-slate-900 rounded-full absolute top-0.5 transition-all duration-300 ${maintenanceMode ? 'left-6' : 'left-0.5'}`}></div>
                           </button>
                         </div>
                       </div>
@@ -1619,7 +1619,7 @@ const Settings = ({
 
               {adminSubTab === 'users' && (
                 <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-5">
-                  <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-250 border-b border-slate-50 dark:border-slate-800 pb-3 flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-250 border-b border-slate-50 dark:border-slate-800 pb-3 flex items-center gap-2">
                     <Users className="w-4.5 h-4.5 text-indigo-500" />
                     <span>Registered Users Directory</span>
                   </h3>
@@ -1637,7 +1637,7 @@ const Settings = ({
                     <div className="overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-800">
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
-                          <tr className="bg-slate-50 dark:bg-slate-850/60 text-slate-550 dark:text-slate-400 font-black uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
+                          <tr className="bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850/60 text-slate-550 dark:text-slate-400 font-black uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
                             <th className="p-3.5">User Email</th>
                             <th className="p-3.5">Business Name</th>
                             <th className="p-3.5">Country</th>
@@ -1648,8 +1648,8 @@ const Settings = ({
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50 font-medium">
                           {adminUsers.map((user) => (
-                            <tr key={user.userId} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20 transition-all">
-                              <td className="p-3.5 font-bold text-slate-800 dark:text-slate-200">{user.email}</td>
+                            <tr key={user.userId} className="hover:bg-slate-50 dark:bg-slate-800/50/50 dark:hover:bg-slate-850/20 transition-all">
+                              <td className="p-3.5 font-bold text-slate-800 dark:text-slate-100 dark:text-slate-200">{user.email}</td>
                               <td className="p-3.5 text-slate-500 dark:text-slate-400">{user.businessName || '—'}</td>
                               <td className="p-3.5 text-slate-500 dark:text-slate-400">{user.country || 'India'}</td>
                               <td className="p-3.5">
@@ -1690,7 +1690,7 @@ const Settings = ({
 
               {adminSubTab === 'requests' && (
                 <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-5">
-                  <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-250 border-b border-slate-50 dark:border-slate-800 pb-3 flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-250 border-b border-slate-50 dark:border-slate-800 pb-3 flex items-center gap-2">
                     <CircleDollarSign className="w-4.5 h-4.5 text-indigo-500" />
                     <span>Manual Premium Upgrade Requests Queue</span>
                   </h3>
@@ -1709,12 +1709,12 @@ const Settings = ({
                       {adminRequests.map((req) => (
                         <div
                           key={req.requestId}
-                          className="p-5 border border-slate-100 dark:border-slate-800 rounded-3xl bg-slate-50/50 dark:bg-slate-850/10 hover:shadow-md transition-all space-y-4"
+                          className="p-5 border border-slate-100 dark:border-slate-800 rounded-3xl bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-850/10 hover:shadow-md transition-all space-y-4"
                         >
                           {/* Top Row: User details & status */}
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-3">
                             <div>
-                              <span className="text-xs font-black text-slate-800 dark:text-slate-200 block">{req.userEmail}</span>
+                              <span className="text-xs font-black text-slate-800 dark:text-slate-100 dark:text-slate-200 block">{req.userEmail}</span>
                               <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
                                 Request ID: {req.requestId} • {new Date(req.createdAt).toLocaleString()}
                               </span>
@@ -1735,7 +1735,7 @@ const Settings = ({
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold">
                             <div>
                               <span className="text-[9px] text-slate-400 uppercase tracking-widest block mb-0.5">Upgrade Plan</span>
-                              <span className="text-slate-800 dark:text-slate-200 font-black">{req.plan}</span>
+                              <span className="text-slate-800 dark:text-slate-100 dark:text-slate-200 font-black">{req.plan}</span>
                             </div>
                             <div>
                               <span className="text-[9px] text-slate-400 uppercase tracking-widest block mb-0.5">Amount Paid</span>
@@ -1743,7 +1743,7 @@ const Settings = ({
                             </div>
                             <div>
                               <span className="text-[9px] text-slate-400 uppercase tracking-widest block mb-0.5">Method</span>
-                              <span className="text-slate-800 dark:text-slate-200 font-bold">{req.paymentMethod}</span>
+                              <span className="text-slate-800 dark:text-slate-100 dark:text-slate-200 font-bold">{req.paymentMethod}</span>
                             </div>
                             <div>
                               <span className="text-[9px] text-slate-400 uppercase tracking-widest block mb-0.5">TXN Reference ID</span>
@@ -1758,7 +1758,7 @@ const Settings = ({
                                 <img
                                   src={req.screenshotBase64}
                                   alt="Thumbnail"
-                                  className="w-16 h-16 object-cover rounded-xl border border-slate-200 dark:border-slate-700 p-1 bg-white cursor-pointer hover:scale-105 transition-all"
+                                  className="w-16 h-16 object-cover rounded-xl border border-slate-200 dark:border-slate-700 p-1 bg-white dark:bg-slate-900 cursor-pointer hover:scale-105 transition-all"
                                   onClick={() => setSelectedScreenshot(req.screenshotBase64)}
                                 />
                                 <button
@@ -1826,22 +1826,22 @@ const Settings = ({
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-center text-xs">
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5">
+                  <div className="bg-white dark:bg-slate-900/5 border border-white/5 rounded-xl p-2.5">
                     <FileText className="w-4 h-4 text-indigo-300 mx-auto mb-1" />
                     <p className="text-lg font-black text-white">{totalInvoices}</p>
                     <span className="text-[8px] text-slate-400 uppercase font-black block">Invoices</span>
                   </div>
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5">
+                  <div className="bg-white dark:bg-slate-900/5 border border-white/5 rounded-xl p-2.5">
                     <Users className="w-4 h-4 text-cyan-300 mx-auto mb-1" />
                     <p className="text-lg font-black text-white">{totalCustomers}</p>
                     <span className="text-[8px] text-slate-400 uppercase font-black block">CRM Clients</span>
                   </div>
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5">
+                  <div className="bg-white dark:bg-slate-900/5 border border-white/5 rounded-xl p-2.5">
                     <Users className="w-4 h-4 text-indigo-300 mx-auto mb-1" />
                     <p className="text-lg font-black text-white">{adminUsers.length}</p>
                     <span className="text-[8px] text-slate-400 uppercase font-black block">Total Users</span>
                   </div>
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5 flex flex-col items-center justify-center">
+                  <div className="bg-white dark:bg-slate-900/5 border border-white/5 rounded-xl p-2.5 flex flex-col items-center justify-center">
                     <div className="flex items-center gap-1 text-[10px] font-bold mt-1">
                       <span className="text-emerald-400">{adminUsers.filter(u => u.planStatus === 'premium').length}</span>
                       <span className="text-slate-500">/</span>
@@ -1849,7 +1849,7 @@ const Settings = ({
                     </div>
                     <span className="text-[7px] text-slate-500 uppercase font-black block mt-0.5">Premium / Free</span>
                   </div>
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5 md:col-span-2">
+                  <div className="bg-white dark:bg-slate-900/5 border border-white/5 rounded-xl p-2.5 md:col-span-2">
                     <span className="text-[8px] text-slate-400 uppercase font-black block">Outstanding Dues</span>
                     <p className="text-base font-black text-amber-300 mt-0.5">{currency}{pendingPayments.toLocaleString('en-IN')}</p>
                   </div>
@@ -1859,7 +1859,7 @@ const Settings = ({
                   <button
                     type="button"
                     onClick={handleForceSync}
-                    className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-extrabold text-[10px] rounded-xl transition-all cursor-pointer border border-white/5"
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-white dark:bg-slate-900/10 hover:bg-white dark:bg-slate-900/20 text-white font-extrabold text-[10px] rounded-xl transition-all cursor-pointer border border-white/5"
                   >
                     <CloudLightning className="w-3.5 h-3.5 text-indigo-300" />
                     <span>Sync Platform Cloud Data</span>
@@ -1939,14 +1939,14 @@ const Settings = ({
               value={rejectionReasonInput}
               onChange={(e) => setRejectionReasonInput(e.target.value)}
               placeholder="e.g. Transaction ID could not be verified on bank records..."
-              className="w-full text-xs p-3 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 text-slate-800 dark:text-white"
+              className="w-full text-xs p-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 text-slate-800 dark:text-slate-100 dark:text-white"
               rows={3}
             />
             <div className="flex justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowRejectionModalFor(null)}
-                className="px-4 py-2 border border-slate-200 dark:border-slate-750 text-slate-505 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850 text-xs font-bold rounded-xl cursor-pointer"
+                className="px-4 py-2 border border-slate-200 dark:border-slate-750 text-slate-505 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-850 text-xs font-bold rounded-xl cursor-pointer"
               >
                 Cancel
               </button>

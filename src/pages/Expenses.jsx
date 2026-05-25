@@ -22,7 +22,7 @@ const CATEGORIES = [
   { name: 'Salaries & Wages', color: 'bg-emerald-100 text-emerald-700', border: 'border-emerald-200' },
   { name: 'Rent & Maintenance', color: 'bg-rose-100 text-rose-700', border: 'border-rose-200' },
   { name: 'Marketing', color: 'bg-sky-100 text-sky-700', border: 'border-sky-200' },
-  { name: 'Other', color: 'bg-slate-100 text-slate-700', border: 'border-slate-200' }
+  { name: 'Other', color: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300', border: 'border-slate-200' }
 ];
 
 const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSettings }) => {
@@ -84,7 +84,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
       {/* 1. HEADER ROW */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">Expense Tracker</h2>
+          <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Expense Tracker</h2>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">MANAGE OPERATING COSTS</p>
         </div>
 
@@ -114,7 +114,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
         </div>
 
         {/* TOP CATEGORIES PANEL */}
-        <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-premium md:col-span-2 space-y-4">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800 shadow-premium md:col-span-2 space-y-4">
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-50 pb-2">
             Cost By Category
           </h3>
@@ -122,11 +122,11 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
             {CATEGORIES.slice(0, 6).map((cat) => {
               const catTotal = getCategoryTotal(cat.name);
               return (
-                <div key={cat.name} className="p-3 bg-slate-50/50 border border-slate-100 rounded-2xl">
+                <div key={cat.name} className="p-3 bg-slate-50 dark:bg-slate-800/50/50 border border-slate-100 dark:border-slate-800 rounded-2xl">
                   <span className={`inline-block text-[9px] font-extrabold px-2 py-0.5 rounded-full ${cat.color}`}>
                     {cat.name.split(' ')[0]}
                   </span>
-                  <p className="text-sm font-black text-slate-700 mt-2">
+                  <p className="text-sm font-black text-slate-700 dark:text-slate-300 mt-2">
                     {formatCurrency(catTotal, currencySymbol)}
                   </p>
                 </div>
@@ -154,7 +154,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Embroidery Thread Reels"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
               />
             </div>
 
@@ -163,7 +163,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-extrabold"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-extrabold"
               >
                 {CATEGORIES.map(c => (
                   <option key={c.name} value={c.name}>{c.name}</option>
@@ -182,7 +182,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="1500"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
                 />
               </div>
 
@@ -193,7 +193,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
                   required
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
                 />
               </div>
             </div>
@@ -211,8 +211,8 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
         {/* 4. EXPENSE ENTRIES REGISTRY */}
         <div className="w-full space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-extrabold text-slate-800 tracking-tight">Registry Log</h3>
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-full">
+            <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Registry Log</h3>
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
               {expenses.length} Records
             </span>
           </div>
@@ -229,14 +229,14 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, x: -30 }}
                     transition={{ duration: 0.2 }}
-                    className="bg-white rounded-2xl p-4 border border-slate-100/80 shadow-premium flex items-center justify-between gap-4"
+                    className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800/80 shadow-premium flex items-center justify-between gap-4"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-400 shrink-0">
                         <Calendar className="w-5 h-5 text-indigo-500" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-slate-700 leading-tight">{exp.title}</h4>
+                        <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 leading-tight">{exp.title}</h4>
                         <div className="flex flex-wrap items-center gap-2 mt-1.5">
                           <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${catInfo.color}`}>
                             {exp.category}
@@ -250,7 +250,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <span className="text-xs font-black text-slate-800">
+                      <span className="text-xs font-black text-slate-800 dark:text-slate-100">
                         {formatCurrency(exp.amount, currencySymbol)}
                       </span>
                       <button
@@ -266,9 +266,9 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
             </AnimatePresence>
 
             {expenses.length === 0 && (
-              <div className="bg-white rounded-3xl p-10 border border-slate-100 text-center shadow-premium">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl p-10 border border-slate-100 dark:border-slate-800 text-center shadow-premium">
                 <Receipt className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-                <h4 className="font-bold text-slate-700">No Operating Costs Logged</h4>
+                <h4 className="font-bold text-slate-700 dark:text-slate-300">No Operating Costs Logged</h4>
                 <p className="text-xs text-slate-400 font-semibold mt-1">
                   Keep overhead clean. Click Log Expense to add business expenses!
                 </p>

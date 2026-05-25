@@ -215,7 +215,7 @@ const Dashboard = ({
                   ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
                   : subscription?.expired
                     ? 'bg-rose-500/15 border-rose-500/30 text-rose-400'
-                    : 'bg-slate-500/15 border-slate-500/30 text-slate-400'
+                    : 'bg-slate-50 dark:bg-slate-800/500/15 border-slate-500/30 text-slate-400'
                 }`}>
                 {subscription?.status === 'premium' ? 'Premium' : subscription?.expired ? 'Expired' : 'Free'}
               </span>
@@ -233,7 +233,7 @@ const Dashboard = ({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onQuickBillOpen}
-              className="flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-black text-xs px-4 py-3.5 rounded-2xl shadow-sm transition-all w-fit uppercase tracking-wider"
+              className="flex items-center justify-center gap-1.5 bg-white dark:bg-slate-900/10 hover:bg-white dark:bg-slate-900/20 border border-white/20 text-white font-black text-xs px-4 py-3.5 rounded-2xl shadow-sm transition-all w-fit uppercase tracking-wider"
             >
               <Zap className="w-4 h-4 text-amber-400" />
               <span>Quick Bill</span>
@@ -281,12 +281,12 @@ const Dashboard = ({
       {/* GLOBAL ANNOUNCEMENT BANNER */}
       {businessSettings?.globalAnnouncement && (
         <motion.div variants={itemVariants} className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-3xl p-4 shadow-sm flex items-start gap-3">
-          <div className="bg-white p-2 rounded-xl shadow-sm text-indigo-500 mt-0.5">
+          <div className="bg-white dark:bg-slate-900 p-2 rounded-xl shadow-sm text-indigo-500 mt-0.5">
             <Megaphone className="w-5 h-5" />
           </div>
           <div className="flex-1">
             <h3 className="text-xs font-black text-indigo-900 uppercase tracking-widest mb-1">Announcement</h3>
-            <p className="text-xs font-semibold text-slate-700 whitespace-pre-wrap leading-relaxed">{businessSettings.globalAnnouncement}</p>
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{businessSettings.globalAnnouncement}</p>
           </div>
         </motion.div>
       )}
@@ -301,7 +301,7 @@ const Dashboard = ({
             <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
               <Rocket className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">
+            <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-200 tracking-tight">
               Welcome to BillQyro
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
@@ -317,7 +317,7 @@ const Dashboard = ({
               </button>
               <button
                 onClick={() => setCurrentTab('create-invoice')}
-                className="inline-flex items-center gap-2 bg-white dark:bg-slate-800 border-2 border-emerald-500/30 dark:border-emerald-500/20 hover:border-emerald-500 text-emerald-600 dark:text-emerald-400 font-black text-xs px-6 py-3.5 rounded-2xl shadow-sm hover:shadow-md active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
+                className="inline-flex items-center gap-2 bg-white dark:bg-slate-900 dark:bg-slate-800 border-2 border-emerald-500/30 dark:border-emerald-500/20 hover:border-emerald-500 text-emerald-600 dark:text-emerald-400 font-black text-xs px-6 py-3.5 rounded-2xl shadow-sm hover:shadow-md active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
               >
                 <FileText className="w-4 h-4" />
                 <span>Create First Bill</span>
@@ -420,7 +420,7 @@ const Dashboard = ({
           <div className="flex gap-3 shrink-0">
             <button
               onClick={() => setCurrentTab('settings')}
-              className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 font-bold text-xs rounded-xl transition-colors whitespace-nowrap cursor-pointer"
+              className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 dark:text-slate-350 font-bold text-xs rounded-xl transition-colors whitespace-nowrap cursor-pointer"
             >
               Learn More
             </button>
@@ -446,7 +446,7 @@ const Dashboard = ({
         {/* Real-Time System Services Status (Col Span 1) */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800/80 shadow-premium flex flex-col justify-between space-y-5">
           <div>
-            <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
+            <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 dark:text-slate-200 tracking-tight flex items-center gap-2">
               <Activity className="w-4.5 h-4.5 text-emerald-500" />
               <span>Workspace Services Status</span>
             </h3>
@@ -458,12 +458,12 @@ const Dashboard = ({
           <div className="grid grid-cols-1 gap-3">
 
             {/* Firebase Status Card */}
-            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+            <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100 dark:border-slate-800/50 dark:border-slate-800/50">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
                   <Activity className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Firebase Database</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-350">Firebase Database</span>
               </div>
               {(() => {
                 if (!firebaseReady) {
@@ -491,12 +491,12 @@ const Dashboard = ({
               })()}
             </div>
 
-            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+            <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100 dark:border-slate-800/50 dark:border-slate-800/50">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
                   <ReceiptText className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Invoice System</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-350">Invoice System</span>
               </div>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -504,12 +504,12 @@ const Dashboard = ({
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+            <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100 dark:border-slate-800/50 dark:border-slate-800/50">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
                   <FileDown className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">PDF Generator</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-350">PDF Generator</span>
               </div>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -517,12 +517,12 @@ const Dashboard = ({
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+            <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100 dark:border-slate-800/50 dark:border-slate-800/50">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
                   <HardDrive className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Offline Storage</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-350">Offline Storage</span>
               </div>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -530,12 +530,12 @@ const Dashboard = ({
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+            <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100 dark:border-slate-800/50 dark:border-slate-800/50">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
                   <Shield className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Security Shield</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-350">Security Shield</span>
               </div>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -543,12 +543,12 @@ const Dashboard = ({
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+            <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100 dark:border-slate-800/50 dark:border-slate-800/50">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
                   <Users className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">CRM Records</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-350">CRM Records</span>
               </div>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -556,12 +556,12 @@ const Dashboard = ({
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-2.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
+            <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-100 dark:border-slate-800/50 dark:border-slate-800/50">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
                   <Clock className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Order Tracking</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-350">Order Tracking</span>
               </div>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -624,7 +624,7 @@ const Dashboard = ({
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800/80 shadow-premium space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight">Revenue Analytics</h3>
+              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 dark:text-slate-200 tracking-tight">Revenue Analytics</h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ROLLING 6 MONTH HISTORY</p>
             </div>
 
@@ -637,9 +637,9 @@ const Dashboard = ({
           {/* Recharts Graph */}
           <div className="relative h-64 w-full mt-4">
             {invoices.length === 0 && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs p-4 rounded-3xl text-center z-10">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white dark:bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-xs p-4 rounded-3xl text-center z-10">
                 <TrendingUp className="w-10 h-10 text-indigo-500 mb-2 animate-bounce" />
-                <h4 className="font-extrabold text-xs text-slate-700 dark:text-slate-350">Revenue will appear after invoices are created</h4>
+                <h4 className="font-extrabold text-xs text-slate-700 dark:text-slate-300 dark:text-slate-350">Revenue will appear after invoices are created</h4>
                 <p className="text-[9px] text-slate-400 font-bold uppercase mt-1">NO REVENUE DATA FOUND</p>
               </div>
             )}
@@ -724,7 +724,7 @@ const Dashboard = ({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
+                <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 dark:text-slate-200 tracking-tight flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-rose-500" />
                   <span>Low Stock Alerts</span>
                 </h3>
@@ -753,9 +753,9 @@ const Dashboard = ({
                       <div key={prod.id} className="flex items-center justify-between p-3 bg-rose-50 dark:bg-rose-950/30 rounded-2xl border border-rose-100 dark:border-rose-900/50">
                         <div className="flex items-center gap-3">
                           <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{prod.name}</span>
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-100 dark:text-slate-200">{prod.name}</span>
                         </div>
-                        <span className="text-[10px] font-black bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 px-2 py-1 rounded-lg border border-rose-100 dark:border-rose-900 shadow-sm">
+                        <span className="text-[10px] font-black bg-white dark:bg-slate-900 dark:bg-slate-800 text-rose-600 dark:text-rose-400 px-2 py-1 rounded-lg border border-rose-100 dark:border-rose-900 shadow-sm">
                           {prod.stockQty} left
                         </span>
                       </div>
@@ -769,7 +769,7 @@ const Dashboard = ({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
+                <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 dark:text-slate-200 tracking-tight flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-indigo-500" />
                   <span>Pending Balance Reminders</span>
                 </h3>
@@ -778,7 +778,7 @@ const Dashboard = ({
               </p>
             </div>
 
-            <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-850 py-1 px-2.5 rounded-full">
+            <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 dark:bg-slate-850 py-1 px-2.5 rounded-full">
               {unpaidInvoices.length} unpaid total
             </span>
           </div>
@@ -787,17 +787,17 @@ const Dashboard = ({
             {unpaidInvoices.map((inv) => (
               <div
                 key={inv.id}
-                className="flex items-center justify-between p-3.5 bg-slate-50/50 dark:bg-slate-950/40 hover:bg-slate-50 dark:hover:bg-slate-950/70 rounded-2xl border border-slate-100/50 dark:border-slate-800/50 transition-all"
+                className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/40 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-950/70 rounded-2xl border border-slate-100 dark:border-slate-800/50 dark:border-slate-800/50 transition-all"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-slate-800 dark:text-slate-200">{inv.invoiceNumber}</span>
+                    <span className="text-xs font-black text-slate-800 dark:text-slate-100 dark:text-slate-200">{inv.invoiceNumber}</span>
                     <span className="text-[9px] bg-amber-50 dark:bg-amber-950/35 text-amber-600 dark:text-amber-400 font-extrabold px-2 py-0.5 rounded uppercase">
                       Due: {inv.dueDate || 'N/A'}
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
-                    Client: <span className="text-slate-800 dark:text-slate-350 font-extrabold">{inv.customerName}</span> • Phone: {inv.customerPhone || 'N/A'}
+                    Client: <span className="text-slate-800 dark:text-slate-100 dark:text-slate-350 font-extrabold">{inv.customerName}</span> • Phone: {inv.customerPhone || 'N/A'}
                   </p>
                 </div>
 
@@ -840,7 +840,7 @@ const Dashboard = ({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight">Recent Logs</h3>
+                <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 dark:text-slate-200 tracking-tight">Recent Logs</h3>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">LATEST TRANSACTIONS</p>
               </div>
 
@@ -868,8 +868,8 @@ const Dashboard = ({
 
               {recentInvoices.length === 0 && (
                 <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800/80 text-center shadow-premium">
-                  <FileSpreadsheet className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2 animate-pulse" />
-                  <h4 className="font-bold text-xs text-slate-700 dark:text-slate-350">No invoices yet</h4>
+                  <FileSpreadsheet className="w-8 h-8 text-slate-300 dark:text-slate-700 dark:text-slate-300 mx-auto mb-2 animate-pulse" />
+                  <h4 className="font-bold text-xs text-slate-700 dark:text-slate-300 dark:text-slate-350">No invoices yet</h4>
                   <p className="text-[10px] text-slate-400 font-semibold mt-1">
                     Start by creating your first bill to see recent transactions here!
                   </p>
@@ -881,7 +881,7 @@ const Dashboard = ({
           {/* Global Search Panel */}
           <div className="space-y-4">
             <div>
-              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 tracking-tight">Global Invoices Filter</h3>
+              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 dark:text-slate-200 tracking-tight">Global Invoices Filter</h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">FAST SEARCH SYSTEM</p>
             </div>
 
@@ -895,7 +895,7 @@ const Dashboard = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search Invoice ID, client..."
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all text-slate-800 dark:text-slate-100"
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-900 transition-all text-slate-800 dark:text-slate-100"
                 />
               </div>
 
@@ -905,13 +905,13 @@ const Dashboard = ({
                     <div
                       key={inv.id}
                       onClick={() => onViewInvoice(inv)}
-                      className="flex justify-between items-center p-2 hover:bg-slate-50 rounded-lg cursor-pointer transition-all border border-transparent hover:border-slate-100"
+                      className="flex justify-between items-center p-2 hover:bg-slate-50 dark:bg-slate-800/50 rounded-lg cursor-pointer transition-all border border-transparent hover:border-slate-100 dark:border-slate-800"
                     >
                       <div>
-                        <p className="text-xs font-extrabold text-slate-800">{inv.invoiceNumber}</p>
+                        <p className="text-xs font-extrabold text-slate-800 dark:text-slate-100">{inv.invoiceNumber}</p>
                         <p className="text-[9px] text-slate-400 font-bold">{inv.customerName}</p>
                       </div>
-                      <span className="text-xs font-black text-slate-800">
+                      <span className="text-xs font-black text-slate-800 dark:text-slate-100">
                         {formatCurrency(inv.grandTotal, currencySymbol)}
                       </span>
                     </div>

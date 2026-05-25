@@ -100,13 +100,13 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="min-h-screen bg-slate-100 flex items-center justify-center p-4 md:p-6 lg:p-8 font-sans antialiased text-slate-900"
+      className="min-h-screen bg-slate-100 dark:bg-slate-800 flex items-center justify-center p-4 md:p-6 lg:p-8 font-sans antialiased text-slate-900 dark:text-white"
     >
       
-      <div className="w-full max-w-[1400px] bg-white rounded-[32px] shadow-2xl overflow-hidden flex flex-col lg:flex-row relative">
+      <div className="w-full max-w-[1400px] bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl overflow-hidden flex flex-col lg:flex-row relative">
         
         {/* LEFT SECTION: Login Form */}
-        <div className="lg:w-[45%] p-8 md:p-14 xl:p-20 flex flex-col relative z-10 bg-white overflow-y-auto no-scrollbar">
+        <div className="lg:w-[45%] p-8 md:p-14 xl:p-20 flex flex-col relative z-10 bg-white dark:bg-slate-900 overflow-y-auto no-scrollbar">
           
           {/* Top Header: Logo */}
           <div className="flex items-center gap-3 mb-16">
@@ -116,7 +116,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
           <div className="w-full max-w-[440px] mx-auto flex-1 flex flex-col justify-center">
             
             <div className="mb-10">
-              <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
+              <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
                 {isLoginMode ? 'Welcome to BillQyro' : 'Create an Account'}
               </h1>
               <p className="text-slate-500 font-medium text-[17px] leading-relaxed">
@@ -126,16 +126,16 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
               </p>
               
               {/* Toggle Login/Signup */}
-              <div className="flex bg-slate-100 p-1 rounded-xl mt-6">
+              <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl mt-6">
                 <button 
                   onClick={() => setIsLoginMode(true)}
-                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isLoginMode ? 'bg-white text-teal-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isLoginMode ? 'bg-white dark:bg-slate-900 text-teal-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-300'}`}
                 >
                   Log In
                 </button>
                 <button 
                   onClick={() => setIsLoginMode(false)}
-                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isLoginMode ? 'bg-white text-teal-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isLoginMode ? 'bg-white dark:bg-slate-900 text-teal-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-300'}`}
                 >
                   Sign Up
                 </button>
@@ -145,7 +145,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
             <form onSubmit={handleAuthSubmit} className="space-y-6">
               {/* Email Field */}
               <div className="space-y-2">
-                <label className="block text-sm font-bold text-slate-700">Email Address</label>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Email Address</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 pointer-events-none">
                     <Mail className="w-5 h-5" />
@@ -155,7 +155,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
                     value={email}
                     onChange={(e) => { setError(''); setEmail(e.target.value); }}
                     placeholder="admin@billqyro.com"
-                    className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-base font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all shadow-sm"
+                    className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-2xl text-base font-semibold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all shadow-sm"
                   />
                 </div>
               </div>
@@ -163,7 +163,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
               {/* Password Field */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="block text-sm font-bold text-slate-700">Password</label>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Password</label>
                   <button type="button" className="text-sm font-bold text-teal-600 hover:text-teal-700 transition-colors">
                     Forgot password?
                   </button>
@@ -177,12 +177,12 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
                     value={password}
                     onChange={(e) => { setError(''); setPassword(e.target.value); }}
                     placeholder="••••"
-                    className="w-full pl-12 pr-16 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-base font-semibold text-slate-900 tracking-wider placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all shadow-sm"
+                    className="w-full pl-12 pr-16 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-2xl text-base font-semibold text-slate-900 dark:text-white tracking-wider placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all shadow-sm"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-4 flex items-center text-xs font-bold text-slate-500 hover:text-slate-700 uppercase tracking-wider"
+                    className="absolute inset-y-0 right-4 flex items-center text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-slate-300 uppercase tracking-wider"
                   >
                     {showPassword ? 'Hide' : 'Show'}
                   </button>
@@ -228,7 +228,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
             <button
               onClick={onQuickStart}
               type="button"
-              className="w-full h-[58px] border-2 border-slate-200 text-slate-700 bg-white rounded-2xl font-bold text-base hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-100 transition-all flex items-center justify-between px-6 shadow-sm"
+              className="w-full h-[58px] border-2 border-slate-200 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 rounded-2xl font-bold text-base hover:bg-slate-50 dark:bg-slate-800/50 hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-100 transition-all flex items-center justify-between px-6 shadow-sm"
             >
               <span>Skip to Demo</span>
               <ArrowRight className="w-5 h-5 text-slate-400" />
@@ -241,7 +241,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-slate-800">Secure & Private</h4>
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100">Secure & Private</h4>
                   <p className="text-[10px] text-slate-500 font-medium mt-1">AES-256 encrypted storage</p>
                 </div>
               </div>
@@ -250,7 +250,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
                   <ArrowRight className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-slate-800">Fast & Reliable</h4>
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100">Fast & Reliable</h4>
                   <p className="text-[10px] text-slate-500 font-medium mt-1">Instant invoice creation</p>
                 </div>
               </div>
@@ -259,7 +259,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
                   <Star className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-slate-800">Trusted Design</h4>
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100">Trusted Design</h4>
                   <p className="text-[10px] text-slate-500 font-medium mt-1">Premium SaaS layout</p>
                 </div>
               </div>
@@ -272,9 +272,9 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
         </div>
 
         {/* RIGHT SECTION: Dashboard Preview / Branding */}
-        <div className="lg:w-[55%] bg-slate-50 p-8 md:p-14 lg:p-20 relative flex flex-col items-center justify-center overflow-hidden border-t lg:border-t-0 lg:border-l border-slate-200">
+        <div className="lg:w-[55%] bg-slate-50 dark:bg-slate-800/50 p-8 md:p-14 lg:p-20 relative flex flex-col items-center justify-center overflow-hidden border-t lg:border-t-0 lg:border-l border-slate-200">
           
-          <div className="absolute top-8 right-8 z-20 flex items-center gap-2 text-sm font-bold text-slate-600 bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50 transition-colors">
+          <div className="absolute top-8 right-8 z-20 flex items-center gap-2 text-sm font-bold text-slate-600 bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50 dark:bg-slate-800/50 transition-colors">
             <Globe className="w-4 h-4" />
             <span>EN</span>
           </div>
@@ -285,7 +285,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
           <div className="w-full max-w-[600px] relative z-10 flex flex-col gap-10">
             
             <div className="text-center lg:text-left mt-8 lg:mt-0">
-              <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
+              <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">
                 All your billing.<br className="hidden lg:block" /> All in one place.
               </h2>
               <p className="text-slate-500 font-medium text-lg leading-relaxed max-w-md mx-auto lg:mx-0">
@@ -294,24 +294,24 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
             </div>
 
             {/* Realistic Dashboard Mockup */}
-            <div className="bg-white rounded-[32px] shadow-2xl shadow-slate-300/60 border border-slate-200 p-2 overflow-hidden aspect-[16/11] flex flex-col relative transform lg:hover:-translate-y-2 lg:hover:scale-[1.01] transition-all duration-500 w-full ml-auto">
+            <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl shadow-slate-300/60 border border-slate-200 p-2 overflow-hidden aspect-[16/11] flex flex-col relative transform lg:hover:-translate-y-2 lg:hover:scale-[1.01] transition-all duration-500 w-full ml-auto">
               
-              <div className="flex items-center gap-2 px-5 py-4 border-b border-slate-100 bg-white">
+              <div className="flex items-center gap-2 px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
                 <div className="w-3.5 h-3.5 rounded-full bg-red-400"></div>
                 <div className="w-3.5 h-3.5 rounded-full bg-yellow-400"></div>
                 <div className="w-3.5 h-3.5 rounded-full bg-green-400"></div>
               </div>
               
-              <div className="flex-1 flex bg-slate-50 overflow-hidden rounded-b-[28px]">
+              <div className="flex-1 flex bg-slate-50 dark:bg-slate-800/50 overflow-hidden rounded-b-[28px]">
                 {/* Mock Sidebar */}
                 <div className="w-24 md:w-44 bg-[#071B3A] flex flex-col gap-4 p-4 md:p-5 shrink-0">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-8 h-8 rounded-lg bg-teal-500 flex items-center justify-center shrink-0">
-                      <div className="w-4 h-4 rounded-sm bg-white"></div>
+                      <div className="w-4 h-4 rounded-sm bg-white dark:bg-slate-900"></div>
                     </div>
-                    <div className="hidden md:block h-4 w-20 bg-white/20 rounded"></div>
+                    <div className="hidden md:block h-4 w-20 bg-white dark:bg-slate-900/20 rounded"></div>
                   </div>
-                  <div className="h-9 w-full bg-white/10 rounded-xl"></div>
+                  <div className="h-9 w-full bg-white dark:bg-slate-900/10 rounded-xl"></div>
                   <div className="h-9 w-full bg-transparent border border-white/5 rounded-xl"></div>
                   <div className="h-9 w-full bg-transparent border border-white/5 rounded-xl"></div>
                   <div className="h-9 w-3/4 bg-transparent border border-white/5 rounded-xl"></div>
@@ -322,21 +322,21 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
                   <div className="flex justify-between items-center">
                     <div className="h-6 w-32 md:w-48 bg-slate-200 rounded-lg"></div>
                     <div className="h-9 w-24 md:w-32 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-xl shadow-md flex items-center justify-center">
-                       <div className="h-2 w-12 md:w-16 bg-white/60 rounded"></div>
+                       <div className="h-2 w-12 md:w-16 bg-white dark:bg-slate-900/60 rounded"></div>
                     </div>
                   </div>
                   
                   {/* Revenue Cards */}
                   <div className="grid grid-cols-3 gap-3 md:gap-4">
-                    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2.5">
+                    <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2.5">
                       <div className="h-2.5 w-16 bg-slate-200 rounded"></div>
                       <div className="h-5 w-24 bg-slate-800 rounded"></div>
                     </div>
-                    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2.5">
+                    <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2.5">
                       <div className="h-2.5 w-16 bg-slate-200 rounded"></div>
                       <div className="h-5 w-24 bg-slate-800 rounded"></div>
                     </div>
-                    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2.5">
+                    <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2.5">
                       <div className="h-2.5 w-16 bg-slate-200 rounded"></div>
                       <div className="h-5 w-24 bg-slate-800 rounded"></div>
                     </div>
@@ -344,7 +344,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
                   
                   <div className="flex gap-4 flex-1 overflow-hidden">
                     {/* Chart Mock */}
-                    <div className="flex-[2] bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5 flex flex-col gap-4">
+                    <div className="flex-[2] bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-4 md:p-5 flex flex-col gap-4">
                       <div className="h-3 w-28 bg-slate-200 rounded"></div>
                       <div className="flex-1 flex items-end gap-3 px-2">
                         <div className="w-full bg-teal-500/20 rounded-t-lg h-[30%]"></div>
@@ -356,14 +356,14 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
                     </div>
                     
                     {/* Recent Invoices Mock */}
-                    <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5 flex flex-col gap-4">
+                    <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-4 md:p-5 flex flex-col gap-4">
                       <div className="h-3 w-20 bg-slate-200 rounded"></div>
                       <div className="flex-1 space-y-3 md:space-y-4">
-                        <div className="h-10 md:h-12 w-full bg-slate-50 rounded-xl border border-slate-100 flex items-center px-3 gap-3">
+                        <div className="h-10 md:h-12 w-full bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center px-3 gap-3">
                            <div className="w-6 h-6 rounded-full bg-slate-200 shrink-0"></div>
                            <div className="h-2 w-full bg-slate-200 rounded"></div>
                         </div>
-                        <div className="h-10 md:h-12 w-full bg-slate-50 rounded-xl border border-slate-100 flex items-center px-3 gap-3">
+                        <div className="h-10 md:h-12 w-full bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center px-3 gap-3">
                            <div className="w-6 h-6 rounded-full bg-slate-200 shrink-0"></div>
                            <div className="h-2 w-full bg-slate-200 rounded"></div>
                         </div>
@@ -377,7 +377,7 @@ const WelcomeOnboarding = ({ onLoginSuccess, onQuickStart }) => {
             {/* Testimonial Card */}
             <div className="relative z-20 -mt-16 md:-mt-20 self-center md:self-start md:ml-12 lg:-ml-6">
               <div className="bg-[#071B3A] text-white p-6 rounded-2xl shadow-xl flex gap-4 w-[340px] md:w-[380px] transform md:hover:-translate-y-1 transition-transform border border-slate-800">
-                <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-full bg-white dark:bg-slate-900/10 flex items-center justify-center shrink-0">
                   <Quote className="w-5 h-5 text-teal-400" />
                 </div>
                 <div>

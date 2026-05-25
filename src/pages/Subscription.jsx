@@ -191,7 +191,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
           </div>
           <div>
             <span className="text-[9px] font-black uppercase text-amber-600 dark:text-amber-450 tracking-wider">Awaiting Manual Activation</span>
-            <h4 className="text-xs font-black text-slate-800 dark:text-slate-200 mt-0.5">Upgrade Request Under Review</h4>
+            <h4 className="text-xs font-black text-slate-800 dark:text-slate-100 dark:text-slate-200 mt-0.5">Upgrade Request Under Review</h4>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold leading-relaxed mt-1">
               Your transfer of <strong className="text-indigo-600 dark:text-indigo-400">{pendingReq.plan} ({pendingReq.paidAmount} {country === 'India' ? 'INR' : country === 'Bangladesh' ? 'BDT' : 'USD'})</strong> with Transaction ID <strong className="font-mono text-slate-700 dark:text-slate-300">{pendingReq.transactionId}</strong> is currently being verified. Your workspace will automatically unlock upon administrator approval.
             </p>
@@ -212,12 +212,12 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
           
           <div className="space-y-4">
             <div>
-              <h3 className="font-extrabold text-slate-700 dark:text-slate-250 text-sm uppercase tracking-wider">Free Starter</h3>
+              <h3 className="font-extrabold text-slate-700 dark:text-slate-300 dark:text-slate-250 text-sm uppercase tracking-wider">Free Starter</h3>
               <p className="text-[10px] text-slate-400 font-bold mt-1">BASIC TRANSITION BILLING</p>
             </div>
             
             <div className="border-t border-b border-slate-50 dark:border-slate-800/60 py-4">
-              <h4 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">
+              <h4 className="text-3xl font-black text-slate-800 dark:text-slate-100 dark:text-white tracking-tight">
                 {formatCurrency(0, currencySymbol)}
                 <span className="text-xs text-slate-400 font-bold"> / lifetime</span>
               </h4>
@@ -234,7 +234,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
           </div>
  
           <div className="mt-8 pt-4 border-t border-slate-50 dark:border-slate-800/60">
-            <div className="w-full py-3.5 bg-slate-50 dark:bg-slate-850/40 border border-slate-100 dark:border-slate-800 rounded-2xl text-center text-xs font-black text-slate-400">
+            <div className="w-full py-3.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850/40 border border-slate-100 dark:border-slate-800 rounded-2xl text-center text-xs font-black text-slate-400">
               {!isPremium ? 'Currently Active Starter' : 'Downgrade Unavailable'}
             </div>
           </div>
@@ -313,14 +313,14 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                   <CreditCard className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-800 dark:text-slate-200">Manual Premium Upgrade Request</h3>
+                  <h3 className="text-base font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-200">Manual Premium Upgrade Request</h3>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Follow steps to unlock Premium growth features</p>
                 </div>
               </div>
               <button 
                 type="button" 
                 onClick={() => setShowUpgradeForm(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 rounded-lg"
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 rounded-lg"
               >
                 ✕
               </button>
@@ -329,9 +329,9 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               
               {/* STEP 1: PAYMENT METHOD MANUAL DETAILS BY COUNTRY */}
-              <div className="space-y-4 bg-slate-50 dark:bg-slate-850 p-5 rounded-2xl border border-slate-100 dark:border-slate-800">
+              <div className="space-y-4 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-850 p-5 rounded-2xl border border-slate-100 dark:border-slate-800">
                 <span className="text-[9px] font-black uppercase text-indigo-600 dark:text-indigo-400 tracking-wider">Step 1: Transfer Payment</span>
-                <h4 className="text-xs font-black text-slate-800 dark:text-slate-200">Send Transfer Amount to Administrator</h4>
+                <h4 className="text-xs font-black text-slate-800 dark:text-slate-100 dark:text-slate-200">Send Transfer Amount to Administrator</h4>
                 
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-semibold space-y-3.5 border-t border-slate-200/50 dark:border-slate-700/50 pt-3">
                   
@@ -342,7 +342,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                         <img 
                           src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent('upi://pay?pa=billqyro@okaxis&pn=BillQyro%20SaaS&am=' + activePricing.amount + '&cu=INR&tn=SaaS%20Upgrade')}`}
                           alt="Admin UPI QR" 
-                          className="w-28 h-28 object-contain rounded-xl border border-white mt-1 shadow-sm bg-white p-1"
+                          className="w-28 h-28 object-contain rounded-xl border border-white mt-1 shadow-sm bg-white dark:bg-slate-900 p-1"
                         />
                       </div>
                       <div className="space-y-1">
@@ -415,7 +415,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
               {/* STEP 2: VERIFICATION REQUEST SUBMISSION FORM */}
               <form onSubmit={handleFormSubmit} className="space-y-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
                 <span className="text-[9px] font-black uppercase text-indigo-600 dark:text-indigo-400 tracking-wider block">Step 2: Submit Details</span>
-                <h4 className="text-xs font-black text-slate-800 dark:text-slate-200">Submit Verification Form</h4>
+                <h4 className="text-xs font-black text-slate-800 dark:text-slate-100 dark:text-slate-200">Submit Verification Form</h4>
                 
                 <div className="grid grid-cols-2 gap-3 pt-1 border-t border-slate-100 dark:border-slate-800/80">
                   <div>
@@ -423,7 +423,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                     <select
                       value={selectedPlan}
                       onChange={(e) => setSelectedPlan(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-white font-bold"
+                      className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-white font-bold"
                     >
                       <option value="Monthly">Monthly Plan ({getPricing('Monthly').label})</option>
                       <option value="Yearly">Yearly Plan ({getPricing('Yearly').label})</option>
@@ -435,7 +435,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                     <select
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-white font-bold"
+                      className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-white font-bold"
                     >
                       {country === 'India' && <option value="UPI">UPI Interface</option>}
                       {country === 'Bangladesh' && (
@@ -460,7 +460,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                     value={paidAmount}
                     onChange={(e) => setPaidAmount(e.target.value)}
                     placeholder="e.g. 499"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-white font-extrabold"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 dark:text-white font-extrabold"
                   />
                 </div>
 
@@ -472,7 +472,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                     value={transactionId}
                     onChange={(e) => setTransactionId(e.target.value)}
                     placeholder="e.g. TXN9876543210AX or BK-89X72"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-white font-mono font-black"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 dark:text-white font-mono font-black"
                   />
                 </div>
 
@@ -481,7 +481,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                   <label className="block mb-1 text-slate-400 text-[9px] uppercase tracking-wide">Payment Screenshot Proof (Optional)</label>
                   <div
                     className={`relative border border-dashed rounded-xl p-3 text-center transition-all ${
-                      isDragging ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                      isDragging ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-800/80'
                     }`}
                     onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                     onDragLeave={() => setIsDragging(false)}
@@ -504,10 +504,10 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                   </div>
 
                   {screenshotBase64 && (
-                    <div className="mt-2.5 flex items-center gap-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl p-2 relative group">
-                      <img src={screenshotBase64} alt="Proof" className="w-12 h-12 object-cover rounded-lg border border-slate-200 dark:border-slate-700 bg-white" />
+                    <div className="mt-2.5 flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 dark:border-slate-700 rounded-xl p-2 relative group">
+                      <img src={screenshotBase64} alt="Proof" className="w-12 h-12 object-cover rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900" />
                       <div className="text-[10px] truncate max-w-xs pr-8">
-                        <span className="text-slate-700 dark:text-slate-350 block font-bold">screenshot_proof.png</span>
+                        <span className="text-slate-700 dark:text-slate-300 dark:text-slate-350 block font-bold">screenshot_proof.png</span>
                         <span className="text-[8.5px] text-slate-450 block font-mono">base64 encoded</span>
                       </div>
                       <button 

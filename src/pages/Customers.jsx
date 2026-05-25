@@ -102,7 +102,7 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
         {/* Header Panel */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-base font-extrabold text-slate-800 tracking-tight">Customer Directory</h2>
+            <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Customer Directory</h2>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">CRM CLIENT DATABASE</p>
           </div>
 
@@ -116,7 +116,7 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
         </div>
 
         {/* SEARCH CARD */}
-        <div className="bg-white rounded-3xl p-4 md:p-5 border border-slate-100 shadow-premium flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 md:p-5 border border-slate-100 dark:border-slate-800 shadow-premium flex items-center justify-between">
           <div className="relative w-full">
             <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
               <Search className="w-4 h-4" />
@@ -126,7 +126,7 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search clients by name, contact, location..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white dark:bg-slate-900 transition-all text-slate-800 dark:text-slate-100"
             />
           </div>
         </div>
@@ -136,7 +136,7 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
           {filteredCustomers.map((cust) => (
             <div 
               key={cust.id}
-              className="bg-white border border-slate-100 rounded-3xl p-5 shadow-premium hover:shadow-premium-hover transition-all duration-300 relative flex flex-col justify-between"
+              className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-5 shadow-premium hover:shadow-premium-hover transition-all duration-300 relative flex flex-col justify-between"
             >
               {/* Top section: Avatar and Actions */}
               <div>
@@ -146,7 +146,7 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
                       {cust.name.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <h3 className="font-extrabold text-sm text-slate-800 tracking-tight leading-none">{cust.name}</h3>
+                      <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 tracking-tight leading-none">{cust.name}</h3>
                       <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 inline-block">Client Contact</span>
                     </div>
                   </div>
@@ -195,9 +195,9 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
           ))}
 
           {filteredCustomers.length === 0 && (
-            <div className="md:col-span-2 lg:col-span-3 bg-white rounded-3xl p-12 border border-slate-100 text-center shadow-premium">
+            <div className="md:col-span-2 lg:col-span-3 bg-white dark:bg-slate-900 rounded-3xl p-12 border border-slate-100 dark:border-slate-800 text-center shadow-premium">
               <Users className="w-12 h-12 text-slate-200 mx-auto mb-3 animate-pulse" />
-              <h4 className="font-extrabold text-slate-700">No customers added</h4>
+              <h4 className="font-extrabold text-slate-700 dark:text-slate-300">No customers added</h4>
               <p className="text-xs text-slate-400 font-semibold mt-1 max-w-xs mx-auto">
                 No customers found. Create invoices to register customers automatically or add them here!
               </p>
@@ -220,7 +220,7 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Supersonic Labs"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
               />
             </div>
 
@@ -231,7 +231,7 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="e.g. +91 99999 88888"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100"
               />
             </div>
 
@@ -242,7 +242,7 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="e.g. billing@supersonic.io"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100"
               />
             </div>
 
@@ -253,7 +253,7 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="e.g. 45, Science Park, Pune..."
                 rows="3"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 leading-relaxed font-semibold"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 leading-relaxed font-semibold"
               />
             </div>
 

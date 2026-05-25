@@ -118,7 +118,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
         {/* Header Panel */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-base font-extrabold text-slate-800 tracking-tight">Billing Inventory</h2>
+            <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Billing Inventory</h2>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">CATALOG OF ASSETS & SERVICES</p>
           </div>
 
@@ -132,7 +132,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
         </div>
 
         {/* SEARCH CARD */}
-        <div className="bg-white rounded-3xl p-4 md:p-5 border border-slate-100 shadow-premium flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 md:p-5 border border-slate-100 dark:border-slate-800 shadow-premium flex items-center justify-between">
           <div className="relative w-full">
             <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
               <Search className="w-4 h-4" />
@@ -142,7 +142,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search catalog items by description, code name..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white dark:bg-slate-900 transition-all text-slate-800 dark:text-slate-100"
             />
           </div>
         </div>
@@ -152,7 +152,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
           {filteredProducts.map((prod) => (
             <div 
               key={prod.id}
-              className="bg-white border border-slate-100 rounded-3xl p-5 shadow-premium hover:shadow-premium-hover transition-all duration-300 relative flex flex-col justify-between"
+              className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-5 shadow-premium hover:shadow-premium-hover transition-all duration-300 relative flex flex-col justify-between"
             >
               {/* Top section: Avatar and Actions */}
               <div>
@@ -162,7 +162,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                       <Tag className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="font-extrabold text-sm text-slate-800 tracking-tight leading-tight">{prod.name}</h3>
+                      <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 tracking-tight leading-tight">{prod.name}</h3>
                       <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 inline-block">Item Resource</span>
                     </div>
                   </div>
@@ -228,9 +228,9 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
           ))}
 
           {filteredProducts.length === 0 && (
-            <div className="md:col-span-2 lg:col-span-3 bg-white rounded-3xl p-12 border border-slate-100 text-center shadow-premium">
+            <div className="md:col-span-2 lg:col-span-3 bg-white dark:bg-slate-900 rounded-3xl p-12 border border-slate-100 dark:border-slate-800 text-center shadow-premium">
               <Layers className="w-12 h-12 text-slate-200 mx-auto mb-3 animate-pulse" />
-              <h4 className="font-extrabold text-slate-700">Inventory Empty</h4>
+              <h4 className="font-extrabold text-slate-700 dark:text-slate-300">Inventory Empty</h4>
               <p className="text-xs text-slate-400 font-semibold mt-1 max-w-xs mx-auto">
                 Populate items, packages, or services inside the catalog to make selecting products during invoice generation immediate.
               </p>
@@ -253,7 +253,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Dedicated Server Hosting"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
               />
             </div>
 
@@ -268,7 +268,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="e.g. 500"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
                 />
               </div>
               <div>
@@ -278,13 +278,13 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="e.g. Services"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100"
                 />
               </div>
             </div>
 
             {/* NEW INVENTORY STOCK FIELDS */}
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100/60 mt-4">
+            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800/60 mt-4">
               <div>
                 <label className="block mb-1 text-slate-400 font-bold">Current Stock Qty</label>
                 <input
@@ -294,7 +294,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   required
                   value={stockQty}
                   onChange={(e) => setStockQty(Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 font-black"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 dark:text-slate-100 font-black"
                 />
               </div>
               <div>
@@ -309,7 +309,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   required
                   value={lowStockThreshold}
                   onChange={(e) => setLowStockThreshold(Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-slate-800 font-black"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-slate-800 dark:text-slate-100 font-black"
                 />
               </div>
             </div>
@@ -321,7 +321,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="e.g. 1 Year AWS Managed Hosting with 99.9% SLA..."
                 rows="3"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 leading-relaxed font-semibold text-xs"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 leading-relaxed font-semibold text-xs"
               />
             </div>
 

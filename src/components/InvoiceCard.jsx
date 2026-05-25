@@ -61,7 +61,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
       case 'offline':
         return 'bg-sky-50 text-sky-600 border-sky-100 dark:bg-sky-950/20 dark:text-sky-400 dark:border-sky-900/30';
       default:
-        return 'bg-slate-50 text-slate-500 border-slate-100 dark:bg-slate-950/20 dark:text-slate-400 dark:border-slate-800/30';
+        return 'bg-slate-50 dark:bg-slate-800/50 text-slate-500 border-slate-100 dark:border-slate-800 dark:bg-slate-950/20 dark:text-slate-400 dark:border-slate-800/30';
     }
   };
 
@@ -89,7 +89,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
       case 'Overdue':
         return 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
       case 'Cancelled':
-        return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700/30';
+        return 'bg-slate-100 dark:bg-slate-800 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700/30';
       case 'Unpaid':
       default:
         return 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
@@ -117,12 +117,12 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Top/Left Section: Metadata */}
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-slate-50 dark:bg-slate-950 text-indigo-500 dark:text-indigo-400 rounded-xl">
+          <div className="p-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-950 text-indigo-500 dark:text-indigo-400 rounded-xl">
             <FileText className="w-6 h-6" />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-bold text-slate-800 dark:text-slate-200 text-sm md:text-base">{invoice.invoiceNumber}</span>
+              <span className="font-bold text-slate-800 dark:text-slate-100 dark:text-slate-200 text-sm md:text-base">{invoice.invoiceNumber}</span>
               <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getStatusStyle(invoice.paymentStatus)}`}>
                 {invoice.paymentStatus}
               </span>
@@ -144,7 +144,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
 
         {/* Right Section: Price & Quick CTA Buttons */}
         <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100 dark:border-slate-800/80">
-          <span className="text-lg font-extrabold text-slate-800 dark:text-slate-150 sm:text-right">
+          <span className="text-lg font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-150 sm:text-right">
             {formatCurrency(invoice.grandTotal, currencySymbol)}
           </span>
 
@@ -191,7 +191,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 10 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 bottom-full mb-2 w-48 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-100 dark:border-slate-800 rounded-2xl p-2 shadow-2xl z-20 flex flex-col gap-1 text-[11px]"
+                    className="absolute right-0 bottom-full mb-2 w-48 bg-white dark:bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-100 dark:border-slate-800 rounded-2xl p-2 shadow-2xl z-20 flex flex-col gap-1 text-[11px]"
                   >
                     <div className="px-3 py-1 font-black text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-wider border-b border-slate-50 dark:border-slate-800/60 mb-1">
                       Quick Share

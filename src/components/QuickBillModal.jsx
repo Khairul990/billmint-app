@@ -90,7 +90,7 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
               type="text"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-100"
               placeholder="Name"
             />
           </div>
@@ -100,7 +100,7 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
               type="tel"
               value={customerPhone}
               onChange={(e) => setCustomerPhone(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-100"
               placeholder="Phone"
             />
           </div>
@@ -113,7 +113,7 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
             type="text"
             value={itemService}
             onChange={(e) => setItemService(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800"
+            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-100"
             placeholder="What are you selling?"
           />
         </div>
@@ -125,7 +125,7 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
               type="number"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-100"
             />
           </div>
           <div>
@@ -136,7 +136,7 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
                 type="number"
                 value={rate}
                 onChange={(e) => setRate(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800"
+                className="w-full pl-8 pr-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-100"
                 placeholder="0.00"
               />
             </div>
@@ -146,7 +146,7 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-bold text-slate-500 mb-1">Total Amount</label>
-            <div className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm font-bold text-slate-800">
+            <div className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 rounded-lg text-sm font-bold text-slate-800 dark:text-slate-100">
               {businessSettings?.currency || '₹'} {((parseFloat(quantity) || 1) * (parseFloat(rate) || 0)).toFixed(2)}
             </div>
           </div>
@@ -158,7 +158,7 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
                 type="number"
                 value={paidAmount}
                 onChange={(e) => setPaidAmount(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-teal-600"
+                className="w-full pl-8 pr-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-teal-600"
                 placeholder="Optional"
               />
             </div>
@@ -171,7 +171,7 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
             type="text"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800"
+            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-100"
             placeholder="Add a note..."
           />
         </div>
@@ -180,7 +180,7 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
         <div className="pt-4 grid grid-cols-2 gap-3">
           <button
             onClick={() => handleSave(false)}
-            className="w-full py-3 bg-slate-100 text-slate-700 font-bold rounded-xl flex items-center justify-center gap-2"
+            className="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl flex items-center justify-center gap-2"
           >
             <Save className="w-4 h-4" /> Save Only
           </button>

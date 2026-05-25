@@ -278,17 +278,17 @@ const PublicInvoice = ({ initialInvoice }) => {
       case 'Overdue':
         return 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-450 border border-rose-200 dark:border-rose-900';
       case 'Cancelled':
-        return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700';
+        return 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700';
       default:
-        return 'bg-slate-100 text-slate-650';
+        return 'bg-slate-100 dark:bg-slate-800 text-slate-650';
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4 md:px-6 flex flex-col items-center justify-between font-sans antialiased text-slate-800 dark:text-slate-250">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-950 py-10 px-4 md:px-6 flex flex-col items-center justify-between font-sans antialiased text-slate-800 dark:text-slate-100 dark:text-slate-250">
       
       {/* Top Floating Control Bar */}
-      <div className="max-w-4xl w-full flex items-center justify-between gap-4 mb-6 z-10 bg-white/70 dark:bg-slate-900/70 p-4 rounded-2xl border border-slate-150 dark:border-slate-800 backdrop-blur-md shadow-sm">
+      <div className="max-w-4xl w-full flex items-center justify-between gap-4 mb-6 z-10 bg-white dark:bg-slate-900/70 dark:bg-slate-900/70 p-4 rounded-2xl border border-slate-150 dark:border-slate-800 backdrop-blur-md shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-indigo-500/10">
             {business.logoUrl ? (
@@ -298,7 +298,7 @@ const PublicInvoice = ({ initialInvoice }) => {
             )}
           </div>
           <div>
-            <h1 className="font-extrabold text-sm text-slate-800 dark:text-white truncate max-w-[150px] sm:max-w-xs">{business.businessName}</h1>
+            <h1 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 dark:text-white truncate max-w-[150px] sm:max-w-xs">{business.businessName}</h1>
             <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">SECURE DIGITAL BILL</span>
           </div>
         </div>
@@ -307,7 +307,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           {liveLinkPrefs.allowCustomerPdfDownload && (
             <button
               onClick={handleDownloadPDF}
-              className="flex items-center justify-center gap-2 py-2 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-250 font-bold text-xs rounded-xl transition-all cursor-pointer"
+              className="flex items-center justify-center gap-2 py-2 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 dark:text-slate-250 font-bold text-xs rounded-xl transition-all cursor-pointer"
             >
               <FileDown className="w-4 h-4" />
               <span className="hidden sm:inline">Download PDF</span>
@@ -351,7 +351,7 @@ const PublicInvoice = ({ initialInvoice }) => {
             <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-slate-500 text-right sm:text-right">
               <div>
                 <span className="text-[10px] text-slate-400 block uppercase font-black">Issue Date</span>
-                <span className="text-slate-700 dark:text-slate-350">{invoice.date}</span>
+                <span className="text-slate-700 dark:text-slate-300 dark:text-slate-350">{invoice.date}</span>
               </div>
               <div>
                 <span className="text-[10px] text-slate-400 block uppercase font-black">Due Date</span>
@@ -362,7 +362,7 @@ const PublicInvoice = ({ initialInvoice }) => {
 
           {/* Business & Customer Address segment */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs font-semibold text-slate-550 dark:text-slate-300">
-            <div className="space-y-2 p-4 bg-slate-50/50 dark:bg-slate-950/20 rounded-2xl border border-slate-100 dark:border-slate-800">
+            <div className="space-y-2 p-4 bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/20 rounded-2xl border border-slate-100 dark:border-slate-800">
               <span className="text-[10px] text-slate-400 uppercase font-black tracking-widest block">Invoiced From</span>
               <strong className="text-slate-900 dark:text-white text-sm block">{business.businessName}</strong>
               {business.ownerName && <p className="text-[11px]">Owner: {business.ownerName}</p>}
@@ -372,7 +372,7 @@ const PublicInvoice = ({ initialInvoice }) => {
               {business.gstNumber && <p className="text-[10px] font-black text-indigo-500 mt-2 uppercase">{taxLabelText}: {business.gstNumber}</p>}
             </div>
 
-            <div className="space-y-2 p-4 bg-slate-50/50 dark:bg-slate-950/20 rounded-2xl border border-slate-100 dark:border-slate-800">
+            <div className="space-y-2 p-4 bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/20 rounded-2xl border border-slate-100 dark:border-slate-800">
               <span className="text-[10px] text-slate-400 uppercase font-black tracking-widest block">Invoiced To</span>
               <strong className="text-slate-900 dark:text-white text-sm block">{invoice.customerName}</strong>
               {invoice.customerPhone && <p className="text-[11px]">Phone: {invoice.customerPhone}</p>}
@@ -432,7 +432,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-semibold text-slate-700 dark:text-slate-300">
                   {invoice.items.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/30">
+                    <tr key={idx} className="hover:bg-slate-50 dark:bg-slate-800/50/50 dark:hover:bg-slate-850/30">
                       <td className="py-3 px-4 text-center text-slate-400 font-bold">{idx + 1}</td>
                       {invoice.billType === 'grocery' ? (
                         <>
@@ -483,11 +483,11 @@ const PublicInvoice = ({ initialInvoice }) => {
 
           {/* Totals & Notes block */}
           <div className="flex flex-col sm:flex-row gap-6 justify-between items-start pt-4 border-t border-slate-50 dark:border-slate-800/80">
-            <div className="w-full sm:w-[50%] p-4 bg-slate-50 dark:bg-slate-950/20 border border-slate-150/40 dark:border-slate-800 rounded-2xl text-xs font-semibold text-slate-500">
+            <div className="w-full sm:w-[50%] p-4 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-950/20 border border-slate-150/40 dark:border-slate-800 rounded-2xl text-xs font-semibold text-slate-500">
               <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block mb-1.5">Invoice Notes & Terms</span>
               <p className="whitespace-pre-wrap leading-relaxed">{invoice.notes || 'Thank you for your business!'}</p>
               {invoice.terms && (
-                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-850">
+                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 dark:border-slate-850">
                   <span className="text-[9px] text-slate-400 font-black uppercase block mb-1">Terms</span>
                   <p className="whitespace-pre-wrap leading-relaxed">{invoice.terms}</p>
                 </div>
@@ -563,11 +563,11 @@ const PublicInvoice = ({ initialInvoice }) => {
                 </div>
 
                 {liveLinkPrefs.showPaymentQr && paymentPrefs.paymentQrEnabled && (
-                  <div className="bg-white p-3 rounded-2xl max-w-[180px] mx-auto shadow-md border border-slate-850">
+                  <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl max-w-[180px] mx-auto shadow-md border border-slate-850">
                     <img 
                       src={qrCodeUrl} 
                       alt="Scan to Pay QR" 
-                      className="w-full h-auto object-contain rounded-lg bg-white" 
+                      className="w-full h-auto object-contain rounded-lg bg-white dark:bg-slate-900" 
                     />
                     <span className="text-[8px] text-slate-400 font-bold uppercase block text-center mt-1.5">Scan to pay now</span>
                   </div>
@@ -587,7 +587,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                         <span>Pay with UPI Apps</span>
                       </a>
                       
-                      <div className="flex items-center justify-between p-2.5 bg-white/5 border border-white/10 rounded-xl text-xs font-bold mt-1">
+                      <div className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-900/5 border border-white/10 rounded-xl text-xs font-bold mt-1">
                         <span className="text-slate-400">UPI ID: <strong className="text-white ml-1">{paymentPrefs.upiId}</strong></span>
                         <button
                           onClick={() => handleCopy(paymentPrefs.upiId, 'UPI ID')}
@@ -624,7 +624,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                         );
                       })}
 
-                      <div className="p-3 bg-white/5 border border-white/5 rounded-xl text-[10px] text-slate-450 leading-relaxed space-y-1">
+                      <div className="p-3 bg-white dark:bg-slate-900/5 border border-white/5 rounded-xl text-[10px] text-slate-450 leading-relaxed space-y-1">
                         <span className="font-extrabold text-white block uppercase tracking-wider mb-1">Manual Transfer Steps:</span>
                         <p>1. Open wallet app (bKash/Nagad).</p>
                         <p>2. Select Send Money / Cash Out to active number.</p>
@@ -640,13 +640,13 @@ const PublicInvoice = ({ initialInvoice }) => {
                   {paymentPrefs.paymentMethod === 'Manual' && (
                     <div className="space-y-3">
                       {paymentPrefs.customPaymentLink && (
-                        <div className="p-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold leading-relaxed text-slate-300">
+                        <div className="p-3 bg-white dark:bg-slate-900/5 border border-white/10 rounded-xl text-xs font-bold leading-relaxed text-slate-300">
                           <span className="text-[9px] text-slate-400 uppercase font-black block mb-1">Payment instructions</span>
                           <p>{paymentPrefs.customPaymentLink}</p>
                         </div>
                       )}
                       
-                      <div className="p-3 bg-white/5 border border-white/5 rounded-xl text-[10px] text-slate-400 space-y-1 leading-relaxed">
+                      <div className="p-3 bg-white dark:bg-slate-900/5 border border-white/5 rounded-xl text-[10px] text-slate-400 space-y-1 leading-relaxed">
                         <span className="font-extrabold text-white block uppercase tracking-wider">Instructions:</span>
                         <p>Complete transfer of total funds. Note reference ID or take screenshot, then submit verify proof below.</p>
                       </div>
@@ -664,7 +664,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                   {liveLinkPrefs.allowPaymentProofSubmit && (
                     <button
                       onClick={() => setShowPaymentForm(true)}
-                      className="w-full flex items-center justify-center gap-1.5 py-3.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-black tracking-widest uppercase transition-all border border-white/10 cursor-pointer hover:border-white/20 active:scale-98"
+                      className="w-full flex items-center justify-center gap-1.5 py-3.5 bg-white dark:bg-slate-900/5 hover:bg-white dark:bg-slate-900/10 text-white rounded-xl text-xs font-black tracking-widest uppercase transition-all border border-white/10 cursor-pointer hover:border-white/20 active:scale-98"
                     >
                       <span>I Have Completed Payment</span>
                       <ArrowRight className="w-4 h-4 text-teal-400" />
@@ -681,7 +681,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                     <Wallet className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200">Submit Payment Proof</h3>
+                    <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-200">Submit Payment Proof</h3>
                     <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Verify your transfer</span>
                   </div>
                 </div>
@@ -694,7 +694,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                       required
                       value={payMethod}
                       onChange={(e) => setPayMethod(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-white font-bold"
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
                     >
                       {country === 'India' && <option value="UPI">UPI Transfer</option>}
                       {country === 'Bangladesh' && (
@@ -720,7 +720,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                         value={payAmount}
                         onChange={(e) => setPayAmount(e.target.value)}
                         placeholder="0.00"
-                        className="w-full pl-8 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-white font-extrabold"
+                        className="w-full pl-8 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 dark:text-white font-extrabold"
                       />
                     </div>
                     <span className="text-[8px] text-slate-400 mt-1 block">Specify exact amount sent (supports partial settlements)</span>
@@ -736,7 +736,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                       value={txnId}
                       onChange={(e) => setTxnId(e.target.value)}
                       placeholder="e.g. TXN10003028"
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-805 dark:text-white font-bold"
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-805 dark:text-white font-bold"
                     />
                   </div>
 
@@ -756,14 +756,14 @@ const PublicInvoice = ({ initialInvoice }) => {
                         />
                         <label
                           htmlFor="payment-proof-upload"
-                          className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer transition-all text-slate-700 dark:text-slate-350"
+                          className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 hover:bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer transition-all text-slate-700 dark:text-slate-300 dark:text-slate-350"
                         >
                           <Upload className="w-4 h-4" />
                           <span>Choose Screenshot</span>
                         </label>
                       </div>
                       {screenshot && (
-                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center shadow-sm relative group shrink-0">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-sm relative group shrink-0">
                           <img src={screenshot} alt="Preview" className="w-full h-full object-cover" />
                         </div>
                       )}
@@ -777,7 +777,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                       onChange={(e) => setCustomerNote(e.target.value)}
                       placeholder="Add any details for the verification clerk..."
                       rows="2"
-                      className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-850 dark:text-slate-200 resize-none text-xs"
+                      className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-850 dark:text-slate-200 resize-none text-xs"
                     />
                   </div>
 
@@ -785,7 +785,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                     <button
                       type="button"
                       onClick={() => setShowPaymentForm(false)}
-                      className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-250 font-bold rounded-xl transition-all cursor-pointer text-center"
+                      className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 dark:text-slate-250 font-bold rounded-xl transition-all cursor-pointer text-center"
                     >
                       Cancel
                     </button>

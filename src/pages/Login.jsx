@@ -37,14 +37,14 @@ const LoginAnimation = () => {
           transition={{ duration: 5, repeat: Infinity, times: [0, 0.2, 0.4, 1], ease: "easeInOut" }}
           className="absolute z-10"
         >
-          <div className="bg-white p-5 rounded-2xl shadow-2xl border border-slate-100 flex flex-col gap-3 w-40">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-3 w-40">
             <div className="flex justify-between items-center mb-1">
-              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"><Logo type="icon" className="w-5 h-5" /></div>
+              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><Logo type="icon" className="w-5 h-5" /></div>
               <div className="w-12 h-2 bg-slate-200 rounded-full" />
             </div>
             <div className="w-full h-2 bg-slate-200 rounded-full" />
             <div className="w-3/4 h-2 bg-slate-200 rounded-full" />
-            <div className="w-full h-[1px] bg-slate-100 my-1" />
+            <div className="w-full h-[1px] bg-slate-100 dark:bg-slate-800 my-1" />
             <div className="w-1/2 h-3 bg-teal-100 rounded-full mt-1" />
           </div>
         </motion.div>
@@ -73,7 +73,7 @@ const LoginAnimation = () => {
           className="absolute z-30"
         >
           <div className="bg-gradient-to-br from-teal-500 to-teal-700 p-6 rounded-2xl shadow-[0_20px_50px_rgba(20,184,166,0.3)] flex flex-col items-center gap-4 w-44 text-white border border-teal-400/30">
-            <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-900/20 p-3 rounded-xl backdrop-blur-sm">
               <FileDown size={40} strokeWidth={1.5} />
             </div>
             <span className="text-xs font-black tracking-widest uppercase">PDF Ready</span>
@@ -207,7 +207,7 @@ const Login = ({ onLoginSuccess }) => {
           <button
             onClick={handleGoogleAuth}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 font-semibold py-3 px-4 rounded-xl transition-all mb-6 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-900 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 dark:text-slate-200 font-semibold py-3 px-4 rounded-xl transition-all mb-6 disabled:opacity-50"
           >
             <GoogleIcon />
             <span>Continue with Google</span>
