@@ -75,13 +75,13 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false }) =
       <motion.rect initial={{ width: 0 }} animate={{ width: 26 }} transition={{ delay: 0.4, duration: 0.4 }} x="35" y="42" width="26" height="4" rx="2" className="fill-teal-600" />
       <motion.rect initial={{ width: 0 }} animate={{ width: 14 }} transition={{ delay: 0.5, duration: 0.4 }} x="35" y="52" width="14" height="4" rx="2" className="fill-teal-600" />
 
-      {/* Bold Dollar $ Symbol in bottom center */}
+      {/* Bold Rupee ₹ Symbol in bottom center */}
       <motion.path 
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
-        transform="scale(1.8) translate(-16, -26)"
-        d="M41 50.5c0-.4.3-.8.8-.8h1.2v-.7c0-.2.2-.4.4-.4h.8c.2 0 .4.2.4.4v.7h1.2c.4 0 .8.4.8.8s-.4.8-.8.8h-2v1h1.5c1 0 1.8.8 1.8 1.8s-.8 1.8-1.8 1.8V57c0 .2-.2.4-.4.4h-.8c-.2 0-.4-.2-.4-.4v-.7H41c-.4 0-.8-.4-.8-.8s.4-.8.8-.8h2v-1H41.5c-1 0-1.8-.8-1.8-1.8zm3 1c.2 0 .3-.1.3-.3s-.1-.3-.3-.3h-1.2c-.2 0-.3.1-.3.3s.1.3.3.3H44zm.3 4c-.2 0-.3.1-.3.3s.1.3.3.3h1.2c.2 0 .3-.1.3-.3s-.1-.3-.3-.3h-1.2z" 
+        transform="translate(39, 56) scale(0.6)"
+        d="M19.5,14 H10 V11 H13.5 C15.5,11 17,10 17,8 C17,6.5 15.5,5.5 13.5,5.5 H10 V3 H20 V0 H6 V3 H10 C12,3 13,4 13,5.5 C13,7 12,8 10,8 H6 V11 H10 V14 H6 V17 H10.5 L19.5,28 H24 L14.5,17 H19.5 V14 Z" 
         className="fill-teal-600"
       />
 
