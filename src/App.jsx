@@ -3,21 +3,21 @@ import { isAdminUser } from './utils/adminAccess';
 import { Toaster, toast } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Lock } from 'lucide-react';
-import Login from './pages/Login';
-import WelcomeOnboarding from './pages/WelcomeOnboarding';
-import SetupBilling from './pages/SetupBilling';
-import Dashboard from './pages/Dashboard';
-import Invoices from './pages/Invoices';
-import CreateInvoice from './pages/CreateInvoice';
-import Guide from './pages/Guide';
-import Customers from './pages/Customers';
-import Products from './pages/Products';
-import Settings from './pages/Settings';
-import Expenses from './pages/Expenses';
-import Subscription from './pages/Subscription';
-import MoreMenu from './pages/MoreMenu';
+const Login = React.lazy(() => import('./pages/Login'));
+const WelcomeOnboarding = React.lazy(() => import('./pages/WelcomeOnboarding'));
+const SetupBilling = React.lazy(() => import('./pages/SetupBilling'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Invoices = React.lazy(() => import('./pages/Invoices'));
+const CreateInvoice = React.lazy(() => import('./pages/CreateInvoice'));
+const Guide = React.lazy(() => import('./pages/Guide'));
+const Customers = React.lazy(() => import('./pages/Customers'));
+const Products = React.lazy(() => import('./pages/Products'));
+const Settings = React.lazy(() => import('./pages/Settings'));
+const Expenses = React.lazy(() => import('./pages/Expenses'));
+const Subscription = React.lazy(() => import('./pages/Subscription'));
+const MoreMenu = React.lazy(() => import('./pages/MoreMenu'));
+const PublicInvoice = React.lazy(() => import('./pages/PublicInvoice'));
 import Layout from './components/Layout';
-import PublicInvoice from './pages/PublicInvoice';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -807,7 +807,13 @@ function App() {
             transition={{ duration: 0.3, ease: 'easeOut' }}
             className="w-full h-full"
           >
-            {renderTabContent()}
+            <React.Suspense fallback={
+              <div className="flex h-64 items-center justify-center">
+                <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-600 rounded-full animate-spin"></div>
+              </div>
+            }>
+              {renderTabContent()}
+            </React.Suspense>
           </motion.div>
         </AnimatePresence>
       </Layout>

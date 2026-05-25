@@ -81,10 +81,12 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-0">
         
         {/* Header Block with Premium Indigo/Blue Gradient Card */}
-        <header className="relative bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-600 dark:from-[#0d1627]/80 dark:via-[#111c33]/80 dark:to-[#0a1122]/80 dark:backdrop-blur-xl dark:border-b dark:border-white/5 px-6 py-8 md:py-10 text-white shadow-md overflow-hidden transition-all duration-300">
-          {/* Subtle Ambient Background Gradients */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl transform translate-x-20 -translate-y-20 pointer-events-none"></div>
-          <div className="absolute -bottom-10 left-10 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <header className="relative bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-600 dark:from-[#0d1627]/80 dark:via-[#111c33]/80 dark:to-[#0a1122]/80 dark:backdrop-blur-xl dark:border-b dark:border-white/5 px-6 py-8 md:py-10 text-white shadow-md transition-all duration-300 z-30">
+          {/* Subtle Ambient Background Gradients wrapped to prevent overflow spill */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
+            <div className="absolute -bottom-10 left-10 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl"></div>
+          </div>
 
           <div className="max-w-6xl mx-auto flex items-center justify-between relative z-10">
             <div>
