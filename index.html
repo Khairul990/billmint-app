@@ -14,8 +14,23 @@
     <meta property="og:title" content="BillQyro - Smart Billing. Premium Invoices." />
     <meta property="og:description" content="Generate professional business invoices instantly. Secure, beautiful, mobile-friendly finance dashboard for modern freelancers and businesses." />
     <meta property="og:type" content="website" />
+
+    <!-- Prevent white flash on load for dark mode -->
+    <script>
+      (function() {
+        try {
+          var localTheme = localStorage.getItem('billqyro_theme');
+          if (localTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.backgroundColor = '#070c18';
+          } else {
+            document.documentElement.style.backgroundColor = '#f8fafc';
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body class="bg-slate-50">
+  <body class="bg-slate-50 dark:bg-[#070c18] transition-colors duration-300">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

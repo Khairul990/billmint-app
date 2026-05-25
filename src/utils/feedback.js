@@ -3,16 +3,30 @@
  */
 
 export const triggerSuccessFeedback = () => {
-  // Light haptic vibration (mobile only)
+  // Read settings
+  let enableHaptics = true;
+  let enableSounds = true;
   try {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      navigator.vibrate([30, 50, 30]); // light, short success pattern
-    }
-  } catch (err) {
-    console.warn('Haptics not supported or blocked:', err);
+    const settings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
+    if (settings.enableHaptics === false) enableHaptics = false;
+    if (settings.enableSounds === false) enableSounds = false;
+  } catch (e) {
+    console.warn('Could not read settings for feedback:', e);
   }
 
-  // Soft success sound
+  if (enableHaptics) {
+    // Light haptic vibration (mobile only)
+    try {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([30, 50, 30]); // light, short success pattern
+      }
+    } catch (err) {
+      console.warn('Haptics not supported or blocked:', err);
+    }
+  }
+
+  if (enableSounds) {
+    // Soft success sound
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (AudioContext) {
@@ -45,4 +59,5 @@ export const triggerSuccessFeedback = () => {
   } catch (err) {
     console.warn('Web Audio API not supported or blocked:', err);
   }
+}
 };

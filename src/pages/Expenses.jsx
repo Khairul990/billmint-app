@@ -12,6 +12,9 @@ import {
   Lightbulb
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
+import BottomSheet from '../components/BottomSheet';
+import PullToRefresh from '../components/PullToRefresh';
+import { syncFromFirestore } from '../utils/storage';
 
 const CATEGORIES = [
   { name: 'Supplies', color: 'bg-indigo-100 text-indigo-700', border: 'border-indigo-200' },
@@ -64,14 +67,20 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
     setShowAddForm(false);
   };
 
+  const handleRefresh = async () => {
+    await syncFromFirestore();
+    window.dispatchEvent(new Event('billqyro_sync'));
+  };
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-6"
-    >
+    <PullToRefresh onRefresh={handleRefresh}>
+      <motion.div 
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -15 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-6 pb-24"
+      >
       {/* 1. HEADER ROW */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -80,11 +89,11 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
         </div>
 
         <button
-          onClick={() => setShowAddForm(!showAddForm)}
+          onClick={() => setShowAddForm(true)}
           className="flex items-center justify-center gap-2 bg-gradient-to-tr from-indigo-600 to-blue-500 text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
         >
           <Plus className="w-4 h-4" />
-          <span>{showAddForm ? 'Close Drawer' : 'Log Expense'}</span>
+          <span>Log Expense</span>
         </button>
       </div>
 
@@ -128,88 +137,79 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
 
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 gap-6 items-start">
         
         {/* 3. LOG NEW EXPENSE DRAWER */}
-        <AnimatePresence>
-          {showAddForm && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:col-span-1 bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-premium space-y-4 overflow-hidden"
+        <BottomSheet 
+          isOpen={showAddForm} 
+          onClose={() => setShowAddForm(false)} 
+          title="Log New Bill"
+        >
+          <form onSubmit={handleAddExpense} className="space-y-4 text-xs font-semibold text-slate-500 pb-4">
+            <div>
+              <label className="block mb-1 text-slate-400">Expense Title / Description</label>
+              <input
+                type="text"
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Embroidery Thread Reels"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1 text-slate-400">Category</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-extrabold"
+              >
+                {CATEGORIES.map(c => (
+                  <option key={c.name} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block mb-1 text-slate-400">Amount ({currencySymbol})</label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  step="0.01"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="1500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 text-slate-400">Date</label>
+                <input
+                  type="date"
+                  required
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-4 mt-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-2xl font-bold shadow-md shadow-indigo-100/50 hover:shadow-lg transition-all flex items-center justify-center gap-2"
             >
-              <h3 className="text-sm font-extrabold text-slate-800 border-b border-slate-50 pb-3 flex items-center gap-2">
-                <Receipt className="w-4.5 h-4.5 text-indigo-500" />
-                <span>Log New Bill</span>
-              </h3>
-
-              <form onSubmit={handleAddExpense} className="space-y-4 text-xs font-semibold text-slate-500">
-                <div>
-                  <label className="block mb-1 text-slate-400">Expense Title / Description</label>
-                  <input
-                    type="text"
-                    required
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g. Embroidery Thread Reels"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-1 text-slate-400">Category</label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-extrabold"
-                  >
-                    {CATEGORIES.map(c => (
-                      <option key={c.name} value={c.name}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block mb-1 text-slate-400">Amount ({currencySymbol})</label>
-                    <input
-                      type="number"
-                      required
-                      min="0"
-                      step="0.01"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      placeholder="1500"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block mb-1 text-slate-400">Date</label>
-                    <input
-                      type="date"
-                      required
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-bold"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3.5 mt-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl font-bold shadow-md shadow-indigo-100/50 hover:shadow-lg transition-all"
-                >
-                  Confirm Log Cost
-                </button>
-              </form>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <Receipt className="w-4 h-4" />
+              <span>Confirm Log Cost</span>
+            </button>
+          </form>
+        </BottomSheet>
 
         {/* 4. EXPENSE ENTRIES REGISTRY */}
-        <div className={`${showAddForm ? 'lg:col-span-2' : 'lg:col-span-3'} space-y-3 w-full`}>
+        <div className="w-full space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-extrabold text-slate-800 tracking-tight">Registry Log</h3>
             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-full">
@@ -278,7 +278,8 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
         </div>
 
       </div>
-    </motion.div>
+      </motion.div>
+    </PullToRefresh>
   );
 };
 

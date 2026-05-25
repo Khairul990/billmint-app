@@ -26,15 +26,18 @@ import {
   FileDown,
   Download,
   Clock,
-  UserCheck,
   Sparkles,
   FileText,
   Rocket,
   Check,
-  Megaphone
+  Megaphone,
+  Zap,
+  Smartphone
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { firebaseReady } from '../utils/firebase';
+import PullToRefresh from '../components/PullToRefresh';
+import { syncFromFirestore } from '../utils/storage';
 
 /**
  * High-End SaaS Dashboard with SVG Charts & WhatsApp Reminders
@@ -52,7 +55,8 @@ const Dashboard = ({
   installPromptEvent = null,
   isAppInstalled = false,
   onInstallApp,
-  subscription = {}
+  subscription = {},
+  onQuickBillOpen
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
@@ -69,6 +73,14 @@ const Dashboard = ({
   const totalDue = invoices.reduce((sum, inv) => sum + (inv.balanceDue || 0), 0);
 
   const totalCustomersCount = customers.length;
+
+  // --- TODAY'S QUICK SUMMARY ---
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todaysInvoices = invoices.filter(inv => inv.date === todayStr);
+  const todayBills = todaysInvoices.length;
+  const todayRevenue = todaysInvoices.reduce((sum, inv) => sum + (inv.grandTotal || 0), 0);
+  const todayCollection = todaysInvoices.reduce((sum, inv) => sum + (inv.amountPaid || 0), 0);
+  const todayDue = todaysInvoices.reduce((sum, inv) => sum + (inv.balanceDue || 0), 0);
 
   // Filter invoices for local dashboard search
   const filteredInvoices = invoices.filter(inv => {
@@ -173,13 +185,19 @@ const Dashboard = ({
     show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
   };
 
+  const handleRefresh = async () => {
+    await syncFromFirestore();
+    window.dispatchEvent(new Event('billqyro_sync'));
+  };
+
   return (
-    <motion.div
-      className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-    >
+    <PullToRefresh onRefresh={handleRefresh}>
+      <motion.div
+        className="space-y-6 pb-24"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
 
       {/* 0. WELCOME HERO BANNER */}
       <motion.div variants={itemVariants} className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-[#071B3A] to-[#19C3A3] text-white relative overflow-hidden shadow-premium border border-slate-800/80">
@@ -210,17 +228,55 @@ const Dashboard = ({
             </p>
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setCurrentTab('create-invoice')}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-xs px-5 py-3.5 rounded-2xl shadow-md cursor-pointer w-fit shrink-0 uppercase tracking-wider"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create Bill</span>
-          </motion.button>
+          <div className="flex items-center gap-3 shrink-0">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onQuickBillOpen}
+              className="flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-black text-xs px-4 py-3.5 rounded-2xl shadow-sm transition-all w-fit uppercase tracking-wider"
+            >
+              <Zap className="w-4 h-4 text-amber-400" />
+              <span>Quick Bill</span>
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setCurrentTab('create-invoice')}
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-xs px-5 py-3.5 rounded-2xl shadow-md cursor-pointer w-fit uppercase tracking-wider"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Full Bill</span>
+            </motion.button>
+          </div>
         </div>
-      </motion.div>
+        </motion.div>
+
+        {/* 0.05 TODAY'S QUICK SUMMARY (Horizontal Scroll for Mobile) */}
+        <motion.div variants={itemVariants} className="w-full overflow-x-auto pb-4 pt-2 hide-scrollbar flex gap-4 sm:grid sm:grid-cols-3">
+          <div className="min-w-[200px] flex-1 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/20 dark:to-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-3xl p-5 shadow-premium">
+            <p className="text-[10px] font-black uppercase tracking-wider text-indigo-500 mb-1">Today's Revenue</p>
+            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">
+              {formatCurrency(todayRevenue, currencySymbol)}
+            </h3>
+            <p className="text-xs font-semibold text-slate-500 mt-1">{todayBills} Bills Created</p>
+          </div>
+          
+          <div className="min-w-[200px] flex-1 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/20 dark:to-emerald-900/10 border border-emerald-100 dark:border-emerald-800/30 rounded-3xl p-5 shadow-premium">
+            <p className="text-[10px] font-black uppercase tracking-wider text-emerald-500 mb-1">Today's Collection</p>
+            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">
+              {formatCurrency(todayCollection, currencySymbol)}
+            </h3>
+            <p className="text-xs font-semibold text-slate-500 mt-1">Cash Inflow</p>
+          </div>
+
+          <div className="min-w-[200px] flex-1 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-900/10 border border-amber-100 dark:border-amber-800/30 rounded-3xl p-5 shadow-premium">
+            <p className="text-[10px] font-black uppercase tracking-wider text-amber-500 mb-1">Today's Dues</p>
+            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">
+              {formatCurrency(todayDue, currencySymbol)}
+            </h3>
+            <p className="text-xs font-semibold text-slate-500 mt-1">Pending Balance</p>
+          </div>
+        </motion.div>
 
       {/* GLOBAL ANNOUNCEMENT BANNER */}
       {businessSettings?.globalAnnouncement && (
@@ -268,6 +324,31 @@ const Dashboard = ({
               </button>
             </div>
           </div>
+        </motion.div>
+      )}
+
+      {/* 0.12 PWA INSTALL CARD (PHASE 5) */}
+      {!isAppInstalled && installPromptEvent && (
+        <motion.div variants={itemVariants} className="p-5 md:p-6 rounded-3xl bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border border-indigo-100 dark:border-indigo-800/30 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/30">
+              <Smartphone className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-sm md:text-base font-extrabold text-indigo-900 dark:text-indigo-100 tracking-tight">
+                Install BillQyro App
+              </h3>
+              <p className="text-xs font-semibold text-indigo-600/80 dark:text-indigo-300/80 mt-0.5">
+                Add to your home screen for a faster, full-screen premium experience.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onInstallApp}
+            className="w-full md:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-all text-xs flex items-center justify-center gap-2 shrink-0"
+          >
+            <Download className="w-4 h-4" /> Install App Now
+          </button>
         </motion.div>
       )}
 
@@ -856,7 +937,8 @@ const Dashboard = ({
         </div>
 
       </div>
-    </motion.div>
+      </motion.div>
+    </PullToRefresh>
   );
 };
 

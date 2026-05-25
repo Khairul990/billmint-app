@@ -21,6 +21,7 @@ import {
   ServerOff,
   ShieldAlert,
   RotateCcw,
+  RefreshCw,
   BarChart3,
   Users,
   CircleDollarSign,
@@ -148,6 +149,10 @@ const Settings = ({
   const [feature_customerDatabase, setFeature_customerDatabase] = useState('Premium');
   const [globalAnnouncement, setGlobalAnnouncement] = useState('');
   const [maintenanceMode, setMaintenanceMode] = useState(false);
+
+  // Premium UX Settings (Phase 6)
+  const [enableHaptics, setEnableHaptics] = useState(true);
+  const [enableSounds, setEnableSounds] = useState(true);
 
   // Admin Panel Tab & Data States
   const [adminSubTab, setAdminSubTab] = useState('features');
@@ -313,6 +318,9 @@ const Settings = ({
       setFeature_customerDatabase(settings.feature_customerDatabase || 'Premium');
       setGlobalAnnouncement(settings.globalAnnouncement || '');
       setMaintenanceMode(settings.maintenanceMode || false);
+
+      setEnableHaptics(settings.enableHaptics !== false);
+      setEnableSounds(settings.enableSounds !== false);
     }
   }, [settings]);
 
@@ -384,6 +392,8 @@ const Settings = ({
       invoiceTemplate,
       defaultBillingTemplate,
       pdfVisibleFields,
+      enableHaptics,
+      enableSounds,
 
       customerLiveLinkSettings: {
         enableLiveInvoiceLink: enableLiveLink,
@@ -603,7 +613,9 @@ const Settings = ({
           { id: 'payment', label: 'Payments', icon: QrCode },
           { id: 'preferences', label: 'Invoices', icon: FileText },
           { id: 'livelink', label: 'Live Links', icon: Link },
-          { id: 'pwa', label: 'Install App', icon: Download }
+          { id: 'premiumux', label: 'Premium UX', icon: Smartphone },
+          { id: 'pwa', label: 'Install App', icon: Download },
+          { id: 'backup', label: 'Data Backup', icon: Database }
         ].map((tab) => {
           const Icon = tab.icon;
           const isSelected = activeTab === tab.id;
@@ -1254,6 +1266,42 @@ const Settings = ({
                 </div>
               ))}
 
+            </div>
+          </div>
+        )}
+
+        {/* 5.5 PREMIUM UX SETTINGS TAB */}
+        {activeTab === 'premiumux' && (
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-100 dark:border-slate-800 shadow-premium space-y-6 animate-fadeIn">
+            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800/80 pb-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                <Smartphone className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-200">Premium Mobile UX</h2>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Configure haptic vibrations and premium sounds</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                { state: enableHaptics, setter: setEnableHaptics, label: 'Enable Haptic Feedback', desc: 'Vibrate on success, errors, and key actions' },
+                { state: enableSounds, setter: setEnableSounds, label: 'Enable Premium Sounds', desc: 'Play satisfying audio cues when bills are saved' }
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-start justify-between p-3.5 bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 rounded-xl">
+                  <div className="mr-3">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-250 block">{item.label}</span>
+                    <span className="text-[9px] text-slate-450 dark:text-slate-400 font-semibold">{item.desc}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => item.setter(!item.state)}
+                    className={`w-9 h-5 rounded-full relative transition-colors duration-300 shrink-0 mt-0.5 focus:outline-none ${item.state ? 'bg-teal-500' : 'bg-slate-350 dark:bg-slate-700'}`}
+                  >
+                    <div className={`w-3 h-3 bg-white rounded-full absolute top-1 transition-all duration-300 ${item.state ? 'left-5' : 'left-1'}`}></div>
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}

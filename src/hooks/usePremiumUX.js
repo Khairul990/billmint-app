@@ -9,6 +9,9 @@ export const usePremiumUX = () => {
   // Play a soft "success" cash-register / ding sound
   const playSuccessSound = useCallback(() => {
     try {
+      const settings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
+      if (settings.enableSounds === false) return;
+
       // Create a short satisfying beep using Web Audio API so we don't need external mp3s
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       if (!AudioContext) return;
@@ -36,17 +39,27 @@ export const usePremiumUX = () => {
   }, []);
 
   const vibrateSuccess = useCallback(() => {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      // Two quick, sharp vibrations
-      navigator.vibrate([50, 50, 50]);
-    }
+    try {
+      const settings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
+      if (settings.enableHaptics === false) return;
+
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        // Two quick, sharp vibrations
+        navigator.vibrate([50, 50, 50]);
+      }
+    } catch (e) { }
   }, []);
 
   const vibrateError = useCallback(() => {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      // One long, heavy vibration
-      navigator.vibrate(200);
-    }
+    try {
+      const settings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
+      if (settings.enableHaptics === false) return;
+
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        // One long, heavy vibration
+        navigator.vibrate(200);
+      }
+    } catch (e) { }
   }, []);
 
   const triggerSuccess = useCallback(() => {

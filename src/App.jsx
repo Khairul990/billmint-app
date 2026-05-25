@@ -48,6 +48,7 @@ const Expenses = React.lazy(() => import('./pages/Expenses'));
 const Subscription = React.lazy(() => import('./pages/Subscription'));
 const MoreMenu = React.lazy(() => import('./pages/MoreMenu'));
 const PublicInvoice = React.lazy(() => import('./pages/PublicInvoice'));
+import QuickBillModal from './components/QuickBillModal';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -130,6 +131,7 @@ function App() {
   // PWA Installer States
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
+  const [isQuickBillOpen, setIsQuickBillOpen] = useState(false);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -576,6 +578,7 @@ function App() {
             isAppInstalled={isAppInstalled}
             onInstallApp={handleInstallApp}
             subscription={subscription}
+            onQuickBillOpen={() => setIsQuickBillOpen(true)}
           />
         );
       case 'invoices':
@@ -601,6 +604,7 @@ function App() {
             setCurrentTab={setCurrentTab}
             editingInvoice={editingInvoice}
             onDownloadPDF={handleDownloadPDF}
+            onQuickBillOpen={() => setIsQuickBillOpen(true)}
           />
         );
       case 'guide':
@@ -813,6 +817,8 @@ function App() {
         userRole={userRole}
         invoices={invoices}
         subscription={subscription}
+        userEmail={getAuthSession()?.userEmail}
+        onQuickBillOpen={() => setIsQuickBillOpen(true)}
       >
         <AnimatePresence mode="wait">
           <motion.div
@@ -832,6 +838,14 @@ function App() {
             </React.Suspense>
           </motion.div>
         </AnimatePresence>
+        
+        <QuickBillModal 
+          isOpen={isQuickBillOpen}
+          onClose={() => setIsQuickBillOpen(false)}
+          onSave={handleSaveInvoice}
+          businessSettings={settings}
+          invoices={invoices}
+        />
       </Layout>
       <Toaster
         position="bottom-right"

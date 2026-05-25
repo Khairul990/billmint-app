@@ -6,7 +6,7 @@ import { LayoutDashboard, FileSpreadsheet, Users, MoreHorizontal } from 'lucide-
  * @param {string} currentTab - active state key
  * @param {Function} setCurrentTab - state update dispatcher
  */
-const BottomNav = ({ currentTab, setCurrentTab }) => {
+const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen }) => {
   const tabs = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
     { id: 'invoices', label: 'Invoices', icon: FileSpreadsheet },
@@ -22,7 +22,7 @@ const BottomNav = ({ currentTab, setCurrentTab }) => {
           return (
             <div key="action" className="relative -top-5 flex-1 flex justify-center">
               <button
-                onClick={() => setCurrentTab('create-invoice')}
+                onClick={onQuickBillOpen}
                 className="w-12 h-12 bg-gradient-to-tr from-teal-500 to-emerald-500 rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(20,184,166,0.4)] border-[3px] border-white dark:border-[#070c18] transform active:scale-95 transition-all"
               >
                 <div className="w-6 h-6 font-bold text-2xl leading-none flex items-center justify-center -mt-1">+</div>

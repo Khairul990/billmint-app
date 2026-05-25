@@ -12,7 +12,7 @@ import Logo from './Logo';
  * @param {Function} onLogout - logout event callback
  * @param {Object} businessSettings - current active business details
  */
-const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {} }) => {
+const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen }) => {
   // Theme state persisted in LocalStorage
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('billqyro_theme') || 'light';
@@ -75,6 +75,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         businessSettings={businessSettings}
         isAuthenticated={isAuthenticated}
         userRole={userRole}
+        userEmail={userEmail}
       />
 
       {/* Main Content Region */}
@@ -144,32 +145,32 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                           {businessSettings?.businessName || 'My Business'}
                         </p>
                         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                          {businessSettings?.email || 'billing@firm.com'}
+                          {userEmail || businessSettings?.email || 'billing@firm.com'}
                         </p>
                       </div>
                       
                       <div className="p-4 border-b border-slate-100 dark:border-slate-800">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Monthly Invoices</span>
+                          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Free Bills Limit</span>
                           <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                            {invoices.length} / {subscription?.plan === 'premium' ? '∞' : '5'}
+                            {invoices.length} / {subscription?.status === 'premium' ? '∞' : (businessSettings?.freeInvoiceLimit || 15)}
                           </span>
                         </div>
                         <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mb-3">
                           <div 
                             className="bg-gradient-to-r from-indigo-500 to-teal-400 h-1.5 rounded-full" 
-                            style={{ width: `${Math.min((invoices.length / (subscription?.plan === 'premium' ? 100 : 5)) * 100, 100)}%` }}
+                            style={{ width: `${Math.min((invoices.length / (subscription?.status === 'premium' ? 100 : (businessSettings?.freeInvoiceLimit || 15))) * 100, 100)}%` }}
                           ></div>
                         </div>
-                        {subscription?.plan !== 'premium' && (
+                        {subscription?.status !== 'premium' && (
                           <button
                             onClick={() => {
                               setCurrentTab('subscription');
                               setIsAccountMenuOpen(false);
                             }}
-                            className="w-full py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                            className="w-full py-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
                           >
-                            Upgrade Plan
+                            Upgrade to Premium
                           </button>
                         )}
                       </div>
@@ -214,7 +215,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       </div>
 
       {/* Mobile Floating Bottom Nav Menu (Hidden on Desktop) */}
-      <BottomNav currentTab={currentTab} setCurrentTab={setCurrentTab} />
+      <BottomNav currentTab={currentTab} setCurrentTab={setCurrentTab} onQuickBillOpen={onQuickBillOpen} />
     </div>
   );
 };

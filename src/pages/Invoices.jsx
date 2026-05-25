@@ -23,12 +23,14 @@ import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
 import { 
   generateWhatsAppShareLink, 
+  generateWhatsAppReminderLink,
   generateEmailShareLink, 
   generateInvoiceShareText 
 } from '../utils/shareUtils';
-import { ensureInvoicePublicToken, saveInvoice } from '../utils/storage';
+import { ensureInvoicePublicToken, saveInvoice, syncFromFirestore } from '../utils/storage';
 import { db, firebaseReady } from '../utils/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import PullToRefresh from '../components/PullToRefresh';
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
@@ -273,13 +275,19 @@ const Invoices = ({
     show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
   };
 
+  const handleRefresh = async () => {
+    await syncFromFirestore();
+    window.dispatchEvent(new Event('billqyro_sync'));
+  };
+
   return (
-    <motion.div 
-      className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-    >
+    <PullToRefresh onRefresh={handleRefresh}>
+      <motion.div 
+        className="space-y-6 pb-24"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
       
       {/* Page Header Area */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -462,6 +470,28 @@ const Invoices = ({
                 >
                   <WhatsAppIcon className="w-4 h-4 text-emerald-500" />
                 </button>
+                {viewingInvoice.paymentStatus !== 'Paid' && (
+                  <button
+                     onClick={async () => {
+                       try {
+                         const token = await ensureInvoicePublicToken(viewingInvoice);
+                         if (!token) {
+                           toast.error('Could not create live link. Please try again.');
+                           return;
+                         }
+                         const updatedInvoice = { ...viewingInvoice, publicToken: token };
+                         const link = generateWhatsAppReminderLink(updatedInvoice, currencySymbol, businessSettings);
+                         window.open(link, '_blank');
+                       } catch (err) {
+                         toast.error('Could not create live link. Please try again.');
+                       }
+                     }}
+                     className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all flex items-center justify-center cursor-pointer"
+                     title="Send Reminder via WhatsApp"
+                  >
+                    <WhatsAppIcon className="w-4 h-4 text-rose-500" />
+                  </button>
+                )}
                 <button
                    onClick={async () => {
                      try {
@@ -612,7 +642,8 @@ const Invoices = ({
           </div>
         </div>
       )}
-    </motion.div>
+      </motion.div>
+    </PullToRefresh>
   );
 };
 

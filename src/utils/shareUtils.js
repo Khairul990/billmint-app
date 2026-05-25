@@ -92,6 +92,31 @@ export function generateWhatsAppShareLink(invoice, currencySymbol = '₹', busin
 }
 
 /**
+ * Generates a WhatsApp reminder link with a polite tone.
+ */
+export function generateWhatsAppReminderLink(invoice, currencySymbol = '₹', businessSettings = {}) {
+  const regionalPrefs = invoice?.regionalSettingsSnapshot || {
+    currency: currencySymbol
+  };
+  const activeSymbol = regionalPrefs.currency || currencySymbol;
+  const activeNumberFormat = regionalPrefs.numberFormat || 'Indian';
+  const phone = cleanPhoneNumber(invoice?.customerPhone || '', activeSymbol);
+  
+  const businessName = invoice.businessSnapshot?.businessName || businessSettings?.businessName || 'Our Business';
+  const balanceDue = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), activeSymbol, activeNumberFormat);
+  
+  const liveLink = invoice.publicToken ? `${window.location.origin}/i/${invoice.publicToken}` : '';
+  
+  let text = `Hi ${invoice.customerName || 'there'},\n\nJust a gentle reminder from ${businessName} that Invoice #${invoice.invoiceNumber || 'N/A'} has a pending balance of *${balanceDue}*.\n\n`;
+  if (liveLink) {
+    text += `You can view the invoice and securely pay online here: ${liveLink}\n\n`;
+  }
+  text += `Please let us know if you have any questions.\nThank you!`;
+  
+  return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+}
+
+/**
  * Creates a mailto link for emailing invoice details.
  * @param {Object} invoice 
  * @param {string} currencySymbol 

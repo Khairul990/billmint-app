@@ -32,11 +32,14 @@ import {
   Info,
   Maximize2,
   Printer,
-  Link
+  Link,
+  MoreHorizontal
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber, autoIncrementString, formatCurrency } from '../utils/invoiceUtils';
 import InvoicePreview from '../components/InvoicePreview';
+import BottomSheet from '../components/BottomSheet';
+import AddCustomerSheet from '../components/AddCustomerSheet';
 import { ensureInvoicePublicToken } from '../utils/storage';
 
 const ALL_FIELDS_BY_TEMPLATE = {
@@ -93,7 +96,8 @@ const CreateInvoice = ({
   onSaveInvoice,
   setCurrentTab,
   editingInvoice = null,
-  onDownloadPDF
+  onDownloadPDF,
+  onQuickBillOpen
 }) => {
   const currencySymbol = businessSettings?.currency || '₹';
 
@@ -106,6 +110,8 @@ const CreateInvoice = ({
   const [showPdfSettings, setShowPdfSettings] = useState(false);
   const [isSheetExpanded, setIsSheetExpanded] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [isMoreActionsOpen, setIsMoreActionsOpen] = useState(false);
+  const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
 
 
   const getExpandedGridCols = () => {
@@ -607,9 +613,17 @@ const CreateInvoice = ({
         </button>
         
         <div className="flex flex-col">
-          <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">
-            {editingInvoice ? 'Edit Billing Sheet' : 'Create Invoicing Sheet'}
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">
+              {editingInvoice ? 'Edit Billing Sheet' : 'Create Invoicing Sheet'}
+            </h2>
+            <button
+              onClick={onQuickBillOpen}
+              className="bg-amber-100 hover:bg-amber-200 text-amber-700 font-bold text-[10px] px-2.5 py-1 rounded-md uppercase tracking-wider transition-colors border border-amber-200"
+            >
+              ⚡ Quick Bill
+            </button>
+          </div>
           <button 
             onClick={() => setCurrentTab('guide')}
             className="text-indigo-500 hover:text-indigo-700 text-xs font-bold flex items-center gap-1 mt-1 transition-colors w-fit"
@@ -798,7 +812,16 @@ const CreateInvoice = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold text-slate-500">
               <div className="sm:col-span-2">
-                <label className="block mb-1.5 text-slate-400">Select Customer from CRM (Automatic Prefill)</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-slate-400">Select Customer from CRM (Automatic Prefill)</label>
+                  <button
+                    onClick={() => setIsAddCustomerOpen(true)}
+                    className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-colors border border-indigo-100"
+                  >
+                    <UserPlus className="w-3 h-3" />
+                    Add Customer
+                  </button>
+                </div>
                 <select
                   value={selectedCustomerId}
                   onChange={handleCustomerSelect}
@@ -2358,6 +2381,113 @@ const CreateInvoice = ({
           </div>
         )}
       </AnimatePresence>
+
+      {/* --- MOBILE STICKY BOTTOM ACTION BAR (PHASE 3) --- */}
+      <div className="md:hidden fixed bottom-14 left-0 right-0 p-3 bg-white/90 backdrop-blur-md border-t border-slate-100 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-30 flex gap-2 pb-safe-bottom transition-all">
+        <button
+          onClick={() => handleSave('Draft')}
+          className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-1.5 text-xs"
+        >
+          <Save className="w-4 h-4" />
+          <span>Save Draft</span>
+        </button>
+        <button
+          onClick={() => handleSave()}
+          className="flex-[1.5] py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl font-bold shadow-md transition-all flex items-center justify-center gap-1.5 text-xs"
+        >
+          <Check className="w-4 h-4" />
+          <span>Save Bill</span>
+        </button>
+        <button
+          onClick={() => setIsMoreActionsOpen(true)}
+          className="w-12 h-12 flex justify-center items-center bg-slate-100 text-slate-700 rounded-xl font-bold"
+        >
+          <MoreHorizontal className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* MORE ACTIONS BOTTOM SHEET */}
+      <BottomSheet isOpen={isMoreActionsOpen} onClose={() => setIsMoreActionsOpen(false)} title="More Actions">
+        <div className="space-y-3 pb-4">
+          <button
+            onClick={() => {
+              setIsMoreActionsOpen(false);
+              setShowPreview(true);
+            }}
+            className="w-full py-4 bg-slate-50 text-slate-700 rounded-xl font-bold hover:bg-slate-100 transition-all flex items-center gap-3 px-4 text-sm border border-slate-100"
+          >
+            <Eye className="w-5 h-5 text-indigo-500" />
+            <span>Preview Invoice</span>
+          </button>
+          
+          <button
+            onClick={() => {
+              setIsMoreActionsOpen(false);
+              if (!editingInvoice) {
+                toast.error('Please save invoice before downloading PDF.');
+                return;
+              }
+              if(onDownloadPDF) onDownloadPDF({ id: editingInvoice.id, invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, terms, paymentStatus, orderStatus, subtotal, taxAmount, grandTotal, balanceDue }); 
+            }}
+            className="w-full py-4 bg-slate-50 text-slate-700 rounded-xl font-bold hover:bg-slate-100 transition-all flex items-center gap-3 px-4 text-sm border border-slate-100"
+          >
+            <Download className="w-5 h-5 text-emerald-500" />
+            <span>Download PDF</span>
+          </button>
+
+          {editingInvoice && (
+            <button
+              onClick={async () => {
+                setIsMoreActionsOpen(false);
+                const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
+                if (!isLiveLinkEnabled) {
+                  toast.error('Live Link is disabled. Enable it from Settings.');
+                  return;
+                }
+                try {
+                  const token = await ensureInvoicePublicToken(editingInvoice);
+                  if (!token) return;
+                  const liveLink = `${window.location.origin}/i/${token}`;
+                  const regionalPrefs = editingInvoice?.regionalSettingsSnapshot || {
+                    currency: currencySymbol,
+                    numberFormat: businessSettings?.numberFormat || 'Indian'
+                  };
+                  const totalStr = formatCurrency(grandTotal, regionalPrefs.currency || currencySymbol, regionalPrefs.numberFormat);
+                  const msg = `Your invoice is ready.\nInvoice No: ${invoiceNumber}\nTotal: ${totalStr}\nView & Pay: ${liveLink}`;
+                  window.open(`https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+                } catch (err) {
+                  toast.error('Could not create live link. Please save invoice and try again.');
+                }
+              }}
+              className="w-full py-4 bg-emerald-50 text-emerald-700 rounded-xl font-bold hover:bg-emerald-100 transition-all flex items-center gap-3 px-4 text-sm border border-emerald-100"
+            >
+              <Send className="w-5 h-5 text-emerald-600" />
+              <span>Share on WhatsApp</span>
+            </button>
+          )}
+        </div>
+      </BottomSheet>
+
+      <AddCustomerSheet 
+        isOpen={isAddCustomerOpen}
+        onClose={() => setIsAddCustomerOpen(false)}
+        onSave={(newCustomer) => {
+          // Add to local list and select it
+          if (onSaveInvoice) {
+            // Need to save the customer. 
+            // Wait, CreateInvoice doesn't take onSaveCustomer prop!
+            // But we can trigger saveCustomer inline when invoice is saved by setting state
+            setCustomerName(newCustomer.name);
+            setCustomerPhone(newCustomer.phone);
+            setCustomerEmail(newCustomer.email);
+            setCustomerAddress(newCustomer.address);
+            setSelectedCustomerId('');
+            setSaveCustomer(true);
+            setIsAddCustomerOpen(false);
+            toast.success('Customer details prefilled! Will be saved when you save the bill.');
+          }
+        }}
+      />
 
     </motion.div>
   );

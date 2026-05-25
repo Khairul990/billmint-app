@@ -5,6 +5,7 @@ import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
 import {
   generateWhatsAppShareLink,
+  generateWhatsAppReminderLink,
   generateEmailShareLink,
   generateInvoiceShareText
 } from '../utils/shareUtils';
@@ -217,6 +218,30 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
                       <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-500" />
                       <span>WhatsApp Share</span>
                     </button>
+
+                    {invoice.paymentStatus !== 'Paid' && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const token = await ensureInvoicePublicToken(invoice);
+                            if (!token) {
+                              toast.error('Could not create live link. Please try again.');
+                              return;
+                            }
+                            const updatedInvoice = { ...invoice, publicToken: token };
+                            const link = generateWhatsAppReminderLink(updatedInvoice, currencySymbol, businessSettings);
+                            window.open(link, '_blank');
+                            setShowShareMenu(false);
+                          } catch (err) {
+                            toast.error('Could not create live link. Please try again.');
+                          }
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-700 dark:hover:text-rose-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                      >
+                        <WhatsAppIcon className="w-3.5 h-3.5 text-rose-500" />
+                        <span>Send Reminder</span>
+                      </button>
+                    )}
 
                     <button
                       onClick={async () => {
