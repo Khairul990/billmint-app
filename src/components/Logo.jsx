@@ -17,22 +17,22 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false }) =
   // Brand color gradients & assets definitions
   const defs = (
     <defs>
-      {/* Primary Mint to Teal gradient for the outer stylized "B" ribbon */}
+      {/* Primary Teal gradient for the outer stylized "Q" ribbon */}
       <linearGradient id="brandGradient" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor="#A7F3D0" /> {/* Soft Mint */}
-        <stop offset="50%" stopColor="#10B981" /> {/* Brand Mint */}
-        <stop offset="100%" stopColor="#06B6D4" /> {/* Brand Teal */}
+        <stop offset="0%" stopColor="#00d2ff" /> {/* Light Cyan/Teal */}
+        <stop offset="50%" stopColor="#059669" /> {/* Emerald 600 */}
+        <stop offset="100%" stopColor="#0f766e" /> {/* Dark Teal */}
       </linearGradient>
       
       {/* Light highlights for paper fold */}
       <linearGradient id="foldGradient" x1="0" y1="1" x2="1" y2="0">
-        <stop offset="0%" stopColor="#D1FAE5" />
-        <stop offset="100%" stopColor="#FFFFFF" />
+        <stop offset="0%" stopColor="#cbd5e1" />
+        <stop offset="100%" stopColor="#ffffff" />
       </linearGradient>
     </defs>
   );
 
-  // Stylized B path + Overlaid Invoicing Sheet matching the user's design image
+  // Stylized Q path + Overlaid Invoicing Sheet matching the user's design image
   const IconSVG = ({ sizeClass = 'w-10 h-10' }) => (
     <motion.svg 
       viewBox="0 0 100 100" 
@@ -46,43 +46,53 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false }) =
     >
       {defs}
       
-      {/* 1. Stylized Ribbon "B" (Back layer) in Emerald/Teal Gradient */}
-      <motion.path 
-        fillRule="evenodd" 
-        clipRule="evenodd"
-        d="M32 15C24 15 24 23 24 30V70C24 77 24 85 32 85H60C72 85 82 77 82 66C82 58 76 51 68 49C76 47 80 40 80 32C80 22 72 15 60 15Z"
-        fill="url(#brandGradient)"
-        className="transition-all duration-300 drop-shadow-sm"
-        animate={{ filter: ['drop-shadow(0px 0px 0px rgba(25, 195, 163, 0))', 'drop-shadow(0px 0px 6px rgba(25, 195, 163, 0.4))', 'drop-shadow(0px 0px 0px rgba(25, 195, 163, 0))'] }}
+      {/* 1. The Teal Q Ring (Back layer) */}
+      <motion.circle 
+        cx="45" cy="45" r="32" 
+        fill="none" 
+        stroke="url(#brandGradient)" 
+        strokeWidth="16" 
+        className="transition-all duration-300 drop-shadow-md"
+        animate={{ filter: ['drop-shadow(0px 0px 0px rgba(5, 150, 105, 0))', 'drop-shadow(0px 0px 8px rgba(5, 150, 105, 0.5))', 'drop-shadow(0px 0px 0px rgba(5, 150, 105, 0))'] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* 2. Premium Invoicing Document Sheet (Front layer) */}
+      {/* 2. Premium White Invoicing Document Sheet (Middle layer) */}
       <path 
-        d="M36 22H52L60 30V60C60 64.4 56.4 68 52 68H42C34 68 30 72 27 76C26 71 28 64 32 60V26C32 23.8 33.8 22 36 22Z" 
-        className="fill-white dark:fill-slate-900 stroke-slate-200/50 dark:stroke-slate-800 transition-colors duration-300 filter drop-shadow-md"
-        strokeWidth="1"
+        d="M30 15 H55 L70 30 V70 C70 73 67 76 64 76 H30 C27 76 24 73 24 70 V21 C24 18 27 15 30 15 Z" 
+        className="fill-white drop-shadow-xl"
       />
 
       {/* Folded paper corner */}
       <path 
-        d="M52 22V28C52 29.1 52.9 30 54 30H60L52 22Z" 
+        d="M55 15 V30 H70 Z" 
         fill="url(#foldGradient)"
-        className="filter drop-shadow-sm"
+        className="drop-shadow-sm"
       />
 
       {/* Three premium horizontal invoice lines */}
-      <motion.rect initial={{ width: 0 }} animate={{ width: 12 }} transition={{ delay: 0.3, duration: 0.4 }} x="38" y="32" width="12" height="2" rx="1" className="fill-emerald-600 dark:fill-emerald-400" />
-      <motion.rect initial={{ width: 0 }} animate={{ width: 16 }} transition={{ delay: 0.4, duration: 0.4 }} x="38" y="38" width="16" height="2" rx="1" className="fill-emerald-600 dark:fill-emerald-400" />
-      <motion.rect initial={{ width: 0 }} animate={{ width: 10 }} transition={{ delay: 0.5, duration: 0.4 }} x="38" y="44" width="10" height="2" rx="1" className="fill-emerald-600 dark:fill-emerald-400" />
+      <motion.rect initial={{ width: 0 }} animate={{ width: 22 }} transition={{ delay: 0.3, duration: 0.4 }} x="35" y="32" width="22" height="4" rx="2" className="fill-teal-600" />
+      <motion.rect initial={{ width: 0 }} animate={{ width: 26 }} transition={{ delay: 0.4, duration: 0.4 }} x="35" y="42" width="26" height="4" rx="2" className="fill-teal-600" />
+      <motion.rect initial={{ width: 0 }} animate={{ width: 14 }} transition={{ delay: 0.5, duration: 0.4 }} x="35" y="52" width="14" height="4" rx="2" className="fill-teal-600" />
 
       {/* Bold Dollar $ Symbol in bottom center */}
       <motion.path 
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
+        transform="scale(1.8) translate(-16, -26)"
         d="M41 50.5c0-.4.3-.8.8-.8h1.2v-.7c0-.2.2-.4.4-.4h.8c.2 0 .4.2.4.4v.7h1.2c.4 0 .8.4.8.8s-.4.8-.8.8h-2v1h1.5c1 0 1.8.8 1.8 1.8s-.8 1.8-1.8 1.8V57c0 .2-.2.4-.4.4h-.8c-.2 0-.4-.2-.4-.4v-.7H41c-.4 0-.8-.4-.8-.8s.4-.8.8-.8h2v-1H41.5c-1 0-1.8-.8-1.8-1.8zm3 1c.2 0 .3-.1.3-.3s-.1-.3-.3-.3h-1.2c-.2 0-.3.1-.3.3s.1.3.3.3H44zm.3 4c-.2 0-.3.1-.3.3s.1.3.3.3h1.2c.2 0 .3-.1.3-.3s-.1-.3-.3-.3h-1.2z" 
-        className="fill-emerald-600 dark:fill-emerald-400"
+        className="fill-teal-600"
+      />
+
+      {/* 3. The Teal Q Tail (Front layer) */}
+      <motion.path 
+        initial={{ opacity: 0, x: -10, y: -10 }}
+        animate={{ opacity: 1, x: 0, y: 0 }}
+        transition={{ delay: 0.7, duration: 0.4 }}
+        d="M 50 50 L 78 80 C 80 82 78 85 75 85 L 62 85 C 60 85 58 84 56 82 L 36 60 Z" 
+        fill="url(#brandGradient)"
+        className="drop-shadow-lg"
       />
     </motion.svg>
   );

@@ -262,12 +262,24 @@ const Guide = ({ setCurrentTab }) => {
         },
         {
             id: 7,
-            title: 'View Reports',
-            explanation: 'Use dashboard reports to check revenue, pending amount, paid invoices, total customers, and recent invoices.',
-            whereToClick: 'Dashboard or Reports',
+            title: 'Send WhatsApp Reminders',
+            explanation: 'You can instantly send payment reminders and invoice links directly to your customers via WhatsApp.',
+            whereToClick: 'Invoices > WhatsApp Button',
+            buttonText: 'View Invoices',
+            tab: 'invoices',
+            tip: 'The reminder message is pre-formatted with due amount and bill number automatically.',
+            Mockup: UIStatusMockup,
+            color: 'text-green-600',
+            bg: 'bg-green-100'
+        },
+        {
+            id: 8,
+            title: 'View Reports & Manage Data',
+            explanation: 'Use dashboard reports to check revenue, and go to Settings to backup your data safely.',
+            whereToClick: 'Dashboard or Settings',
             buttonText: 'View Dashboard',
             tab: 'dashboard',
-            tip: 'Dashboard data should come from real invoices/customers.',
+            tip: 'You can export JSON backups of all your data from Settings anytime.',
             Mockup: UIDashboardMockup,
             color: 'text-cyan-600',
             bg: 'bg-cyan-100'
@@ -275,12 +287,14 @@ const Guide = ({ setCurrentTab }) => {
     ];
 
     const faqs = [
-        { q: "How do I create my first bill?", a: "Navigate to the Create Invoice section from the sidebar or dashboard. Select an existing customer or add a new one, fill in the items, adjust pricing, and click Save." },
+        { q: "How do I create my first bill quickly?", a: "Use the 'Quick Bill' button on the bottom menu on mobile, or navigate to Create Invoice from the sidebar. You can create bills without selecting existing customers or products to save time." },
         { q: "How do I add customer details?", a: "Go to the Customers tab and click 'New Customer'. Fill out their contact information. This allows you to quickly select them later when making bills." },
         { q: "How do I download PDF?", a: "Once an invoice is created, go to the Invoices list or dashboard, and click the 'Download PDF' icon on the specific invoice card." },
+        { q: "How do I send WhatsApp Reminders?", a: "Open any Invoice card and tap the WhatsApp 'Send Reminder' button. It will open WhatsApp with a ready-made message containing the total due and invoice link." },
         { q: "How do I mark payment as paid?", a: "Open the invoice from the Invoices tab and adjust the 'Amount Paid' field to match the 'Grand Total', or simply change the payment status badge." },
-        { q: "How do I change business name or logo?", a: "Navigate to the Settings tab. There you can upload a new logo, change your business name, set GST details, and update your address." },
-        { q: "What happens if internet/Firebase is offline?", a: "BillQyro works completely offline! All data is securely stored in your browser's LocalStorage and will sync automatically when you reconnect if Firebase is enabled." },
+        { q: "How do I Backup or Restore my data?", a: "Go to Settings > Data Backup. From here, you can 'Export Database' to download a backup file, 'Import Database' to restore, or force a 'Sync to Cloud'." },
+        { q: "What happens if internet is offline?", a: "BillQyro works completely offline! All data is securely stored in your browser's LocalStorage. It will sync automatically when you reconnect." },
+        { q: "How do I refresh data on mobile?", a: "Simply pull down from the top of the screen on Dashboard, Invoices, Customers, or Expenses to trigger a manual refresh (Pull-to-refresh)." }
     ];
 
     const filteredFaqs = faqs.filter(faq => 
