@@ -25,8 +25,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
-import { login, getSettings } from '../utils/storage';
-import { getAdminEmail } from '../utils/adminAccess';
+import { login, getSettings, getAdminEmail } from '../utils/storage';
 
 const DashboardMockup = () => (
   <div className="relative w-full max-w-lg mt-auto pb-12 pt-8 mx-auto">
