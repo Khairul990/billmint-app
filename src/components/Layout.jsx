@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
-import { ReceiptText, LogOut, ShieldCheck, Sun, Moon } from 'lucide-react';
+import { ReceiptText, LogOut, ShieldCheck, Sun, Moon, User } from 'lucide-react';
 import Logo from './Logo';
 
 /**
@@ -112,11 +112,15 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 )}
               </button>
 
-              {/* Mobile Header Brand & Fast Actions */}
+              {/* Mobile Header Account Action */}
               <div className="md:hidden flex items-center">
-                <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white">
-                  <Logo type="icon" className="w-6 h-6 text-white" />
-                </div>
+                <button
+                  onClick={() => setCurrentTab('settings')}
+                  className="w-10 h-10 rounded-2xl bg-white/10 dark:bg-slate-800/40 backdrop-blur-md border border-white/20 dark:border-slate-700/30 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+                  title="Account Settings"
+                >
+                  <User className="w-5 h-5 text-indigo-100" />
+                </button>
               </div>
             </div>
           </div>
