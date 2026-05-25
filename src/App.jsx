@@ -3,6 +3,37 @@ import { isAdminUser } from './utils/adminAccess';
 import { Toaster, toast } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Lock } from 'lucide-react';
+import Layout from './components/Layout';
+import {
+  getAuthSession,
+  logout,
+  getInvoices,
+  saveInvoice,
+  deleteInvoice,
+  getCustomers,
+  saveCustomer,
+  deleteCustomer,
+  getProducts,
+  saveProduct,
+  deleteProduct,
+  getSettings,
+  saveSettings,
+  resetToDemoData,
+  initializeStorage,
+  getSubscriptionStatus,
+  saveSubscriptionStatus,
+  getExpenses,
+  saveExpense,
+  deleteExpense,
+  importRestore,
+  syncFromFirestore,
+  enableRealTimeSync
+} from './utils/storage';
+import { downloadInvoicePDF } from './utils/pdfUtils';
+import { auth, firebaseReady } from './utils/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { triggerSuccessFeedback } from './utils/feedback';
+
 const Login = React.lazy(() => import('./pages/Login'));
 const WelcomeOnboarding = React.lazy(() => import('./pages/WelcomeOnboarding'));
 const SetupBilling = React.lazy(() => import('./pages/SetupBilling'));
@@ -17,7 +48,6 @@ const Expenses = React.lazy(() => import('./pages/Expenses'));
 const Subscription = React.lazy(() => import('./pages/Subscription'));
 const MoreMenu = React.lazy(() => import('./pages/MoreMenu'));
 const PublicInvoice = React.lazy(() => import('./pages/PublicInvoice'));
-import Layout from './components/Layout';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -53,35 +83,7 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-import {
-  getAuthSession,
-  logout,
-  getInvoices,
-  saveInvoice,
-  deleteInvoice,
-  getCustomers,
-  saveCustomer,
-  deleteCustomer,
-  getProducts,
-  saveProduct,
-  deleteProduct,
-  getSettings,
-  saveSettings,
-  resetToDemoData,
-  initializeStorage,
-  getSubscriptionStatus,
-  saveSubscriptionStatus,
-  getExpenses,
-  saveExpense,
-  deleteExpense,
-  importRestore,
-  syncFromFirestore,
-  enableRealTimeSync
-} from './utils/storage';
-import { downloadInvoicePDF } from './utils/pdfUtils';
-import { auth, firebaseReady } from './utils/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { triggerSuccessFeedback } from './utils/feedback';
+
 
 function App() {
 
@@ -682,23 +684,37 @@ function App() {
   }
 
   if (publicToken) {
-    return <PublicInvoice initialInvoice={publicInvoice} />;
+    return (
+      <React.Suspense fallback={
+        <div className="flex h-screen items-center justify-center">
+          <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-600 rounded-full animate-spin"></div>
+        </div>
+      }>
+        <PublicInvoice initialInvoice={publicInvoice} />
+      </React.Suspense>
+    );
   }
 
   // Show onboarding/login if not authenticated
   if (!isAuthenticated) {
     return (
-      <WelcomeOnboarding
-        onLoginSuccess={handleLoginSuccess}
-        onQuickStart={() => {
-          initializeStorage();
-          const session = { timestamp: Date.now(), token: 'billqyro-secure-session', userEmail: 'demo@billqyro.com' };
-          localStorage.setItem('billqyro_auth', JSON.stringify(session));
-          localStorage.setItem('billqyro_user_role', 'user');
-          localStorage.removeItem('billqyro_admin_unlocked');
-          handleLoginSuccess();
-        }}
-      />
+      <React.Suspense fallback={
+        <div className="flex h-screen items-center justify-center">
+          <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-600 rounded-full animate-spin"></div>
+        </div>
+      }>
+        <WelcomeOnboarding
+          onLoginSuccess={handleLoginSuccess}
+          onQuickStart={() => {
+            initializeStorage();
+            const session = { timestamp: Date.now(), token: 'billqyro-secure-session', userEmail: 'demo@billqyro.com' };
+            localStorage.setItem('billqyro_auth', JSON.stringify(session));
+            localStorage.setItem('billqyro_user_role', 'user');
+            localStorage.removeItem('billqyro_admin_unlocked');
+            handleLoginSuccess();
+          }}
+        />
+      </React.Suspense>
     );
   }
 
