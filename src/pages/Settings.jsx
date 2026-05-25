@@ -36,7 +36,8 @@ import {
   Sliders,
   Sparkles,
   Link,
-  Info
+  Info,
+  Smartphone
 } from 'lucide-react';
 
 import {
