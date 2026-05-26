@@ -200,14 +200,14 @@ const Dashboard = ({
       >
 
       {/* 0. WELCOME HERO BANNER */}
-      <motion.div variants={itemVariants} className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-[#071B3A] to-[#19C3A3] text-white relative overflow-hidden shadow-premium border border-slate-800/80">
+      <motion.div variants={itemVariants} className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-theme-btnFrom to-theme-btnTo text-white relative overflow-hidden shadow-premium border border-theme-border/10">
         <div className="absolute -top-24 -right-24 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-black uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Workspace Authenticated</span>
               </div>
@@ -215,15 +215,15 @@ const Dashboard = ({
                   ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
                   : subscription?.expired
                     ? 'bg-rose-500/15 border-rose-500/30 text-rose-400'
-                    : 'bg-slate-50 dark:bg-slate-800/500/15 border-slate-500/30 text-slate-400'
+                    : 'bg-white/10 border-white/20 text-white'
                 }`}>
                 {subscription?.status === 'premium' ? 'Premium' : subscription?.expired ? 'Expired' : 'Free'}
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-              Welcome back, <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">{businessName}</span>
+              Welcome back, <span className="bg-gradient-to-r from-white via-slate-100 to-emerald-200 bg-clip-text text-transparent">{businessName}</span>
             </h1>
-            <p className="text-xs text-slate-400 font-medium">
+            <p className="text-xs text-slate-100/90 font-semibold">
               Your professional invoicing workspace is loaded and ready. Let's make billing seamless today!
             </p>
           </div>
@@ -233,7 +233,7 @@ const Dashboard = ({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onQuickBillOpen}
-              className="flex items-center justify-center gap-1.5 bg-white dark:bg-slate-900/10 hover:bg-white dark:bg-slate-900/20 border border-white/20 text-white font-black text-xs px-4 py-3.5 rounded-2xl shadow-sm transition-all w-fit uppercase tracking-wider"
+              className="flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-black text-xs px-4 py-3.5 rounded-2xl shadow-sm transition-all w-fit uppercase tracking-wider"
             >
               <Zap className="w-4 h-4 text-amber-400" />
               <span>Quick Bill</span>
@@ -242,41 +242,41 @@ const Dashboard = ({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setCurrentTab('create-invoice')}
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-xs px-5 py-3.5 rounded-2xl shadow-md cursor-pointer w-fit uppercase tracking-wider"
+              className="flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-theme-primary font-black text-xs px-5 py-3.5 rounded-2xl shadow-md cursor-pointer w-fit uppercase tracking-wider"
             >
               <Plus className="w-4 h-4" />
               <span>Full Bill</span>
             </motion.button>
           </div>
         </div>
-        </motion.div>
+      </motion.div>
 
-        {/* 0.05 TODAY'S QUICK SUMMARY (Horizontal Scroll for Mobile) */}
-        <motion.div variants={itemVariants} className="w-full overflow-x-auto pb-4 pt-2 hide-scrollbar flex gap-4 sm:grid sm:grid-cols-3">
-          <div className="min-w-[200px] flex-1 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/20 dark:to-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-3xl p-5 shadow-premium">
-            <p className="text-[10px] font-black uppercase tracking-wider text-indigo-500 mb-1">Today's Revenue</p>
-            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">
-              {formatCurrency(todayRevenue, currencySymbol)}
-            </h3>
-            <p className="text-xs font-semibold text-slate-500 mt-1">{todayBills} Bills Created</p>
-          </div>
-          
-          <div className="min-w-[200px] flex-1 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/20 dark:to-emerald-900/10 border border-emerald-100 dark:border-emerald-800/30 rounded-3xl p-5 shadow-premium">
-            <p className="text-[10px] font-black uppercase tracking-wider text-emerald-500 mb-1">Today's Collection</p>
-            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">
-              {formatCurrency(todayCollection, currencySymbol)}
-            </h3>
-            <p className="text-xs font-semibold text-slate-500 mt-1">Cash Inflow</p>
-          </div>
+      {/* 0.05 TODAY'S QUICK SUMMARY (Horizontal Scroll for Mobile) */}
+      <motion.div variants={itemVariants} className="w-full overflow-x-auto pb-4 pt-2 hide-scrollbar flex gap-4 sm:grid sm:grid-cols-3">
+        <div className="min-w-[200px] flex-1 bg-theme-card border border-theme-border rounded-3xl p-5 shadow-premium">
+          <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted mb-1">Today's Revenue</p>
+          <h3 className="text-2xl font-black text-theme-text tracking-tight">
+            {formatCurrency(todayRevenue, currencySymbol)}
+          </h3>
+          <p className="text-xs font-semibold text-theme-muted mt-1">{todayBills} Bills Created</p>
+        </div>
+        
+        <div className="min-w-[200px] flex-1 bg-theme-card border border-theme-border rounded-3xl p-5 shadow-premium">
+          <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted mb-1">Today's Collection</p>
+          <h3 className="text-2xl font-black text-theme-text tracking-tight">
+            {formatCurrency(todayCollection, currencySymbol)}
+          </h3>
+          <p className="text-xs font-semibold text-theme-muted mt-1">Cash Inflow</p>
+        </div>
 
-          <div className="min-w-[200px] flex-1 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-900/10 border border-amber-100 dark:border-amber-800/30 rounded-3xl p-5 shadow-premium">
-            <p className="text-[10px] font-black uppercase tracking-wider text-amber-500 mb-1">Today's Dues</p>
-            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">
-              {formatCurrency(todayDue, currencySymbol)}
-            </h3>
-            <p className="text-xs font-semibold text-slate-500 mt-1">Pending Balance</p>
-          </div>
-        </motion.div>
+        <div className="min-w-[200px] flex-1 bg-theme-card border border-theme-border rounded-3xl p-5 shadow-premium">
+          <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted mb-1">Today's Dues</p>
+          <h3 className="text-2xl font-black text-theme-text tracking-tight">
+            {formatCurrency(todayDue, currencySymbol)}
+          </h3>
+          <p className="text-xs font-semibold text-theme-muted mt-1">Pending Balance</p>
+        </div>
+      </motion.div>
 
       {/* GLOBAL ANNOUNCEMENT BANNER */}
       {businessSettings?.globalAnnouncement && (

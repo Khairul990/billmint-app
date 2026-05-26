@@ -13,9 +13,9 @@ import Logo from './Logo';
  * @param {Object} businessSettings - current active business details
  */
 const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen }) => {
-  // Theme state persisted in LocalStorage
+  // Theme state persisted in LocalStorage and synced from Firebase Settings Cloud
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('billqyro_theme') || 'light';
+    return businessSettings?.themePreset || localStorage.getItem('billqyro_theme') || 'light';
   });
 
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
@@ -26,6 +26,16 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   }, [currentTab]);
 
   useEffect(() => {
+    if (businessSettings?.themePreset) {
+      setTheme(businessSettings.themePreset);
+    }
+  }, [businessSettings?.themePreset]);
+
+  useEffect(() => {
+    // Apply data-theme attribute for dynamic CSS custom properties
+    document.documentElement.setAttribute('data-theme', theme);
+    
+    // Toggle dark class to support standard dark: utility states for Dark Premium theme
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
@@ -66,7 +76,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-800/50 dark:bg-[#070c18] dark:bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] dark:from-[#0d1627] dark:via-[#070c18] dark:to-[#040810] flex flex-col md:flex-row w-full font-sans antialiased text-slate-800 dark:text-slate-100 transition-colors duration-300">
+    <div className="min-h-screen bg-theme-background flex flex-col md:flex-row w-full font-sans antialiased text-theme-text transition-colors duration-300">
       {/* Desktop Sidebar (Hidden on Mobile) */}
       <Sidebar
         currentTab={currentTab}
@@ -82,7 +92,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-0">
         
         {/* Header Block with Premium Dual-Theme Layout */}
-        <header className="relative bg-white/80 dark:bg-[#070c18]/80 backdrop-blur-md dark:backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 px-6 py-8 md:py-10 text-slate-900 dark:text-white shadow-[0_1px_3px_rgba(7,13,25,0.01),0_10px_20px_-10px_rgba(7,13,25,0.02)] dark:shadow-none transition-all duration-300 z-30">
+        <header className="relative bg-theme-card/80 backdrop-blur-md border-b border-theme-border px-6 py-8 md:py-10 text-theme-text shadow-[0_1px_3px_rgba(7,13,25,0.01),0_10px_20px_-10px_rgba(7,13,25,0.02)] transition-all duration-300 z-30">
           {/* Subtle Ambient Background Gradients wrapped to prevent overflow spill */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-0 right-0 w-64 h-64 bg-slate-100 dark:bg-slate-900/5 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
@@ -92,17 +102,17 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
           <div className="max-w-6xl mx-auto flex items-center justify-between relative z-10">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-900/40 px-2.5 py-0.5 rounded-full border border-slate-200/60 dark:border-white/5 backdrop-blur-md">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-theme-muted bg-theme-background px-2.5 py-0.5 rounded-full border border-theme-border backdrop-blur-md">
                   Active Workspace
                 </span>
-                <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/10 border border-emerald-500/15 dark:border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/15 dark:border-emerald-500/20 px-2.5 py-0.5 rounded-full">
                   <ShieldCheck className="w-3.5 h-3.5" /> Secure
                 </span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mt-2 text-slate-900 dark:text-white">
+              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mt-2 text-theme-text">
                 {getPageTitle(currentTab)}
               </h2>
-              <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-semibold mt-1">
+              <p className="text-xs md:text-sm text-theme-muted font-semibold mt-1">
                 Manage your enterprise invoices, clients, and assets smoothly.
               </p>
             </div>
@@ -112,7 +122,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <button
                 onClick={toggleTheme}
                 type="button"
-                className="w-10 h-10 rounded-2xl bg-slate-50 dark:bg-[#0b1221]/50 border border-slate-200/60 dark:border-white/5 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
+                className="w-10 h-10 rounded-2xl bg-theme-background border border-theme-border flex items-center justify-center text-theme-text hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
                 title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
               >
                 {theme === 'light' ? (
@@ -126,7 +136,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div className="relative flex items-center">
                 <button
                   onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
-                  className="w-10 h-10 rounded-2xl bg-slate-50 dark:bg-[#0b1221]/50 border border-slate-200/60 dark:border-white/5 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
+                  className="w-10 h-10 rounded-2xl bg-theme-background border border-theme-border flex items-center justify-center text-theme-text hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
                   title="Account Settings"
                 >
                   <User className="w-5 h-5" />

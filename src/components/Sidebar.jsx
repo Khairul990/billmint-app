@@ -25,9 +25,9 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-[#071B3A] dark:bg-[#070c18]/90 dark:backdrop-blur-xl border-r border-slate-800 dark:border-white/5 h-screen sticky top-0 left-0 z-30 shadow-2xl transition-all duration-300">
+    <aside className="hidden md:flex flex-col w-64 bg-theme-sidebar border-r border-theme-border/10 h-screen sticky top-0 left-0 z-30 shadow-2xl transition-all duration-300">
       {/* Brand Header */}
-      <div className="p-6 border-b border-[#14284B] dark:border-white/5 flex items-center">
+      <div className="p-6 border-b border-theme-border/10 flex items-center">
         <Logo type="horizontal" forceWhiteText={true} />
       </div>
 
@@ -46,19 +46,19 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
               className={`relative w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors duration-300 group cursor-pointer ${
                 isActive 
                   ? 'text-white' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeSidebar"
-                  className="absolute inset-0 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.4)]"
+                  className="absolute inset-0 bg-gradient-to-r from-theme-btnFrom to-theme-btnTo rounded-xl shadow-[0_0_20px_rgba(25,195,163,0.35)]"
                   initial={false}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}
               <Icon className={`relative z-10 w-5 h-5 transition-transform duration-300 ${
-                isActive ? 'text-white scale-110' : 'text-slate-500 group-hover:text-teal-400 group-hover:scale-110'
+                isActive ? 'text-white scale-110' : 'text-slate-500 group-hover:text-theme-accent group-hover:scale-110'
               }`} />
               <span className="relative z-10">{item.label}</span>
             </motion.button>
@@ -67,8 +67,8 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
       </nav>
 
       {/* Sidebar Footer with Business Account Summary & Logout */}
-      <div className="p-4 border-t border-[#14284B] dark:border-white/5 flex flex-col gap-3">
-        <div className="flex items-center gap-3 p-3 bg-[#14284B] dark:bg-slate-900/5 border border-slate-800/50 dark:border-white/5 rounded-xl">
+      <div className="p-4 border-t border-theme-border/10 flex flex-col gap-3">
+        <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl">
           {businessSettings?.logoUrl ? (
             <img
               src={businessSettings.logoUrl}
@@ -76,7 +76,7 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
               className="w-9 h-9 rounded-lg object-cover shadow-sm bg-white dark:bg-slate-900"
             />
           ) : (
-            <div className="w-9 h-9 rounded-lg bg-teal-500/20 text-teal-400 font-bold flex items-center justify-center text-sm">
+            <div className="w-9 h-9 rounded-lg bg-theme-accent/20 text-theme-accent font-bold flex items-center justify-center text-sm">
               {businessSettings?.businessName?.charAt(0) || 'B'}
             </div>
           )}

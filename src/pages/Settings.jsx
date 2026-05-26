@@ -57,6 +57,60 @@ import { getAdminEmail } from '../utils/adminAccess';
 import { firebaseReady } from '../utils/firebase';
 import { toast } from 'react-hot-toast';
 
+const getThemePreviewColors = (preset) => {
+  const themes = {
+    light: {
+      background: '#F7F9FC',
+      sidebar: '#071B3A',
+      card: '#FFFFFF',
+      text: '#101828',
+      muted: '#667085',
+      accent: '#19C3A3',
+      primary: '#14284B',
+      softAccent: '#ECFDF5',
+      border: '#E5EAF1',
+      btnFrom: '#14284B',
+      btnTo: '#19C3A3',
+      headerColor: '#071B3A',
+      tableHeaderBg: '#ECFDF5',
+      totalBg: '#E5EAF1'
+    },
+    dark: {
+      background: '#04111F',
+      sidebar: '#020B16',
+      card: '#0B1F35',
+      text: '#FFFFFF',
+      muted: '#CBD5E1',
+      accent: '#9FE5CF',
+      primary: '#071B3A',
+      softAccent: 'rgba(159,229,207,0.12)',
+      border: 'rgba(255,255,255,0.12)',
+      btnFrom: '#19C3A3',
+      btnTo: '#9FE5CF',
+      headerColor: '#9FE5CF',
+      tableHeaderBg: 'rgba(159,229,207,0.15)',
+      totalBg: 'rgba(255,255,255,0.08)'
+    },
+    rose: {
+      background: '#FFF1F2',
+      sidebar: '#4A0D19',
+      card: '#FFFFFF',
+      text: '#231018',
+      muted: 'rgba(76, 29, 48, 0.65)',
+      accent: '#F43F5E',
+      primary: '#881337',
+      softAccent: '#FFF1F2',
+      border: '#FFE4E6',
+      btnFrom: '#881337',
+      btnTo: '#F43F5E',
+      headerColor: '#881337',
+      tableHeaderBg: '#FFE4E6',
+      totalBg: '#FFE4E6'
+    }
+  };
+  return themes[preset] || themes.light;
+};
+
 /**
  * Normal User Business Settings Page reorganized into 5 beautiful clean tabs.
  * Allows standard users to configure their own firm's profile.
@@ -75,6 +129,7 @@ const Settings = ({
   onInstallApp
 }) => {
   const [activeTab, setActiveTab] = useState('profile');
+  const [themePreset, setThemePreset] = useState('light');
 
   // Business Profile States
   const [businessName, setBusinessName] = useState('');
@@ -322,6 +377,7 @@ const Settings = ({
 
       setEnableHaptics(settings.enableHaptics !== false);
       setEnableSounds(settings.enableSounds !== false);
+      setThemePreset(settings.themePreset || 'light');
     }
   }, [settings]);
 
@@ -389,6 +445,7 @@ const Settings = ({
       showQrInPreview,
       customPaymentLink,
 
+      themePreset,
       brandColor,
       invoiceTemplate,
       defaultBillingTemplate,
@@ -610,6 +667,7 @@ const Settings = ({
       <div className="flex bg-slate-100 dark:bg-slate-800 dark:bg-slate-900/60 p-1.5 rounded-2xl mb-6 overflow-x-auto no-scrollbar gap-1">
         {[
           { id: 'profile', label: 'Profile', icon: Building2 },
+          { id: 'theme', label: 'Theme Studio', icon: Palette },
           { id: 'regional', label: 'Regional', icon: Globe },
           { id: 'payment', label: 'Payments', icon: QrCode },
           { id: 'preferences', label: 'Invoices', icon: FileText },
@@ -788,6 +846,279 @@ const Settings = ({
                     rows="2"
                     className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 dark:text-slate-100 dark:text-white font-medium resize-none text-xs"
                   />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 1.5 BRAND THEME STUDIO TAB */}
+        {activeTab === 'theme' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* Studio Header */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-premium flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-teal-650 dark:text-teal-400 flex items-center justify-center">
+                <Palette className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100">Brand Theme Studio</h2>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Customize the look of your BillQyro workspace and invoice PDF</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column: Preset Selectors & Controls */}
+              <div className="lg:col-span-5 space-y-5">
+                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-5">
+                  <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">Select Preset Theme</h3>
+                  
+                  {/* Theme Presets List */}
+                  <div className="space-y-3">
+                    {[
+                      {
+                        id: 'light',
+                        name: 'Light Professional',
+                        desc: 'Clean white, navy text, mint action buttons. Best default for all businesses.',
+                        colors: ['#f0f3f6', '#071B3A', '#19C3A3']
+                      },
+                      {
+                        id: 'dark',
+                        name: 'Dark Premium',
+                        desc: 'Dark navy dashboard with teal glow. Best for night use and premium finance look.',
+                        colors: ['#04111F', '#020B16', '#9FE5CF']
+                      },
+                      {
+                        id: 'rose',
+                        name: 'Rose Business',
+                        desc: 'Burgundy, rose, and soft white. Great for fashion, boutique, beauty, and embroidery businesses.',
+                        colors: ['#FFF1F2', '#4A0D19', '#F43F5E']
+                      }
+                    ].map((preset) => {
+                      const isSelected = themePreset === preset.id;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => setThemePreset(preset.id)}
+                          className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden cursor-pointer flex flex-col gap-2 ${
+                            isSelected 
+                              ? 'border-emerald-500 bg-emerald-500/[0.03] shadow-premium glow-emerald' 
+                              : 'border-slate-200/60 dark:border-slate-800 hover:border-slate-350 dark:hover:border-slate-700 bg-slate-50/50 dark:bg-slate-850/50'
+                          }`}
+                        >
+                          <div className="flex justify-between items-center w-full">
+                            <span className="text-xs font-extrabold text-slate-850 dark:text-slate-100">{preset.name}</span>
+                            <div className="flex gap-1 items-center">
+                              {preset.colors.map((c, i) => (
+                                <span key={i} className="w-3.5 h-3.5 rounded-full border border-white/20 shadow-sm" style={{ backgroundColor: c }}></span>
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-[10px] text-slate-400 dark:text-slate-400 font-semibold leading-relaxed pr-6">{preset.desc}</p>
+                          {isSelected && (
+                            <span className="absolute bottom-2 right-2 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8px] font-bold">✓</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Actions buttons */}
+                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        document.documentElement.setAttribute('data-theme', themePreset);
+                        if (themePreset === 'dark') {
+                          document.documentElement.classList.add('dark');
+                        } else {
+                          document.documentElement.classList.remove('dark');
+                        }
+                        toast.success(`Previewing ${themePreset === 'light' ? 'Light Professional' : themePreset === 'dark' ? 'Dark Premium' : 'Rose Business'} theme!`);
+                      }}
+                      className="w-full py-3 bg-slate-100 hover:bg-slate-200/75 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 font-black text-xs rounded-xl shadow-sm transition-all active:scale-[0.98] cursor-pointer uppercase tracking-wider"
+                    >
+                      Preview Theme
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSave(null)}
+                      className="w-full py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer uppercase tracking-wider"
+                    >
+                      Save Theme
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setThemePreset('light');
+                        const payload = {
+                          ...settings,
+                          themePreset: 'light',
+                          themeUpdatedAt: new Date().toISOString()
+                        };
+                        onSaveSettings(payload);
+                        document.documentElement.setAttribute('data-theme', 'light');
+                        document.documentElement.classList.remove('dark');
+                        toast.success('Reset to BillQyro Classic default theme!');
+                      }}
+                      className="w-full py-2 bg-transparent text-slate-400 hover:text-rose-500 text-[10px] font-bold text-center transition-all cursor-pointer block uppercase tracking-wider"
+                    >
+                      Reset to BillQyro Classic
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Live Interactive Mocks Previews */}
+              <div className="lg:col-span-7 space-y-6">
+                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-6">
+                  <div>
+                    <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">Theme Studio Live Mocks</h3>
+                    <p className="text-[9px] text-slate-450 dark:text-slate-500 font-semibold leading-relaxed mt-0.5">Real-time dynamic visualization of presets applied to core panels</p>
+                  </div>
+
+                  {/* Previews Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {/* 1. Dashboard Mock */}
+                    {(() => {
+                      const colors = getThemePreviewColors(themePreset);
+                      return (
+                        <div className="border border-slate-200/60 dark:border-slate-800 rounded-2xl p-4 space-y-3 relative overflow-hidden flex flex-col justify-between" style={{ backgroundColor: colors.background }}>
+                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-slate-400 bg-white/40 dark:bg-black/30 px-1.5 py-0.5 rounded border border-slate-200/10">PC Workspace</span>
+                          <div className="space-y-2">
+                            <span className="text-[8px] font-black uppercase text-slate-455 tracking-wider block">Desktop Dashboard</span>
+                            <div className="flex gap-2">
+                              {/* Sidebar miniature */}
+                              <div className="w-14 rounded p-1.5 space-y-1" style={{ backgroundColor: colors.sidebar }}>
+                                <div className="w-8 h-1 rounded-sm bg-white/40"></div>
+                                <div className="w-10 h-0.5 rounded-sm bg-white/20"></div>
+                                <div className="w-10 h-0.5 rounded-sm bg-white/20"></div>
+                                <div className="w-10 h-0.5 rounded-sm bg-white/20"></div>
+                              </div>
+                              {/* Main panel miniature */}
+                              <div className="flex-1 space-y-2">
+                                {/* Hero Mock */}
+                                <div className="rounded p-2 text-white text-[6px] space-y-1 relative" style={{ background: `linear-gradient(135deg, ${colors.btnFrom}, ${colors.btnTo})` }}>
+                                  <span className="font-extrabold block">Welcome to BillQyro</span>
+                                  <div className="w-12 h-1 bg-white/30 rounded-sm"></div>
+                                </div>
+                                {/* Stats Box mock */}
+                                <div className="grid grid-cols-2 gap-1">
+                                  <div className="rounded p-1 border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+                                    <span className="text-[5px] text-slate-400 block leading-none">Collection</span>
+                                    <span className="text-[6px] font-extrabold" style={{ color: colors.text }}>$1,200</span>
+                                  </div>
+                                  <div className="rounded p-1 border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+                                    <span className="text-[5px] text-slate-400 block leading-none">Dues</span>
+                                    <span className="text-[6px] font-extrabold" style={{ color: colors.text }}>$450</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Create button */}
+                          <div className="w-full h-5 rounded-lg flex items-center justify-center text-[7px] font-black uppercase tracking-wider text-white shadow-sm" style={{ background: `linear-gradient(90deg, ${colors.btnFrom}, ${colors.btnTo})` }}>
+                            Create Invoice
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* 2. Mobile screen Mock */}
+                    {(() => {
+                      const colors = getThemePreviewColors(themePreset);
+                      return (
+                        <div className="border border-slate-200/60 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center relative overflow-hidden bg-slate-950 min-h-[145px]">
+                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-slate-400 bg-white/10 px-1.5 py-0.5 rounded border border-white/5">Smartphone UI</span>
+                          {/* Mobile Screen Shell */}
+                          <div className="w-3/4 flex-1 border border-white/10 bg-slate-900 rounded-t-xl overflow-hidden flex flex-col justify-between" style={{ backgroundColor: colors.background }}>
+                            {/* Mobile header */}
+                            <div className="p-1 flex justify-between items-center border-b" style={{ borderColor: colors.border }}>
+                              <span className="text-[5px] font-bold" style={{ color: colors.text }}>BillQyro</span>
+                              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors.accent }}></span>
+                            </div>
+                            {/* Mobile card info */}
+                            <div className="p-2 space-y-1.5">
+                              <div className="rounded p-1.5 border space-y-1" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+                                <div className="w-10 h-0.5 bg-slate-300 rounded-sm"></div>
+                                <div className="w-14 h-1 rounded-sm" style={{ backgroundColor: colors.accent }}></div>
+                              </div>
+                            </div>
+                            {/* Floating pill action mock */}
+                            <div className="flex justify-center -mb-2">
+                              <span className="px-2 py-0.5 rounded-full text-[4.5px] font-black text-white shadow-sm flex items-center gap-0.5" style={{ background: `linear-gradient(90deg, ${colors.btnFrom}, ${colors.btnTo})` }}>
+                                ⚡ Quick Bill
+                              </span>
+                            </div>
+                            {/* Mobile Bottom navigation bar mockup */}
+                            <div className="h-4 border-t flex justify-around items-center" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+                              <span className="w-1 h-1 rounded-full bg-slate-400"></span>
+                              <span className="w-1 h-1 rounded-full bg-slate-400"></span>
+                              <span className="w-2.5 h-1 rounded-sm" style={{ backgroundColor: colors.accent }}></span>
+                              <span className="w-1 h-1 rounded-full bg-slate-400"></span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* 3. A4 Printable PDF Mock */}
+                    {(() => {
+                      const colors = getThemePreviewColors(themePreset);
+                      return (
+                        <div className="border border-slate-200/60 dark:border-slate-800 rounded-2xl p-4 bg-slate-100 dark:bg-slate-900/50 flex flex-col justify-between items-center relative overflow-hidden min-h-[145px]">
+                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-slate-400 bg-white/40 dark:bg-black/30 px-1.5 py-0.5 rounded border border-slate-200/10">Printable PDF</span>
+                          {/* Mini paper sheet */}
+                          <div className="w-[85%] flex-1 bg-white border border-slate-200 shadow-sm p-2 flex flex-col justify-between">
+                            {/* Header accent */}
+                            <div className="flex justify-between items-start pb-1.5 border-b border-slate-150">
+                              <div className="space-y-0.5">
+                                <span className="text-[6px] font-extrabold block" style={{ color: colors.headerColor }}>BillQyro Store</span>
+                                <div className="w-10 h-0.5 bg-slate-300 rounded-sm"></div>
+                              </div>
+                              <span className="text-[6px] font-black tracking-wide" style={{ color: colors.headerColor }}>INVOICE</span>
+                            </div>
+                            {/* Table Mockup */}
+                            <div className="my-1.5 space-y-0.5">
+                              {/* Header Accent Line */}
+                              <div className="h-1 rounded-sm w-full" style={{ backgroundColor: colors.tableHeaderBg }}></div>
+                              <div className="h-0.5 bg-slate-100 w-full"></div>
+                              <div className="h-0.5 bg-slate-100 w-full"></div>
+                            </div>
+                            {/* Total Highlight Accent Row */}
+                            <div className="flex justify-between items-center p-1 rounded-sm" style={{ backgroundColor: colors.totalBg }}>
+                              <span className="text-[5px] font-black" style={{ color: colors.headerColor }}>GRAND TOTAL</span>
+                              <span className="text-[5.5px] font-black" style={{ color: colors.headerColor }}>$1,650.00</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* 4. Scan to Pay QR Card Preview */}
+                    {(() => {
+                      const colors = getThemePreviewColors(themePreset);
+                      return (
+                        <div className="border border-slate-200/60 dark:border-slate-800 rounded-2xl p-4 bg-white dark:bg-slate-900 flex flex-col justify-between items-center relative overflow-hidden min-h-[145px]">
+                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-200/10">QR Pay Card</span>
+                          {/* Miniature Scan Card frame */}
+                          <div className="w-[85%] border border-slate-100 dark:border-slate-800 rounded-xl p-2.5 flex flex-col items-center justify-between text-center gap-1.5 shadow-sm bg-slate-50 dark:bg-slate-950/20">
+                            <span className="text-[6px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block leading-none">Scan to Pay</span>
+                            
+                            {/* Mini QR border styled in theme accent */}
+                            <div className="p-1 rounded border-2 border-dashed flex items-center justify-center" style={{ borderColor: colors.accent }}>
+                              <div className="w-10 h-10 bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-[5px] text-slate-400">QR Code</div>
+                            </div>
+
+                            <div className="space-y-0.5">
+                              <span className="text-[5.5px] text-slate-500 dark:text-slate-400 block font-semibold leading-none">BillQyro Payment</span>
+                              <span className="text-[7px] font-black block leading-tight" style={{ color: colors.headerColor }}>$1,650.00 Due</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             </div>

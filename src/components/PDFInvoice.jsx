@@ -248,7 +248,31 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
 
   const currencySymbol = regionalPrefs.currency || '₹';
   const templateId = businessSettings?.invoiceTemplate || 'modern';
-  const brandColor = businessSettings?.brandColor || '#14b8a6';
+  
+  // Resolve Dynamic PDF Theme accent colors
+  const themePreset = businessSettings?.themePreset || 'light';
+  let brandColor = '#19C3A3'; 
+  let headerColor = '#0a1128';
+  let tableHeaderBg = '#14284B';
+  let totalHighlightBg = '#eff6ff';
+
+  if (themePreset === 'dark') {
+    brandColor = '#9FE5CF';
+    headerColor = '#071B3A';
+    tableHeaderBg = '#071B3A';
+    totalHighlightBg = 'rgba(159, 229, 207, 0.12)';
+  } else if (themePreset === 'rose') {
+    brandColor = '#F43F5E';
+    headerColor = '#881337';
+    tableHeaderBg = '#881337';
+    totalHighlightBg = '#FFF1F2';
+  } else { // light
+    brandColor = '#19C3A3';
+    headerColor = '#14284B';
+    tableHeaderBg = '#14284B';
+    totalHighlightBg = '#ECFDF5';
+  }
+
   const dynamicFont = regionalPrefs.country === 'Bangladesh' ? 'Noto Sans Bengali' : 'Noto Sans';
 
   const formatVal = (num) => {
@@ -320,7 +344,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
 
       {/* Compact Item Table */}
       <View style={styles.table}>
-        <View style={[styles.compactTableHeader, { backgroundColor: brandColor }]}>
+        <View style={[styles.compactTableHeader, { backgroundColor: tableHeaderBg }]}>
           <Text style={styles.compactColSN}>S.N.</Text>
           {invoice.billType === 'grocery' ? (
             <>
@@ -410,9 +434,9 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
               <Text style={{ fontSize: 7 }}>{formatVal(invoice.taxAmount)}</Text>
             </View>
           )}
-          <View style={styles.grandTotalRow}>
-            <Text style={{ fontSize: 8, fontWeight: 'bold' }}>Grand Total</Text>
-            <Text style={{ fontSize: 8, fontWeight: 'bold' }}>{formatVal(invoice.grandTotal)}</Text>
+          <View style={[styles.grandTotalRow, { backgroundColor: totalHighlightBg }]}>
+            <Text style={{ fontSize: 8, fontWeight: 'bold', color: themePreset === 'rose' ? '#881337' : '#0f172a' }}>Grand Total</Text>
+            <Text style={{ fontSize: 8, fontWeight: 'bold', color: themePreset === 'rose' ? '#881337' : '#0f172a' }}>{formatVal(invoice.grandTotal)}</Text>
           </View>
           {invoice.balanceDue > 0 && (
             <View style={styles.dueRow}>
@@ -440,7 +464,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
       {/* Elegant Invoice Header */}
       <View style={styles.header}>
         <View style={styles.businessInfo}>
-          <Text style={[styles.businessName, { color: brandColor }]}>
+          <Text style={[styles.businessName, { color: headerColor }]}>
             {businessSettings?.businessName || 'BillQyro Technologies'}
           </Text>
           <Text style={styles.businessSub}>
@@ -491,7 +515,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
 
       {/* Item Table */}
       <View style={styles.table}>
-        <View style={[styles.tableHeader, { backgroundColor: brandColor }]}>
+        <View style={[styles.tableHeader, { backgroundColor: tableHeaderBg }]}>
           <Text style={styles.colSN}>S.N.</Text>
           {invoice.billType === 'grocery' ? (
             <>
@@ -617,9 +641,9 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
             </View>
           )}
 
-          <View style={styles.grandTotalRow}>
-            <Text style={{ fontWeight: 'bold' }}>Grand Total</Text>
-            <Text style={{ fontWeight: 'bold' }}>{formatVal(invoice.grandTotal)}</Text>
+          <View style={[styles.grandTotalRow, { backgroundColor: totalHighlightBg }]}>
+            <Text style={{ fontWeight: 'bold', color: themePreset === 'rose' ? '#881337' : '#0f172a' }}>Grand Total</Text>
+            <Text style={{ fontWeight: 'bold', color: themePreset === 'rose' ? '#881337' : '#0f172a' }}>{formatVal(invoice.grandTotal)}</Text>
           </View>
 
           <View style={styles.totalRow}>

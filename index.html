@@ -15,16 +15,21 @@
     <meta property="og:description" content="Generate professional business invoices instantly. Secure, beautiful, mobile-friendly finance dashboard for modern freelancers and businesses." />
     <meta property="og:type" content="website" />
 
-    <!-- Prevent white flash on load for dark mode -->
+    <!-- Prevent white flash on load for dark/rose modes -->
     <script>
       (function() {
         try {
-          var localTheme = localStorage.getItem('billqyro_theme');
+          var localTheme = localStorage.getItem('billqyro_theme') || 'light';
+          document.documentElement.setAttribute('data-theme', localTheme);
           if (localTheme === 'dark') {
             document.documentElement.classList.add('dark');
-            document.documentElement.style.backgroundColor = '#070c18';
+            document.documentElement.style.backgroundColor = '#04111F';
+          } else if (localTheme === 'rose') {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.backgroundColor = '#FFF1F2';
           } else {
-            document.documentElement.style.backgroundColor = '#f8fafc';
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.backgroundColor = '#F7F9FC';
           }
         } catch (e) {}
       })();

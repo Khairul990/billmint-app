@@ -352,7 +352,7 @@ export const getFirebaseUserId = () => {
         if (data.userEmail === 'demo@billqyro.com') return 'demo-user';
         return data.userEmail.replace(/[^a-zA-Z0-9]/g, '_');
       }
-    } catch (e) { }
+    } catch (e) { /* ignore */ }
   }
   return 'demo-user';
 };
@@ -419,7 +419,7 @@ export const initializeStorage = () => {
   try {
     const stored = localStorage.getItem(KEYS.INVOICES);
     if (stored) currentInvoices = JSON.parse(stored);
-  } catch(e) {}
+  } catch(e) { /* ignore */ }
   
   if (!Array.isArray(currentInvoices)) {
     currentInvoices = [];
@@ -442,7 +442,7 @@ export const initializeStorage = () => {
         }
         localStorage.removeItem(oldKey);
       }
-    } catch (e) {}
+    } catch (e) { /* ignore */ }
   });
 
   if (!localStorage.getItem(KEYS.INVOICES)) {
@@ -1405,17 +1405,17 @@ export const syncFromFirestore = async () => {
     try {
       const snap1 = await getDocs(collection(db, 'invoices', userId, 'items'));
       snap1.forEach(docSnap => invoicesMap.set(docSnap.id, docSnap.data()));
-    } catch(e) {}
+    } catch(e) { /* ignore */ }
     
     try {
       const snap2 = await getDocs(collection(db, 'invoice', userId, 'items'));
       snap2.forEach(docSnap => invoicesMap.set(docSnap.id, docSnap.data()));
-    } catch(e) {}
+    } catch(e) { /* ignore */ }
     
     try {
       const snap3 = await getDocs(collection(db, 'users', userId, 'invoices'));
       snap3.forEach(docSnap => invoicesMap.set(docSnap.id, docSnap.data()));
-    } catch(e) {}
+    } catch(e) { /* ignore */ }
 
     const invoices = Array.from(invoicesMap.values());
     if (invoices.length > 0) {

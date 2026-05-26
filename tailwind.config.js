@@ -11,6 +11,19 @@ export default {
         sans: ['Inter', 'sans-serif'],
       },
       colors: {
+        theme: {
+          background: 'var(--theme-background)',
+          sidebar: 'var(--theme-sidebar)',
+          card: 'var(--theme-card)',
+          text: 'var(--theme-text)',
+          muted: 'var(--theme-muted-text)',
+          primary: 'var(--theme-primary)',
+          accent: 'var(--theme-accent)',
+          softAccent: 'var(--theme-soft-accent)',
+          border: 'var(--theme-border)',
+          btnFrom: 'var(--theme-btn-from)',
+          btnTo: 'var(--theme-btn-to)',
+        },
         // Redefining standard colors to map perfectly to the BillQyro logo style
         slate: {
           50: '#f0f3f6',   // Sophisticated cool pearl slate (less harsh/bright)

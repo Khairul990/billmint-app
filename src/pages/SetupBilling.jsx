@@ -159,13 +159,12 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
   const handleSave = () => {
     setIsSaving(true);
     
-    // Formulate final configuration
-    let currencySymbol = '₹';
-    let currencyCode = 'INR';
-    let taxLabel = 'GST';
-    let computedTax = 18;
-    let dateFormat = 'DD/MM/YYYY';
-    let numberFormat = 'Indian';
+    let currencySymbol;
+    let currencyCode;
+    let taxLabel;
+    let computedTax;
+    let dateFormat;
+    let numberFormat;
 
     if (country === 'India') {
       currencySymbol = '₹';
