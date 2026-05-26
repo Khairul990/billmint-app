@@ -1,6 +1,29 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, AlertCircle, FileDown, RefreshCw, CheckCircle2, ChevronRight } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowRight,
+  Building2,
+  Check,
+  CreditCard,
+  Download,
+  Eye,
+  EyeOff,
+  FileCheck2,
+  FileText,
+  Globe2,
+  IndianRupee,
+  Link2,
+  Mail,
+  Plus,
+  QrCode,
+  ReceiptText,
+  Share2,
+  Smartphone,
+  UserRound,
+  Zap,
+  AlertCircle,
+  CheckCircle2
+} from "lucide-react";
 import Logo from '../components/Logo';
 import { auth, firebaseReady } from '../utils/firebase';
 import { 
@@ -12,86 +35,763 @@ import {
 } from 'firebase/auth';
 import { login } from '../utils/storage';
 
-const GoogleIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5">
-    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-    <path fill="none" d="M1 1h22v22H1z" />
-  </svg>
-);
+const STEPS = [
+  { key: "login", title: "Secure Login", sub: "Enter BillQyro workspace", icon: Check },
+  { key: "setup", title: "Workspace Setup", sub: "Region and business details", icon: Globe2 },
+  { key: "dashboard", title: "Dashboard Opened", sub: "All billing tools ready", icon: CreditCard },
+  { key: "customer", title: "Customer Added", sub: "Ready for billing", icon: UserRound },
+  { key: "invoice", title: "Invoice Created", sub: "Items and total added", icon: ReceiptText },
+  { key: "preview", title: "Live Preview", sub: "Customer invoice view ready", icon: Smartphone },
+  { key: "pdf", title: "PDF Ready", sub: "Printable invoice generated", icon: FileCheck2 },
+  { key: "download", title: "Downloaded", sub: "Saved successfully", icon: Download },
+  { key: "share", title: "Share Link Sent", sub: "Customer receives full invoice link", icon: Share2 },
+  { key: "paylink", title: "Payment Link Opened", sub: "Customer can pay instantly", icon: IndianRupee },
+  { key: "paid", title: "Payment Received", sub: "Status synced automatically", icon: CreditCard },
+  { key: "done", title: "Completed", sub: "Billing completed", icon: Check },
+];
 
-const LoginAnimation = () => {
+function cn(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function ShowcaseCard({ icon: Icon, title, sub, children }) {
   return (
-    <div className="flex flex-col items-center justify-center h-full relative p-8">
-      <div className="relative w-64 h-64 flex items-center justify-center">
-        
-        {/* Step 1: Bill Created */}
-        <motion.div
-          animate={{
-            y: [20, -20, -20, 20],
-            opacity: [0, 1, 0, 0],
-            scale: [0.8, 1, 0.8, 0.8]
-          }}
-          transition={{ duration: 5, repeat: Infinity, times: [0, 0.2, 0.4, 1], ease: "easeInOut" }}
-          className="absolute z-10"
-        >
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-3 w-40">
-            <div className="flex justify-between items-center mb-1">
-              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><Logo type="icon" className="w-5 h-5" /></div>
-              <div className="w-12 h-2 bg-slate-200 rounded-full" />
-            </div>
-            <div className="w-full h-2 bg-slate-200 rounded-full" />
-            <div className="w-3/4 h-2 bg-slate-200 rounded-full" />
-            <div className="w-full h-[1px] bg-slate-100 dark:bg-slate-800 my-1" />
-            <div className="w-1/2 h-3 bg-teal-100 rounded-full mt-1" />
-          </div>
-        </motion.div>
-
-        {/* Step 2: Processing */}
-        <motion.div
-          animate={{
-            rotate: 360,
-            opacity: [0, 0, 1, 0, 0],
-            scale: [0.5, 0.5, 1.2, 0.5, 0.5]
-          }}
-          transition={{ duration: 5, repeat: Infinity, times: [0, 0.35, 0.5, 0.65, 1], ease: "easeInOut" }}
-          className="absolute z-20 text-teal-400 drop-shadow-xl bg-slate-900 rounded-full p-3 border border-slate-800"
-        >
-          <RefreshCw size={32} />
-        </motion.div>
-
-        {/* Step 3: PDF Ready */}
-        <motion.div
-          animate={{
-            y: [-20, 0, 0, 20],
-            opacity: [0, 0, 0, 1, 0],
-            scale: [0.8, 0.8, 0.8, 1, 0.8]
-          }}
-          transition={{ duration: 5, repeat: Infinity, times: [0, 0.5, 0.6, 0.8, 1], ease: "backOut" }}
-          className="absolute z-30"
-        >
-          <div className="bg-gradient-to-br from-teal-500 to-teal-700 p-6 rounded-2xl shadow-[0_20px_50px_rgba(20,184,166,0.3)] flex flex-col items-center gap-4 w-44 text-white border border-teal-400/30">
-            <div className="bg-white dark:bg-slate-900/20 p-3 rounded-xl backdrop-blur-sm">
-              <FileDown size={40} strokeWidth={1.5} />
-            </div>
-            <span className="text-xs font-black tracking-widest uppercase">PDF Ready</span>
-          </div>
-        </motion.div>
+    <motion.div
+      initial={{ opacity: 0, y: 22, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -18, scale: 0.96 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className="relative flex h-[430px] w-full flex-col overflow-hidden rounded-[1.8rem] border border-emerald-300/20 bg-slate-950/55 p-5 shadow-2xl shadow-black/40 backdrop-blur-xl before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/[0.07] before:to-transparent before:content-['']"
+    >
+      <div className="relative z-10 mb-4 flex shrink-0 items-center gap-3 border-b border-white/10 pb-4">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-emerald-400/10 text-emerald-300">
+          <Icon size={21} />
+        </div>
+        <div className="min-w-0">
+          <h3 className="truncate font-black tracking-tight text-white">{title}</h3>
+          <p className="mt-0.5 truncate text-xs text-emerald-300/80">{sub}</p>
+        </div>
       </div>
+      <div className="relative z-10 min-h-0 flex-1 overflow-hidden">{children}</div>
+    </motion.div>
+  );
+}
 
-      <div className="mt-12 text-center relative z-40">
-        <h3 className="text-2xl font-bold text-white mb-3">Professional Invoicing</h3>
-        <p className="text-sm text-slate-400 max-w-[280px] mx-auto leading-relaxed">
-          Create, manage and download premium PDF invoices instantly across all your devices.
-        </p>
-      </div>
+function DemoInput({ width }) {
+  return (
+    <div className="h-10 rounded-2xl border border-white/10 bg-slate-950/55 px-4 py-3">
+      <div className="h-2 rounded-full bg-slate-600/45" style={{ width }} />
     </div>
   );
-};
+}
 
-const Login = ({ onLoginSuccess }) => {
+function LoginDemoCard() {
+  return (
+    <ShowcaseCard icon={Check} title="Secure Login" sub="Workspace unlocked">
+      <div className="flex h-full flex-col justify-center rounded-[1.4rem] border border-white/10 bg-white/[0.04] p-4">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-400/10 text-emerald-300">
+            <Check size={22} />
+          </div>
+          <div>
+            <p className="font-black text-white">Welcome back</p>
+            <p className="text-xs text-slate-500">Secure workspace access verified</p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          <DemoInput width="70%" />
+          <DemoInput width="52%" />
+        </div>
+        <motion.div
+          initial={{ width: "0%" }}
+          animate={{ width: "100%" }}
+          transition={{ duration: 1.15, ease: "easeOut" }}
+          className="mt-4 h-10 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-300 shadow-lg shadow-emerald-500/20"
+        />
+      </div>
+    </ShowcaseCard>
+  );
+}
+
+function InfoField({ label, value }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-slate-950/45 px-3 py-2.5">
+      <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-1 truncate text-[11px] font-bold text-slate-200">{value}</p>
+    </div>
+  );
+}
+
+function SetupCard() {
+  const regions = [
+    { code: "IN", label: "India" },
+    { code: "BD", label: "Bangladesh" },
+    { code: "Other", label: "Manual" },
+  ];
+
+  return (
+    <ShowcaseCard icon={Globe2} title="Workspace Setup" sub="Configure once, bill faster">
+      <div className="flex h-full flex-col gap-4">
+        <div className="rounded-[1.35rem] border border-emerald-300/20 bg-[#0b1728] p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-wide text-emerald-300">Step 1 of 2</p>
+              <p className="mt-1 font-black text-white">Configure Local Region</p>
+            </div>
+            <div className="grid h-10 w-10 place-items-center rounded-2xl border border-emerald-300/20 bg-emerald-300/10 text-emerald-300">
+              <Globe2 size={18} />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {regions.map((region, index) => (
+              <motion.div
+                key={region.code}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.12 }}
+                className={cn(
+                  "rounded-2xl border p-3 text-center",
+                  index === 0 ? "border-emerald-300/60 bg-emerald-300/10" : "border-white/10 bg-white/[0.03]"
+                )}
+              >
+                <p className="text-base font-black text-white">{region.code}</p>
+                <p className="mt-1 text-[10px] text-slate-500">{region.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex-1 rounded-[1.35rem] border border-white/10 bg-white/[0.035] p-4">
+          <div className="mb-3 flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-300/10 text-emerald-300">
+              <Building2 size={18} />
+            </div>
+            <div>
+              <p className="font-black text-white">Your Business Workspace</p>
+              <p className="text-xs text-slate-500">Business details saved securely</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <InfoField label="Business" value="Your Shop / Studio" />
+            <InfoField label="Owner" value="Account Owner" />
+            <div className="col-span-2">
+              <InfoField label="Billing Email" value="business@example.com" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </ShowcaseCard>
+  );
+}
+
+function SideMini({ label, active = false }) {
+  return (
+    <div className={cn("rounded-xl px-2 py-2 text-[9px] font-bold", active ? "bg-emerald-300/10 text-emerald-300" : "text-slate-600")}>
+      {label}
+    </div>
+  );
+}
+
+function DashStat({ label, value, active = false }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn("rounded-2xl border p-2", active ? "border-emerald-300/15 bg-emerald-300/[0.055]" : "border-white/10 bg-white/[0.035]")}
+    >
+      <p className={cn("text-[9px] font-bold uppercase tracking-wide", active ? "text-emerald-300/80" : "text-slate-500")}>{label}</p>
+      <p className="mt-1 text-sm font-black text-white">{value}</p>
+    </motion.div>
+  );
+}
+
+function ActionTile({ icon: Icon, text, active = false }) {
+  return (
+    <div className={cn("flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[9px] font-black", active ? "bg-emerald-400 text-slate-950" : "bg-white/[0.035] text-slate-500")}>
+      <Icon size={13} />
+      {text}
+    </div>
+  );
+}
+
+function DashboardCard() {
+  return (
+    <ShowcaseCard icon={CreditCard} title="Dashboard Opened" sub="Active workspace ready">
+      <div className="h-full overflow-hidden rounded-[1.4rem] border border-white/10 bg-[#080f1c]">
+        <div className="flex h-full">
+          <div className="w-[76px] border-r border-white/10 bg-[#060b14] p-2.5">
+            <div className="mb-4 grid h-7 w-7 place-items-center rounded-lg bg-emerald-400 text-[10px] font-black text-slate-950">BQ</div>
+            <div className="space-y-2">
+              <SideMini active label="Dash" />
+              <SideMini label="Bills" />
+              <SideMini label="Clients" />
+              <SideMini label="Plans" />
+            </div>
+          </div>
+
+          <div className="min-w-0 flex-1 p-3">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="inline-flex rounded-full border border-emerald-300/25 bg-emerald-300/10 px-2 py-1 text-[8px] font-black uppercase tracking-wide text-emerald-300">
+                  Active Workspace
+                </div>
+                <p className="mt-2 truncate text-sm font-black text-white">Business Dashboard</p>
+              </div>
+              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-emerald-300">
+                <CreditCard size={15} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              <DashStat label="Revenue" value="₹82.4K" active />
+              <DashStat label="Bills" value="128" />
+              <DashStat label="Clients" value="42" />
+            </div>
+
+            <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-[9px] font-black uppercase tracking-wide text-slate-500">Quick Actions</p>
+                <p className="text-[9px] font-bold text-emerald-300">Ready</p>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <ActionTile icon={Plus} text="Invoice" active />
+                <ActionTile icon={UserRound} text="Customer" />
+                <ActionTile icon={FileText} text="PDF" />
+              </div>
+            </div>
+
+            <div className="mt-3 rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.045] p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[9px] font-black uppercase tracking-wide text-emerald-300">Recent Bill</p>
+                  <p className="mt-1 truncate text-xs font-black text-white">INV-DEMO-1002</p>
+                  <p className="mt-0.5 text-[10px] text-slate-500">₹2,510 · Pending</p>
+                </div>
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-emerald-400/10 text-emerald-300">
+                  <ReceiptText size={18} />
+                </div>
+              </div>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+                <motion.div initial={{ width: "0%" }} animate={{ width: "76%" }} transition={{ duration: 1, ease: "easeOut" }} className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ShowcaseCard>
+  );
+}
+
+function MiniChip({ label, value }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+      <p className="text-slate-500">{label}</p>
+      <p className="mt-1 font-bold text-slate-200">{value}</p>
+    </div>
+  );
+}
+
+function CustomerCard() {
+  return (
+    <ShowcaseCard icon={UserRound} title="Customer Added" sub="Profile saved">
+      <div className="flex h-full flex-col justify-center gap-4">
+        <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-emerald-300/25 bg-emerald-400/10 font-black text-emerald-300">DC</div>
+          <div className="min-w-0">
+            <p className="font-bold text-white">Demo Customer</p>
+            <p className="mt-1 text-xs text-slate-500">Sample customer profile · India</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 text-xs">
+          <MiniChip label="Payment" value="Cash" />
+          <MiniChip label="Status" value="Active" />
+        </div>
+      </div>
+    </ShowcaseCard>
+  );
+}
+
+function InvoiceCard() {
+  const rows = [
+    ["Embroidery Design ×2", "₹800"],
+    ["Garment Stitching ×3", "₹1,200"],
+    ["Custom Repair ×1", "₹350"],
+    ["Finishing Charge ×1", "₹160"],
+  ];
+
+  return (
+    <ShowcaseCard icon={ReceiptText} title="Invoice Created" sub="Items added automatically">
+      <div className="flex h-full flex-col justify-center">
+        <div className="space-y-2">
+          {rows.map(([item, price], index) => (
+            <motion.div
+              key={item}
+              initial={{ opacity: 0, x: -14, scale: 0.98 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{ delay: index * 0.16, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+              className="flex items-center justify-between rounded-xl bg-white/[0.035] px-3 py-2 text-xs"
+            >
+              <span className="flex min-w-0 items-center gap-2 truncate text-slate-400">
+                <Plus size={12} className="shrink-0 text-emerald-300" />
+                {item}
+              </span>
+              <span className="shrink-0 font-semibold text-slate-200">{price}</span>
+            </motion.div>
+          ))}
+        </div>
+        <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
+          <span className="text-xs text-slate-500">Grand Total</span>
+          <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.72, duration: 0.45 }} className="text-2xl font-black text-emerald-300">
+            ₹2,510
+          </motion.span>
+        </div>
+        <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ delay: 0.25, duration: 1.2, ease: "easeOut" }} className="mt-4 h-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300" />
+      </div>
+    </ShowcaseCard>
+  );
+}
+
+function MiniInvoiceDocument({ compact = false, pdf = false }) {
+  const rows = [
+    ["SH-134", "S/BUTI", "2", "₹80"],
+    ["SH-140", "S/BUTI", "2", "₹120"],
+    ["SH-145", "B/BUTI", "1", "₹120"],
+    ["SH-01-010", "Repair", "1", "₹50"],
+  ];
+
+  return (
+    <div className={cn("flex h-full flex-col overflow-hidden rounded-[1rem] bg-white text-slate-900", compact ? "p-3" : "p-2")}>
+      <div className="shrink-0 border-b border-slate-200 pb-2">
+        <p className={cn("font-black leading-tight", compact ? "text-[11px]" : "text-[10px]")}>KB.Embroidery Designer</p>
+        <p className="mt-0.5 truncate text-[7px] font-semibold text-slate-500">Dhulagor Howrah · khairul2052007@gmail.com</p>
+        <div className="mt-2 flex items-center justify-between">
+          <p className="text-[10px] font-black tracking-wide">INVOICE</p>
+          <div className="text-right text-[7px] font-bold text-slate-500">
+            <p>INV-1002</p>
+            <p>24-05-2026</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid shrink-0 grid-cols-2 gap-2 border-b border-slate-200 py-2 text-[7px]">
+        <div>
+          <p className="font-black uppercase text-slate-400">Invoiced To</p>
+          <p className="mt-1 font-bold">Soheb Mollik</p>
+          <p className="text-slate-500">Howrah</p>
+        </div>
+        <div>
+          <p className="font-black uppercase text-slate-400">Registry</p>
+          <p className="mt-1 text-slate-600">Term: Cash</p>
+          <p className="text-slate-600">Status: Pending</p>
+        </div>
+      </div>
+
+      <div className="min-h-0 flex-1 py-2">
+        <div className="grid grid-cols-[0.8fr_1fr_0.4fr_0.6fr] gap-1 rounded-md bg-slate-100 px-1.5 py-1 text-[6.5px] font-black text-slate-500">
+          <span>Design</span>
+          <span>Type</span>
+          <span>Qty</span>
+          <span>Amt</span>
+        </div>
+        <div className="mt-1 space-y-1">
+          {rows.map(([design, type, qty, amount]) => (
+            <div key={design} className="grid grid-cols-[0.8fr_1fr_0.4fr_0.6fr] gap-1 px-1.5 text-[6.5px] font-semibold text-slate-600">
+              <span>{design}</span>
+              <span>{type}</span>
+              <span>{qty}</span>
+              <span>{amount}</span>
+            </div>
+          ))}
+          <div className="px-1.5 text-[6.5px] font-semibold text-slate-400">+ 23 more embroidery items</div>
+        </div>
+      </div>
+
+      <div className="grid shrink-0 grid-cols-[0.9fr_1fr] gap-2 border-t border-slate-200 pt-2">
+        <div className="rounded-lg bg-slate-100 p-2 text-center">
+          <QrCode className="mx-auto text-slate-700" size={compact ? 18 : 15} />
+          <p className="mt-1 text-[6.5px] font-black text-slate-600">UPI QR</p>
+        </div>
+        <div className="space-y-1 text-[7px] font-bold">
+          <div className="flex justify-between gap-2">
+            <span className="text-slate-500">Subtotal</span>
+            <span>₹2510.00</span>
+          </div>
+          <div className="flex justify-between gap-2">
+            <span className="text-slate-500">Paid</span>
+            <span>₹0.00</span>
+          </div>
+          <div className="flex justify-between gap-2 rounded-md bg-slate-100 px-1.5 py-1">
+            <span>Balance</span>
+            <span>₹2510.00</span>
+          </div>
+        </div>
+      </div>
+      {pdf ? <p className="mt-1 shrink-0 text-center text-[6px] font-bold text-slate-400">Powered by BillQyro Invoicing SaaS</p> : null}
+    </div>
+  );
+}
+
+function PreviewCard() {
+  return (
+    <ShowcaseCard icon={Smartphone} title="Live Preview" sub="Customer invoice view ready">
+      <div className="mx-auto h-full max-w-[260px] rounded-[1.6rem] border border-emerald-300/15 bg-slate-950/75 p-2.5 shadow-2xl shadow-emerald-500/10">
+        <MiniInvoiceDocument compact />
+      </div>
+    </ShowcaseCard>
+  );
+}
+
+function PdfCard() {
+  return (
+    <ShowcaseCard icon={FileCheck2} title="PDF Ready" sub="Invoice converted to printable PDF">
+      <div className="grid h-full grid-cols-[1fr_0.62fr] gap-3">
+        <motion.div
+          initial={{ opacity: 0, x: -14, rotate: -1 }}
+          animate={{ opacity: 1, x: 0, rotate: 0 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="min-h-0 overflow-hidden rounded-[1.35rem] border border-white/10 bg-white p-3 text-slate-900 shadow-xl"
+        >
+          <MiniInvoiceDocument pdf />
+        </motion.div>
+
+        <div className="flex min-h-0 flex-col justify-between gap-3">
+          <motion.div
+            initial={{ scale: 0.84, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.22, type: "spring", stiffness: 150, damping: 14 }}
+            className="grid flex-1 place-items-center rounded-[1.35rem] border border-emerald-300/25 bg-emerald-300/[0.045] p-3 text-center"
+          >
+            <div>
+              <div className="mx-auto grid h-16 w-14 place-items-center rounded-2xl border border-emerald-300/25 bg-slate-950/45 text-emerald-300">
+                <FileText size={26} />
+              </div>
+              <p className="mt-3 text-lg font-black text-white">PDF</p>
+              <p className="mt-1 text-[10px] font-semibold text-slate-500">2 pages · 184 KB</p>
+            </div>
+          </motion.div>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-center text-[10px] font-bold text-slate-300">INV-DEMO-1002.pdf</div>
+        </div>
+      </div>
+    </ShowcaseCard>
+  );
+}
+
+function DownloadCard() {
+  return (
+    <ShowcaseCard icon={Download} title="Downloaded" sub="Saved successfully">
+      <div className="flex h-full flex-col items-center justify-center text-center">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 180, damping: 12 }}
+          className="grid h-20 w-20 place-items-center rounded-full border border-emerald-300/35 bg-emerald-400/10 text-emerald-300 shadow-xl shadow-emerald-500/20"
+        >
+          <Check size={34} strokeWidth={3} />
+        </motion.div>
+        <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-white/10">
+          <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.1, ease: "easeOut" }} className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300" />
+        </div>
+        <p className="mt-3 text-sm font-bold text-emerald-300">100% Complete</p>
+      </div>
+    </ShowcaseCard>
+  );
+}
+
+function LinkFeature({ icon: Icon, label }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-white/10 bg-white/[0.035] p-2 text-center">
+      <Icon className="mx-auto text-emerald-300" size={15} />
+      <p className="mt-1.5 text-[9px] font-bold text-slate-400">{label}</p>
+    </motion.div>
+  );
+}
+
+function ShareChip({ icon: Icon, label, value, compact = false }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn("flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.035]", compact ? "p-2.5" : "p-3")}
+    >
+      <div className={cn("grid place-items-center rounded-xl bg-white/5 text-emerald-300", compact ? "h-8 w-8" : "h-9 w-9")}>
+        <Icon size={compact ? 15 : 17} />
+      </div>
+      <div className="min-w-0">
+        <p className="truncate text-xs text-slate-500">{label}</p>
+        <p className="truncate text-xs font-bold text-emerald-300">{value}</p>
+      </div>
+    </motion.div>
+  );
+}
+
+function SkeletonLine({ w }) {
+  return <div className="h-2 rounded-full bg-slate-200" style={{ width: w }} />;
+}
+
+function ShareCard() {
+  return (
+    <ShowcaseCard icon={Share2} title="Share Link Sent" sub="Customer receives full invoice link">
+      <div className="grid h-full grid-rows-[auto_1fr] gap-3">
+        <div className="rounded-[1.25rem] border border-emerald-300/20 bg-emerald-300/[0.045] p-3">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-wide text-emerald-300">Public Invoice Link</p>
+              <p className="mt-1 truncate text-[11px] font-bold text-slate-300">billqyro.app/i/demo-invoice</p>
+            </div>
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-emerald-300/25 bg-slate-950/45 text-emerald-300">
+              <Link2 size={16} />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <LinkFeature icon={FileText} label="View" />
+            <LinkFeature icon={Download} label="PDF" />
+            <LinkFeature icon={IndianRupee} label="Pay" />
+          </div>
+        </div>
+
+        <div className="grid min-h-0 grid-cols-[0.92fr_0.78fr] gap-3">
+          <div className="flex min-h-0 flex-col gap-2">
+            <ShareChip icon={Smartphone} label="WhatsApp" value="Sent" compact />
+            <ShareChip icon={Mail} label="Email" value="Delivered" compact />
+            <ShareChip icon={QrCode} label="QR Code" value="Ready" compact />
+          </div>
+          <motion.div
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.25 }}
+            className="flex min-h-0 flex-col rounded-[1.25rem] border border-white/10 bg-white p-3 text-slate-900 shadow-xl"
+          >
+            <div className="mb-2 flex shrink-0 items-center justify-between text-[8px] font-black">
+              <span>Customer View</span>
+              <span className="text-emerald-600">OPEN</span>
+            </div>
+            <div className="shrink-0 space-y-1.5">
+              <SkeletonLine w="100%" />
+              <SkeletonLine w="78%" />
+              <SkeletonLine w="62%" />
+            </div>
+            <div className="mt-3 rounded-xl bg-slate-100 p-2 text-center text-[9px] font-black text-slate-900">₹2,510 Due</div>
+            <div className="mt-2 rounded-xl bg-emerald-500 p-2 text-center text-[9px] font-black text-white">Pay Now</div>
+          </motion.div>
+        </div>
+      </div>
+    </ShowcaseCard>
+  );
+}
+
+function PaymentLinkCard() {
+  return (
+    <ShowcaseCard icon={IndianRupee} title="Payment Link Opened" sub="Customer pays from invoice link">
+      <div className="grid h-full grid-cols-[0.92fr_1fr] gap-3">
+        <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} className="min-h-0 overflow-hidden rounded-[1.35rem] border border-white/10 bg-white p-2.5 text-slate-900 shadow-xl">
+          <MiniInvoiceDocument compact />
+        </motion.div>
+
+        <div className="flex min-h-0 flex-col gap-3">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.045] p-4"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-wide text-emerald-300">UPI Payment</p>
+                <p className="mt-1 text-lg font-black text-white">₹2,510</p>
+                <p className="mt-1 text-[10px] font-semibold text-slate-500">9903591839@ybl</p>
+              </div>
+              <div className="grid h-12 w-12 place-items-center rounded-2xl border border-emerald-300/25 bg-slate-950/45 text-emerald-300">
+                <QrCode size={24} />
+              </div>
+            </div>
+            <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.1, ease: "easeOut" }} className="h-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300" />
+          </motion.div>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-xs text-slate-400">
+            Customer can view bill, download PDF, scan QR, or pay through link.
+          </div>
+        </div>
+      </div>
+    </ShowcaseCard>
+  );
+}
+
+function PaymentSuccessCard() {
+  return (
+    <ShowcaseCard icon={CreditCard} title="Payment Received" sub="Invoice status auto-updated">
+      <div className="flex h-full flex-col items-center justify-center text-center">
+        <motion.div
+          initial={{ scale: 0.78, opacity: 0 }}
+          animate={{ scale: [0.78, 1.08, 1], opacity: 1 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className="grid h-20 w-20 place-items-center rounded-full border border-emerald-300/35 bg-emerald-400/10 text-emerald-300 shadow-xl shadow-emerald-500/20"
+        >
+          <IndianRupee size={34} strokeWidth={3} />
+        </motion.div>
+        <h3 className="mt-5 text-2xl font-black text-white">₹2,510 Paid</h3>
+        <p className="mt-2 text-sm text-slate-500">Payment status changed to Paid.</p>
+        <div className="mt-5 grid w-full grid-cols-2 gap-3 text-left">
+          <MiniChip label="Payment" value="UPI" />
+          <MiniChip label="Status" value="Paid" />
+        </div>
+      </div>
+    </ShowcaseCard>
+  );
+}
+
+function DeliveredCard() {
+  return (
+    <ShowcaseCard icon={Check} title="Completed" sub="Billing completed">
+      <div className="flex h-full flex-col items-center justify-center text-center">
+        <motion.div
+          initial={{ scale: 0.7, opacity: 0 }}
+          animate={{ scale: [0.7, 1.08, 1], opacity: 1 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="grid h-24 w-24 place-items-center rounded-full border border-emerald-300/35 bg-emerald-400/10 text-emerald-300 shadow-xl shadow-emerald-500/20"
+        >
+          <Check size={42} strokeWidth={3} />
+        </motion.div>
+        <h3 className="mt-6 text-2xl font-black text-white">All set</h3>
+        <p className="mt-2 max-w-[240px] text-sm leading-6 text-slate-500">Customer, invoice, PDF, share link and payment completed.</p>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-2 text-xs font-bold text-emerald-300"
+        >
+          <Zap size={14} /> Ready for next bill
+        </motion.div>
+      </div>
+    </ShowcaseCard>
+  );
+}
+
+const STEP_COMPONENTS = [
+  LoginDemoCard,
+  SetupCard,
+  DashboardCard,
+  CustomerCard,
+  InvoiceCard,
+  PreviewCard,
+  PdfCard,
+  DownloadCard,
+  ShareCard,
+  PaymentLinkCard,
+  PaymentSuccessCard,
+  DeliveredCard,
+];
+
+function ShowcasePanel() {
+  const [active, setActive] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    if (isPaused) return undefined;
+    const timer = window.setInterval(() => {
+      setActive((value) => (value + 1) % STEPS.length);
+    }, 3400);
+    return () => window.clearInterval(timer);
+  }, [isPaused]);
+
+  const ActiveComponent = STEP_COMPONENTS[active] || LoginDemoCard;
+  const ActiveIcon = STEPS[active].icon;
+
+  return (
+    <section
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      className="relative hidden lg:flex min-h-[560px] flex-col overflow-hidden bg-[#07101d] p-6 lg:min-h-[640px] lg:w-[47%] lg:p-8"
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_48%_36%,rgba(22,169,125,0.20),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(34,211,238,0.10),transparent_28%),radial-gradient(circle_at_18%_82%,rgba(16,185,129,0.09),transparent_30%)]" />
+      <motion.div
+        aria-hidden="true"
+        animate={isPaused ? { scale: 1, opacity: 0.42 } : { scale: [1, 1.12, 1], opacity: [0.35, 0.65, 0.35] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-400/10 blur-3xl"
+      />
+      <div className="pointer-events-none absolute inset-x-8 top-24 h-px bg-gradient-to-r from-transparent via-emerald-300/20 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-10 bottom-24 h-px bg-gradient-to-r from-transparent via-cyan-300/10 to-transparent" />
+
+      <div className="relative z-10 flex items-center justify-between">
+        <Logo type="horizontal" className="h-8" forceWhiteText />
+        <div className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-300 shadow-lg shadow-emerald-500/10">
+          {isPaused ? "Paused Preview" : "Sample Workflow"}
+        </div>
+      </div>
+
+      <div className="relative z-10 flex flex-1 items-center justify-center py-7">
+        <div className="relative w-full max-w-[390px]">
+          <motion.div
+            aria-hidden="true"
+            animate={isPaused ? { rotate: 0 } : { rotate: 360 }}
+            transition={{ duration: 22, repeat: isPaused ? 0 : Infinity, ease: "linear" }}
+            className="absolute -inset-7 rounded-[2.3rem] border border-emerald-300/10"
+          />
+          <motion.div
+            aria-hidden="true"
+            animate={isPaused ? { rotate: 0 } : { rotate: -360 }}
+            transition={{ duration: 28, repeat: isPaused ? 0 : Infinity, ease: "linear" }}
+            className="absolute -inset-12 rounded-[2.6rem] border border-cyan-300/5"
+          />
+          <AnimatePresence mode="wait">
+            <ActiveComponent key={STEPS[active].key} />
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <div className="relative z-10 mx-auto w-full max-w-[410px] rounded-[1.35rem] border border-white/10 bg-black/15 p-3 backdrop-blur-sm">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-300">
+              Step {active + 1} of {STEPS.length}
+            </p>
+            <p className="mt-1 truncate text-sm font-black text-white">{STEPS[active].title}</p>
+            <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-500">{STEPS[active].sub}</p>
+          </div>
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-emerald-300/25 bg-emerald-300/10 text-emerald-300">
+            <ActiveIcon size={18} />
+          </div>
+        </div>
+
+        <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+          <motion.div
+            className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300"
+            animate={{ width: `${((active + 1) / STEPS.length) * 100}%` }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+          />
+        </div>
+
+        <p className="mb-2 text-center text-[10px] font-semibold text-slate-600">Sample demo only · real data appears after login</p>
+        <div className="flex items-center justify-center gap-1.5 overflow-hidden">
+          {STEPS.map((step, index) => {
+            const StepIcon = step.icon;
+            const isDone = index < active;
+            const isActive = index === active;
+            return (
+              <button
+                key={step.key}
+                type="button"
+                onClick={() => {
+                  setActive(index);
+                  setIsPaused(true);
+                }}
+                title={`${step.title} - ${step.sub}`}
+                className={cn(
+                  "grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs transition",
+                  isActive && "border-emerald-300 bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/25",
+                  isDone && !isActive && "border-emerald-300/40 bg-emerald-400/10 text-emerald-300",
+                  !isDone && !isActive && "border-white/10 bg-white/[0.03] text-slate-600"
+                )}
+              >
+                {isDone ? <Check size={12} /> : <StepIcon size={12} />}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+function LoginPanel({ onLoginSuccess }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -99,6 +799,9 @@ const Login = ({ onLoginSuccess }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+
+  const [cardHover, setCardHover] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
 
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -176,95 +879,103 @@ const Login = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-900 font-sans overflow-hidden">
-      
-      {/* Left side animation (hidden on mobile) */}
-      <div className="hidden lg:flex w-5/12 bg-slate-950 border-r border-slate-800 items-center justify-center relative overflow-hidden">
-        {/* Abstract background blobs */}
-        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-teal-900/20 blur-3xl rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-900/10 blur-3xl rounded-full" />
-        
-        <LoginAnimation />
+    <section className="flex flex-1 items-center justify-center border-l border-white/5 bg-[#0e1520] p-6 sm:p-10 relative">
+      <div className="absolute top-6 left-6 lg:hidden">
+        <Logo type="horizontal" className="h-8" forceWhiteText />
       </div>
 
-      {/* Right side login form */}
-      <div className="flex w-full lg:w-7/12 items-center justify-center p-6 sm:p-12 relative">
-        <div className="absolute top-6 left-6 lg:hidden">
-          <Logo type="horizontal" className="h-8" forceWhiteText />
-        </div>
-
-        <div className="w-full max-w-[420px] bg-white dark:bg-slate-900 rounded-3xl p-8 sm:p-10 shadow-2xl border border-slate-100 dark:border-slate-800">
-          
-          <div className="mb-8 text-center">
-            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              {isSignUp ? 'Create Account' : 'Welcome Back'}
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
-              {isSignUp ? 'Join BillQyro to create premium invoices.' : 'Enter your credentials to access your dashboard.'}
-            </p>
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        onMouseMove={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          const x = ((event.clientX - rect.left) / rect.width) * 100;
+          const y = ((event.clientY - rect.top) / rect.height) * 100;
+          setMousePosition({ x, y });
+          setCardHover(true);
+        }}
+        onMouseLeave={() => setCardHover(false)}
+        className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b1420] p-6 shadow-2xl shadow-black/25 backdrop-blur-xl transition-colors duration-300 hover:border-emerald-300/25 sm:p-7"
+      >
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          animate={cardHover ? { opacity: 0.72 } : { opacity: 0.18 }}
+          transition={{ duration: 0.28 }}
+          style={{
+            background: `radial-gradient(420px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(16,185,129,0.16), rgba(34,211,238,0.055) 28%, transparent 64%)`,
+          }}
+        />
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.075] via-transparent to-transparent"
+          animate={cardHover ? { opacity: 0.75 } : { opacity: 0.22 }}
+          transition={{ duration: 0.3 }}
+        />
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-white/12 blur-xl"
+          animate={cardHover ? { x: [0, 760] } : { x: 0 }}
+          transition={{ duration: 1.15, ease: "easeInOut" }}
+        />
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-emerald-300/10"
+          animate={cardHover ? { boxShadow: "inset 0 0 0 1px rgba(110,231,183,0.18), 0 0 40px rgba(16,185,129,0.10)" } : { boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.04), 0 0 0 rgba(0,0,0,0)" }}
+          transition={{ duration: 0.25 }}
+        />
+        <div className="relative z-10">
+          <div className="mb-8 hidden lg:block">
+            <Logo type="horizontal" className="h-10" forceWhiteText />
           </div>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-300">
+            {isSignUp ? 'Secure Signup' : 'Secure Login'} <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+          </div>
+          <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+            {isSignUp ? 'Create Account' : 'Welcome back'}
+          </h1>
+          <p className="mt-2 text-sm font-semibold text-slate-400">
+            {isSignUp ? 'Join BillQyro to create premium invoices.' : 'Sign in to manage your own customers, invoices, PDFs, links, and payments.'}
+          </p>
 
-          <button
-            onClick={handleGoogleAuth}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-900 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 dark:text-slate-200 font-semibold py-3 px-4 rounded-xl transition-all mb-6 disabled:opacity-50"
+          <form
+            className="mt-8 space-y-5"
+            onSubmit={handleAuth}
           >
-            <GoogleIcon />
-            <span>Continue with Google</span>
-          </button>
+            <label className="block">
+              <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Email address</span>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => { setError(''); setResetSent(false); setEmail(e.target.value); }}
+                placeholder="your@email.com"
+                className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-300/60 focus:bg-emerald-300/[0.03]"
+              />
+            </label>
 
-          <div className="relative flex items-center mb-6">
-            <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
-            <span className="flex-shrink-0 mx-4 text-slate-400 text-xs font-medium uppercase tracking-wider">Or email</span>
-            <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
-          </div>
-
-          <form onSubmit={handleAuth} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => { setError(''); setResetSent(false); setEmail(e.target.value); }}
-                  placeholder="name@company.com"
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-colors"
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">Password</label>
-                {!isSignUp && (
-                  <button 
-                    type="button" 
-                    onClick={handleForgotPassword}
-                    className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300"
-                  >
-                    Forgot password?
-                  </button>
-                )}
+            <label className="block">
+              <div className="flex justify-between items-center mb-2">
+                <span className="block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Password</span>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => { setError(''); setPassword(e.target.value); }}
                   placeholder="••••••••"
-                  className="w-full pl-11 pr-11 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-colors"
+                  className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 pr-12 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-300/60 focus:bg-emerald-300/[0.03]"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-emerald-300"
+                  aria-label="Toggle password visibility"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-            </div>
+            </label>
 
             <AnimatePresence>
               {error && (
@@ -274,7 +985,7 @@ const Login = ({ onLoginSuccess }) => {
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="flex items-start gap-2 p-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-xl text-sm text-rose-600 dark:text-rose-400">
+                  <div className="flex items-start gap-2 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-sm text-rose-400">
                     <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
                     <span className="leading-tight">{error}</span>
                   </div>
@@ -287,7 +998,7 @@ const Login = ({ onLoginSuccess }) => {
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="flex items-start gap-2 p-3 bg-teal-50 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/20 rounded-xl text-sm text-teal-600 dark:text-teal-400">
+                  <div className="flex items-start gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-sm text-emerald-400">
                     <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
                     <span className="leading-tight">Password reset email sent. Check your inbox.</span>
                   </div>
@@ -295,38 +1006,101 @@ const Login = ({ onLoginSuccess }) => {
               )}
             </AnimatePresence>
 
-            <button
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 text-slate-500">
+                <input type="checkbox" className="h-4 w-4 accent-emerald-400" />
+                Remember me
+              </label>
+              {!isSignUp && (
+                <button 
+                  type="button" 
+                  onClick={handleForgotPassword}
+                  className="font-bold text-emerald-300 hover:text-emerald-200"
+                >
+                  Forgot password?
+                </button>
+              )}
+            </div>
+
+            <motion.button
+              whileHover={{ y: -2, scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none"
+              className="group relative flex h-[52px] w-full items-center justify-center overflow-hidden rounded-[22px] border border-emerald-200/25 bg-emerald-300/10 px-6 font-black text-white shadow-[0_18px_45px_rgba(16,185,129,0.22)] backdrop-blur-2xl transition disabled:cursor-not-allowed disabled:opacity-80"
             >
-              {loading ? (
-                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <span>{isSignUp ? 'Create Account' : 'Sign In'}</span>
-                  <ChevronRight className="w-4 h-4" />
-                </>
-              )}
+              <span className="absolute inset-0 rounded-[22px] bg-gradient-to-br from-white/22 via-emerald-300/18 to-cyan-300/12" />
+              <span className="absolute inset-[1px] rounded-[21px] bg-gradient-to-b from-white/12 via-white/4 to-black/20" />
+              <span className="absolute left-4 right-4 top-1 h-5 rounded-full bg-white/35 blur-lg opacity-70 transition group-hover:opacity-100" />
+              <span className="absolute -left-24 top-0 h-full w-20 rotate-12 bg-white/45 blur-md transition-all duration-700 group-hover:left-[120%]" />
+              <span className="absolute bottom-0 left-8 h-10 w-28 rounded-full bg-emerald-300/25 blur-2xl transition group-hover:bg-cyan-300/30" />
+              <span className="absolute inset-0 rounded-[22px] ring-1 ring-inset ring-white/20" />
+              <span className="relative flex items-center gap-2 text-sm drop-shadow-[0_1px_10px_rgba(255,255,255,0.18)]">
+                {loading ? "Processing..." : (isSignUp ? "Create Account" : "Sign In to Dashboard")}
+                {loading ? (
+                  <motion.span
+                    className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                  />
+                ) : (
+                  <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={18} />
+                )}
+              </span>
+            </motion.button>
+
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="text-xs text-slate-700">or</span>
+              <div className="h-px flex-1 bg-white/10" />
+            </div>
+
+            <button 
+              type="button" 
+              onClick={handleGoogleAuth}
+              disabled={loading}
+              className="flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] text-sm font-bold text-slate-400 transition hover:bg-white/[0.06] hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg viewBox="0 0 24 24" className="w-5 h-5 shrink-0">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                <path fill="none" d="M1 1h22v22H1z" />
+              </svg>
+              Continue with Google
             </button>
           </form>
 
-          <div className="mt-8 text-center">
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
-              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-              <button 
-                onClick={() => { setIsSignUp(!isSignUp); setError(''); setResetSent(false); }} 
-                className="font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
-              >
-                {isSignUp ? 'Sign In' : 'Sign Up'}
-              </button>
-            </p>
-          </div>
+          <p className="mt-6 text-center text-sm text-slate-600">
+            {isSignUp ? 'Already have an account?' : "Need access?"}{' '}
+            <button 
+              type="button"
+              onClick={() => { setIsSignUp(!isSignUp); setError(''); setResetSent(false); }}
+              className="font-bold text-emerald-300 hover:text-emerald-200"
+            >
+              {isSignUp ? 'Sign In' : 'Create free account'}
+            </button>
+          </p>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
 
+export default function Login({ onLoginSuccess }) {
+  return (
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#030914] p-0 sm:p-4 lg:p-8 font-sans">
+      <div className="relative z-10 mx-auto flex min-h-[100vh] sm:min-h-[calc(100vh-2rem)] max-w-6xl overflow-hidden sm:rounded-[2rem] border-0 sm:border border-white/10 bg-[#07101d] shadow-2xl shadow-black/50 lg:min-h-[680px]">
+        <div className="hidden lg:flex lg:w-full">
+          <ShowcasePanel />
+          <LoginPanel onLoginSuccess={onLoginSuccess} />
+        </div>
+        <div className="flex w-full flex-col lg:hidden">
+          <ShowcasePanel />
+          <LoginPanel onLoginSuccess={onLoginSuccess} />
         </div>
       </div>
     </div>
   );
-};
-
-export default Login;
+}
