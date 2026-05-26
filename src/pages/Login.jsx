@@ -22,9 +22,6 @@ import {
   UserRound,
   Zap,
 } from "lucide-react";
-import { auth, firebaseReady } from '../utils/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { login } from '../utils/storage';
 
 const STEPS = [
   { key: "login", title: "Secure Login", sub: "Enter BillQyro workspace", icon: Check },
@@ -836,49 +833,11 @@ function ShowcasePanel() {
   );
 }
 
-function LoginPanel({ onLoginSuccess }) {
+function LoginPanel() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [cardHover, setCardHover] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleLogin = async (event) => {
-    event.preventDefault();
-    setIsSigningIn(true);
-    setError('');
-    
-    try {
-      if (firebaseReady && auth && email && password) {
-        await signInWithEmailAndPassword(auth, email, password);
-        onLoginSuccess();
-      } else if (email) {
-        const isOk = login(email);
-        if (isOk) {
-          localStorage.setItem('billqyro_admin_unlocked', 'true');
-          onLoginSuccess();
-        } else {
-          window.setTimeout(() => {
-            onLoginSuccess();
-            setIsSigningIn(false);
-          }, 1400);
-        }
-      } else {
-        window.setTimeout(() => {
-          if (onLoginSuccess) onLoginSuccess();
-          setIsSigningIn(false);
-        }, 1400);
-      }
-    } catch (err) {
-      console.error(err);
-      setError('Invalid credentials');
-      window.setTimeout(() => {
-        setIsSigningIn(false);
-      }, 1400);
-    }
-  };
 
   return (
     <section className="flex flex-1 items-center justify-center border-l border-white/5 bg-[#0e1520] p-6 sm:p-10">
@@ -935,14 +894,16 @@ function LoginPanel({ onLoginSuccess }) {
 
         <form
           className="mt-8 space-y-5"
-          onSubmit={handleLogin}
+          onSubmit={(event) => {
+            event.preventDefault();
+            setIsSigningIn(true);
+            window.setTimeout(() => setIsSigningIn(false), 1400);
+          }}
         >
           <label className="block">
             <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Email address</span>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
               className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-300/60 focus:bg-emerald-300/[0.03]"
             />
@@ -953,8 +914,6 @@ function LoginPanel({ onLoginSuccess }) {
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 pr-12 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-300/60 focus:bg-emerald-300/[0.03]"
               />
@@ -1027,17 +986,17 @@ function LoginPanel({ onLoginSuccess }) {
   );
 }
 
-export default function Login({ onLoginSuccess }) {
+export default function BillQyroLoginPreview() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#030914] p-4 text-white sm:p-6 lg:p-8">
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#07101d] shadow-2xl shadow-black/50 lg:min-h-[680px]">
         <div className="hidden lg:flex lg:w-full">
           <ShowcasePanel />
-          <LoginPanel onLoginSuccess={onLoginSuccess} />
+          <LoginPanel />
         </div>
         <div className="flex w-full flex-col lg:hidden">
           <ShowcasePanel />
-          <LoginPanel onLoginSuccess={onLoginSuccess} />
+          <LoginPanel />
         </div>
       </div>
     </div>
