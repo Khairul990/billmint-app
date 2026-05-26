@@ -68,7 +68,7 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
 
       {/* Sidebar Footer with Business Account Summary & Logout */}
       <div className="p-4 border-t border-[#14284B] dark:border-white/5 flex flex-col gap-3">
-        <div className="flex items-center gap-3 p-3 bg-[#14284B] dark:bg-white dark:bg-slate-900/5 border border-slate-800/50 dark:border-white/5 rounded-xl">
+        <div className="flex items-center gap-3 p-3 bg-[#14284B] dark:bg-slate-900/5 border border-slate-800/50 dark:border-white/5 rounded-xl">
           {businessSettings?.logoUrl ? (
             <img
               src={businessSettings.logoUrl}
