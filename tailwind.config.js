@@ -13,9 +13,9 @@ export default {
       colors: {
         // Redefining standard colors to map perfectly to the BillQyro logo style
         slate: {
-          50: '#f4f7f9',   // Cool soft white background
-          100: '#e8edf2',  // Very soft border
-          200: '#d5dee8',
+          50: '#f0f3f6',   // Sophisticated cool pearl slate (less harsh/bright)
+          100: '#e2e7ec',  // Refined soft border
+          200: '#d0d7de',
           300: '#b0c0d4',
           400: '#849bba',
           500: '#5a759c',  // Muted gray-blue secondary text
