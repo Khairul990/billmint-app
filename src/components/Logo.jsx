@@ -35,7 +35,7 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false }) =
   // Use the uploaded 3D Teal icon PNG
   const IconSVG = ({ sizeClass = 'w-10 h-10' }) => (
     <motion.img 
-      src="/logo-v2.png"
+      src="/logo.png"
       alt="BillQyro Logo"
       className={`${sizeClass} shrink-0 object-contain drop-shadow-md`}
       initial={{ opacity: 0, scale: 0.8, y: 5 }}
