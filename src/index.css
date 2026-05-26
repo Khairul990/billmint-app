@@ -10,7 +10,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   .dark body {
-    @apply text-slate-200;
+    @apply bg-[#070c18] text-slate-200;
   }
 }
 
@@ -25,6 +25,7 @@
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 10px;
+  transition: background 0.3s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
@@ -47,20 +48,66 @@
   scrollbar-width: none;
 }
 
-/* Clean glassmorphism styling card */
-.glass-card {
-  @apply bg-white/80 backdrop-blur-md border border-slate-100/50 shadow-premium;
-}
-.dark .glass-card {
-  @apply bg-[#0b1221]/70 backdrop-blur-xl border border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.5)];
+@layer components {
+  /* Ultra-Premium Glass Cards */
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-md border border-slate-200/50 shadow-[0_8px_30px_rgb(7,13,25,0.02)] transition-all duration-300 hover:shadow-premium-hover hover:border-slate-300/60 rounded-3xl;
+  }
+  
+  .dark .glass-card {
+    @apply bg-[#0b1221]/60 backdrop-blur-xl border border-white/5 shadow-[0_12px_40px_rgba(0,0,0,0.5)] hover:border-white/10 hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)];
+  }
+
+  /* High-end Input Styling */
+  .premium-input {
+    @apply w-full px-4 py-3 bg-white border border-slate-200 text-slate-800 rounded-2xl shadow-sm outline-none transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 placeholder-slate-400 text-sm font-semibold;
+  }
+
+  .dark .premium-input {
+    @apply bg-[#0b1221]/50 border-white/10 text-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-400/10 placeholder-slate-500;
+  }
+
+  /* Premium Buttons */
+  .btn-primary {
+    @apply flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-md transition-all duration-300 hover:shadow-[0_10px_20px_-10px_rgba(16,185,129,0.5)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer;
+  }
+
+  .btn-secondary {
+    @apply flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-sm transition-all duration-300 hover:bg-slate-50 hover:border-slate-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer;
+  }
+
+  .dark .btn-secondary {
+    @apply bg-[#0b1221]/45 border-white/5 text-slate-200 hover:bg-[#111c33]/60 hover:border-white/10;
+  }
+
+  /* Premium Surfaces and Panels */
+  .premium-surface {
+    @apply bg-white border border-slate-100 shadow-[0_1px_3px_rgba(7,13,25,0.01),0_20px_25px_-5px_rgba(7,13,25,0.02)] rounded-3xl;
+  }
+
+  .dark .premium-surface {
+    @apply bg-gradient-to-b from-[#0e1627]/90 to-[#070c18]/95 border border-white/5 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)] rounded-3xl;
+  }
+
+  /* Elegant Badge Tags */
+  .premium-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border transition-all;
+  }
 }
 
-/* Premium Dark Mode Box Utilities */
-.dark-premium-surface {
-  @apply bg-gradient-to-b from-[#101828] to-[#0b1221] border border-white/[0.05] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05),0_8px_30px_rgb(0,0,0,0.4)];
+/* Micro-animations and premium glows */
+.glow-emerald {
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
 }
-.dark-premium-input {
-  @apply bg-[#0d1424] border border-white/[0.08] focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)];
+.dark .glow-emerald {
+  box-shadow: 0 0 35px rgba(16, 185, 129, 0.25);
+}
+
+.glow-indigo {
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.1);
+}
+.dark .glow-indigo {
+  box-shadow: 0 0 35px rgba(99, 102, 241, 0.2);
 }
 
 /* Print Specific Overrides */
