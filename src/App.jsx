@@ -35,7 +35,6 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { triggerSuccessFeedback } from './utils/feedback';
 
 const Login = React.lazy(() => import('./pages/Login'));
-const WelcomeOnboarding = React.lazy(() => import('./pages/WelcomeOnboarding'));
 const SetupBilling = React.lazy(() => import('./pages/SetupBilling'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Invoices = React.lazy(() => import('./pages/Invoices'));
@@ -707,17 +706,7 @@ function App() {
           <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-600 rounded-full animate-spin"></div>
         </div>
       }>
-        <WelcomeOnboarding
-          onLoginSuccess={handleLoginSuccess}
-          onQuickStart={() => {
-            initializeStorage();
-            const session = { timestamp: Date.now(), token: 'billqyro-secure-session', userEmail: 'demo@billqyro.com' };
-            localStorage.setItem('billqyro_auth', JSON.stringify(session));
-            localStorage.setItem('billqyro_user_role', 'user');
-            localStorage.removeItem('billqyro_admin_unlocked');
-            handleLoginSuccess();
-          }}
-        />
+        <Login onLoginSuccess={handleLoginSuccess} />
       </React.Suspense>
     );
   }
