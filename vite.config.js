@@ -8,7 +8,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'logo.svg', 'app-icon.svg', 'offline.html'],
+      includeAssets: ['favicon-v2.png', 'apple-touch-icon-v2.png', 'logo-v2.png', 'app-icon-v2.png', 'offline.html'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         maximumFileSizeToCacheInBytes: 5000000 // 5MB limit
@@ -24,17 +24,17 @@ export default defineConfig({
         scope: '/',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: 'pwa-192x192-v2.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'pwa-512x512-v2.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: 'apple-touch-icon.png',
+            src: 'apple-touch-icon-v2.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any'
