@@ -50,6 +50,9 @@ service cloud.firestore {
     match /customers/{userId}/items/{customerId} {
       allow read, write: if isAuth() && request.auth.uid == userId;
     }
+    match /invoices/{userId}/items/{invoiceId} {
+      allow read, write: if isAuth() && request.auth.uid == userId;
+    }
     match /products/{userId}/items/{productId} {
       allow read, write: if isAuth() && request.auth.uid == userId;
     }
