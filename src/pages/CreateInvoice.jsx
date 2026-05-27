@@ -444,49 +444,59 @@ const CreateInvoice = ({
   // --- SAVE OPERATION ---
   const handleSave = (statusOverride) => {
     if (!customerName) {
-      alert('Please add customer name and at least one invoice item.');
+      alert('Please add customer name before saving the invoice.');
       return;
     }
 
+    // Parse and sanitize items, defaulting empty quantities to 1 and empty rates to 0
     const cleanedItems = items.filter(item => 
-      item.description.trim() !== '' || 
-      item.designNo.trim() !== '' || 
-      item.rate > 0
-    );
+      (item.description && item.description.trim() !== '') || 
+      (item.designNo && item.designNo.trim() !== '') || 
+      (parseFloat(item.rate) > 0)
+    ).map(item => {
+      const qty = parseFloat(item.qty);
+      const rate = parseFloat(item.rate !== undefined ? item.rate : (item.unitPrice !== undefined ? item.unitPrice : item.price));
+      return {
+        ...item,
+        qty: isNaN(qty) ? 1 : qty,
+        rate: isNaN(rate) ? 0 : rate,
+        amount: (isNaN(qty) ? 1 : qty) * (isNaN(rate) ? 0 : rate)
+      };
+    });
 
     if (cleanedItems.length === 0) {
-      alert('Please add item description and rate before saving invoice.');
+      alert('Please add at least one invoice item description or code.');
       return;
     }
 
-    const invalidItem = cleanedItems.some(item => (!item.description && !item.designNo) || item.qty <= 0 || item.rate < 0);
-    if (invalidItem) {
-      alert('Please add item description and rate before saving invoice.');
+    // Check for negative quantities or rates
+    const hasNegative = cleanedItems.some(item => item.qty < 0 || item.rate < 0);
+    if (hasNegative) {
+      alert('Quantity and rate cannot be negative values.');
       return;
     }
-
     const businessSnapshot = editingInvoice?.businessSnapshot || {
-      businessName: businessSettings.businessName || '',
-      logoUrl: businessSettings.logoUrl || '',
-      ownerName: businessSettings.ownerName || '',
-      phone: businessSettings.phone || '',
-      whatsapp: businessSettings.whatsapp || '',
-      email: businessSettings.email || '',
-      address: businessSettings.address || '',
-      gstNumber: businessSettings.gstNumber || ''
+      businessName: businessSettings?.businessName || '',
+      logoUrl: businessSettings?.logoUrl || '',
+      ownerName: businessSettings?.ownerName || '',
+      phone: businessSettings?.phone || '',
+      whatsapp: businessSettings?.whatsapp || '',
+      email: businessSettings?.email || '',
+      address: businessSettings?.address || '',
+      gstNumber: businessSettings?.gstNumber || ''
     };
 
     const paymentSettingsSnapshot = editingInvoice?.paymentSettingsSnapshot || {
-      paymentQrEnabled: businessSettings.paymentQrEnabled || false,
-      paymentMethod: businessSettings.paymentMethod || 'Manual',
-      upiId: businessSettings.upiId || '',
-      bkashNumber: businessSettings.bkashNumber || '',
-      nagadNumber: businessSettings.nagadNumber || '',
-      rocketNumber: businessSettings.rocketNumber || '',
-      payeeName: businessSettings.payeeName || businessSettings.businessName || '',
-      paymentNote: businessSettings.paymentNote || '',
-      customPaymentLink: businessSettings.customPaymentLink || '',
-      customerLiveLinkSettings: businessSettings.customerLiveLinkSettings || {
+      paymentQrEnabled: businessSettings?.paymentQrEnabled || false,
+      paymentMethod: businessSettings?.paymentMethod || 'Manual',
+      upiId: businessSettings?.upiId || '',
+      bkashNumber: businessSettings?.bkashNumber || '',
+      nagadNumber: businessSettings?.nagadNumber || '',
+      rocketNumber: businessSettings?.rocketNumber || '',
+      payeeName: businessSettings?.payeeName || businessSettings?.businessName || '',
+      paymentNote: businessSettings?.paymentNote || '',
+      customPaymentLink: businessSettings?.customPaymentLink || '',
+      customerLiveLinkSettings: businessSettings?.customerLiveLinkSettings || {
         enableLiveInvoiceLink: true,
         showPaymentQr: true,
         allowCustomerPdfDownload: true,
@@ -499,13 +509,13 @@ const CreateInvoice = ({
     };
 
     const regionalSettingsSnapshot = editingInvoice?.regionalSettingsSnapshot || {
-      country: businessSettings.country || 'India',
-      currency: businessSettings.currency || '₹',
-      currencyCode: businessSettings.currencyCode || (businessSettings.country === 'Bangladesh' ? 'BDT' : businessSettings.country === 'Other' ? 'USD' : 'INR'),
-      language: businessSettings.language || 'English',
-      taxLabel: businessSettings.taxLabel || (businessSettings.country === 'Bangladesh' ? 'VAT' : businessSettings.country === 'Other' ? 'Tax' : 'GST'),
-      dateFormat: businessSettings.dateFormat || 'DD/MM/YYYY',
-      numberFormat: businessSettings.numberFormat || 'Indian'
+      country: businessSettings?.country || 'India',
+      currency: businessSettings?.currency || '₹',
+      currencyCode: businessSettings?.currencyCode || (businessSettings?.country === 'Bangladesh' ? 'BDT' : businessSettings?.country === 'Other' ? 'USD' : 'INR'),
+      language: businessSettings?.language || 'English',
+      taxLabel: businessSettings?.taxLabel || (businessSettings?.country === 'Bangladesh' ? 'VAT' : businessSettings?.country === 'Other' ? 'Tax' : 'GST'),
+      dateFormat: businessSettings?.dateFormat || 'DD/MM/YYYY',
+      numberFormat: businessSettings?.numberFormat || 'Indian'
     };
 
     const payload = {
@@ -1610,15 +1620,57 @@ const CreateInvoice = ({
                 <Eye className="w-4 h-4" />
                 <span>Preview PDF</span>
               </button>
+
               <button
                 onClick={() => { 
-                  if (!editingInvoice) {
-                    alert('Please save invoice before downloading PDF.');
+                  if (!customerName) {
+                    toast.error('Please add customer name before downloading PDF.');
                     return;
                   }
-                  if(onDownloadPDF) onDownloadPDF({ id: editingInvoice.id, invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, terms, paymentStatus, orderStatus, subtotal, taxAmount, grandTotal, balanceDue }); 
+                  const cleanedItems = items.filter(item => 
+                    (item.description && item.description.trim() !== '') || 
+                    (item.designNo && item.designNo.trim() !== '') || 
+                    (parseFloat(item.rate) > 0)
+                  ).map(item => {
+                    const qty = parseFloat(item.qty);
+                    const rate = parseFloat(item.rate !== undefined ? item.rate : (item.unitPrice !== undefined ? item.unitPrice : item.price));
+                    return {
+                      ...item,
+                      qty: isNaN(qty) ? 1 : qty,
+                      rate: isNaN(rate) ? 0 : rate,
+                      amount: (isNaN(qty) ? 1 : qty) * (isNaN(rate) ? 0 : rate)
+                    };
+                  });
+                  if (cleanedItems.length === 0) {
+                    toast.error('Please add at least one item before downloading PDF.');
+                    return;
+                  }
+                  if (onDownloadPDF) {
+                    onDownloadPDF({ 
+                      id: editingInvoice?.id || 'inv-temp', 
+                      invoiceNumber, 
+                      date, 
+                      dueDate, 
+                      customerName, 
+                      customerPhone, 
+                      customerEmail, 
+                      customerAddress, 
+                      items: cleanedItems, 
+                      taxPercentage, 
+                      discountAmount, 
+                      amountPaid, 
+                      notes, 
+                      terms, 
+                      paymentStatus, 
+                      orderStatus, 
+                      subtotal, 
+                      taxAmount, 
+                      grandTotal, 
+                      balanceDue 
+                    });
+                  }
                 }}
-                className="w-full py-4 bg-white dark:bg-slate-900 border border-teal-500 text-teal-600 rounded-xl font-bold hover:bg-teal-50 transition-all flex items-center justify-center gap-2 text-[14px] shadow-sm"
+                className="w-full py-4 bg-white dark:bg-slate-900 border border-teal-500 text-teal-600 dark:text-teal-400 rounded-xl font-bold hover:bg-teal-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 text-[14px] shadow-sm cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 <span>Download PDF</span>
@@ -1648,7 +1700,18 @@ const CreateInvoice = ({
                           return;
                         }
                         const liveLink = `${window.location.origin}/i/${token}`;
-                        await navigator.clipboard.writeText(liveLink);
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                          await navigator.clipboard.writeText(liveLink);
+                        } else {
+                          const textArea = document.createElement("textarea");
+                          textArea.value = liveLink;
+                          textArea.style.position = "fixed";
+                          document.body.appendChild(textArea);
+                          textArea.focus();
+                          textArea.select();
+                          document.execCommand('copy');
+                          document.body.removeChild(textArea);
+                        }
                         toast.success('Live invoice link copied!');
                       } catch (err) {
                         toast.error('Could not create live link. Please save invoice and try again.');

@@ -788,12 +788,12 @@ export const saveExpense = async (expense) => {
   // Save to IndexedDB
   await BillQyroDB.put('expenses', expense);
 
-  // Sync / queue
+  // Sync / queue (Non-blocking)
   if (firebaseReady) {
     if (navigator.onLine) {
-      await firestoreSave('expenses', expense.id, expense);
+      firestoreSave('expenses', expense.id, expense).catch(e => console.error(e));
     } else {
-      await queueSyncTransaction('save', 'expenses', expense.id, expense);
+      queueSyncTransaction('save', 'expenses', expense.id, expense).catch(e => console.error(e));
     }
   }
   return expenses;
@@ -807,12 +807,12 @@ export const deleteExpense = async (id) => {
   // Delete from IndexedDB
   await BillQyroDB.delete('expenses', id);
 
-  // Sync / queue
+  // Sync / queue (Non-blocking)
   if (firebaseReady) {
     if (navigator.onLine) {
-      await firestoreDelete('expenses', id);
+      firestoreDelete('expenses', id).catch(e => console.error(e));
     } else {
-      await queueSyncTransaction('delete', 'expenses', id);
+      queueSyncTransaction('delete', 'expenses', id).catch(e => console.error(e));
     }
   }
   return filtered;
@@ -842,12 +842,12 @@ export const saveCustomer = async (customer) => {
   // Save to IndexedDB
   await BillQyroDB.put('customers', customer);
 
-  // Sync / queue
+  // Sync / queue (Non-blocking)
   if (firebaseReady) {
     if (navigator.onLine) {
-      await firestoreSave('customers', customer.id, customer);
+      firestoreSave('customers', customer.id, customer).catch(e => console.error(e));
     } else {
-      await queueSyncTransaction('save', 'customers', customer.id, customer);
+      queueSyncTransaction('save', 'customers', customer.id, customer).catch(e => console.error(e));
     }
   }
   return customers;
@@ -861,12 +861,12 @@ export const deleteCustomer = async (id) => {
   // Delete from IndexedDB
   await BillQyroDB.delete('customers', id);
 
-  // Sync / queue
+  // Sync / queue (Non-blocking)
   if (firebaseReady) {
     if (navigator.onLine) {
-      await firestoreDelete('customers', id);
+      firestoreDelete('customers', id).catch(e => console.error(e));
     } else {
-      await queueSyncTransaction('delete', 'customers', id);
+      queueSyncTransaction('delete', 'customers', id).catch(e => console.error(e));
     }
   }
   return filtered;
@@ -896,12 +896,12 @@ export const saveProduct = async (product) => {
   // Save to IndexedDB
   await BillQyroDB.put('products', product);
 
-  // Sync / queue
+  // Sync / queue (Non-blocking)
   if (firebaseReady) {
     if (navigator.onLine) {
-      await firestoreSave('products', product.id, product);
+      firestoreSave('products', product.id, product).catch(e => console.error(e));
     } else {
-      await queueSyncTransaction('save', 'products', product.id, product);
+      queueSyncTransaction('save', 'products', product.id, product).catch(e => console.error(e));
     }
   }
   return products;
@@ -915,12 +915,12 @@ export const deleteProduct = async (id) => {
   // Delete from IndexedDB
   await BillQyroDB.delete('products', id);
 
-  // Sync / queue
+  // Sync / queue (Non-blocking)
   if (firebaseReady) {
     if (navigator.onLine) {
-      await firestoreDelete('products', id);
+      firestoreDelete('products', id).catch(e => console.error(e));
     } else {
-      await queueSyncTransaction('delete', 'products', id);
+      queueSyncTransaction('delete', 'products', id).catch(e => console.error(e));
     }
   }
   return filtered;
@@ -1043,27 +1043,33 @@ export const saveInvoice = async (invoice) => {
   // Save to IndexedDB
   await BillQyroDB.put('invoices', invoice);
 
-  // Sync / queue + syncStatus tracking
-  let firebaseStatus = 'success';
+  // Sync / queue + syncStatus tracking (Non-blocking)
+  let firebaseStatus = 'pending';
   if (firebaseReady) {
     if (navigator.onLine) {
-      const r1 = await firestoreSave('invoices', invoice.id, invoice);
-      const r2 = await firestoreSave('publicInvoices', invoice.publicToken, invoice);
-      if (r1?.status === 'success' && r2?.status === 'success') {
-        invoice.syncStatus = 'synced';
-        firebaseStatus = 'success';
-      } else {
-        invoice.syncStatus = 'failed';
-        firebaseStatus = 'failed';
-      }
-      // Persist syncStatus back to localStorage + IndexedDB
+      invoice.syncStatus = 'pending';
       const idx = invoices.findIndex(inv => inv.id === invoice.id);
       if (idx !== -1) invoices[idx] = invoice;
       localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
       await BillQyroDB.put('invoices', invoice);
+
+      // Fire and forget
+      Promise.all([
+        firestoreSave('invoices', invoice.id, invoice),
+        firestoreSave('publicInvoices', invoice.publicToken, invoice)
+      ]).then(async ([r1, r2]) => {
+        const currentInvoices = JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
+        const updateIdx = currentInvoices.findIndex(inv => inv.id === invoice.id);
+        if (updateIdx !== -1) {
+          currentInvoices[updateIdx].syncStatus = (r1?.status === 'success' && r2?.status === 'success') ? 'synced' : 'failed';
+          localStorage.setItem(KEYS.INVOICES, JSON.stringify(currentInvoices));
+          await BillQyroDB.put('invoices', currentInvoices[updateIdx]);
+          window.dispatchEvent(new CustomEvent('billqyro_sync'));
+        }
+      }).catch(err => console.error('Firestore async save error:', err));
     } else {
       invoice.syncStatus = 'pending';
-      await queueSyncTransaction('save', 'invoices', invoice.id, invoice);
+      queueSyncTransaction('save', 'invoices', invoice.id, invoice).catch(e => console.error(e));
       firebaseStatus = 'failed';
       // Persist syncStatus back to localStorage + IndexedDB
       const idx = invoices.findIndex(inv => inv.id === invoice.id);
@@ -1221,14 +1227,14 @@ export const deleteInvoice = async (id) => {
   // Delete from IndexedDB
   await BillQyroDB.delete('invoices', id);
 
-  // Sync / queue
+  // Sync / queue (Non-blocking)
   let firebaseStatus = 'success';
   if (firebaseReady) {
     if (navigator.onLine) {
-      await firestoreDelete('invoices', id);
-      await firestoreDelete('publicInvoices', id);
+      firestoreDelete('invoices', id).catch(e => console.error(e));
+      firestoreDelete('publicInvoices', id).catch(e => console.error(e));
     } else {
-      await queueSyncTransaction('delete', 'invoices', id);
+      queueSyncTransaction('delete', 'invoices', id).catch(e => console.error(e));
       firebaseStatus = 'failed';
     }
   }

@@ -2,14 +2,15 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 // Register Google Fonts to support regional currency symbols and scripts
+// Using reliable raw github links to prevent loading hangs
 Font.register({
   family: 'Noto Sans',
-  src: 'https://fonts.gstatic.com/s/notosans/v30/o-0IIpQli3j_HsGDy8g1254L.ttf'
+  src: 'https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf'
 });
 
 Font.register({
   family: 'Noto Sans Bengali',
-  src: 'https://fonts.gstatic.com/s/notosansbengali/v19/FeV-df232upI3c5zSrv4yVqX9z5L1m7487Q.ttf'
+  src: 'https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSansBengali/NotoSansBengali-Regular.ttf'
 });
 
 // Register a clean, premium font hierarchy if desired, otherwise use standard helvetica
@@ -314,7 +315,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
   }
 
   const qrCodeUrl = qrEnabled && qrText
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrText)}`
+    ? `https://quickchart.io/qr?size=150&text=${encodeURIComponent(qrText)}`
     : null;
 
   const renderTemplate1 = () => (
