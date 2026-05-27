@@ -437,11 +437,11 @@ const Invoices = ({
             setViewingInvoice(null);
             onEditInvoice(null);
           }}
-          className="fixed inset-0 z-[9999] overflow-y-auto bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 no-print"
+          className="fixed inset-0 z-[9999] overflow-y-auto bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 sm:p-6 md:p-10 no-print"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-theme-app dark:bg-theme-surface w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative animate-scaleUp border border-white/10 max-h-[92vh] flex flex-col"
+            className="bg-theme-app dark:bg-theme-surface w-full max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-2xl relative animate-scaleUp border border-white/10 flex flex-col my-10"
           >
             
             {/* Modal Top Actions Header Bar */}
@@ -602,8 +602,8 @@ const Invoices = ({
               </div>
             </div>
 
-            {/* Scrollable Preview Wrapper */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6 bg-theme-app dark:bg-theme-surface">
+            {/* Preview Wrapper (No internal scroll) */}
+            <div className="p-4 md:p-6 bg-theme-app dark:bg-theme-surface">
               {/* Pending Payment Verification Panel */}
               {viewingInvoice && (viewingInvoice.paymentProofs || []).filter(p => p.status === 'Pending').length > 0 && (
                 <div className="mb-6 p-5 bg-gradient-to-tr from-indigo-50 to-indigo-100/50 border border-theme-border-soft rounded-2xl shadow-sm">
