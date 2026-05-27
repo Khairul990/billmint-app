@@ -114,37 +114,39 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
 
   return (
     <div className="bg-theme-card dark:bg-theme-card rounded-2xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft/80 shadow-premium hover:shadow-premium-hover transition-all duration-300">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Top/Left Section: Metadata */}
         <div className="flex items-center gap-3">
           <div className="p-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-app text-theme-accent dark:text-theme-accent rounded-xl">
             <FileText className="w-6 h-6" />
           </div>
           <div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2">
               <span className="font-bold text-theme-primary dark:text-theme-primary dark:text-theme-secondary text-sm md:text-base">{invoice.invoiceNumber}</span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getStatusStyle(invoice.paymentStatus)}`}>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+              <span className={`text-[9px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getStatusStyle(invoice.paymentStatus)}`}>
                 {invoice.paymentStatus}
               </span>
               {invoice.orderStatus && (
-                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getOrderStatusStyle(invoice.orderStatus)}`}>
+                <span className={`text-[9px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getOrderStatusStyle(invoice.orderStatus)}`}>
                   {invoice.orderStatus}
                 </span>
               )}
               {invoice.syncStatus && getSyncStatusLabel(invoice.syncStatus) && (
-                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getSyncStatusStyle(invoice.syncStatus)}`}>
+                <span className={`text-[9px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getSyncStatusStyle(invoice.syncStatus)}`}>
                   {getSyncStatusLabel(invoice.syncStatus)}
                 </span>
               )}
             </div>
-            <p className="text-sm font-semibold text-theme-primary dark:text-theme-muted mt-1">{invoice.customerName}</p>
-            <p className="text-xs text-theme-muted dark:text-theme-muted mt-1">Due: {invoice.dueDate}</p>
+            <p className="text-sm font-semibold text-theme-primary dark:text-theme-muted mt-1.5 line-clamp-1 break-all pr-2">{invoice.customerName}</p>
+            <p className="text-xs text-theme-muted dark:text-theme-muted mt-0.5">Due: {invoice.dueDate}</p>
           </div>
         </div>
 
         {/* Right Section: Price & Quick CTA Buttons */}
-        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-3 sm:pt-0 border-theme-border-soft dark:border-theme-border-soft/80">
-          <span className="text-lg font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-150 sm:text-right">
+        <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 pt-3 md:pt-0 border-theme-border-soft dark:border-theme-border-soft/80">
+          <span className="text-lg font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-150 md:text-right">
             {formatCurrency(invoice.grandTotal, currencySymbol)}
           </span>
 
