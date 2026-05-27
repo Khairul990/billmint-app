@@ -60,33 +60,33 @@ const PublicInvoice = ({ initialInvoice }) => {
   if (!invoice) {
     const requestedToken = window.location.pathname.split('/').pop() || 'N/A';
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center text-white font-sans">
+      <div className="min-h-screen bg-theme-app flex flex-col items-center justify-center p-6 text-center text-white font-sans">
         <AlertCircle className="w-16 h-16 text-rose-500 mb-4 animate-bounce" />
         <h1 className="text-2xl font-black mb-2 text-white">Invoice Not Found</h1>
-        <p className="text-slate-400 text-sm max-w-md mb-8">
+        <p className="text-theme-muted text-sm max-w-md mb-8">
           The invoice link you followed may have expired, been deleted, or contains an incorrect public token.
         </p>
         
         {/* Dynamic Diagnostics Box for Developer Debugging */}
-        <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-5 text-left font-mono text-[11px] text-slate-400 space-y-2.5 shadow-2xl">
-          <div className="font-extrabold text-indigo-400 border-b border-slate-800 pb-2 uppercase text-[10px] tracking-wider flex items-center justify-between">
+        <div className="w-full max-w-lg bg-theme-card border border-slate-800 rounded-3xl p-5 text-left font-mono text-[11px] text-theme-muted space-y-2.5 shadow-2xl">
+          <div className="font-extrabold text-theme-accent border-b border-slate-800 pb-2 uppercase text-[10px] tracking-wider flex items-center justify-between">
             <span>System Diagnostics (DEBUG)</span>
-            <span className="bg-indigo-950 text-indigo-400 px-2 py-0.5 rounded-full text-[8px] font-black">Live</span>
+            <span className="bg-indigo-950 text-theme-accent px-2 py-0.5 rounded-full text-[8px] font-black">Live</span>
           </div>
           <div>
-            <span className="text-slate-500">Requested Token:</span>{' '}
-            <span className="text-teal-400 select-all font-bold">{requestedToken}</span>
+            <span className="text-theme-muted">Requested Token:</span>{' '}
+            <span className="text-theme-accent select-all font-bold">{requestedToken}</span>
           </div>
           <div>
-            <span className="text-slate-500">Firebase Ready:</span>{' '}
-            <span className={window.billqyro_firebaseReady ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+            <span className="text-theme-muted">Firebase Ready:</span>{' '}
+            <span className={window.billqyro_firebaseReady ? "text-theme-accent font-bold" : "text-rose-400 font-bold"}>
               {window.billqyro_firebaseReady ? 'TRUE (Connected)' : 'FALSE (Offline fallback mode)'}
             </span>
           </div>
           {window.billqyro_lastError && (
             <div className="border-t border-slate-800 pt-2.5 mt-2.5">
               <span className="text-rose-400 font-bold block mb-1">Query Error / Status:</span>
-              <pre className="whitespace-pre-wrap bg-slate-950 p-3 rounded-xl border border-rose-950/40 text-rose-300 select-all font-semibold max-h-40 overflow-y-auto leading-relaxed">{window.billqyro_lastError}</pre>
+              <pre className="whitespace-pre-wrap bg-theme-app p-3 rounded-xl border border-rose-950/40 text-rose-300 select-all font-semibold max-h-40 overflow-y-auto leading-relaxed">{window.billqyro_lastError}</pre>
             </div>
           )}
         </div>
@@ -265,32 +265,32 @@ const PublicInvoice = ({ initialInvoice }) => {
   const getStatusBadgeStyle = (status) => {
     switch (status) {
       case 'Paid':
-        return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900';
+        return 'bg-theme-accent-light text-theme-accent dark:bg-theme-accent/10 dark:text-theme-accent border border-theme-border-soft dark:border-theme-accent/20';
       case 'Partially Paid':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200 dark:border-blue-900';
+        return 'bg-theme-accent-light text-theme-accent dark:bg-theme-accent/10 dark:text-theme-accent border border-theme-border-soft dark:border-theme-accent/20';
       case 'Payment Submitted':
       case 'Submitted':
       case 'Pending Verification':
-        return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900';
+        return 'bg-theme-accent-light text-theme-accent dark:bg-theme-accent/10 dark:text-theme-accent border border-theme-border-soft dark:border-theme-accent/20';
       case 'Pending':
       case 'Unpaid':
         return 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-900';
       case 'Overdue':
         return 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-450 border border-rose-200 dark:border-rose-900';
       case 'Cancelled':
-        return 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700';
+        return 'bg-theme-surface dark:bg-theme-card text-theme-muted dark:bg-theme-card dark:text-theme-muted border border-theme-border-soft dark:border-theme-border-soft';
       default:
-        return 'bg-slate-100 dark:bg-slate-800 text-slate-650';
+        return 'bg-theme-surface dark:bg-theme-card text-slate-650';
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-950 py-10 px-4 md:px-6 flex flex-col items-center justify-between font-sans antialiased text-slate-800 dark:text-slate-100 dark:text-slate-250">
+    <div className="min-h-screen bg-theme-app dark:bg-theme-surface dark:bg-theme-app py-10 px-4 md:px-6 flex flex-col items-center justify-between font-sans antialiased text-theme-primary dark:text-theme-primary dark:text-slate-250">
       
       {/* Top Floating Control Bar */}
-      <div className="max-w-4xl w-full flex items-center justify-between gap-4 mb-6 z-10 bg-white dark:bg-slate-900/70 dark:bg-slate-900/70 p-4 rounded-2xl border border-slate-150 dark:border-slate-800 backdrop-blur-md shadow-sm">
+      <div className="max-w-4xl w-full flex items-center justify-between gap-4 mb-6 z-10 bg-theme-card dark:bg-theme-card/70 dark:bg-theme-card/70 p-4 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft backdrop-blur-md shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-indigo-500/10">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-theme-accent to-theme-accent-dark text-white flex items-center justify-center font-bold text-sm shadow-md shadow-glow">
             {business.logoUrl ? (
               <img src={business.logoUrl} alt="Logo" className="w-8 h-8 object-contain rounded-lg" />
             ) : (
@@ -298,8 +298,8 @@ const PublicInvoice = ({ initialInvoice }) => {
             )}
           </div>
           <div>
-            <h1 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 dark:text-white truncate max-w-[150px] sm:max-w-xs">{business.businessName}</h1>
-            <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">SECURE DIGITAL BILL</span>
+            <h1 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary dark:text-theme-primary truncate max-w-[150px] sm:max-w-xs">{business.businessName}</h1>
+            <span className="text-[10px] font-bold text-theme-muted block uppercase tracking-wider">SECURE DIGITAL BILL</span>
           </div>
         </div>
 
@@ -307,7 +307,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           {liveLinkPrefs.allowCustomerPdfDownload && (
             <button
               onClick={handleDownloadPDF}
-              className="flex items-center justify-center gap-2 py-2 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 dark:text-slate-250 font-bold text-xs rounded-xl transition-all cursor-pointer"
+              className="flex items-center justify-center gap-2 py-2 px-4 bg-theme-surface dark:bg-theme-card hover:bg-theme-border-soft dark:bg-theme-card dark:hover:bg-slate-700 text-theme-primary dark:text-theme-muted dark:text-slate-250 font-bold text-xs rounded-xl transition-all cursor-pointer"
             >
               <FileDown className="w-4 h-4" />
               <span className="hidden sm:inline">Download PDF</span>
@@ -317,7 +317,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           {liveLinkPrefs.allowPaymentProofSubmit && invoice.paymentStatus !== 'Paid' && (
             <button
               onClick={() => setShowPaymentForm(!showPaymentForm)}
-              className="flex items-center justify-center gap-2 py-2 px-5 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white font-black text-xs rounded-xl shadow-md transition-all cursor-pointer uppercase tracking-wider"
+              className="flex items-center justify-center gap-2 py-2 px-5 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-black text-xs rounded-xl shadow-md transition-all cursor-pointer uppercase tracking-wider"
             >
               <Wallet className="w-4 h-4" />
               <span>{showPaymentForm ? 'View Invoice' : 'I Have Paid'}</span>
@@ -329,60 +329,60 @@ const PublicInvoice = ({ initialInvoice }) => {
       <div className="max-w-4xl w-full flex flex-col lg:flex-row gap-6 items-start relative">
 
         {/* --- LEFT: DYNAMIC INVOICE DISPLAY CARD (Strictly Read-Only) --- */}
-        <div className="w-full lg:flex-1 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium p-6 md:p-8 space-y-6 relative overflow-hidden">
+        <div className="w-full lg:flex-1 bg-theme-card dark:bg-theme-card rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium p-6 md:p-8 space-y-6 relative overflow-hidden">
           
           {/* Elegant top color band */}
-          <div className="absolute top-0 left-0 w-full h-2.5 bg-gradient-to-r from-indigo-500 via-teal-500 to-emerald-500"></div>
+          <div className="absolute top-0 left-0 w-full h-2.5 bg-[image:var(--accent-gradient)]"></div>
 
           {/* Invoice Meta header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-3 border-b border-slate-50 dark:border-slate-800/80 pb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-3 border-b border-slate-50 dark:border-theme-border-soft/80 pb-6">
             <div className="space-y-1">
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+              <h2 className="text-2xl font-black text-theme-primary dark:text-theme-primary tracking-tight flex items-center gap-2">
                 <span>Invoice</span>
                 <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${getStatusBadgeStyle(invoice.paymentStatus)}`}>
                   {invoice.paymentStatus}
                 </span>
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+              <p className="text-xs text-theme-muted dark:text-theme-muted font-bold uppercase tracking-wider">
                 ID: {invoice.invoiceNumber}
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-slate-500 text-right sm:text-right">
+            <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-theme-muted text-right sm:text-right">
               <div>
-                <span className="text-[10px] text-slate-400 block uppercase font-black">Issue Date</span>
-                <span className="text-slate-700 dark:text-slate-300 dark:text-slate-350">{invoice.date}</span>
+                <span className="text-[10px] text-theme-muted block uppercase font-black">Issue Date</span>
+                <span className="text-theme-primary dark:text-theme-muted dark:text-theme-muted">{invoice.date}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 block uppercase font-black">Due Date</span>
-                <span className="text-slate-750 dark:text-slate-300 font-bold">{invoice.dueDate || 'N/A'}</span>
+                <span className="text-[10px] text-theme-muted block uppercase font-black">Due Date</span>
+                <span className="text-slate-750 dark:text-theme-muted font-bold">{invoice.dueDate || 'N/A'}</span>
               </div>
             </div>
           </div>
 
           {/* Business & Customer Address segment */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs font-semibold text-slate-550 dark:text-slate-300">
-            <div className="space-y-2 p-4 bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/20 rounded-2xl border border-slate-100 dark:border-slate-800">
-              <span className="text-[10px] text-slate-400 uppercase font-black tracking-widest block">Invoiced From</span>
-              <strong className="text-slate-900 dark:text-white text-sm block">{business.businessName}</strong>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs font-semibold text-slate-550 dark:text-theme-muted">
+            <div className="space-y-2 p-4 bg-theme-app dark:bg-theme-surface/50 dark:bg-theme-app/20 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft">
+              <span className="text-[10px] text-theme-muted uppercase font-black tracking-widest block">Invoiced From</span>
+              <strong className="text-theme-primary dark:text-theme-primary text-sm block">{business.businessName}</strong>
               {business.ownerName && <p className="text-[11px]">Owner: {business.ownerName}</p>}
               {business.phone && <p className="text-[11px]">Phone: {business.phone}</p>}
               {business.email && <p className="text-[11px] truncate">Email: {business.email}</p>}
-              {business.address && <p className="text-[10px] text-slate-400 leading-relaxed mt-1 whitespace-pre-wrap">{business.address}</p>}
-              {business.gstNumber && <p className="text-[10px] font-black text-indigo-500 mt-2 uppercase">{taxLabelText}: {business.gstNumber}</p>}
+              {business.address && <p className="text-[10px] text-theme-muted leading-relaxed mt-1 whitespace-pre-wrap">{business.address}</p>}
+              {business.gstNumber && <p className="text-[10px] font-black text-theme-accent mt-2 uppercase">{taxLabelText}: {business.gstNumber}</p>}
             </div>
 
-            <div className="space-y-2 p-4 bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/20 rounded-2xl border border-slate-100 dark:border-slate-800">
-              <span className="text-[10px] text-slate-400 uppercase font-black tracking-widest block">Invoiced To</span>
-              <strong className="text-slate-900 dark:text-white text-sm block">{invoice.customerName}</strong>
+            <div className="space-y-2 p-4 bg-theme-app dark:bg-theme-surface/50 dark:bg-theme-app/20 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft">
+              <span className="text-[10px] text-theme-muted uppercase font-black tracking-widest block">Invoiced To</span>
+              <strong className="text-theme-primary dark:text-theme-primary text-sm block">{invoice.customerName}</strong>
               {invoice.customerPhone && <p className="text-[11px]">Phone: {invoice.customerPhone}</p>}
               {invoice.customerEmail && <p className="text-[11px] truncate">Email: {invoice.customerEmail}</p>}
-              {invoice.customerAddress && <p className="text-[10px] text-slate-400 leading-relaxed mt-1 whitespace-pre-wrap">{invoice.customerAddress}</p>}
+              {invoice.customerAddress && <p className="text-[10px] text-theme-muted leading-relaxed mt-1 whitespace-pre-wrap">{invoice.customerAddress}</p>}
             </div>
           </div>
 
           {/* Items Table Display (Strictly Read-Only) */}
-          <div className="border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
+          <div className="border border-theme-border-soft dark:border-theme-border-soft rounded-2xl overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
                 <thead className="bg-[#071B3A] text-white text-[10px] uppercase font-black tracking-wider">
@@ -430,27 +430,27 @@ const PublicInvoice = ({ initialInvoice }) => {
                     <th className="py-3.5 px-4 text-right w-[120px]">Amount</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-semibold text-slate-700 dark:text-slate-300">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-semibold text-theme-primary dark:text-theme-muted">
                   {invoice.items.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50 dark:bg-slate-800/50/50 dark:hover:bg-slate-850/30">
-                      <td className="py-3 px-4 text-center text-slate-400 font-bold">{idx + 1}</td>
+                    <tr key={idx} className="hover:bg-theme-app dark:bg-theme-surface/50 dark:hover:bg-slate-850/30">
+                      <td className="py-3 px-4 text-center text-theme-muted font-bold">{idx + 1}</td>
                       {invoice.billType === 'grocery' ? (
                         <>
-                          <td className="py-3 px-4 text-slate-900 dark:text-white font-extrabold">{item.description || 'Product'}</td>
+                          <td className="py-3 px-4 text-theme-primary dark:text-theme-primary font-extrabold">{item.description || 'Product'}</td>
                           <td className="py-3 px-4 text-center">{item.size || 'N/A'}</td>
                           <td className="py-3 px-4 text-center">{item.qty}</td>
                           <td className="py-3 px-4 text-right">{formatVal(item.rate)}</td>
                         </>
                       ) : invoice.billType === 'repair' ? (
                         <>
-                          <td className="py-3 px-4 text-slate-900 dark:text-white font-extrabold">{item.designNo || 'Service'}</td>
+                          <td className="py-3 px-4 text-theme-primary dark:text-theme-primary font-extrabold">{item.designNo || 'Service'}</td>
                           <td className="py-3 px-4">{item.description || 'N/A'}</td>
                           <td className="py-3 px-4 text-center">{item.qty}</td>
                           <td className="py-3 px-4 text-right">{formatVal(item.rate)}</td>
                         </>
                       ) : invoice.billType === 'retail' ? (
                         <>
-                          <td className="py-3 px-4 text-slate-900 dark:text-white font-extrabold">{item.productName || 'Product'}</td>
+                          <td className="py-3 px-4 text-theme-primary dark:text-theme-primary font-extrabold">{item.productName || 'Product'}</td>
                           <td className="py-3 px-4">{item.sizeVariant || 'N/A'}</td>
                           <td className="py-3 px-4 text-center">{item.qty}</td>
                           <td className="py-3 px-4 text-right">{formatVal(item.price)}</td>
@@ -458,7 +458,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                         </>
                       ) : invoice.billType === 'custom' ? (
                         <>
-                          <td className="py-3 px-4 text-slate-900 dark:text-white font-extrabold">{item.itemService || 'Item'}</td>
+                          <td className="py-3 px-4 text-theme-primary dark:text-theme-primary font-extrabold">{item.itemService || 'Item'}</td>
                           <td className="py-3 px-4">{item.description || 'N/A'}</td>
                           <td className="py-3 px-4 text-center">{item.qty}</td>
                           <td className="py-3 px-4 text-right">{formatVal(item.rate)}</td>
@@ -466,14 +466,14 @@ const PublicInvoice = ({ initialInvoice }) => {
                       ) : (
                         // embroidery
                         <>
-                          <td className="py-3 px-4 text-slate-900 dark:text-white font-extrabold">{item.designNo || 'N/A'}</td>
-                          <td className="py-3 px-4"><span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black">{item.workType || 'Embroidery'}</span></td>
+                          <td className="py-3 px-4 text-theme-primary dark:text-theme-primary font-extrabold">{item.designNo || 'N/A'}</td>
+                          <td className="py-3 px-4"><span className="px-2 py-0.5 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black">{item.workType || 'Embroidery'}</span></td>
                           <td className="py-3 px-4">{item.description || 'Stitching Service'}</td>
                           <td className="py-3 px-4 text-center">{item.qty}</td>
                           <td className="py-3 px-4 text-right">{formatVal(item.rate)}</td>
                         </>
                       )}
-                      <td className="py-3 px-4 text-right font-black text-slate-900 dark:text-white">{formatVal(item.amount)}</td>
+                      <td className="py-3 px-4 text-right font-black text-theme-primary dark:text-theme-primary">{formatVal(item.amount)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -482,46 +482,46 @@ const PublicInvoice = ({ initialInvoice }) => {
           </div>
 
           {/* Totals & Notes block */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-between items-start pt-4 border-t border-slate-50 dark:border-slate-800/80">
-            <div className="w-full sm:w-[50%] p-4 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-950/20 border border-slate-150/40 dark:border-slate-800 rounded-2xl text-xs font-semibold text-slate-500">
-              <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block mb-1.5">Invoice Notes & Terms</span>
+          <div className="flex flex-col sm:flex-row gap-6 justify-between items-start pt-4 border-t border-slate-50 dark:border-theme-border-soft/80">
+            <div className="w-full sm:w-[50%] p-4 bg-theme-app dark:bg-theme-surface dark:bg-theme-app/20 border border-theme-border-soft/40 dark:border-theme-border-soft rounded-2xl text-xs font-semibold text-theme-muted">
+              <span className="text-[10px] text-theme-muted font-black uppercase tracking-wider block mb-1.5">Invoice Notes & Terms</span>
               <p className="whitespace-pre-wrap leading-relaxed">{invoice.notes || 'Thank you for your business!'}</p>
               {invoice.terms && (
-                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 dark:border-slate-850">
-                  <span className="text-[9px] text-slate-400 font-black uppercase block mb-1">Terms</span>
+                <div className="mt-3 pt-3 border-t border-theme-border-soft dark:border-theme-border-soft dark:border-slate-850">
+                  <span className="text-[9px] text-theme-muted font-black uppercase block mb-1">Terms</span>
                   <p className="whitespace-pre-wrap leading-relaxed">{invoice.terms}</p>
                 </div>
               )}
             </div>
 
-            <div className="w-full sm:w-[40%] text-xs font-semibold text-slate-500 space-y-2">
+            <div className="w-full sm:w-[40%] text-xs font-semibold text-theme-muted space-y-2">
               <div className="flex justify-between py-1.5 border-b border-slate-50 dark:border-slate-850">
-                <span className="text-slate-400">Subtotal</span>
-                <span className="text-slate-850 dark:text-slate-200">{formatVal(invoice.subtotal)}</span>
+                <span className="text-theme-muted">Subtotal</span>
+                <span className="text-slate-850 dark:text-theme-secondary">{formatVal(invoice.subtotal)}</span>
               </div>
               
               {invoice.discountAmount > 0 && (
                 <div className="flex justify-between py-1.5 border-b border-slate-50 dark:border-slate-850">
-                  <span className="text-slate-400">Discount</span>
+                  <span className="text-theme-muted">Discount</span>
                   <span className="text-rose-500">-{formatVal(invoice.discountAmount)}</span>
                 </div>
               )}
 
               {invoice.taxAmount > 0 && (
                 <div className="flex justify-between py-1.5 border-b border-slate-50 dark:border-slate-850">
-                  <span className="text-slate-400">{taxLabelText} ({invoice.taxPercentage}%)</span>
-                  <span className="text-slate-850 dark:text-slate-200">{formatVal(invoice.taxAmount)}</span>
+                  <span className="text-theme-muted">{taxLabelText} ({invoice.taxPercentage}%)</span>
+                  <span className="text-slate-850 dark:text-theme-secondary">{formatVal(invoice.taxAmount)}</span>
                 </div>
               )}
 
-              <div className="flex justify-between items-center py-2.5 bg-indigo-50/50 dark:bg-indigo-950/25 px-3.5 rounded-xl text-slate-900 dark:text-white font-extrabold text-sm border border-indigo-100/50 dark:border-indigo-900/50">
+              <div className="flex justify-between items-center py-2.5 bg-theme-surface dark:bg-theme-surface dark:bg-theme-accent/10 px-3.5 rounded-xl text-theme-primary dark:text-theme-primary font-extrabold text-sm border border-theme-border-soft dark:border-theme-accent/20">
                 <span>Grand Total</span>
                 <span>{formatVal(invoice.grandTotal)}</span>
               </div>
 
               {liveLinkPrefs.showPaidDueAmount && (
                 <>
-                  <div className="flex justify-between py-1.5 border-b border-slate-50 dark:border-slate-850 px-1 text-emerald-600 dark:text-emerald-400">
+                  <div className="flex justify-between py-1.5 border-b border-slate-50 dark:border-slate-850 px-1 text-theme-accent dark:text-theme-accent">
                     <span>Amount Paid</span>
                     <span className="font-extrabold">{formatVal(invoice.amountPaid || 0)}</span>
                   </div>
@@ -538,8 +538,8 @@ const PublicInvoice = ({ initialInvoice }) => {
           </div>
 
           {/* Secure lock footer */}
-          <div className="text-center pt-4 border-t border-slate-50 dark:border-slate-800/80 text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          <div className="text-center pt-4 border-t border-slate-50 dark:border-theme-border-soft/80 text-[10px] text-theme-muted font-bold uppercase tracking-wider flex items-center justify-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-theme-accent" />
             <span>Securely Compiled by BillQyro Invoicing SaaS</span>
           </div>
 
@@ -551,25 +551,25 @@ const PublicInvoice = ({ initialInvoice }) => {
 
             {/* PAYMENT BOX GATEWAY (TASK 4) */}
             {!showPaymentForm ? (
-              <div className="bg-slate-900 text-white rounded-3xl border border-slate-800 shadow-premium p-6 space-y-5 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+              <div className="bg-theme-card text-white rounded-3xl border border-slate-800 shadow-premium p-6 space-y-5 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-36 h-36 bg-theme-accent-light rounded-full blur-2xl pointer-events-none"></div>
                 
                 <div>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400 bg-indigo-500/20 border border-indigo-500/30 px-2.5 py-1 rounded-full w-fit">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light border border-theme-border-soft px-2.5 py-1 rounded-full w-fit">
                     Payment Hub
                   </span>
                   <h3 className="text-lg font-black mt-2">Instant Invoicing Gateway</h3>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">CHOOSE YOUR SETTLEMENT METHOD</p>
+                  <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">CHOOSE YOUR SETTLEMENT METHOD</p>
                 </div>
 
                 {liveLinkPrefs.showPaymentQr && paymentPrefs.paymentQrEnabled && (
-                  <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl max-w-[180px] mx-auto shadow-md border border-slate-850">
+                  <div className="bg-theme-card dark:bg-theme-card p-3 rounded-2xl max-w-[180px] mx-auto shadow-md border border-slate-850">
                     <img 
                       src={qrCodeUrl} 
                       alt="Scan to Pay QR" 
-                      className="w-full h-auto object-contain rounded-lg bg-white dark:bg-slate-900" 
+                      className="w-full h-auto object-contain rounded-lg bg-theme-card dark:bg-theme-card" 
                     />
-                    <span className="text-[8px] text-slate-400 font-bold uppercase block text-center mt-1.5">Scan to pay now</span>
+                    <span className="text-[8px] text-theme-muted font-bold uppercase block text-center mt-1.5">Scan to pay now</span>
                   </div>
                 )}
 
@@ -581,17 +581,17 @@ const PublicInvoice = ({ initialInvoice }) => {
                     <div className="space-y-2">
                       <a
                         href={upiLink}
-                        className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white rounded-xl text-xs font-black tracking-widest uppercase transition-all shadow-md active:scale-98 cursor-pointer"
+                        className="w-full flex items-center justify-center gap-2 py-3 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 rounded-xl text-xs font-black tracking-widest uppercase transition-all shadow-md active:scale-98 cursor-pointer"
                       >
                         <Wallet className="w-4 h-4" />
                         <span>Pay with UPI Apps</span>
                       </a>
                       
-                      <div className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-900/5 border border-white/10 rounded-xl text-xs font-bold mt-1">
-                        <span className="text-slate-400">UPI ID: <strong className="text-white ml-1">{paymentPrefs.upiId}</strong></span>
+                      <div className="flex items-center justify-between p-2.5 bg-theme-card dark:bg-theme-surface/5 border border-white/10 rounded-xl text-xs font-bold mt-1">
+                        <span className="text-theme-muted">UPI ID: <strong className="text-white ml-1">{paymentPrefs.upiId}</strong></span>
                         <button
                           onClick={() => handleCopy(paymentPrefs.upiId, 'UPI ID')}
-                          className="text-indigo-400 hover:text-indigo-350 cursor-pointer shrink-0 ml-2"
+                          className="text-theme-accent hover:text-theme-accent cursor-pointer shrink-0 ml-2"
                         >
                           <Copy className="w-3.5 h-3.5" />
                         </button>
@@ -607,7 +607,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                       {[
                         { name: 'bKash', num: paymentPrefs.bkashNumber, color: 'border-pink-500/20 bg-pink-500/5 text-pink-400' },
                         { name: 'Nagad', num: paymentPrefs.nagadNumber, color: 'border-orange-500/20 bg-orange-500/5 text-orange-400' },
-                        { name: 'Rocket', num: paymentPrefs.rocketNumber, color: 'border-indigo-500/20 bg-indigo-500/5 text-indigo-400' }
+                        { name: 'Rocket', num: paymentPrefs.rocketNumber, color: 'border-theme-border-soft bg-theme-accent-light text-theme-accent' }
                       ].map((mfs) => {
                         if (!mfs.num) return null;
                         return (
@@ -624,7 +624,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                         );
                       })}
 
-                      <div className="p-3 bg-white dark:bg-slate-900/5 border border-white/5 rounded-xl text-[10px] text-slate-450 leading-relaxed space-y-1">
+                      <div className="p-3 bg-theme-card dark:bg-theme-surface/5 border border-white/5 rounded-xl text-[10px] text-slate-450 leading-relaxed space-y-1">
                         <span className="font-extrabold text-white block uppercase tracking-wider mb-1">Manual Transfer Steps:</span>
                         <p>1. Open wallet app (bKash/Nagad).</p>
                         <p>2. Select Send Money / Cash Out to active number.</p>
@@ -640,13 +640,13 @@ const PublicInvoice = ({ initialInvoice }) => {
                   {paymentPrefs.paymentMethod === 'Manual' && (
                     <div className="space-y-3">
                       {paymentPrefs.customPaymentLink && (
-                        <div className="p-3 bg-white dark:bg-slate-900/5 border border-white/10 rounded-xl text-xs font-bold leading-relaxed text-slate-300">
-                          <span className="text-[9px] text-slate-400 uppercase font-black block mb-1">Payment instructions</span>
+                        <div className="p-3 bg-theme-card dark:bg-theme-surface/5 border border-white/10 rounded-xl text-xs font-bold leading-relaxed text-theme-muted">
+                          <span className="text-[9px] text-theme-muted uppercase font-black block mb-1">Payment instructions</span>
                           <p>{paymentPrefs.customPaymentLink}</p>
                         </div>
                       )}
                       
-                      <div className="p-3 bg-white dark:bg-slate-900/5 border border-white/5 rounded-xl text-[10px] text-slate-400 space-y-1 leading-relaxed">
+                      <div className="p-3 bg-theme-card dark:bg-theme-surface/5 border border-white/5 rounded-xl text-[10px] text-theme-muted space-y-1 leading-relaxed">
                         <span className="font-extrabold text-white block uppercase tracking-wider">Instructions:</span>
                         <p>Complete transfer of total funds. Note reference ID or take screenshot, then submit verify proof below.</p>
                       </div>
@@ -655,7 +655,7 @@ const PublicInvoice = ({ initialInvoice }) => {
 
                   {/* Payment footnote */}
                   {paymentPrefs.paymentNote && (
-                    <p className="text-[10px] text-slate-500 font-bold italic text-center leading-relaxed">
+                    <p className="text-[10px] text-theme-muted font-bold italic text-center leading-relaxed">
                       * {paymentPrefs.paymentNote}
                     </p>
                   )}
@@ -664,10 +664,10 @@ const PublicInvoice = ({ initialInvoice }) => {
                   {liveLinkPrefs.allowPaymentProofSubmit && (
                     <button
                       onClick={() => setShowPaymentForm(true)}
-                      className="w-full flex items-center justify-center gap-1.5 py-3.5 bg-white dark:bg-slate-900/5 hover:bg-white dark:bg-slate-900/10 text-white rounded-xl text-xs font-black tracking-widest uppercase transition-all border border-white/10 cursor-pointer hover:border-white/20 active:scale-98"
+                      className="w-full flex items-center justify-center gap-1.5 py-3.5 bg-theme-card dark:bg-theme-surface/5 hover:bg-theme-card dark:bg-theme-card/10 text-white rounded-xl text-xs font-black tracking-widest uppercase transition-all border border-white/10 cursor-pointer hover:border-white/20 active:scale-98"
                     >
                       <span>I Have Completed Payment</span>
-                      <ArrowRight className="w-4 h-4 text-teal-400" />
+                      <ArrowRight className="w-4 h-4 text-theme-accent" />
                     </button>
                   )}
 
@@ -675,26 +675,26 @@ const PublicInvoice = ({ initialInvoice }) => {
               </div>
             ) : (
               // SUBMIT PAYMENT PROOF SCREEN (TASK 5)
-              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium p-6 space-y-4 animate-scaleUp text-xs font-semibold text-slate-500">
-                <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800/80 pb-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+              <div className="bg-theme-card dark:bg-theme-card rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium p-6 space-y-4 animate-scaleUp text-xs font-semibold text-theme-muted">
+                <div className="flex items-center gap-2.5 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-theme-accent-light dark:bg-theme-accent-light/40 text-theme-accent flex items-center justify-center">
                     <Wallet className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-200">Submit Payment Proof</h3>
-                    <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Verify your transfer</span>
+                    <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Submit Payment Proof</h3>
+                    <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider block">Verify your transfer</span>
                   </div>
                 </div>
 
                 <form onSubmit={handleSubmitProof} className="space-y-4">
                   
                   <div>
-                    <label className="block mb-1 text-slate-400 font-bold uppercase text-[9px] tracking-wider">Settlement Method *</label>
+                    <label className="block mb-1 text-theme-muted font-bold uppercase text-[9px] tracking-wider">Settlement Method *</label>
                     <select
                       required
                       value={payMethod}
                       onChange={(e) => setPayMethod(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 dark:text-white font-bold"
+                      className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                     >
                       {country === 'India' && <option value="UPI">UPI Transfer</option>}
                       {country === 'Bangladesh' && (
@@ -710,9 +710,9 @@ const PublicInvoice = ({ initialInvoice }) => {
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-slate-400 font-bold uppercase text-[9px] tracking-wider">Paid Amount *</label>
+                    <label className="block mb-1 text-theme-muted font-bold uppercase text-[9px] tracking-wider">Paid Amount *</label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-bold">{currencySymbol}</span>
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-muted font-bold">{currencySymbol}</span>
                       <input
                         type="number"
                         step="0.01"
@@ -720,14 +720,14 @@ const PublicInvoice = ({ initialInvoice }) => {
                         value={payAmount}
                         onChange={(e) => setPayAmount(e.target.value)}
                         placeholder="0.00"
-                        className="w-full pl-8 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 dark:text-white font-extrabold"
+                        className="w-full pl-8 pr-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary dark:text-theme-primary font-extrabold"
                       />
                     </div>
-                    <span className="text-[8px] text-slate-400 mt-1 block">Specify exact amount sent (supports partial settlements)</span>
+                    <span className="text-[8px] text-theme-muted mt-1 block">Specify exact amount sent (supports partial settlements)</span>
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-slate-400 font-bold uppercase text-[9px] tracking-wider">
+                    <label className="block mb-1 text-theme-muted font-bold uppercase text-[9px] tracking-wider">
                       Transaction / Reference ID {liveLinkPrefs.requireTransactionId && '*'}
                     </label>
                     <input
@@ -736,12 +736,12 @@ const PublicInvoice = ({ initialInvoice }) => {
                       value={txnId}
                       onChange={(e) => setTxnId(e.target.value)}
                       placeholder="e.g. TXN10003028"
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-805 dark:text-white font-bold"
+                      className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-slate-805 dark:text-theme-primary font-bold"
                     />
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-slate-400 font-bold uppercase text-[9px] tracking-wider">
+                    <label className="block mb-1 text-theme-muted font-bold uppercase text-[9px] tracking-wider">
                       Upload screenshot proof {liveLinkPrefs.requirePaymentScreenshot && '*'}
                     </label>
                     <div className="flex items-center gap-3">
@@ -756,14 +756,14 @@ const PublicInvoice = ({ initialInvoice }) => {
                         />
                         <label
                           htmlFor="payment-proof-upload"
-                          className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 hover:bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer transition-all text-slate-700 dark:text-slate-300 dark:text-slate-350"
+                          className="w-full flex items-center justify-center gap-2 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card hover:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl cursor-pointer transition-all text-theme-primary dark:text-theme-muted dark:text-theme-muted"
                         >
                           <Upload className="w-4 h-4" />
                           <span>Choose Screenshot</span>
                         </label>
                       </div>
                       {screenshot && (
-                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-sm relative group shrink-0">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-theme-border-soft bg-theme-surface dark:bg-theme-card flex items-center justify-center shadow-sm relative group shrink-0">
                           <img src={screenshot} alt="Preview" className="w-full h-full object-cover" />
                         </div>
                       )}
@@ -771,13 +771,13 @@ const PublicInvoice = ({ initialInvoice }) => {
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-slate-400 font-bold uppercase text-[9px] tracking-wider">Notes / Memo (Optional)</label>
+                    <label className="block mb-1 text-theme-muted font-bold uppercase text-[9px] tracking-wider">Notes / Memo (Optional)</label>
                     <textarea
                       value={customerNote}
                       onChange={(e) => setCustomerNote(e.target.value)}
                       placeholder="Add any details for the verification clerk..."
                       rows="2"
-                      className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-850 dark:text-slate-200 resize-none text-xs"
+                      className="w-full px-4 py-2 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-slate-850 dark:text-theme-secondary resize-none text-xs"
                     />
                   </div>
 
@@ -785,14 +785,14 @@ const PublicInvoice = ({ initialInvoice }) => {
                     <button
                       type="button"
                       onClick={() => setShowPaymentForm(false)}
-                      className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 dark:text-slate-250 font-bold rounded-xl transition-all cursor-pointer text-center"
+                      className="flex-1 py-3 bg-theme-surface dark:bg-theme-card hover:bg-theme-border-soft dark:bg-theme-card dark:hover:bg-slate-700 text-theme-primary dark:text-theme-muted dark:text-slate-250 font-bold rounded-xl transition-all cursor-pointer text-center"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="flex-1 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white font-black rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                      className="flex-1 py-3 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-black rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
                     >
                       {isSubmitting ? (
                         <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -808,14 +808,14 @@ const PublicInvoice = ({ initialInvoice }) => {
 
             {/* Quick Contact Button */}
             {liveLinkPrefs.showContactButton && (business.phone || business.email) && (
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800 shadow-premium space-y-3.5 text-xs font-semibold text-slate-500">
-                <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Need help with invoice?</span>
-                <p className="text-slate-400 font-medium">Contact our account representative directly for corrections or billing questions.</p>
+              <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-3.5 text-xs font-semibold text-theme-muted">
+                <span className="text-[10px] text-theme-muted font-black uppercase tracking-wider block">Need help with invoice?</span>
+                <p className="text-theme-muted font-medium">Contact our account representative directly for corrections or billing questions.</p>
                 <div className="grid grid-cols-1 gap-2 pt-1.5">
                   {business.phone && (
                     <a
                       href={`tel:${business.phone}`}
-                      className="w-full flex items-center justify-center gap-2 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-indigo-400"
+                      className="w-full flex items-center justify-center gap-2 py-2 bg-theme-accent-light hover:bg-theme-accent-light text-theme-accent font-bold rounded-xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-theme-accent"
                     >
                       <Phone className="w-4 h-4" />
                       <span>Call {business.phone}</span>
@@ -824,7 +824,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                   {business.email && (
                     <a
                       href={`mailto:${business.email}?subject=Inquiry%20Invoice%20${invoice.invoiceNumber}`}
-                      className="w-full flex items-center justify-center gap-2 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-indigo-400"
+                      className="w-full flex items-center justify-center gap-2 py-2 bg-theme-accent-light hover:bg-theme-accent-light text-theme-accent font-bold rounded-xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-theme-accent"
                     >
                       <Mail className="w-4 h-4" />
                       <span>Email Representative</span>
@@ -840,8 +840,8 @@ const PublicInvoice = ({ initialInvoice }) => {
       </div>
 
       {/* Floating Watermark */}
-      <div className="mt-10 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none z-10 flex items-center gap-1.5">
-        <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+      <div className="mt-10 text-center text-[10px] font-black text-theme-muted uppercase tracking-widest leading-none z-10 flex items-center gap-1.5">
+        <ShieldCheck className="w-3.5 h-3.5 text-theme-accent animate-pulse" />
         <span>BillQyro Billing Platform</span>
       </div>
 

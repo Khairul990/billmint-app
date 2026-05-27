@@ -133,8 +133,10 @@ const KEYS = {
   SUBSCRIPTION: 'billqyro_subscription',
 };
 
-// Default Settings (initialized empty as required to avoid fake business details)
 const DEFAULT_SETTINGS = {
+  themePreset: 'light',
+  themeColor: 'light',
+  darkMode: false,
   country: 'India',
   countryCode: '',
   language: 'English',
@@ -670,6 +672,29 @@ export const submitPremiumRequest = async (plan, paidAmount, paymentMethod, tran
 };
 
 // Admin Helpers for SaaS Operations
+export const getGlobalAdminSettings = async () => {
+  if (!firebaseReady) return null;
+  try {
+    const docSnap = await getDoc(doc(db, 'adminSettings', 'global'));
+    if (docSnap.exists()) return docSnap.data();
+    return null;
+  } catch (e) {
+    console.warn("Error fetching global admin settings", e);
+    return null;
+  }
+};
+
+export const updateGlobalAdminSettings = async (payload) => {
+  if (!firebaseReady) return false;
+  try {
+    await setDoc(doc(db, 'adminSettings', 'global'), payload, { merge: true });
+    return true;
+  } catch (e) {
+    console.error("Error updating global admin settings", e);
+    return false;
+  }
+};
+
 export const getAdminUsersList = async () => {
   if (!firebaseReady) return [];
   try {
@@ -1219,8 +1244,82 @@ export const saveInvoicePublicly = async (invoice) => {
   return { status: 'success' };
 };
 
-export const deleteInvoice = async (id) => {
+export const restoreInvoice = async (id) => {
   const invoices = getInvoices();
+  const idx = invoices.findIndex(inv => inv.id === id);
+  if (idx !== -1) {
+    invoices[idx].isDeleted = false;
+    invoices[idx].deletedAt = null;
+    invoices[idx].updatedAt = new Date().toISOString();
+    invoices[idx].syncStatus = 'pending';
+    
+    localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+    await BillQyroDB.put('invoices', invoices[idx]);
+
+    let firebaseStatus = 'pending';
+    if (firebaseReady) {
+      if (navigator.onLine) {
+        try {
+          await firestoreSave('invoices', id, invoices[idx]);
+          await firestoreSave('publicInvoices', invoices[idx].publicToken, invoices[idx]);
+          firebaseStatus = 'success';
+          invoices[idx].syncStatus = 'synced';
+          localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+          await BillQyroDB.put('invoices', invoices[idx]);
+        } catch (e) {
+          firebaseStatus = 'failed';
+        }
+      } else {
+        queueSyncTransaction('save', 'invoices', id, invoices[idx]).catch(e => console.error(e));
+        firebaseStatus = 'failed';
+      }
+    }
+    
+    return {
+      updatedInvoices: invoices,
+      firebaseStatus
+    };
+  }
+  return { updatedInvoices: invoices, firebaseStatus: 'failed' };
+};
+
+export const deleteInvoice = async (id, permanent = false) => {
+  const invoices = getInvoices();
+  
+  if (!permanent) {
+    const idx = invoices.findIndex(inv => inv.id === id);
+    if (idx !== -1) {
+      invoices[idx].isDeleted = true;
+      invoices[idx].deletedAt = new Date().toISOString();
+      invoices[idx].updatedAt = new Date().toISOString();
+      invoices[idx].syncStatus = 'pending';
+      
+      localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+      await BillQyroDB.put('invoices', invoices[idx]);
+
+      let firebaseStatus = 'pending';
+      if (firebaseReady) {
+        if (navigator.onLine) {
+          try {
+            await firestoreSave('invoices', id, invoices[idx]);
+            await firestoreSave('publicInvoices', invoices[idx].publicToken, invoices[idx]);
+            firebaseStatus = 'success';
+            invoices[idx].syncStatus = 'synced';
+            localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+            await BillQyroDB.put('invoices', invoices[idx]);
+          } catch (e) {
+            firebaseStatus = 'failed';
+          }
+        } else {
+          queueSyncTransaction('save', 'invoices', id, invoices[idx]).catch(e => console.error(e));
+          firebaseStatus = 'failed';
+        }
+      }
+      return { updatedInvoices: invoices, firebaseStatus };
+    }
+  }
+
+  // Permanent Delete
   const filtered = invoices.filter(inv => inv.id !== id);
   localStorage.setItem(KEYS.INVOICES, JSON.stringify(filtered));
 

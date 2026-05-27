@@ -25,10 +25,10 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-theme-sidebar border-r border-theme-border/10 h-screen sticky top-0 left-0 z-30 shadow-2xl transition-all duration-300">
+    <aside className="hidden md:flex flex-col w-64 bg-theme-sidebar border-r border-theme-border-soft/10 h-screen sticky top-0 left-0 z-30 shadow-2xl transition-all duration-300">
       {/* Brand Header */}
-      <div className="p-6 border-b border-theme-border/10 flex items-center">
-        <Logo type="horizontal" forceWhiteText={true} />
+      <div className="p-6 border-b border-theme-border-soft/10 flex items-center">
+        <Logo type="horizontal" forceWhiteText={false} />
       </div>
 
       {/* Nav Menu */}
@@ -45,20 +45,20 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
               onClick={() => setCurrentTab(item.id)}
               className={`relative w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors duration-300 group cursor-pointer ${
                 isActive 
-                  ? 'text-white' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'text-theme-button-text' 
+                  : 'text-theme-sidebar-text/70 hover:text-theme-button-text hover:bg-theme-accent-light/10'
               }`}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeSidebar"
-                  className="absolute inset-0 bg-gradient-to-r from-theme-btnFrom to-theme-btnTo rounded-xl shadow-[0_0_20px_rgba(25,195,163,0.35)]"
+                  className="absolute inset-0 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-xl shadow-glow"
                   initial={false}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}
               <Icon className={`relative z-10 w-5 h-5 transition-transform duration-300 ${
-                isActive ? 'text-white scale-110' : 'text-slate-500 group-hover:text-theme-accent group-hover:scale-110'
+                isActive ? 'text-theme-button-text scale-110' : 'text-theme-sidebar-text/70 group-hover:text-theme-accent group-hover:scale-110'
               }`} />
               <span className="relative z-10">{item.label}</span>
             </motion.button>
@@ -67,22 +67,22 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
       </nav>
 
       {/* Sidebar Footer with Business Account Summary & Logout */}
-      <div className="p-4 border-t border-theme-border/10 flex flex-col gap-3">
-        <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl">
+      <div className="p-4 border-t border-theme-border-soft/10 flex flex-col gap-3">
+        <div className="flex items-center gap-3 p-3 bg-theme-accent-light/10 border border-theme-border-soft rounded-xl">
           {businessSettings?.logoUrl ? (
             <img
               src={businessSettings.logoUrl}
               alt="Logo"
-              className="w-9 h-9 rounded-lg object-cover shadow-sm bg-white dark:bg-slate-900"
+              className="w-9 h-9 rounded-lg object-cover shadow-sm bg-theme-card dark:bg-theme-card"
             />
           ) : (
-            <div className="w-9 h-9 rounded-lg bg-theme-accent/20 text-theme-accent font-bold flex items-center justify-center text-sm">
+            <div className="w-9 h-9 rounded-lg bg-theme-accent-light text-theme-accent font-bold flex items-center justify-center text-sm">
               {businessSettings?.businessName?.charAt(0) || 'B'}
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h4 className="text-xs font-bold text-white truncate">{businessSettings?.businessName || 'My Business'}</h4>
-            <p className="text-[10px] text-slate-400 font-medium truncate">{userEmail || businessSettings?.email || 'billing@firm.com'}</p>
+            <h4 className="text-xs font-bold text-theme-sidebar-text truncate">{businessSettings?.businessName || 'My Business'}</h4>
+            <p className="text-[10px] text-theme-sidebar-text/70 font-medium truncate">{userEmail || businessSettings?.email || 'billing@firm.com'}</p>
           </div>
         </div>
 

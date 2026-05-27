@@ -9,10 +9,10 @@ service cloud.firestore {
 
     // Rules for users collection and their private subcollections (like invoices)
     match /users/{userId} {
-      allow read, write: if isAuth();
+      allow read, write: if isAuth() && request.auth.uid == userId;
       
       match /invoices/{invoiceId} {
-        allow read, write: if isAuth();
+        allow read, write: if isAuth() && request.auth.uid == userId;
       }
     }
     
@@ -42,28 +42,32 @@ service cloud.firestore {
     
     // Rules for other collections to maintain backward compatibility
     match /settings/{userId} {
-      allow read, write: if isAuth();
+      allow read, write: if isAuth() && request.auth.uid == userId;
     }
     match /subscription/{userId} {
-      allow read, write: if isAuth();
+      allow read, write: if isAuth() && request.auth.uid == userId;
     }
     match /customers/{userId}/items/{customerId} {
-      allow read, write: if isAuth();
+      allow read, write: if isAuth() && request.auth.uid == userId;
     }
     match /products/{userId}/items/{productId} {
-      allow read, write: if isAuth();
+      allow read, write: if isAuth() && request.auth.uid == userId;
     }
     match /expenses/{userId}/items/{expenseId} {
-      allow read, write: if isAuth();
+      allow read, write: if isAuth() && request.auth.uid == userId;
     }
     match /premiumRequests/{requestId} {
-      allow read, write: if isAuth();
+      allow read, write: if isAuth(); // Could be restricted further but kept simple for now
     }
     match /usersList/{userId} {
-      allow read, write: if isAuth();
+      // Any authenticated user might need to write here on signup, 
+      // but only admin or self should read. For now restrict to self or admin.
+      allow write: if isAuth();
+      allow read: if isAuth() && (request.auth.uid == userId || request.auth.token.email == 'khairul2052007@gmail.com');
     }
     match /platformConfig/{configId} {
-      allow read, write: if isAuth();
+      allow read: if isAuth();
+      allow write: if isAuth() && request.auth.token.email == 'khairul2052007@gmail.com';
     }
   }
 }

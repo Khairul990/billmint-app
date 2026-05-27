@@ -27,9 +27,9 @@ const MoreMenu = ({
     <div className="space-y-6 max-w-2xl mx-auto">
       
       {/* Dynamic SaaS Hub Greeting Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-3xl p-6 text-white shadow-premium relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-36 h-36 bg-white dark:bg-slate-900/10 rounded-full blur-2xl pointer-events-none"></div>
-        <span className="text-[9px] font-black tracking-widest text-indigo-100 bg-white dark:bg-slate-900/20 px-2.5 py-1 rounded-full uppercase">
+      <div className="bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-3xl p-6 text-white shadow-premium relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-36 h-36 bg-theme-card dark:bg-theme-card/10 rounded-full blur-2xl pointer-events-none"></div>
+        <span className="text-[9px] font-black tracking-widest text-theme-accent bg-theme-card dark:bg-theme-card/20 px-2.5 py-1 rounded-full uppercase">
           BillQyro Workspace Hub
         </span>
         <h2 className="text-xl font-extrabold tracking-tight mt-2.5">
@@ -46,17 +46,17 @@ const MoreMenu = ({
         {/* Expenses page */}
         <button
           onClick={() => setCurrentTab('expenses')}
-          className="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 text-left p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
+          className="bg-theme-card dark:bg-theme-card hover:bg-theme-app dark:bg-theme-surface text-left p-5 rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
         >
           <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center group-hover:bg-rose-100 transition-colors shrink-0">
             <TrendingDown className="w-6 h-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <h4 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-1.5">
+            <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary tracking-tight flex items-center gap-1.5">
               <span>Overhead Expenses</span>
-              <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity" />
+              <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-theme-muted transition-opacity" />
             </h4>
-            <p className="text-[11px] text-slate-400 font-semibold truncate">
+            <p className="text-[11px] text-theme-muted font-semibold truncate">
               Log machine threads, needles, bills, repairs
             </p>
           </div>
@@ -65,17 +65,17 @@ const MoreMenu = ({
         {/* Inventory page */}
         <button
           onClick={() => setCurrentTab('products')}
-          className="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 text-left p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
+          className="bg-theme-card dark:bg-theme-card hover:bg-theme-app dark:bg-theme-surface text-left p-5 rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
         >
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center group-hover:bg-blue-100 transition-colors shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-theme-accent-light text-theme-accent flex items-center justify-center group-hover:bg-theme-accent-light transition-colors shrink-0">
             <Layers className="w-6 h-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <h4 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-1.5">
+            <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary tracking-tight flex items-center gap-1.5">
               <span>Products & Catalog</span>
-              <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity" />
+              <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-theme-muted transition-opacity" />
             </h4>
-            <p className="text-[11px] text-slate-400 font-semibold truncate">
+            <p className="text-[11px] text-theme-muted font-semibold truncate">
               Prefill stitch types, sizes, catalog prices
             </p>
           </div>
@@ -84,17 +84,17 @@ const MoreMenu = ({
         {/* Subscriptions page */}
         <button
           onClick={() => setCurrentTab('subscription')}
-          className="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 text-left p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
+          className="bg-theme-card dark:bg-theme-card hover:bg-theme-app dark:bg-theme-surface text-left p-5 rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
         >
           <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center group-hover:bg-amber-100 transition-colors shrink-0">
             <Sparkles className="w-6 h-6 animate-pulse" />
           </div>
           <div className="min-w-0 flex-1">
-            <h4 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-1.5">
+            <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary tracking-tight flex items-center gap-1.5">
               <span>SaaS Subscriptions</span>
-              <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity" />
+              <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-theme-muted transition-opacity" />
             </h4>
-            <p className="text-[11px] text-slate-400 font-semibold truncate">
+            <p className="text-[11px] text-theme-muted font-semibold truncate">
               Unlock custom logo uploads & watermarks
             </p>
           </div>
@@ -103,17 +103,17 @@ const MoreMenu = ({
         {/* User Settings */}
         <button
           onClick={() => setCurrentTab('settings')}
-          className="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 text-left p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
+          className="bg-theme-card dark:bg-theme-card hover:bg-theme-app dark:bg-theme-surface text-left p-5 rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
         >
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center group-hover:bg-indigo-100 transition-colors shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-theme-accent-light text-theme-accent flex items-center justify-center group-hover:bg-theme-accent-light transition-colors shrink-0">
             <Settings className="w-6 h-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <h4 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-1.5">
+            <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary tracking-tight flex items-center gap-1.5">
               <span>Business Settings</span>
-              <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity" />
+              <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-theme-muted transition-opacity" />
             </h4>
-            <p className="text-[11px] text-slate-400 font-semibold truncate">
+            <p className="text-[11px] text-theme-muted font-semibold truncate">
               Setup your company profile, logo, and taxes
             </p>
           </div>
@@ -123,17 +123,17 @@ const MoreMenu = ({
         {/* How to Use Guide page */}
         <button
           onClick={() => setCurrentTab('guide')}
-          className="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 text-left p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full sm:col-span-2"
+          className="bg-theme-card dark:bg-theme-card hover:bg-theme-app dark:bg-theme-surface text-left p-5 rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full sm:col-span-2"
         >
-          <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-500 flex items-center justify-center group-hover:bg-teal-100 transition-colors shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-theme-accent-light text-theme-accent flex items-center justify-center group-hover:bg-theme-accent-light transition-colors shrink-0">
             <HelpCircle className="w-6 h-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <h4 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-1.5">
+            <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary tracking-tight flex items-center gap-1.5">
               <span>How to Use BillQyro</span>
-              <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity" />
+              <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-theme-muted transition-opacity" />
             </h4>
-            <p className="text-[11px] text-slate-400 font-semibold truncate">
+            <p className="text-[11px] text-theme-muted font-semibold truncate">
               Learn to create invoices and manage customers
             </p>
           </div>

@@ -65,21 +65,21 @@ const SetupProgress = ({ businessSettings = {}, customers = [], invoices = [] })
     const progressPercent = Math.round((completedCount / items.length) * 100);
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800/80 shadow-premium space-y-5">
+        <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft/80 shadow-premium space-y-5">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-400 text-white shadow-sm">
+                    <div className="p-1.5 rounded-xl bg-[image:var(--accent-gradient)] text-theme-button-text border-0 shadow-sm">
                         <Activity className="w-4 h-4" />
                     </div>
                     <div>
-                        <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 dark:text-slate-200 tracking-tight flex items-center gap-2">
+                        <h3 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary dark:text-theme-secondary tracking-tight flex items-center gap-2">
                             <span>Setup Progress</span>
                             {progressPercent === 100 && (
-                                <Sparkles className="w-4 h-4 text-emerald-500" />
+                                <Sparkles className="w-4 h-4 text-theme-accent" />
                             )}
                         </h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">
                             {progressPercent}% Complete
                         </p>
                     </div>
@@ -95,7 +95,7 @@ const SetupProgress = ({ businessSettings = {}, customers = [], invoices = [] })
                             r="16"
                             fill="none"
                             stroke="currentColor"
-                            className="text-slate-100 dark:text-slate-800 dark:text-slate-100"
+                            className="text-slate-100 dark:text-theme-primary dark:text-theme-primary"
                             strokeWidth="3"
                         />
                         {/* Progress arc */}
@@ -111,21 +111,21 @@ const SetupProgress = ({ businessSettings = {}, customers = [], invoices = [] })
                         />
                         <defs>
                             <linearGradient id="progressGradient" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%" stopColor="#10b981" />
-                                <stop offset="100%" stopColor="#06b6d4" />
+                                <stop offset="0%" stopColor="var(--accent)" />
+                                <stop offset="100%" stopColor="var(--accent-dark)" />
                             </linearGradient>
                         </defs>
                     </svg>
-                    <span className="absolute inset-0 flex items-center justify-center text-xs font-black text-slate-700 dark:text-slate-300">
+                    <span className="absolute inset-0 flex items-center justify-center text-xs font-black text-theme-primary dark:text-theme-muted">
                         {progressPercent}%
                     </span>
                 </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+            <div className="w-full bg-theme-surface dark:bg-theme-card h-2.5 rounded-full overflow-hidden">
                 <div
-                    className="bg-gradient-to-r from-emerald-400 to-teal-400 h-full rounded-full transition-all duration-700 ease-out"
+                    className="bg-[image:var(--accent-gradient)] h-full rounded-full transition-all duration-700 ease-out"
                     style={{ width: `${progressPercent}%` }}
                 ></div>
             </div>
@@ -137,19 +137,19 @@ const SetupProgress = ({ businessSettings = {}, customers = [], invoices = [] })
                     return (
                         <div
                             key={item.id}
-                            className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50/50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/50 dark:border-slate-800/50 transition-all"
+                            className="flex items-center justify-between p-2.5 rounded-2xl bg-theme-app dark:bg-theme-surface/50 dark:bg-theme-app/40 border border-theme-border-soft dark:border-theme-border-soft/50 dark:border-theme-border-soft/50 transition-all"
                         >
                             <div className="flex items-center gap-2.5">
                                 {/* Status icon */}
                                 <div
                                     className={`p-1.5 rounded-xl ${item.complete
-                                            ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500'
-                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                                            ? 'bg-theme-accent-light dark:bg-theme-accent-light/30 text-theme-accent'
+                                            : 'bg-theme-surface dark:bg-theme-card text-theme-muted'
                                         }`}
                                 >
                                     <IconComp className="w-3.5 h-3.5" />
                                 </div>
-                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                <span className="text-xs font-bold text-theme-primary dark:text-theme-muted">
                                     {item.label}
                                 </span>
                             </div>
@@ -157,8 +157,8 @@ const SetupProgress = ({ businessSettings = {}, customers = [], invoices = [] })
                             {/* Status badge */}
                             <span
                                 className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${item.complete
-                                        ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500'
-                                        : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400'
+                                        ? 'bg-theme-accent-light border border-theme-border-soft text-theme-accent'
+                                        : 'bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft text-theme-muted'
                                     }`}
                             >
                                 {item.complete ? (

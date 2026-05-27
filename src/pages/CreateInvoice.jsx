@@ -584,27 +584,27 @@ const CreateInvoice = ({
       
       {/* Help Banner */}
       {showBanner && (
-        <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative shadow-sm">
-          <button onClick={() => setShowBanner(false)} className="absolute top-2 right-2 text-indigo-400 hover:text-indigo-600">
+        <div className="bg-theme-accent-light border border-theme-border-soft rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative shadow-sm">
+          <button onClick={() => setShowBanner(false)} className="absolute top-2 right-2 text-theme-accent hover:text-theme-accent">
             <X className="w-4 h-4" />
           </button>
           <div>
-            <h3 className="text-indigo-800 font-bold text-sm flex items-center gap-2">
+            <h3 className="text-theme-accent font-bold text-sm flex items-center gap-2">
               <Info className="w-4 h-4" />
               Create your bill in 3 simple steps
             </h3>
-            <p className="text-indigo-600 text-xs mt-1 font-medium">Select or add customer, add invoice items, then save or download PDF.</p>
+            <p className="text-theme-accent text-xs mt-1 font-medium">Select or add customer, add invoice items, then save or download PDF.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 shrink-0 pr-6 sm:pr-0">
-            <button type="button" onClick={() => setCurrentTab('guide')} className="px-3 py-1.5 bg-white dark:bg-slate-900 text-indigo-600 text-xs font-bold rounded-lg border border-indigo-200 hover:bg-indigo-50 shadow-sm transition-all flex items-center gap-1.5">
+            <button type="button" onClick={() => setCurrentTab('guide')} className="px-3 py-1.5 bg-theme-card dark:bg-theme-card text-theme-accent text-xs font-bold rounded-lg border border-theme-border-soft hover:bg-theme-accent-light shadow-sm transition-all flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5" />
               View Guide
             </button>
-            <button type="button" onClick={() => document.getElementById('crm-section')?.scrollIntoView({behavior: 'smooth'})} className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 shadow-sm transition-all flex items-center gap-1.5">
+            <button type="button" onClick={() => document.getElementById('crm-section')?.scrollIntoView({behavior: 'smooth'})} className="px-3 py-1.5 bg-theme-accent text-white text-xs font-bold rounded-lg hover:opacity-90 shadow-sm transition-all flex items-center gap-1.5">
               <UserPlus className="w-3.5 h-3.5" />
               Add Customer
             </button>
-            <button type="button" onClick={() => document.getElementById('items-section')?.scrollIntoView({behavior: 'smooth'})} className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 shadow-sm transition-all flex items-center gap-1.5">
+            <button type="button" onClick={() => document.getElementById('items-section')?.scrollIntoView({behavior: 'smooth'})} className="px-3 py-1.5 bg-theme-accent text-white text-xs font-bold rounded-lg hover:opacity-90 shadow-sm transition-all flex items-center gap-1.5">
               <Plus className="w-3.5 h-3.5" />
               Add Item
             </button>
@@ -616,7 +616,7 @@ const CreateInvoice = ({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <button
           onClick={() => setCurrentTab('invoices')}
-          className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-100 transition-all w-fit"
+          className="flex items-center gap-2 text-xs font-bold text-theme-muted hover:text-theme-primary dark:text-theme-primary transition-all w-fit"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Invoices</span>
@@ -624,7 +624,7 @@ const CreateInvoice = ({
         
         <div className="flex flex-col">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
+            <h2 className="text-xl font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">
               {editingInvoice ? 'Edit Billing Sheet' : 'Create Invoicing Sheet'}
             </h2>
             <button
@@ -634,57 +634,120 @@ const CreateInvoice = ({
               ⚡ Quick Bill
             </button>
           </div>
-          <button 
-            onClick={() => setCurrentTab('guide')}
-            className="text-indigo-500 hover:text-indigo-700 text-xs font-bold flex items-center gap-1 mt-1 transition-colors w-fit"
-          >
-            <HelpCircle className="w-3.5 h-3.5" />
-            Need help? Learn how to create a bill
-          </button>
+          <div className="flex items-center gap-3 mt-1">
+            <button 
+              onClick={() => setCurrentTab('guide')}
+              className="text-theme-accent hover:text-theme-accent text-xs font-bold flex items-center gap-1 transition-colors w-fit"
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              Need help?
+            </button>
+            <div className="w-px h-3 bg-theme-border-strong dark:bg-theme-surface"></div>
+            <label className="text-theme-accent hover:text-theme-accent text-xs font-bold flex items-center gap-1 transition-colors w-fit cursor-pointer">
+              <Download className="w-3.5 h-3.5 rotate-180" />
+              Import .billqyro
+              <input 
+                type="file" 
+                accept=".billqyro,.json" 
+                className="hidden" 
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    try {
+                      const data = JSON.parse(event.target.result);
+                      if (data && (data.invoiceNumber || data.items)) {
+                        // Load into state
+                        if (data.invoiceNumber) setInvoiceNumber(data.invoiceNumber);
+                        if (data.date) setDate(data.date);
+                        if (data.dueDate) setDueDate(data.dueDate);
+                        if (data.customerName) setCustomerName(data.customerName);
+                        if (data.customerPhone) setCustomerPhone(data.customerPhone);
+                        if (data.customerEmail) setCustomerEmail(data.customerEmail);
+                        if (data.customerAddress) setCustomerAddress(data.customerAddress);
+                        if (data.items) setItems(data.items);
+                        if (data.taxPercentage !== undefined) setTaxPercentage(data.taxPercentage);
+                        if (data.discountAmount !== undefined) setDiscountAmount(data.discountAmount);
+                        if (data.amountPaid !== undefined) setAmountPaid(data.amountPaid);
+                        if (data.notes) setNotes(data.notes);
+                        if (data.terms) setTerms(data.terms);
+                        if (data.billType) setBillType(data.billType);
+                        toast.success('Backup loaded successfully!');
+                      } else {
+                        toast.error('Invalid backup format.');
+                      }
+                    } catch(err) {
+                      toast.error('Failed to parse backup file.');
+                    }
+                  };
+                  reader.readAsText(file);
+                }} 
+              />
+            </label>
+            <div className="w-px h-3 bg-theme-border-strong dark:bg-theme-surface"></div>
+            <button 
+              onClick={() => {
+                const payload = { invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, terms, paymentStatus, orderStatus, billType };
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", `${invoiceNumber || 'draft'}.billqyro`);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                toast.success('Backup downloaded!');
+              }}
+              className="text-theme-accent hover:text-theme-accent text-xs font-bold flex items-center gap-1 transition-colors w-fit"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Download Backup
+            </button>
+          </div>
         </div>
         
         {/* Search Bar for Create Invoice Header */}
         <div className="relative flex-1 max-w-sm hidden md:block">
-          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none">
+          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-muted pointer-events-none">
             <Search className="w-4 h-4" />
           </span>
           <input
             type="text"
             placeholder="Search items, customers..."
-            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 shadow-sm transition-all"
+            className="w-full pl-10 pr-4 py-2 bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary dark:text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent shadow-sm transition-all"
           />
         </div>
       </div>
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-slate-500">
-            <BarChart3 className="w-4 h-4 text-teal-500" />
+        <div className="bg-theme-card dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft shadow-sm flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-theme-muted">
+            <BarChart3 className="w-4 h-4 text-theme-accent" />
             <span className="text-xs font-bold uppercase tracking-wider">Total Invoices</span>
           </div>
-          <span className="text-xl font-black text-slate-800 dark:text-slate-100">{invoices.length}</span>
+          <span className="text-xl font-black text-theme-primary dark:text-theme-primary">{invoices.length}</span>
         </div>
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-slate-500">
-            <Check className="w-4 h-4 text-emerald-500" />
+        <div className="bg-theme-card dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft shadow-sm flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-theme-muted">
+            <Check className="w-4 h-4 text-theme-accent" />
             <span className="text-xs font-bold uppercase tracking-wider">Paid Invoices</span>
           </div>
-          <span className="text-xl font-black text-slate-800 dark:text-slate-100">{invoices.filter(i => i.paymentStatus === 'Paid').length}</span>
+          <span className="text-xl font-black text-theme-primary dark:text-theme-primary">{invoices.filter(i => i.paymentStatus === 'Paid').length}</span>
         </div>
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-slate-500">
+        <div className="bg-theme-card dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft shadow-sm flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-theme-muted">
             <HelpCircle className="w-4 h-4 text-amber-500" />
             <span className="text-xs font-bold uppercase tracking-wider">Pending Dues</span>
           </div>
-          <span className="text-xl font-black text-slate-800 dark:text-slate-100">{invoices.filter(i => i.balanceDue > 0).length}</span>
+          <span className="text-xl font-black text-theme-primary dark:text-theme-primary">{invoices.filter(i => i.balanceDue > 0).length}</span>
         </div>
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-slate-500">
-            <Users className="w-4 h-4 text-indigo-500" />
+        <div className="bg-theme-card dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft shadow-sm flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-theme-muted">
+            <Users className="w-4 h-4 text-theme-accent" />
             <span className="text-xs font-bold uppercase tracking-wider">Total Clients</span>
           </div>
-          <span className="text-xl font-black text-slate-800 dark:text-slate-100">{customers.length}</span>
+          <span className="text-xl font-black text-theme-primary dark:text-theme-primary">{customers.length}</span>
         </div>
       </div>
 
@@ -697,18 +760,18 @@ const CreateInvoice = ({
           <div className="bg-gradient-to-br from-slate-900 to-[#0f2349] rounded-3xl p-5 md:p-6 border border-slate-700/40 shadow-xl space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center shadow-lg">
+                <div className="w-8 h-8 rounded-xl bg-[image:var(--accent-gradient)] text-theme-button-text flex items-center justify-center shadow-lg">
                   <Layers className="w-4 h-4 text-white" />
                 </div>
                 <div>
                   <h3 className="text-sm font-extrabold text-white">Bill Type</h3>
-                  <p className="text-[10px] text-slate-400 font-bold">Select your business template</p>
+                  <p className="text-[10px] text-theme-muted font-bold">Select your business template</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowPdfSettings(true)}
-                className="px-3 py-1.5 bg-white dark:bg-slate-900/10 hover:bg-white dark:bg-slate-900/20 text-white/80 hover:text-white font-bold text-[10px] rounded-xl flex items-center gap-1.5 transition-all border border-white/10 shrink-0"
+                className="px-3 py-1.5 bg-theme-card dark:bg-theme-card/10 hover:bg-theme-card dark:bg-theme-card/20 text-white/80 hover:text-white font-bold text-[10px] rounded-xl flex items-center gap-1.5 transition-all border border-white/10 shrink-0"
               >
                 <LayoutTemplate className="w-3 h-3" />
                 PDF Fields
@@ -733,20 +796,20 @@ const CreateInvoice = ({
                   }}
                   className={`py-3 px-2 rounded-2xl text-center leading-tight transition-all border-2 ${
                     billType === type.id
-                    ? 'bg-gradient-to-br from-teal-400 to-emerald-500 border-teal-400 text-white shadow-lg shadow-teal-500/30 scale-105'
-                    : 'bg-white dark:bg-slate-900/5 border-white/10 text-slate-400 hover:bg-white dark:bg-slate-900/10 hover:border-white/20 hover:text-white hover:scale-102'
+                    ? 'bg-[image:var(--accent-gradient)] text-theme-button-text border-theme-accent text-white shadow-lg shadow-theme-glow scale-105'
+                    : 'bg-theme-card dark:bg-theme-surface/5 border-white/10 text-theme-muted hover:bg-theme-card dark:bg-theme-card/10 hover:border-white/20 hover:text-white hover:scale-102'
                   }`}
                 >
                   <div className="text-xl mb-0.5">{type.emoji}</div>
                   <div className="text-[11px] font-extrabold">{type.label}</div>
-                  <div className={`text-[9px] font-bold ${ billType === type.id ? 'text-white/70' : 'text-slate-500'}`}>{type.sub}</div>
+                  <div className={`text-[9px] font-bold ${ billType === type.id ? 'text-white/70' : 'text-theme-muted'}`}>{type.sub}</div>
                 </button>
               ))}
             </div>
 
             {/* Live column preview chips */}
             <div className="flex flex-wrap gap-1.5 pt-2 border-t border-white/10">
-              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider py-1 mr-1">Columns:</span>
+              <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider py-1 mr-1">Columns:</span>
               {(
                 billType === 'embroidery' ? ['Design No','Work Type','Description','Size','Qty','Rate','Amount'] :
                 billType === 'grocery'   ? ['Product Name','Unit','Qty','Unit Price','Amount'] :
@@ -756,77 +819,77 @@ const CreateInvoice = ({
               ).map((col, i) => (
                 <span key={i} className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                   col === 'Amount'
-                    ? 'bg-teal-500/20 text-teal-400 border border-teal-500/30'
-                    : 'bg-white dark:bg-slate-900/10 text-slate-400 border border-white/10'
+                    ? 'bg-theme-accent/20 text-theme-accent border border-theme-accent/30'
+                    : 'bg-theme-card dark:bg-theme-card/10 text-theme-muted border border-white/10'
                 }`}>{col}</span>
               ))}
             </div>
           </div>
 
           {/* Metadata Grid */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-4">
-            <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 border-b border-slate-50 pb-3 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-indigo-500" />
+          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
+            <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-slate-50 pb-3 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-theme-accent" />
               <span>Invoicing Metadata</span>
             </h3>
             
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-semibold text-slate-500">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-semibold text-theme-muted">
               <div>
-                <label className="block mb-1.5 text-slate-400">Invoice Number</label>
+                <label className="block mb-1.5 text-theme-muted">Invoice Number</label>
                 <input
                   type="text"
                   value={invoiceNumber}
                   onChange={(e) => setInvoiceNumber(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-extrabold uppercase"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold uppercase"
                 />
-                <p className="text-[10px] text-slate-400 mt-1.5 leading-tight">
+                <p className="text-[10px] text-theme-muted mt-1.5 leading-tight">
                   Invoice number is generated automatically, but you can edit it if needed.
                 </p>
               </div>
               <div>
-                <label className="block mb-1.5 text-slate-400">Issue Date</label>
+                <label className="block mb-1.5 text-theme-muted">Issue Date</label>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
                 />
               </div>
               <div>
-                <label className="block mb-1.5 text-slate-400">Due Date</label>
+                <label className="block mb-1.5 text-theme-muted">Due Date</label>
                 <input
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
                 />
               </div>
             </div>
           </div>
 
           {/* Customer CRM Selector */}
-          <div id="crm-section" className="bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-4 relative scroll-mt-6">
+          <div id="crm-section" className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4 relative scroll-mt-6">
             <div className="flex items-center justify-between border-b border-slate-50 pb-3">
               <div className="flex flex-col">
-                <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                  <User className="w-4 h-4 text-indigo-500" />
+                <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary flex items-center gap-2">
+                  <User className="w-4 h-4 text-theme-accent" />
                   <span>Client & Customer CRM</span>
                 </h3>
-                <p className="text-[10px] text-slate-500 font-bold mt-1">Customer details will appear on the invoice PDF.</p>
+                <p className="text-[10px] text-theme-muted font-bold mt-1">Customer details will appear on the invoice PDF.</p>
               </div>
               
-              <span className="text-[10px] bg-indigo-50 text-indigo-600 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider hidden sm:block">
+              <span className="text-[10px] bg-theme-accent-light text-theme-accent font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider hidden sm:block">
                 SaaS CRM Integrated
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold text-slate-500">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold text-theme-muted">
               <div className="sm:col-span-2">
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-slate-400">Select Customer from CRM (Automatic Prefill)</label>
+                  <label className="text-theme-muted">Select Customer from CRM (Automatic Prefill)</label>
                   <button
                     onClick={() => setIsAddCustomerOpen(true)}
-                    className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-colors border border-indigo-100"
+                    className="flex items-center gap-1 text-[10px] font-bold text-theme-accent bg-theme-accent-light hover:bg-theme-accent-light px-2.5 py-1 rounded-lg transition-colors border border-theme-border-soft"
                   >
                     <UserPlus className="w-3 h-3" />
                     Add Customer
@@ -835,7 +898,7 @@ const CreateInvoice = ({
                 <select
                   value={selectedCustomerId}
                   onChange={handleCustomerSelect}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 dark:text-slate-300 font-bold"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-muted font-bold"
                 >
                   <option value="">-- Manual Client Entry --</option>
                   {customers.map((c) => (
@@ -850,56 +913,56 @@ const CreateInvoice = ({
               </div>
 
               <div>
-                <label className="block mb-1.5 text-slate-400">Customer Name *</label>
+                <label className="block mb-1.5 text-theme-muted">Customer Name *</label>
                 <input
                   type="text"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   placeholder="Acme Embroidery"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
                 />
               </div>
               <div>
-                <label className="block mb-1.5 text-slate-400">Phone Number * <span className="font-normal text-[10px]">(WhatsApp Ready)</span></label>
+                <label className="block mb-1.5 text-theme-muted">Phone Number * <span className="font-normal text-[10px]">(WhatsApp Ready)</span></label>
                 <input
                   type="text"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
                   placeholder="+91 XXXXX XXXXX"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block mb-1.5 text-slate-400">Email Address</label>
+                <label className="block mb-1.5 text-theme-muted">Email Address</label>
                 <input
                   type="email"
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
                   placeholder="billing@customer.com"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block mb-1.5 text-slate-400">Billing Address *</label>
+                <label className="block mb-1.5 text-theme-muted">Billing Address *</label>
                 <textarea
                   value={customerAddress}
                   onChange={(e) => setCustomerAddress(e.target.value)}
                   placeholder="123 Garment Street..."
                   rows="2"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 leading-relaxed text-xs"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary leading-relaxed text-xs"
                 />
               </div>
 
               {!selectedCustomerId && (
-                <div className="sm:col-span-2 flex items-center gap-2 mt-1 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100/50">
+                <div className="sm:col-span-2 flex items-center gap-2 mt-1 bg-theme-surface dark:bg-theme-surface p-3 rounded-xl border border-theme-border-soft">
                   <input
                     type="checkbox"
                     id="saveCustomer"
                     checked={saveCustomer}
                     onChange={(e) => setSaveCustomer(e.target.checked)}
-                    className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                    className="w-4 h-4 text-theme-accent rounded border-theme-border-soft focus:ring-indigo-500 cursor-pointer"
                   />
-                  <label htmlFor="saveCustomer" className="text-xs font-bold text-indigo-900 cursor-pointer select-none">
+                  <label htmlFor="saveCustomer" className="text-xs font-bold text-theme-accent cursor-pointer select-none">
                     Save this customer for future invoices
                   </label>
                 </div>
@@ -908,18 +971,18 @@ const CreateInvoice = ({
           </div>
 
           {/* Premium Smart Item Table */}
-          <div id="items-section" className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium overflow-hidden scroll-mt-6">
+          <div id="items-section" className="bg-theme-card dark:bg-theme-card rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium overflow-hidden scroll-mt-6">
             {/* Table Header Bar */}
-            <div className="bg-gradient-to-r from-[#071B3A] to-[#0d2b55] px-5 md:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-t-3xl">
+            <div className="bg-theme-surface border-b border-theme-border-soft px-5 md:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-t-3xl">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center">
-                  <Layers className="w-4 h-4 text-teal-400" />
+                <div className="w-8 h-8 rounded-xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center">
+                  <Layers className="w-4 h-4 text-theme-accent" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-extrabold text-white">Invoice Items Sheet</h3>
-                  <p className="text-[10px] text-slate-400 font-bold">Qty × Rate = Amount (auto-calculated)</p>
+                  <h3 className="text-sm font-extrabold text-theme-primary">Invoice Items Sheet</h3>
+                  <p className="text-[10px] text-theme-muted font-bold">Qty × Rate = Amount (auto-calculated)</p>
                 </div>
-                <span className="text-[9px] font-extrabold px-2.5 py-1 rounded-full bg-teal-500/20 text-teal-400 border border-teal-500/30 hidden md:block ml-2">⚡ Smart Rates On</span>
+                <span className="text-[9px] font-extrabold px-2.5 py-1 rounded-full bg-theme-accent/10 text-theme-accent border border-theme-accent/20 hidden md:block ml-2">⚡ Smart Rates On</span>
               </div>
               <div className="flex items-center gap-2">
                 <motion.button
@@ -927,9 +990,9 @@ const CreateInvoice = ({
                   whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={() => setShowPdfSettings(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900/10 hover:bg-white dark:bg-slate-900/20 text-white rounded-lg text-xs font-bold transition-colors border border-white/10 cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-theme-card dark:bg-theme-card/50 hover:bg-theme-card/80 dark:hover:bg-theme-card text-theme-primary rounded-lg text-xs font-bold transition-colors border border-theme-border-soft cursor-pointer"
                 >
-                  <Settings className="w-3.5 h-3.5 text-slate-300" />
+                  <Settings className="w-3.5 h-3.5 text-theme-muted" />
                   <span>Customize PDF</span>
                 </motion.button>
                 <motion.button
@@ -937,7 +1000,7 @@ const CreateInvoice = ({
                   whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={() => setIsSheetExpanded(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-500 hover:bg-teal-400 text-white rounded-lg text-xs font-bold transition-colors shadow-sm cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[image:var(--accent-gradient)] text-theme-button-text hover:opacity-90 rounded-lg text-xs font-bold transition-colors shadow-sm cursor-pointer border-0"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
                   <span>Expand Sheet</span>
@@ -947,18 +1010,18 @@ const CreateInvoice = ({
 
             <div className="p-5 md:p-6 space-y-4">
 
-            <div className="flex gap-2 flex-wrap pb-3 mb-1 border-b border-slate-100 dark:border-slate-800">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider py-1.5 mr-1">Quick Fill:</span>
-              <button onClick={() => addQuickFillItem('Embroidery', 'Embroidery Work', 0)} className="px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-100 hover:bg-teal-100 rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">🧵 Embroidery Work</button>
+            <div className="flex gap-2 flex-wrap pb-3 mb-1 border-b border-theme-border-soft dark:border-theme-border-soft">
+              <span className="text-[10px] text-theme-muted font-bold uppercase tracking-wider py-1.5 mr-1">Quick Fill:</span>
+              <button onClick={() => addQuickFillItem('Embroidery', 'Embroidery Work', 0)} className="px-3 py-1.5 bg-theme-accent-light text-theme-accent border border-theme-border-soft hover:bg-theme-accent-light rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">🧵 Embroidery Work</button>
               <button onClick={() => addQuickFillItem('Repair', 'Repair Work', 0)} className="px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-100 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">🔧 Repair Work</button>
-              <button onClick={() => addQuickFillItem('Design Work', 'Custom Design', 0)} className="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-100 rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">📝 Custom Design</button>
+              <button onClick={() => addQuickFillItem('Design Work', 'Custom Design', 0)} className="px-3 py-1.5 bg-theme-accent-light text-theme-accent border border-theme-border-soft hover:bg-theme-accent-light rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">📝 Custom Design</button>
             </div>
 
             {/* Desktop Headers + Items */}
             <div className="w-full overflow-x-auto pb-4 -mx-1 px-1">
               <div className="min-w-[900px] flex flex-col">
                 {/* Column headers - desktop only */}
-                <div className="hidden lg:grid gap-2 text-[10px] font-black text-slate-400 uppercase tracking-wider px-3 pb-2 mb-0 border-b-2 border-slate-100 dark:border-slate-800" style={{ gridTemplateColumns: getGridCols() }}>
+                <div className="hidden lg:grid gap-2 text-[10px] font-black text-theme-muted uppercase tracking-wider px-3 pb-2 mb-0 border-b-2 border-theme-border-soft dark:border-theme-border-soft" style={{ gridTemplateColumns: getGridCols() }}>
                   <div className="text-center">#</div>
                   {billType === 'grocery' ? (
                     <>
@@ -1009,18 +1072,18 @@ const CreateInvoice = ({
                   {items.map((item, index) => (
                     <div 
                       key={index}
-                      className="flex flex-col lg:grid items-center gap-2 px-3 py-3 lg:py-2 bg-white dark:bg-slate-900 lg:bg-slate-50 dark:bg-slate-800/50/60 rounded-2xl border border-slate-100 dark:border-slate-800 lg:border-slate-100 dark:border-slate-800/80 shadow-sm lg:shadow-none"
+                      className="flex flex-col lg:grid items-center gap-2 px-3 py-3 lg:py-2 bg-theme-card dark:bg-theme-card lg:bg-theme-app dark:bg-theme-surface/60 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft lg:border-theme-border-soft dark:border-theme-border-soft/80 shadow-sm lg:shadow-none"
                       style={{ gridTemplateColumns: getGridCols() }}
                     >
                   
                   {/* Mobile: Item header with number + delete */}
                   <div className="flex justify-between items-center lg:hidden mb-1">
-                    <span className="text-xs font-black text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">Item #{index + 1}</span>
+                    <span className="text-xs font-black text-theme-primary dark:text-theme-muted bg-theme-surface dark:bg-theme-card px-3 py-1 rounded-full">Item #{index + 1}</span>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => handleDuplicateItem(index)}
-                        className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 py-1.5 px-3 rounded-lg"
+                        className="flex items-center gap-1 text-[10px] font-bold text-theme-accent bg-theme-accent-light border border-theme-border-soft py-1.5 px-3 rounded-lg"
                       >
                         <Copy className="w-3 h-3" />
                         <span>Duplicate</span>
@@ -1039,19 +1102,19 @@ const CreateInvoice = ({
 
                   {/* S.N. (Desktop only) */}
                   <div className="hidden lg:flex items-center justify-center min-h-[48px]">
-                    <span className="text-[13px] font-extrabold text-slate-400 w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-full">{index + 1}</span>
+                    <span className="text-[13px] font-extrabold text-theme-muted w-8 h-8 flex items-center justify-center bg-theme-surface dark:bg-theme-card rounded-full">{index + 1}</span>
                   </div>
 
                   {/* Design No - embroidery only */}
                   {(billType === 'embroidery') && (
                     <div>
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Design / Item Code</label>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Design / Item Code</label>
                       <input
                         type="text"
                         value={item.designNo || ''}
                         onChange={(e) => handleItemChange(index, 'designNo', e.target.value)}
                         placeholder="e.g. SO-5"
-                        className="w-full px-3 py-3 min-h-[48px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-extrabold text-sm uppercase tracking-wide transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-3 py-3 min-h-[48px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold text-sm uppercase tracking-wide transition-all placeholder:text-theme-muted placeholder:font-normal"
                       />
                     </div>
                   )}
@@ -1059,13 +1122,13 @@ const CreateInvoice = ({
                   {/* Repair: Service Name */}
                   {billType === 'repair' && (
                     <div>
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Service / Item Name</label>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Service / Item Name</label>
                       <input
                         type="text"
                         value={item.serviceName || ''}
                         onChange={(e) => handleItemChange(index, 'serviceName', e.target.value)}
                         placeholder="e.g. Mobile Screen"
-                        className="w-full px-3 py-3 min-h-[48px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-extrabold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-3 py-3 min-h-[48px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold text-sm transition-all placeholder:text-theme-muted placeholder:font-normal"
                       />
                     </div>
                   )}
@@ -1073,13 +1136,13 @@ const CreateInvoice = ({
                   {/* Retail: Product Name */}
                   {billType === 'retail' && (
                     <div>
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Product Name</label>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Product Name</label>
                       <input
                         type="text"
                         value={item.productName || ''}
                         onChange={(e) => handleItemChange(index, 'productName', e.target.value)}
                         placeholder="e.g. Denim Jeans"
-                        className="w-full px-3 py-3 min-h-[48px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-extrabold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-3 py-3 min-h-[48px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold text-sm transition-all placeholder:text-theme-muted placeholder:font-normal"
                       />
                     </div>
                   )}
@@ -1087,13 +1150,13 @@ const CreateInvoice = ({
                   {/* Custom: Item / Service */}
                   {billType === 'custom' && (
                     <div>
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Item / Service</label>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Item / Service</label>
                       <input
                         type="text"
                         value={item.itemService || ''}
                         onChange={(e) => handleItemChange(index, 'itemService', e.target.value)}
                         placeholder="e.g. Design Work"
-                        className="w-full px-3 py-3 min-h-[48px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-extrabold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-3 py-3 min-h-[48px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold text-sm transition-all placeholder:text-theme-muted placeholder:font-normal"
                       />
                     </div>
                   )}
@@ -1101,11 +1164,11 @@ const CreateInvoice = ({
                   {/* Work Type - embroidery only */}
                   {billType === 'embroidery' && (
                     <div>
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Work Type</label>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Work Type</label>
                       <select
                         value={item.workType || 'Embroidery'}
                         onChange={(e) => handleItemChange(index, 'workType', e.target.value)}
-                        className="w-full px-3 py-3.5 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 dark:text-slate-300 font-bold text-[13px] transition-all appearance-auto truncate"
+                        className="w-full px-3 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-muted font-bold text-[13px] transition-all appearance-auto truncate"
                       >
                         <option value="Embroidery">Embroidery</option>
                         <option value="Stitching">Stitching</option>
@@ -1120,13 +1183,13 @@ const CreateInvoice = ({
                   {/* Retail: Category */}
                   {billType === 'retail' && (
                     <div>
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Category</label>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Category</label>
                       <input
                         type="text"
                         value={item.category || ''}
                         onChange={(e) => handleItemChange(index, 'category', e.target.value)}
                         placeholder="e.g. Clothing"
-                        className="w-full px-3 py-3.5 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 dark:text-slate-300 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-3 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-muted font-bold text-sm transition-all placeholder:text-theme-muted placeholder:font-normal"
                       />
                     </div>
                   )}
@@ -1134,13 +1197,13 @@ const CreateInvoice = ({
                   {/* Repair: Problem / Details */}
                   {billType === 'repair' && (
                     <div>
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Problem / Details</label>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Problem / Details</label>
                       <input
                         type="text"
                         value={item.problemDetails || ''}
                         onChange={(e) => handleItemChange(index, 'problemDetails', e.target.value)}
                         placeholder="e.g. Screen Cracked"
-                        className="w-full px-3 py-3.5 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 dark:text-slate-300 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-3 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-muted font-bold text-sm transition-all placeholder:text-theme-muted placeholder:font-normal"
                       />
                     </div>
                   )}
@@ -1148,7 +1211,7 @@ const CreateInvoice = ({
                   {/* Description / Product Name - grocery, embroidery */}
                   {(billType !== 'repair' && billType !== 'retail' && billType !== 'custom') && (
                     <div className="space-y-1.5">
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">
                         {billType === 'grocery' ? 'Product Name' : 'Description'}
                       </label>
                       <input
@@ -1159,13 +1222,13 @@ const CreateInvoice = ({
                           billType === 'grocery' ? "e.g. Basmati Rice 1kg" :
                           "e.g. Embroidery Work on Shirt"
                         }
-                        className="w-full px-3 py-3 min-h-[48px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-3 py-3 min-h-[48px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold text-sm transition-all placeholder:text-theme-muted placeholder:font-normal"
                       />
                       {/* Catalog Helper */}
                       <select
                         onChange={(e) => handleProductSelect(index, e.target.value)}
                         defaultValue=""
-                        className="text-[9px] bg-slate-100 dark:bg-slate-800 border-0 text-slate-500 py-1 px-2 rounded-lg focus:outline-none cursor-pointer w-full hover:bg-slate-200 transition-colors"
+                        className="text-[9px] bg-theme-surface dark:bg-theme-card border-0 text-theme-muted py-1 px-2 rounded-lg focus:outline-none cursor-pointer w-full hover:bg-theme-border-soft transition-colors"
                       >
                         <option value="">📦 Quick Prefill from Catalog...</option>
                         {products.map((p) => (
@@ -1178,13 +1241,13 @@ const CreateInvoice = ({
                   {/* Custom: Description */}
                   {billType === 'custom' && (
                     <div className="space-y-1.5">
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Description</label>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Description</label>
                       <input
                         type="text"
                         value={item.description || ''}
                         onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                         placeholder="e.g. Custom design on 4x4 cloth"
-                        className="w-full px-3 py-3.5 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-3 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold text-sm transition-all placeholder:text-theme-muted placeholder:font-normal"
                       />
                     </div>
                   )}
@@ -1192,14 +1255,14 @@ const CreateInvoice = ({
                   {/* Size / Unit - not for repair/retail/custom */}
                   {(billType !== 'repair' && billType !== 'retail' && billType !== 'custom') && (
                     <div>
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">
                         {billType === 'grocery' ? 'Unit' : 'Size'}
                       </label>
                       {billType === 'grocery' ? (
                         <select
                           value={item.size || ''}
                           onChange={(e) => handleItemChange(index, 'size', e.target.value)}
-                          className="w-full px-3 py-3.5 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 dark:text-slate-300 font-bold text-[13px] transition-all"
+                          className="w-full px-3 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-muted font-bold text-[13px] transition-all"
                         >
                           <option value="">Select</option>
                           <option value="Kg">Kg</option>
@@ -1216,7 +1279,7 @@ const CreateInvoice = ({
                           value={item.size || ''}
                           onChange={(e) => handleItemChange(index, 'size', e.target.value)}
                           placeholder="e.g. L/XL"
-                          className="w-full px-2 py-3.5 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 dark:text-slate-300 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                          className="w-full px-2 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-muted font-bold text-sm transition-all placeholder:text-theme-muted placeholder:font-normal"
                         />
                       )}
                     </div>
@@ -1225,13 +1288,13 @@ const CreateInvoice = ({
                   {/* Retail: Size/Variant */}
                   {billType === 'retail' && (
                     <div>
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Size / Variant</label>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Size / Variant</label>
                       <input
                         type="text"
                         value={item.sizeVariant || ''}
                         onChange={(e) => handleItemChange(index, 'sizeVariant', e.target.value)}
                         placeholder="e.g. 32 inch"
-                        className="w-full px-2 py-3.5 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 dark:text-slate-300 font-bold text-sm transition-all placeholder:text-slate-300 placeholder:font-normal"
+                        className="w-full px-2 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-muted font-bold text-sm transition-all placeholder:text-theme-muted placeholder:font-normal"
                       />
                     </div>
                   )}
@@ -1239,15 +1302,15 @@ const CreateInvoice = ({
                   {/* Repair: Parts Cost */}
                   {billType === 'repair' && (
                     <div>
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Parts Cost</label>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Parts Cost</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-sm">{currencySymbol}</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-muted font-bold text-sm">{currencySymbol}</span>
                         <input
                           type="number" min="0"
                           value={item.partsCost ?? ''}
                           onChange={(e) => handleItemChange(index, 'partsCost', e.target.value)}
                           placeholder="0.00"
-                          className="w-full pl-7 pr-3 py-3 min-h-[48px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-extrabold text-sm transition-all placeholder:text-slate-300"
+                          className="w-full pl-7 pr-3 py-3 min-h-[48px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold text-sm transition-all placeholder:text-theme-muted"
                         />
                       </div>
                     </div>
@@ -1256,15 +1319,15 @@ const CreateInvoice = ({
                   {/* Repair: Labour Charge */}
                   {billType === 'repair' && (
                     <div>
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Labour Charge</label>
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Labour Charge</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-sm">{currencySymbol}</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-muted font-bold text-sm">{currencySymbol}</span>
                         <input
                           type="number" min="0"
                           value={item.labourCharge ?? ''}
                           onChange={(e) => handleItemChange(index, 'labourCharge', e.target.value)}
                           placeholder="0.00"
-                          className="w-full pl-7 pr-3 py-3 min-h-[48px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-extrabold text-sm transition-all placeholder:text-slate-300"
+                          className="w-full pl-7 pr-3 py-3 min-h-[48px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold text-sm transition-all placeholder:text-theme-muted"
                         />
                       </div>
                     </div>
@@ -1272,32 +1335,32 @@ const CreateInvoice = ({
 
                   {/* Qty */}
                   <div>
-                    <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Quantity</label>
+                    <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Quantity</label>
                     <input
                       type="number"
                       min="0.01" step="any"
                       value={item.qty}
                       onChange={(e) => handleItemChange(index, 'qty', e.target.value)}
-                      className="w-full px-2 py-3.5 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-extrabold text-sm transition-all"
+                      className="w-full px-2 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold text-sm transition-all"
                     />
                   </div>
 
                   {/* Rate / Unit Price - not for repair or retail */}
                   {(billType !== 'repair' && billType !== 'retail') && (
                     <div>
-                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+                      <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">
                         {billType === 'grocery' ? 'Unit Price' : 'Rate per item'}
                       </label>
                       <div className="flex gap-1 items-center">
                         <div className="relative flex-1">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-extrabold text-sm select-none">{currencySymbol}</span>
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-muted font-extrabold text-sm select-none">{currencySymbol}</span>
                           <input
                             type="number"
                             min="0" step="any"
                             value={item.rate ?? ''}
                             onChange={(e) => handleItemChange(index, 'rate', e.target.value)}
                             placeholder="0.00"
-                            className="w-full pl-8 pr-3 py-3.5 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-extrabold text-sm transition-all placeholder:text-slate-300"
+                            className="w-full pl-8 pr-3 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold text-sm transition-all placeholder:text-theme-muted"
                           />
                         </div>
                         {billType !== 'grocery' && (
@@ -1305,7 +1368,7 @@ const CreateInvoice = ({
                             type="button"
                             onClick={() => openSmartRateCalculator(index)}
                             title="Calculate using sub-charges"
-                            className="bg-teal-50 text-teal-600 hover:bg-teal-100 w-10 h-12 flex items-center justify-center rounded-xl transition-colors shrink-0 hidden lg:flex border border-teal-100"
+                            className="bg-theme-accent-light text-theme-accent hover:bg-theme-accent-light w-10 h-12 flex items-center justify-center rounded-xl transition-colors shrink-0 hidden lg:flex border border-theme-border-soft"
                           >
                             <Calculator className="w-4 h-4" />
                           </button>
@@ -1318,14 +1381,14 @@ const CreateInvoice = ({
                   {billType === 'retail' && (
                     <>
                       <div>
-                        <label className="lg:hidden block mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Price ({currencySymbol})</label>
+                        <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Price ({currencySymbol})</label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-sm">{currencySymbol}</span>
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-muted font-bold text-sm">{currencySymbol}</span>
                           <input type="number" min="0" step="any"
                             value={item.price ?? ''}
                             onChange={(e) => handleItemChange(index, 'price', e.target.value)}
                             placeholder="0.00"
-                            className="w-full pl-8 pr-3 py-3.5 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-extrabold text-sm transition-all placeholder:text-slate-300"
+                            className="w-full pl-8 pr-3 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold text-sm transition-all placeholder:text-theme-muted"
                           />
                         </div>
                       </div>
@@ -1337,7 +1400,7 @@ const CreateInvoice = ({
                             value={item.discount ?? ''}
                             onChange={(e) => handleItemChange(index, 'discount', e.target.value)}
                             placeholder="0.00"
-                            className="w-full pl-6 pr-3 py-3.5 min-h-[52px] bg-white dark:bg-slate-900 border border-rose-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-rose-500/20 hover:border-rose-400 focus:border-rose-400 text-rose-600 font-extrabold text-sm transition-all placeholder:text-rose-200"
+                            className="w-full pl-6 pr-3 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-rose-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-rose-500/20 hover:border-rose-400 focus:border-rose-400 text-rose-600 font-extrabold text-sm transition-all placeholder:text-rose-200"
                           />
                         </div>
                       </div>
@@ -1346,13 +1409,13 @@ const CreateInvoice = ({
 
                   {/* Row Total - Amount (auto-calculated, read-only) */}
                   <div className="flex flex-col justify-center">
-                    <label className="lg:hidden block mb-1 text-[10px] font-bold text-teal-500 uppercase tracking-wide">Amount (auto-calculated)</label>
-                    <div className="min-h-[52px] flex items-center justify-end px-4 py-2 bg-gradient-to-r from-teal-50 to-emerald-50/30 border border-teal-200/60 shadow-inner rounded-xl w-full">
+                    <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-accent uppercase tracking-wide">Amount (auto-calculated)</label>
+                    <div className="min-h-[52px] flex items-center justify-end px-4 py-2 bg-[image:var(--accent-gradient)]/30 border border-theme-border-soft/60 shadow-inner rounded-xl w-full">
                       <div className="text-right">
-                        <span className="block text-teal-700 font-black text-[15px] leading-tight tabular-nums">
+                        <span className="block text-theme-accent font-black text-[15px] leading-tight tabular-nums">
                           {currencySymbol}{(item.amount ?? (item.qty * (item.rate || 0))).toFixed(2)}
                         </span>
-                        <span className="text-[9px] text-teal-400 font-bold uppercase tracking-wider hidden lg:block">
+                        <span className="text-[9px] text-theme-accent font-bold uppercase tracking-wider hidden lg:block">
                           {billType === 'retail'
                             ? `${item.qty || 0}×${currencySymbol}${item.price || 0}-${currencySymbol}${item.discount || 0}`
                             : billType === 'repair'
@@ -1370,10 +1433,10 @@ const CreateInvoice = ({
                       type="button"
                       onClick={() => handleDuplicateItem(index)}
                       title="Duplicate item"
-                      className="flex flex-col items-center gap-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/80 transition-all p-2 rounded-xl group"
+                      className="flex flex-col items-center gap-1 text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light/80 transition-all p-2 rounded-xl group"
                     >
                       <Copy className="w-4 h-4" />
-                      <span className="text-[9px] font-bold uppercase tracking-wide group-hover:text-indigo-600">Copy</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wide group-hover:text-theme-accent">Copy</span>
                     </button>
                     
                     {items.length > 1 ? (
@@ -1381,7 +1444,7 @@ const CreateInvoice = ({
                         type="button"
                         onClick={() => removeItemRow(index)}
                         title="Remove item"
-                        className="flex flex-col items-center gap-1 text-slate-300 hover:text-rose-500 hover:bg-rose-50/80 transition-all p-2 rounded-xl group"
+                        className="flex flex-col items-center gap-1 text-theme-muted hover:text-rose-500 hover:bg-rose-50/80 transition-all p-2 rounded-xl group"
                       >
                         <Trash2 className="w-4 h-4" />
                         <span className="text-[9px] font-bold uppercase tracking-wide group-hover:text-rose-500">Del</span>
@@ -1393,11 +1456,11 @@ const CreateInvoice = ({
 
                   {/* Mobile: Smart Rate button at bottom */}
                   {billType !== 'grocery' && billType !== 'repair' && billType !== 'retail' && (
-                    <div className="lg:hidden pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div className="lg:hidden pt-2 border-t border-theme-border-soft dark:border-theme-border-soft">
                       <button
                         type="button"
                         onClick={() => openSmartRateCalculator(index)}
-                        className="w-full flex items-center justify-center gap-2 text-[11px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 py-2 rounded-xl transition-colors"
+                        className="w-full flex items-center justify-center gap-2 text-[11px] font-bold text-theme-accent bg-theme-accent-light border border-theme-border-soft py-2 rounded-xl transition-colors"
                       >
                         <Calculator className="w-3.5 h-3.5" />
                         <span>Open Smart Rate Calculator</span>
@@ -1412,19 +1475,19 @@ const CreateInvoice = ({
             </div>
             </div>{/* end inner p-5 wrapper */}
             {/* Items footer: Add Item + mini totals */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end px-5 md:px-6 py-4 border-t border-slate-100 dark:border-slate-800 gap-4 bg-slate-50 dark:bg-slate-800/50/50">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end px-5 md:px-6 py-4 border-t border-theme-border-soft dark:border-theme-border-soft gap-4 bg-theme-app dark:bg-theme-surface/50">
               <button
                 onClick={addItemRow}
-                className="flex items-center gap-2 text-xs font-extrabold text-white transition-all w-fit px-5 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 rounded-xl shadow-md shadow-teal-500/20 hover:shadow-lg hover:shadow-teal-500/30 hover:-translate-y-0.5"
+                className="flex items-center gap-2 text-xs font-extrabold text-white transition-all w-fit px-5 py-3 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 rounded-xl shadow-md shadow-glow hover:shadow-lg hover:shadow-theme-glow hover:-translate-y-0.5"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Another Item Line</span>
               </button>
 
-              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl w-full sm:w-64 space-y-1.5 shadow-sm border border-slate-100 dark:border-slate-800">
-                <div className="flex justify-between text-xs font-semibold text-slate-500">
+              <div className="bg-theme-card dark:bg-theme-card p-3 rounded-2xl w-full sm:w-64 space-y-1.5 shadow-sm border border-theme-border-soft dark:border-theme-border-soft">
+                <div className="flex justify-between text-xs font-semibold text-theme-muted">
                   <span>Items Total:</span>
-                  <span className="font-extrabold text-slate-700 dark:text-slate-300">{currencySymbol}{subtotal.toFixed(2)}</span>
+                  <span className="font-extrabold text-theme-primary dark:text-theme-muted">{currencySymbol}{subtotal.toFixed(2)}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-[10px] font-semibold text-rose-500">
@@ -1433,12 +1496,12 @@ const CreateInvoice = ({
                   </div>
                 )}
                 {taxAmount > 0 && (
-                  <div className="flex justify-between text-[10px] font-semibold text-slate-400">
+                  <div className="flex justify-between text-[10px] font-semibold text-theme-muted">
                     <span>Tax:</span>
                     <span>+{currencySymbol}{taxAmount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm font-black text-white bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-xl px-3 py-2 mt-1">
+                <div className="flex justify-between text-sm font-black text-theme-button-text bg-[image:var(--accent-gradient)] rounded-xl px-3 py-2 mt-1 shadow-glow border-0">
                   <span>Grand Total</span>
                   <span>{currencySymbol}{grandTotal.toFixed(2)}</span>
                 </div>
@@ -1451,26 +1514,26 @@ const CreateInvoice = ({
         <div className="w-full lg:w-[30%] space-y-6">
           
           {/* Overrides & Payment */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-4">
-            <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 border-b border-slate-50 pb-3 flex items-center gap-2">
-              <Coins className="w-4 h-4 text-indigo-500" />
+          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
+            <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-slate-50 pb-3 flex items-center gap-2">
+              <Coins className="w-4 h-4 text-theme-accent" />
               <span>Billing Overrides</span>
             </h3>
             
-            <div className="space-y-4 text-xs font-semibold text-slate-500">
+            <div className="space-y-4 text-xs font-semibold text-theme-muted">
               
               {/* Payment status (Automatic suggestions active) */}
               <div>
                 <div className="flex justify-between items-center mb-1">
-                  <label className="text-slate-400">Payment Status</label>
-                  <span className="text-[9px] text-indigo-500 font-extrabold tracking-wide uppercase">
+                  <label className="text-theme-muted">Payment Status</label>
+                  <span className="text-[9px] text-theme-accent font-extrabold tracking-wide uppercase">
                     Auto-Synchronizing
                   </span>
                 </div>
                 <select
                   value={paymentStatus}
                   onChange={(e) => setPaymentStatus(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-extrabold dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold dark:bg-theme-card dark:border-theme-border-soft dark:text-theme-primary"
                 >
                   <option value="Paid">Paid</option>
                   <option value="Pending">Pending</option>
@@ -1480,11 +1543,11 @@ const CreateInvoice = ({
 
               {/* Order Status */}
               <div>
-                <label className="block mb-1.5 text-slate-400">Order Status</label>
+                <label className="block mb-1.5 text-theme-muted">Order Status</label>
                 <select
                   value={orderStatus}
                   onChange={(e) => setOrderStatus(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-extrabold dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold dark:bg-theme-card dark:border-theme-border-soft dark:text-theme-primary"
                 >
                   <option value="Pending">Pending</option>
                   <option value="In Progress">In Progress</option>
@@ -1496,8 +1559,8 @@ const CreateInvoice = ({
 
               {/* Tax percentage */}
               <div>
-                <label className="block mb-1.5 text-slate-400 flex items-center gap-1">
-                  <Percent className="w-3.5 h-3.5 text-slate-300" />
+                <label className="block mb-1.5 text-theme-muted flex items-center gap-1">
+                  <Percent className="w-3.5 h-3.5 text-theme-muted" />
                   <span>GST/Tax Rate (%)</span>
                 </label>
                 <input
@@ -1506,14 +1569,14 @@ const CreateInvoice = ({
                   max="100"
                   value={taxPercentage}
                   onChange={(e) => setTaxPercentage(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
                 />
               </div>
 
               {/* Discount */}
               <div>
-                <label className="block mb-1.5 text-slate-400 flex items-center gap-1">
-                  <Coins className="w-3.5 h-3.5 text-slate-300" />
+                <label className="block mb-1.5 text-theme-muted flex items-center gap-1">
+                  <Coins className="w-3.5 h-3.5 text-theme-muted" />
                   <span>Flat Discount ({currencySymbol})</span>
                 </label>
                 <input
@@ -1521,47 +1584,47 @@ const CreateInvoice = ({
                   min="0"
                   value={discountAmount}
                   onChange={(e) => setDiscountAmount(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
                 />
               </div>
 
               {/* Notes */}
               <div>
-                <label className="block mb-1.5 text-slate-400">Customer Notes</label>
+                <label className="block mb-1.5 text-theme-muted">Customer Notes</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Thank you for your business!"
                   rows="2"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 dark:text-slate-300 leading-relaxed text-xs"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-muted leading-relaxed text-xs"
                 />
               </div>
 
               {/* Terms */}
               <div>
-                <label className="block mb-1.5 text-slate-400">Terms & Conditions</label>
+                <label className="block mb-1.5 text-theme-muted">Terms & Conditions</label>
                 <textarea
                   value={terms}
                   onChange={(e) => setTerms(e.target.value)}
                   placeholder="1. Payment is due within 30 days..."
                   rows="2"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 dark:text-slate-300 leading-relaxed text-xs"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-muted leading-relaxed text-xs"
                 />
               </div>
             </div>
           </div>
 
           {/* Tally calculations & Amount Paid details */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-slate-800 shadow-premium space-y-4">
-            <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 border-b border-slate-50 pb-3 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-indigo-500" />
+          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
+            <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-slate-50 pb-3 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-theme-accent" />
               <span>Tally Sheet</span>
             </h3>
             
-            <div className="space-y-3.5 text-xs font-semibold text-slate-500">
+            <div className="space-y-3.5 text-xs font-semibold text-theme-muted">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span className="text-slate-800 dark:text-slate-100 font-bold">{currencySymbol}{subtotal.toFixed(2)}</span>
+                <span className="text-theme-primary dark:text-theme-primary font-bold">{currencySymbol}{subtotal.toFixed(2)}</span>
               </div>
               
               {discountAmount > 0 && (
@@ -1573,33 +1636,33 @@ const CreateInvoice = ({
               
               <div className="flex justify-between">
                 <span>{businessSettings?.taxLabel || 'Tax'} ({taxPercentage}%)</span>
-                <span className="text-slate-800 dark:text-slate-100 font-bold">{currencySymbol}{taxAmount.toFixed(2)}</span>
+                <span className="text-theme-primary dark:text-theme-primary font-bold">{currencySymbol}{taxAmount.toFixed(2)}</span>
               </div>
 
-              <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-3 text-slate-900 dark:text-white">
-                <span className="text-sm font-extrabold text-slate-800 dark:text-slate-100">Grand Total</span>
-                <span className="text-lg font-black text-indigo-600">
+              <div className="flex justify-between items-center border-t border-theme-border-soft dark:border-theme-border-soft pt-3 text-theme-primary dark:text-theme-primary">
+                <span className="text-sm font-extrabold text-theme-primary dark:text-theme-primary">Grand Total</span>
+                <span className="text-lg font-black text-theme-accent">
                   {currencySymbol}{grandTotal.toFixed(2)}
                 </span>
               </div>
 
               {/* Amount Paid input */}
-              <div className="border-t border-slate-100 dark:border-slate-800 pt-3.5 space-y-2">
-                <label className="block text-[10px] text-slate-400 uppercase font-black">Amount Paid ({currencySymbol})</label>
+              <div className="border-t border-theme-border-soft dark:border-theme-border-soft pt-3.5 space-y-2">
+                <label className="block text-[10px] text-theme-muted uppercase font-black">Amount Paid ({currencySymbol})</label>
                 <input
                   type="number"
                   min="0"
                   max={grandTotal}
                   value={amountPaid}
                   onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 bg-indigo-50/50 border border-indigo-100/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-indigo-900 font-black text-sm text-right"
+                  className="w-full px-4 py-3 bg-theme-surface dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary font-black text-sm text-right"
                 />
               </div>
 
               {/* Balance Due calculation */}
-              <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl">
-                <span className="text-[10px] uppercase font-bold text-slate-400">Balance Outstanding</span>
-                <span className={`text-sm font-black ${balanceDue > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+              <div className="flex justify-between items-center bg-theme-app dark:bg-theme-surface p-3 rounded-2xl">
+                <span className="text-[10px] uppercase font-bold text-theme-muted">Balance Outstanding</span>
+                <span className={`text-sm font-black ${balanceDue > 0 ? 'text-amber-600' : 'text-theme-accent'}`}>
                   {currencySymbol}{balanceDue.toFixed(2)}
                 </span>
               </div>
@@ -1608,14 +1671,14 @@ const CreateInvoice = ({
             <div className="pt-2 flex flex-col gap-3">
               <button
                 onClick={() => handleSave('Draft')}
-                className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 text-[14px]"
+                className="w-full py-4 bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted rounded-xl font-bold hover:bg-theme-border-soft transition-all flex items-center justify-center gap-2 text-[14px]"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Draft</span>
               </button>
               <button
                 onClick={() => setShowPreview(true)}
-                className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 text-[14px]"
+                className="w-full py-4 bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted rounded-xl font-bold hover:bg-theme-border-soft transition-all flex items-center justify-center gap-2 text-[14px]"
               >
                 <Eye className="w-4 h-4" />
                 <span>Preview PDF</span>
@@ -1670,14 +1733,14 @@ const CreateInvoice = ({
                     });
                   }
                 }}
-                className="w-full py-4 bg-white dark:bg-slate-900 border border-teal-500 text-teal-600 dark:text-teal-400 rounded-xl font-bold hover:bg-teal-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 text-[14px] shadow-sm cursor-pointer"
+                className="w-full py-4 bg-theme-card dark:bg-theme-card border border-theme-accent text-theme-accent rounded-xl font-bold hover:bg-theme-accent-light dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 text-[14px] shadow-sm cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 <span>Download PDF</span>
               </button>
               <button
                 onClick={() => handleSave()}
-                className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-all flex items-center justify-center gap-2 text-[14px] cursor-pointer"
+                className="w-full py-4 bg-theme-accent text-white rounded-xl font-bold hover:opacity-90 shadow-md transition-all flex items-center justify-center gap-2 text-[14px] cursor-pointer"
               >
                 <Check className="w-4 h-4" />
                 <span>Save Invoice</span>
@@ -1717,7 +1780,7 @@ const CreateInvoice = ({
                         toast.error('Could not create live link. Please save invoice and try again.');
                       }
                     }}
-                    className="w-full py-4 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-xl font-bold hover:from-teal-655 hover:to-emerald-655 shadow-md transition-all flex items-center justify-center gap-2 text-[14px] cursor-pointer"
+                    className="w-full py-4 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-xl font-bold hover:opacity-90 shadow-md transition-all flex items-center justify-center gap-2 text-[14px] cursor-pointer"
                   >
                     <Link className="w-4 h-4" />
                     <span>Copy Live Link</span>
@@ -1761,7 +1824,7 @@ const CreateInvoice = ({
                   type="button"
                   disabled
                   title="Save invoice first to create live link"
-                  className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1 text-[14px] cursor-not-allowed border border-slate-200/40"
+                  className="w-full py-4 bg-theme-surface dark:bg-theme-card text-theme-muted rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1 text-[14px] cursor-not-allowed border border-theme-border-soft/40"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <Link className="w-4 h-4 text-slate-350" />
@@ -1781,7 +1844,7 @@ const CreateInvoice = ({
                   const msg = `Hi ${customerName},\nHere is your invoice ${invoiceNumber} for ${totalStr}.`;
                   window.open(`https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
                 }}
-                className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 dark:text-slate-200 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-[14px]"
+                className="w-full py-4 bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted dark:text-theme-secondary rounded-xl font-bold hover:bg-theme-border-soft dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-[14px]"
               >
                 <Send className="w-4 h-4" />
                 <span>Send WhatsApp Reminder</span>
@@ -1795,17 +1858,17 @@ const CreateInvoice = ({
 
       {/* SMART COMPOSITE RATE MODAL */}
       {showSmartRate && activeItemIndex !== null && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-theme-card/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-theme-card dark:bg-theme-card rounded-3xl max-w-md w-full shadow-2xl border border-theme-border-soft dark:border-theme-border-soft overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-5">
+            <div className="bg-[image:var(--accent-gradient)] text-theme-button-text border-0 p-5">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-black uppercase tracking-wider flex items-center gap-2">
                   <Calculator className="w-4 h-4" />
                   <span>Smart Rate Composite</span>
                 </h4>
-                <span className="text-[10px] bg-white dark:bg-slate-900/20 text-white font-bold py-1 px-2.5 rounded-full">
+                <span className="text-[10px] bg-theme-card dark:bg-theme-card/20 text-white font-bold py-1 px-2.5 rounded-full">
                   Item #{activeItemIndex + 1}
                 </span>
               </div>
@@ -1816,67 +1879,67 @@ const CreateInvoice = ({
 
             {/* Modal Body */}
             <div className="p-6 space-y-4">
-              <p className="text-xs text-slate-400 font-bold leading-relaxed">
+              <p className="text-xs text-theme-muted font-bold leading-relaxed">
                 Embroidery jobs typically sum multiple service adders. Enter sub-charges to automatically sum the composite row rate.
               </p>
 
-              <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-slate-500">
+              <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-theme-muted">
                 <div>
-                  <label className="block mb-1 text-slate-400">Embroidery Charge ({currencySymbol})</label>
+                  <label className="block mb-1 text-theme-muted">Embroidery Charge ({currencySymbol})</label>
                   <input
                     type="number"
                     min="0"
                     value={smartCharges.embroidery || ''}
                     onChange={(e) => setSmartCharges({ ...smartCharges, embroidery: parseFloat(e.target.value) || 0 })}
                     placeholder="0.00"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-black text-right"
+                    className="w-full px-3.5 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary font-black text-right"
                   />
                 </div>
 
                 <div>
-                  <label className="block mb-1 text-slate-400">Punching Charge ({currencySymbol})</label>
+                  <label className="block mb-1 text-theme-muted">Punching Charge ({currencySymbol})</label>
                   <input
                     type="number"
                     min="0"
                     value={smartCharges.punching || ''}
                     onChange={(e) => setSmartCharges({ ...smartCharges, punching: parseFloat(e.target.value) || 0 })}
                     placeholder="0.00"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-black text-right"
+                    className="w-full px-3.5 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary font-black text-right"
                   />
                 </div>
 
                 <div>
-                  <label className="block mb-1 text-slate-400">Repair Charge ({currencySymbol})</label>
+                  <label className="block mb-1 text-theme-muted">Repair Charge ({currencySymbol})</label>
                   <input
                     type="number"
                     min="0"
                     value={smartCharges.repair || ''}
                     onChange={(e) => setSmartCharges({ ...smartCharges, repair: parseFloat(e.target.value) || 0 })}
                     placeholder="0.00"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-black text-right"
+                    className="w-full px-3.5 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary font-black text-right"
                   />
                 </div>
 
                 <div>
-                  <label className="block mb-1 text-slate-400">Other/Misc Charge ({currencySymbol})</label>
+                  <label className="block mb-1 text-theme-muted">Other/Misc Charge ({currencySymbol})</label>
                   <input
                     type="number"
                     min="0"
                     value={smartCharges.other || ''}
                     onChange={(e) => setSmartCharges({ ...smartCharges, other: parseFloat(e.target.value) || 0 })}
                     placeholder="0.00"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-black text-right"
+                    className="w-full px-3.5 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary font-black text-right"
                   />
                 </div>
               </div>
 
               {/* Real-time Composite Tally */}
-              <div className="bg-indigo-50/50 rounded-2xl p-4 border border-indigo-100/30 flex justify-between items-center mt-6">
+              <div className="bg-theme-surface dark:bg-theme-surface rounded-2xl p-4 border border-theme-border-soft flex justify-between items-center mt-6">
                 <div>
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase block leading-none">Composite Rate</span>
-                  <span className="text-xs text-indigo-500 font-bold mt-1 block">Live Summed Total</span>
+                  <span className="text-[10px] text-theme-muted font-extrabold uppercase block leading-none">Composite Rate</span>
+                  <span className="text-xs text-theme-accent font-bold mt-1 block">Live Summed Total</span>
                 </div>
-                <span className="text-2xl font-black text-indigo-600">
+                <span className="text-2xl font-black text-theme-accent">
                   {currencySymbol}
                   {((parseFloat(smartCharges.repair) || 0) + 
                     (parseFloat(smartCharges.punching) || 0) + 
@@ -1888,14 +1951,14 @@ const CreateInvoice = ({
             </div>
 
             {/* Modal Actions */}
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 flex gap-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="bg-theme-app dark:bg-theme-surface p-4 flex gap-3 border-t border-theme-border-soft dark:border-theme-border-soft">
               <button
                 type="button"
                 onClick={() => {
                   setShowSmartRate(false);
                   setActiveItemIndex(null);
                 }}
-                className="flex-1 py-3 text-xs font-extrabold text-slate-500 hover:text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:bg-slate-800 rounded-xl transition-all"
+                className="flex-1 py-3 text-xs font-extrabold text-theme-muted hover:text-theme-primary dark:text-theme-primary hover:bg-theme-surface dark:bg-theme-card rounded-xl transition-all"
               >
                 Cancel / Discard
               </button>
@@ -1903,7 +1966,7 @@ const CreateInvoice = ({
               <button
                 type="button"
                 onClick={applySmartRate}
-                className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-md shadow-indigo-100 flex items-center justify-center gap-1.5 transition-all"
+                className="flex-1 py-3 bg-theme-accent hover:opacity-90 text-white rounded-xl text-xs font-black shadow-md shadow-indigo-100 flex items-center justify-center gap-1.5 transition-all"
               >
                 <Check className="w-4 h-4" />
                 <span>Apply Composite Rate</span>
@@ -1922,46 +1985,46 @@ const CreateInvoice = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-theme-card/60 backdrop-blur-sm p-4"
           >
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white dark:bg-slate-900 md:rounded-3xl shadow-2xl w-full h-full md:w-[98vw] md:max-w-[1550px] md:h-[90vh] flex flex-col overflow-hidden"
+              className="bg-theme-card dark:bg-theme-card md:rounded-3xl shadow-2xl w-full h-full md:w-[98vw] md:max-w-[1550px] md:h-[90vh] flex flex-col overflow-hidden"
             >
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-[#071B3A] to-[#0d2b55] px-4 md:px-6 py-4 flex items-center justify-between shrink-0">
+            <div className="bg-theme-surface border-b border-theme-border-soft px-4 md:px-6 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center">
-                  <Maximize2 className="w-5 h-5 text-teal-400" />
+                <div className="w-10 h-10 rounded-xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center">
+                  <Maximize2 className="w-5 h-5 text-theme-accent" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-extrabold text-white">Invoice Items Sheet</h3>
-                  <p className="text-xs text-slate-300 font-medium">Template: <span className="text-teal-400 font-bold capitalize">{billType}</span> | Add products or services.</p>
+                  <h3 className="text-lg font-extrabold text-theme-primary">Invoice Items Sheet</h3>
+                  <p className="text-xs text-theme-muted font-medium">Template: <span className="text-theme-accent font-bold capitalize">{billType}</span> | Add products or services.</p>
                 </div>
               </div>
-              <button onClick={() => setIsSheetExpanded(false)} className="p-2 hover:bg-white dark:bg-slate-900/10 rounded-xl transition-colors">
-                <X className="w-6 h-6 text-slate-300" />
+              <button onClick={() => setIsSheetExpanded(false)} className="p-2 hover:bg-theme-card dark:bg-theme-card/10 rounded-xl transition-colors">
+                <X className="w-6 h-6 text-theme-muted" />
               </button>
             </div>
 
             {/* Quick Fill & Body */}
-            <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex-1 overflow-y-auto bg-theme-app dark:bg-theme-surface">
               <div className="p-4 md:p-6 space-y-6 max-w-full">
                 
-                <div className="flex gap-2 flex-wrap pb-4 border-b border-slate-200/60">
-                  <span className="text-[11px] text-slate-400 font-black uppercase tracking-widest py-1.5 mr-2">Quick Fill:</span>
-                  <button onClick={() => addQuickFillItem('Embroidery', 'Embroidery Work', 0)} className="px-3.5 py-1.5 bg-white dark:bg-slate-900 text-teal-700 border border-teal-200 hover:border-teal-400 hover:bg-teal-50 shadow-sm rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">🧵 Embroidery</button>
-                  <button onClick={() => addQuickFillItem('Repair', 'Repair Work', 0)} className="px-3.5 py-1.5 bg-white dark:bg-slate-900 text-amber-700 border border-amber-200 hover:border-amber-400 hover:bg-amber-50 shadow-sm rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">🔧 Repair</button>
-                  <button onClick={() => addQuickFillItem('Design Work', 'Custom Design', 0)} className="px-3.5 py-1.5 bg-white dark:bg-slate-900 text-indigo-700 border border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50 shadow-sm rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">📝 Custom Design</button>
+                <div className="flex gap-2 flex-wrap pb-4 border-b border-theme-border-soft/60">
+                  <span className="text-[11px] text-theme-muted font-black uppercase tracking-widest py-1.5 mr-2">Quick Fill:</span>
+                  <button onClick={() => addQuickFillItem('Embroidery', 'Embroidery Work', 0)} className="px-3.5 py-1.5 bg-theme-card dark:bg-theme-card text-theme-accent border border-theme-border-soft hover:border-theme-accent hover:bg-theme-accent-light shadow-sm rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">🧵 Embroidery</button>
+                  <button onClick={() => addQuickFillItem('Repair', 'Repair Work', 0)} className="px-3.5 py-1.5 bg-theme-card dark:bg-theme-card text-amber-700 border border-amber-200 hover:border-amber-400 hover:bg-amber-50 shadow-sm rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">🔧 Repair</button>
+                  <button onClick={() => addQuickFillItem('Design Work', 'Custom Design', 0)} className="px-3.5 py-1.5 bg-theme-card dark:bg-theme-card text-theme-accent border border-theme-border-soft hover:border-theme-accent hover:bg-theme-accent-light shadow-sm rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">📝 Custom Design</button>
                 </div>
 
                 <div className="w-full overflow-x-auto pb-4 scroll-smooth" style={{ WebkitOverflowScrolling: 'touch' }}>
                   <div className="min-w-max w-full flex flex-col px-1">
                     {/* Table Headers */}
-                    <div className="hidden lg:grid gap-3 text-[11px] font-black text-slate-400 uppercase tracking-widest px-4 pb-3 border-b-2 border-slate-200" style={{ gridTemplateColumns: getExpandedGridCols() }}>
+                    <div className="hidden lg:grid gap-3 text-[11px] font-black text-theme-muted uppercase tracking-widest px-4 pb-3 border-b-2 border-theme-border-soft" style={{ gridTemplateColumns: getExpandedGridCols() }}>
                   <div className="text-center">#</div>
                   {billType === 'grocery' ? (
                     <>
@@ -2013,29 +2076,29 @@ const CreateInvoice = ({
                   {items.map((item, index) => (
                     <div 
                       key={index}
-                      className="flex flex-col lg:grid items-center gap-3 lg:gap-3 px-4 py-4 lg:py-2.5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 shadow-sm hover:border-teal-200 transition-colors"
+                      className="flex flex-col lg:grid items-center gap-3 lg:gap-3 px-4 py-4 lg:py-2.5 bg-theme-card dark:bg-theme-card rounded-2xl border border-theme-border-soft shadow-sm hover:border-theme-border-soft transition-colors"
                       style={{ gridTemplateColumns: getExpandedGridCols() }}
                     >
                       {/* Mobile Header */}
-                      <div className="flex justify-between items-center w-full lg:hidden mb-2 pb-2 border-b border-slate-100 dark:border-slate-800">
-                        <span className="text-sm font-black text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl">Item #{index + 1}</span>
+                      <div className="flex justify-between items-center w-full lg:hidden mb-2 pb-2 border-b border-theme-border-soft dark:border-theme-border-soft">
+                        <span className="text-sm font-black text-theme-primary dark:text-theme-muted bg-theme-surface dark:bg-theme-card px-3 py-1 rounded-xl">Item #{index + 1}</span>
                       </div>
 
                       {/* Desktop S.N. */}
                       <div className="hidden lg:flex items-center justify-center min-h-[52px]">
-                        <span className="text-sm font-extrabold text-slate-400 w-9 h-9 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-full">{index + 1}</span>
+                        <span className="text-sm font-extrabold text-theme-muted w-9 h-9 flex items-center justify-center bg-theme-surface dark:bg-theme-card rounded-full">{index + 1}</span>
                       </div>
 
                       {/* ITEM FIELDS */}
                       {(billType === 'embroidery') && (
                         <div className="w-full">
-                          <label className="lg:hidden block mb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Design / Item Code</label>
+                          <label className="lg:hidden block mb-1 text-[11px] font-bold text-theme-muted uppercase tracking-wide">Design / Item Code</label>
                           <input
                             type="text"
                             value={item.designNo || ''}
                             onChange={(e) => handleItemChange(index, 'designNo', e.target.value)}
                             placeholder="e.g. D-101"
-                            className="w-full px-4 py-3 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-bold text-[14px] transition-all placeholder:text-slate-300"
+                            className="w-full px-4 py-3 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-[14px] focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold text-[14px] transition-all placeholder:text-theme-muted"
                           />
                         </div>
                       )}
@@ -2043,12 +2106,12 @@ const CreateInvoice = ({
                       {/* ... Other specific fields ... */}
                       {(billType === 'embroidery' || billType === 'repair' || billType === 'custom') && (
                         <div className="w-full">
-                          <label className="lg:hidden block mb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wide">{billType === 'embroidery' ? 'Work Type' : billType === 'repair' ? 'Service' : 'Item / Service'}</label>
+                          <label className="lg:hidden block mb-1 text-[11px] font-bold text-theme-muted uppercase tracking-wide">{billType === 'embroidery' ? 'Work Type' : billType === 'repair' ? 'Service' : 'Item / Service'}</label>
                           {billType === 'embroidery' ? (
                             <select
                               value={item.workType || 'Embroidery'}
                               onChange={(e) => handleItemChange(index, 'workType', e.target.value)}
-                              className="w-full px-4 py-3 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 dark:text-slate-300 font-bold text-[14px] transition-all appearance-auto truncate"
+                              className="w-full px-4 py-3 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-[14px] focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-muted font-bold text-[14px] transition-all appearance-auto truncate"
                             >
                               <option value="Embroidery">Embroidery</option>
                               <option value="Stitching">Stitching</option>
@@ -2063,7 +2126,7 @@ const CreateInvoice = ({
                               value={item.serviceName || item.itemService || ''}
                               onChange={(e) => handleItemChange(index, billType === 'repair' ? 'serviceName' : 'itemService', e.target.value)}
                               placeholder={billType === 'repair' ? "e.g. Screen Replacement" : "e.g. Logo Design"}
-                              className="w-full px-4 py-3 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-bold text-[14px] transition-all placeholder:text-slate-300"
+                              className="w-full px-4 py-3 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-[14px] focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold text-[14px] transition-all placeholder:text-theme-muted"
                             />
                           )}
                         </div>
@@ -2071,13 +2134,13 @@ const CreateInvoice = ({
 
                       {(billType === 'retail' || billType === 'grocery') && (
                         <div className="w-full">
-                          <label className="lg:hidden block mb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Product Name</label>
+                          <label className="lg:hidden block mb-1 text-[11px] font-bold text-theme-muted uppercase tracking-wide">Product Name</label>
                           <input
                             type="text"
                             value={item.productName || item.description || ''}
                             onChange={(e) => handleItemChange(index, billType === 'retail' ? 'productName' : 'description', e.target.value)}
                             placeholder="e.g. T-Shirt / Rice"
-                            className="w-full px-4 py-3 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-bold text-[14px] transition-all placeholder:text-slate-300"
+                            className="w-full px-4 py-3 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-[14px] focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold text-[14px] transition-all placeholder:text-theme-muted"
                           />
                         </div>
                       )}
@@ -2085,13 +2148,13 @@ const CreateInvoice = ({
                       {/* Description */}
                       {(billType === 'embroidery' || billType === 'custom') && (
                         <div className="w-full">
-                          <label className="lg:hidden block mb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Description</label>
+                          <label className="lg:hidden block mb-1 text-[11px] font-bold text-theme-muted uppercase tracking-wide">Description</label>
                           <input
                             type="text"
                             value={item.description || ''}
                             onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                             placeholder="Detailed description..."
-                            className="w-full px-4 py-3 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-bold text-[14px] transition-all placeholder:text-slate-300"
+                            className="w-full px-4 py-3 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-[14px] focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold text-[14px] transition-all placeholder:text-theme-muted"
                           />
                         </div>
                       )}
@@ -2099,36 +2162,36 @@ const CreateInvoice = ({
                       {/* Size */}
                       {(billType === 'embroidery' || billType === 'grocery') && (
                         <div className="w-full">
-                          <label className="lg:hidden block mb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wide">{billType === 'grocery' ? 'Unit' : 'Size'}</label>
+                          <label className="lg:hidden block mb-1 text-[11px] font-bold text-theme-muted uppercase tracking-wide">{billType === 'grocery' ? 'Unit' : 'Size'}</label>
                           <input
                             type="text"
                             value={item.size || ''}
                             onChange={(e) => handleItemChange(index, 'size', e.target.value)}
                             placeholder={billType === 'grocery' ? "Kg" : "L/XL"}
-                            className="w-full px-3 py-3 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-[14px] text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-700 dark:text-slate-300 font-bold text-[14px] transition-all placeholder:text-slate-300"
+                            className="w-full px-3 py-3 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-[14px] text-center focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-muted font-bold text-[14px] transition-all placeholder:text-theme-muted"
                           />
                         </div>
                       )}
 
                       {/* Qty */}
                       <div className="w-full">
-                        <label className="lg:hidden block mb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Quantity</label>
+                        <label className="lg:hidden block mb-1 text-[11px] font-bold text-theme-muted uppercase tracking-wide">Quantity</label>
                         <div className="relative">
                           <input
                             type="number"
                             min="1"
                             value={item.qty || ''}
                             onChange={(e) => handleItemChange(index, 'qty', parseInt(e.target.value) || 0)}
-                            className="w-full px-3 py-3 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-[14px] text-center focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-black text-[15px] transition-all"
+                            className="w-full px-3 py-3 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-[14px] text-center focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-black text-[15px] transition-all"
                           />
                         </div>
                       </div>
 
                       {/* Rate */}
                       <div className="w-full">
-                        <label className="lg:hidden block mb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Rate / Price</label>
+                        <label className="lg:hidden block mb-1 text-[11px] font-bold text-theme-muted uppercase tracking-wide">Rate / Price</label>
                         <div className="relative">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-theme-muted font-bold">{currencySymbol}</span>
                           <input
                             type="number"
                             min="0"
@@ -2136,26 +2199,26 @@ const CreateInvoice = ({
                             value={item.rate ?? item.price ?? ''}
                             onChange={(e) => handleItemChange(index, billType === 'retail' ? 'price' : 'rate', parseFloat(e.target.value) || 0)}
                             placeholder="0.00"
-                            className="w-full pl-8 pr-4 py-3 min-h-[52px] bg-white dark:bg-slate-900 border border-slate-200 rounded-[14px] text-right focus:outline-none focus:ring-2 focus:ring-teal-500/30 hover:border-teal-400 focus:border-teal-500 text-slate-800 dark:text-slate-100 font-extrabold text-[15px] transition-all placeholder:text-slate-300"
+                            className="w-full pl-8 pr-4 py-3 min-h-[52px] bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-[14px] text-right focus:outline-none focus:ring-2 focus:ring-theme-accent/30 hover:border-theme-accent focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold text-[15px] transition-all placeholder:text-theme-muted"
                           />
                         </div>
                       </div>
 
                       {/* Amount */}
                       <div className="w-full">
-                        <label className="lg:hidden block mb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Amount</label>
-                        <div className="w-full pl-4 pr-4 py-3 min-h-[52px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-[14px] flex items-center justify-end shadow-inner">
-                          <span className="text-teal-600 font-black text-[15px] tracking-tight">{currencySymbol}{(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                        <label className="lg:hidden block mb-1 text-[11px] font-bold text-theme-muted uppercase tracking-wide">Amount</label>
+                        <div className="w-full pl-4 pr-4 py-3 min-h-[52px] bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-[14px] flex items-center justify-end shadow-inner">
+                          <span className="text-theme-accent font-black text-[15px] tracking-tight">{currencySymbol}{(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
                       </div>
 
                       {/* Actions */}
-                      <div className="w-full flex lg:justify-center items-center gap-2 mt-2 lg:mt-0 pt-3 lg:pt-0 border-t border-slate-100 dark:border-slate-800 lg:border-t-0">
+                      <div className="w-full flex lg:justify-center items-center gap-2 mt-2 lg:mt-0 pt-3 lg:pt-0 border-t border-theme-border-soft dark:border-theme-border-soft lg:border-t-0">
                         <button
                           type="button"
                           onClick={() => handleDuplicateItem(index)}
                           title="Duplicate item"
-                          className="flex-1 lg:flex-none flex items-center justify-center gap-1.5 p-3 min-h-[52px] text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 rounded-[14px] transition-colors"
+                          className="flex-1 lg:flex-none flex items-center justify-center gap-1.5 p-3 min-h-[52px] text-theme-accent bg-theme-accent-light border border-theme-border-soft hover:bg-theme-accent-light rounded-[14px] transition-colors"
                         >
                           <Copy className="w-4 h-4" />
                           <span className="lg:hidden text-xs font-bold">Duplicate</span>
@@ -2183,7 +2246,7 @@ const CreateInvoice = ({
                       whileTap={{ scale: 0.98 }}
                       type="button"
                       onClick={addItemRow}
-                      className="w-full lg:w-auto px-5 py-3.5 border-2 border-dashed border-teal-200 hover:border-teal-400 text-teal-600 hover:text-teal-700 bg-teal-50/50 hover:bg-teal-50 rounded-2xl flex items-center justify-center gap-2 text-sm font-black transition-colors shadow-sm cursor-pointer"
+                      className="w-full lg:w-auto px-5 py-3.5 border-2 border-dashed border-theme-border-soft hover:border-theme-accent text-theme-accent hover:text-theme-accent bg-theme-surface dark:bg-theme-surface hover:bg-theme-accent-light rounded-2xl flex items-center justify-center gap-2 text-sm font-black transition-colors shadow-sm cursor-pointer"
                     >
                       <Plus className="w-5 h-5" />
                       Add Another Item Line
@@ -2196,15 +2259,15 @@ const CreateInvoice = ({
             </div>
             
             {/* Modal Footer */}
-            <div className="bg-white dark:bg-slate-900 border-t border-slate-200 px-4 md:px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 shrink-0 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
+            <div className="bg-theme-card dark:bg-theme-card border-t border-theme-border-soft px-4 md:px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 shrink-0 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
               <div className="flex gap-6 w-full md:w-auto justify-between md:justify-start">
                 <div>
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Items Total</p>
-                  <p className="text-xl font-extrabold text-slate-800 dark:text-slate-100">{currencySymbol}{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-[11px] font-bold text-theme-muted uppercase tracking-wider mb-1">Items Total</p>
+                  <p className="text-xl font-extrabold text-theme-primary dark:text-theme-primary">{currencySymbol}{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] font-bold text-teal-600/70 uppercase tracking-wider mb-1">Grand Total</p>
-                  <p className="text-2xl font-black text-teal-600">{currencySymbol}{grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-[11px] font-bold text-theme-accent/70 uppercase tracking-wider mb-1">Grand Total</p>
+                  <p className="text-2xl font-black text-theme-accent">{currencySymbol}{grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
               <div className="flex gap-3 w-full md:w-auto">
@@ -2213,7 +2276,7 @@ const CreateInvoice = ({
                   whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={() => setIsSheetExpanded(false)}
-                  className="flex-1 md:flex-none px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm transition-colors cursor-pointer"
+                  className="flex-1 md:flex-none px-6 py-3 bg-theme-surface dark:bg-theme-card hover:bg-theme-border-soft text-theme-primary dark:text-theme-muted rounded-xl font-bold text-sm transition-colors cursor-pointer"
                 >
                   Cancel
                 </motion.button>
@@ -2222,7 +2285,7 @@ const CreateInvoice = ({
                   whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={() => setIsSheetExpanded(false)}
-                  className="flex-1 md:flex-none px-8 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white rounded-xl font-black text-sm transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 md:flex-none px-8 py-3 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 rounded-xl font-black text-sm transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Check className="w-4 h-4" />
                   Apply & Close
@@ -2242,25 +2305,25 @@ const CreateInvoice = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-theme-card/60 backdrop-blur-sm p-4"
           >
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 space-y-5"
+              className="bg-theme-card dark:bg-theme-card rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 space-y-5"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">Customize PDF Fields</h3>
-                  <p className="text-[11px] text-slate-400 font-bold mt-0.5 capitalize">Template: {billType}</p>
+                  <h3 className="text-lg font-extrabold text-theme-primary dark:text-theme-primary">Customize PDF Fields</h3>
+                  <p className="text-[11px] text-theme-muted font-bold mt-0.5 capitalize">Template: {billType}</p>
                 </div>
-                <button onClick={() => setShowPdfSettings(false)} className="p-2 hover:bg-slate-100 dark:bg-slate-800 rounded-xl transition-colors">
-                  <X className="w-5 h-5 text-slate-500" />
+                <button onClick={() => setShowPdfSettings(false)} className="p-2 hover:bg-theme-surface dark:bg-theme-card rounded-xl transition-colors">
+                  <X className="w-5 h-5 text-theme-muted" />
                 </button>
               </div>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs text-theme-muted leading-relaxed">
                 Select which columns will be <strong>visible in the PDF invoice</strong>. Uncheck to hide a column from the printed bill.
               </p>
               <div className="space-y-3">
@@ -2270,7 +2333,7 @@ const CreateInvoice = ({
                   return fields.map((field) => {
                     const isChecked = pdfVisibleFields.length === 0 || pdfVisibleFields.includes(field.key);
                     return (
-                      <label key={field.key} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:bg-slate-800/50 cursor-pointer border border-slate-100 dark:border-slate-800 transition-colors">
+                      <label key={field.key} className="flex items-center gap-3 p-3 rounded-xl hover:bg-theme-app dark:bg-theme-surface cursor-pointer border border-theme-border-soft dark:border-theme-border-soft transition-colors">
                         <input
                           type="checkbox"
                           checked={isChecked}
@@ -2288,25 +2351,25 @@ const CreateInvoice = ({
                           }}
                           className="w-4 h-4 rounded accent-teal-500 cursor-pointer"
                         />
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{field.label}</span>
+                        <span className="text-sm font-semibold text-theme-primary dark:text-theme-muted">{field.label}</span>
                         {field.key === 'amount' && (
-                          <span className="ml-auto text-[9px] font-bold text-slate-300 uppercase">Always shown</span>
+                          <span className="ml-auto text-[9px] font-bold text-theme-muted uppercase">Always shown</span>
                         )}
                       </label>
                     );
                   });
                 })()}
               </div>
-              <div className="flex gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex gap-3 pt-2 border-t border-theme-border-soft dark:border-theme-border-soft">
                 <button
                   onClick={() => setPdfVisibleFields((ALL_FIELDS_BY_TEMPLATE[billType] || ALL_FIELDS_BY_TEMPLATE['custom']).map(f => f.key))}
-                  className="flex-1 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 transition-colors"
+                  className="flex-1 py-2.5 text-xs font-bold text-theme-muted hover:bg-theme-app dark:bg-theme-surface rounded-xl border border-theme-border-soft transition-colors"
                 >
                   Show All
                 </button>
                 <button
                   onClick={() => setShowPdfSettings(false)}
-                  className="flex-1 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-xs font-black rounded-xl shadow-md transition-all"
+                  className="flex-1 py-2.5 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 text-xs font-black rounded-xl shadow-md transition-all"
                 >
                   Save & Close
                 </button>
@@ -2319,19 +2382,19 @@ const CreateInvoice = ({
       {/* DYNAMIC ELEVEN-STAR PREVIEW MODAL OVERLAY */}
       <AnimatePresence>
         {showPreview && (
-          <div className="fixed inset-0 z-[110] overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 no-print">
+          <div className="fixed inset-0 z-[110] overflow-y-auto bg-theme-card/40 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 no-print">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="bg-slate-50 dark:bg-slate-800/50 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative border border-white/10 max-h-[92vh] flex flex-col"
+              className="bg-theme-app dark:bg-theme-surface w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative border border-white/10 max-h-[92vh] flex flex-col"
             >
               {/* Modal Top Actions Header Bar */}
-              <div className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 px-6 py-4 flex items-center justify-between shrink-0">
+              <div className="bg-theme-card dark:bg-theme-card border-b border-theme-border-soft dark:border-theme-border-soft px-6 py-4 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-indigo-500" />
-                  <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
+                  <FileText className="w-5 h-5 text-theme-accent" />
+                  <span className="font-extrabold text-theme-primary dark:text-theme-primary text-sm">
                     {invoiceNumber || 'Draft'} - Live Preview Mode
                   </span>
                 </div>
@@ -2339,7 +2402,7 @@ const CreateInvoice = ({
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => window.print()}
-                    className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 dark:bg-slate-800/50 rounded-xl transition-all cursor-pointer"
+                    className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all cursor-pointer"
                     title="Print Invoice"
                   >
                     <Printer className="w-4 h-4" />
@@ -2370,15 +2433,15 @@ const CreateInvoice = ({
                         });
                       }
                     }}
-                    className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-slate-50 dark:bg-slate-800/50 rounded-xl transition-all cursor-pointer"
+                    className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all cursor-pointer"
                     title="Download PDF"
                   >
                     <Download className="w-4 h-4" />
                   </button>
-                  <div className="w-px h-6 bg-slate-100 dark:bg-slate-800 mx-1"></div>
+                  <div className="w-px h-6 bg-theme-surface dark:bg-theme-card mx-1"></div>
                   <button
                     onClick={() => setShowPreview(false)}
-                    className="p-2 text-slate-400 hover:text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:bg-slate-800 rounded-xl transition-all cursor-pointer"
+                    className="p-2 text-theme-muted hover:text-theme-primary dark:text-theme-primary hover:bg-theme-surface dark:bg-theme-card rounded-xl transition-all cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -2386,7 +2449,7 @@ const CreateInvoice = ({
               </div>
 
               {/* Scrollable Preview Wrapper */}
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50 dark:bg-slate-800/50">
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-theme-app dark:bg-theme-surface">
                 <InvoicePreview 
                   invoice={{
                     invoiceNumber,
@@ -2414,7 +2477,7 @@ const CreateInvoice = ({
               </div>
               
               {/* Print Only Embedded Capture Zone */}
-              <div className="hidden print:block print:absolute print:inset-0 bg-white dark:bg-slate-900">
+              <div className="hidden print:block print:absolute print:inset-0 bg-theme-card dark:bg-theme-card">
                 <InvoicePreview 
                   invoice={{
                     invoiceNumber,
@@ -2446,24 +2509,24 @@ const CreateInvoice = ({
       </AnimatePresence>
 
       {/* --- MOBILE STICKY BOTTOM ACTION BAR (PHASE 3) --- */}
-      <div className="md:hidden fixed bottom-14 left-0 right-0 p-3 bg-white dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-30 flex gap-2 pb-safe-bottom transition-all">
+      <div className="md:hidden fixed bottom-14 left-0 right-0 p-3 bg-theme-card dark:bg-theme-card/90 backdrop-blur-md border-t border-theme-border-soft dark:border-theme-border-soft shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-30 flex gap-2 pb-safe-bottom transition-all">
         <button
           onClick={() => handleSave('Draft')}
-          className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-1.5 text-xs"
+          className="flex-1 py-3 bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted rounded-xl font-bold hover:bg-theme-border-soft transition-all flex items-center justify-center gap-1.5 text-xs"
         >
           <Save className="w-4 h-4" />
           <span>Save Draft</span>
         </button>
         <button
           onClick={() => handleSave()}
-          className="flex-[1.5] py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl font-bold shadow-md transition-all flex items-center justify-center gap-1.5 text-xs"
+          className="flex-[1.5] py-3 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-xl font-bold shadow-md transition-all flex items-center justify-center gap-1.5 text-xs"
         >
           <Check className="w-4 h-4" />
           <span>Save Bill</span>
         </button>
         <button
           onClick={() => setIsMoreActionsOpen(true)}
-          className="w-12 h-12 flex justify-center items-center bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold"
+          className="w-12 h-12 flex justify-center items-center bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted rounded-xl font-bold"
         >
           <MoreHorizontal className="w-5 h-5" />
         </button>
@@ -2477,9 +2540,9 @@ const CreateInvoice = ({
               setIsMoreActionsOpen(false);
               setShowPreview(true);
             }}
-            className="w-full py-4 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-100 dark:bg-slate-800 transition-all flex items-center gap-3 px-4 text-sm border border-slate-100 dark:border-slate-800"
+            className="w-full py-4 bg-theme-app dark:bg-theme-surface text-theme-primary dark:text-theme-muted rounded-xl font-bold hover:bg-theme-surface dark:bg-theme-card transition-all flex items-center gap-3 px-4 text-sm border border-theme-border-soft dark:border-theme-border-soft"
           >
-            <Eye className="w-5 h-5 text-indigo-500" />
+            <Eye className="w-5 h-5 text-theme-accent" />
             <span>Preview Invoice</span>
           </button>
           
@@ -2492,9 +2555,9 @@ const CreateInvoice = ({
               }
               if(onDownloadPDF) onDownloadPDF({ id: editingInvoice.id, invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, terms, paymentStatus, orderStatus, subtotal, taxAmount, grandTotal, balanceDue }); 
             }}
-            className="w-full py-4 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-100 dark:bg-slate-800 transition-all flex items-center gap-3 px-4 text-sm border border-slate-100 dark:border-slate-800"
+            className="w-full py-4 bg-theme-app dark:bg-theme-surface text-theme-primary dark:text-theme-muted rounded-xl font-bold hover:bg-theme-surface dark:bg-theme-card transition-all flex items-center gap-3 px-4 text-sm border border-theme-border-soft dark:border-theme-border-soft"
           >
-            <Download className="w-5 h-5 text-emerald-500" />
+            <Download className="w-5 h-5 text-theme-accent" />
             <span>Download PDF</span>
           </button>
 
@@ -2522,9 +2585,9 @@ const CreateInvoice = ({
                   toast.error('Could not create live link. Please save invoice and try again.');
                 }
               }}
-              className="w-full py-4 bg-emerald-50 text-emerald-700 rounded-xl font-bold hover:bg-emerald-100 transition-all flex items-center gap-3 px-4 text-sm border border-emerald-100"
+              className="w-full py-4 bg-theme-accent-light text-theme-accent rounded-xl font-bold hover:bg-theme-accent-light transition-all flex items-center gap-3 px-4 text-sm border border-theme-border-soft"
             >
-              <Send className="w-5 h-5 text-emerald-600" />
+              <Send className="w-5 h-5 text-theme-accent" />
               <span>Share on WhatsApp</span>
             </button>
           )}

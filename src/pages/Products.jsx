@@ -118,13 +118,13 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
         {/* Header Panel */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Billing Inventory</h2>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">CATALOG OF ASSETS & SERVICES</p>
+            <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">Billing Inventory</h2>
+            <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">CATALOG OF ASSETS & SERVICES</p>
           </div>
 
           <button
             onClick={openAddModal}
-            className="flex items-center justify-center gap-2 bg-gradient-to-tr from-indigo-600 to-blue-500 text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Add New Product/Service</span>
@@ -132,9 +132,9 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
         </div>
 
         {/* SEARCH CARD */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 md:p-5 border border-slate-100 dark:border-slate-800 shadow-premium flex items-center justify-between">
+        <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center justify-between">
           <div className="relative w-full">
-            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
+            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted pointer-events-none">
               <Search className="w-4 h-4" />
             </span>
             <input
@@ -142,7 +142,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search catalog items by description, code name..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white dark:bg-slate-900 transition-all text-slate-800 dark:text-slate-100"
+              className="w-full pl-10 pr-4 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent focus:bg-theme-card dark:bg-theme-card transition-all text-theme-primary dark:text-theme-primary"
             />
           </div>
         </div>
@@ -152,32 +152,32 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
           {filteredProducts.map((prod) => (
             <div 
               key={prod.id}
-              className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-5 shadow-premium hover:shadow-premium-hover transition-all duration-300 relative flex flex-col justify-between"
+              className="bg-theme-card dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-3xl p-5 shadow-premium hover:shadow-premium-hover transition-all duration-300 relative flex flex-col justify-between"
             >
               {/* Top section: Avatar and Actions */}
               <div>
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100/30 flex items-center justify-center font-extrabold text-blue-600 text-sm">
+                    <div className="w-10 h-10 rounded-xl bg-theme-accent-light border border-theme-border-soft flex items-center justify-center font-extrabold text-theme-accent text-sm">
                       <Tag className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 tracking-tight leading-tight">{prod.name}</h3>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 inline-block">Item Resource</span>
+                      <h3 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary tracking-tight leading-tight">{prod.name}</h3>
+                      <span className="text-[10px] text-theme-muted font-bold uppercase tracking-widest mt-0.5 inline-block">Item Resource</span>
                     </div>
                   </div>
 
                   <div className="flex gap-1">
                     <button
                       onClick={() => openEditModal(prod)}
-                      className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                      className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light rounded-xl transition-all"
                       title="Edit Item"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(prod.id)}
-                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                      className="p-2 text-theme-muted hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
                       title="Delete Item"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -191,13 +191,13 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
                       prod.stockQty <= (prod.lowStockThreshold || 5) 
                         ? 'bg-rose-50 text-rose-600 border border-rose-100' 
-                        : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                        : 'bg-theme-accent-light text-theme-accent border border-theme-border-soft'
                     }`}>
                       {prod.stockQty <= (prod.lowStockThreshold || 5) && <BadgeAlert className="w-3 h-3" />}
                       Stock: {prod.stockQty} {prod.stockQty <= (prod.lowStockThreshold || 5) && '(Low)'}
                     </span>
                     {prod.category && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-theme-accent-light text-theme-accent border border-theme-border-soft">
                         {prod.category}
                       </span>
                     )}
@@ -205,22 +205,22 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                 )}
                 {prod.stockQty === undefined && prod.category && (
                   <div className="mt-3 flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-theme-accent-light text-theme-accent border border-theme-border-soft">
                       {prod.category}
                     </span>
                   </div>
                 )}
 
                 {/* Description Body */}
-                <div className="mt-3 min-h-12 leading-relaxed text-xs text-slate-400 font-semibold line-clamp-2">
+                <div className="mt-3 min-h-12 leading-relaxed text-xs text-theme-muted font-semibold line-clamp-2">
                   {prod.description || 'No detailed specifications added.'}
                 </div>
               </div>
 
               {/* Bottom section: Pricing */}
               <div className="border-t border-slate-50 pt-4 mt-5 flex justify-between items-center">
-                <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">M.R.P. Rate</span>
-                <span className="text-base font-black text-indigo-600">
+                <span className="text-[10px] text-theme-muted font-extrabold uppercase tracking-wider">M.R.P. Rate</span>
+                <span className="text-base font-black text-theme-accent">
                   {formatCurrency(prod.price, currencySymbol)}
                 </span>
               </div>
@@ -228,10 +228,10 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
           ))}
 
           {filteredProducts.length === 0 && (
-            <div className="md:col-span-2 lg:col-span-3 bg-white dark:bg-slate-900 rounded-3xl p-12 border border-slate-100 dark:border-slate-800 text-center shadow-premium">
+            <div className="md:col-span-2 lg:col-span-3 bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
               <Layers className="w-12 h-12 text-slate-200 mx-auto mb-3 animate-pulse" />
-              <h4 className="font-extrabold text-slate-700 dark:text-slate-300">Inventory Empty</h4>
-              <p className="text-xs text-slate-400 font-semibold mt-1 max-w-xs mx-auto">
+              <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">Inventory Empty</h4>
+              <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
                 Populate items, packages, or services inside the catalog to make selecting products during invoice generation immediate.
               </p>
             </div>
@@ -244,22 +244,22 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
           onClose={() => setIsModalOpen(false)} 
           title={editingProduct ? 'Update Catalog Item' : 'Add Catalog Item'}
         >
-          <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold text-slate-500 pb-4">
+          <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold text-theme-muted pb-4">
             <div>
-              <label className="block mb-1 text-slate-400">Product/Service Title</label>
+              <label className="block mb-1 text-theme-muted">Product/Service Title</label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Dedicated Server Hosting"
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
+                className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block mb-1 text-slate-400">Unit Price ({currencySymbol})</label>
+                <label className="block mb-1 text-theme-muted">Unit Price ({currencySymbol})</label>
                 <input
                   type="number"
                   step="0.01"
@@ -268,25 +268,25 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="e.g. 500"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 font-bold"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
                 />
               </div>
               <div>
-                <label className="block mb-1 text-slate-400">Category Tag</label>
+                <label className="block mb-1 text-theme-muted">Category Tag</label>
                 <input
                   type="text"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="e.g. Services"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary"
                 />
               </div>
             </div>
 
             {/* NEW INVENTORY STOCK FIELDS */}
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800/60 mt-4">
+            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-theme-border-soft dark:border-theme-border-soft/60 mt-4">
               <div>
-                <label className="block mb-1 text-slate-400 font-bold">Current Stock Qty</label>
+                <label className="block mb-1 text-theme-muted font-bold">Current Stock Qty</label>
                 <input
                   type="number"
                   step="1"
@@ -294,11 +294,11 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   required
                   value={stockQty}
                   onChange={(e) => setStockQty(Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 dark:text-slate-100 font-black"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-black"
                 />
               </div>
               <div>
-                <label className="block mb-1 text-slate-400 font-bold flex items-center gap-1">
+                <label className="block mb-1 text-theme-muted font-bold flex items-center gap-1">
                   Low Stock Alert At
                   <BadgeAlert className="w-3 h-3 text-rose-500" />
                 </label>
@@ -309,26 +309,26 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   required
                   value={lowStockThreshold}
                   onChange={(e) => setLowStockThreshold(Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-slate-800 dark:text-slate-100 font-black"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-theme-primary dark:text-theme-primary font-black"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block mb-1 text-slate-400">Detailed Description (Optional)</label>
+              <label className="block mb-1 text-theme-muted">Detailed Description (Optional)</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="e.g. 1 Year AWS Managed Hosting with 99.9% SLA..."
                 rows="3"
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-slate-100 leading-relaxed font-semibold text-xs"
+                className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary leading-relaxed font-semibold text-xs"
               />
             </div>
 
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-2xl font-bold hover:from-indigo-700 hover:to-blue-700 shadow-md shadow-indigo-100/50 hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-2xl font-bold hover:opacity-90 shadow-md shadow-theme-glow hover:shadow-lg transition-all flex items-center justify-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 <span>{editingProduct ? 'Save Changes' : 'Add to Catalog'}</span>

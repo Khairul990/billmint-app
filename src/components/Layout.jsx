@@ -3,6 +3,7 @@ import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import { ReceiptText, LogOut, ShieldCheck, Sun, Moon, User } from 'lucide-react';
 import Logo from './Logo';
+import { getSettings, saveSettings } from '../utils/storage';
 
 /**
  * Global App Layout Shell
@@ -13,9 +14,15 @@ import Logo from './Logo';
  * @param {Object} businessSettings - current active business details
  */
 const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen }) => {
-  // Theme state persisted in LocalStorage and synced from Firebase Settings Cloud
-  const [theme, setTheme] = useState(() => {
-    return businessSettings?.themePreset || localStorage.getItem('billqyro_theme') || 'light';
+  // Theme and Mode state
+  const [themeColor, setThemeColor] = useState(() => {
+    // Migration: If old themePreset is "dark", default to "light" color (dark mode handled below)
+    const preset = businessSettings?.themePreset || businessSettings?.themeColor || localStorage.getItem('billqyro_theme_color') || 'light';
+    return preset === 'dark' ? 'light' : preset;
+  });
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const isDark = businessSettings?.darkMode ?? (businessSettings?.themePreset === 'dark') ?? (localStorage.getItem('billqyro_dark_mode') === 'true');
+    return isDark;
   });
 
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
@@ -26,26 +33,46 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   }, [currentTab]);
 
   useEffect(() => {
-    if (businessSettings?.themePreset) {
-      setTheme(businessSettings.themePreset);
+    if (businessSettings?.themeColor || businessSettings?.themePreset) {
+      const preset = businessSettings.themeColor || businessSettings.themePreset;
+      setThemeColor(preset === 'dark' ? 'light' : preset);
     }
-  }, [businessSettings?.themePreset]);
+    if (businessSettings?.darkMode !== undefined) {
+      setIsDarkMode(businessSettings.darkMode);
+    } else if (businessSettings?.themePreset === 'dark') {
+      setIsDarkMode(true);
+    }
+  }, [businessSettings?.themeColor, businessSettings?.darkMode, businessSettings?.themePreset]);
 
   useEffect(() => {
-    // Apply data-theme attribute for dynamic CSS custom properties
-    document.documentElement.setAttribute('data-theme', theme);
-    
-    // Toggle dark class to support standard dark: utility states for Dark Premium theme
-    if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', themeColor);
+    localStorage.setItem('billqyro_theme_color', themeColor);
+  }, [themeColor]);
+
+  useEffect(() => {
+    if (isDarkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-    localStorage.setItem('billqyro_theme', theme);
-  }, [theme]);
+    localStorage.setItem('billqyro_dark_mode', isDarkMode);
+  }, [isDarkMode]);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    setIsDarkMode(prev => {
+      const newDarkMode = !prev;
+      const currentSettings = getSettings() || {};
+      currentSettings.darkMode = newDarkMode;
+      
+      // Clear legacy dark preset so it doesn't conflict
+      if (currentSettings.themePreset === 'dark') {
+        currentSettings.themePreset = 'light';
+      }
+      
+      saveSettings(currentSettings);
+      window.dispatchEvent(new CustomEvent('billqyro_sync'));
+      return newDarkMode;
+    });
   };
 
   const getPageTitle = (tab) => {
@@ -76,7 +103,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   };
 
   return (
-    <div className="min-h-screen bg-theme-background flex flex-col md:flex-row w-full font-sans antialiased text-theme-text transition-colors duration-300">
+    <div className="min-h-screen bg-theme-app flex flex-col md:flex-row w-full font-sans antialiased text-theme-primary transition-colors duration-300">
       {/* Desktop Sidebar (Hidden on Mobile) */}
       <Sidebar
         currentTab={currentTab}
@@ -92,24 +119,24 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-0">
         
         {/* Header Block with Premium Dual-Theme Layout */}
-        <header className="relative bg-theme-card/80 backdrop-blur-md border-b border-theme-border px-6 py-8 md:py-10 text-theme-text shadow-[0_1px_3px_rgba(7,13,25,0.01),0_10px_20px_-10px_rgba(7,13,25,0.02)] transition-all duration-300 z-30">
+        <header className="relative bg-theme-card/80 backdrop-blur-md border-b border-theme-border-soft px-6 py-8 md:py-10 text-theme-primary shadow-[0_1px_3px_rgba(7,13,25,0.01),0_10px_20px_-10px_rgba(7,13,25,0.02)] transition-all duration-300 z-30">
           {/* Subtle Ambient Background Gradients wrapped to prevent overflow spill */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-slate-100 dark:bg-slate-900/5 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
-            <div className="absolute -bottom-10 left-10 w-48 h-48 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-2xl"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-theme-surface dark:bg-theme-surface/5 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
+            <div className="absolute -bottom-10 left-10 w-48 h-48 bg-theme-accent-light dark:bg-theme-accent-light rounded-full blur-2xl"></div>
           </div>
 
           <div className="max-w-6xl mx-auto flex items-center justify-between relative z-10">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-theme-muted bg-theme-background px-2.5 py-0.5 rounded-full border border-theme-border backdrop-blur-md">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-theme-muted bg-theme-app px-2.5 py-0.5 rounded-full border border-theme-border-soft backdrop-blur-md">
                   Active Workspace
                 </span>
-                <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/15 dark:border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-theme-accent dark:text-theme-accent bg-theme-accent-light border border-theme-accent/15 dark:border-theme-border-soft px-2.5 py-0.5 rounded-full">
                   <ShieldCheck className="w-3.5 h-3.5" /> Secure
                 </span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mt-2 text-theme-text">
+              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mt-2 text-theme-primary">
                 {getPageTitle(currentTab)}
               </h2>
               <p className="text-xs md:text-sm text-theme-muted font-semibold mt-1">
@@ -122,10 +149,10 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <button
                 onClick={toggleTheme}
                 type="button"
-                className="w-10 h-10 rounded-2xl bg-theme-background border border-theme-border flex items-center justify-center text-theme-text hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
-                title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+                className="w-10 h-10 rounded-2xl bg-theme-app border border-theme-border-soft flex items-center justify-center text-theme-primary hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
+                title={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
               >
-                {theme === 'light' ? (
+                {!isDarkMode ? (
                   <Moon className="w-5 h-5" />
                 ) : (
                   <Sun className="w-5 h-5 text-amber-400 animate-pulse" />
@@ -136,7 +163,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div className="relative flex items-center">
                 <button
                   onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
-                  className="w-10 h-10 rounded-2xl bg-theme-background border border-theme-border flex items-center justify-center text-theme-text hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
+                  className="w-10 h-10 rounded-2xl bg-theme-app border border-theme-border-soft flex items-center justify-center text-theme-primary hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
                   title="Account Settings"
                 >
                   <User className="w-5 h-5" />
@@ -149,26 +176,26 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                       className="fixed inset-0 z-40" 
                       onClick={() => setIsAccountMenuOpen(false)}
                     />
-                    <div className="absolute top-14 right-0 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 z-50 overflow-hidden flex flex-col animate-fadeIn">
-                      <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
-                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100 dark:text-white truncate">
+                    <div className="absolute top-14 right-0 w-72 bg-theme-card dark:bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft dark:border-theme-border-soft z-50 overflow-hidden flex flex-col animate-fadeIn">
+                      <div className="p-4 bg-theme-app dark:bg-theme-surface border-b border-theme-border-soft dark:border-theme-border-soft">
+                        <p className="text-sm font-bold text-theme-primary dark:text-theme-primary dark:text-theme-primary truncate">
                           {businessSettings?.businessName || 'My Business'}
                         </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                        <p className="text-xs text-theme-muted dark:text-theme-muted truncate">
                           {userEmail || businessSettings?.email || 'billing@firm.com'}
                         </p>
                       </div>
                       
-                      <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+                      <div className="p-4 border-b border-theme-border-soft dark:border-theme-border-soft">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Free Bills Limit</span>
-                          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                          <span className="text-xs font-semibold text-theme-muted dark:text-theme-muted">Free Bills Limit</span>
+                          <span className="text-xs font-bold text-theme-accent dark:text-theme-accent">
                             {invoices.length} / {subscription?.status === 'premium' ? '∞' : (businessSettings?.freeInvoiceLimit || 15)}
                           </span>
                         </div>
-                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mb-3">
+                        <div className="w-full bg-theme-surface dark:bg-theme-card rounded-full h-1.5 mb-3">
                           <div 
-                            className="bg-gradient-to-r from-indigo-500 to-teal-400 h-1.5 rounded-full" 
+                            className="bg-[image:var(--accent-gradient)] text-theme-button-text border-0 h-1.5 rounded-full" 
                             style={{ width: `${Math.min((invoices.length / (subscription?.status === 'premium' ? 100 : (businessSettings?.freeInvoiceLimit || 15))) * 100, 100)}%` }}
                           ></div>
                         </div>
@@ -178,7 +205,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                               setCurrentTab('subscription');
                               setIsAccountMenuOpen(false);
                             }}
-                            className="w-full py-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
+                            className="w-full py-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 text-xs font-bold rounded-xl shadow-sm transition-all"
                           >
                             Upgrade to Premium
                           </button>
@@ -203,7 +230,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                               setCurrentTab('login');
                               setIsAccountMenuOpen(false);
                             }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-colors cursor-pointer"
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-theme-accent dark:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light rounded-xl transition-colors cursor-pointer"
                           >
                             <User className="w-4 h-4" />
                             Log In

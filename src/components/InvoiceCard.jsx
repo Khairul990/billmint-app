@@ -31,7 +31,7 @@ const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
  * @param {Function} onDelete - Delete callback
  * @param {Function} onDownload - Download PDF callback
  */
-const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, onView, onEdit, onDelete, onDownload }) => {
+const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, onView, onEdit, onDelete, onDownload, onRestore, onDownloadBackup, isDeleted }) => {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const menuRef = useRef(null);
 
@@ -53,15 +53,15 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
   const getSyncStatusStyle = (status) => {
     switch (status) {
       case 'synced':
-        return 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30';
+        return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent-light/20 dark:text-theme-accent dark:border-theme-accent/30';
       case 'pending':
         return 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
       case 'failed':
         return 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
       case 'offline':
-        return 'bg-sky-50 text-sky-600 border-sky-100 dark:bg-sky-950/20 dark:text-sky-400 dark:border-sky-900/30';
+        return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-sky-950/20 dark:text-theme-accent dark:border-sky-900/30';
       default:
-        return 'bg-slate-50 dark:bg-slate-800/50 text-slate-500 border-slate-100 dark:border-slate-800 dark:bg-slate-950/20 dark:text-slate-400 dark:border-slate-800/30';
+        return 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:border-theme-border-soft dark:bg-theme-app/20 dark:text-theme-muted dark:border-theme-border-soft/30';
     }
   };
 
@@ -78,18 +78,18 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
   const getStatusStyle = (status) => {
     switch (status) {
       case 'Paid':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30';
+        return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent-light/20 dark:text-theme-accent dark:border-theme-accent/30';
       case 'Payment Submitted':
       case 'Payment Submitted / Pending Verification':
         return 'bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-950/20 dark:text-purple-400 dark:border-purple-900/30';
       case 'Partially Paid':
-        return 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30';
+        return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent/10 dark:text-theme-accent dark:border-theme-accent/30';
       case 'Pending':
         return 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
       case 'Overdue':
         return 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
       case 'Cancelled':
-        return 'bg-slate-100 dark:bg-slate-800 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700/30';
+        return 'bg-theme-surface dark:bg-theme-card text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-theme-border-soft/30';
       case 'Unpaid':
       default:
         return 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
@@ -99,11 +99,11 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
   const getOrderStatusStyle = (status) => {
     switch (status) {
       case 'Delivered':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30';
+        return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent-light/20 dark:text-theme-accent dark:border-theme-accent/30';
       case 'Ready':
-        return 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/30';
+        return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent/10 dark:text-theme-accent dark:border-theme-accent/30';
       case 'In Progress':
-        return 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30';
+        return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent/10 dark:text-theme-accent dark:border-theme-accent/30';
       case 'Cancelled':
         return 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
       case 'Pending':
@@ -113,16 +113,16 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 md:p-5 border border-slate-100 dark:border-slate-800/80 shadow-premium hover:shadow-premium-hover transition-all duration-300">
+    <div className="bg-theme-card dark:bg-theme-card rounded-2xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft/80 shadow-premium hover:shadow-premium-hover transition-all duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Top/Left Section: Metadata */}
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-slate-50 dark:bg-slate-800/50 dark:bg-slate-950 text-indigo-500 dark:text-indigo-400 rounded-xl">
+          <div className="p-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-app text-theme-accent dark:text-theme-accent rounded-xl">
             <FileText className="w-6 h-6" />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-bold text-slate-800 dark:text-slate-100 dark:text-slate-200 text-sm md:text-base">{invoice.invoiceNumber}</span>
+              <span className="font-bold text-theme-primary dark:text-theme-primary dark:text-theme-secondary text-sm md:text-base">{invoice.invoiceNumber}</span>
               <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getStatusStyle(invoice.paymentStatus)}`}>
                 {invoice.paymentStatus}
               </span>
@@ -137,191 +137,216 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
                 </span>
               )}
             </div>
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mt-1">{invoice.customerName}</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Due: {invoice.dueDate}</p>
+            <p className="text-sm font-semibold text-theme-primary dark:text-theme-muted mt-1">{invoice.customerName}</p>
+            <p className="text-xs text-theme-muted dark:text-theme-muted mt-1">Due: {invoice.dueDate}</p>
           </div>
         </div>
 
         {/* Right Section: Price & Quick CTA Buttons */}
-        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100 dark:border-slate-800/80">
-          <span className="text-lg font-extrabold text-slate-800 dark:text-slate-100 dark:text-slate-150 sm:text-right">
+        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-3 sm:pt-0 border-theme-border-soft dark:border-theme-border-soft/80">
+          <span className="text-lg font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-150 sm:text-right">
             {formatCurrency(invoice.grandTotal, currencySymbol)}
           </span>
 
           <div className="flex items-center gap-2 mt-2">
-            <button
-              onClick={() => onView(invoice)}
-              title="Preview Invoice"
-              className="p-2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-xl transition-all cursor-pointer"
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onEdit(invoice)}
-              title="Edit Invoice"
-              className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-xl transition-all cursor-pointer"
-            >
-              <Edit2 className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onDownload(invoice)}
-              title="Download PDF"
-              className="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-xl transition-all cursor-pointer"
-            >
-              <Download className="w-4 h-4" />
-            </button>
+            {!isDeleted && (
+              <>
+                <button
+                  onClick={() => onView(invoice)}
+                  title="Preview Invoice"
+                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-indigo-950/30 rounded-xl transition-all cursor-pointer"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onEdit(invoice)}
+                  title="Edit Invoice"
+                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-blue-950/30 rounded-xl transition-all cursor-pointer"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onDownload(invoice)}
+                  title="Download PDF"
+                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/30 rounded-xl transition-all cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
 
-            {/* Quick Share Popover Dropdown */}
-            <div className="relative flex" ref={menuRef}>
-              <button
-                onClick={() => setShowShareMenu(!showShareMenu)}
-                title="Share Invoice"
-                className={`p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center ${showShareMenu
-                  ? 'text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/30'
-                  : 'text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30'
-                  }`}
-              >
-                <Share2 className="w-4 h-4" />
-              </button>
-
-              <AnimatePresence>
-                {showShareMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 bottom-full mb-2 w-48 bg-white dark:bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-100 dark:border-slate-800 rounded-2xl p-2 shadow-2xl z-20 flex flex-col gap-1 text-[11px]"
+                {/* Quick Share Popover Dropdown */}
+                <div className="relative flex" ref={menuRef}>
+                  <button
+                    onClick={() => setShowShareMenu(!showShareMenu)}
+                    title="Share Invoice"
+                    className={`p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center ${showShareMenu
+                      ? 'text-theme-accent bg-theme-accent-light dark:text-theme-accent dark:bg-indigo-950/30'
+                      : 'text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-indigo-950/30'
+                      }`}
                   >
-                    <div className="px-3 py-1 font-black text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-wider border-b border-slate-50 dark:border-slate-800/60 mb-1">
-                      Quick Share
-                    </div>
+                    <Share2 className="w-4 h-4" />
+                  </button>
 
-                    <button
-                      onClick={async () => {
-                        try {
-                          const token = await ensureInvoicePublicToken(invoice);
-                          if (!token) {
-                            toast.error('Could not create live link. Please try again.');
-                            return;
-                          }
-                          const updatedInvoice = { ...invoice, publicToken: token };
-                          const link = generateWhatsAppShareLink(updatedInvoice, currencySymbol, businessSettings);
-                          window.open(link, '_blank');
-                          setShowShareMenu(false);
-                        } catch (err) {
-                          toast.error('Could not create live link. Please try again.');
-                        }
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 hover:text-emerald-700 dark:hover:text-emerald-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
-                    >
-                      <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>WhatsApp Share</span>
-                    </button>
+                  <AnimatePresence>
+                    {showShareMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 bottom-full mb-2 w-48 bg-theme-card dark:bg-theme-card/95 dark:bg-theme-card/95 backdrop-blur-md border border-theme-border-soft dark:border-theme-border-soft rounded-2xl p-2 shadow-2xl z-20 flex flex-col gap-1 text-[11px]"
+                      >
+                        <div className="px-3 py-1 font-black text-[9px] text-theme-muted dark:text-theme-muted uppercase tracking-wider border-b border-slate-50 dark:border-theme-border-soft/60 mb-1">
+                          Quick Share
+                        </div>
 
-                    {invoice.paymentStatus !== 'Paid' && (
-                      <button
-                        onClick={async () => {
-                          try {
-                            const token = await ensureInvoicePublicToken(invoice);
-                            if (!token) {
+                        <button
+                          onClick={async () => {
+                            try {
+                              const token = await ensureInvoicePublicToken(invoice);
+                              if (!token) {
+                                toast.error('Could not create live link. Please try again.');
+                                return;
+                              }
+                              const updatedInvoice = { ...invoice, publicToken: token };
+                              const link = generateWhatsAppShareLink(updatedInvoice, currencySymbol, businessSettings);
+                              window.open(link, '_blank');
+                              setShowShareMenu(false);
+                            } catch (err) {
                               toast.error('Could not create live link. Please try again.');
+                            }
+                          }}
+                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/20 hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                        >
+                          <WhatsAppIcon className="w-3.5 h-3.5 text-theme-accent" />
+                          <span>WhatsApp Share</span>
+                        </button>
+
+                        {invoice.paymentStatus !== 'Paid' && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                const token = await ensureInvoicePublicToken(invoice);
+                                if (!token) {
+                                  toast.error('Could not create live link. Please try again.');
+                                  return;
+                                }
+                                const updatedInvoice = { ...invoice, publicToken: token };
+                                const link = generateWhatsAppReminderLink(updatedInvoice, currencySymbol, businessSettings);
+                                window.open(link, '_blank');
+                                setShowShareMenu(false);
+                              } catch (err) {
+                                toast.error('Could not create live link. Please try again.');
+                              }
+                            }}
+                            className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-700 dark:hover:text-rose-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                          >
+                            <WhatsAppIcon className="w-3.5 h-3.5 text-rose-500" />
+                            <span>Send Reminder</span>
+                          </button>
+                        )}
+
+                        <button
+                          onClick={async () => {
+                            try {
+                              const token = await ensureInvoicePublicToken(invoice);
+                              if (!token) {
+                                toast.error('Could not create live link. Please try again.');
+                                return;
+                              }
+                              const updatedInvoice = { ...invoice, publicToken: token };
+                              const { mailto } = generateEmailShareLink(updatedInvoice, currencySymbol, businessSettings);
+                              window.open(mailto, '_blank');
+                              setShowShareMenu(false);
+                            } catch (err) {
+                              toast.error('Could not create live link. Please try again.');
+                            }
+                          }}
+                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-sky-950/20 hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                        >
+                          <Mail className="w-3.5 h-3.5 text-theme-accent" />
+                          <span>Email Invoice</span>
+                        </button>
+
+                        <button
+                          onClick={async () => {
+                            const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
+                            if (!isLiveLinkEnabled) {
+                              toast.error('Live Link is disabled. Enable it from Settings.');
                               return;
                             }
-                            const updatedInvoice = { ...invoice, publicToken: token };
-                            const link = generateWhatsAppReminderLink(updatedInvoice, currencySymbol, businessSettings);
-                            window.open(link, '_blank');
-                            setShowShareMenu(false);
-                          } catch (err) {
-                            toast.error('Could not create live link. Please try again.');
-                          }
-                        }}
-                        className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-700 dark:hover:text-rose-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
-                      >
-                        <WhatsAppIcon className="w-3.5 h-3.5 text-rose-500" />
-                        <span>Send Reminder</span>
-                      </button>
+                            try {
+                              const token = await ensureInvoicePublicToken(invoice);
+                              if (!token) {
+                                toast.error('Could not create live link. Please try again.');
+                                return;
+                              }
+                              const liveLink = `${window.location.origin}/i/${token}`;
+                              await navigator.clipboard.writeText(liveLink);
+                              toast.success('Live Invoice Link copied to clipboard!');
+                              setShowShareMenu(false);
+                            } catch (err) {
+                              toast.error('Could not create live link. Please try again.');
+                            }
+                          }}
+                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-indigo-950/20 hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                        >
+                          <Link className="w-3.5 h-3.5 text-theme-accent" />
+                          <span>Copy Live Link</span>
+                        </button>
+
+                        <button
+                          onClick={async () => {
+                            try {
+                              const token = await ensureInvoicePublicToken(invoice);
+                              if (!token) {
+                                toast.error('Could not create live link. Please try again.');
+                                return;
+                              }
+                              const updatedInvoice = { ...invoice, publicToken: token };
+                              const text = generateInvoiceShareText(updatedInvoice, currencySymbol, businessSettings);
+                              await navigator.clipboard.writeText(text);
+                              toast.success('Invoicing summary copied to clipboard!');
+                              setShowShareMenu(false);
+                            } catch (err) {
+                              toast.error('Could not create live link. Please try again.');
+                            }
+                          }}
+                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-amber-50 dark:hover:bg-amber-950/20 hover:text-amber-700 dark:hover:text-amber-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                        >
+                          <Copy className="w-3.5 h-3.5 text-amber-500" />
+                          <span>Copy Summary</span>
+                        </button>
+                      </motion.div>
                     )}
+                  </AnimatePresence>
+                </div>
+              </>
+            )}
 
-                    <button
-                      onClick={async () => {
-                        try {
-                          const token = await ensureInvoicePublicToken(invoice);
-                          if (!token) {
-                            toast.error('Could not create live link. Please try again.');
-                            return;
-                          }
-                          const updatedInvoice = { ...invoice, publicToken: token };
-                          const { mailto } = generateEmailShareLink(updatedInvoice, currencySymbol, businessSettings);
-                          window.open(mailto, '_blank');
-                          setShowShareMenu(false);
-                        } catch (err) {
-                          toast.error('Could not create live link. Please try again.');
-                        }
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-sky-950/20 hover:text-sky-700 dark:hover:text-sky-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
-                    >
-                      <Mail className="w-3.5 h-3.5 text-sky-500" />
-                      <span>Email Invoice</span>
-                    </button>
+            {isDeleted && onRestore && (
+              <button
+                onClick={() => onRestore(invoice.id)}
+                title="Restore Invoice"
+                className="text-xs font-bold px-3 py-1.5 bg-theme-accent-light text-theme-accent hover:bg-theme-accent-light rounded-lg transition-all"
+              >
+                Restore
+              </button>
+            )}
 
-                    <button
-                      onClick={async () => {
-                        const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
-                        if (!isLiveLinkEnabled) {
-                          toast.error('Live Link is disabled. Enable it from Settings.');
-                          return;
-                        }
-                        try {
-                          const token = await ensureInvoicePublicToken(invoice);
-                          if (!token) {
-                            toast.error('Could not create live link. Please try again.');
-                            return;
-                          }
-                          const liveLink = `${window.location.origin}/i/${token}`;
-                          await navigator.clipboard.writeText(liveLink);
-                          toast.success('Live Invoice Link copied to clipboard!');
-                          setShowShareMenu(false);
-                        } catch (err) {
-                          toast.error('Could not create live link. Please try again.');
-                        }
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-700 dark:hover:text-indigo-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
-                    >
-                      <Link className="w-3.5 h-3.5 text-indigo-500" />
-                      <span>Copy Live Link</span>
-                    </button>
+            {!isDeleted && onDownloadBackup && (
+              <button
+                onClick={() => onDownloadBackup()}
+                title="Download Editable Backup (.billqyro)"
+                className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light rounded-xl transition-all"
+              >
+                <Download className="w-4 h-4" />
+              </button>
+            )}
 
-                    <button
-                      onClick={async () => {
-                        try {
-                          const token = await ensureInvoicePublicToken(invoice);
-                          if (!token) {
-                            toast.error('Could not create live link. Please try again.');
-                            return;
-                          }
-                          const updatedInvoice = { ...invoice, publicToken: token };
-                          const text = generateInvoiceShareText(updatedInvoice, currencySymbol, businessSettings);
-                          await navigator.clipboard.writeText(text);
-                          toast.success('Invoicing summary copied to clipboard!');
-                          setShowShareMenu(false);
-                        } catch (err) {
-                          toast.error('Could not create live link. Please try again.');
-                        }
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/20 hover:text-amber-700 dark:hover:text-amber-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
-                    >
-                      <Copy className="w-3.5 h-3.5 text-amber-500" />
-                      <span>Copy Summary</span>
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
             <button
               onClick={() => onDelete(invoice.id)}
-              title="Delete Invoice"
-              className="p-2 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-all cursor-pointer"
+              title={isDeleted ? "Permanently Delete" : "Move to Trash"}
+              className="p-2 text-theme-muted dark:text-theme-muted hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-all cursor-pointer"
             >
               <Trash2 className="w-4 h-4" />
             </button>

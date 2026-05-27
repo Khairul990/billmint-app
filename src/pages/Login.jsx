@@ -26,6 +26,7 @@ import {
 import { auth, firebaseReady } from '../utils/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { login } from '../utils/storage';
+import Logo from '../components/Logo';
 
 const STEPS = [
   { key: "login", title: "Secure Login", sub: "Enter BillQyro workspace", icon: Check },
@@ -48,53 +49,8 @@ function cn(...classes) {
 
 function BrandMark({ small = false }) {
   return (
-    <div className={cn("flex items-center", small ? "gap-2.5" : "gap-3")}> 
-      <motion.div
-        animate={{ y: [0, -1, 0] }}
-        transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
-        className={cn(
-          "relative grid shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#13e6c8] via-[#0fb895] to-[#087965] shadow-lg shadow-emerald-500/20 ring-1 ring-white/10",
-          small ? "h-9 w-9" : "h-11 w-11"
-        )}
-      >
-        <div className="absolute inset-[5px] rounded-full bg-white/12" />
-        <motion.span
-          animate={{ scale: [1, 1.22, 1], opacity: [0.95, 1, 0.95] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,0.9)]"
-        />
-
-        <svg viewBox="0 0 32 32" className={cn("relative z-10 text-white", small ? "h-5 w-5" : "h-6 w-6")} aria-hidden="true">
-          <path
-            d="M9 5.75h10.2L24 10.55V26.2c0 .9-.72 1.62-1.62 1.62H9c-.9 0-1.62-.72-1.62-1.62V7.38c0-.9.72-1.63 1.62-1.63Z"
-            fill="rgba(255,255,255,0.96)"
-          />
-          <path d="M19.2 5.75v4.8H24" fill="rgba(226,232,240,0.95)" />
-          <path d="M11.2 14.2h8.8M11.2 17.4h8.8M11.2 20.6h6.2" stroke="#0f766e" strokeWidth="1.55" strokeLinecap="round" />
-          <path d="M12.2 24.5h5.8" stroke="#0f766e" strokeWidth="1.8" strokeLinecap="round" />
-        </svg>
-      </motion.div>
-
-      <div className="min-w-0 leading-none">
-        <div className="relative inline-flex items-center">
-          <span className={cn("font-black tracking-tight text-white", small ? "text-[15px]" : "text-[21px]")}>Bill</span>
-          <span className={cn("font-black tracking-tight text-emerald-300", small ? "text-[15px]" : "text-[21px]")}>Qyro</span>
-          <motion.span
-            animate={{ rotate: [-18, -5, -18], y: [0, -1.5, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className={cn("absolute rounded-full bg-emerald-300", small ? "-right-2 -top-1 h-2 w-1" : "-right-2.5 -top-1.5 h-2.5 w-1.5")}
-          />
-        </div>
-
-        <div className="mt-1 flex items-center gap-2">
-          <div className={cn("font-black uppercase leading-[1.05] tracking-[0.13em] text-slate-400/90", small ? "text-[5.5px]" : "text-[6.5px]")}> 
-            Modern Billing & Invoicing
-            <br />
-            Platform
-          </div>
-          <span className={cn("h-px bg-emerald-400/35", small ? "w-5" : "w-7")} />
-        </div>
-      </div>
+    <div className={cn("flex items-center", small ? "scale-75 origin-left" : "scale-100 origin-left")}>
+      <Logo type="horizontal" />
     </div>
   );
 }
@@ -102,19 +58,19 @@ function BrandMark({ small = false }) {
 function ShowcaseCard({ icon: Icon, title, sub, children }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 22, scale: 0.96 }}
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -18, scale: 0.96 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="relative flex h-[430px] w-full flex-col overflow-hidden rounded-[1.8rem] border border-emerald-300/20 bg-slate-950/55 p-5 shadow-2xl shadow-black/40 backdrop-blur-xl before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/[0.07] before:to-transparent before:content-['']"
+      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 160, damping: 18, mass: 1 }}
+      className="relative flex h-[430px] w-full flex-col overflow-hidden rounded-[1.8rem] border border-theme-border-soft/40 bg-theme-app/40 p-5 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] backdrop-blur-2xl ring-1 ring-inset ring-white/5 before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/[0.08] before:to-transparent before:content-['']"
     >
-      <div className="relative z-10 mb-4 flex shrink-0 items-center gap-3 border-b border-white/10 pb-4">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-emerald-400/10 text-emerald-300">
+      <div className="relative z-10 mb-4 flex shrink-0 items-center gap-3 border-b border-theme-border-soft pb-4">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-theme-accent-light text-theme-accent">
           <Icon size={21} />
         </div>
         <div className="min-w-0">
-          <h3 className="truncate font-black tracking-tight text-white">{title}</h3>
-          <p className="mt-0.5 truncate text-xs text-emerald-300/80">{sub}</p>
+          <h3 className="truncate font-black tracking-tight text-theme-primary">{title}</h3>
+          <p className="mt-0.5 truncate text-xs text-theme-accent/80">{sub}</p>
         </div>
       </div>
       <div className="relative z-10 min-h-0 flex-1 overflow-hidden">{children}</div>
@@ -124,7 +80,7 @@ function ShowcaseCard({ icon: Icon, title, sub, children }) {
 
 function DemoInput({ width }) {
   return (
-    <div className="h-10 rounded-2xl border border-white/10 bg-slate-950/55 px-4 py-3">
+    <div className="h-10 rounded-2xl border border-theme-border-soft bg-theme-card px-4 py-3">
       <div className="h-2 rounded-full bg-slate-600/45" style={{ width }} />
     </div>
   );
@@ -133,14 +89,14 @@ function DemoInput({ width }) {
 function LoginDemoCard() {
   return (
     <ShowcaseCard icon={Check} title="Secure Login" sub="Workspace unlocked">
-      <div className="flex h-full flex-col justify-center rounded-[1.4rem] border border-white/10 bg-white/[0.04] p-4">
+      <div className="flex h-full flex-col justify-center rounded-[1.4rem] border border-theme-border-soft bg-theme-surface p-4">
         <div className="mb-4 flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-400/10 text-emerald-300">
+          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-theme-accent-light text-theme-accent">
             <Check size={22} />
           </div>
           <div>
-            <p className="font-black text-white">Welcome back</p>
-            <p className="text-xs text-slate-500">Secure workspace access verified</p>
+            <p className="font-black text-theme-primary">Welcome back</p>
+            <p className="text-xs text-theme-muted">Secure workspace access verified</p>
           </div>
         </div>
         <div className="space-y-3">
@@ -151,7 +107,7 @@ function LoginDemoCard() {
           initial={{ width: "0%" }}
           animate={{ width: "100%" }}
           transition={{ duration: 1.15, ease: "easeOut" }}
-          className="mt-4 h-10 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-300 shadow-lg shadow-emerald-500/20"
+          className="mt-4 h-10 rounded-2xl bg-[image:var(--accent-gradient)] shadow-glow"
         />
       </div>
     </ShowcaseCard>
@@ -160,9 +116,9 @@ function LoginDemoCard() {
 
 function InfoField({ label, value }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/45 px-3 py-2.5">
-      <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1 truncate text-[11px] font-bold text-slate-200">{value}</p>
+    <div className="rounded-2xl border border-theme-border-soft bg-theme-card px-3 py-2.5">
+      <p className="text-[9px] font-bold uppercase tracking-wide text-theme-muted">{label}</p>
+      <p className="mt-1 truncate text-[11px] font-bold text-theme-primary">{value}</p>
     </div>
   );
 }
@@ -177,13 +133,13 @@ function SetupCard() {
   return (
     <ShowcaseCard icon={Globe2} title="Workspace Setup" sub="Configure once, bill faster">
       <div className="flex h-full flex-col gap-4">
-        <div className="rounded-[1.35rem] border border-emerald-300/20 bg-[#0b1728] p-4">
+        <div className="rounded-[1.35rem] border border-theme-border-soft bg-theme-surface p-4">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-wide text-emerald-300">Step 1 of 2</p>
-              <p className="mt-1 font-black text-white">Configure Local Region</p>
+              <p className="text-[10px] font-black uppercase tracking-wide text-theme-accent">Step 1 of 2</p>
+              <p className="mt-1 font-black text-theme-primary">Configure Local Region</p>
             </div>
-            <div className="grid h-10 w-10 place-items-center rounded-2xl border border-emerald-300/20 bg-emerald-300/10 text-emerald-300">
+            <div className="grid h-10 w-10 place-items-center rounded-2xl border border-theme-border-soft bg-theme-accent-light text-theme-accent">
               <Globe2 size={18} />
             </div>
           </div>
@@ -196,24 +152,24 @@ function SetupCard() {
                 transition={{ delay: index * 0.12 }}
                 className={cn(
                   "rounded-2xl border p-3 text-center",
-                  index === 0 ? "border-emerald-300/60 bg-emerald-300/10" : "border-white/10 bg-white/[0.03]"
+                  index === 0 ? "border-theme-accent/60 bg-theme-accent-light" : "border-theme-border-soft bg-theme-surface"
                 )}
               >
-                <p className="text-base font-black text-white">{region.code}</p>
-                <p className="mt-1 text-[10px] text-slate-500">{region.label}</p>
+                <p className="text-base font-black text-theme-primary">{region.code}</p>
+                <p className="mt-1 text-[10px] text-theme-muted">{region.label}</p>
               </motion.div>
             ))}
           </div>
         </div>
 
-        <div className="flex-1 rounded-[1.35rem] border border-white/10 bg-white/[0.035] p-4">
+        <div className="flex-1 rounded-[1.35rem] border border-theme-border-soft bg-theme-surface p-4">
           <div className="mb-3 flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-300/10 text-emerald-300">
+            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-theme-accent-light text-theme-accent">
               <Building2 size={18} />
             </div>
             <div>
-              <p className="font-black text-white">Your Business Workspace</p>
-              <p className="text-xs text-slate-500">Business details saved securely</p>
+              <p className="font-black text-theme-primary">Your Business Workspace</p>
+              <p className="text-xs text-theme-muted">Business details saved securely</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -231,7 +187,7 @@ function SetupCard() {
 
 function SideMini({ label, active = false }) {
   return (
-    <div className={cn("rounded-xl px-2 py-2 text-[9px] font-bold", active ? "bg-emerald-300/10 text-emerald-300" : "text-slate-600")}>
+    <div className={cn("rounded-xl px-2 py-2 text-[9px] font-bold", active ? "bg-theme-accent-light text-theme-accent" : "text-theme-muted")}>
       {label}
     </div>
   );
@@ -242,17 +198,17 @@ function DashStat({ label, value, active = false }) {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn("rounded-2xl border p-2", active ? "border-emerald-300/15 bg-emerald-300/[0.055]" : "border-white/10 bg-white/[0.035]")}
+      className={cn("rounded-2xl border p-2", active ? "border-theme-border-soft bg-theme-accent-light" : "border-theme-border-soft bg-theme-surface")}
     >
-      <p className={cn("text-[9px] font-bold uppercase tracking-wide", active ? "text-emerald-300/80" : "text-slate-500")}>{label}</p>
-      <p className="mt-1 text-sm font-black text-white">{value}</p>
+      <p className={cn("text-[9px] font-bold uppercase tracking-wide", active ? "text-theme-accent/80" : "text-theme-muted")}>{label}</p>
+      <p className="mt-1 text-sm font-black text-theme-primary">{value}</p>
     </motion.div>
   );
 }
 
 function ActionTile({ icon: Icon, text, active = false }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[9px] font-black", active ? "bg-emerald-400 text-slate-950" : "bg-white/[0.035] text-slate-500")}>
+    <div className={cn("flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[9px] font-black", active ? "bg-theme-accent text-slate-950" : "bg-theme-surface text-theme-muted")}>
       <Icon size={13} />
       {text}
     </div>
@@ -262,10 +218,10 @@ function ActionTile({ icon: Icon, text, active = false }) {
 function DashboardCard() {
   return (
     <ShowcaseCard icon={CreditCard} title="Dashboard Opened" sub="Active workspace ready">
-      <div className="h-full overflow-hidden rounded-[1.4rem] border border-white/10 bg-[#080f1c]">
+      <div className="h-full overflow-hidden rounded-[1.4rem] border border-theme-border-soft bg-theme-surface">
         <div className="flex h-full">
-          <div className="w-[76px] border-r border-white/10 bg-[#060b14] p-2.5">
-            <div className="mb-4 grid h-7 w-7 place-items-center rounded-lg bg-emerald-400 text-[10px] font-black text-slate-950">BQ</div>
+          <div className="w-[76px] border-r border-theme-border-soft bg-theme-card p-2.5">
+            <div className="mb-4 grid h-7 w-7 place-items-center rounded-lg bg-theme-accent text-[10px] font-black text-slate-950">BQ</div>
             <div className="space-y-2">
               <SideMini active label="Dash" />
               <SideMini label="Bills" />
@@ -277,12 +233,12 @@ function DashboardCard() {
           <div className="min-w-0 flex-1 p-3">
             <div className="mb-3 flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <div className="inline-flex rounded-full border border-emerald-300/25 bg-emerald-300/10 px-2 py-1 text-[8px] font-black uppercase tracking-wide text-emerald-300">
+                <div className="inline-flex rounded-full border border-theme-border-soft bg-theme-accent-light px-2 py-1 text-[8px] font-black uppercase tracking-wide text-theme-accent">
                   Active Workspace
                 </div>
-                <p className="mt-2 truncate text-sm font-black text-white">Business Dashboard</p>
+                <p className="mt-2 truncate text-sm font-black text-theme-primary">Business Dashboard</p>
               </div>
-              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-emerald-300">
+              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-theme-border-soft bg-theme-surface text-theme-accent">
                 <CreditCard size={15} />
               </div>
             </div>
@@ -293,10 +249,10 @@ function DashboardCard() {
               <DashStat label="Clients" value="42" />
             </div>
 
-            <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+            <div className="mt-3 rounded-2xl border border-theme-border-soft bg-theme-surface p-3">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-[9px] font-black uppercase tracking-wide text-slate-500">Quick Actions</p>
-                <p className="text-[9px] font-bold text-emerald-300">Ready</p>
+                <p className="text-[9px] font-black uppercase tracking-wide text-theme-muted">Quick Actions</p>
+                <p className="text-[9px] font-bold text-theme-accent">Ready</p>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <ActionTile icon={Plus} text="Invoice" active />
@@ -305,19 +261,19 @@ function DashboardCard() {
               </div>
             </div>
 
-            <div className="mt-3 rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.045] p-3">
+            <div className="mt-3 rounded-2xl border border-theme-border-soft bg-theme-accent-light p-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[9px] font-black uppercase tracking-wide text-emerald-300">Recent Bill</p>
-                  <p className="mt-1 truncate text-xs font-black text-white">INV-DEMO-1002</p>
-                  <p className="mt-0.5 text-[10px] text-slate-500">₹2,510 · Pending</p>
+                  <p className="text-[9px] font-black uppercase tracking-wide text-theme-accent">Recent Bill</p>
+                  <p className="mt-1 truncate text-xs font-black text-theme-primary">INV-DEMO-1002</p>
+                  <p className="mt-0.5 text-[10px] text-theme-muted">₹2,510 · Pending</p>
                 </div>
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-emerald-400/10 text-emerald-300">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-theme-accent-light text-theme-accent">
                   <ReceiptText size={18} />
                 </div>
               </div>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
-                <motion.div initial={{ width: "0%" }} animate={{ width: "76%" }} transition={{ duration: 1, ease: "easeOut" }} className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300" />
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-theme-card/10">
+                <motion.div initial={{ width: "0%" }} animate={{ width: "76%" }} transition={{ duration: 1, ease: "easeOut" }} className="h-full rounded-full bg-[image:var(--accent-gradient)]" />
               </div>
             </div>
           </div>
@@ -329,9 +285,9 @@ function DashboardCard() {
 
 function MiniChip({ label, value }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
-      <p className="text-slate-500">{label}</p>
-      <p className="mt-1 font-bold text-slate-200">{value}</p>
+    <div className="rounded-2xl border border-theme-border-soft bg-theme-surface p-3">
+      <p className="text-theme-muted">{label}</p>
+      <p className="mt-1 font-bold text-theme-primary">{value}</p>
     </div>
   );
 }
@@ -340,11 +296,11 @@ function CustomerCard() {
   return (
     <ShowcaseCard icon={UserRound} title="Customer Added" sub="Profile saved">
       <div className="flex h-full flex-col justify-center gap-4">
-        <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-emerald-300/25 bg-emerald-400/10 font-black text-emerald-300">DC</div>
+        <div className="flex items-center gap-4 rounded-2xl border border-theme-border-soft bg-theme-surface p-4">
+          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-theme-border-soft bg-theme-accent-light font-black text-theme-accent">DC</div>
           <div className="min-w-0">
-            <p className="font-bold text-white">Demo Customer</p>
-            <p className="mt-1 text-xs text-slate-500">Sample customer profile · India</p>
+            <p className="font-bold text-theme-primary">Demo Customer</p>
+            <p className="mt-1 text-xs text-theme-muted">Sample customer profile · India</p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 text-xs">
@@ -374,23 +330,23 @@ function InvoiceCard() {
               initial={{ opacity: 0, x: -14, scale: 0.98 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ delay: index * 0.16, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-              className="flex items-center justify-between rounded-xl bg-white/[0.035] px-3 py-2 text-xs"
+              className="flex items-center justify-between rounded-xl bg-theme-surface px-3 py-2 text-xs"
             >
-              <span className="flex min-w-0 items-center gap-2 truncate text-slate-400">
-                <Plus size={12} className="shrink-0 text-emerald-300" />
+              <span className="flex min-w-0 items-center gap-2 truncate text-theme-muted">
+                <Plus size={12} className="shrink-0 text-theme-accent" />
                 {item}
               </span>
-              <span className="shrink-0 font-semibold text-slate-200">{price}</span>
+              <span className="shrink-0 font-semibold text-theme-primary">{price}</span>
             </motion.div>
           ))}
         </div>
-        <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
-          <span className="text-xs text-slate-500">Grand Total</span>
-          <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.72, duration: 0.45 }} className="text-2xl font-black text-emerald-300">
+        <div className="mt-4 flex items-center justify-between border-t border-theme-border-soft pt-4">
+          <span className="text-xs text-theme-muted">Grand Total</span>
+          <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.72, duration: 0.45 }} className="text-2xl font-black text-theme-accent">
             ₹2,510
           </motion.span>
         </div>
-        <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ delay: 0.25, duration: 1.2, ease: "easeOut" }} className="mt-4 h-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300" />
+        <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ delay: 0.25, duration: 1.2, ease: "easeOut" }} className="mt-4 h-1.5 rounded-full bg-[image:var(--accent-gradient)]" />
       </div>
     </ShowcaseCard>
   );
@@ -405,34 +361,34 @@ function MiniInvoiceDocument({ compact = false, pdf = false }) {
   ];
 
   return (
-    <div className={cn("flex h-full flex-col overflow-hidden rounded-[1rem] bg-white text-slate-900", compact ? "p-3" : "p-2")}>
-      <div className="shrink-0 border-b border-slate-200 pb-2">
+    <div className={cn("flex h-full flex-col overflow-hidden rounded-[1rem] bg-theme-card text-theme-primary", compact ? "p-3" : "p-2")}>
+      <div className="shrink-0 border-b border-theme-border-soft pb-2">
         <p className={cn("font-black leading-tight", compact ? "text-[11px]" : "text-[10px]")}>KB.Embroidery Designer</p>
-        <p className="mt-0.5 truncate text-[7px] font-semibold text-slate-500">Dhulagor Howrah · khairul2052007@gmail.com</p>
+        <p className="mt-0.5 truncate text-[7px] font-semibold text-theme-muted">Dhulagor Howrah · khairul2052007@gmail.com</p>
         <div className="mt-2 flex items-center justify-between">
           <p className="text-[10px] font-black tracking-wide">INVOICE</p>
-          <div className="text-right text-[7px] font-bold text-slate-500">
+          <div className="text-right text-[7px] font-bold text-theme-muted">
             <p>INV-1002</p>
             <p>24-05-2026</p>
           </div>
         </div>
       </div>
 
-      <div className="grid shrink-0 grid-cols-2 gap-2 border-b border-slate-200 py-2 text-[7px]">
+      <div className="grid shrink-0 grid-cols-2 gap-2 border-b border-theme-border-soft py-2 text-[7px]">
         <div>
-          <p className="font-black uppercase text-slate-400">Invoiced To</p>
+          <p className="font-black uppercase text-theme-muted">Invoiced To</p>
           <p className="mt-1 font-bold">Soheb Mollik</p>
-          <p className="text-slate-500">Howrah</p>
+          <p className="text-theme-muted">Howrah</p>
         </div>
         <div>
-          <p className="font-black uppercase text-slate-400">Registry</p>
-          <p className="mt-1 text-slate-600">Term: Cash</p>
-          <p className="text-slate-600">Status: Pending</p>
+          <p className="font-black uppercase text-theme-muted">Registry</p>
+          <p className="mt-1 text-theme-muted">Term: Cash</p>
+          <p className="text-theme-muted">Status: Pending</p>
         </div>
       </div>
 
       <div className="min-h-0 flex-1 py-2">
-        <div className="grid grid-cols-[0.8fr_1fr_0.4fr_0.6fr] gap-1 rounded-md bg-slate-100 px-1.5 py-1 text-[6.5px] font-black text-slate-500">
+        <div className="grid grid-cols-[0.8fr_1fr_0.4fr_0.6fr] gap-1 rounded-md bg-theme-surface px-1.5 py-1 text-[6.5px] font-black text-theme-muted">
           <span>Design</span>
           <span>Type</span>
           <span>Qty</span>
@@ -440,38 +396,38 @@ function MiniInvoiceDocument({ compact = false, pdf = false }) {
         </div>
         <div className="mt-1 space-y-1">
           {rows.map(([design, type, qty, amount]) => (
-            <div key={design} className="grid grid-cols-[0.8fr_1fr_0.4fr_0.6fr] gap-1 px-1.5 text-[6.5px] font-semibold text-slate-600">
+            <div key={design} className="grid grid-cols-[0.8fr_1fr_0.4fr_0.6fr] gap-1 px-1.5 text-[6.5px] font-semibold text-theme-muted">
               <span>{design}</span>
               <span>{type}</span>
               <span>{qty}</span>
               <span>{amount}</span>
             </div>
           ))}
-          <div className="px-1.5 text-[6.5px] font-semibold text-slate-400">+ 23 more embroidery items</div>
+          <div className="px-1.5 text-[6.5px] font-semibold text-theme-muted">+ 23 more embroidery items</div>
         </div>
       </div>
 
-      <div className="grid shrink-0 grid-cols-[0.9fr_1fr] gap-2 border-t border-slate-200 pt-2">
-        <div className="rounded-lg bg-slate-100 p-2 text-center">
-          <QrCode className="mx-auto text-slate-700" size={compact ? 18 : 15} />
-          <p className="mt-1 text-[6.5px] font-black text-slate-600">UPI QR</p>
+      <div className="grid shrink-0 grid-cols-[0.9fr_1fr] gap-2 border-t border-theme-border-soft pt-2">
+        <div className="rounded-lg bg-theme-surface p-2 text-center">
+          <QrCode className="mx-auto text-theme-primary" size={compact ? 18 : 15} />
+          <p className="mt-1 text-[6.5px] font-black text-theme-muted">UPI QR</p>
         </div>
         <div className="space-y-1 text-[7px] font-bold">
           <div className="flex justify-between gap-2">
-            <span className="text-slate-500">Subtotal</span>
+            <span className="text-theme-muted">Subtotal</span>
             <span>₹2510.00</span>
           </div>
           <div className="flex justify-between gap-2">
-            <span className="text-slate-500">Paid</span>
+            <span className="text-theme-muted">Paid</span>
             <span>₹0.00</span>
           </div>
-          <div className="flex justify-between gap-2 rounded-md bg-slate-100 px-1.5 py-1">
+          <div className="flex justify-between gap-2 rounded-md bg-theme-surface px-1.5 py-1">
             <span>Balance</span>
             <span>₹2510.00</span>
           </div>
         </div>
       </div>
-      {pdf ? <p className="mt-1 shrink-0 text-center text-[6px] font-bold text-slate-400">Powered by BillQyro Invoicing SaaS</p> : null}
+      {pdf ? <p className="mt-1 shrink-0 text-center text-[6px] font-bold text-theme-muted">Powered by BillQyro Invoicing SaaS</p> : null}
     </div>
   );
 }
@@ -479,7 +435,7 @@ function MiniInvoiceDocument({ compact = false, pdf = false }) {
 function PreviewCard() {
   return (
     <ShowcaseCard icon={Smartphone} title="Live Preview" sub="Customer invoice view ready">
-      <div className="mx-auto h-full max-w-[260px] rounded-[1.6rem] border border-emerald-300/15 bg-slate-950/75 p-2.5 shadow-2xl shadow-emerald-500/10">
+      <div className="mx-auto h-full max-w-[260px] rounded-[1.6rem] border border-theme-border-soft bg-theme-card p-2.5 shadow-2xl shadow-glow">
         <MiniInvoiceDocument compact />
       </div>
     </ShowcaseCard>
@@ -494,7 +450,7 @@ function PdfCard() {
           initial={{ opacity: 0, x: -14, rotate: -1 }}
           animate={{ opacity: 1, x: 0, rotate: 0 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="min-h-0 overflow-hidden rounded-[1.35rem] border border-white/10 bg-white p-3 text-slate-900 shadow-xl"
+          className="min-h-0 overflow-hidden rounded-[1.35rem] border border-theme-border-soft bg-theme-card p-3 text-theme-primary shadow-xl"
         >
           <MiniInvoiceDocument pdf />
         </motion.div>
@@ -504,17 +460,17 @@ function PdfCard() {
             initial={{ scale: 0.84, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.22, type: "spring", stiffness: 150, damping: 14 }}
-            className="grid flex-1 place-items-center rounded-[1.35rem] border border-emerald-300/25 bg-emerald-300/[0.045] p-3 text-center"
+            className="grid flex-1 place-items-center rounded-[1.35rem] border border-theme-border-soft bg-theme-accent-light p-3 text-center"
           >
             <div>
-              <div className="mx-auto grid h-16 w-14 place-items-center rounded-2xl border border-emerald-300/25 bg-slate-950/45 text-emerald-300">
+              <div className="mx-auto grid h-16 w-14 place-items-center rounded-2xl border border-theme-border-soft bg-theme-card text-theme-accent">
                 <FileText size={26} />
               </div>
-              <p className="mt-3 text-lg font-black text-white">PDF</p>
-              <p className="mt-1 text-[10px] font-semibold text-slate-500">2 pages · 184 KB</p>
+              <p className="mt-3 text-lg font-black text-theme-primary">PDF</p>
+              <p className="mt-1 text-[10px] font-semibold text-theme-muted">2 pages · 184 KB</p>
             </div>
           </motion.div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-center text-[10px] font-bold text-slate-300">INV-DEMO-1002.pdf</div>
+          <div className="rounded-2xl border border-theme-border-soft bg-theme-surface p-3 text-center text-[10px] font-bold text-theme-muted">INV-DEMO-1002.pdf</div>
         </div>
       </div>
     </ShowcaseCard>
@@ -529,14 +485,14 @@ function DownloadCard() {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 180, damping: 12 }}
-          className="grid h-20 w-20 place-items-center rounded-full border border-emerald-300/35 bg-emerald-400/10 text-emerald-300 shadow-xl shadow-emerald-500/20"
+          className="grid h-20 w-20 place-items-center rounded-full border border-theme-accent/35 bg-theme-accent-light text-theme-accent shadow-xl shadow-glow"
         >
           <Check size={34} strokeWidth={3} />
         </motion.div>
-        <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-white/10">
-          <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.1, ease: "easeOut" }} className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300" />
+        <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-theme-card/10">
+          <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.1, ease: "easeOut" }} className="h-full rounded-full bg-[image:var(--accent-gradient)]" />
         </div>
-        <p className="mt-3 text-sm font-bold text-emerald-300">100% Complete</p>
+        <p className="mt-3 text-sm font-bold text-theme-accent">100% Complete</p>
       </div>
     </ShowcaseCard>
   );
@@ -544,9 +500,9 @@ function DownloadCard() {
 
 function LinkFeature({ icon: Icon, label }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-white/10 bg-white/[0.035] p-2 text-center">
-      <Icon className="mx-auto text-emerald-300" size={15} />
-      <p className="mt-1.5 text-[9px] font-bold text-slate-400">{label}</p>
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-theme-border-soft bg-theme-surface p-2 text-center">
+      <Icon className="mx-auto text-theme-accent" size={15} />
+      <p className="mt-1.5 text-[9px] font-bold text-theme-muted">{label}</p>
     </motion.div>
   );
 }
@@ -556,34 +512,34 @@ function ShareChip({ icon: Icon, label, value, compact = false }) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn("flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.035]", compact ? "p-2.5" : "p-3")}
+      className={cn("flex items-center gap-3 rounded-2xl border border-theme-border-soft bg-theme-surface", compact ? "p-2.5" : "p-3")}
     >
-      <div className={cn("grid place-items-center rounded-xl bg-white/5 text-emerald-300", compact ? "h-8 w-8" : "h-9 w-9")}>
+      <div className={cn("grid place-items-center rounded-xl bg-theme-card/5 text-theme-accent", compact ? "h-8 w-8" : "h-9 w-9")}>
         <Icon size={compact ? 15 : 17} />
       </div>
       <div className="min-w-0">
-        <p className="truncate text-xs text-slate-500">{label}</p>
-        <p className="truncate text-xs font-bold text-emerald-300">{value}</p>
+        <p className="truncate text-xs text-theme-muted">{label}</p>
+        <p className="truncate text-xs font-bold text-theme-accent">{value}</p>
       </div>
     </motion.div>
   );
 }
 
 function SkeletonLine({ w }) {
-  return <div className="h-2 rounded-full bg-slate-200" style={{ width: w }} />;
+  return <div className="h-2 rounded-full bg-theme-border-soft" style={{ width: w }} />;
 }
 
 function ShareCard() {
   return (
     <ShowcaseCard icon={Share2} title="Share Link Sent" sub="Customer receives full invoice link">
       <div className="grid h-full grid-rows-[auto_1fr] gap-3">
-        <div className="rounded-[1.25rem] border border-emerald-300/20 bg-emerald-300/[0.045] p-3">
+        <div className="rounded-[1.25rem] border border-theme-border-soft bg-theme-accent-light p-3">
           <div className="mb-2 flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[9px] font-black uppercase tracking-wide text-emerald-300">Public Invoice Link</p>
-              <p className="mt-1 truncate text-[11px] font-bold text-slate-300">billqyro.app/i/demo-invoice</p>
+              <p className="text-[9px] font-black uppercase tracking-wide text-theme-accent">Public Invoice Link</p>
+              <p className="mt-1 truncate text-[11px] font-bold text-theme-muted">billqyro.app/i/demo-invoice</p>
             </div>
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-emerald-300/25 bg-slate-950/45 text-emerald-300">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-theme-border-soft bg-theme-card text-theme-accent">
               <Link2 size={16} />
             </div>
           </div>
@@ -604,19 +560,19 @@ function ShareCard() {
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.25 }}
-            className="flex min-h-0 flex-col rounded-[1.25rem] border border-white/10 bg-white p-3 text-slate-900 shadow-xl"
+            className="flex min-h-0 flex-col rounded-[1.25rem] border border-theme-border-soft bg-theme-card p-3 text-theme-primary shadow-xl"
           >
             <div className="mb-2 flex shrink-0 items-center justify-between text-[8px] font-black">
               <span>Customer View</span>
-              <span className="text-emerald-600">OPEN</span>
+              <span className="text-theme-accent">OPEN</span>
             </div>
             <div className="shrink-0 space-y-1.5">
               <SkeletonLine w="100%" />
               <SkeletonLine w="78%" />
               <SkeletonLine w="62%" />
             </div>
-            <div className="mt-3 rounded-xl bg-slate-100 p-2 text-center text-[9px] font-black text-slate-900">₹2,510 Due</div>
-            <div className="mt-2 rounded-xl bg-emerald-500 p-2 text-center text-[9px] font-black text-white">Pay Now</div>
+            <div className="mt-3 rounded-xl bg-theme-surface p-2 text-center text-[9px] font-black text-theme-primary">₹2,510 Due</div>
+            <div className="mt-2 rounded-xl bg-theme-accent p-2 text-center text-[9px] font-black text-theme-primary">Pay Now</div>
           </motion.div>
         </div>
       </div>
@@ -628,7 +584,7 @@ function PaymentLinkCard() {
   return (
     <ShowcaseCard icon={IndianRupee} title="Payment Link Opened" sub="Customer pays from invoice link">
       <div className="grid h-full grid-cols-[0.92fr_1fr] gap-3">
-        <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} className="min-h-0 overflow-hidden rounded-[1.35rem] border border-white/10 bg-white p-2.5 text-slate-900 shadow-xl">
+        <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} className="min-h-0 overflow-hidden rounded-[1.35rem] border border-theme-border-soft bg-theme-card p-2.5 text-theme-primary shadow-xl">
           <MiniInvoiceDocument compact />
         </motion.div>
 
@@ -637,21 +593,21 @@ function PaymentLinkCard() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.045] p-4"
+            className="rounded-2xl border border-theme-border-soft bg-theme-accent-light p-4"
           >
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-wide text-emerald-300">UPI Payment</p>
-                <p className="mt-1 text-lg font-black text-white">₹2,510</p>
-                <p className="mt-1 text-[10px] font-semibold text-slate-500">9903591839@ybl</p>
+                <p className="text-[10px] font-black uppercase tracking-wide text-theme-accent">UPI Payment</p>
+                <p className="mt-1 text-lg font-black text-theme-primary">₹2,510</p>
+                <p className="mt-1 text-[10px] font-semibold text-theme-muted">9903591839@ybl</p>
               </div>
-              <div className="grid h-12 w-12 place-items-center rounded-2xl border border-emerald-300/25 bg-slate-950/45 text-emerald-300">
+              <div className="grid h-12 w-12 place-items-center rounded-2xl border border-theme-border-soft bg-theme-card text-theme-accent">
                 <QrCode size={24} />
               </div>
             </div>
-            <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.1, ease: "easeOut" }} className="h-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300" />
+            <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.1, ease: "easeOut" }} className="h-1.5 rounded-full bg-[image:var(--accent-gradient)]" />
           </motion.div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-xs text-slate-400">
+          <div className="rounded-2xl border border-theme-border-soft bg-theme-surface p-3 text-xs text-theme-muted">
             Customer can view bill, download PDF, scan QR, or pay through link.
           </div>
         </div>
@@ -668,12 +624,12 @@ function PaymentSuccessCard() {
           initial={{ scale: 0.78, opacity: 0 }}
           animate={{ scale: [0.78, 1.08, 1], opacity: 1 }}
           transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          className="grid h-20 w-20 place-items-center rounded-full border border-emerald-300/35 bg-emerald-400/10 text-emerald-300 shadow-xl shadow-emerald-500/20"
+          className="grid h-20 w-20 place-items-center rounded-full border border-theme-accent/35 bg-theme-accent-light text-theme-accent shadow-xl shadow-glow"
         >
           <IndianRupee size={34} strokeWidth={3} />
         </motion.div>
-        <h3 className="mt-5 text-2xl font-black text-white">₹2,510 Paid</h3>
-        <p className="mt-2 text-sm text-slate-500">Payment status changed to Paid.</p>
+        <h3 className="mt-5 text-2xl font-black text-theme-primary">₹2,510 Paid</h3>
+        <p className="mt-2 text-sm text-theme-muted">Payment status changed to Paid.</p>
         <div className="mt-5 grid w-full grid-cols-2 gap-3 text-left">
           <MiniChip label="Payment" value="UPI" />
           <MiniChip label="Status" value="Paid" />
@@ -691,17 +647,17 @@ function DeliveredCard() {
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: [0.7, 1.08, 1], opacity: 1 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="grid h-24 w-24 place-items-center rounded-full border border-emerald-300/35 bg-emerald-400/10 text-emerald-300 shadow-xl shadow-emerald-500/20"
+          className="grid h-24 w-24 place-items-center rounded-full border border-theme-accent/35 bg-theme-accent-light text-theme-accent shadow-xl shadow-glow"
         >
           <Check size={42} strokeWidth={3} />
         </motion.div>
-        <h3 className="mt-6 text-2xl font-black text-white">All set</h3>
-        <p className="mt-2 max-w-[240px] text-sm leading-6 text-slate-500">Customer, invoice, PDF, share link and payment completed.</p>
+        <h3 className="mt-6 text-2xl font-black text-theme-primary">All set</h3>
+        <p className="mt-2 max-w-[240px] text-sm leading-6 text-theme-muted">Customer, invoice, PDF, share link and payment completed.</p>
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45 }}
-          className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-2 text-xs font-bold text-emerald-300"
+          className="mt-5 inline-flex items-center gap-2 rounded-full border border-theme-border-soft bg-theme-accent-light px-4 py-2 text-xs font-bold text-theme-accent"
         >
           <Zap size={14} /> Ready for next bill
         </motion.div>
@@ -744,21 +700,21 @@ function ShowcasePanel() {
     <section
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative flex min-h-[560px] flex-col overflow-hidden bg-[#07101d] p-6 lg:min-h-[640px] lg:w-[47%] lg:p-8"
+      className="relative flex min-h-[560px] flex-col overflow-hidden bg-theme-surface p-6 lg:min-h-[640px] lg:w-[47%] lg:p-8"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_48%_36%,rgba(22,169,125,0.20),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(34,211,238,0.10),transparent_28%),radial-gradient(circle_at_18%_82%,rgba(16,185,129,0.09),transparent_30%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_48%_36%,var(--accent-glow),transparent_32%),radial-gradient(circle_at_82%_18%,var(--accent-glow),transparent_28%)] opacity-30" />
       <motion.div
         aria-hidden="true"
         animate={isPaused ? { scale: 1, opacity: 0.42 } : { scale: [1, 1.12, 1], opacity: [0.35, 0.65, 0.35] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-400/10 blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-theme-accent-light blur-3xl"
       />
-      <div className="pointer-events-none absolute inset-x-8 top-24 h-px bg-gradient-to-r from-transparent via-emerald-300/20 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-10 bottom-24 h-px bg-gradient-to-r from-transparent via-cyan-300/10 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-8 top-24 h-px bg-gradient-to-r from-transparent via-theme-accent/20 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-10 bottom-24 h-px bg-gradient-to-r from-transparent via-theme-accent/10 to-transparent" />
 
       <div className="relative z-10 flex items-center justify-between">
         <BrandMark small />
-        <div className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-300 shadow-lg shadow-emerald-500/10">
+        <div className="rounded-full border border-theme-border-soft bg-theme-accent-light px-3 py-1 text-[10px] font-black uppercase tracking-wide text-theme-accent shadow-glow">
           {isPaused ? "Paused Preview" : "Sample Workflow"}
         </div>
       </div>
@@ -769,13 +725,13 @@ function ShowcasePanel() {
             aria-hidden="true"
             animate={isPaused ? { rotate: 0 } : { rotate: 360 }}
             transition={{ duration: 22, repeat: isPaused ? 0 : Infinity, ease: "linear" }}
-            className="absolute -inset-7 rounded-[2.3rem] border border-emerald-300/10"
+            className="absolute -inset-7 rounded-[2.3rem] border border-theme-border-soft"
           />
           <motion.div
             aria-hidden="true"
             animate={isPaused ? { rotate: 0 } : { rotate: -360 }}
             transition={{ duration: 28, repeat: isPaused ? 0 : Infinity, ease: "linear" }}
-            className="absolute -inset-12 rounded-[2.6rem] border border-cyan-300/5"
+            className="absolute -inset-12 rounded-[2.6rem] border border-theme-accent/5"
           />
           <AnimatePresence mode="wait">
             <ActiveComponent key={STEPS[active].key} />
@@ -783,29 +739,29 @@ function ShowcasePanel() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-[410px] rounded-[1.35rem] border border-white/10 bg-black/15 p-3 backdrop-blur-sm">
+      <div className="relative z-10 mx-auto w-full max-w-[410px] rounded-[1.35rem] border border-theme-border-soft bg-theme-surface/50 p-3 backdrop-blur-sm">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-300">
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-theme-accent">
               Step {active + 1} of {STEPS.length}
             </p>
-            <p className="mt-1 truncate text-sm font-black text-white">{STEPS[active].title}</p>
-            <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-500">{STEPS[active].sub}</p>
+            <p className="mt-1 truncate text-sm font-black text-theme-primary">{STEPS[active].title}</p>
+            <p className="mt-0.5 truncate text-[11px] font-semibold text-theme-muted">{STEPS[active].sub}</p>
           </div>
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-emerald-300/25 bg-emerald-300/10 text-emerald-300">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-theme-border-soft bg-theme-accent-light text-theme-accent">
             <ActiveIcon size={18} />
           </div>
         </div>
 
-        <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+        <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-theme-card/10">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300"
+            className="h-full rounded-full bg-[image:var(--accent-gradient)]"
             animate={{ width: `${((active + 1) / STEPS.length) * 100}%` }}
             transition={{ duration: 0.45, ease: "easeOut" }}
           />
         </div>
 
-        <p className="mb-2 text-center text-[10px] font-semibold text-slate-600">Sample demo only · real data appears after login</p>
+        <p className="mb-2 text-center text-[10px] font-semibold text-theme-muted">Sample demo only · real data appears after login</p>
         <div className="flex items-center justify-center gap-1.5 overflow-hidden">
           {STEPS.map((step, index) => {
             const StepIcon = step.icon;
@@ -822,9 +778,9 @@ function ShowcasePanel() {
                 title={`${step.title} - ${step.sub}`}
                 className={cn(
                   "grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs transition",
-                  isActive && "border-emerald-300 bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/25",
-                  isDone && !isActive && "border-emerald-300/40 bg-emerald-400/10 text-emerald-300",
-                  !isDone && !isActive && "border-white/10 bg-white/[0.03] text-slate-600"
+                  isActive && "border-theme-accent bg-theme-accent text-slate-950 shadow-lg shadow-theme-glow",
+                  isDone && !isActive && "border-theme-accent/40 bg-theme-accent-light text-theme-accent",
+                  !isDone && !isActive && "border-theme-border-soft bg-theme-surface text-theme-muted"
                 )}
               >
                 {isDone ? <Check size={12} /> : <StepIcon size={12} />}
@@ -882,7 +838,7 @@ function LoginPanel({ onLoginSuccess }) {
   };
 
   return (
-    <section className="flex flex-1 items-center justify-center border-l border-white/5 bg-[#0e1520] p-6 sm:p-10">
+    <section className="flex flex-1 items-center justify-center border-l border-theme-border-soft bg-theme-app/50 p-6 sm:p-10">
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
@@ -895,7 +851,7 @@ function LoginPanel({ onLoginSuccess }) {
           setCardHover(true);
         }}
         onMouseLeave={() => setCardHover(false)}
-        className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b1420] p-6 shadow-2xl shadow-black/25 backdrop-blur-xl transition-colors duration-300 hover:border-emerald-300/25 sm:p-7"
+        className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface/80 p-6 shadow-2xl shadow-theme-glow/5 backdrop-blur-xl transition-colors duration-300 sm:p-7"
       >
         <motion.div
           aria-hidden="true"
@@ -903,7 +859,7 @@ function LoginPanel({ onLoginSuccess }) {
           animate={cardHover ? { opacity: 0.72 } : { opacity: 0.18 }}
           transition={{ duration: 0.28 }}
           style={{
-            background: `radial-gradient(420px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(16,185,129,0.16), rgba(34,211,238,0.055) 28%, transparent 64%)`,
+            background: `radial-gradient(420px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(225,29,72,0.16), rgba(244,114,182,0.055) 28%, transparent 64%)`,
           }}
         />
         <motion.div
@@ -914,25 +870,27 @@ function LoginPanel({ onLoginSuccess }) {
         />
         <motion.div
           aria-hidden="true"
-          className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-white/12 blur-xl"
+          className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-theme-card/12 blur-xl"
           animate={cardHover ? { x: [0, 760] } : { x: 0 }}
           transition={{ duration: 1.15, ease: "easeInOut" }}
         />
         <motion.div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-emerald-300/10"
-          animate={cardHover ? { boxShadow: "inset 0 0 0 1px rgba(110,231,183,0.18), 0 0 40px rgba(16,185,129,0.10)" } : { boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.04), 0 0 0 rgba(0,0,0,0)" }}
+          className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-theme-accent/10"
+          animate={cardHover ? { boxShadow: "inset 0 0 0 1px rgba(225,29,72,0.18), 0 0 40px rgba(225,29,72,0.10)" } : { boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.04), 0 0 0 rgba(0,0,0,0)" }}
           transition={{ duration: 0.25 }}
         />
         <div className="relative z-10">
-        <div className="mb-8">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="mb-8">
           <BrandMark />
-        </div>
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-300">
-          Secure Login <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-        </div>
-        <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">Welcome back</h1>
-        <p className="mt-2 text-sm font-semibold text-slate-400">Sign in to manage your own customers, invoices, PDFs, links, and payments.</p>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-theme-border-soft bg-theme-accent-light px-3 py-1 text-[10px] font-black uppercase tracking-wide text-theme-accent">
+            Secure Login <span className="h-1.5 w-1.5 rounded-full bg-theme-accent" />
+          </div>
+          <h1 className="text-3xl font-black tracking-tight text-theme-primary sm:text-4xl">Welcome back</h1>
+          <p className="mt-2 text-sm font-semibold text-theme-muted">Sign in to manage your own customers, invoices, PDFs, links, and payments.</p>
+        </motion.div>
 
         {error && <p className="mt-4 rounded-xl bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-400">{error}</p>}
 
@@ -940,90 +898,95 @@ function LoginPanel({ onLoginSuccess }) {
           className="mt-8 space-y-5"
           onSubmit={handleLogin}
         >
-          <label className="block">
-            <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Email address</span>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-300/60 focus:bg-emerald-300/[0.03]"
-            />
-          </label>
+          <motion.label initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="block relative group">
+            <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent">Email address</span>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Mail className="h-[18px] w-[18px] text-theme-muted group-focus-within:text-theme-accent transition-colors" />
+              </div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-11 pr-4 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
+              />
+            </div>
+          </motion.label>
 
-          <label className="block">
-            <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Password</span>
+          <motion.label initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.5 }} className="block relative group">
+            <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent">Password</span>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 pr-12 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-300/60 focus:bg-emerald-300/[0.03]"
+                className="h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-4 pr-12 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-emerald-300"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted transition hover:text-theme-accent"
                 aria-label="Toggle password visibility"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-          </label>
+          </motion.label>
 
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2 text-slate-500">
-              <input type="checkbox" className="h-4 w-4 accent-emerald-400" />
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }} className="flex items-center justify-between text-sm">
+            <label className="flex items-center gap-2 text-theme-muted">
+              <input type="checkbox" className="h-4 w-4 accent-theme-accent" />
               Remember me
             </label>
-            <a className="font-bold text-emerald-300 hover:text-emerald-200" href="#">
+            <a className="font-bold text-theme-accent hover:text-theme-accent" href="#">
               Forgot password?
             </a>
-          </div>
+          </motion.div>
 
-          <motion.button
-            whileHover={{ y: -2, scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            disabled={isSigningIn}
-            className="group relative flex h-[52px] w-full items-center justify-center overflow-hidden rounded-[22px] border border-emerald-200/25 bg-emerald-300/10 px-6 font-black text-white shadow-[0_18px_45px_rgba(16,185,129,0.22)] backdrop-blur-2xl transition disabled:cursor-not-allowed disabled:opacity-80"
-          >
-            <span className="absolute inset-0 rounded-[22px] bg-gradient-to-br from-white/22 via-emerald-300/18 to-cyan-300/12" />
-            <span className="absolute inset-[1px] rounded-[21px] bg-gradient-to-b from-white/12 via-white/4 to-black/20" />
-            <span className="absolute left-4 right-4 top-1 h-5 rounded-full bg-white/35 blur-lg opacity-70 transition group-hover:opacity-100" />
-            <span className="absolute -left-24 top-0 h-full w-20 rotate-12 bg-white/45 blur-md transition-all duration-700 group-hover:left-[120%]" />
-            <span className="absolute bottom-0 left-8 h-10 w-28 rounded-full bg-emerald-300/25 blur-2xl transition group-hover:bg-cyan-300/30" />
-            <span className="absolute inset-0 rounded-[22px] ring-1 ring-inset ring-white/20" />
-            <span className="relative flex items-center gap-2 text-sm drop-shadow-[0_1px_10px_rgba(255,255,255,0.18)]">
-              {isSigningIn ? "Signing in..." : "Sign In to Dashboard"}
-              {isSigningIn ? (
-                <motion.span
-                  className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-                />
-              ) : (
-                <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={18} />
-              )}
-            </span>
-          </motion.button>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.5 }}>
+            <motion.button
+              whileHover={{ y: -2, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={isSigningIn}
+              className="group relative flex h-[52px] w-full items-center justify-center overflow-hidden rounded-[22px] border-0 bg-[image:var(--accent-gradient)] px-6 font-black text-theme-primary shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-2xl transition-all disabled:cursor-not-allowed disabled:opacity-80 hover:shadow-[0_0_35px_var(--accent-glow)]"
+            >
+              <span className="absolute inset-[1px] rounded-[21px] bg-gradient-to-b from-white/20 via-white/5 to-black/20 pointer-events-none" />
+              <span className="absolute left-4 right-4 top-1 h-5 rounded-full bg-white/20 blur-lg opacity-70 transition group-hover:opacity-100 pointer-events-none" />
+              <span className="absolute -left-24 top-0 h-full w-20 rotate-12 bg-white/30 blur-md transition-all duration-700 group-hover:left-[120%] pointer-events-none" />
+              
+              <span className="relative flex items-center gap-2 text-[15px] drop-shadow-[0_1px_8px_rgba(0,0,0,0.3)]">
+                {isSigningIn ? "Signing in..." : "Sign In to Dashboard"}
+                {isSigningIn ? (
+                  <motion.span
+                    className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                  />
+                ) : (
+                  <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={18} />
+                )}
+              </span>
+            </motion.button>
+          </motion.div>
 
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-white/10" />
-            <span className="text-xs text-slate-700">or</span>
-            <div className="h-px flex-1 bg-white/10" />
-          </div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.5 }} className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-theme-card/10" />
+            <span className="text-xs font-bold uppercase tracking-wider text-theme-muted">or</span>
+            <div className="h-px flex-1 bg-theme-card/10" />
+          </motion.div>
 
-          <button type="button" className="flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] text-sm font-bold text-slate-400 transition hover:bg-white/[0.06] hover:text-slate-200">
-            <span className="grid h-5 w-5 place-items-center rounded-full bg-white text-xs font-black text-slate-950">G</span>
+          <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.5 }} type="button" className="flex h-[52px] w-full items-center justify-center gap-3 rounded-[22px] border border-theme-border-soft bg-theme-surface text-sm font-bold text-theme-muted transition-all hover:bg-theme-card hover:text-theme-primary hover:shadow-[0_0_15px_rgba(0,0,0,0.05)]">
+            <span className="grid h-6 w-6 place-items-center rounded-full bg-slate-100 text-xs font-black text-slate-900">G</span>
             Continue with Google
-          </button>
+          </motion.button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-600">
-          Need access? <a href="#" className="font-bold text-emerald-300">Create free account</a>
-        </p>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.5 }} className="mt-6 text-center text-sm text-theme-muted">
+          Need access? <a href="#" className="font-bold text-theme-accent hover:text-theme-primary transition-colors">Create free account</a>
+        </motion.p>
               </div>
       </motion.div>
     </section>
@@ -1032,8 +995,8 @@ function LoginPanel({ onLoginSuccess }) {
 
 export default function Login({ onLoginSuccess }) {
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-[#030914] p-4 text-white sm:p-6 lg:p-8">
-      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#07101d] shadow-2xl shadow-black/50 lg:min-h-[680px]">
+    <div className="relative min-h-screen w-full overflow-hidden bg-theme-app p-4 text-theme-primary sm:p-6 lg:p-8">
+      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface shadow-2xl shadow-theme-glow/10 lg:min-h-[680px]">
         <div className="hidden lg:flex lg:w-full">
           <ShowcasePanel />
           <LoginPanel onLoginSuccess={onLoginSuccess} />

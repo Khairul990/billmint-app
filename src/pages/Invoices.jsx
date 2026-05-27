@@ -56,13 +56,14 @@ const Invoices = ({
   invoices = [], 
   editingInvoice = null,
   onEditInvoice, 
-  onDeleteInvoice, 
+  onDeleteInvoice, // Used for both soft and permanent delete now
   onDownloadPDF, 
   setCurrentTab,
   businessSettings 
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [viewMode, setViewMode] = useState('active'); // 'active' or 'trash'
   
   // Modal Preview State
   const [viewingInvoice, setViewingInvoice] = useState(null);
@@ -248,6 +249,12 @@ const Invoices = ({
 
   // --- FILTER LOGIC ---
   const filteredInvoices = invoices.filter((inv) => {
+    // 1. Filter by viewMode (Trash vs Active)
+    const isDeleted = inv.isDeleted === true;
+    if (viewMode === 'active' && isDeleted) return false;
+    if (viewMode === 'trash' && !isDeleted) return false;
+
+    // 2. Filter by Search Query
     const q = searchQuery.toLowerCase();
     const matchSearch = (
       inv.invoiceNumber.toLowerCase().includes(q) ||
@@ -256,6 +263,7 @@ const Invoices = ({
       inv.date.includes(q)
     );
 
+    // 3. Filter by Status
     const matchStatus = statusFilter === 'All' || inv.paymentStatus === statusFilter;
 
     return matchSearch && matchStatus;
@@ -263,6 +271,16 @@ const Invoices = ({
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadBackup = (invoice) => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(invoice, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", `${invoice.invoiceNumber}.billqyro`);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
   };
 
   const containerVariants = {
@@ -292,37 +310,52 @@ const Invoices = ({
       {/* Page Header Area */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Active Invoices</h2>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">MANAGE TRANSACTION HISTORY</p>
+          <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">
+            {viewMode === 'active' ? 'Active Invoices' : 'Recently Deleted'}
+          </h2>
+          <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">MANAGE TRANSACTION HISTORY</p>
         </div>
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => {
-            onEditInvoice(null); // Clear editing state
-            setCurrentTab('create-invoice');
-          }}
-          className="flex items-center justify-center gap-2 bg-gradient-to-tr from-indigo-600 to-blue-500 text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md transition-shadow cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Create New Invoice</span>
-        </motion.button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setViewMode(viewMode === 'active' ? 'trash' : 'active')}
+            className={`text-xs font-bold px-4 py-2.5 rounded-xl border transition-all ${
+              viewMode === 'trash' 
+                ? 'bg-rose-50 text-rose-600 border-rose-200' 
+                : 'bg-theme-card text-theme-muted border-theme-border-soft hover:bg-theme-app'
+            }`}
+          >
+            {viewMode === 'active' ? 'View Trash' : 'View Active Invoices'}
+          </button>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              onEditInvoice(null); // Clear editing state
+              setCurrentTab('create-invoice');
+            }}
+            className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md transition-shadow cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create New Invoice</span>
+          </motion.button>
+        </div>
       </div>
 
       {/* SEARCH AND FILTERS */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 md:p-5 border border-slate-100 dark:border-slate-800 shadow-premium flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex flex-col md:flex-row gap-4 items-center justify-between">
         
         {/* Left Side: Filter Tabs */}
-        <div className="flex gap-1 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-2xl w-full md:w-auto overflow-x-auto no-scrollbar">
+        <div className="flex gap-1 bg-theme-app dark:bg-theme-surface p-1.5 rounded-2xl w-full md:w-auto overflow-x-auto no-scrollbar">
           {['All', 'Paid', 'Pending', 'Unpaid'].map((status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`text-xs font-bold px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
                 statusFilter === status
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm border border-slate-100 dark:border-slate-800/50'
-                  : 'text-slate-400 hover:text-slate-600'
+                  ? 'bg-theme-card dark:bg-theme-card text-theme-primary dark:text-theme-primary shadow-sm border border-theme-border-soft dark:border-theme-border-soft/50'
+                  : 'text-theme-muted hover:text-theme-muted'
               }`}
             >
               {status}
@@ -332,7 +365,7 @@ const Invoices = ({
 
         {/* Right Side: Search */}
         <div className="relative w-full md:w-80">
-          <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
+          <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted pointer-events-none">
             <Search className="w-4 h-4" />
           </span>
           <input
@@ -340,7 +373,7 @@ const Invoices = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search invoice number, client..."
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white dark:bg-slate-900 transition-all text-slate-800 dark:text-slate-100"
+            className="w-full pl-10 pr-4 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent focus:bg-theme-card dark:bg-theme-card transition-all text-theme-primary dark:text-theme-primary"
           />
         </div>
       </div>
@@ -349,26 +382,47 @@ const Invoices = ({
       <div className="space-y-3">
         {filteredInvoices.map((invoice) => (
           <motion.div key={invoice.id} variants={itemVariants}>
-            <InvoiceCard
-              invoice={invoice}
-              currencySymbol={currencySymbol}
-              businessSettings={businessSettings}
-              onView={(inv) => setViewingInvoice(inv)}
-              onEdit={(inv) => {
-                onEditInvoice(inv);
-                setCurrentTab('create-invoice');
-              }}
-              onDelete={onDeleteInvoice}
-              onDownload={onDownloadPDF}
-            />
+              <InvoiceCard
+                invoice={invoice}
+                currencySymbol={currencySymbol}
+                businessSettings={businessSettings}
+                onView={(inv) => setViewingInvoice(inv)}
+                onEdit={(inv) => {
+                  onEditInvoice(inv);
+                  setCurrentTab('create-invoice');
+                }}
+                onDelete={(id) => {
+                  if (viewMode === 'active') {
+                    if (window.confirm('Move this invoice to Trash?')) {
+                      import('../utils/storage').then(({ deleteInvoice }) => deleteInvoice(id, false)).then(() => window.dispatchEvent(new Event('billqyro_sync')));
+                    }
+                  } else {
+                    const confirmText = window.prompt('Type DELETE to permanently delete this invoice:');
+                    if (confirmText === 'DELETE') {
+                      onDeleteInvoice(id, true); // permanent delete
+                    } else if (confirmText !== null) {
+                      toast.error('Deletion cancelled. You must type DELETE exactly.');
+                    }
+                  }
+                }}
+                onRestore={viewMode === 'trash' ? (id) => {
+                  import('../utils/storage').then(({ restoreInvoice }) => restoreInvoice(id)).then(() => {
+                    toast.success('Invoice restored!');
+                    window.dispatchEvent(new Event('billqyro_sync'));
+                  });
+                } : null}
+                onDownload={onDownloadPDF}
+                onDownloadBackup={() => handleDownloadBackup(invoice)}
+                isDeleted={viewMode === 'trash'}
+              />
           </motion.div>
         ))}
 
         {filteredInvoices.length === 0 && (
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 border border-slate-100 dark:border-slate-800 text-center shadow-premium">
+          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
             <FileSpreadsheet className="w-12 h-12 text-slate-200 mx-auto mb-3 animate-pulse" />
-            <h4 className="font-extrabold text-slate-700 dark:text-slate-300">No invoices yet</h4>
-            <p className="text-xs text-slate-400 font-semibold mt-1 max-w-xs mx-auto">
+            <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">No invoices yet</h4>
+            <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
               No invoices found. Create your first bill to see transaction records here!
             </p>
           </div>
@@ -382,31 +436,31 @@ const Invoices = ({
             setViewingInvoice(null);
             onEditInvoice(null);
           }}
-          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 no-print"
+          className="fixed inset-0 z-50 overflow-y-auto bg-theme-card/40 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 no-print"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-slate-50 dark:bg-slate-800/50 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative animate-scaleUp border border-white/10 max-h-[92vh] flex flex-col"
+            className="bg-theme-app dark:bg-theme-surface w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative animate-scaleUp border border-white/10 max-h-[92vh] flex flex-col"
           >
             
             {/* Modal Top Actions Header Bar */}
-            <div className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 px-6 py-4 flex items-center justify-between shrink-0">
+            <div className="bg-theme-card dark:bg-theme-card border-b border-theme-border-soft dark:border-theme-border-soft px-6 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
-                <FileSpreadsheet className="w-5 h-5 text-indigo-500" />
-                <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">{viewingInvoice.invoiceNumber} - Preview Mode</span>
+                <FileSpreadsheet className="w-5 h-5 text-theme-accent" />
+                <span className="font-extrabold text-theme-primary dark:text-theme-primary text-sm">{viewingInvoice.invoiceNumber} - Preview Mode</span>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={handlePrint}
-                  className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 dark:bg-slate-800/50 rounded-xl transition-all"
+                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all"
                   title="Print Invoice"
                 >
                   <Printer className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => onDownloadPDF(viewingInvoice)}
-                  className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-slate-50 dark:bg-slate-800/50 rounded-xl transition-all"
+                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all"
                   title="Download PDF"
                 >
                   <Download className="w-4 h-4" />
@@ -431,7 +485,7 @@ const Invoices = ({
                       toast.error('Could not create live link. Please try again.');
                     }
                   }}
-                  className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 dark:bg-slate-800/50 rounded-xl transition-all cursor-pointer"
+                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all cursor-pointer"
                   title="Copy Live Link"
                 >
                   <Link className="w-4 h-4" />
@@ -442,12 +496,12 @@ const Invoices = ({
                     setViewingInvoice(null);
                     setCurrentTab('create-invoice');
                   }}
-                  className="p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-50 dark:bg-slate-800/50 rounded-xl transition-all"
+                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all"
                   title="Edit Invoice"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
-                <div className="w-px h-6 bg-slate-100 dark:bg-slate-800 mx-1"></div>
+                <div className="w-px h-6 bg-theme-surface dark:bg-theme-card mx-1"></div>
 
                 {/* SaaS Invoice Sharing Suite */}
                 <button
@@ -465,10 +519,10 @@ const Invoices = ({
                        toast.error('Could not create live link. Please try again.');
                      }
                    }}
-                   className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all flex items-center justify-center cursor-pointer"
+                   className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light rounded-xl transition-all flex items-center justify-center cursor-pointer"
                    title="Share via WhatsApp"
                 >
-                  <WhatsAppIcon className="w-4 h-4 text-emerald-500" />
+                  <WhatsAppIcon className="w-4 h-4 text-theme-accent" />
                 </button>
                 {viewingInvoice.paymentStatus !== 'Paid' && (
                   <button
@@ -486,7 +540,7 @@ const Invoices = ({
                          toast.error('Could not create live link. Please try again.');
                        }
                      }}
-                     className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all flex items-center justify-center cursor-pointer"
+                     className="p-2 text-theme-muted hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all flex items-center justify-center cursor-pointer"
                      title="Send Reminder via WhatsApp"
                   >
                     <WhatsAppIcon className="w-4 h-4 text-rose-500" />
@@ -507,10 +561,10 @@ const Invoices = ({
                        toast.error('Could not create live link. Please try again.');
                      }
                    }}
-                   className="p-2 text-slate-500 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all flex items-center justify-center cursor-pointer"
+                   className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light rounded-xl transition-all flex items-center justify-center cursor-pointer"
                    title="Share via Email"
                 >
-                  <Mail className="w-4 h-4 text-sky-500" />
+                  <Mail className="w-4 h-4 text-theme-accent" />
                 </button>
                 <button
                    onClick={async () => {
@@ -528,19 +582,19 @@ const Invoices = ({
                        toast.error('Could not create live link. Please try again.');
                      }
                    }}
-                   className="p-2 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all flex items-center justify-center cursor-pointer"
+                   className="p-2 text-theme-muted hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all flex items-center justify-center cursor-pointer"
                    title="Copy Invoice Text"
                 >
                   <Copy className="w-4 h-4 text-amber-500" />
                 </button>
 
-                <div className="w-px h-6 bg-slate-100 dark:bg-slate-800 mx-1"></div>
+                <div className="w-px h-6 bg-theme-surface dark:bg-theme-card mx-1"></div>
                 <button
                   onClick={() => {
                     setViewingInvoice(null);
                     onEditInvoice(null);
                   }}
-                  className="p-2 text-slate-400 hover:text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:bg-slate-800 rounded-xl transition-all"
+                  className="p-2 text-theme-muted hover:text-theme-primary dark:text-theme-primary hover:bg-theme-surface dark:bg-theme-card rounded-xl transition-all"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -548,55 +602,55 @@ const Invoices = ({
             </div>
 
             {/* Scrollable Preview Wrapper */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-theme-app dark:bg-theme-surface">
               {/* Pending Payment Verification Panel */}
               {viewingInvoice && (viewingInvoice.paymentProofs || []).filter(p => p.status === 'Pending').length > 0 && (
-                <div className="mb-6 p-5 bg-gradient-to-tr from-indigo-50 to-indigo-100/50 border border-indigo-200/50 rounded-2xl shadow-sm">
-                  <div className="flex items-center gap-2 text-indigo-900 font-extrabold mb-4">
-                    <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                <div className="mb-6 p-5 bg-gradient-to-tr from-indigo-50 to-indigo-100/50 border border-theme-border-soft rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2 text-theme-accent font-extrabold mb-4">
+                    <ShieldCheck className="w-5 h-5 text-theme-accent" />
                     <span className="text-sm">Pending Payment Verification ({(viewingInvoice.paymentProofs || []).filter(p => p.status === 'Pending').length})</span>
                   </div>
                   
                   <div className="space-y-4">
                     {(viewingInvoice.paymentProofs || []).filter(p => p.status === 'Pending').map((proof) => (
-                      <div key={proof.id} className="bg-white dark:bg-slate-900 border border-indigo-100 rounded-xl p-4 flex flex-col md:flex-row justify-between gap-4 shadow-sm">
+                      <div key={proof.id} className="bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl p-4 flex flex-col md:flex-row justify-between gap-4 shadow-sm">
                         <div className="space-y-2 text-xs">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-slate-500">Method:</span>
-                            <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md font-bold uppercase">{proof.method}</span>
-                            <span className="font-bold text-slate-500 ml-2">Amount:</span>
-                            <span className="font-extrabold text-slate-800 dark:text-slate-100">{currencySymbol}{proof.amount}</span>
+                            <span className="font-bold text-theme-muted">Method:</span>
+                            <span className="bg-theme-accent-light text-theme-accent px-2 py-0.5 rounded-md font-bold uppercase">{proof.method}</span>
+                            <span className="font-bold text-theme-muted ml-2">Amount:</span>
+                            <span className="font-extrabold text-theme-primary dark:text-theme-primary">{currencySymbol}{proof.amount}</span>
                           </div>
                           
                           {proof.transactionId && (
                             <div>
-                              <span className="font-bold text-slate-500">Transaction ID:</span>{' '}
-                              <span className="font-mono text-slate-800 dark:text-slate-100 select-all font-semibold bg-slate-50 dark:bg-slate-800/50 px-1.5 py-0.5 rounded">{proof.transactionId}</span>
+                              <span className="font-bold text-theme-muted">Transaction ID:</span>{' '}
+                              <span className="font-mono text-theme-primary dark:text-theme-primary select-all font-semibold bg-theme-app dark:bg-theme-surface px-1.5 py-0.5 rounded">{proof.transactionId}</span>
                             </div>
                           )}
                           
                           {proof.notes && (
                             <div>
-                              <span className="font-bold text-slate-500">Customer Note:</span>{' '}
-                              <span className="text-slate-600 italic">"{proof.notes}"</span>
+                              <span className="font-bold text-theme-muted">Customer Note:</span>{' '}
+                              <span className="text-theme-muted italic">"{proof.notes}"</span>
                             </div>
                           )}
                           
                           {proof.screenshot && (
                             <div className="mt-2">
-                              <span className="font-bold text-slate-500 block mb-1">Receipt Screenshot:</span>
+                              <span className="font-bold text-theme-muted block mb-1">Receipt Screenshot:</span>
                               <a 
                                 href={proof.screenshot} 
                                 target="_blank" 
                                 rel="noopener noreferrer" 
-                                className="inline-block relative rounded-lg overflow-hidden border border-slate-200 hover:border-indigo-300 transition-all max-w-[200px]"
+                                className="inline-block relative rounded-lg overflow-hidden border border-theme-border-soft hover:border-indigo-300 transition-all max-w-[200px]"
                               >
                                 <img 
                                   src={proof.screenshot} 
                                   alt="Payment receipt proof" 
                                   className="max-h-32 object-cover object-center"
                                 />
-                                <div className="absolute inset-0 bg-slate-900/10 hover:bg-slate-900/30 flex items-center justify-center transition-all opacity-0 hover:opacity-100 text-white font-bold text-[10px]">
+                                <div className="absolute inset-0 bg-theme-card/10 hover:bg-theme-card/30 flex items-center justify-center transition-all opacity-0 hover:opacity-100 text-white font-bold text-[10px]">
                                   Click to View Full
                                 </div>
                               </a>
@@ -607,7 +661,7 @@ const Invoices = ({
                         <div className="flex sm:flex-row md:flex-col justify-end gap-2 md:w-48 shrink-0">
                           <button
                             onClick={() => handleApproveProof(proof)}
-                            className="flex items-center justify-center gap-1.5 bg-gradient-to-tr from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all cursor-pointer w-full text-center"
+                            className="flex items-center justify-center gap-1.5 bg-gradient-to-tr from-theme-accent to-theme-accent-dark hover:opacity-90 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all cursor-pointer w-full text-center"
                           >
                             <Check className="w-3.5 h-3.5" />
                             <span>Approve & Verify</span>
@@ -633,7 +687,7 @@ const Invoices = ({
             </div>
             
             {/* Print Only Embedded Capture Zone */}
-            <div className="hidden print:block print:absolute print:inset-0 bg-white dark:bg-slate-900">
+            <div className="hidden print:block print:absolute print:inset-0 bg-theme-card dark:bg-theme-card">
               <InvoicePreview 
                 invoice={viewingInvoice}
                 businessSettings={businessSettings}

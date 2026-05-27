@@ -4,6 +4,7 @@ import { Toaster, toast } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Lock } from 'lucide-react';
 import Layout from './components/Layout';
+import PostLoginWelcome from './components/PostLoginWelcome';
 import {
   getAuthSession,
   logout,
@@ -27,7 +28,8 @@ import {
   deleteExpense,
   importRestore,
   syncFromFirestore,
-  enableRealTimeSync
+  enableRealTimeSync,
+  getGlobalAdminSettings
 } from './utils/storage';
 import { downloadInvoicePDF } from './utils/pdfUtils';
 import { auth, firebaseReady } from './utils/firebase';
@@ -88,8 +90,22 @@ class ErrorBoundary extends React.Component {
 function App() {
 
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
+  const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(getAuthSession() !== null);
-  const [currentTab, setCurrentTab] = useState('dashboard');
+  const [currentTab, setCurrentTab] = useState(() => {
+    const saved = localStorage.getItem('billqyro_last_route');
+    if (saved) {
+      const adminRoutes = ['settings', 'more']; // routes requiring admin unlock or just checking role isn't enough, wait
+      // Actually settings is accessible to regular users sometimes? No, settings is for everyone, but some tabs in settings might be admin.
+      // But wait, the admin route in previous conversation was `more` or `settings`? Let's just restore `saved`.
+      return saved;
+    }
+    return 'dashboard';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('billqyro_last_route', currentTab);
+  }, [currentTab]);
   const [userRole, setUserRole] = useState(() => localStorage.getItem('billqyro_user_role') || 'user');
 
   // Boot Interceptor for Public Invoice
@@ -235,6 +251,16 @@ function App() {
             setExpenses(synced.expenses || []);
             if (synced.subscription) setSubscription(synced.subscription);
           }
+          
+          // Fetch global admin settings for defaults
+          try {
+            const adminGlobal = await getGlobalAdminSettings();
+            if (adminGlobal) {
+              if (adminGlobal.defaultTheme) localStorage.setItem('billqyro_admin_default_theme', adminGlobal.defaultTheme);
+              if (adminGlobal.defaultMode) localStorage.setItem('billqyro_admin_default_mode', adminGlobal.defaultMode);
+            }
+          } catch (e) { console.warn('Could not fetch admin settings on boot.'); }
+
           // Enable real-time multi-device sync
           enableRealTimeSync();
         } catch (e) {
@@ -263,6 +289,7 @@ function App() {
   // --- AUTH BRIDGE ---
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
+    setShowWelcomeAnimation(true);
     setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
 
     setInvoices(getInvoices());
@@ -346,38 +373,52 @@ function App() {
     let unlinkedItems = false;
     let lowStockWarning = false;
 
-    if (isNew) {
-      let productsUpdated = false;
-      const currentProducts = [...products];
+    let productsUpdated = false;
+    const currentProducts = [...products];
 
-      for (const item of payload.items) {
-        const itemName = (item.description || item.productName || item.serviceName || item.itemService || '').trim().toLowerCase();
+    // 1. If editing an existing invoice, reverse previous stock deduction
+    const oldInvoice = payload.id ? invoices.find(inv => inv.id === payload.id) : null;
+    if (oldInvoice && oldInvoice.items) {
+      for (const oldItem of oldInvoice.items) {
+        const itemName = (oldItem.description || oldItem.productName || oldItem.serviceName || oldItem.itemService || '').trim().toLowerCase();
         if (!itemName) continue;
 
         const matchedProduct = currentProducts.find(p => p.name.trim().toLowerCase() === itemName);
-        
-        if (matchedProduct) {
-          const requestedQty = parseFloat(item.qty) || 1;
-          const currentStock = matchedProduct.stockQty !== undefined ? matchedProduct.stockQty : 0;
-          if (currentStock < requestedQty) {
-            lowStockWarning = true;
-            matchedProduct.stockQty = 0; // Prevent going below 0 without confirmation
-          } else {
-            matchedProduct.stockQty = currentStock - requestedQty;
-          }
+        if (matchedProduct && matchedProduct.stockQty !== undefined) {
+          const oldQty = parseFloat(oldItem.qty) || 1;
+          matchedProduct.stockQty += oldQty;
           productsUpdated = true;
-        } else {
-          unlinkedItems = true;
         }
       }
+    }
 
-      if (productsUpdated) {
-        // Save updated products one by one
-        for (const p of currentProducts) {
-          await saveProduct(p);
+    // 2. Apply new stock deduction
+    for (const item of payload.items) {
+      const itemName = (item.description || item.productName || item.serviceName || item.itemService || '').trim().toLowerCase();
+      if (!itemName) continue;
+
+      const matchedProduct = currentProducts.find(p => p.name.trim().toLowerCase() === itemName);
+      
+      if (matchedProduct) {
+        const requestedQty = parseFloat(item.qty) || 1;
+        const currentStock = matchedProduct.stockQty !== undefined ? matchedProduct.stockQty : 0;
+        if (currentStock < requestedQty) {
+          lowStockWarning = true;
+          matchedProduct.stockQty = 0; // Prevent going below 0 without confirmation
+        } else {
+          matchedProduct.stockQty = currentStock - requestedQty;
         }
-        setProducts(currentProducts);
+        productsUpdated = true;
+      } else {
+        unlinkedItems = true;
       }
+    }
+
+    if (productsUpdated) {
+      for (const p of currentProducts) {
+        await saveProduct(p);
+      }
+      setProducts(currentProducts);
     }
 
     const { updatedInvoices, firebaseStatus } = await saveInvoice(payload);
@@ -672,16 +713,16 @@ function App() {
         );
       }
       default:
-        return <div className="text-center font-bold text-slate-400 p-10">404 Tab Not Found</div>;
+        return <div className="text-center font-bold text-theme-muted p-10">404 Tab Not Found</div>;
     }
   };
 
   // Intercept for Public Invoice Loading/Display (No Auth Route Interceptor)
   if (loadingPublicInvoice) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center text-white font-sans">
-        <span className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></span>
-        <p className="text-slate-400 text-xs font-bold uppercase mt-4 tracking-widest animate-pulse">Loading secure digital invoice...</p>
+      <div className="min-h-screen bg-theme-main flex flex-col items-center justify-center p-6 text-center text-white font-sans">
+        <span className="w-10 h-10 border-4 border-theme-accent border-t-transparent rounded-full animate-spin"></span>
+        <p className="text-theme-muted text-xs font-bold uppercase mt-4 tracking-widest animate-pulse">Loading secure digital invoice...</p>
       </div>
     );
   }
@@ -690,7 +731,7 @@ function App() {
     return (
       <React.Suspense fallback={
         <div className="flex h-screen items-center justify-center">
-          <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-600 rounded-full animate-spin"></div>
+          <div className="w-10 h-10 border-4 border-theme-border-soft border-t-indigo-600 rounded-full animate-spin"></div>
         </div>
       }>
         <PublicInvoice initialInvoice={publicInvoice} />
@@ -703,7 +744,7 @@ function App() {
     return (
       <React.Suspense fallback={
         <div className="flex h-screen items-center justify-center">
-          <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-600 rounded-full animate-spin"></div>
+          <div className="w-10 h-10 border-4 border-theme-border-soft border-t-indigo-600 rounded-full animate-spin"></div>
         </div>
       }>
         <Login onLoginSuccess={handleLoginSuccess} />
@@ -716,23 +757,23 @@ function App() {
     const session = getAuthSession();
     if (!isAdminUser(session)) {
       return (
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center font-sans text-white">
+        <div className="min-h-screen bg-theme-main flex flex-col items-center justify-center p-6 text-center font-sans text-white">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="max-w-md bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6"
+            className="max-w-md bg-theme-card p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6"
           >
             <div className="w-16 h-16 bg-rose-500/20 text-rose-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-rose-500/10">
               <Lock className="w-8 h-8" />
             </div>
             <h1 className="text-2xl font-black tracking-tight text-white">Account Deactivated</h1>
-            <p className="text-slate-400 text-xs font-semibold leading-relaxed">
+            <p className="text-theme-muted text-xs font-semibold leading-relaxed">
               Your BillQyro workspace has been temporarily blocked by the platform administrator due to policy guidelines or outstanding billing concerns.
             </p>
             <div className="p-4 bg-slate-850/50 rounded-2xl border border-slate-800/80 text-left space-y-2">
-              <span className="text-[10px] text-slate-500 uppercase font-black block tracking-widest">Administrator Notice</span>
-              <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">
-                If you believe this is an error or wish to request immediate reactivation, please contact support at <strong className="text-indigo-400 select-all">{settings.email || 'support@billqyro.com'}</strong> or email your account manager directly.
+              <span className="text-[10px] text-theme-muted uppercase font-black block tracking-widest">Administrator Notice</span>
+              <p className="text-[11px] text-theme-muted font-semibold leading-relaxed">
+                If you believe this is an error or wish to request immediate reactivation, please contact support at <strong className="text-theme-accent select-all">{settings.email || 'support@billqyro.com'}</strong> or email your account manager directly.
               </p>
             </div>
             <button
@@ -755,7 +796,7 @@ function App() {
     const session = getAuthSession();
     if (!isAdminUser(session)) {
       return (
-        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
+        <div className="min-h-screen bg-theme-card flex flex-col items-center justify-center p-6 text-center">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -765,12 +806,12 @@ function App() {
               <Lock className="w-8 h-8" />
             </div>
             <h1 className="text-2xl font-black text-white mb-3">App Under Maintenance</h1>
-            <p className="text-slate-400 font-medium leading-relaxed mb-8">
+            <p className="text-theme-muted font-medium leading-relaxed mb-8">
               We are currently performing scheduled maintenance to bring you a better experience. Please check back later.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors"
+              className="px-6 py-3 bg-theme-accent hover:opacity-90 text-white font-bold rounded-xl transition-colors"
             >
               Refresh Page
             </button>
@@ -780,7 +821,7 @@ function App() {
                 logout();
                 setIsAuthenticated(false);
               }}
-              className="block w-full mt-4 text-xs font-bold text-slate-500 hover:text-slate-300"
+              className="block w-full mt-4 text-xs font-bold text-theme-muted hover:text-theme-muted"
             >
               Sign out
             </button>
@@ -792,6 +833,11 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <PostLoginWelcome 
+        show={showWelcomeAnimation} 
+        userName={settings?.businessName || ''} 
+        onComplete={() => setShowWelcomeAnimation(false)} 
+      />
       <Layout
         currentTab={currentTab}
         setCurrentTab={(tab) => {
@@ -820,7 +866,7 @@ function App() {
           >
             <React.Suspense fallback={
               <div className="flex h-64 items-center justify-center">
-                <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-600 rounded-full animate-spin"></div>
+                <div className="w-10 h-10 border-4 border-theme-border-soft border-t-theme-accent rounded-full animate-spin"></div>
               </div>
             }>
               {renderTabContent()}

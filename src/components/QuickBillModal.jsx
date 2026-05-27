@@ -85,22 +85,22 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
         {/* Customer Section */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Customer Name *</label>
+            <label className="block text-xs font-bold text-theme-muted mb-1">Customer Name *</label>
             <input
               type="text"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-100"
+              className="w-full px-3 py-2 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-lg text-sm font-semibold text-theme-primary dark:text-theme-primary"
               placeholder="Name"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Phone Number</label>
+            <label className="block text-xs font-bold text-theme-muted mb-1">Phone Number</label>
             <input
               type="tel"
               value={customerPhone}
               onChange={(e) => setCustomerPhone(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-100"
+              className="w-full px-3 py-2 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-lg text-sm font-semibold text-theme-primary dark:text-theme-primary"
               placeholder="Phone"
             />
           </div>
@@ -108,35 +108,35 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
 
         {/* Item Section */}
         <div>
-          <label className="block text-xs font-bold text-slate-500 mb-1">Item / Service Name *</label>
+          <label className="block text-xs font-bold text-theme-muted mb-1">Item / Service Name *</label>
           <input
             type="text"
             value={itemService}
             onChange={(e) => setItemService(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-100"
+            className="w-full px-3 py-2 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-lg text-sm font-semibold text-theme-primary dark:text-theme-primary"
             placeholder="What are you selling?"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Quantity</label>
+            <label className="block text-xs font-bold text-theme-muted mb-1">Quantity</label>
             <input
               type="number"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-100"
+              className="w-full px-3 py-2 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-lg text-sm font-semibold text-theme-primary dark:text-theme-primary"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Rate *</label>
+            <label className="block text-xs font-bold text-theme-muted mb-1">Rate *</label>
             <div className="relative">
-              <span className="absolute left-3 top-2 text-slate-400 font-bold">{businessSettings?.currency || '₹'}</span>
+              <span className="absolute left-3 top-2 text-theme-muted font-bold">{businessSettings?.currency || '₹'}</span>
               <input
                 type="number"
                 value={rate}
                 onChange={(e) => setRate(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-100"
+                className="w-full pl-8 pr-3 py-2 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-lg text-sm font-semibold text-theme-primary dark:text-theme-primary"
                 placeholder="0.00"
               />
             </div>
@@ -145,20 +145,20 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Total Amount</label>
-            <div className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 rounded-lg text-sm font-bold text-slate-800 dark:text-slate-100">
+            <label className="block text-xs font-bold text-theme-muted mb-1">Total Amount</label>
+            <div className="w-full px-3 py-2 bg-theme-surface dark:bg-theme-card border border-theme-border-soft rounded-lg text-sm font-bold text-theme-primary dark:text-theme-primary">
               {businessSettings?.currency || '₹'} {((parseFloat(quantity) || 1) * (parseFloat(rate) || 0)).toFixed(2)}
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Amount Paid</label>
+            <label className="block text-xs font-bold text-theme-muted mb-1">Amount Paid</label>
             <div className="relative">
-              <span className="absolute left-3 top-2 text-slate-400 font-bold">{businessSettings?.currency || '₹'}</span>
+              <span className="absolute left-3 top-2 text-theme-muted font-bold">{businessSettings?.currency || '₹'}</span>
               <input
                 type="number"
                 value={paidAmount}
                 onChange={(e) => setPaidAmount(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-teal-600"
+                className="w-full pl-8 pr-3 py-2 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-lg text-sm font-semibold text-theme-accent"
                 placeholder="Optional"
               />
             </div>
@@ -166,12 +166,12 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-500 mb-1">Notes (Optional)</label>
+          <label className="block text-xs font-bold text-theme-muted mb-1">Notes (Optional)</label>
           <input
             type="text"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-100"
+            className="w-full px-3 py-2 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-lg text-sm font-semibold text-theme-primary dark:text-theme-primary"
             placeholder="Add a note..."
           />
         </div>
@@ -180,13 +180,13 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
         <div className="pt-4 grid grid-cols-2 gap-3">
           <button
             onClick={() => handleSave(false)}
-            className="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl flex items-center justify-center gap-2"
+            className="w-full py-3 bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted font-bold rounded-xl flex items-center justify-center gap-2"
           >
             <Save className="w-4 h-4" /> Save Only
           </button>
           <button
             onClick={() => handleSave(true)}
-            className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl flex items-center justify-center gap-2"
+            className="w-full py-3 bg-theme-accent text-white font-bold rounded-xl flex items-center justify-center gap-2"
           >
             <Download className="w-4 h-4" /> Save & PDF
           </button>

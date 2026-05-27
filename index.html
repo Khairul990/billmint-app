@@ -19,17 +19,20 @@
     <script>
       (function() {
         try {
-          var localTheme = localStorage.getItem('billqyro_theme') || 'light';
-          document.documentElement.setAttribute('data-theme', localTheme);
-          if (localTheme === 'dark') {
+          var userTheme = localStorage.getItem('billqyro_theme_color');
+          var userMode = localStorage.getItem('billqyro_dark_mode');
+          
+          var adminTheme = localStorage.getItem('billqyro_admin_default_theme');
+          var adminMode = localStorage.getItem('billqyro_admin_default_mode');
+          
+          var activeTheme = userTheme || adminTheme || 'pink';
+          var isDark = userMode !== null ? userMode === 'true' : (adminMode === 'dark');
+          
+          document.documentElement.setAttribute('data-theme', activeTheme);
+          if (isDark) {
             document.documentElement.classList.add('dark');
-            document.documentElement.style.backgroundColor = '#04111F';
-          } else if (localTheme === 'rose') {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.style.backgroundColor = '#FFF1F2';
           } else {
             document.documentElement.classList.remove('dark');
-            document.documentElement.style.backgroundColor = '#F7F9FC';
           }
         } catch (e) {}
       })();
@@ -43,53 +46,325 @@
           position: fixed;
           inset: 0;
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          background-color: #f8fafc;
+          background-color: var(--app-bg, #f8fafc);
           z-index: 9999;
-          transition: opacity 0.5s ease-out;
+          transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
+          overflow: hidden;
         }
-        html.dark .splash-container {
-          background-color: #070c18;
+
+        /* Animated Background Gradients & Orbs */
+        .splash-bg-glow {
+          position: absolute;
+          width: 60vw;
+          height: 60vw;
+          max-width: 600px;
+          max-height: 600px;
+          background: radial-gradient(circle, var(--accent, #10b981) 0%, transparent 70%);
+          opacity: 0.12;
+          filter: blur(80px);
+          animation: float 8s ease-in-out infinite alternate;
+          border-radius: 50%;
         }
+        .splash-bg-glow.top-left { top: -20%; left: -10%; }
+        .splash-bg-glow.bottom-right { bottom: -20%; right: -10%; animation-delay: -4s; }
+
+        @keyframes float {
+          0% { transform: translate(0, 0) scale(1); }
+          100% { transform: translate(5%, 5%) scale(1.1); }
+        }
+
+        /* Glassmorphism Center Card */
+        .splash-card {
+          position: relative;
+          z-index: 10;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 3rem 4rem;
+          background: rgba(255, 255, 255, 0.6);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid var(--border-soft, rgba(0,0,0,0.05));
+          border-radius: 2.5rem;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05), 0 0 40px rgba(0,0,0,0.02);
+          animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          opacity: 0;
+          transform: translateY(20px) scale(0.95);
+        }
+
+        html.dark .splash-card {
+          background: rgba(20, 25, 35, 0.5);
+          border-color: rgba(255, 255, 255, 0.05);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255,255,255,0.02);
+        }
+
+        /* Logo Pulse & Glow */
+        .splash-logo-wrapper {
+          position: relative;
+          margin-bottom: 2rem;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .splash-logo-glow {
+          position: absolute;
+          inset: -1rem;
+          background: var(--accent, #10b981);
+          filter: blur(24px);
+          opacity: 0.2;
+          border-radius: 50%;
+          animation: pulseGlow 3s ease-in-out infinite alternate;
+        }
+
         .splash-logo {
-          width: 80px;
-          height: 80px;
-          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          position: relative;
+          width: 88px;
+          height: 88px;
+          color: var(--accent, #10b981);
+          animation: subtleScale 4s ease-in-out infinite alternate;
+          filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
         }
-        .splash-text {
-          margin-top: 1.5rem;
+
+        @keyframes pulseGlow {
+          0% { opacity: 0.1; transform: scale(0.9); }
+          100% { opacity: 0.3; transform: scale(1.1); }
+        }
+
+        @keyframes subtleScale {
+          0% { transform: scale(1); }
+          100% { transform: scale(1.05); }
+        }
+
+        /* SVG Logo Components Styling */
+        .logo-back-ring {
+          stroke: currentColor;
+          animation: pulseRing 3s ease-in-out infinite alternate;
+        }
+        @keyframes pulseRing {
+          0% { filter: drop-shadow(0px 0px 0px currentColor); }
+          100% { filter: drop-shadow(0px 0px 8px currentColor); }
+        }
+        
+        .logo-sheet {
+          fill: #ffffff;
+          filter: drop-shadow(0 20px 13px rgba(0,0,0,0.05)) drop-shadow(0 8px 5px rgba(0,0,0,0.05));
+        }
+        
+        html.dark .logo-sheet {
+          fill: #1e293b;
+          filter: drop-shadow(0 20px 13px rgba(0,0,0,0.3)) drop-shadow(0 8px 5px rgba(0,0,0,0.2));
+        }
+        
+        .logo-fold {
+          fill: url(#foldGradient);
+        }
+
+        html.dark .logo-fold {
+          fill: url(#foldGradientDark);
+        }
+        
+        .logo-accent-rect {
+          fill: currentColor;
+          animation: revealRect 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          transform-origin: left;
+          transform: scaleX(0);
+        }
+        
+        @keyframes revealRect {
+          to { transform: scaleX(1); }
+        }
+
+        .logo-rupee {
+          fill: currentColor;
+          animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+          opacity: 0;
+          transform: translate(39px, 56px) scale(0);
+          transform-origin: 10px 10px;
+        }
+        
+        @keyframes popIn {
+          to { opacity: 1; transform: translate(39px, 56px) scale(0.6); }
+        }
+
+        .logo-front-tail {
+          fill: currentColor;
+          animation: slideInTail 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          opacity: 0;
+          transform: translate(-10px, -10px);
+          filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+        }
+        
+        @keyframes slideInTail {
+          to { opacity: 1; transform: translate(0, 0); }
+        }
+
+        /* Text and Typography */
+        .splash-text-container {
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          gap: 0.6rem;
+        }
+
+        .splash-title {
           font-family: 'Inter', system-ui, sans-serif;
-          font-size: 1.5rem;
+          font-size: 1.8rem;
           font-weight: 900;
-          letter-spacing: -0.025em;
-          color: #0f172a;
+          letter-spacing: -0.03em;
+          color: var(--text-primary, #0f172a);
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-        html.dark .splash-text {
+
+        html.dark .splash-title {
           color: #ffffff;
         }
-        .splash-text-qyro {
-          color: #10b981;
+
+        .splash-title span {
+          color: var(--accent, #10b981);
         }
+
         .splash-subtitle {
-          margin-top: 0.5rem;
           font-family: 'Inter', system-ui, sans-serif;
-          font-size: 0.65rem;
-          font-weight: 900;
-          letter-spacing: 0.15em;
-          color: #64748b;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          color: var(--text-muted, #64748b);
           text-transform: uppercase;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 200px;
         }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: .7; transform: scale(0.95); }
+
+        /* Animated Loading Dots */
+        .loading-dots {
+          display: inline-block;
+          width: 1.2em;
+          text-align: left;
+        }
+        
+        .loading-dots::after {
+          content: '';
+          animation: dots 1.5s infinite steps(4, end);
+        }
+
+        @keyframes dots {
+          0%, 20% { content: ''; }
+          40% { content: '.'; }
+          60% { content: '..'; }
+          80%, 100% { content: '...'; }
+        }
+
+        /* Thin Animated Progress Line */
+        .splash-progress-track {
+          margin-top: 2rem;
+          width: 100%;
+          max-width: 220px;
+          height: 2px;
+          background: var(--border-soft, rgba(0,0,0,0.05));
+          border-radius: 2px;
+          overflow: hidden;
+          position: relative;
+        }
+
+        html.dark .splash-progress-track {
+          background: rgba(255,255,255,0.05);
+        }
+
+        .splash-progress-bar {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 30%;
+          background: var(--accent, #10b981);
+          border-radius: 2px;
+          animation: progress 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes progress {
+          0% { transform: translateX(-150%) scaleX(0.2); }
+          50% { transform: translateX(100%) scaleX(1.5); }
+          100% { transform: translateX(350%) scaleX(0.2); }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+          .splash-card {
+            padding: 2.5rem 2rem;
+            width: 90%;
+            max-width: 340px;
+          }
+          .splash-logo {
+            width: 76px;
+            height: 76px;
+          }
+          .splash-title {
+            font-size: 1.6rem;
+          }
         }
       </style>
       <div class="splash-container">
-        <img src="/logo.svg" alt="BillQyro" class="splash-logo" />
-        <div class="splash-text">Bill<span class="splash-text-qyro">Qyro</span></div>
-        <div class="splash-subtitle">Loading Platform...</div>
+        <!-- Floating Glow Orbs -->
+        <div class="splash-bg-glow top-left"></div>
+        <div class="splash-bg-glow bottom-right"></div>
+        
+        <!-- Center Glass Card -->
+        <div class="splash-card">
+          <!-- Logo & Glow -->
+          <div class="splash-logo-wrapper">
+            <div class="splash-logo-glow"></div>
+            <!-- Official BillQyro SVG Logo (from Logo.jsx) -->
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="splash-logo">
+              <defs>
+                <linearGradient id="foldGradient" x1="0" y1="1" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#cbd5e1" />
+                  <stop offset="100%" stop-color="#ffffff" />
+                </linearGradient>
+                <linearGradient id="foldGradientDark" x1="0" y1="1" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#334155" />
+                  <stop offset="100%" stop-color="#1e293b" />
+                </linearGradient>
+              </defs>
+              
+              <!-- 1. The Accent Q Ring -->
+              <circle cx="45" cy="45" r="32" fill="none" stroke-width="16" class="logo-back-ring" />
+              
+              <!-- 2. Premium Invoicing Document Sheet -->
+              <path d="M30 15 H55 L70 30 V70 C70 73 67 76 64 76 H30 C27 76 24 73 24 70 V21 C24 18 27 15 30 15 Z" class="logo-sheet" />
+              
+              <!-- Folded paper corner -->
+              <path d="M55 15 V30 H70 Z" class="logo-fold" />
+              
+              <!-- Three premium horizontal invoice lines -->
+              <rect x="35" y="32" width="22" height="4" rx="2" class="logo-accent-rect" style="animation-delay: 0.3s;" />
+              <rect x="35" y="42" width="26" height="4" rx="2" class="logo-accent-rect" style="animation-delay: 0.4s;" />
+              <rect x="35" y="52" width="14" height="4" rx="2" class="logo-accent-rect" style="animation-delay: 0.5s;" />
+              
+              <!-- Bold Rupee ₹ Symbol -->
+              <path class="logo-rupee" style="animation-delay: 0.6s;" d="M19.5,14 H10 V11 H13.5 C15.5,11 17,10 17,8 C17,6.5 15.5,5.5 13.5,5.5 H10 V3 H20 V0 H6 V3 H10 C12,3 13,4 13,5.5 C13,7 12,8 10,8 H6 V11 H10 V14 H6 V17 H10.5 L19.5,28 H24 L14.5,17 H19.5 V14 Z" />
+              
+              <!-- 3. The Accent Q Tail -->
+              <path d="M 50 50 L 78 80 C 80 82 78 85 75 85 L 62 85 C 60 85 58 84 56 82 L 36 60 Z" class="logo-front-tail" style="animation-delay: 0.7s;" />
+            </svg>
+          </div>
+
+          <!-- Text content -->
+          <div class="splash-text-container">
+            <div class="splash-title">Bill<span>Qyro</span></div>
+            <div class="splash-subtitle">Initializing BillQyro Workspace<span class="loading-dots"></span></div>
+          </div>
+
+          <!-- Progress Line -->
+          <div class="splash-progress-track">
+            <div class="splash-progress-bar"></div>
+          </div>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>

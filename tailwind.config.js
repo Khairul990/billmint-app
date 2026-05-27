@@ -12,62 +12,37 @@ export default {
       },
       colors: {
         theme: {
-          background: 'var(--theme-background)',
-          sidebar: 'var(--theme-sidebar)',
-          card: 'var(--theme-card)',
-          text: 'var(--theme-text)',
-          muted: 'var(--theme-muted-text)',
-          primary: 'var(--theme-primary)',
-          accent: 'var(--theme-accent)',
-          softAccent: 'var(--theme-soft-accent)',
-          border: 'var(--theme-border)',
-          btnFrom: 'var(--theme-btn-from)',
-          btnTo: 'var(--theme-btn-to)',
-        },
-        // Redefining standard colors to map perfectly to the BillQyro logo style
-        slate: {
-          50: '#f0f3f6',   // Sophisticated cool pearl slate (less harsh/bright)
-          100: '#e2e7ec',  // Refined soft border
-          200: '#d0d7de',
-          300: '#b0c0d4',
-          400: '#849bba',
-          500: '#5a759c',  // Muted gray-blue secondary text
-          600: '#435b80',
-          700: '#324663',
-          800: '#1b273b',  // Premium dark surface border/details
-          900: '#0f172a',  // Rich dark navy primary text / surfaces
-          950: '#070d19',  // Deepest luxury dark mode navy background
-        },
-        indigo: {
-          50: '#effaf5',   // Soft minty surface accent
-          100: '#d7f5e9',  // Light mint border
-          200: '#aff0d6',
-          300: '#7ce7bf',
-          400: '#4adba5',
-          500: '#10B981',  // Brand Mint highlight (standard emerald/mint)
-          600: '#059669',  // Rich brand mint
-          700: '#047857',
-          800: '#065f46',
-          900: '#064e3b',
-          950: '#022c22',
-        },
-        blue: {
-          50: '#ecfeff',   // Soft teal-cyan surface
-          100: '#cffafe',  // Light teal-cyan border
-          200: '#a5f3fc',
-          300: '#67e8f9',
-          400: '#22d3ee',
-          500: '#06b6d4',  // Brand Teal-Cyan secondary highlight
-          600: '#0891b2',  // Rich brand teal
-          700: '#0e7490',
-          800: '#155e75',
-          900: '#164e63',
-          950: '#083344',
+          app: 'var(--app-bg)',
+          'app-soft': 'var(--app-bg-soft)',
+          surface: 'var(--surface)',
+          'surface-elevated': 'var(--surface-elevated)',
+          card: 'var(--card-bg)',
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          muted: 'var(--text-muted)',
+          'button-text': 'var(--button-text)',
+          'border-soft': 'var(--border-soft)',
+          'border-strong': 'var(--border-strong)',
+          accent: 'var(--accent)',
+          'accent-light': 'var(--accent-light)',
+          'accent-dark': 'var(--accent-dark)',
+          'sidebar-bg': 'var(--sidebar-bg)',
+          'sidebar-active': 'var(--sidebar-active)',
+          'sidebar-text': 'var(--sidebar-text)',
+          'input-bg': 'var(--input-bg)',
+          'chart-primary': 'var(--chart-primary)',
+          success: 'var(--status-success)',
+          warning: 'var(--status-warning)',
+          danger: 'var(--status-danger)',
         }
+      },
+      backgroundImage: {
+        'theme-accent-gradient': 'var(--accent-gradient)',
       },
       boxShadow: {
         'premium': '0 4px 20px -2px rgba(7, 13, 25, 0.03), 0 2px 8px -1px rgba(7, 13, 25, 0.02)',
         'premium-hover': '0 10px 25px -3px rgba(7, 13, 25, 0.06), 0 4px 12px -2px rgba(7, 13, 25, 0.03)',
+        'theme-glow': '0 4px 24px -4px var(--accent-glow)',
       }
     },
   },

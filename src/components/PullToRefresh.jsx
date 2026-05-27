@@ -77,8 +77,8 @@ const PullToRefresh = ({ onRefresh, children }) => {
           opacity: isPulling || isRefreshing ? 1 : 0
         }}
       >
-        <div className={`p-2 bg-white dark:bg-slate-900 rounded-full shadow-md flex items-center justify-center transition-transform ${isRefreshing ? 'animate-spin' : ''}`} style={{ transform: `rotate(${Math.min(pullDistance, 180)}deg)` }}>
-          <RefreshCw className={`w-5 h-5 ${isThresholdMet || isRefreshing ? 'text-indigo-600' : 'text-slate-400'}`} />
+        <div className={`p-2 bg-theme-card dark:bg-theme-card rounded-full shadow-md flex items-center justify-center transition-transform ${isRefreshing ? 'animate-spin' : ''}`} style={{ transform: `rotate(${Math.min(pullDistance, 180)}deg)` }}>
+          <RefreshCw className={`w-5 h-5 ${isThresholdMet || isRefreshing ? 'text-theme-accent' : 'text-theme-muted'}`} />
         </div>
       </div>
       
