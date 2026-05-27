@@ -4,6 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  font-size: 14px;
+}
+
 @layer base {
   :root, [data-theme="light"] {
     --theme-background: #f0f3f6; /* Matching our custom Pearl Slate background */
