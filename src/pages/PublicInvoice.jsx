@@ -71,7 +71,7 @@ const PublicInvoice = ({ initialInvoice }) => {
         <div className="w-full max-w-lg bg-theme-card border border-slate-800 rounded-3xl p-5 text-left font-mono text-[11px] text-theme-muted space-y-2.5 shadow-2xl">
           <div className="font-extrabold text-theme-accent border-b border-slate-800 pb-2 uppercase text-[10px] tracking-wider flex items-center justify-between">
             <span>System Diagnostics (DEBUG)</span>
-            <span className="bg-indigo-950 text-theme-accent px-2 py-0.5 rounded-full text-[8px] font-black">Live</span>
+            <span className="bg-theme-accent-dark text-theme-accent px-2 py-0.5 rounded-full text-[8px] font-black">Live</span>
           </div>
           <div>
             <span className="text-theme-muted">Requested Token:</span>{' '}
@@ -815,7 +815,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                   {business.phone && (
                     <a
                       href={`tel:${business.phone}`}
-                      className="w-full flex items-center justify-center gap-2 py-2 bg-theme-accent-light hover:bg-theme-accent-light text-theme-accent font-bold rounded-xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-theme-accent"
+                      className="w-full flex items-center justify-center gap-2 py-2 bg-theme-accent-light hover:bg-theme-accent-light text-theme-accent font-bold rounded-xl transition-all cursor-pointer dark:bg-theme-accent-light dark:text-theme-accent"
                     >
                       <Phone className="w-4 h-4" />
                       <span>Call {business.phone}</span>
@@ -824,7 +824,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                   {business.email && (
                     <a
                       href={`mailto:${business.email}?subject=Inquiry%20Invoice%20${invoice.invoiceNumber}`}
-                      className="w-full flex items-center justify-center gap-2 py-2 bg-theme-accent-light hover:bg-theme-accent-light text-theme-accent font-bold rounded-xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-theme-accent"
+                      className="w-full flex items-center justify-center gap-2 py-2 bg-theme-accent-light hover:bg-theme-accent-light text-theme-accent font-bold rounded-xl transition-all cursor-pointer dark:bg-theme-accent-light dark:text-theme-accent"
                     >
                       <Mail className="w-4 h-4" />
                       <span>Email Representative</span>

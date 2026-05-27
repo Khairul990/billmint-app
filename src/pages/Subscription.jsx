@@ -275,7 +275,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
  
           <div className="mt-8 pt-4 border-t border-white/5 relative z-10">
             {isPremium ? (
-              <div className="w-full py-3.5 bg-indigo-950/30 border border-theme-border-soft rounded-2xl text-center text-xs font-bold text-theme-accent flex flex-col gap-0.5">
+              <div className="w-full py-3.5 bg-theme-accent-light border border-theme-border-soft rounded-2xl text-center text-xs font-bold text-theme-accent flex flex-col gap-0.5">
                 <span>Premium Plan Active</span>
                 <span className="text-[9px] font-medium text-theme-accent">Expires: {getExpiryDateString()}</span>
               </div>
@@ -363,7 +363,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                   {country === 'Bangladesh' && (
                     <div className="space-y-3">
                       <div className="space-y-2">
-                        <div className="p-2 bg-pink-500/10 border border-pink-500/20 text-pink-500 rounded-lg flex justify-between items-center">
+                        <div className="p-2 bg-theme-accent-light border border-theme-accent/20 text-theme-accent rounded-lg flex justify-between items-center">
                           <span className="font-black text-[9px] uppercase">bKash Personal / SendMoney</span>
                           <span className="font-mono font-black select-all">01700-123456</span>
                         </div>
@@ -371,7 +371,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                           <span className="font-black text-[9px] uppercase">Nagad Personal / SendMoney</span>
                           <span className="font-mono font-black select-all">01900-123456</span>
                         </div>
-                        <div className="p-2 bg-purple-500/10 border border-purple-500/20 text-purple-500 rounded-lg flex justify-between items-center">
+                        <div className="p-2 bg-theme-accent-light border border-theme-accent/20 text-theme-accent rounded-lg flex justify-between items-center">
                           <span className="font-black text-[9px] uppercase">Rocket Personal Number</span>
                           <span className="font-mono font-black select-all">01800-123456</span>
                         </div>

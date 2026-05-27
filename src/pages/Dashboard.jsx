@@ -831,7 +831,7 @@ const Dashboard = ({
 
             <div className="space-y-3">
               {recentInvoices.map((invoice) => (
-                <InvoiceCard
+                <InvoiceCard compact={true}
                   key={invoice.id}
                   invoice={invoice}
                   currencySymbol={currencySymbol}

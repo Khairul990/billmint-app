@@ -446,8 +446,40 @@ function App() {
     triggerSuccessFeedback();
 
     if (unlinkedItems) {
-      toast.error('Some items were not linked to inventory, so stock was not updated for them.', { icon: '⚠️', duration: 4000 });
+      toast.custom(
+        (t) => (
+          <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-amber-50 dark:bg-amber-950/40 shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-amber-500/30`}>
+            <div className="flex-1 w-0 p-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 pt-0.5">
+                  <span className="text-xl">⚠️</span>
+                </div>
+                <div className="ml-3 flex-1">
+                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                    Some bill items are not linked to products, so inventory stock was not updated.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex border-l border-amber-500/20">
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                  setCurrentTab('products');
+                }}
+                className="w-full border border-transparent rounded-none rounded-r-xl p-4 flex items-center justify-center text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 focus:outline-none transition-colors"
+              >
+                Link Products
+              </button>
+            </div>
+          </div>
+        ),
+        { duration: 6000 }
+      );
+    } else if (productsUpdated) {
+      toast.success('Inventory stock updated successfully.', { duration: 4000 });
     }
+
     if (lowStockWarning) {
       toast.error('Low stock or insufficient stock for some products.', { duration: 4000 });
     }

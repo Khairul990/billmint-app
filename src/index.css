@@ -11,32 +11,32 @@ html {
 @layer base {
   /* 1. Pink Premium */
   :root, [data-theme="pink"] {
-    --app-bg: #FFF9FA; /* warm ivory / soft white */
-    --app-bg-soft: #FCE8F0; /* soft blush pink */
+    --app-bg: #FFF7FB;
+    --app-bg-soft: #FCE7F3;
     --surface: #FFFFFF;
     --surface-elevated: #FFFFFF;
     --card-bg: #FFFFFF;
     
-    --text-primary: #2D1A25; /* dark charcoal / dark plum */
-    --text-secondary: #5A3A4A; /* cocoa / slate-brown */
-    --text-muted: #8F7281; /* readable warm gray, not too light */
+    --text-primary: #21111D;
+    --text-secondary: #10122B;
+    --text-muted: #10122B;
     --button-text: #FFFFFF;
     
-    --border-soft: rgba(225, 29, 72, 0.15); /* very soft rose-gray */
-    --border-strong: rgba(225, 29, 72, 0.3);
+    --border-soft: rgba(236, 72, 153, 0.15);
+    --border-strong: rgba(236, 72, 153, 0.3);
     
-    --accent: #E11D48; /* rose pink */
-    --accent-light: rgba(225, 29, 72, 0.08); /* very light pink */
-    --accent-dark: #BE123C;
-    --accent-gradient: linear-gradient(135deg, #E11D48, #F472B6); /* rose pink to soft blush pink */
-    --accent-glow: rgba(225, 29, 72, 0.25); /* very subtle pink glow */
+    --accent: #EC4899;
+    --accent-light: rgba(236, 72, 153, 0.08);
+    --accent-dark: #10122B;
+    --accent-gradient: linear-gradient(135deg, #EC4899, #FB7185);
+    --accent-glow: rgba(236, 72, 153, 0.25);
     
-    --sidebar-bg: #FFF9FA; /* soft white/ivory */
-    --sidebar-active: rgba(225, 29, 72, 0.1);
-    --sidebar-text: #2D1A25; /* dark and readable */
+    --sidebar-bg: #FFF7FB;
+    --sidebar-active: rgba(236, 72, 153, 0.1);
+    --sidebar-text: #21111D;
     
     --input-bg: #FFFFFF;
-    --chart-primary: #E11D48;
+    --chart-primary: #EC4899;
     
     --status-success: #10B981;
     --status-warning: #F59E0B;
@@ -44,99 +44,99 @@ html {
   }
   
   .dark, .dark[data-theme="pink"], [data-theme="pink"].dark {
-    --app-bg: #0B0715;
-    --app-bg-soft: #120A1F;
-    --surface: #06030A;
-    --surface-elevated: #1A0F2E;
-    --card-bg: #130D26;
+    --app-bg: #07081C;
+    --app-bg-soft: #151735;
+    --surface: #07081C;
+    --surface-elevated: #151735;
+    --card-bg: #10122B;
     
-    --text-primary: #FDF4F8;
-    --text-secondary: #E3C8D7;
-    --text-muted: #A38496;
+    --text-primary: #FFF7FB;
+    --text-secondary: #FFF7FB;
+    --text-muted: rgba(255, 255, 255, 0.5);
     --button-text: #FFFFFF;
     
     --border-soft: rgba(236, 72, 153, 0.15);
     --border-strong: rgba(236, 72, 153, 0.3);
     
-    --accent: #F472B6;
-    --accent-light: rgba(244, 114, 182, 0.15);
-    --accent-dark: #DB2777;
-    --accent-gradient: linear-gradient(135deg, #F472B6, #A78BFA);
-    --accent-glow: rgba(244, 114, 182, 0.3);
+    --accent: #EC4899;
+    --accent-light: rgba(236, 72, 153, 0.15);
+    --accent-dark: #FB7185;
+    --accent-gradient: linear-gradient(135deg, #EC4899, #FB7185);
+    --accent-glow: rgba(236, 72, 153, 0.3);
     
-    --sidebar-bg: #06030A;
-    --sidebar-active: rgba(244, 114, 182, 0.15);
-    --sidebar-text: #FDF4F8;
+    --sidebar-bg: #07081C;
+    --sidebar-active: rgba(236, 72, 153, 0.15);
+    --sidebar-text: #FFF7FB;
     
-    --input-bg: #130D26;
-    --chart-primary: #F472B6;
+    --input-bg: #10122B;
+    --chart-primary: #FB7185;
     
     --status-success: #10B981;
     --status-warning: #F59E0B;
     --status-danger: #EF4444;
   }
 
-  /* 2. Blue Professional */
-  [data-theme="blue"] {
-    --app-bg: #F4F7FB;
-    --app-bg-soft: #EBF1F8;
+  /* 2. Royal Indigo */
+  [data-theme="indigo"] {
+    --app-bg: #F5F3FF;
+    --app-bg-soft: #EDE9FE;
     --surface: #FFFFFF;
     --surface-elevated: #FFFFFF;
     --card-bg: #FFFFFF;
     
-    --text-primary: #0F172A;
-    --text-secondary: #334155;
-    --text-muted: #64748B;
+    --text-primary: #1E1B4B;
+    --text-secondary: #312E81;
+    --text-muted: #312E81;
     --button-text: #FFFFFF;
     
-    --border-soft: rgba(59, 130, 246, 0.15);
-    --border-strong: rgba(59, 130, 246, 0.3);
+    --border-soft: rgba(91, 52, 214, 0.15);
+    --border-strong: rgba(91, 52, 214, 0.3);
     
-    --accent: #3B82F6;
-    --accent-light: rgba(59, 130, 246, 0.1);
-    --accent-dark: #1D4ED8;
-    --accent-gradient: linear-gradient(135deg, #2563EB, #06B6D4);
-    --accent-glow: rgba(59, 130, 246, 0.3);
+    --accent: #5B34D6;
+    --accent-light: rgba(91, 52, 214, 0.08);
+    --accent-dark: #312E81;
+    --accent-gradient: linear-gradient(135deg, #5B34D6, #7C3AED);
+    --accent-glow: rgba(91, 52, 214, 0.25);
     
-    --sidebar-bg: #0B1727;
-    --sidebar-active: rgba(59, 130, 246, 0.15);
-    --sidebar-text: #FFFFFF;
+    --sidebar-bg: #F5F3FF;
+    --sidebar-active: rgba(91, 52, 214, 0.1);
+    --sidebar-text: #1E1B4B;
     
     --input-bg: #FFFFFF;
-    --chart-primary: #3B82F6;
+    --chart-primary: #5B34D6;
     
     --status-success: #10B981;
     --status-warning: #F59E0B;
     --status-danger: #EF4444;
   }
-
-  .dark[data-theme="blue"] {
-    --app-bg: #090E17;
-    --app-bg-soft: #0D1421;
-    --surface: #04070B;
-    --surface-elevated: #162032;
-    --card-bg: #121A27;
+  
+  .dark[data-theme="indigo"] {
+    --app-bg: #080712;
+    --app-bg-soft: #141026;
+    --surface: #080712;
+    --surface-elevated: #141026;
+    --card-bg: #1D1638;
     
-    --text-primary: #F8FAFC;
-    --text-secondary: #CBD5E1;
-    --text-muted: #94A3B8;
+    --text-primary: #F8F7FF;
+    --text-secondary: #F8F7FF;
+    --text-muted: rgba(255, 255, 255, 0.5);
     --button-text: #FFFFFF;
     
-    --border-soft: rgba(96, 165, 250, 0.15);
-    --border-strong: rgba(96, 165, 250, 0.3);
+    --border-soft: rgba(91, 52, 214, 0.15);
+    --border-strong: rgba(91, 52, 214, 0.3);
     
-    --accent: #60A5FA;
-    --accent-light: rgba(96, 165, 250, 0.15);
-    --accent-dark: #2563EB;
-    --accent-gradient: linear-gradient(135deg, #3B82F6, #22D3EE);
-    --accent-glow: rgba(96, 165, 250, 0.3);
+    --accent: #5B34D6;
+    --accent-light: rgba(91, 52, 214, 0.15);
+    --accent-dark: #7C3AED;
+    --accent-gradient: linear-gradient(135deg, #5B34D6, #7C3AED);
+    --accent-glow: rgba(91, 52, 214, 0.3);
     
-    --sidebar-bg: #04070B;
-    --sidebar-active: rgba(96, 165, 250, 0.15);
-    --sidebar-text: #F8FAFC;
+    --sidebar-bg: #080712;
+    --sidebar-active: rgba(91, 52, 214, 0.15);
+    --sidebar-text: #F8F7FF;
     
-    --input-bg: #121A27;
-    --chart-primary: #60A5FA;
+    --input-bg: #1D1638;
+    --chart-primary: #7C3AED;
     
     --status-success: #10B981;
     --status-warning: #F59E0B;
@@ -145,64 +145,64 @@ html {
 
   /* 3. Emerald Business */
   [data-theme="emerald"] {
-    --app-bg: #ECFDF5;
-    --app-bg-soft: #D1FAE5;
+    --app-bg: #F4FBF8;
+    --app-bg-soft: #DCFCE7;
     --surface: #FFFFFF;
     --surface-elevated: #FFFFFF;
     --card-bg: #FFFFFF;
     
-    --text-primary: #022C22;
-    --text-secondary: #064E3B;
-    --text-muted: #059669;
+    --text-primary: #12372A;
+    --text-secondary: #12372A;
+    --text-muted: #12372A;
     --button-text: #FFFFFF;
     
-    --border-soft: rgba(16, 185, 129, 0.15);
-    --border-strong: rgba(16, 185, 129, 0.3);
+    --border-soft: rgba(5, 150, 105, 0.15);
+    --border-strong: rgba(5, 150, 105, 0.3);
     
-    --accent: #10B981;
-    --accent-light: rgba(16, 185, 129, 0.1);
-    --accent-dark: #047857;
-    --accent-gradient: linear-gradient(135deg, #059669, #0D9488);
-    --accent-glow: rgba(16, 185, 129, 0.3);
+    --accent: #059669;
+    --accent-light: rgba(5, 150, 105, 0.08);
+    --accent-dark: #12372A;
+    --accent-gradient: linear-gradient(135deg, #059669, #34D399);
+    --accent-glow: rgba(5, 150, 105, 0.25);
     
-    --sidebar-bg: #064E3B;
-    --sidebar-active: rgba(16, 185, 129, 0.15);
-    --sidebar-text: #FFFFFF;
+    --sidebar-bg: #F4FBF8;
+    --sidebar-active: rgba(5, 150, 105, 0.1);
+    --sidebar-text: #12372A;
     
     --input-bg: #FFFFFF;
-    --chart-primary: #10B981;
+    --chart-primary: #059669;
     
     --status-success: #10B981;
     --status-warning: #F59E0B;
     --status-danger: #EF4444;
   }
-
+  
   .dark[data-theme="emerald"] {
-    --app-bg: #02120C;
-    --app-bg-soft: #031F15;
-    --surface: #010A07;
-    --surface-elevated: #06281C;
-    --card-bg: #051A13;
+    --app-bg: #071A14;
+    --app-bg-soft: #0D241C;
+    --surface: #071A14;
+    --surface-elevated: #0D241C;
+    --card-bg: #12372A;
     
     --text-primary: #ECFDF5;
-    --text-secondary: #A7F3D0;
-    --text-muted: #6EE7B7;
+    --text-secondary: #ECFDF5;
+    --text-muted: rgba(255, 255, 255, 0.5);
     --button-text: #FFFFFF;
     
-    --border-soft: rgba(52, 211, 153, 0.15);
-    --border-strong: rgba(52, 211, 153, 0.3);
+    --border-soft: rgba(5, 150, 105, 0.15);
+    --border-strong: rgba(5, 150, 105, 0.3);
     
-    --accent: #34D399;
-    --accent-light: rgba(52, 211, 153, 0.15);
-    --accent-dark: #059669;
-    --accent-gradient: linear-gradient(135deg, #10B981, #14B8A6);
-    --accent-glow: rgba(52, 211, 153, 0.3);
+    --accent: #059669;
+    --accent-light: rgba(5, 150, 105, 0.15);
+    --accent-dark: #34D399;
+    --accent-gradient: linear-gradient(135deg, #059669, #34D399);
+    --accent-glow: rgba(5, 150, 105, 0.3);
     
-    --sidebar-bg: #010A07;
-    --sidebar-active: rgba(52, 211, 153, 0.15);
+    --sidebar-bg: #071A14;
+    --sidebar-active: rgba(5, 150, 105, 0.15);
     --sidebar-text: #ECFDF5;
     
-    --input-bg: #051A13;
+    --input-bg: #12372A;
     --chart-primary: #34D399;
     
     --status-success: #10B981;
@@ -210,134 +210,268 @@ html {
     --status-danger: #EF4444;
   }
 
-  /* 4. Purple Luxury */
-  [data-theme="purple"] {
-    --app-bg: #FDFBFF;
-    --app-bg-soft: #F5F3FA;
+  /* 4. Rose Gold Luxe */
+  [data-theme="rose"] {
+    --app-bg: #FFF8F2;
+    --app-bg-soft: #FFE4E6;
     --surface: #FFFFFF;
     --surface-elevated: #FFFFFF;
     --card-bg: #FFFFFF;
     
-    --text-primary: #231139;
-    --text-secondary: #4C3A62;
-    --text-muted: #7E6B97;
+    --text-primary: #2A1714;
+    --text-secondary: #3A1F1A;
+    --text-muted: #3A1F1A;
     --button-text: #FFFFFF;
     
-    --border-soft: rgba(139, 92, 246, 0.15);
-    --border-strong: rgba(139, 92, 246, 0.3);
+    --border-soft: rgba(244, 63, 94, 0.15);
+    --border-strong: rgba(244, 63, 94, 0.3);
     
-    --accent: #8B5CF6;
-    --accent-light: rgba(139, 92, 246, 0.1);
-    --accent-dark: #5B21B6;
-    --accent-gradient: linear-gradient(135deg, #7C3AED, #EC4899);
-    --accent-glow: rgba(139, 92, 246, 0.3);
+    --accent: #F43F5E;
+    --accent-light: rgba(244, 63, 94, 0.08);
+    --accent-dark: #3A1F1A;
+    --accent-gradient: linear-gradient(135deg, #F43F5E, #D4A44A);
+    --accent-glow: rgba(244, 63, 94, 0.25);
     
-    --sidebar-bg: #1B0F2A;
-    --sidebar-active: rgba(139, 92, 246, 0.15);
-    --sidebar-text: #FFFFFF;
+    --sidebar-bg: #FFF8F2;
+    --sidebar-active: rgba(244, 63, 94, 0.1);
+    --sidebar-text: #2A1714;
     
     --input-bg: #FFFFFF;
-    --chart-primary: #8B5CF6;
+    --chart-primary: #F43F5E;
     
     --status-success: #10B981;
     --status-warning: #F59E0B;
     --status-danger: #EF4444;
   }
-
-  .dark[data-theme="purple"] {
-    --app-bg: #0C0614;
-    --app-bg-soft: #140A21;
-    --surface: #050209;
-    --surface-elevated: #1D0F30;
-    --card-bg: #150A24;
+  
+  .dark[data-theme="rose"] {
+    --app-bg: #150B08;
+    --app-bg-soft: #281611;
+    --surface: #150B08;
+    --surface-elevated: #281611;
+    --card-bg: #20110D;
     
-    --text-primary: #F5F3FA;
-    --text-secondary: #DDD6EA;
-    --text-muted: #A79BB8;
+    --text-primary: #FFF7ED;
+    --text-secondary: #FFF7ED;
+    --text-muted: rgba(255, 255, 255, 0.5);
     --button-text: #FFFFFF;
     
-    --border-soft: rgba(167, 139, 250, 0.15);
-    --border-strong: rgba(167, 139, 250, 0.3);
+    --border-soft: rgba(244, 63, 94, 0.15);
+    --border-strong: rgba(244, 63, 94, 0.3);
     
-    --accent: #A78BFA;
-    --accent-light: rgba(167, 139, 250, 0.15);
-    --accent-dark: #7C3AED;
-    --accent-gradient: linear-gradient(135deg, #8B5CF6, #F472B6);
-    --accent-glow: rgba(167, 139, 250, 0.3);
-    
-    --sidebar-bg: #050209;
-    --sidebar-active: rgba(167, 139, 250, 0.15);
-    --sidebar-text: #F5F3FA;
-    
-    --input-bg: #150A24;
-    --chart-primary: #A78BFA;
-    
-    --status-success: #10B981;
-    --status-warning: #F59E0B;
-    --status-danger: #EF4444;
-  }
-
-  /* 5. Rose Gold */
-  [data-theme="rose"] {
-    --app-bg: #FFF9F6; /* warm ivory */
-    --app-bg-soft: #FDEEE6; /* light cream */
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
-    --card-bg: #FFFFFF;
-    
-    --text-primary: #3E2422; /* dark chocolate */
-    --text-secondary: #6A4441; /* cocoa */
-    --text-muted: #A37E7B; /* soft brown/rose */
-    --button-text: #FFFFFF;
-    
-    --border-soft: rgba(244, 63, 94, 0.2);
-    --border-strong: rgba(217, 119, 6, 0.4);
-    
-    --accent: #E11D48; /* rose */
-    --accent-light: rgba(244, 63, 94, 0.1);
-    --accent-dark: #BE123C;
-    --accent-gradient: linear-gradient(135deg, #E11D48, #D97706); /* rose to soft gold */
+    --accent: #F43F5E;
+    --accent-light: rgba(244, 63, 94, 0.15);
+    --accent-dark: #D4A44A;
+    --accent-gradient: linear-gradient(135deg, #F43F5E, #D4A44A);
     --accent-glow: rgba(244, 63, 94, 0.3);
     
-    --sidebar-bg: #2E1B1A; /* dark warm brown/espresso */
+    --sidebar-bg: #150B08;
     --sidebar-active: rgba(244, 63, 94, 0.15);
-    --sidebar-text: #FFF9F6;
+    --sidebar-text: #FFF7ED;
     
-    --input-bg: #FFFFFF;
-    --chart-primary: #D97706; /* soft gold */
+    --input-bg: #20110D;
+    --chart-primary: #D4A44A;
     
     --status-success: #10B981;
     --status-warning: #F59E0B;
     --status-danger: #EF4444;
   }
 
-  .dark[data-theme="rose"] {
-    --app-bg: #1C1311; /* dark espresso */
-    --app-bg-soft: #251917;
-    --surface: #0E0908;
-    --surface-elevated: #362522;
-    --card-bg: #2A1C1A; /* dark warm brown */
+  /* 5. Midnight Blue */
+  [data-theme="midnight"] {
+    --app-bg: #F5FAFF;
+    --app-bg-soft: #DBEAFE;
+    --surface: #FFFFFF;
+    --surface-elevated: #FFFFFF;
+    --card-bg: #FFFFFF;
     
-    --text-primary: #FFF3EC; /* warm white */
-    --text-secondary: #E3CDC2;
-    --text-muted: #C09A8F;
+    --text-primary: #081A35;
+    --text-secondary: #081A35;
+    --text-muted: #081A35;
     --button-text: #FFFFFF;
     
-    --border-soft: rgba(251, 113, 133, 0.15);
-    --border-strong: rgba(251, 113, 133, 0.3);
+    --border-soft: rgba(37, 99, 235, 0.15);
+    --border-strong: rgba(37, 99, 235, 0.3);
     
-    --accent: #FB7185;
-    --accent-light: rgba(251, 113, 133, 0.15);
-    --accent-dark: #E11D48;
-    --accent-gradient: linear-gradient(135deg, #F43F5E, #FCD34D); /* rose to amber/gold */
-    --accent-glow: rgba(251, 113, 133, 0.3);
+    --accent: #2563EB;
+    --accent-light: rgba(37, 99, 235, 0.08);
+    --accent-dark: #081A35;
+    --accent-gradient: linear-gradient(135deg, #2563EB, #38BDF8);
+    --accent-glow: rgba(37, 99, 235, 0.25);
     
-    --sidebar-bg: #0E0908;
-    --sidebar-active: rgba(251, 113, 133, 0.15);
-    --sidebar-text: #FFF3EC;
+    --sidebar-bg: #F5FAFF;
+    --sidebar-active: rgba(37, 99, 235, 0.1);
+    --sidebar-text: #081A35;
     
-    --input-bg: #2A1C1A;
-    --chart-primary: #FCD34D;
+    --input-bg: #FFFFFF;
+    --chart-primary: #2563EB;
+    
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  
+  .dark[data-theme="midnight"] {
+    --app-bg: #06101F;
+    --app-bg-soft: #0B1B35;
+    --surface: #06101F;
+    --surface-elevated: #0B1B35;
+    --card-bg: #081A35;
+    
+    --text-primary: #F5FAFF;
+    --text-secondary: #F5FAFF;
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --button-text: #FFFFFF;
+    
+    --border-soft: rgba(37, 99, 235, 0.15);
+    --border-strong: rgba(37, 99, 235, 0.3);
+    
+    --accent: #2563EB;
+    --accent-light: rgba(37, 99, 235, 0.15);
+    --accent-dark: #38BDF8;
+    --accent-gradient: linear-gradient(135deg, #2563EB, #38BDF8);
+    --accent-glow: rgba(37, 99, 235, 0.3);
+    
+    --sidebar-bg: #06101F;
+    --sidebar-active: rgba(37, 99, 235, 0.15);
+    --sidebar-text: #F5FAFF;
+    
+    --input-bg: #081A35;
+    --chart-primary: #38BDF8;
+    
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+
+  /* 6. Champagne Black */
+  [data-theme="champagne"] {
+    --app-bg: #FFFCF4;
+    --app-bg-soft: #FEF3C7;
+    --surface: #FFFFFF;
+    --surface-elevated: #FFFFFF;
+    --card-bg: #FFFFFF;
+    
+    --text-primary: #241D12;
+    --text-secondary: #1E1A15;
+    --text-muted: #1E1A15;
+    --button-text: #FFFFFF;
+    
+    --border-soft: rgba(214, 168, 79, 0.15);
+    --border-strong: rgba(214, 168, 79, 0.3);
+    
+    --accent: #D6A84F;
+    --accent-light: rgba(214, 168, 79, 0.08);
+    --accent-dark: #1E1A15;
+    --accent-gradient: linear-gradient(135deg, #D6A84F, #F97316);
+    --accent-glow: rgba(214, 168, 79, 0.25);
+    
+    --sidebar-bg: #FFFCF4;
+    --sidebar-active: rgba(214, 168, 79, 0.1);
+    --sidebar-text: #241D12;
+    
+    --input-bg: #FFFFFF;
+    --chart-primary: #D6A84F;
+    
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  
+  .dark[data-theme="champagne"] {
+    --app-bg: #100E0B;
+    --app-bg-soft: #211B12;
+    --surface: #100E0B;
+    --surface-elevated: #211B12;
+    --card-bg: #1A1510;
+    
+    --text-primary: #FFFBEB;
+    --text-secondary: #FFFBEB;
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --button-text: #FFFFFF;
+    
+    --border-soft: rgba(214, 168, 79, 0.15);
+    --border-strong: rgba(214, 168, 79, 0.3);
+    
+    --accent: #D6A84F;
+    --accent-light: rgba(214, 168, 79, 0.15);
+    --accent-dark: #F97316;
+    --accent-gradient: linear-gradient(135deg, #D6A84F, #F97316);
+    --accent-glow: rgba(214, 168, 79, 0.3);
+    
+    --sidebar-bg: #100E0B;
+    --sidebar-active: rgba(214, 168, 79, 0.15);
+    --sidebar-text: #FFFBEB;
+    
+    --input-bg: #1A1510;
+    --chart-primary: #F97316;
+    
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+
+  /* 7. Ruby Burgundy */
+  [data-theme="ruby"] {
+    --app-bg: #FFF8FA;
+    --app-bg-soft: #FCE7F0;
+    --surface: #FFFFFF;
+    --surface-elevated: #FFFFFF;
+    --card-bg: #FFFFFF;
+    
+    --text-primary: #2B1220;
+    --text-secondary: #2B1220;
+    --text-muted: #2B1220;
+    --button-text: #FFFFFF;
+    
+    --border-soft: rgba(190, 24, 93, 0.15);
+    --border-strong: rgba(190, 24, 93, 0.3);
+    
+    --accent: #BE185D;
+    --accent-light: rgba(190, 24, 93, 0.08);
+    --accent-dark: #2B1220;
+    --accent-gradient: linear-gradient(135deg, #BE185D, #7C2D12);
+    --accent-glow: rgba(190, 24, 93, 0.25);
+    
+    --sidebar-bg: #FFF8FA;
+    --sidebar-active: rgba(190, 24, 93, 0.1);
+    --sidebar-text: #2B1220;
+    
+    --input-bg: #FFFFFF;
+    --chart-primary: #BE185D;
+    
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  
+  .dark[data-theme="ruby"] {
+    --app-bg: #14070E;
+    --app-bg-soft: #22101A;
+    --surface: #14070E;
+    --surface-elevated: #22101A;
+    --card-bg: #2B1220;
+    
+    --text-primary: #FFF7FB;
+    --text-secondary: #FFF7FB;
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --button-text: #FFFFFF;
+    
+    --border-soft: rgba(190, 24, 93, 0.15);
+    --border-strong: rgba(190, 24, 93, 0.3);
+    
+    --accent: #BE185D;
+    --accent-light: rgba(190, 24, 93, 0.15);
+    --accent-dark: #7C2D12;
+    --accent-gradient: linear-gradient(135deg, #BE185D, #7C2D12);
+    --accent-glow: rgba(190, 24, 93, 0.3);
+    
+    --sidebar-bg: #14070E;
+    --sidebar-active: rgba(190, 24, 93, 0.15);
+    --sidebar-text: #FFF7FB;
+    
+    --input-bg: #2B1220;
+    --chart-primary: #7C2D12;
     
     --status-success: #10B981;
     --status-warning: #F59E0B;
@@ -359,10 +493,10 @@ html {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-soft, #cbd5e1);
+  background: var(--border-strong, #cbd5e1);
   border-radius: 10px;
   transition: background 0.3s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted, #94a3b8);
+  background: var(--accent, #94a3b8);
 }

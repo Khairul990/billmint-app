@@ -242,7 +242,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
                 <td className="py-4 font-semibold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     {item.designNo && item.designNo !== 'N/A' && (
-                      <span className="inline-block px-2 py-0.5 bg-theme-accent-light dark:bg-indigo-950/40 text-theme-accent dark:text-theme-accent rounded text-[9px] font-black tracking-wider uppercase border border-theme-border-soft/10">
+                      <span className="inline-block px-2 py-0.5 bg-theme-accent-light dark:bg-theme-accent-light text-theme-accent dark:text-theme-accent rounded text-[9px] font-black tracking-wider uppercase border border-theme-border-soft/10">
                         {item.designNo}
                       </span>
                     )}

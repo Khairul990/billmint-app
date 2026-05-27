@@ -31,7 +31,7 @@ const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
  * @param {Function} onDelete - Delete callback
  * @param {Function} onDownload - Download PDF callback
  */
-const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, onView, onEdit, onDelete, onDownload, onRestore, onDownloadBackup, isDeleted }) => {
+const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, compact = false, onView, onEdit, onDelete, onDownload, onRestore, onDownloadBackup, isDeleted }) => {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const menuRef = useRef(null);
 
@@ -81,7 +81,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
         return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent-light/20 dark:text-theme-accent dark:border-theme-accent/30';
       case 'Payment Submitted':
       case 'Payment Submitted / Pending Verification':
-        return 'bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-950/20 dark:text-purple-400 dark:border-purple-900/30';
+        return 'bg-purple-50 text-purple-700 border-purple-100 dark:bg-theme-accent-light dark:text-purple-400 dark:border-purple-900/30';
       case 'Partially Paid':
         return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent/10 dark:text-theme-accent dark:border-theme-accent/30';
       case 'Pending':
@@ -114,7 +114,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
 
   return (
     <div className="bg-theme-card dark:bg-theme-card rounded-2xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft/80 shadow-premium hover:shadow-premium-hover transition-all duration-300">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className={`flex flex-col ${compact ? '' : 'md:flex-row md:items-center'} justify-between gap-4`}>
         {/* Top/Left Section: Metadata */}
         <div className="flex items-center gap-3">
           <div className="p-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-app text-theme-accent dark:text-theme-accent rounded-xl">
@@ -145,8 +145,8 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
         </div>
 
         {/* Right Section: Price & Quick CTA Buttons */}
-        <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 pt-3 md:pt-0 border-theme-border-soft dark:border-theme-border-soft/80">
-          <span className="text-lg font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-150 md:text-right">
+        <div className={`flex ${compact ? 'flex-row items-center justify-between border-t pt-3' : 'md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 pt-3 md:pt-0'} border-theme-border-soft dark:border-theme-border-soft/80`}>
+          <span className={`text-lg font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-150 ${compact ? '' : 'md:text-right'}`}>
             {formatCurrency(invoice.grandTotal, currencySymbol)}
           </span>
 
@@ -156,14 +156,14 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
                 <button
                   onClick={() => onView(invoice)}
                   title="Preview Invoice"
-                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-indigo-950/30 rounded-xl transition-all cursor-pointer"
+                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light rounded-xl transition-all cursor-pointer"
                 >
                   <Eye className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => onEdit(invoice)}
                   title="Edit Invoice"
-                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-blue-950/30 rounded-xl transition-all cursor-pointer"
+                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light rounded-xl transition-all cursor-pointer"
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
@@ -181,8 +181,8 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
                     onClick={() => setShowShareMenu(!showShareMenu)}
                     title="Share Invoice"
                     className={`p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center ${showShareMenu
-                      ? 'text-theme-accent bg-theme-accent-light dark:text-theme-accent dark:bg-indigo-950/30'
-                      : 'text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-indigo-950/30'
+                      ? 'text-theme-accent bg-theme-accent-light dark:text-theme-accent dark:bg-theme-accent-light'
+                      : 'text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light'
                       }`}
                   >
                     <Share2 className="w-4 h-4" />
@@ -290,7 +290,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, o
                               toast.error('Could not create live link. Please try again.');
                             }
                           }}
-                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-indigo-950/20 hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-theme-accent-light hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
                         >
                           <Link className="w-3.5 h-3.5 text-theme-accent" />
                           <span>Copy Live Link</span>

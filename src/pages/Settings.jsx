@@ -930,37 +930,14 @@ const Settings = ({
                   {/* Theme Presets List */}
                   <div className="space-y-3">
                     {[
-                      {
-                        id: 'pink',
-                        name: 'Pink Premium',
-                        desc: 'Deep navy backgrounds with premium pink accents. Best for SaaS.',
-                        colors: ['#0B0715', '#F472B6']
-                      },
-                      {
-                        id: 'blue',
-                        name: 'Blue Professional',
-                        desc: 'Clean blues and crisp whites. Corporate standard.',
-                        colors: ['#0B1727', '#3B82F6']
-                      },
-                      {
-                        id: 'emerald',
-                        name: 'Emerald Business',
-                        desc: 'Rich emerald greens, dark charcoal backgrounds. Eco and finance.',
-                        colors: ['#064E3B', '#10B981']
-                      },
-                      {
-                        id: 'purple',
-                        name: 'Purple Luxury',
-                        desc: 'Violets and pinks, deep black-purple backgrounds. Modern premium.',
-                        colors: ['#1B0F2A', '#8B5CF6']
-                      },
-                      {
-                        id: 'rose',
-                        name: 'Rose Gold',
-                        desc: 'Rose and soft gold accents, warm whites, dark brown backgrounds.',
-                        colors: ['#2E1B1A', '#F43F5E']
-                      }
-                    ].map((preset) => {
+                        { id: 'pink', name: 'Pink Premium', desc: 'Deep navy backgrounds with premium pink accents. Best for SaaS.', colors: ['#10122B', '#EC4899', '#FB7185'] },
+                        { id: 'indigo', name: 'Royal Indigo', desc: 'Deep indigo and vibrant purple for an elegant touch.', colors: ['#312E81', '#5B34D6', '#7C3AED'] },
+                        { id: 'emerald', name: 'Emerald Business', desc: 'Rich emerald greens for eco and finance sectors.', colors: ['#12372A', '#059669', '#34D399'] },
+                        { id: 'rose', name: 'Rose Gold Luxe', desc: 'Warm rose and gold accents on dark brown backgrounds.', colors: ['#3A1F1A', '#F43F5E', '#D4A44A'] },
+                        { id: 'midnight', name: 'Midnight Blue', desc: 'Deep blues and cyan for a professional marine look.', colors: ['#081A35', '#2563EB', '#38BDF8'] },
+                        { id: 'champagne', name: 'Champagne Black', desc: 'Elegant black and champagne gold for high-end feel.', colors: ['#1E1A15', '#D6A84F', '#F97316'] },
+                        { id: 'ruby', name: 'Ruby Burgundy', desc: 'Deep burgundy and ruby for a rich, vibrant aesthetic.', colors: ['#2B1220', '#BE185D', '#7C2D12'] }
+                      ].map((preset) => {
                       const isSelected = themeColor === preset.id;
                       return (
                         <button
@@ -1937,11 +1914,13 @@ const Settings = ({
                               className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-slate-805 dark:text-theme-primary font-bold"
                             >
                               <option value="pink">Pink Premium</option>
-                              <option value="blue">Blue Professional</option>
-                              <option value="emerald">Emerald Business</option>
-                              <option value="purple">Purple Luxury</option>
-                              <option value="rose">Rose Gold</option>
-                            </select>
+                                <option value="indigo">Royal Indigo</option>
+                                <option value="emerald">Emerald Business</option>
+                                <option value="rose">Rose Gold Luxe</option>
+                                <option value="midnight">Midnight Blue</option>
+                                <option value="champagne">Champagne Black</option>
+                                <option value="ruby">Ruby Burgundy</option>
+                              </select>
                           </div>
                           <div>
                             <label className="block mb-1.5 text-theme-muted uppercase text-[9px] font-black tracking-wider">Default Display Mode</label>
@@ -2003,7 +1982,7 @@ const Settings = ({
                           className="w-full text-xs p-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 resize-none h-20 text-theme-primary dark:text-theme-primary dark:text-theme-primary"
                         />
                       </div>
-                      <button onClick={handleSave} className="w-full py-2 bg-theme-accent-light hover:bg-theme-accent-light text-theme-accent font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-theme-accent">
+                      <button onClick={handleSave} className="w-full py-2 bg-theme-accent-light hover:bg-theme-accent-light text-theme-accent font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-theme-accent-light dark:text-theme-accent">
                         Publish Banner
                       </button>
                     </div>
@@ -2043,7 +2022,7 @@ const Settings = ({
                       <button
                         type="button"
                         onClick={handleExport}
-                        className="flex items-center justify-center gap-2 py-3 bg-theme-accent-light hover:bg-theme-accent-light/80 text-theme-accent font-bold text-xs rounded-2xl transition-all cursor-pointer dark:bg-indigo-950/20 dark:text-theme-accent"
+                        className="flex items-center justify-center gap-2 py-3 bg-theme-accent-light hover:bg-theme-accent-light/80 text-theme-accent font-bold text-xs rounded-2xl transition-all cursor-pointer dark:bg-theme-accent-light dark:text-theme-accent"
                       >
                         <Download className="w-4 h-4" />
                         <span>Export Database (JSON)</span>

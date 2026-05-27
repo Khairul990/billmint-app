@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Link
 } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
 import { 
@@ -430,13 +431,13 @@ const Invoices = ({
       </div>
 
       {/* DYNAMIC ELEVEN-STAR PREVIEW MODAL OVERLAY */}
-      {viewingInvoice && (
+      {viewingInvoice && createPortal(
         <div 
           onClick={() => {
             setViewingInvoice(null);
             onEditInvoice(null);
           }}
-          className="fixed inset-0 z-50 overflow-y-auto bg-theme-card/40 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 no-print"
+          className="fixed inset-0 z-[9999] overflow-y-auto bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 no-print"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
@@ -694,7 +695,8 @@ const Invoices = ({
               />
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       </motion.div>
     </PullToRefresh>
