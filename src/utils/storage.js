@@ -88,7 +88,7 @@ export const syncOfflineTransactions = async () => {
             if (localIdx !== -1) {
               invoices[localIdx].syncStatus = 'synced';
               invoices[localIdx].updatedAt = new Date().toISOString();
-              localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+              updateLocalCache(KEYS.INVOICES, invoices);
               await BillQyroDB.put('invoices', invoices[localIdx]);
             }
           }
@@ -131,6 +131,17 @@ const KEYS = {
   INVOICES: 'billqyro_invoices',
   EXPENSES: 'billqyro_expenses',
   SUBSCRIPTION: 'billqyro_subscription',
+};
+
+
+const updateLocalCache = (key, items) => {
+  const cacheLimit = 20;
+  const sorted = [...items].sort((a,b) => {
+    const da = a.createdAt ? new Date(a.createdAt) : 0;
+    const db = b.createdAt ? new Date(b.createdAt) : 0;
+    return db - da;
+  });
+  localStorage.setItem(key, JSON.stringify(sorted.slice(0, cacheLimit)));
 };
 
 const DEFAULT_SETTINGS = {
@@ -790,13 +801,17 @@ export const saveSettings = (settings) => {
 };
 
 // --- EXPENSES ---
-export const getExpenses = () => {
+export const getExpenses = async () => {
   initializeStorage();
+  try {
+    const data = await BillQyroDB.getAll('expenses');
+    if (data && data.length > 0) return data;
+  } catch(e) {}
   return JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [];
 };
 
 export const saveExpense = async (expense) => {
-  const expenses = getExpenses();
+  const expenses = await getExpenses();
   if (expense.id) {
     const index = expenses.findIndex(e => e.id === expense.id);
     if (index !== -1) {
@@ -808,7 +823,7 @@ export const saveExpense = async (expense) => {
     expense.id = 'exp-' + Date.now();
     expenses.push(expense);
   }
-  localStorage.setItem(KEYS.EXPENSES, JSON.stringify(expenses));
+  updateLocalCache(KEYS.EXPENSES, expenses);
 
   // Save to IndexedDB
   await BillQyroDB.put('expenses', expense);
@@ -825,9 +840,9 @@ export const saveExpense = async (expense) => {
 };
 
 export const deleteExpense = async (id) => {
-  const expenses = getExpenses();
+  const expenses = await getExpenses();
   const filtered = expenses.filter(e => e.id !== id);
-  localStorage.setItem(KEYS.EXPENSES, JSON.stringify(filtered));
+  updateLocalCache(KEYS.EXPENSES, filtered);
 
   // Delete from IndexedDB
   await BillQyroDB.delete('expenses', id);
@@ -844,13 +859,17 @@ export const deleteExpense = async (id) => {
 };
 
 // --- CUSTOMERS ---
-export const getCustomers = () => {
+export const getCustomers = async () => {
   initializeStorage();
+  try {
+    const data = await BillQyroDB.getAll('customers');
+    if (data && data.length > 0) return data;
+  } catch(e) {}
   return JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [];
 };
 
 export const saveCustomer = async (customer) => {
-  const customers = getCustomers();
+  const customers = await getCustomers();
   if (customer.id) {
     const index = customers.findIndex(c => c.id === customer.id);
     if (index !== -1) {
@@ -862,7 +881,7 @@ export const saveCustomer = async (customer) => {
     customer.id = 'c-' + Date.now();
     customers.push(customer);
   }
-  localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(customers));
+  updateLocalCache(KEYS.CUSTOMERS, customers);
 
   // Save to IndexedDB
   await BillQyroDB.put('customers', customer);
@@ -879,9 +898,9 @@ export const saveCustomer = async (customer) => {
 };
 
 export const deleteCustomer = async (id) => {
-  const customers = getCustomers();
+  const customers = await getCustomers();
   const filtered = customers.filter(c => c.id !== id);
-  localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(filtered));
+  updateLocalCache(KEYS.CUSTOMERS, filtered);
 
   // Delete from IndexedDB
   await BillQyroDB.delete('customers', id);
@@ -898,13 +917,17 @@ export const deleteCustomer = async (id) => {
 };
 
 // --- PRODUCTS ---
-export const getProducts = () => {
+export const getProducts = async () => {
   initializeStorage();
+  try {
+    const data = await BillQyroDB.getAll('products');
+    if (data && data.length > 0) return data;
+  } catch(e) {}
   return JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [];
 };
 
 export const saveProduct = async (product) => {
-  const products = getProducts();
+  const products = await getProducts();
   if (product.id) {
     const index = products.findIndex(p => p.id === product.id);
     if (index !== -1) {
@@ -916,7 +939,7 @@ export const saveProduct = async (product) => {
     product.id = 'p-' + Date.now();
     products.push(product);
   }
-  localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(products));
+  updateLocalCache(KEYS.PRODUCTS, products);
 
   // Save to IndexedDB
   await BillQyroDB.put('products', product);
@@ -933,9 +956,9 @@ export const saveProduct = async (product) => {
 };
 
 export const deleteProduct = async (id) => {
-  const products = getProducts();
+  const products = await getProducts();
   const filtered = products.filter(p => p.id !== id);
-  localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(filtered));
+  updateLocalCache(KEYS.PRODUCTS, filtered);
 
   // Delete from IndexedDB
   await BillQyroDB.delete('products', id);
@@ -952,8 +975,14 @@ export const deleteProduct = async (id) => {
 };
 
 // --- INVOICES ---
-export const getInvoices = () => {
+export const getInvoices = async () => {
   initializeStorage();
+  try {
+    const data = await BillQyroDB.getAll('invoices');
+    if (data && data.length > 0) {
+      return data.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+    }
+  } catch(e) {}
   return JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
 };
 
@@ -967,7 +996,7 @@ const generateSecureToken = () => {
 };
 
 export const saveInvoice = async (invoice) => {
-  const invoices = getInvoices();
+  const invoices = await getInvoices();
 
   // 1. Ensure secure publicToken is generated
   if (!invoice.publicToken || invoice.publicToken === 'undefined' || invoice.publicToken === 'null' || invoice.publicToken === '') {
@@ -1063,7 +1092,7 @@ export const saveInvoice = async (invoice) => {
     await saveCustomer(customerPayload);
   }
 
-  localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+  updateLocalCache(KEYS.INVOICES, invoices);
 
   // Save to IndexedDB
   await BillQyroDB.put('invoices', invoice);
@@ -1075,7 +1104,7 @@ export const saveInvoice = async (invoice) => {
       invoice.syncStatus = 'pending';
       const idx = invoices.findIndex(inv => inv.id === invoice.id);
       if (idx !== -1) invoices[idx] = invoice;
-      localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+      updateLocalCache(KEYS.INVOICES, invoices);
       await BillQyroDB.put('invoices', invoice);
 
       // Fire and forget
@@ -1099,7 +1128,7 @@ export const saveInvoice = async (invoice) => {
       // Persist syncStatus back to localStorage + IndexedDB
       const idx = invoices.findIndex(inv => inv.id === invoice.id);
       if (idx !== -1) invoices[idx] = invoice;
-      localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+      updateLocalCache(KEYS.INVOICES, invoices);
       await BillQyroDB.put('invoices', invoice);
     }
   } else {
@@ -1107,7 +1136,7 @@ export const saveInvoice = async (invoice) => {
     // Persist syncStatus back to localStorage + IndexedDB
     const idx = invoices.findIndex(inv => inv.id === invoice.id);
     if (idx !== -1) invoices[idx] = invoice;
-    localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+    updateLocalCache(KEYS.INVOICES, invoices);
     await BillQyroDB.put('invoices', invoice);
   }
 
@@ -1117,12 +1146,12 @@ export const saveInvoice = async (invoice) => {
   };
 };
 
-const syncLocalInvoice = (cloudData) => {
-  const invoices = getInvoices();
+const syncLocalInvoice = async (cloudData) => {
+  const invoices = await getInvoices();
   const localIdx = invoices.findIndex(inv => inv.id === cloudData.id);
   if (localIdx !== -1) {
     invoices[localIdx] = cloudData;
-    localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+    updateLocalCache(KEYS.INVOICES, invoices);
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
   }
 };
@@ -1144,7 +1173,7 @@ export const getInvoiceByPublicToken = async (token) => {
 
       if (snap.exists()) {
         const cloudData = snap.data();
-        syncLocalInvoice(cloudData);
+        await syncLocalInvoice(cloudData);
         return cloudData;
       }
 
@@ -1157,7 +1186,7 @@ export const getInvoiceByPublicToken = async (token) => {
 
       if (snap.exists()) {
         const cloudData = snap.data();
-        syncLocalInvoice(cloudData);
+        await syncLocalInvoice(cloudData);
         return cloudData;
       }
 
@@ -1177,7 +1206,7 @@ export const getInvoiceByPublicToken = async (token) => {
 
   // Local storage fallback
   console.log('[DEBUG] getInvoiceByPublicToken - Document not found in Firestore. Trying local localStorage fallback...');
-  const invoices = getInvoices();
+  const invoices = await getInvoices();
   const localMatch = invoices.find(inv => inv.publicToken === token);
   console.log('[DEBUG] getInvoiceByPublicToken - Local localStorage match found:', !!localMatch);
   return localMatch || null;
@@ -1193,11 +1222,11 @@ export const ensureInvoicePublicToken = async (invoice) => {
   const token = invoice.publicToken;
 
   // 2. Save back to local storage invoices list
-  const invoices = getInvoices();
+  const invoices = await getInvoices();
   const idx = invoices.findIndex(inv => inv.id === invoice.id);
   if (idx !== -1) {
     invoices[idx] = invoice;
-    localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+    updateLocalCache(KEYS.INVOICES, invoices);
   }
 
   // 3. Force save/create public-safe copy and private copy in Firestore
@@ -1223,11 +1252,11 @@ export const ensureInvoicePublicToken = async (invoice) => {
 };
 
 export const saveInvoicePublicly = async (invoice) => {
-  const invoices = getInvoices();
+  const invoices = await getInvoices();
   const index = invoices.findIndex(inv => inv.id === invoice.id || inv.publicToken === invoice.publicToken);
   if (index !== -1) {
     invoices[index] = invoice;
-    localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+    updateLocalCache(KEYS.INVOICES, invoices);
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
   }
 
@@ -1245,7 +1274,7 @@ export const saveInvoicePublicly = async (invoice) => {
 };
 
 export const restoreInvoice = async (id) => {
-  const invoices = getInvoices();
+  const invoices = await getInvoices();
   const idx = invoices.findIndex(inv => inv.id === id);
   if (idx !== -1) {
     invoices[idx].isDeleted = false;
@@ -1253,7 +1282,7 @@ export const restoreInvoice = async (id) => {
     invoices[idx].updatedAt = new Date().toISOString();
     invoices[idx].syncStatus = 'pending';
     
-    localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+    updateLocalCache(KEYS.INVOICES, invoices);
     await BillQyroDB.put('invoices', invoices[idx]);
 
     let firebaseStatus = 'pending';
@@ -1264,7 +1293,7 @@ export const restoreInvoice = async (id) => {
           await firestoreSave('publicInvoices', invoices[idx].publicToken, invoices[idx]);
           firebaseStatus = 'success';
           invoices[idx].syncStatus = 'synced';
-          localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+          updateLocalCache(KEYS.INVOICES, invoices);
           await BillQyroDB.put('invoices', invoices[idx]);
         } catch (e) {
           firebaseStatus = 'failed';
@@ -1284,7 +1313,7 @@ export const restoreInvoice = async (id) => {
 };
 
 export const deleteInvoice = async (id, permanent = false) => {
-  const invoices = getInvoices();
+  const invoices = await getInvoices();
   
   if (!permanent) {
     const idx = invoices.findIndex(inv => inv.id === id);
@@ -1294,7 +1323,7 @@ export const deleteInvoice = async (id, permanent = false) => {
       invoices[idx].updatedAt = new Date().toISOString();
       invoices[idx].syncStatus = 'pending';
       
-      localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+      updateLocalCache(KEYS.INVOICES, invoices);
       await BillQyroDB.put('invoices', invoices[idx]);
 
       let firebaseStatus = 'pending';
@@ -1305,7 +1334,7 @@ export const deleteInvoice = async (id, permanent = false) => {
             await firestoreSave('publicInvoices', invoices[idx].publicToken, invoices[idx]);
             firebaseStatus = 'success';
             invoices[idx].syncStatus = 'synced';
-            localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+            updateLocalCache(KEYS.INVOICES, invoices);
             await BillQyroDB.put('invoices', invoices[idx]);
           } catch (e) {
             firebaseStatus = 'failed';
@@ -1321,7 +1350,7 @@ export const deleteInvoice = async (id, permanent = false) => {
 
   // Permanent Delete
   const filtered = invoices.filter(inv => inv.id !== id);
-  localStorage.setItem(KEYS.INVOICES, JSON.stringify(filtered));
+  updateLocalCache(KEYS.INVOICES, filtered);
 
   // Delete from IndexedDB
   await BillQyroDB.delete('invoices', id);
@@ -1345,18 +1374,18 @@ export const deleteInvoice = async (id, permanent = false) => {
 };
 
 // --- BACKUP & RESTORE DATABASE ---
-export const exportBackup = () => {
+export const exportBackup = async () => {
   return {
     settings: getSettings(),
-    customers: getCustomers(),
-    products: getProducts(),
-    invoices: getInvoices(),
-    expenses: getExpenses(),
+    customers: await getCustomers(),
+    products: await getProducts(),
+    invoices: await getInvoices(),
+    expenses: await getExpenses(),
     subscription: getSubscriptionStatus(),
   };
 };
 
-export const importRestore = (backupData) => {
+export const importRestore = async (backupData) => {
   if (!backupData || typeof backupData !== 'object') {
     throw new Error('Invalid backup file structure.');
   }
@@ -1369,10 +1398,14 @@ export const importRestore = (backupData) => {
   }
 
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(backupData.settings));
-  localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(backupData.customers));
-  localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(backupData.products));
-  localStorage.setItem(KEYS.INVOICES, JSON.stringify(backupData.invoices));
-  localStorage.setItem(KEYS.EXPENSES, JSON.stringify(backupData.expenses));
+  updateLocalCache(KEYS.CUSTOMERS, backupData.customers);
+  for (const c of backupData.customers) await BillQyroDB.put('customers', c);
+  updateLocalCache(KEYS.PRODUCTS, backupData.products);
+  for (const p of backupData.products) await BillQyroDB.put('products', p);
+  updateLocalCache(KEYS.INVOICES, backupData.invoices);
+  for (const i of backupData.invoices) await BillQyroDB.put('invoices', i);
+  updateLocalCache(KEYS.EXPENSES, backupData.expenses);
+  for (const e of backupData.expenses) await BillQyroDB.put('expenses', e);
   localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(backupData.subscription));
 
   // If Firebase is enabled, batch update Firestore as well
@@ -1391,29 +1424,13 @@ export const importRestore = (backupData) => {
   return backupData;
 };
 
-export const clearInvoices = () => {
-  localStorage.setItem(KEYS.INVOICES, JSON.stringify([]));
-  window.dispatchEvent(new CustomEvent('billqyro_sync'));
-  return { status: 'success' };
-};
+export const clearInvoices = async () => { localStorage.setItem(KEYS.INVOICES, JSON.stringify([])); await BillQyroDB.clear('invoices'); window.dispatchEvent(new CustomEvent('billqyro_sync')); return { status: 'success' }; };
 
-export const clearCustomers = () => {
-  localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify([]));
-  window.dispatchEvent(new CustomEvent('billqyro_sync'));
-  return { status: 'success' };
-};
+export const clearCustomers = async () => { localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify([])); await BillQyroDB.clear('customers'); window.dispatchEvent(new CustomEvent('billqyro_sync')); return { status: 'success' }; };
 
-export const clearProducts = () => {
-  localStorage.setItem(KEYS.PRODUCTS, JSON.stringify([]));
-  window.dispatchEvent(new CustomEvent('billqyro_sync'));
-  return { status: 'success' };
-};
+export const clearProducts = async () => { localStorage.setItem(KEYS.PRODUCTS, JSON.stringify([])); await BillQyroDB.clear('products'); window.dispatchEvent(new CustomEvent('billqyro_sync')); return { status: 'success' }; };
 
-export const clearExpenses = () => {
-  localStorage.setItem(KEYS.EXPENSES, JSON.stringify([]));
-  window.dispatchEvent(new CustomEvent('billqyro_sync'));
-  return { status: 'success' };
-};
+export const clearExpenses = async () => { localStorage.setItem(KEYS.EXPENSES, JSON.stringify([])); await BillQyroDB.clear('expenses'); window.dispatchEvent(new CustomEvent('billqyro_sync')); return { status: 'success' }; };
 
 export const getStorageUsage = () => {
   let totalBytes = 0;
@@ -1486,68 +1503,49 @@ export const syncFromFirestore = async () => {
   }
   try {
     const userId = getFirebaseUserId();
-    console.log(`Syncing data from Firestore for user: ${userId}`);
+    console.log("Syncing data from Firestore for user: " + userId);
 
-    // Sync settings
     const settingsDoc = await getDoc(doc(db, 'settings', userId));
     if (settingsDoc.exists()) {
       localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settingsDoc.data()));
     }
 
-    // Sync customers
     const customersSnap = await getDocs(collection(db, 'customers', userId, 'items'));
     const customers = [];
-    customersSnap.forEach(docSnap => {
-      customers.push(docSnap.data());
-    });
+    customersSnap.forEach(docSnap => customers.push(docSnap.data()));
     if (customers.length > 0) {
-      localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(customers));
+      for(const c of customers) await BillQyroDB.put('customers', c);
+      updateLocalCache(KEYS.CUSTOMERS, customers);
     }
 
-    // Sync invoices
     const invoicesMap = new Map();
-    
     try {
       const snap1 = await getDocs(collection(db, 'invoices', userId, 'items'));
       snap1.forEach(docSnap => invoicesMap.set(docSnap.id, docSnap.data()));
-    } catch(e) { /* ignore */ }
+    } catch(e) {}
     
-    try {
-      const snap2 = await getDocs(collection(db, 'invoice', userId, 'items'));
-      snap2.forEach(docSnap => invoicesMap.set(docSnap.id, docSnap.data()));
-    } catch(e) { /* ignore */ }
-    
-    try {
-      const snap3 = await getDocs(collection(db, 'users', userId, 'invoices'));
-      snap3.forEach(docSnap => invoicesMap.set(docSnap.id, docSnap.data()));
-    } catch(e) { /* ignore */ }
-
     const invoices = Array.from(invoicesMap.values());
     if (invoices.length > 0) {
-      localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+      for(const i of invoices) await BillQyroDB.put('invoices', i);
+      updateLocalCache(KEYS.INVOICES, invoices);
     }
 
-    // Sync products
     const productsSnap = await getDocs(collection(db, 'products', userId, 'items'));
     const products = [];
-    productsSnap.forEach(docSnap => {
-      products.push(docSnap.data());
-    });
+    productsSnap.forEach(docSnap => products.push(docSnap.data()));
     if (products.length > 0) {
-      localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(products));
+      for(const p of products) await BillQyroDB.put('products', p);
+      updateLocalCache(KEYS.PRODUCTS, products);
     }
 
-    // Sync expenses
     const expensesSnap = await getDocs(collection(db, 'expenses', userId, 'items'));
     const expenses = [];
-    expensesSnap.forEach(docSnap => {
-      expenses.push(docSnap.data());
-    });
+    expensesSnap.forEach(docSnap => expenses.push(docSnap.data()));
     if (expenses.length > 0) {
-      localStorage.setItem(KEYS.EXPENSES, JSON.stringify(expenses));
+      for(const e of expenses) await BillQyroDB.put('expenses', e);
+      updateLocalCache(KEYS.EXPENSES, expenses);
     }
 
-    // Sync subscription
     const subDoc = await getDoc(doc(db, 'subscription', userId));
     if (subDoc.exists()) {
       localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(subDoc.data()));
@@ -1565,4 +1563,42 @@ export const syncFromFirestore = async () => {
     console.error("Error syncing from Firestore:", error);
     throw error;
   }
+};
+
+
+
+
+export const cleanDuplicateDrafts = async () => {
+  const invoices = await getInvoices();
+  const valid = invoices.filter(inv => inv.grandTotal > 0 || inv.paymentStatus === 'Paid' || inv.paymentStatus === 'Draft');
+  const removed = invoices.length - valid.length;
+  
+  if (removed > 0) {
+    await BillQyroDB.clear('invoices');
+    for (const inv of valid) await BillQyroDB.put('invoices', inv);
+    updateLocalCache(KEYS.INVOICES, valid);
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  }
+  return removed;
+};
+
+export const cleanTemporaryData = async () => {
+  let count = 0;
+  try {
+    const queue = await BillQyroDB.getAll('syncQueue');
+    const oldTxs = queue.filter(tx => Date.now() - (tx.createdAt||0) > 7 * 24 * 60 * 60 * 1000);
+    for (const tx of oldTxs) {
+      await BillQyroDB.delete('syncQueue', tx.id);
+      count++;
+    }
+  } catch(e){}
+  return count;
+};
+
+export const clearCacheOnly = () => {
+  localStorage.removeItem(KEYS.INVOICES);
+  localStorage.removeItem(KEYS.CUSTOMERS);
+  localStorage.removeItem(KEYS.PRODUCTS);
+  localStorage.removeItem(KEYS.EXPENSES);
+  return {status: 'success'};
 };

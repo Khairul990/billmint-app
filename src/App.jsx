@@ -133,12 +133,24 @@ function App() {
   }, []);
 
   // Storage states
-  const [invoices, setInvoices] = useState(() => getInvoices());
-  const [customers, setCustomers] = useState(() => getCustomers());
-  const [products, setProducts] = useState(() => getProducts());
+  const [invoices, setInvoices] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [products, setProducts] = useState([]);
   const [settings, setSettings] = useState(() => getSettings());
-  const [expenses, setExpenses] = useState(() => getExpenses());
+  const [expenses, setExpenses] = useState([]);
   const [subscription, setSubscription] = useState(() => getSubscriptionStatus());
+
+  
+  // Async Data Loader for IndexedDB
+  useEffect(() => {
+    const loadLocalData = async () => {
+      setInvoices(await getInvoices());
+      setCustomers(await getCustomers());
+      setProducts(await getProducts());
+      setExpenses(await getExpenses());
+    };
+    loadLocalData();
+  }, []);
 
   // Workspace Contexts
   const [editingInvoice, setEditingInvoice] = useState(null);
@@ -273,12 +285,12 @@ function App() {
 
   // Listen for Real-Time cloud updates triggered by storage.js
   useEffect(() => {
-    const handleSync = () => {
-      setInvoices(getInvoices());
-      setCustomers(getCustomers());
-      setProducts(getProducts());
+    const handleSync = async () => {
+      setInvoices(await getInvoices());
+      setCustomers(await getCustomers());
+      setProducts(await getProducts());
       setSettings(getSettings());
-      setExpenses(getExpenses());
+      setExpenses(await getExpenses());
       setSubscription(getSubscriptionStatus());
     };
 
@@ -292,12 +304,12 @@ function App() {
     setShowWelcomeAnimation(true);
     setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
 
-    setInvoices(getInvoices());
-    setCustomers(getCustomers());
-    setProducts(getProducts());
+    getInvoices().then(setInvoices);
+    getCustomers().then(setCustomers);
+    getProducts().then(setProducts);
     const currentSettings = getSettings() || {};
     setSettings(currentSettings);
-    setExpenses(getExpenses());
+    getExpenses().then(setExpenses);
     setSubscription(getSubscriptionStatus());
 
     // Setup & Onboarding Routing
