@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FileText, Eye, Edit2, Trash2, Download, Share2, Mail, Copy, Check, Link } from 'lucide-react';
+import { FileText, Eye, Edit2, Trash2, Download, Share2, Mail, Copy, Check, Link, RefreshCw } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
 import {
@@ -352,6 +352,21 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
             >
               <Trash2 className="w-4 h-4" />
             </button>
+            
+            {!isDeleted && invoice.syncStatus === 'failed' && (
+              <button
+                onClick={() => {
+                  toast.loading('Retrying sync...', { id: 'retrySync' });
+                  import('../utils/storage').then(m => m.retrySyncInvoice(invoice.id)).then(res => {
+                    toast.dismiss('retrySync');
+                  });
+                }}
+                title={`Retry Sync. Error: ${invoice.syncError || 'Unknown'}`}
+                className="p-2 text-rose-600 dark:text-rose-400 hover:text-white dark:hover:text-white hover:bg-rose-600 dark:hover:bg-rose-600 rounded-xl transition-all cursor-pointer flex items-center gap-1"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
       </div>

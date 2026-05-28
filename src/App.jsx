@@ -515,9 +515,13 @@ function App() {
   // Customers
   const handleSaveCustomer = async (payload) => {
     try {
-      const updated = await saveCustomer(payload);
-      setCustomers(updated);
-      toast.success('Customer saved successfully');
+      const { updatedCustomers, firebaseStatus } = await saveCustomer(payload);
+      setCustomers(updatedCustomers);
+      if (firebaseStatus === 'failed') {
+        toast.success('Customer saved locally. Will sync with cloud when online.');
+      } else {
+        toast.success('Customer saved successfully');
+      }
     } catch (error) {
       console.error(error);
       toast.error('Failed to save customer');
@@ -526,44 +530,62 @@ function App() {
 
   const handleDeleteCustomer = async (id) => {
     if (window.confirm('Are you sure you want to delete this customer?')) {
-      const updatedCustomers = await deleteCustomer(id);
+      const { updatedCustomers, firebaseStatus } = await deleteCustomer(id);
       setCustomers(updatedCustomers);
-      toast.success('Customer deleted');
+      if (firebaseStatus === 'failed') {
+        toast.success('Customer deleted locally. Will sync with cloud when online.');
+      } else {
+        toast.success('Customer deleted');
+      }
     }
   };
 
   // Products
   const handleSaveProduct = async (payload) => {
     try {
-      const updatedProducts = await saveProduct(payload);
+      const { updatedProducts, firebaseStatus } = await saveProduct(payload);
       setProducts(updatedProducts);
-      toast.success('Product/Service saved successfully');
+      if (firebaseStatus === 'failed') {
+        toast.success('Product/Service saved locally. Will sync with cloud when online.');
+      } else {
+        toast.success('Product/Service saved successfully');
+      }
     } catch (error) {
       console.error(error);
       toast.error('Failed to save product');
     }
   };
 
-  const handleDeleteProduct = (id) => {
-    const updated = deleteProduct(id);
-    setProducts(updated);
+  const handleDeleteProduct = async (id) => {
+    const { updatedProducts, firebaseStatus } = await deleteProduct(id);
+    setProducts(updatedProducts);
+    if (firebaseStatus === 'failed') {
+      toast.success('Product deleted locally. Will sync with cloud when online.', { id: 'delete-product-toast' });
+    }
   };
 
   // Expenses
   const handleSaveExpense = async (payload) => {
     try {
-      const updatedExpenses = await saveExpense(payload);
+      const { updatedExpenses, firebaseStatus } = await saveExpense(payload);
       setExpenses(updatedExpenses);
-      toast.success('Expense saved successfully');
+      if (firebaseStatus === 'failed') {
+        toast.success('Expense saved locally. Will sync with cloud when online.');
+      } else {
+        toast.success('Expense saved successfully');
+      }
     } catch (error) {
       console.error(error);
       toast.error('Failed to save expense');
     }
   };
 
-  const handleDeleteExpense = (id) => {
-    const updated = deleteExpense(id);
-    setExpenses(updated);
+  const handleDeleteExpense = async (id) => {
+    const { updatedExpenses, firebaseStatus } = await deleteExpense(id);
+    setExpenses(updatedExpenses);
+    if (firebaseStatus === 'failed') {
+      toast.success('Expense deleted locally. Will sync with cloud when online.', { id: 'delete-expense-toast' });
+    }
   };
 
   // Subscription
