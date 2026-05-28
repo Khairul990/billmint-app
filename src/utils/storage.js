@@ -612,7 +612,34 @@ export const login = (email, password) => {
 
 export const logout = () => {
   localStorage.removeItem(KEYS.AUTH);
+  localStorage.removeItem(KEYS.SETTINGS);
+  localStorage.removeItem(KEYS.CUSTOMERS);
+  localStorage.removeItem(KEYS.PRODUCTS);
+  localStorage.removeItem(KEYS.INVOICES);
+  localStorage.removeItem(KEYS.EXPENSES);
+  localStorage.removeItem(KEYS.SUBSCRIPTION);
+  localStorage.removeItem('billqyro_last_route');
   sessionStorage.clear();
+  try {
+    BillQyroDB.deleteDB('billqyro-offline-db');
+  } catch (e) {
+    console.error('Failed to clear IndexedDB on logout', e);
+  }
+};
+
+export const clearAllLocalData = async () => {
+  localStorage.clear();
+  sessionStorage.clear();
+  try {
+    await BillQyroDB.deleteDB('billqyro-offline-db');
+    const caches = await window.caches.keys();
+    for (const name of caches) {
+      await window.caches.delete(name);
+    }
+    console.log('All local data cleared successfully.');
+  } catch (err) {
+    console.error('Error clearing storage', err);
+  }
 };
 
 // --- SUBSCRIPTION ---

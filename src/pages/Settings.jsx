@@ -56,7 +56,8 @@ import {
   updatePremiumRequestStatus,
   updateUserBlockStatus,
   getGlobalAdminSettings,
-  updateGlobalAdminSettings
+  updateGlobalAdminSettings,
+  clearAllLocalData
 } from '../utils/storage';
 import { getAdminEmail } from '../utils/adminAccess';
 import { firebaseReady } from '../utils/firebase';
@@ -183,6 +184,16 @@ const Settings = ({
       clearCacheOnly();
       toast.success("Cache cleared! Please refresh the page.");
       setStorageInfo(getStorageUsage());
+    }
+  };
+
+  const handleClearAllLocalData = async () => {
+    if (window.confirm("CRITICAL WARNING: This will completely wipe ALL local data including IndexedDB, Cache, and LocalStorage. You will be logged out. Are you absolutely sure?")) {
+      await clearAllLocalData();
+      toast.success("All local app data cleared! Logging out...");
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
     }
   };
 
@@ -1812,6 +1823,19 @@ const Settings = ({
                         <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Resets LocalStorage UI cache</div>
                       </div>
                     </button>
+                    
+                    {isAdmin && (
+                      <button 
+                        onClick={handleClearAllLocalData}
+                        className="flex items-center gap-3 p-4 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 transition-colors text-left md:col-span-2"
+                      >
+                        <ShieldAlert className="text-red-500" size={24} />
+                        <div>
+                          <div className="font-semibold text-red-600 dark:text-red-500">HARD RESET (Admin Testing Only)</div>
+                          <div className="text-xs text-red-500/80">Completely wipe ALL local storage, IndexedDB, and Cache Storage</div>
+                        </div>
+                      </button>
+                    )}
                   </div>
                 </div>
               )}

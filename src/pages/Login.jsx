@@ -856,8 +856,13 @@ function LoginPanel({ onLoginSuccess }) {
           const settingsRef = doc(db, 'settings', user.uid);
           await setDoc(settingsRef, {
             email: user.email,
-            ownerName: 'New User',
-            businessName: 'My Business',
+            contactEmail: user.email,
+            ownerName: '',
+            businessName: '',
+            phone: '',
+            whatsapp: '',
+            address: '',
+            logoUrl: '',
             createdAt: new Date().toISOString()
           }, { merge: true });
           
@@ -913,8 +918,13 @@ function LoginPanel({ onLoginSuccess }) {
           const settingsRef = doc(db, 'settings', user.uid);
           await setDoc(settingsRef, {
             email: user.email,
-            ownerName: user.displayName || 'Google User',
-            businessName: 'My Business',
+            contactEmail: user.email,
+            ownerName: '',
+            businessName: '',
+            phone: '',
+            whatsapp: '',
+            address: '',
+            logoUrl: '',
             createdAt: new Date().toISOString()
           }, { merge: true });
         }
