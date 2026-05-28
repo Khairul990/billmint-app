@@ -23,8 +23,10 @@ jobs:
       - name: Install Node Dependencies
         run: npm ci || npm install --legacy-peer-deps
 
-      - name: Build Web Assets (Vite)
-        run: npm run build
+      - name: Build Web Assets
+        run: npm run build:android
+        env:
+          CI: false
 
       - name: Sync Web Assets to Android
         run: npx cap sync android

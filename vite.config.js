@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     VitePWA({
@@ -56,8 +56,9 @@ export default defineConfig({
     })
   ],
   build: {
-    minify: 'terser',
-    terserOptions: {
+    minify: mode === 'android' ? false : 'terser',
+    sourcemap: mode === 'android' ? false : undefined,
+    terserOptions: mode === 'android' ? undefined : {
       compress: {
         drop_console: true,
       },
@@ -74,4 +75,4 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000
   }
-})
+}))
