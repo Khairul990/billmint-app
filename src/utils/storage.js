@@ -1625,6 +1625,27 @@ export const importRestore = async (backupData) => {
 
 export const clearInvoices = async () => { localStorage.setItem(KEYS.INVOICES, JSON.stringify([])); await BillQyroDB.clear('invoices'); window.dispatchEvent(new CustomEvent('billqyro_sync')); return { status: 'success' }; };
 
+export const emptyTrash = async () => {
+  const invoices = await getInvoices();
+  const trashInvoices = invoices.filter(inv => inv.isDeleted === true);
+  const activeInvoices = invoices.filter(inv => inv.isDeleted !== true);
+  
+  updateLocalCache(KEYS.INVOICES, activeInvoices);
+  
+  for (const inv of trashInvoices) {
+    await BillQyroDB.delete('invoices', inv.id);
+    if (firebaseReady && navigator.onLine) {
+      firestoreDelete('invoices', inv.id).catch(e => console.error(e));
+      firestoreDelete('publicInvoices', inv.publicToken || inv.id).catch(e => console.error(e));
+    } else if (firebaseReady && !navigator.onLine) {
+      queueSyncTransaction('delete', 'invoices', inv.id).catch(e => console.error(e));
+    }
+  }
+  
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  return { status: 'success', count: trashInvoices.length };
+};
+
 export const clearCustomers = async () => { localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify([])); await BillQyroDB.clear('customers'); window.dispatchEvent(new CustomEvent('billqyro_sync')); return { status: 'success' }; };
 
 export const clearProducts = async () => { localStorage.setItem(KEYS.PRODUCTS, JSON.stringify([])); await BillQyroDB.clear('products'); window.dispatchEvent(new CustomEvent('billqyro_sync')); return { status: 'success' }; };

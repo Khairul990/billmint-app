@@ -57,7 +57,8 @@ import {
   updateUserBlockStatus,
   getGlobalAdminSettings,
   updateGlobalAdminSettings,
-  clearAllLocalData
+  clearAllLocalData,
+  emptyTrash
 } from '../utils/storage';
 import { getAdminEmail } from '../utils/adminAccess';
 import { firebaseReady } from '../utils/firebase';
@@ -194,6 +195,14 @@ const Settings = ({
       setTimeout(() => {
         window.location.href = '/';
       }, 1500);
+    }
+  };
+
+  const handleEmptyTrash = async () => {
+    if (window.confirm("Are you sure you want to PERMANENTLY delete all invoices currently in the Trash? This cannot be undone.")) {
+      const res = await emptyTrash();
+      toast.success(`Successfully deleted ${res.count} trash invoices forever.`);
+      setStorageInfo(getStorageUsage());
     }
   };
 
@@ -1827,12 +1836,23 @@ const Settings = ({
                     {isAdmin && (
                       <button 
                         onClick={handleClearAllLocalData}
-                        className="flex items-center gap-3 p-4 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 transition-colors text-left md:col-span-2"
+                        className="flex items-center gap-3 p-4 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 transition-colors text-left md:col-span-1"
                       >
                         <ShieldAlert className="text-red-500" size={24} />
                         <div>
-                          <div className="font-semibold text-red-600 dark:text-red-500">HARD RESET (Admin Testing Only)</div>
-                          <div className="text-xs text-red-500/80">Completely wipe ALL local storage, IndexedDB, and Cache Storage</div>
+                          <div className="font-semibold text-red-600 dark:text-red-500">HARD RESET (Admin)</div>
+                          <div className="text-xs text-red-500/80">Completely wipe ALL local storage</div>
+                        </div>
+                      </button>
+
+                      <button 
+                        onClick={handleEmptyTrash}
+                        className="flex items-center gap-3 p-4 rounded-xl border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition-colors text-left md:col-span-1"
+                      >
+                        <Trash2 className="text-rose-500" size={24} />
+                        <div>
+                          <div className="font-semibold text-rose-600 dark:text-rose-500">Empty Trash Data</div>
+                          <div className="text-xs text-rose-500/80">Permanently delete all soft-deleted invoices</div>
                         </div>
                       </button>
                     )}
