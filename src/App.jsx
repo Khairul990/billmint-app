@@ -63,6 +63,16 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error("ErrorBoundary caught an error", error, errorInfo);
+    
+    // Automatically reload on Vite dynamic import failure (new deployment pushed)
+    if (error && error.message && error.message.includes('Failed to fetch dynamically imported module')) {
+      if (!sessionStorage.getItem('billqyro_chunk_failed_reload')) {
+        sessionStorage.setItem('billqyro_chunk_failed_reload', 'true');
+        window.location.reload();
+        return;
+      }
+    }
+    
     this.setState({ errorInfo });
   }
 
