@@ -1,5 +1,9 @@
 # BillQyro Android APK Build Guide
 
+> [!WARNING]
+> **APK Build is currently PAUSED/DISABLED.** 
+> The GitHub Actions workflow for building the Android APK has been disabled as of now. The existing Vercel web app and PWA remain fully functional. This guide is retained for future reference if APK building is re-enabled.
+
 This guide will explain how to generate and download the native Android APK for BillQyro using GitHub Actions, without needing to install Android Studio on your PC!
 
 ## 1. Pushing Changes to GitHub
