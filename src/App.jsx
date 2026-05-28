@@ -528,14 +528,19 @@ function App() {
     setCurrentTab('invoices');
   };
 
-  const handleDeleteInvoice = async (id) => {
-    if (window.confirm('Are you sure you want to delete this invoice? This action is permanent.')) {
-      const { updatedInvoices, firebaseStatus } = await deleteInvoice(id);
+  const handleDeleteInvoice = async (id, permanent = false) => {
+    let shouldDelete = true;
+    if (!permanent) {
+      shouldDelete = window.confirm('Are you sure you want to move this invoice to trash?');
+    }
+    
+    if (shouldDelete) {
+      const { updatedInvoices, firebaseStatus } = await deleteInvoice(id, permanent);
       setInvoices(updatedInvoices);
       if (firebaseStatus === 'failed') {
-        toast.success('Invoice deleted locally. Will sync with cloud when online.');
+        toast.success(permanent ? 'Invoice permanently deleted locally. Will sync when online.' : 'Invoice moved to trash locally.');
       } else {
-        toast.success('Invoice deleted successfully');
+        toast.success(permanent ? 'Invoice permanently deleted!' : 'Invoice moved to trash.');
       }
     }
   };

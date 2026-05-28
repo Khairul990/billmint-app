@@ -394,9 +394,7 @@ const Invoices = ({
                 }}
                 onDelete={(id) => {
                   if (viewMode === 'active') {
-                    if (window.confirm('Move this invoice to Trash?')) {
-                      import('../utils/storage').then(({ deleteInvoice }) => deleteInvoice(id, false)).then(() => window.dispatchEvent(new Event('billqyro_sync')));
-                    }
+                    onDeleteInvoice(id, false);
                   } else {
                     const confirmText = window.prompt('Type DELETE to permanently delete this invoice:');
                     if (confirmText === 'DELETE') {
