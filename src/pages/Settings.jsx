@@ -61,7 +61,7 @@ import {
 import { getAdminEmail } from '../utils/adminAccess';
 import { firebaseReady } from '../utils/firebase';
 import { toast } from 'react-hot-toast';
-import { testSupabaseWriteRead, testSyncProfileToSupabase } from '../services/supabaseDataService';
+
 
 const getThemePreviewColors = (preset) => {
   const isDark = document.documentElement.classList.contains('dark');
@@ -193,37 +193,6 @@ const Settings = ({
     toast.success(`Database provider updated to: ${provider}`);
   };
 
-  const handleTestSupabase = async () => {
-    toast.loading("Testing Supabase...", { id: 'test-sb' });
-    const result = await testSupabaseWriteRead();
-    if (result.success) {
-      toast.success("Supabase test successful", { id: 'test-sb' });
-      console.log("Supabase Test Data:", result.data);
-    } else {
-      toast.error(`Supabase test failed: ${result.error}`, { id: 'test-sb' });
-    }
-  };
-
-  const handleSyncProfileToSupabase = async () => {
-    toast.loading("Syncing profile to Supabase...", { id: 'sync-sb' });
-    
-    // Check if we have data to sync
-    if (!loggedInEmail && !businessName) {
-      toast.error("No profile data found to sync.", { id: 'sync-sb' });
-      return;
-    }
-
-    const profileData = loggedInEmail ? { email: loggedInEmail, name: ownerName || 'BillQyro User' } : null;
-    const businessData = businessName ? { business_name: businessName } : null;
-
-    const result = await testSyncProfileToSupabase(profileData, businessData);
-    if (result.success) {
-      toast.success("Profile sync successful", { id: 'sync-sb' });
-      console.log("Supabase Sync Data:", result);
-    } else {
-      toast.error(`Sync failed: ${result.error}`, { id: 'sync-sb', duration: 5000 });
-    }
-  };
 
   const [themeColor, setThemeColor] = useState('light');
   const [darkMode, setDarkMode] = useState(false);
@@ -1780,29 +1749,6 @@ const Settings = ({
 
               {storageInfo && (
                 <div className="space-y-4">
-                  {/* SUPABASE CONNECTION TEST */}
-                  <div className="bg-theme-bg/50 dark:bg-theme-dark-bg/50 rounded-2xl p-6 border border-theme-border-soft dark:border-theme-border-soft relative overflow-hidden group hover:border-theme-accent/30 transition-all duration-300">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="font-semibold text-theme-text dark:text-theme-dark-text">Supabase Connection Test</span>
-                      <div className="text-[10px] p-2.5 rounded-xl border font-bold text-center bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-400">
-                        {dbProvider === 'firebase' ? 'Firebase Active' : dbProvider === 'supabase' ? 'Supabase Ready (Experimental)' : 'Dual Sync Not Enabled Yet'}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleTestSupabase}
-                      className="w-full py-3 bg-theme-app dark:bg-theme-surface hover:bg-theme-accent hover:text-white text-theme-primary font-bold text-xs uppercase rounded-xl border border-theme-border-soft transition-all"
-                    >
-                      Test Supabase Write/Read
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSyncProfileToSupabase}
-                      className="w-full mt-2 py-3 bg-theme-app dark:bg-theme-surface hover:bg-theme-accent hover:text-white text-theme-primary font-bold text-xs uppercase rounded-xl border border-theme-border-soft transition-all"
-                    >
-                      Sync Profile to Supabase
-                    </button>
-                  </div>
 
                   <div className="bg-theme-bg/50 dark:bg-theme-dark-bg/50 rounded-2xl p-6 border border-theme-border-soft dark:border-theme-border-soft relative overflow-hidden group hover:border-theme-accent/30 transition-all duration-300">
                     <div className="flex justify-between items-center mb-2">

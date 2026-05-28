@@ -1,3 +1,4 @@
+// DEACTIVATED: Supabase is no longer used in this project. Firebase is the sole active backend.
 /*
  * ============================================================================
  * BILLQYRO SUPABASE AUTHENTICATION & RLS STRATEGY PLAN

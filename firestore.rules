@@ -60,12 +60,13 @@ service cloud.firestore {
       allow read, write: if isAuth() && request.auth.uid == userId;
     }
     match /premiumRequests/{requestId} {
-      allow read, write: if isAuth(); // Could be restricted further but kept simple for now
+      // Users can only read/write their own requests
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAuth() && (resource.data.userId == request.auth.uid || request.auth.token.email == 'khairul2052007@gmail.com');
+      allow update, delete: if isAuth() && request.auth.token.email == 'khairul2052007@gmail.com';
     }
     match /usersList/{userId} {
-      // Any authenticated user might need to write here on signup, 
-      // but only admin or self should read. For now restrict to self or admin.
-      allow write: if isAuth();
+      allow write: if isAuth() && request.auth.uid == userId;
       allow read: if isAuth() && (request.auth.uid == userId || request.auth.token.email == 'khairul2052007@gmail.com');
     }
     match /platformConfig/{configId} {

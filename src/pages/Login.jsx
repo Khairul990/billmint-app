@@ -807,26 +807,44 @@ function LoginPanel({ onLoginSuccess }) {
     setIsSigningIn(true);
     setError('');
     
+    if (!email || !email.trim()) {
+      setError('Email is required');
+      setIsSigningIn(false);
+      return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError('Invalid email format');
+      setIsSigningIn(false);
+      return;
+    }
+
+    if (!password || !password.trim()) {
+      setError('Password is required');
+      setIsSigningIn(false);
+      return;
+    }
+
+    if (password.trim().length < 6) {
+      setError('Password must be at least 6 characters');
+      setIsSigningIn(false);
+      return;
+    }
+    
     try {
-      if (firebaseReady && auth && email && password) {
-        await signInWithEmailAndPassword(auth, email, password);
+      if (firebaseReady && auth) {
+        await signInWithEmailAndPassword(auth, email.trim(), password.trim());
         onLoginSuccess();
-      } else if (email) {
-        const isOk = login(email);
+      } else {
+        const isOk = login(email.trim(), password.trim());
         if (isOk) {
           localStorage.setItem('billqyro_admin_unlocked', 'true');
           onLoginSuccess();
         } else {
-          window.setTimeout(() => {
-            onLoginSuccess();
-            setIsSigningIn(false);
-          }, 1400);
-        }
-      } else {
-        window.setTimeout(() => {
-          if (onLoginSuccess) onLoginSuccess();
+          setError('Invalid credentials');
           setIsSigningIn(false);
-        }, 1400);
+        }
       }
     } catch (err) {
       console.error(err);

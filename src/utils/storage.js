@@ -508,7 +508,7 @@ export const resetToDemoData = () => {
     logoUrl: '',
     ownerName: 'Admin Owner',
     phone: '+91 98765 00000',
-    email: 'billing@billqyro.com',
+    email: '',
     address: '102, Design Market, Tech Park Phase-II, Bangalore, Karnataka - 560103',
     gstNumber: '29AAAAA0000A1Z5',
     country: 'India',
@@ -579,18 +579,19 @@ export const getAuthSession = () => {
   }
 };
 
-export const login = (passcodeOrEmail) => {
+export const login = (email, password) => {
   const activeSettings = getSettings() || DEFAULT_SETTINGS;
   const targetPasscode = activeSettings.adminPasscode || '1118';
   const targetEmail = activeSettings.adminEmail || getAdminEmail();
 
-  const inputStr = String(passcodeOrEmail).toLowerCase().trim();
-  const isEmailMatch = inputStr === targetEmail.toLowerCase();
-  const isPasscodeMatch = String(passcodeOrEmail) === targetPasscode;
-  const isMasterAdmin = isEmailMatch; // admin email check handled by ADMIN_EMAIL
+  const inputEmail = String(email).toLowerCase().trim();
+  const inputPass = String(password).trim();
 
-  if (isPasscodeMatch || isEmailMatch || isMasterAdmin) {
-    const sessionEmail = inputStr; // email is already validated
+  const isEmailMatch = inputEmail === targetEmail.toLowerCase();
+  const isPasscodeMatch = inputPass === targetPasscode;
+
+  if (isEmailMatch && isPasscodeMatch) {
+    const sessionEmail = inputEmail; // email is already validated
     const session = { timestamp: Date.now(), token: 'billqyro-secure-session', userEmail: sessionEmail };
     localStorage.setItem(KEYS.AUTH, JSON.stringify(session));
 
@@ -611,6 +612,7 @@ export const login = (passcodeOrEmail) => {
 
 export const logout = () => {
   localStorage.removeItem(KEYS.AUTH);
+  sessionStorage.clear();
 };
 
 // --- SUBSCRIPTION ---
