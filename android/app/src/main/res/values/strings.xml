@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BillQyro</string>
+    <string name="title_activity_main">BillQyro</string>
+    <string name="package_name">com.billqyro.app</string>
+    <string name="custom_url_scheme">com.billqyro.app</string>
+</resources>

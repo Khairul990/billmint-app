@@ -108,6 +108,24 @@ function App() {
   }, [currentTab]);
   const [userRole, setUserRole] = useState(() => localStorage.getItem('billqyro_user_role') || 'user');
 
+  // Capacitor Android Back Button Handler
+  useEffect(() => {
+    import('@capacitor/app').then(({ App: CapApp }) => {
+      CapApp.removeAllListeners('backButton');
+      CapApp.addListener('backButton', () => {
+        setCurrentTab((prevTab) => {
+          if (prevTab !== 'dashboard') {
+            return 'dashboard';
+          } else {
+            CapApp.exitApp();
+            return prevTab;
+          }
+        });
+      });
+    }).catch(() => { /* not in capacitor env */ });
+  }, []);
+
+
   // Boot Interceptor for Public Invoice
   const [publicInvoice, setPublicInvoice] = useState(null);
   const [loadingPublicInvoice, setLoadingPublicInvoice] = useState(false);
