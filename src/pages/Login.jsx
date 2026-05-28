@@ -23,8 +23,9 @@ import {
   Zap,
 } from "lucide-react";
 
-import { auth, firebaseReady } from '../utils/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, firebaseReady, db } from '../utils/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { login } from '../utils/storage';
 import Logo from '../components/Logo';
 
@@ -802,8 +803,11 @@ function LoginPanel({ onLoginSuccess }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = async (event) => {
+  const [isLoginMode, setIsLoginMode] = useState(true);
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!isLoginMode) console.log('Signup clicked');
     setIsSigningIn(true);
     setError('');
     
@@ -834,24 +838,98 @@ function LoginPanel({ onLoginSuccess }) {
     
     try {
       if (firebaseReady && auth) {
-        await signInWithEmailAndPassword(auth, email.trim(), password.trim());
-        onLoginSuccess();
-      } else {
-        const isOk = login(email.trim(), password.trim());
-        if (isOk) {
-          localStorage.setItem('billqyro_admin_unlocked', 'true');
+        if (isLoginMode) {
+          await signInWithEmailAndPassword(auth, email.trim(), password.trim());
           onLoginSuccess();
         } else {
-          setError('Invalid credentials');
+          const result = await createUserWithEmailAndPassword(auth, email.trim(), password.trim());
+          const user = result.user;
+          // Create Firestore documents using standard Date fallback instead of serverTimestamp for simplicity
+          const userDocRef = doc(db, 'usersList', user.uid);
+          await setDoc(userDocRef, {
+            userId: user.uid,
+            email: user.email,
+            createdAt: new Date().toISOString(),
+            role: 'user'
+          }, { merge: true });
+          
+          const settingsRef = doc(db, 'settings', user.uid);
+          await setDoc(settingsRef, {
+            email: user.email,
+            ownerName: 'New User',
+            businessName: 'My Business',
+            createdAt: new Date().toISOString()
+          }, { merge: true });
+          
+          console.log('Signup success');
+          onLoginSuccess();
+        }
+      } else {
+        if (isLoginMode) {
+          const isOk = login(email.trim(), password.trim());
+          if (isOk) {
+            localStorage.setItem('billqyro_admin_unlocked', 'true');
+            onLoginSuccess();
+          } else {
+            setError('Invalid credentials');
+            setIsSigningIn(false);
+          }
+        } else {
+          setError('Firebase not configured. Cannot create account offline.');
           setIsSigningIn(false);
         }
       }
     } catch (err) {
-      console.error(err);
-      setError('Invalid credentials');
-      window.setTimeout(() => {
+      console.error('Firebase auth error', err);
+      let errorMsg = err.message || 'Authentication failed';
+      if (err.code === 'auth/email-already-in-use') errorMsg = 'Email is already in use.';
+      if (err.code === 'auth/invalid-credential') errorMsg = 'Invalid email or password.';
+      setError(errorMsg);
+      setIsSigningIn(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    console.log('Google login clicked');
+    setIsSigningIn(true);
+    setError('');
+    try {
+      if (firebaseReady && auth) {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        
+        // Check/Create user profile
+        const userDocRef = doc(db, 'usersList', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (!userDocSnap.exists()) {
+          await setDoc(userDocRef, {
+            userId: user.uid,
+            email: user.email,
+            createdAt: new Date().toISOString(),
+            role: 'user'
+          }, { merge: true });
+          
+          const settingsRef = doc(db, 'settings', user.uid);
+          await setDoc(settingsRef, {
+            email: user.email,
+            ownerName: user.displayName || 'Google User',
+            businessName: 'My Business',
+            createdAt: new Date().toISOString()
+          }, { merge: true });
+        }
+        console.log('Google login success');
+        onLoginSuccess();
+      } else {
+        setError('Firebase is not configured for Google login.');
         setIsSigningIn(false);
-      }, 1400);
+      }
+    } catch (err) {
+      console.error('Firebase auth error', err);
+      if (err.code !== 'auth/popup-closed-by-user') {
+        setError(err.message || 'Google login failed');
+      }
+      setIsSigningIn(false);
     }
   };
 
@@ -904,17 +982,21 @@ function LoginPanel({ onLoginSuccess }) {
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-theme-border-soft bg-theme-accent-light px-3 py-1 text-[10px] font-black uppercase tracking-wide text-theme-accent">
-            Secure Login <span className="h-1.5 w-1.5 rounded-full bg-theme-accent" />
+            {isLoginMode ? 'Secure Login' : 'Create Account'} <span className="h-1.5 w-1.5 rounded-full bg-theme-accent" />
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-theme-primary sm:text-4xl">Welcome back</h1>
-          <p className="mt-2 text-sm font-semibold text-theme-muted">Sign in to manage your own customers, invoices, PDFs, links, and payments.</p>
+          <h1 className="text-3xl font-black tracking-tight text-theme-primary sm:text-4xl">
+            {isLoginMode ? 'Welcome back' : 'Get started'}
+          </h1>
+          <p className="mt-2 text-sm font-semibold text-theme-muted">
+            {isLoginMode ? 'Sign in to manage your own customers, invoices, PDFs, links, and payments.' : 'Create an account to securely manage your business and sync your data.'}
+          </p>
         </motion.div>
 
         {error && <p className="mt-4 rounded-xl bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-400">{error}</p>}
 
         <form
           className="mt-8 space-y-5"
-          onSubmit={handleLogin}
+          onSubmit={handleSubmit}
         >
           <motion.label initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="block relative group">
             <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent">Email address</span>
@@ -958,9 +1040,11 @@ function LoginPanel({ onLoginSuccess }) {
               <input type="checkbox" className="h-4 w-4 accent-theme-accent" />
               Remember me
             </label>
-            <a className="font-bold text-theme-accent hover:text-theme-accent" href="#">
-              Forgot password?
-            </a>
+            {isLoginMode && (
+              <a className="font-bold text-theme-accent hover:text-theme-accent" href="#">
+                Forgot password?
+              </a>
+            )}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.5 }}>
@@ -976,7 +1060,7 @@ function LoginPanel({ onLoginSuccess }) {
               <span className="absolute -left-24 top-0 h-full w-20 rotate-12 bg-white/30 blur-md transition-all duration-700 group-hover:left-[120%] pointer-events-none" />
               
               <span className="relative flex items-center gap-2 text-[15px] drop-shadow-[0_1px_8px_rgba(0,0,0,0.3)]">
-                {isSigningIn ? "Signing in..." : "Sign In to Dashboard"}
+                {isSigningIn ? (isLoginMode ? "Signing in..." : "Creating account...") : (isLoginMode ? "Sign In to Dashboard" : "Sign Up to Dashboard")}
                 {isSigningIn ? (
                   <motion.span
                     className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white"
@@ -996,14 +1080,26 @@ function LoginPanel({ onLoginSuccess }) {
             <div className="h-px flex-1 bg-theme-card/10" />
           </motion.div>
 
-          <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.5 }} type="button" className="flex h-[52px] w-full items-center justify-center gap-3 rounded-[22px] border border-theme-border-soft bg-theme-surface text-sm font-bold text-theme-muted transition-all hover:bg-theme-card hover:text-theme-primary hover:shadow-[0_0_15px_rgba(0,0,0,0.05)]">
+          <motion.button 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ delay: 0.8, duration: 0.5 }} 
+            type="button" 
+            onClick={handleGoogleLogin}
+            disabled={isSigningIn}
+            className="flex h-[52px] w-full items-center justify-center gap-3 rounded-[22px] border border-theme-border-soft bg-theme-surface text-sm font-bold text-theme-muted transition-all hover:bg-theme-card hover:text-theme-primary hover:shadow-[0_0_15px_rgba(0,0,0,0.05)] disabled:opacity-70 disabled:cursor-not-allowed"
+          >
             <span className="grid h-6 w-6 place-items-center rounded-full bg-slate-100 text-xs font-black text-slate-900">G</span>
-            Continue with Google
+            {isSigningIn && !email && !password ? "Connecting to Google..." : "Continue with Google"}
           </motion.button>
         </form>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.5 }} className="mt-6 text-center text-sm text-theme-muted">
-          Need access? <a href="#" className="font-bold text-theme-accent hover:text-theme-primary transition-colors">Create free account</a>
+          {isLoginMode ? (
+            <>Need access? <button type="button" onClick={() => { setIsLoginMode(false); setError(''); }} className="font-bold text-theme-accent hover:text-theme-primary transition-colors cursor-pointer">Create free account</button></>
+          ) : (
+            <>Already have an account? <button type="button" onClick={() => { setIsLoginMode(true); setError(''); }} className="font-bold text-theme-accent hover:text-theme-primary transition-colors cursor-pointer">Sign in instead</button></>
+          )}
         </motion.p>
               </div>
       </motion.div>
