@@ -762,13 +762,13 @@ const CreateInvoice = ({
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(420px,0.9fr)] gap-6 lg:gap-8 items-start w-full">
         
         {/* LEFT COLUMN: WIZARD STEPS */}
-        <div className="w-full space-y-6">
+        <div className="w-full space-y-5">
           
           {/* STEP 1: CONFIGURATION & CRM */}
-          <div className="space-y-6">
+          <div className="space-y-5">
           
           {/* Bill Type / Business Type Selector */}
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
+          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
             <div className="flex items-center justify-between border-b border-theme-border-soft pb-3">
               <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-theme-accent" />
@@ -836,7 +836,7 @@ const CreateInvoice = ({
           </div>
 
           {/* Metadata Grid */}
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
+          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
             <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-theme-border-soft pb-3 flex items-center gap-2">
               <Calendar className="w-4 h-4 text-theme-accent" />
               <span>Invoicing Metadata</span>
@@ -877,7 +877,7 @@ const CreateInvoice = ({
           </div>
 
           {/* Customer CRM Selector */}
-          <div id="crm-section" className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4 relative scroll-mt-6">
+          <div id="crm-section" className="bg-theme-card dark:bg-theme-card rounded-3xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4 relative scroll-mt-6">
             <div className="flex items-center justify-between border-b border-theme-border-soft pb-3">
               <div className="flex flex-col">
                 <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary flex items-center gap-2">
@@ -980,14 +980,12 @@ const CreateInvoice = ({
           </div>
           </div>
 
-          </div>
-
         {/* STEP 2: ITEMS */}
-        <div className="space-y-6">
+        <div className="space-y-5">
           {/* Premium Smart Item Table */}
           <div id="items-section" className="bg-theme-card dark:bg-theme-card rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium overflow-hidden scroll-mt-6">
             {/* Table Header Bar */}
-            <div className="bg-theme-surface border-b border-theme-border-soft px-5 md:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-t-3xl">
+            <div className="bg-theme-surface border-b border-theme-border-soft px-4 md:px-5 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-t-3xl">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center">
                   <Layers className="w-4 h-4 text-theme-accent" />
@@ -1022,7 +1020,7 @@ const CreateInvoice = ({
               </div>
             </div>
 
-            <div className="p-5 md:p-6 space-y-4">
+            <div className="p-4 md:p-5 space-y-4">
 
             <div className="flex gap-2 flex-wrap pb-3 mb-1 border-b border-theme-border-soft dark:border-theme-border-soft">
               <span className="text-[10px] text-theme-muted font-bold uppercase tracking-wider py-1.5 mr-1">Quick Fill:</span>
@@ -1041,8 +1039,8 @@ const CreateInvoice = ({
           </div>
           
           {/* STEP 2: ITEMS SECTION */}
-          <div className={currentStep === 2 ? 'block space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300' : 'hidden'}>
-            <div className="flex items-center justify-between bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-sm">
+          <div className={currentStep === 2 ? 'block space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-300' : 'hidden'}>
+            <div className="flex items-center justify-between bg-theme-card border border-theme-border-soft rounded-3xl p-4 shadow-sm">
               <div>
                 <h3 className="font-extrabold text-sm flex items-center gap-2 text-theme-primary"><Layers className="w-4 h-4 text-theme-accent" /> Items & Services</h3>
                 <p className="text-[10px] text-theme-muted font-bold">Add products or services to this bill</p>
@@ -1509,7 +1507,7 @@ const CreateInvoice = ({
             </div>
             </div>{/* end inner p-5 wrapper */}
             {/* Items footer: Add Item + mini totals */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end px-5 md:px-6 py-4 border-t border-theme-border-soft dark:border-theme-border-soft gap-4 bg-theme-app dark:bg-theme-surface/50">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end px-4 md:px-5 py-3 border-t border-theme-border-soft dark:border-theme-border-soft gap-3 bg-theme-app dark:bg-theme-surface/50">
               <button
                 onClick={addItemRow}
                 className="flex items-center gap-2 text-xs font-extrabold text-white transition-all w-fit px-5 py-3 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 rounded-xl shadow-md shadow-glow hover:shadow-lg hover:shadow-theme-glow hover:-translate-y-0.5"
@@ -1544,274 +1542,124 @@ const CreateInvoice = ({
           </div>
         </div>
 
-        {/* STEP 3: TALLY, SUB-CHARGES & PAYMENT */}
-        <div className="space-y-6">
-           <div className="flex items-center justify-between bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-sm">
-              <div>
-                <h3 className="font-extrabold text-sm flex items-center gap-2 text-theme-primary"><Coins className="w-4 h-4 text-theme-accent" /> Sub-charges & Payment</h3>
-                <p className="text-[10px] text-theme-muted font-bold">Manage taxes, discounts, and payments</p>
-              </div>
-            </div>
-          
-          {/* Overrides & Payment */}
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
-            <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-theme-border-soft pb-3 flex items-center gap-2">
-              <Coins className="w-4 h-4 text-theme-accent" />
-              <span>Billing Overrides</span>
+        {/* BILLING / TAX / TOTALS - Compact */}
+        <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
+          <div className="flex items-center justify-between border-b border-theme-border-soft pb-3">
+            <h3 className="text-sm font-extrabold text-theme-primary flex items-center gap-2">
+              <Calculator className="w-4 h-4 text-theme-accent" />
+              <span>Billing / Tax / Totals</span>
             </h3>
-            
-            <div className="space-y-4 text-xs font-semibold text-theme-muted">
-              
-              {/* Payment status (Automatic suggestions active) */}
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="text-theme-muted">Payment Status</label>
-                  <span className="text-[9px] text-theme-accent font-extrabold tracking-wide uppercase">
-                    Auto-Synchronizing
-                  </span>
-                </div>
-                <select
-                  value={paymentStatus}
-                  onChange={(e) => setPaymentStatus(e.target.value)}
-                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold dark:bg-theme-card dark:border-theme-border-soft dark:text-theme-primary"
-                >
-                  <option value="Paid">Paid</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Unpaid">Unpaid</option>
-                </select>
-              </div>
+            <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-theme-accent/10 text-theme-accent border border-theme-accent/20">Auto-calculated</span>
+          </div>
 
-              {/* Order Status */}
-              <div>
-                <label className="block mb-1.5 text-theme-muted">Order Status</label>
-                <select
-                  value={orderStatus}
-                  onChange={(e) => setOrderStatus(e.target.value)}
-                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold dark:bg-theme-card dark:border-theme-border-soft dark:text-theme-primary"
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Ready">Ready</option>
-                  <option value="Delivered">Delivered</option>
-                  <option value="Cancelled">Cancelled</option>
-                </select>
-              </div>
-
-              {/* Tax percentage */}
-              <div>
-                <label className="block mb-1.5 text-theme-muted flex items-center gap-1">
-                  <Percent className="w-3.5 h-3.5 text-theme-muted" />
-                  <span>GST/Tax Rate (%)</span>
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={taxPercentage}
-                  onChange={(e) => setTaxPercentage(e.target.value)}
-                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
-                />
-              </div>
-
-              {/* Discount */}
-              <div>
-                <label className="block mb-1.5 text-theme-muted flex items-center gap-1">
-                  <Coins className="w-3.5 h-3.5 text-theme-muted" />
-                  <span>Flat Discount ({currencySymbol})</span>
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={discountAmount}
-                  onChange={(e) => setDiscountAmount(e.target.value)}
-                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
-                />
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="block mb-1.5 text-theme-muted">Customer Notes</label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Thank you for your business!"
-                  rows="2"
-                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-muted leading-relaxed text-xs"
-                />
-              </div>
-
-              {/* Terms */}
-              <div>
-                <label className="block mb-1.5 text-theme-muted">Terms & Conditions</label>
-                <textarea
-                  value={terms}
-                  onChange={(e) => setTerms(e.target.value)}
-                  placeholder="1. Payment is due within 30 days..."
-                  rows="2"
-                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-muted leading-relaxed text-xs"
-                />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-3 text-xs font-semibold text-theme-muted">
+            <div>
+              <label className="block mb-1 text-theme-muted">Payment Status</label>
+              <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)} className="w-full px-3 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary font-extrabold">
+                <option value="Paid">Paid</option>
+                <option value="Pending">Pending</option>
+                <option value="Unpaid">Unpaid</option>
+              </select>
+            </div>
+            <div>
+              <label className="block mb-1 text-theme-muted">Order Status</label>
+              <select value={orderStatus} onChange={(e) => setOrderStatus(e.target.value)} className="w-full px-3 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary font-extrabold">
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Ready">Ready</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div>
+              <label className="block mb-1 text-theme-muted flex items-center gap-1">
+                <Percent className="w-3 h-3" />
+                <span>GST/Tax Rate (%)</span>
+              </label>
+              <input type="number" min="0" max="100" value={taxPercentage} onChange={(e) => setTaxPercentage(e.target.value)} className="w-full px-3 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary font-bold" />
+            </div>
+            <div>
+              <label className="block mb-1 text-theme-muted flex items-center gap-1">
+                <Coins className="w-3 h-3" />
+                <span>Flat Discount ({currencySymbol})</span>
+              </label>
+              <input type="number" min="0" value={discountAmount} onChange={(e) => setDiscountAmount(e.target.value)} className="w-full px-3 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary font-bold" />
+            </div>
+            <div>
+              <label className="block mb-1 text-theme-muted">Amount Paid ({currencySymbol})</label>
+              <input type="number" min="0" max={grandTotal} value={amountPaid} onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)} className="w-full px-3 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary font-black" />
+            </div>
+            <div className="flex flex-col justify-end">
+              <div className="flex justify-between items-center bg-theme-app dark:bg-theme-surface p-2.5 rounded-xl h-[42px]">
+                <span className="text-[10px] uppercase font-bold text-theme-muted">Balance</span>
+                <span className={`text-sm font-black ${balanceDue > 0 ? 'text-theme-warning' : 'text-theme-accent'}`}>{currencySymbol}{balanceDue.toFixed(2)}</span>
               </div>
             </div>
           </div>
 
-          {/* Tally calculations & Amount Paid details */}
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
-            <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-theme-border-soft pb-3 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-theme-accent" />
-              <span>Step 3: Tally & Totals</span>
-            </h3>
-            
-            <div className="space-y-3.5 text-xs font-semibold text-theme-muted">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span className="text-theme-primary dark:text-theme-primary font-bold">{currencySymbol}{subtotal.toFixed(2)}</span>
-              </div>
-              
-              {discountAmount > 0 && (
-                <div className="flex justify-between text-theme-danger">
-                  <span>Discount</span>
-                  <span className="font-bold">-{currencySymbol}{parseFloat(discountAmount).toFixed(2)}</span>
-                </div>
-              )}
-              
-              <div className="flex justify-between">
-                <span>{businessSettings?.taxLabel || 'Tax'} ({taxPercentage}%)</span>
-                <span className="text-theme-primary dark:text-theme-primary font-bold">{currencySymbol}{taxAmount.toFixed(2)}</span>
-              </div>
+          {/* Notes & Terms inline */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Customer Notes</label>
+              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Thank you for your business!" rows="1" className="w-full px-3 py-2 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary text-xs" />
+            </div>
+            <div>
+              <label className="block mb-1 text-[10px] font-bold text-theme-muted uppercase tracking-wide">Terms & Conditions</label>
+              <textarea value={terms} onChange={(e) => setTerms(e.target.value)} placeholder="1. Payment is due within 30 days..." rows="1" className="w-full px-3 py-2 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary text-xs" />
+            </div>
+          </div>
 
-              <div className="flex justify-between items-center border-t border-theme-border-soft dark:border-theme-border-soft pt-3 text-theme-primary dark:text-theme-primary">
-                <span className="text-sm font-extrabold text-theme-primary dark:text-theme-primary">Grand Total</span>
-                <span className="text-lg font-black text-theme-accent">
-                  {currencySymbol}{grandTotal.toFixed(2)}
-                </span>
-              </div>
-
-              {/* Amount Paid input */}
-              <div className="border-t border-theme-border-soft dark:border-theme-border-soft pt-3.5 space-y-2">
-                <label className="block text-[10px] text-theme-muted uppercase font-black">Amount Paid ({currencySymbol})</label>
-                <input
-                  type="number"
-                  min="0"
-                  max={grandTotal}
-                  value={amountPaid}
-                  onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 bg-theme-surface dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary font-black text-sm text-right"
-                />
-              </div>
-
-              {/* Balance Due calculation */}
-              <div className="flex justify-between items-center bg-theme-app dark:bg-theme-surface p-3 rounded-2xl">
-                <span className="text-[10px] uppercase font-bold text-theme-muted">Balance Outstanding</span>
-                <span className={`text-sm font-black ${balanceDue > 0 ? 'text-theme-warning' : 'text-theme-accent'}`}>
-                  {currencySymbol}{balanceDue.toFixed(2)}
-                </span>
+          {/* Grand Total row */}
+          <div className="flex items-center justify-between border-t border-theme-border-soft pt-3">
+            <div className="flex gap-4 text-[11px] text-theme-muted flex-wrap">
+              <span>Subtotal: <strong className="text-theme-primary">{currencySymbol}{subtotal.toFixed(2)}</strong></span>
+              {discountAmount > 0 && <span className="text-theme-danger">Discount: -{currencySymbol}{parseFloat(discountAmount).toFixed(2)}</span>}
+              <span>Tax ({taxPercentage}%): <strong className="text-theme-primary">{currencySymbol}{taxAmount.toFixed(2)}</strong></span>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-xs font-extrabold text-theme-primary">Grand Total</span>
+              <span className="text-lg font-black text-theme-accent">{currencySymbol}{grandTotal.toFixed(2)}</span>
             </div>
           </div>
         </div>
 
-        {/* STEP 4: PREVIEW & ACTIONS */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-sm">
-            <div>
-              <h3 className="font-extrabold text-sm flex items-center gap-2 text-theme-primary"><Check className="w-4 h-4 text-theme-accent" /> Finalize & Send</h3>
-              <p className="text-[10px] text-theme-muted font-bold">Review the preview on the right (or scroll down) and save.</p>
-            </div>
+        {/* INVOICE ACTIONS - Compact */}
+        <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium">
+          <div className="grid grid-cols-2 gap-2.5">
+            <button onClick={() => handleSave('Draft')} className="h-[44px] bg-theme-surface dark:bg-theme-card text-theme-primary rounded-xl font-bold hover:bg-theme-border-soft transition-all flex items-center justify-center gap-2 text-[12px] border border-theme-border-soft/50 shadow-sm">
+              <Save className="w-3.5 h-3.5" /> Save Draft
+            </button>
+            <button onClick={() => setShowPreview(true)} className="h-[44px] bg-theme-surface dark:bg-theme-card text-theme-primary rounded-xl font-bold hover:bg-theme-border-soft transition-all flex items-center justify-center gap-2 text-[12px] border border-theme-border-soft/50 shadow-sm">
+              <Eye className="w-3.5 h-3.5" /> Preview PDF
+            </button>
+            <button onClick={handleDownloadPDF} className="h-[44px] bg-theme-surface dark:bg-theme-card border border-theme-accent text-theme-accent rounded-xl font-bold hover:bg-theme-accent-light transition-all flex items-center justify-center gap-2 text-[12px] shadow-sm cursor-pointer">
+              <Download className="w-3.5 h-3.5" /> Download PDF
+            </button>
+            <button onClick={() => handleSave()} className="h-[44px] bg-[image:var(--accent-gradient)] text-theme-button-text rounded-xl font-bold hover:opacity-90 shadow-md transition-all flex items-center justify-center gap-2 text-[12px] cursor-pointer">
+              <Check className="w-3.5 h-3.5" /> Save Invoice
+            </button>
+            <button onClick={() => { if(editingInvoice) handleCopyLiveLink(); }} disabled={!editingInvoice} className={`h-[44px] rounded-xl font-bold flex items-center justify-center gap-2 text-[12px] transition-all shadow-sm border ${editingInvoice ? 'bg-theme-surface border-theme-border-soft text-theme-primary hover:bg-theme-border-soft cursor-pointer' : 'bg-theme-surface/50 border-theme-border-soft/40 text-theme-muted cursor-not-allowed'}`}>
+              <Link className="w-3.5 h-3.5" /> Copy Live Link
+            </button>
+            <button onClick={() => { if(editingInvoice && customerPhone) handleSendWhatsAppReminder(); }} disabled={!editingInvoice || !customerPhone} className={`h-[44px] rounded-xl font-bold flex items-center justify-center gap-2 text-[12px] transition-all shadow-sm border ${(editingInvoice && customerPhone) ? 'bg-[#25D366]/10 border-[#25D366]/30 text-[#128C7E] dark:text-[#25D366] hover:bg-[#25D366]/20 cursor-pointer' : 'bg-theme-surface/50 border-theme-border-soft/40 text-theme-muted cursor-not-allowed'}`}>
+              <Send className="w-3.5 h-3.5" /> WhatsApp Reminder
+            </button>
           </div>
-
-          <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
-            <h3 className="text-sm font-extrabold text-theme-primary border-b border-theme-border-soft pb-3 mb-4">Invoice Actions</h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                onClick={() => handleSave('Draft')}
-                className="w-full h-[52px] bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted rounded-xl font-bold hover:bg-theme-border-soft transition-all flex items-center justify-center gap-2 text-[13px] border border-theme-border-soft/50 shadow-sm"
-              >
-                <Save className="w-4 h-4" />
-                <span>Save Draft</span>
-              </button>
-              
-              <button
-                onClick={() => setShowPreview(true)}
-                className="w-full h-[52px] bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted rounded-xl font-bold hover:bg-theme-border-soft transition-all flex items-center justify-center gap-2 text-[13px] border border-theme-border-soft/50 shadow-sm"
-              >
-                <Eye className="w-4 h-4" />
-                <span>Preview PDF</span>
-              </button>
-
-              <button
-                onClick={handleDownloadPDF}
-                className="w-full h-[52px] bg-theme-surface dark:bg-theme-card border border-theme-accent text-theme-accent rounded-xl font-bold hover:bg-theme-accent-light dark:hover:bg-theme-card transition-all flex items-center justify-center gap-2 text-[13px] shadow-sm cursor-pointer"
-              >
-                <Download className="w-4 h-4" />
-                <span>Download PDF</span>
-              </button>
-              
-              <button
-                onClick={() => handleSave()}
-                className="w-full h-[52px] bg-[image:var(--accent-gradient)] bg-theme-accent text-theme-button-text rounded-xl font-bold hover:opacity-90 shadow-md transition-all flex items-center justify-center gap-2 text-[13px] cursor-pointer"
-              >
-                <Check className="w-4 h-4" />
-                <span>Save Invoice</span>
-              </button>
-
-              {/* Copy Live Link */}
-              <button
-                onClick={() => { if(editingInvoice) handleCopyLiveLink(); }}
-                disabled={!editingInvoice}
-                title={!editingInvoice ? "Save invoice first to create live link" : "Copy Live Link"}
-                className={`w-full h-[52px] rounded-xl font-bold flex flex-col items-center justify-center gap-1 text-[13px] transition-all shadow-sm border ${
-                  editingInvoice
-                    ? 'bg-theme-surface border-theme-border-soft text-theme-primary hover:bg-theme-border-soft cursor-pointer'
-                    : 'bg-theme-surface/50 border-theme-border-soft/40 text-theme-muted cursor-not-allowed'
-                }`}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <Link className="w-4 h-4" />
-                  <span>Copy Live Link</span>
-                </div>
-                {!editingInvoice && (
-                  <span className="text-[9px] text-theme-muted font-medium leading-none">Save invoice first</span>
-                )}
-              </button>
-
-              {/* Send WhatsApp Reminder */}
-              <button
-                onClick={() => { if(editingInvoice && customerPhone) handleSendWhatsAppReminder(); }}
-                disabled={!editingInvoice || !customerPhone}
-                title={!editingInvoice ? "Save invoice first" : (!customerPhone ? "Customer phone required" : "Send reminder")}
-                className={`w-full h-[52px] rounded-xl font-bold flex flex-col items-center justify-center gap-1 text-[13px] transition-all shadow-sm border ${
-                  (editingInvoice && customerPhone)
-                    ? 'bg-[#25D366]/10 border-[#25D366]/30 text-[#128C7E] dark:text-[#25D366] hover:bg-[#25D366]/20 cursor-pointer'
-                    : 'bg-theme-surface/50 border-theme-border-soft/40 text-theme-muted cursor-not-allowed'
-                }`}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <Send className="w-4 h-4" />
-                  <span>WhatsApp Reminder</span>
-                </div>
-                {(!editingInvoice || !customerPhone) && (
-                  <span className="text-[9px] text-theme-muted font-medium leading-none">
-                    {!editingInvoice ? 'Save invoice first' : 'Add customer phone'}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-          </div>
+        </div>
         </div>
         {/* CLOSE LEFT WIZARD COLUMN */}
 
       {/* RIGHT COLUMN STICKY LIVE PREVIEW (Desktop Only, Stacked on Mobile) */}
-      <div className="w-full lg:sticky lg:top-8 self-start max-h-[92vh] overflow-hidden bg-theme-card rounded-3xl border border-theme-border-soft shadow-premium">
-        <div className="bg-theme-accent-light px-5 py-4 flex items-center justify-between border-b border-theme-accent/20">
+      <div className="w-full lg:sticky lg:top-28 self-start max-h-[calc(100vh-180px)] overflow-hidden bg-theme-card rounded-3xl border border-theme-border-soft shadow-premium">
+        <div className="bg-theme-accent-light px-4 py-3 flex items-center justify-between border-b border-theme-accent/20">
           <div className="flex items-center gap-2">
              <Eye className="w-4 h-4 text-theme-accent" />
             <span className="text-xs font-bold text-theme-accent uppercase tracking-wider">Live Preview</span>
           </div>
           <span className="text-[10px] font-black bg-theme-accent text-white px-2 py-0.5 rounded-full shadow-glow">Auto-updating</span>
         </div>
-        <div className="p-4 overflow-y-auto no-scrollbar h-[calc(92vh-60px)]">
-          <div className="scale-[0.75] lg:scale-[0.85] 2xl:scale-[0.95] origin-top-left w-[133%] lg:w-[117%] 2xl:w-[105%] transition-all">
+        <div className="p-3 overflow-y-auto no-scrollbar h-[calc(100vh-240px)]">
+          <div className="scale-[0.75] lg:scale-[0.95] origin-top-left w-[133%] lg:w-[105%] transition-all">
             <InvoicePreview invoice={{ invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, terms, paymentStatus, orderStatus, billType, pdfVisibleFields, businessSnapshot: businessSettings }} currencySymbol={currencySymbol} />
           </div>
         </div>
