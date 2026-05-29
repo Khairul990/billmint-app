@@ -8,6 +8,7 @@ import {
   Phone,
   Mail,
   User,
+  Check,
   CheckCircle2,
   Percent,
   QrCode,
