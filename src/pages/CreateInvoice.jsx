@@ -611,34 +611,7 @@ const CreateInvoice = ({
           <p className="text-sm font-bold text-theme-muted mt-1">Configure and generate a new bill</p>
         </div>
 
-        {/* WIZARD PROGRESS BAR */}
-        <div className="bg-theme-card border border-theme-border-soft rounded-[20px] p-2 md:p-3 shadow-sm flex items-center justify-between gap-1 md:gap-2 overflow-x-auto no-scrollbar mt-2">
-          {[
-            { num: 1, label: 'Customer', icon: <User className="w-4 h-4" /> },
-            { num: 2, label: 'Items', icon: <Layers className="w-4 h-4" /> },
-            { num: 3, label: 'Payment', icon: <Coins className="w-4 h-4" /> },
-            { num: 4, label: 'Preview', icon: <Check className="w-4 h-4" /> }
-          ].map((step, idx, arr) => (
-            <div key={step.num} className="flex items-center flex-shrink-0 relative flex-1">
-              <button
-                onClick={() => setCurrentStep(step.num)}
-                className={`flex-1 flex items-center justify-center gap-2 px-3 md:px-5 py-2.5 md:py-3 rounded-[16px] transition-all font-bold text-xs md:text-[13px] ${
-                  currentStep === step.num
-                    ? 'bg-theme-accent text-white shadow-md shadow-theme-accent/20 border border-theme-accent scale-100 z-10'
-                    : currentStep > step.num
-                      ? 'bg-theme-accent/10 text-theme-accent border border-theme-accent/20'
-                      : 'bg-transparent text-theme-muted hover:bg-theme-surface border border-transparent'
-                }`}
-              >
-                {step.icon}
-                <span className="whitespace-nowrap">{step.label}</span>
-              </button>
-              {idx < arr.length - 1 && (
-                <div className="hidden sm:block flex-1 h-[2px] bg-theme-border-soft mx-2"></div>
-              )}
-            </div>
-          ))}
-        </div>
+
       </div>
 
       {/* MAIN LAYOUT: LEFT FORM, RIGHT PREVIEW */}
@@ -648,7 +621,7 @@ const CreateInvoice = ({
         <div className="w-full space-y-6">
           
           {/* STEP 1: CONFIGURATION & CRM */}
-<div className={currentStep === 1 ? 'block space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300' : 'hidden'}>
+          <div className="space-y-6">
           
           {/* Bill Type / Business Type Selector */}
           <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
@@ -863,15 +836,10 @@ const CreateInvoice = ({
           </div>
           </div>
 
-          <div className="flex justify-end pt-2">
-            <button onClick={() => setCurrentStep(2)} className="bg-[image:var(--accent-gradient)] text-white px-6 py-3 rounded-xl font-black shadow-md shadow-theme-glow flex items-center gap-2 hover:scale-105 transition-all">
-              Next: Items <ArrowRight className="w-4 h-4" />
-            </button>
           </div>
-        </div>
 
         {/* STEP 2: ITEMS */}
-        <div className={currentStep === 2 ? 'block space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300' : 'hidden'}>
+        <div className="space-y-6">
           {/* Premium Smart Item Table */}
           <div id="items-section" className="bg-theme-card dark:bg-theme-card rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium overflow-hidden scroll-mt-6">
             {/* Table Header Bar */}
@@ -1430,27 +1398,15 @@ const CreateInvoice = ({
               </div>
             </div>
           </div>
-            {/* WIZARD STEP 2 NEXT BUTTON */}
-            <div className="flex justify-between pt-4">
-              <button onClick={() => setCurrentStep(1)} className="bg-theme-card border border-theme-border-soft text-theme-primary px-6 py-3 rounded-xl font-bold hover:bg-theme-app transition-all flex items-center gap-2">
-                <ArrowLeft className="w-4 h-4" /> Back
-              </button>
-              <button onClick={() => setCurrentStep(3)} className="bg-[image:var(--accent-gradient)] text-white px-6 py-3 rounded-xl font-black shadow-md shadow-theme-glow flex items-center gap-2 hover:scale-105 transition-all">
-                Next: Payment <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
         </div>
 
         {/* STEP 3: TALLY, SUB-CHARGES & PAYMENT */}
-        <div className={currentStep === 3 ? 'block space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300' : 'hidden'}>
+        <div className="space-y-6">
            <div className="flex items-center justify-between bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-sm">
               <div>
                 <h3 className="font-extrabold text-sm flex items-center gap-2 text-theme-primary"><Coins className="w-4 h-4 text-theme-accent" /> Sub-charges & Payment</h3>
                 <p className="text-[10px] text-theme-muted font-bold">Manage taxes, discounts, and payments</p>
               </div>
-              <button onClick={() => setCurrentStep(2)} className="text-xs font-bold text-theme-muted hover:text-theme-primary flex items-center gap-1">
-                <ArrowLeft className="w-3 h-3" /> Back
-              </button>
             </div>
           
           {/* Overrides & Payment */}
@@ -1607,27 +1563,15 @@ const CreateInvoice = ({
                 </span>
             </div>
           </div>
-          
-          <div className="pt-2 border-t border-theme-border-soft flex justify-between">
-            <button onClick={() => setCurrentStep(2)} className="bg-theme-card border border-theme-border-soft text-theme-primary px-6 py-3 rounded-xl font-bold hover:bg-theme-app transition-all flex items-center gap-2 text-sm">
-              <ArrowLeft className="w-4 h-4" /> Back to Items
-            </button>
-            <button onClick={() => setCurrentStep(4)} className="bg-[image:var(--accent-gradient)] text-white px-6 py-3 rounded-xl font-black shadow-md shadow-theme-glow flex items-center gap-2 hover:scale-105 transition-all text-sm border-0">
-              Next: Preview <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
 
         {/* STEP 4: PREVIEW & ACTIONS */}
-        <div className={currentStep === 4 ? 'block space-y-6 animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden'}>
+        <div className="space-y-6">
           <div className="flex items-center justify-between bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-sm">
             <div>
               <h3 className="font-extrabold text-sm flex items-center gap-2 text-theme-primary"><Check className="w-4 h-4 text-theme-accent" /> Finalize & Send</h3>
               <p className="text-[10px] text-theme-muted font-bold">Review the preview on the right (or scroll down) and save.</p>
             </div>
-            <button onClick={() => setCurrentStep(3)} className="text-xs font-bold text-theme-muted hover:text-theme-primary flex items-center gap-1">
-              <ArrowLeft className="w-3 h-3" /> Back
-            </button>
           </div>
 
           <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium space-y-3">
@@ -1817,10 +1761,9 @@ const CreateInvoice = ({
           </div>
         </div>
         {/* CLOSE LEFT WIZARD COLUMN */}
-      </div>
 
       {/* RIGHT COLUMN STICKY LIVE PREVIEW (Desktop Only, Stacked on Mobile) */}
-      <div className={`${currentStep === 4 ? 'block' : 'hidden lg:block'} w-full lg:sticky lg:top-8 self-start max-h-[92vh] overflow-hidden bg-theme-card rounded-3xl border border-theme-border-soft shadow-premium`}>
+      <div className="w-full lg:sticky lg:top-8 self-start max-h-[92vh] overflow-hidden bg-theme-card rounded-3xl border border-theme-border-soft shadow-premium">
         <div className="bg-theme-accent-light px-5 py-4 flex items-center justify-between border-b border-theme-accent/20">
           <div className="flex items-center gap-2">
              <Eye className="w-4 h-4 text-theme-accent" />
@@ -1835,6 +1778,8 @@ const CreateInvoice = ({
         </div>
       </div>
       {/* CLOSE MAIN FLEX GRID */}
+      </div>
+      
       {/* SMART COMPOSITE RATE MODAL */}
       {showSmartRate && activeItemIndex !== null && (
         <div className="fixed inset-0 bg-theme-card/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
