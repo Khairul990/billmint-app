@@ -6,7 +6,7 @@ import {
   Settings, 
   LayoutTemplate, 
   Save, 
-  ArrowLeft, 
+  ArrowLeft, ArrowRight,
   Users, 
   Layers, 
   Percent, 
