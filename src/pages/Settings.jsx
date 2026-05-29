@@ -735,10 +735,12 @@ const Settings = ({
     <div className="max-w-4xl mx-auto pb-12 relative font-sans text-theme-primary dark:text-theme-primary dark:text-theme-secondary">
 
       {/* DEVELOPMENT DEBUG BLOCK */}
-      <div className="bg-slate-800 text-[10px] text-green-400 p-2 mb-4 rounded font-mono break-all dark:bg-theme-card dark:border dark:border-theme-border-soft flex justify-between">
-        <span>Logged in as: {loggedInEmail} | Admin access: {isAdmin ? 'true' : 'false'}</span>
-        <span>Target Admin: {getAdminEmail()}</span>
-      </div>
+      {isAdmin && (
+        <div className="bg-slate-800 text-[10px] text-green-400 p-2 mb-4 rounded font-mono break-all dark:bg-theme-card dark:border dark:border-theme-border-soft flex justify-between">
+          <span>Logged in as: {loggedInEmail} | Admin access: {isAdmin ? 'true' : 'false'}</span>
+          <span>Target Admin: {getAdminEmail()}</span>
+        </div>
+      )}
 
       {/* Toast Notification */}
       {showToast && (
@@ -771,11 +773,10 @@ const Settings = ({
           { id: 'regional', label: 'Regional', icon: Globe },
           { id: 'payment', label: 'Payments', icon: QrCode },
           { id: 'preferences', label: 'Invoices', icon: FileText },
-          { id: 'livelink', label: 'Live Links', icon: Link },
-          { id: 'premiumux', label: 'Premium UX', icon: Smartphone },
-          { id: 'pwa', label: 'Install App', icon: Download },
-            { id: 'pwa', label: 'Install App', icon: Download },
-          { id: 'storage', label: 'Data Backup & Storage', icon: Database }
+          { id: 'livelink', label: 'Links', icon: Link },
+          { id: 'premiumux', label: 'UX', icon: Smartphone },
+          { id: 'pwa', label: 'App', icon: Download },
+          { id: 'storage', label: 'Backup', icon: Database }
         ].map((tab) => {
           const Icon = tab.icon;
           const isSelected = activeTab === tab.id;
@@ -783,13 +784,16 @@ const Settings = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${isSelected
-                  ? 'bg-theme-card dark:bg-theme-card dark:bg-theme-card text-theme-primary dark:text-theme-primary shadow-sm border border-theme-border-soft dark:border-theme-border-soft/50 dark:border-theme-border-soft/50'
-                  : 'text-theme-muted hover:text-theme-muted dark:hover:text-theme-muted'
-                }`}
+              className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all cursor-pointer border ${
+                isSelected 
+                  ? 'bg-[image:var(--accent-gradient)] border-theme-accent text-white shadow-md scale-105' 
+                  : 'bg-theme-app dark:bg-theme-surface/30 border-transparent text-theme-muted hover:bg-theme-card dark:hover:bg-theme-card hover:border-theme-border-soft hover:shadow-sm hover:text-theme-primary transition-all duration-300'
+              }`}
             >
-              <Icon className={`w-4 h-4 ${isSelected ? 'text-theme-accent' : 'text-theme-muted'}`} />
-              <span>{tab.label}</span>
+              <Icon className={`w-5 h-5 mb-1.5 ${isSelected ? 'text-white' : 'text-theme-muted'}`} />
+              <span className={`text-[10px] font-bold tracking-wide uppercase ${isSelected ? 'text-white' : 'text-theme-muted'}`}>
+                {tab.label}
+              </span>
             </button>
           );
         })}
@@ -927,12 +931,18 @@ const Settings = ({
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted"><Mail className="w-4 h-4" /></span>
                   <input
+                  <input
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="billing@firm.com"
-                    className="w-full pl-10 pr-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium"
+                    value={loggedInEmail}
+                    readOnly
+                    title="Contact email is locked to your verified Google account identity for security."
+                    className="w-full pl-10 pr-20 py-3 bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 rounded-xl focus:outline-none text-slate-500 dark:text-slate-400 font-medium cursor-not-allowed opacity-90 shadow-inner"
                   />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[9px] font-extrabold uppercase px-2 py-1 rounded-lg tracking-wider flex items-center gap-1 shadow-sm">
+                      <Check className="w-2.5 h-2.5" /> Verified
+                    </span>
+                  </div>
                 </div>
               </div>
 

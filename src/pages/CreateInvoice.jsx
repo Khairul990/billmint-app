@@ -764,7 +764,7 @@ const CreateInvoice = ({
                   <Layers className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-extrabold text-white">Bill Type</h3>
+                  <h3 className="text-sm font-extrabold text-white">Step 1: Bill Template</h3>
                   <p className="text-[10px] text-theme-muted font-bold">Select your business template</p>
                 </div>
               </div>
@@ -873,7 +873,7 @@ const CreateInvoice = ({
               <div className="flex flex-col">
                 <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary flex items-center gap-2">
                   <User className="w-4 h-4 text-theme-accent" />
-                  <span>Client & Customer CRM</span>
+                  <span>Step 2: Client & Customer</span>
                 </h3>
                 <p className="text-[10px] text-theme-muted font-bold mt-1">Customer details will appear on the invoice PDF.</p>
               </div>
@@ -979,7 +979,7 @@ const CreateInvoice = ({
                   <Layers className="w-4 h-4 text-theme-accent" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-extrabold text-theme-primary">Invoice Items Sheet</h3>
+                  <h3 className="text-sm font-extrabold text-theme-primary">Step 3: Invoice Items Sheet</h3>
                   <p className="text-[10px] text-theme-muted font-bold">Qty × Rate = Amount (auto-calculated)</p>
                 </div>
                 <span className="text-[9px] font-extrabold px-2.5 py-1 rounded-full bg-theme-accent/10 text-theme-accent border border-theme-accent/20 hidden md:block ml-2">⚡ Smart Rates On</span>
@@ -1618,7 +1618,7 @@ const CreateInvoice = ({
           <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
             <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-slate-50 pb-3 flex items-center gap-2">
               <FileText className="w-4 h-4 text-theme-accent" />
-              <span>Tally Sheet</span>
+              <span>Step 4: Tally & Totals</span>
             </h3>
             
             <div className="space-y-3.5 text-xs font-semibold text-theme-muted">

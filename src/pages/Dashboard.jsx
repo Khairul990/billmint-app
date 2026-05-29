@@ -253,28 +253,28 @@ const Dashboard = ({
 
       {/* 0.05 TODAY'S QUICK SUMMARY (Horizontal Scroll for Mobile) */}
       <motion.div variants={itemVariants} className="w-full overflow-x-auto pb-4 pt-2 hide-scrollbar flex gap-4 sm:grid sm:grid-cols-3">
-        <div className="min-w-[200px] flex-1 bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-premium">
-          <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted mb-1">Today's Revenue</p>
+        <div className="min-w-[200px] flex-1 bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-premium flex flex-col justify-between hover:shadow-lg transition-all duration-300">
+          <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted mb-2">Today's Revenue</p>
           <h3 className="text-2xl font-black text-theme-primary tracking-tight">
             {formatCurrency(todayRevenue, currencySymbol)}
           </h3>
-          <p className="text-xs font-semibold text-theme-muted mt-1">{todayBills} Bills Created</p>
+          <p className="text-xs font-semibold text-theme-muted mt-2">{todayBills} Bills Created</p>
         </div>
         
-        <div className="min-w-[200px] flex-1 bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-premium">
-          <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted mb-1">Today's Collection</p>
+        <div className="min-w-[200px] flex-1 bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-premium flex flex-col justify-between hover:shadow-lg transition-all duration-300">
+          <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted mb-2">Today's Collection</p>
           <h3 className="text-2xl font-black text-theme-primary tracking-tight">
             {formatCurrency(todayCollection, currencySymbol)}
           </h3>
-          <p className="text-xs font-semibold text-theme-muted mt-1">Cash Inflow</p>
+          <p className="text-xs font-semibold text-theme-muted mt-2">Cash Inflow</p>
         </div>
 
-        <div className="min-w-[200px] flex-1 bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-premium">
-          <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted mb-1">Today's Dues</p>
+        <div className="min-w-[200px] flex-1 bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-premium flex flex-col justify-between hover:shadow-lg transition-all duration-300">
+          <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted mb-2">Pending Due</p>
           <h3 className="text-2xl font-black text-theme-primary tracking-tight">
             {formatCurrency(todayDue, currencySymbol)}
           </h3>
-          <p className="text-xs font-semibold text-theme-muted mt-1">Pending Balance</p>
+          <p className="text-xs font-semibold text-theme-muted mt-2">Uncollected Cash</p>
         </div>
       </motion.div>
 

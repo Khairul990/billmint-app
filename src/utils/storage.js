@@ -1287,6 +1287,15 @@ export const saveInvoice = async (invoice) => {
   invoice.userId = getFirebaseUserId();
 
   const timestamp = new Date().toISOString();
+  const sessionStr = localStorage.getItem(GLOBAL_KEYS.AUTH);
+  const session = sessionStr ? JSON.parse(sessionStr) : null;
+  const userEmail = session?.userEmail || session?.email || 'demo-user';
+  const settings = getSettings();
+  
+  invoice.createdByUid = getFirebaseUserId();
+  invoice.createdByEmail = userEmail;
+  invoice.businessContactEmail = settings?.email || userEmail;
+
   if (invoice.id && invoice.id.startsWith('inv-')) {
     const index = invoices.findIndex(inv => inv.id === invoice.id);
     if (index !== -1) {
