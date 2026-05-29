@@ -128,7 +128,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             <div className="absolute -bottom-10 left-10 w-48 h-48 bg-theme-accent-light dark:bg-theme-accent-light rounded-full blur-2xl"></div>
           </div>
 
-          <div className={`${currentTab === 'create-invoice' ? 'max-w-[1550px]' : 'max-w-6xl'} mx-auto flex items-center justify-between relative z-10`}>
+          <div className={`${currentTab === 'create-invoice' ? 'max-w-[1440px] lg:px-4' : 'max-w-6xl'} mx-auto flex items-center justify-between relative z-10`}>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-theme-muted bg-theme-app px-2.5 py-0.5 rounded-full border border-theme-border-soft backdrop-blur-md">
@@ -248,7 +248,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         </header>
 
         {/* Dynamic Page Content Shell */}
-        <main className={`flex-1 ${currentTab === 'create-invoice' ? 'max-w-[1550px]' : 'max-w-6xl'} w-full mx-auto p-4 md:p-6 md:py-8 transition-opacity duration-300 animate-fadeIn`}>
+        <main className={`flex-1 ${currentTab === 'create-invoice' ? 'max-w-[1440px] lg:px-4' : 'max-w-6xl'} w-full mx-auto p-4 md:p-6 md:py-8 transition-opacity duration-300 animate-fadeIn`}>
           {children}
         </main>
       </div>

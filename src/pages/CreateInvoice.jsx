@@ -642,10 +642,10 @@ const CreateInvoice = ({
       </div>
 
       {/* MAIN LAYOUT: LEFT FORM, RIGHT PREVIEW */}
-      <div className="flex flex-col xl:flex-row gap-6 xl:gap-8 items-start relative mt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(380px,0.85fr)] gap-6 lg:gap-8 items-start relative mt-6 w-full">
         
         {/* LEFT COLUMN: WIZARD STEPS */}
-        <div className="w-full xl:w-[60%] space-y-6">
+        <div className="w-full space-y-6">
           
           {/* STEP 1: CONFIGURATION & CRM */}
 <div className={currentStep === 1 ? 'block space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300' : 'hidden'}>
@@ -1820,16 +1820,16 @@ const CreateInvoice = ({
       </div>
 
       {/* RIGHT COLUMN STICKY LIVE PREVIEW (Desktop Only, Stacked on Mobile) */}
-      <div className={`${currentStep === 4 ? 'block' : 'hidden xl:block'} w-full xl:w-[40%] xl:sticky xl:top-6 self-start max-h-[90vh] overflow-hidden bg-theme-card rounded-3xl border border-theme-border-soft shadow-premium`}>
+      <div className={`${currentStep === 4 ? 'block' : 'hidden lg:block'} w-full lg:sticky lg:top-8 self-start max-h-[92vh] overflow-hidden bg-theme-card rounded-3xl border border-theme-border-soft shadow-premium`}>
         <div className="bg-theme-accent-light px-5 py-4 flex items-center justify-between border-b border-theme-accent/20">
           <div className="flex items-center gap-2">
-            <Eye className="w-4 h-4 text-theme-accent" />
+             <Eye className="w-4 h-4 text-theme-accent" />
             <span className="text-xs font-bold text-theme-accent uppercase tracking-wider">Live Preview</span>
           </div>
           <span className="text-[10px] font-black bg-theme-accent text-white px-2 py-0.5 rounded-full shadow-glow">Auto-updating</span>
         </div>
-        <div className="p-4 overflow-y-auto no-scrollbar h-[calc(90vh-60px)]">
-          <div className="scale-[0.75] xl:scale-[0.8] origin-top-left w-[133%] xl:w-[125%] transition-all">
+        <div className="p-4 overflow-y-auto no-scrollbar h-[calc(92vh-60px)]">
+          <div className="scale-[0.75] lg:scale-[0.85] 2xl:scale-[0.95] origin-top-left w-[133%] lg:w-[117%] 2xl:w-[105%] transition-all">
             <InvoicePreview invoice={{ invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, terms, paymentStatus, orderStatus, billType, pdfVisibleFields, businessSnapshot: businessSettings }} currencySymbol={currencySymbol} />
           </div>
         </div>
