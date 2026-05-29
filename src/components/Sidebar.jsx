@@ -82,7 +82,7 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
           )}
           <div className="min-w-0 flex-1">
             <h4 className="text-xs font-bold text-theme-sidebar-text truncate">{businessSettings?.businessName || 'My Business'}</h4>
-            <p className="text-[10px] text-theme-sidebar-text/70 font-medium truncate">{userEmail || businessSettings?.email || 'billing@firm.com'}</p>
+            <p className="text-[10px] text-theme-sidebar-text/70 font-medium truncate">{businessSettings?.email || userEmail || 'No email provided'}</p>
           </div>
         </div>
 

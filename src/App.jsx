@@ -951,7 +951,7 @@ function App() {
         userRole={userRole}
         invoices={invoices}
         subscription={subscription}
-        userEmail={getAuthSession()?.email}
+        userEmail={getAuthSession()?.userEmail}
         onQuickBillOpen={() => setIsQuickBillOpen(true)}
       >
         <AnimatePresence mode="wait">

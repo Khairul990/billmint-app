@@ -182,7 +182,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                           {businessSettings?.businessName || 'My Business'}
                         </p>
                         <p className="text-xs text-theme-muted dark:text-theme-muted truncate">
-                          {userEmail || businessSettings?.email || 'billing@firm.com'}
+                          {businessSettings?.email || userEmail || 'No email provided'}
                         </p>
                       </div>
                       

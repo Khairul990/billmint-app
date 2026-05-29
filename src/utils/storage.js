@@ -927,7 +927,23 @@ export const updateUserBlockStatus = async (targetUserId, blocked) => {
 // --- SETTINGS ---
 export const getSettings = () => {
   initializeStorage();
-  return JSON.parse(localStorage.getItem(KEYS.SETTINGS));
+  const settings = JSON.parse(localStorage.getItem(KEYS.SETTINGS));
+  if (settings && (!settings.email || settings.email === 'billing@firm.com' || settings.email.includes('firm email demo'))) {
+    const authSession = localStorage.getItem(GLOBAL_KEYS.AUTH);
+    if (authSession) {
+      try {
+         const sessionObj = JSON.parse(authSession);
+         if (sessionObj.userEmail && sessionObj.userEmail !== 'demo@billqyro.com') {
+           settings.email = sessionObj.userEmail;
+         } else {
+           settings.email = '';
+         }
+      } catch (e) {}
+    } else {
+      settings.email = '';
+    }
+  }
+  return settings;
 };
 
 export const saveSettings = (settings) => {
