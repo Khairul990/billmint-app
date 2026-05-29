@@ -16,7 +16,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen }) => {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-theme-card dark:bg-theme-card/95 dark:bg-[#070c18]/80 backdrop-blur-xl border-t border-theme-border-soft dark:border-theme-border-soft/80 dark:border-white/5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] px-3 py-2 flex items-center justify-around pb-safe-bottom transition-colors duration-300">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-theme-card dark:bg-theme-card/95 dark:bg-[#070c18]/80 backdrop-blur-xl border-t border-theme-border-soft dark:border-theme-border-soft/80 dark:border-white/5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] px-3 py-2 flex items-center justify-around pb-safe-bottom transition-colors duration-300">
       {tabs.map((tab) => {
         if (tab.isAction) {
           return (

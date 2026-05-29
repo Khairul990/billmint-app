@@ -105,7 +105,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   };
 
   return (
-    <div className="min-h-screen bg-theme-app flex flex-col md:flex-row w-full font-sans antialiased text-theme-primary transition-colors duration-300">
+    <div className="min-h-screen bg-theme-app flex flex-col lg:flex-row w-full font-sans antialiased text-theme-primary transition-colors duration-300">
       {/* Desktop Sidebar (Hidden on Mobile) */}
       <Sidebar
         currentTab={currentTab}
@@ -128,7 +128,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             <div className="absolute -bottom-10 left-10 w-48 h-48 bg-theme-accent-light dark:bg-theme-accent-light rounded-full blur-2xl"></div>
           </div>
 
-          <div className={`${currentTab === 'create-invoice' ? 'max-w-[1500px] lg:px-6' : 'max-w-6xl'} w-full mx-auto flex items-center justify-between relative z-10`}>
+          <div className={`${currentTab === 'create-invoice' ? 'max-w-[1500px] lg:px-6' : 'max-w-6xl'} w-full mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10`}>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-theme-muted bg-theme-app px-2.5 py-0.5 rounded-full border border-theme-border-soft backdrop-blur-md">

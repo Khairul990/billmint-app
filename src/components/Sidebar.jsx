@@ -25,7 +25,7 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-theme-sidebar border-r border-theme-border-soft/10 h-screen sticky top-0 left-0 z-30 shadow-2xl transition-all duration-300">
+    <aside className="hidden lg:flex flex-col w-64 bg-theme-sidebar border-r border-theme-border-soft/10 h-screen sticky top-0 left-0 z-30 shadow-2xl transition-all duration-300">
       {/* Brand Header */}
       <div className="p-6 border-b border-theme-border-soft/10 flex items-center">
         <Logo type="horizontal" forceWhiteText={false} />
