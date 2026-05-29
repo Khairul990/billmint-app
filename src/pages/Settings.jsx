@@ -931,7 +931,6 @@ const Settings = ({
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted"><Mail className="w-4 h-4" /></span>
                   <input
-                  <input
                     type="email"
                     value={loggedInEmail}
                     readOnly
