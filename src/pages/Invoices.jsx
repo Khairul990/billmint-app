@@ -418,14 +418,19 @@ const Invoices = ({
         ))}
 
         {filteredInvoices.length === 0 && (
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
-            <FileSpreadsheet className="w-12 h-12 text-slate-200 mx-auto mb-3 animate-pulse" />
-            <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">No invoices yet</h4>
-            <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
-              No invoices found. Create your first bill to see transaction records here!
-            </p>
-          </div>
-        )}
+            <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium relative overflow-hidden">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] dark:opacity-5 grayscale">
+                <img src="/brand/billqyro-icon.png" alt="Watermark" className="w-64 h-64 object-contain scale-125" />
+              </div>
+              <div className="relative z-10">
+                <img src="/brand/billqyro-icon.png" alt="Empty" className="w-12 h-12 object-contain mx-auto mb-3 opacity-40 grayscale drop-shadow-sm" />
+                <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">No invoices yet</h4>
+                <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
+                  No invoices found. Create your first bill to see transaction records here!
+                </p>
+              </div>
+            </div>
+          )}
       </div>
 
       {/* DYNAMIC ELEVEN-STAR PREVIEW MODAL OVERLAY */}
