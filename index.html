@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link id="favicon-32" rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link id="favicon-16" rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link id="apple-touch-icon" rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link id="favicon-ico" rel="shortcut icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     
     <!-- SEO Optimization Meta Tags -->
@@ -33,6 +36,32 @@
             document.documentElement.classList.add('dark');
           } else {
             document.documentElement.classList.remove('dark');
+          }
+
+          var themeFolderMap = {
+            classic: 'billqyro-classic',
+            pink: 'pink-premium',
+            emerald: 'emerald-business',
+            indigo: 'royal-indigo',
+            rose: 'rose-gold-luxe',
+            midnight: 'midnight-blue',
+            ruby: 'ruby-burgundy',
+            champagne: 'champagne-black'
+          };
+          
+          var folder = themeFolderMap[activeTheme];
+          if (folder) {
+            var f32 = document.getElementById('favicon-32');
+            if (f32) f32.href = '/icons/themes/' + folder + '/favicon-32x32.png';
+            
+            var f16 = document.getElementById('favicon-16');
+            if (f16) f16.href = '/icons/themes/' + folder + '/favicon-16x16.png';
+            
+            var aIcon = document.getElementById('apple-touch-icon');
+            if (aIcon) aIcon.href = '/icons/themes/' + folder + '/apple-touch-icon.png';
+            
+            var fIco = document.getElementById('favicon-ico');
+            if (fIco) fIco.href = '/icons/themes/' + folder + '/favicon.ico';
           }
         } catch (e) {}
       })();

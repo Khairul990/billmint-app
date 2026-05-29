@@ -296,11 +296,12 @@ function App() {
           // Fetch global admin settings for defaults
           try {
             const adminGlobal = await getGlobalAdminSettings();
-            if (adminGlobal) {
-              if (adminGlobal.defaultTheme) {
-                localStorage.setItem('billqyro_admin_default_theme', adminGlobal.defaultTheme);
-                document.documentElement.setAttribute('data-theme', adminGlobal.defaultTheme);
-              }
+              if (adminGlobal) {
+                if (adminGlobal.defaultTheme) {
+                  localStorage.setItem('billqyro_admin_default_theme', adminGlobal.defaultTheme);
+                  document.documentElement.setAttribute('data-theme', adminGlobal.defaultTheme);
+                  import('./utils/themeIcon').then(m => m.updateFaviconForTheme(adminGlobal.defaultTheme));
+                }
               if (adminGlobal.defaultMode) {
                 localStorage.setItem('billqyro_admin_default_mode', adminGlobal.defaultMode);
                 if (adminGlobal.defaultMode === 'dark') document.documentElement.classList.add('dark');

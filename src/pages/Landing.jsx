@@ -12,8 +12,10 @@ const Landing = ({ onLoginClick }) => {
         const adminGlobal = await getGlobalAdminSettings();
         if (adminGlobal && adminGlobal.defaultTheme) {
           document.documentElement.setAttribute('data-theme', adminGlobal.defaultTheme);
+          import('../utils/themeIcon').then(m => m.updateFaviconForTheme(adminGlobal.defaultTheme));
         } else if (!document.documentElement.hasAttribute('data-theme')) {
           document.documentElement.setAttribute('data-theme', 'pink');
+          import('../utils/themeIcon').then(m => m.updateFaviconForTheme('pink'));
         }
       } catch (e) {
         // Silent fallback

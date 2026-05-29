@@ -1026,6 +1026,7 @@ const Settings = ({
                           onClick={() => {
                             setThemeColor(preset.id);
                             document.documentElement.setAttribute('data-theme', preset.id);
+                            import('../utils/themeIcon').then(m => m.updateFaviconForTheme(preset.id));
                           }}
                           className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden cursor-pointer flex flex-col gap-2 ${
                             isSelected 
@@ -1056,6 +1057,7 @@ const Settings = ({
                       type="button"
                       onClick={() => {
                         document.documentElement.setAttribute('data-theme', themeColor);
+                        import('../utils/themeIcon').then(m => m.updateFaviconForTheme(themeColor));
                         toast.success(`Previewing ${themeColor} theme!`);
                       }}
                       className="w-full py-3 bg-theme-surface hover:bg-theme-border-soft/75 dark:bg-theme-card dark:hover:bg-slate-750 text-theme-primary dark:text-theme-secondary font-black text-xs rounded-xl shadow-sm transition-all active:scale-[0.98] cursor-pointer uppercase tracking-wider"
@@ -1083,6 +1085,7 @@ const Settings = ({
                         };
                         onSaveSettings(payload);
                         document.documentElement.setAttribute('data-theme', 'light');
+                        import('../utils/themeIcon').then(m => m.updateFaviconForTheme('light'));
                         document.documentElement.classList.remove('dark');
                         toast.success('Reset to BillQyro Classic default theme!');
                       }}

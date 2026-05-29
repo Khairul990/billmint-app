@@ -4,6 +4,7 @@ import BottomNav from './BottomNav';
 import { ReceiptText, LogOut, ShieldCheck, Sun, Moon, User } from 'lucide-react';
 import Logo from './Logo';
 import { getSettings, saveSettings } from '../utils/storage';
+import { updateFaviconForTheme } from '../utils/themeIcon';
 
 /**
  * Global App Layout Shell
@@ -46,6 +47,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', themeColor);
+    updateFaviconForTheme(themeColor);
     localStorage.setItem('billqyro_theme_color', themeColor);
   }, [themeColor]);
 
