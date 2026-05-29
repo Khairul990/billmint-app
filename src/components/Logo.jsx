@@ -2,36 +2,102 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 /**
- * High-fidelity Logo Component for BillQyro
- * Uses the official uploaded golden Q brand icon.
+ * High-fidelity Vector Logo and Brand Asset Component for BillQyro
+ * Matches the uploaded brand design exactly:
+ * - Stylized ribbon "B" (Back layer) in Emerald/Teal Gradient
+ * - Premium Invoicing Document Sheet (Front layer) in White (Light mode) / Slate-900 (Dark mode)
+ * - Top-Right Paper Fold corner and bottom-left leaf tail curl
+ * - "Bill" in Slate-900/White / "Qyro" in Emerald-500/Emerald-400
+ * - Spaced horizontal markers and Modern spaced sub-tagline
  * 
  * @param {string} type - 'icon' | 'horizontal' | 'app-icon'
  * @param {string} className - additional sizing / layout classes
  */
 const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false }) => {
-  // Main brand icon from public folder
-  const BRAND_ICON_URL = '/brand/billqyro-icon.png';
+  // Brand color gradients & assets definitions
+  const defs = (
+    <defs>
+      {/* Light highlights for paper fold */}
+      <linearGradient id="foldGradient" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0%" stopColor="#cbd5e1" />
+        <stop offset="100%" stopColor="#ffffff" />
+      </linearGradient>
+    </defs>
+  );
 
-  const IconImg = ({ sizeClass = 'w-10 h-10' }) => (
-    <motion.div 
-      className={`${sizeClass} shrink-0 relative rounded-full overflow-hidden shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.05)] bg-white/5`}
+  // Stylized Q path + Overlaid Invoicing Sheet matching the user's design image
+  const IconSVG = ({ sizeClass = 'w-10 h-10' }) => (
+    <motion.svg 
+      viewBox="0 0 100 100" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+      className={`${sizeClass} shrink-0 overflow-visible`}
       initial={{ opacity: 0, scale: 0.8, y: 5 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       whileHover={{ scale: 1.05 }}
     >
-      <img src={BRAND_ICON_URL} alt="BillQyro Brand Icon" className="w-full h-full object-contain" />
-    </motion.div>
+      {defs}
+      
+      {/* 1. The Teal Q Ring (Back layer) */}
+      <motion.circle 
+        cx="45" cy="45" r="32" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="16" 
+        className="text-theme-accent transition-all duration-300 drop-shadow-md"
+        animate={{ filter: ['drop-shadow(0px 0px 0px rgba(5, 150, 105, 0))', 'drop-shadow(0px 0px 8px rgba(5, 150, 105, 0.5))', 'drop-shadow(0px 0px 0px rgba(5, 150, 105, 0))'] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* 2. Premium White Invoicing Document Sheet (Middle layer) */}
+      <path 
+        d="M30 15 H55 L70 30 V70 C70 73 67 76 64 76 H30 C27 76 24 73 24 70 V21 C24 18 27 15 30 15 Z" 
+        className="fill-white drop-shadow-xl"
+      />
+
+      {/* Folded paper corner */}
+      <path 
+        d="M55 15 V30 H70 Z" 
+        fill="url(#foldGradient)"
+        className="drop-shadow-sm"
+      />
+
+      {/* Three premium horizontal invoice lines */}
+      <motion.rect initial={{ width: 0 }} animate={{ width: 22 }} transition={{ delay: 0.3, duration: 0.4 }} x="35" y="32" width="22" height="4" rx="2" className="fill-theme-accent" />
+      <motion.rect initial={{ width: 0 }} animate={{ width: 26 }} transition={{ delay: 0.4, duration: 0.4 }} x="35" y="42" width="26" height="4" rx="2" className="fill-theme-accent" />
+      <motion.rect initial={{ width: 0 }} animate={{ width: 14 }} transition={{ delay: 0.5, duration: 0.4 }} x="35" y="52" width="14" height="4" rx="2" className="fill-theme-accent" />
+
+      {/* Bold Rupee ₹ Symbol in bottom center */}
+      <motion.path 
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
+        transform="translate(39, 56) scale(0.6)"
+        d="M19.5,14 H10 V11 H13.5 C15.5,11 17,10 17,8 C17,6.5 15.5,5.5 13.5,5.5 H10 V3 H20 V0 H6 V3 H10 C12,3 13,4 13,5.5 C13,7 12,8 10,8 H6 V11 H10 V14 H6 V17 H10.5 L19.5,28 H24 L14.5,17 H19.5 V14 Z" 
+        className="fill-theme-accent"
+      />
+
+      {/* 3. The Teal Q Tail (Front layer) */}
+      <motion.path 
+        initial={{ opacity: 0, x: -10, y: -10 }}
+        animate={{ opacity: 1, x: 0, y: 0 }}
+        transition={{ delay: 0.7, duration: 0.4 }}
+        d="M 50 50 L 78 80 C 80 82 78 85 75 85 L 62 85 C 60 85 58 84 56 82 L 36 60 Z" 
+        fill="currentColor"
+        className="text-theme-accent drop-shadow-lg"
+      />
+    </motion.svg>
   );
 
   if (type === 'icon') {
-    return <IconImg sizeClass={className || 'w-10 h-10'} />;
+    return <IconSVG sizeClass={className || 'w-10 h-10'} />;
   }
 
   if (type === 'app-icon') {
     return (
       <div className={`aspect-square rounded-[2rem] bg-theme-card dark:bg-theme-app flex flex-col items-center justify-center p-6 border border-theme-border-soft shadow-premium transition-all duration-300 hover:shadow-premium-hover ${className}`}>
-        <IconImg sizeClass="w-3/5 h-3/5" />
+        <IconSVG sizeClass="w-3/5 h-3/5" />
         <div className="mt-4 flex flex-col items-center select-none text-center">
           <span className="text-xl font-extrabold text-theme-primary tracking-tight transition-colors duration-300">
             Bill<span className="text-theme-accent font-extrabold">Qyro</span>
@@ -54,7 +120,7 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false }) =
       animate="visible"
       whileHover="hover"
     >
-      <IconImg sizeClass="w-10 h-10" />
+      <IconSVG sizeClass="w-10 h-10" />
       <div className="flex flex-col select-none">
         <div className="flex items-baseline leading-none">
           {/* Bill text */}
