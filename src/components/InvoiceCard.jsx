@@ -67,10 +67,10 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
 
   const getSyncStatusLabel = (status) => {
     switch (status) {
-      case 'synced': return 'Synced';
-      case 'pending': return 'Sync Pending';
+      case 'synced': return 'Saved to Cloud';
+      case 'pending': return 'Pending Sync';
       case 'failed': return 'Sync Failed';
-      case 'offline': return 'Offline Saved';
+      case 'offline': return 'Offline Draft';
       default: return '';
     }
   };

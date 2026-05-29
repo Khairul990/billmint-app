@@ -774,8 +774,8 @@ const Settings = ({
           { id: 'livelink', label: 'Live Links', icon: Link },
           { id: 'premiumux', label: 'Premium UX', icon: Smartphone },
           { id: 'pwa', label: 'Install App', icon: Download },
-            { id: 'storage', label: 'Storage & Health', icon: HardDrive },
-          { id: 'backup', label: 'Data Backup', icon: Database }
+            { id: 'pwa', label: 'Install App', icon: Download },
+          { id: 'storage', label: 'Data Backup & Storage', icon: Database }
         ].map((tab) => {
           const Icon = tab.icon;
           const isSelected = activeTab === tab.id;
@@ -1759,11 +1759,11 @@ const Settings = ({
             <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-6 animate-fadeIn">
               <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
                 <div className="p-3 rounded-2xl bg-gradient-to-br from-theme-accent/20 to-theme-accent2/20 text-theme-accent">
-                  <HardDrive size={28} className="drop-shadow-sm" />
+                  <Database size={28} className="drop-shadow-sm" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-theme-text to-theme-text/70 dark:from-theme-dark-text dark:to-theme-dark-text/70">Storage & Data Health</h2>
-                  <p className="text-theme-text-soft dark:text-theme-dark-text-soft text-sm">Monitor and manage application data usage</p>
+                  <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-theme-text to-theme-text/70 dark:from-theme-dark-text dark:to-theme-dark-text/70">Data Backup & Storage</h2>
+                  <p className="text-theme-text-soft dark:text-theme-dark-text-soft text-sm">Monitor and manage your business data safely</p>
                 </div>
               </div>
 
@@ -1791,50 +1791,54 @@ const Settings = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                     <button 
                       onClick={handleExport}
-                      className="flex items-center gap-3 p-4 rounded-xl border border-theme-accent/20 bg-theme-accent/5 hover:bg-theme-accent/10 transition-colors text-left"
+                      className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors text-left"
                     >
-                      <Database className="text-theme-accent" size={24} />
+                      <Database className="text-emerald-500" size={24} />
                       <div>
-                        <div className="font-semibold text-theme-text dark:text-theme-dark-text">Export Full Backup</div>
-                        <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Download complete JSON backup</div>
+                        <div className="font-semibold text-theme-text dark:text-theme-dark-text">Download Full Backup</div>
+                        <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Save a complete offline JSON backup of your workspace</div>
                       </div>
                     </button>
                     
-                    <button 
-                      onClick={handleCleanTemporaryData}
-                      className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors text-left"
-                    >
-                      <RefreshCw className="text-emerald-500" size={24} />
-                      <div>
-                        <div className="font-semibold text-theme-text dark:text-theme-dark-text">Clean Temporary Data</div>
-                        <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Clear logs & old sync queue</div>
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[10px] text-amber-600 dark:text-amber-500/80 font-bold uppercase tracking-wider px-1">
+                        ⚠️ This will NOT delete invoices or customers. Recommendation: Download Backup first.
                       </div>
-                    </button>
-
-                    <button 
-                      onClick={handleCleanDuplicateDrafts}
-                      className="flex items-center gap-3 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 transition-colors text-left"
-                    >
-                      <Trash2 className="text-amber-500" size={24} />
-                      <div>
-                        <div className="font-semibold text-theme-text dark:text-theme-dark-text">Clean Duplicate Drafts</div>
-                        <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Remove empty/zero drafts</div>
-                      </div>
-                    </button>
-
-                    <button 
-                      onClick={handleClearCacheOnly}
-                      className="flex items-center gap-3 p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 transition-colors text-left"
-                    >
-                      <RotateCcw className="text-blue-500" size={24} />
-                      <div>
-                        <div className="font-semibold text-theme-text dark:text-theme-dark-text">Clear Cache Only</div>
-                        <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Resets LocalStorage UI cache</div>
-                      </div>
-                    </button>
+                      <button 
+                        onClick={handleClearCacheOnly}
+                        className="flex items-center gap-3 p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 transition-colors text-left h-full"
+                      >
+                        <RotateCcw className="text-blue-500" size={24} />
+                        <div>
+                          <div className="font-semibold text-theme-text dark:text-theme-dark-text">Clear App Cache</div>
+                          <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Fixes UI bugs by resetting temporary local cache</div>
+                        </div>
+                      </button>
+                    </div>
                     
                     {isAdmin && (
                       <>
+                        <button 
+                          onClick={handleCleanTemporaryData}
+                          className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors text-left"
+                        >
+                          <RefreshCw className="text-emerald-500" size={24} />
+                          <div>
+                            <div className="font-semibold text-theme-text dark:text-theme-dark-text">Clean Temporary Data</div>
+                            <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Clear logs & old sync queue</div>
+                          </div>
+                        </button>
+
+                        <button 
+                          onClick={handleCleanDuplicateDrafts}
+                          className="flex items-center gap-3 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 transition-colors text-left"
+                        >
+                          <Trash2 className="text-amber-500" size={24} />
+                          <div>
+                            <div className="font-semibold text-theme-text dark:text-theme-dark-text">Clean Duplicate Drafts</div>
+                            <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Remove empty/zero drafts</div>
+                          </div>
+                        </button>
                         <button 
                           onClick={handleClearAllLocalData}
                           className="flex items-center gap-3 p-4 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 transition-colors text-left md:col-span-1"

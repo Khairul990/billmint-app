@@ -43,9 +43,11 @@ export const migrateLocalStorageToIndexedDB = async () => {
 };
 
 export const queueSyncTransaction = async (action, storeName, docId, data) => {
+  const userId = getFirebaseUserId();
   const transactionId = 'tx-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
   const tx = {
     id: transactionId,
+    userId,
     action, // 'save' or 'delete'
     storeName, // 'invoices', 'customers', 'products', 'expenses'
     docId,
@@ -60,13 +62,16 @@ export const syncOfflineTransactions = async () => {
   if (!firebaseReady || !navigator.onLine) return;
 
   try {
+    const userId = getFirebaseUserId();
     const queue = await BillQyroDB.getAll('syncQueue');
-    if (queue.length === 0) return;
+    const userQueue = queue.filter(tx => tx.userId === userId || !tx.userId);
+    
+    if (userQueue.length === 0) return;
 
-    console.log(`[SYNC QUEUE] Syncing ${queue.length} offline transactions...`);
+    console.log(`[SYNC QUEUE] Syncing ${userQueue.length} offline transactions...`);
 
     // Sort by createdAt so we sync in order
-    const sortedQueue = queue.sort((a, b) => a.createdAt - b.createdAt);
+    const sortedQueue = userQueue.sort((a, b) => a.createdAt - b.createdAt);
 
     for (const tx of sortedQueue) {
       try {
@@ -130,8 +135,8 @@ if (typeof window !== 'undefined') {
   });
 }
 
-// LocalStorage Keys
-const KEYS = {
+// LocalStorage Global Keys
+export const GLOBAL_KEYS = {
   AUTH: 'billqyro_auth',
   SETTINGS: 'billqyro_settings',
   CUSTOMERS: 'billqyro_customers',
@@ -141,6 +146,81 @@ const KEYS = {
   SUBSCRIPTION: 'billqyro_subscription',
 };
 
+export const getScopedKey = (baseKey) => {
+  if (baseKey === GLOBAL_KEYS.AUTH) return baseKey;
+  const uid = getFirebaseUserId();
+  // Ensure we don't scope if there's no valid uid
+  return uid ? `${baseKey}_${uid}` : baseKey;
+};
+
+// Dynamic KEYS that automatically scope to the current user
+export const KEYS = {
+  get AUTH() { return GLOBAL_KEYS.AUTH; },
+  get SETTINGS() { return getScopedKey(GLOBAL_KEYS.SETTINGS); },
+  get CUSTOMERS() { return getScopedKey(GLOBAL_KEYS.CUSTOMERS); },
+  get PRODUCTS() { return getScopedKey(GLOBAL_KEYS.PRODUCTS); },
+  get INVOICES() { return getScopedKey(GLOBAL_KEYS.INVOICES); },
+  get EXPENSES() { return getScopedKey(GLOBAL_KEYS.EXPENSES); },
+  get SUBSCRIPTION() { return getScopedKey(GLOBAL_KEYS.SUBSCRIPTION); },
+};
+
+export const migrateGlobalToScopedStorage = async () => {
+  const uid = getFirebaseUserId();
+  if (!uid || uid === 'demo-user') return;
+
+  const migrationKey = `billqyro_storage_migrated_${uid}`;
+  if (localStorage.getItem(migrationKey) === 'true') return;
+
+  console.log('[MIGRATION] Starting safe global to scoped storage migration for:', uid);
+
+  const collections = ['invoices', 'customers', 'products', 'expenses', 'settings', 'subscription'];
+  let migratedCount = 0;
+
+  for (const col of collections) {
+    const globalKey = GLOBAL_KEYS[col.toUpperCase()];
+    const scopedKey = KEYS[col.toUpperCase()];
+    
+    if (globalKey === scopedKey) continue;
+
+    const globalDataStr = localStorage.getItem(globalKey);
+    if (globalDataStr) {
+      try {
+        const globalData = JSON.parse(globalDataStr);
+        const existingScopedStr = localStorage.getItem(scopedKey);
+        
+        if (!existingScopedStr) {
+          localStorage.setItem(scopedKey, globalDataStr);
+          migratedCount++;
+        } else {
+          if (Array.isArray(globalData)) {
+            const scopedData = JSON.parse(existingScopedStr);
+            const merged = [...scopedData];
+            let added = false;
+            for (const item of globalData) {
+              if (!merged.find(x => x.id === item.id)) {
+                merged.push(item);
+                added = true;
+              }
+            }
+            if (added) {
+              localStorage.setItem(scopedKey, JSON.stringify(merged));
+              migratedCount++;
+            }
+          }
+        }
+        
+        // Backup the old global key instead of deleting it permanently
+        localStorage.setItem(`${globalKey}_backup`, globalDataStr);
+        localStorage.removeItem(globalKey);
+      } catch (e) {
+        console.error(`[MIGRATION] Error migrating ${col}:`, e);
+      }
+    }
+  }
+
+  localStorage.setItem(migrationKey, 'true');
+  console.log(`[MIGRATION] Completed. Migrated collections safely.`);
+};
 
 const updateLocalCache = (key, items) => {
   const cacheLimit = 20;
@@ -1722,6 +1802,7 @@ export const syncFromFirestore = async () => {
     return null;
   }
   try {
+    await migrateGlobalToScopedStorage();
     const userId = getFirebaseUserId();
     console.log("Syncing data from Firestore for user: " + userId);
 
