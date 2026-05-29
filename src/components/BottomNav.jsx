@@ -45,7 +45,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen }) => {
           >
             <div className={`p-1.5 rounded-xl transition-all duration-300 ${
               isActive 
-                ? 'bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white shadow-md shadow-theme-glow dark:shadow-none scale-110' 
+                ? 'bg-[image:var(--accent-gradient)] text-white shadow-md shadow-theme-glow dark:shadow-none scale-110' 
                 : 'text-theme-muted dark:text-theme-muted hover:text-theme-muted dark:hover:text-theme-muted hover:bg-slate-100 dark:hover:bg-slate-800/30'
             }`}>
               <Icon className="w-5 h-5" />
