@@ -28,6 +28,7 @@ import {
   Search,
   X,
   BookOpen,
+  FileDown,
   UserPlus,
   Info,
   Maximize2,
