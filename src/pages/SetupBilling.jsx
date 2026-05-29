@@ -91,7 +91,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
       id: 'custom',
       title: 'Custom Bill',
       icon: <PenTool className="w-5 h-5 text-theme-muted" />,
-      color: 'bg-theme-app dark:bg-theme-surface border-theme-border-soft hover:border-slate-500 dark:bg-theme-surface/40 dark:border-theme-border-soft',
+      color: 'bg-theme-app dark:bg-theme-surface border-theme-border-soft hover:border-theme-border-soft0 dark:bg-theme-surface/40 dark:border-theme-border-soft',
       description: 'Item/Service, Description, Quantity, Rate, Amount'
     }
   ];
@@ -390,7 +390,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
 
                 {/* Base64 Logo Upload integration */}
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase">Corporate Logo (Optional)</label>
+                  <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase">Corporate Logo (Optional)</label>
                   <div
                     className={`relative border-2 border-dashed rounded-xl p-4.5 text-center transition-all ${
                       isDragging ? 'border-theme-accent bg-theme-accent-light/30 dark:bg-theme-accent-light/20' : 'border-theme-border-soft bg-theme-app dark:bg-theme-surface hover:bg-theme-surface dark:bg-theme-card dark:border-theme-border-soft dark:bg-theme-surface/40 dark:hover:bg-slate-850'
@@ -433,7 +433,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                       <button
                         type="button"
                         onClick={() => setLogoUrl('')}
-                        className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 bg-theme-danger/5 text-theme-danger hover:bg-rose-100 rounded-lg transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -560,7 +560,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase">Rocket Account Number (Optional)</label>
+                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase">Rocket Account Number (Optional)</label>
                         <input
                           type="text"
                           value={rocketNumber}

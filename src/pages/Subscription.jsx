@@ -185,12 +185,12 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
 
       {/* PENDING NOTIFICATION BANNER */}
       {pendingReq && (
-        <div className="p-5 bg-amber-50 dark:bg-amber-950/20 border border-amber-250 dark:border-amber-900/30 rounded-3xl flex gap-3.5 animate-pulse shadow-sm">
-          <div className="p-2.5 bg-theme-card dark:bg-theme-card rounded-xl text-amber-500 shadow-sm h-fit">
+        <div className="p-5 bg-theme-warning/5 dark:bg-amber-950/20 border border-amber-250 dark:border-amber-900/30 rounded-3xl flex gap-3.5 animate-pulse shadow-sm">
+          <div className="p-2.5 bg-theme-card dark:bg-theme-card rounded-xl text-theme-warning shadow-sm h-fit">
             <Clock className="w-5.5 h-5.5" />
           </div>
           <div>
-            <span className="text-[9px] font-black uppercase text-amber-600 dark:text-amber-450 tracking-wider">Awaiting Manual Activation</span>
+            <span className="text-[9px] font-black uppercase text-theme-warning dark:text-amber-450 tracking-wider">Awaiting Manual Activation</span>
             <h4 className="text-xs font-black text-theme-primary dark:text-theme-primary dark:text-theme-secondary mt-0.5">Upgrade Request Under Review</h4>
             <p className="text-[11px] text-theme-muted dark:text-theme-muted font-semibold leading-relaxed mt-1">
               Your transfer of <strong className="text-theme-accent dark:text-theme-accent">{pendingReq.plan} ({pendingReq.paidAmount} {country === 'India' ? 'INR' : country === 'Bangladesh' ? 'BDT' : 'USD'})</strong> with Transaction ID <strong className="font-mono text-theme-primary dark:text-theme-muted">{pendingReq.transactionId}</strong> is currently being verified. Your workspace will automatically unlock upon administrator approval.
@@ -216,7 +216,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
               <p className="text-[10px] text-theme-muted font-bold mt-1">BASIC TRANSITION BILLING</p>
             </div>
             
-            <div className="border-t border-b border-slate-50 dark:border-theme-border-soft/60 py-4">
+            <div className="border-t border-b border-theme-border-soft dark:border-theme-border-soft/60 py-4">
               <h4 className="text-3xl font-black text-theme-primary dark:text-theme-primary dark:text-theme-primary tracking-tight">
                 {formatCurrency(0, currencySymbol)}
                 <span className="text-xs text-theme-muted font-bold"> / lifetime</span>
@@ -233,7 +233,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
             </ul>
           </div>
  
-          <div className="mt-8 pt-4 border-t border-slate-50 dark:border-theme-border-soft/60">
+          <div className="mt-8 pt-4 border-t border-theme-border-soft dark:border-theme-border-soft/60">
             <div className="w-full py-3.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 border border-theme-border-soft dark:border-theme-border-soft rounded-2xl text-center text-xs font-black text-theme-muted">
               {!isPremium ? 'Currently Active Starter' : 'Downgrade Unavailable'}
             </div>
@@ -285,7 +285,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                 onClick={() => setShowUpgradeForm(true)}
                 className={`w-full py-4 text-white rounded-2xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 transition-all cursor-pointer ${
                   pendingReq 
-                    ? 'bg-slate-800 border border-slate-700/50 text-theme-muted cursor-not-allowed' 
+                    ? 'bg-theme-card border border-slate-700/50 text-theme-muted cursor-not-allowed' 
                     : 'bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 hover:shadow-lg hover:shadow-glow active:scale-[0.98]'
                 }`}
               >
@@ -481,7 +481,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                   <label className="block mb-1 text-theme-muted text-[9px] uppercase tracking-wide">Payment Screenshot Proof (Optional)</label>
                   <div
                     className={`relative border border-dashed rounded-xl p-3 text-center transition-all ${
-                      isDragging ? 'border-theme-accent bg-theme-surface dark:bg-theme-surface' : 'border-theme-border-soft dark:border-theme-border-soft bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 hover:bg-theme-surface dark:bg-theme-card dark:hover:bg-slate-800/80'
+                      isDragging ? 'border-theme-accent bg-theme-surface dark:bg-theme-surface' : 'border-theme-border-soft dark:border-theme-border-soft bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 hover:bg-theme-surface dark:bg-theme-card dark:hover:bg-theme-card/80'
                     }`}
                     onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                     onDragLeave={() => setIsDragging(false)}
@@ -508,12 +508,12 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                       <img src={screenshotBase64} alt="Proof" className="w-12 h-12 object-cover rounded-lg border border-theme-border-soft dark:border-theme-border-soft bg-theme-card dark:bg-theme-card" />
                       <div className="text-[10px] truncate max-w-xs pr-8">
                         <span className="text-theme-primary dark:text-theme-muted dark:text-theme-muted block font-bold">screenshot_proof.png</span>
-                        <span className="text-[8.5px] text-slate-450 block font-mono">base64 encoded</span>
+                        <span className="text-[8.5px] text-theme-muted block font-mono">base64 encoded</span>
                       </div>
                       <button 
                         type="button" 
                         onClick={() => setScreenshotBase64('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-rose-500 font-bold hover:scale-110 transition-transform"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-danger font-bold hover:scale-110 transition-transform"
                       >
                         ✕
                       </button>

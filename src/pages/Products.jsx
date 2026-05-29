@@ -177,7 +177,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                     </button>
                     <button
                       onClick={() => handleDelete(prod.id)}
-                      className="p-2 text-theme-muted hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                      className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all"
                       title="Delete Item"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -190,7 +190,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   <div className="mt-3 flex items-center gap-2 flex-wrap">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
                       prod.stockQty <= (prod.lowStockThreshold || 5) 
-                        ? 'bg-rose-50 text-rose-600 border border-rose-100' 
+                        ? 'bg-theme-danger/5 text-theme-danger border border-rose-100' 
                         : 'bg-theme-accent-light text-theme-accent border border-theme-border-soft'
                     }`}>
                       {prod.stockQty <= (prod.lowStockThreshold || 5) && <BadgeAlert className="w-3 h-3" />}
@@ -218,7 +218,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
               </div>
 
               {/* Bottom section: Pricing */}
-              <div className="border-t border-slate-50 pt-4 mt-5 flex justify-between items-center">
+              <div className="border-t border-theme-border-soft pt-4 mt-5 flex justify-between items-center">
                 <span className="text-[10px] text-theme-muted font-extrabold uppercase tracking-wider">M.R.P. Rate</span>
                 <span className="text-base font-black text-theme-accent">
                   {formatCurrency(prod.price, currencySymbol)}
@@ -300,7 +300,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
               <div>
                 <label className="block mb-1 text-theme-muted font-bold flex items-center gap-1">
                   Low Stock Alert At
-                  <BadgeAlert className="w-3 h-3 text-rose-500" />
+                  <BadgeAlert className="w-3 h-3 text-theme-danger" />
                 </label>
                 <input
                   type="number"

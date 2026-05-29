@@ -89,7 +89,7 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
         {isAuthenticated && (
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all animate-fadeIn cursor-pointer"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-theme-danger hover:bg-theme-danger/10 hover:text-red-300 transition-all animate-fadeIn cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Log out</span>

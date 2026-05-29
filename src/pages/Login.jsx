@@ -1002,7 +1002,7 @@ function LoginPanel({ onLoginSuccess }) {
           </p>
         </motion.div>
 
-        {error && <p className="mt-4 rounded-xl bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-400">{error}</p>}
+        {error && <p className="mt-4 rounded-xl bg-theme-danger/10 px-4 py-2 text-sm font-semibold text-theme-danger">{error}</p>}
 
         <form
           className="mt-8 space-y-5"

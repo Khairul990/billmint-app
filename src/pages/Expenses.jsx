@@ -18,9 +18,9 @@ import { syncFromFirestore } from '../utils/storage';
 
 const CATEGORIES = [
   { name: 'Supplies', color: 'bg-theme-accent-light text-theme-accent', border: 'border-theme-border-soft' },
-  { name: 'Utilities', color: 'bg-amber-100 text-amber-700', border: 'border-amber-200' },
+  { name: 'Utilities', color: 'bg-amber-100 text-amber-700', border: 'border-theme-warning/30' },
   { name: 'Salaries & Wages', color: 'bg-theme-accent-light text-theme-accent', border: 'border-theme-border-soft' },
-  { name: 'Rent & Maintenance', color: 'bg-rose-100 text-rose-700', border: 'border-rose-200' },
+  { name: 'Rent & Maintenance', color: 'bg-rose-100 text-rose-700', border: 'border-theme-danger/30' },
   { name: 'Marketing', color: 'bg-theme-accent-light text-theme-accent', border: 'border-theme-border-soft' },
   { name: 'Other', color: 'bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted', border: 'border-theme-border-soft' }
 ];
@@ -115,7 +115,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
 
         {/* TOP CATEGORIES PANEL */}
         <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium md:col-span-2 space-y-4">
-          <h3 className="text-xs font-bold text-theme-muted uppercase tracking-wider border-b border-slate-50 pb-2">
+          <h3 className="text-xs font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft pb-2">
             Cost By Category
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -255,7 +255,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
                       </span>
                       <button
                         onClick={() => onDeleteExpense(exp.id)}
-                        className="p-2 rounded-lg bg-rose-50 border border-rose-100 text-rose-500 hover:text-rose-600 hover:bg-rose-100 transition-all"
+                        className="p-2 rounded-lg bg-theme-danger/5 border border-rose-100 text-theme-danger hover:text-theme-danger hover:bg-rose-100 transition-all"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

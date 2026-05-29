@@ -48,7 +48,7 @@ const MoreMenu = ({
           onClick={() => setCurrentTab('expenses')}
           className="bg-theme-card dark:bg-theme-card hover:bg-theme-app dark:bg-theme-surface text-left p-5 rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
         >
-          <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center group-hover:bg-rose-100 transition-colors shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-theme-danger/5 text-theme-danger flex items-center justify-center group-hover:bg-rose-100 transition-colors shrink-0">
             <TrendingDown className="w-6 h-6" />
           </div>
           <div className="min-w-0 flex-1">
@@ -86,7 +86,7 @@ const MoreMenu = ({
           onClick={() => setCurrentTab('subscription')}
           className="bg-theme-card dark:bg-theme-card hover:bg-theme-app dark:bg-theme-surface text-left p-5 rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
         >
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center group-hover:bg-amber-100 transition-colors shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-theme-warning/5 text-theme-warning flex items-center justify-center group-hover:bg-amber-100 transition-colors shrink-0">
             <Sparkles className="w-6 h-6 animate-pulse" />
           </div>
           <div className="min-w-0 flex-1">

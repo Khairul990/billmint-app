@@ -716,13 +716,13 @@ const Settings = ({
 
   const firebaseStatusColor = {
     connected: 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent/10 dark:text-theme-accent dark:border-theme-accent/30',
-    offline: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900',
+    offline: 'bg-theme-warning/5 text-amber-700 border-theme-warning/30 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900',
     'not-configured': 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-surface/40 dark:text-theme-muted dark:border-theme-border-soft',
   }[firebaseStatus];
 
   const firebaseStatusDot = {
     connected: 'bg-theme-accent',
-    offline: 'bg-amber-400',
+    offline: 'bg-theme-warning',
     'not-configured': 'bg-slate-400',
   }[firebaseStatus];
 
@@ -737,7 +737,7 @@ const Settings = ({
 
       {/* DEVELOPMENT DEBUG BLOCK */}
       {isAdmin && (
-        <div className="bg-slate-800 text-[10px] text-green-400 p-2 mb-4 rounded font-mono break-all dark:bg-theme-card dark:border dark:border-theme-border-soft flex justify-between">
+        <div className="bg-theme-card text-[10px] text-green-400 p-2 mb-4 rounded font-mono break-all dark:bg-theme-card dark:border dark:border-theme-border-soft flex justify-between">
           <span>Logged in as: {loggedInEmail} | Admin access: {isAdmin ? 'true' : 'false'}</span>
           <span>Target Admin: {getAdminEmail()}</span>
         </div>
@@ -818,7 +818,7 @@ const Settings = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Registered Business Name</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Registered Business Name</label>
                 <input
                   type="text"
                   required
@@ -830,7 +830,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Owner Full Name</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Owner Full Name</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted"><User className="w-4 h-4" /></span>
                   <input
@@ -844,7 +844,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Business Logo URL</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Business Logo URL</label>
                 <div
                   className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${isDragging ? 'border-theme-accent bg-theme-accent-light dark:bg-teal-950/20' : 'border-theme-border-soft bg-theme-app dark:bg-theme-surface hover:bg-theme-surface dark:bg-theme-card dark:border-theme-border-soft dark:bg-theme-surface/40 dark:hover:bg-slate-850'
                     }`}
@@ -897,7 +897,7 @@ const Settings = ({
                     <button
                       type="button"
                       onClick={() => setLogoUrl('')}
-                      className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm cursor-pointer"
+                      className="absolute -top-2 -right-2 bg-theme-danger text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm cursor-pointer"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
@@ -906,7 +906,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Phone Number</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Phone Number</label>
                 <input
                   type="text"
                   value={phone}
@@ -917,7 +917,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">WhatsApp Link Number</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">WhatsApp Link Number</label>
                 <input
                   type="text"
                   value={whatsapp}
@@ -928,7 +928,7 @@ const Settings = ({
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Contact Email</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Contact Email</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted"><Mail className="w-4 h-4" /></span>
                   <input
@@ -936,10 +936,10 @@ const Settings = ({
                     value={loggedInEmail}
                     readOnly
                     title="Contact email is locked to your verified Google account identity for security."
-                    className="w-full pl-10 pr-20 py-3 bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 rounded-xl focus:outline-none text-slate-500 dark:text-slate-400 font-medium cursor-not-allowed opacity-90 shadow-inner"
+                    className="w-full pl-10 pr-20 py-3 bg-slate-100 dark:bg-theme-card/40 border border-slate-200 dark:border-slate-700/50 rounded-xl focus:outline-none text-theme-muted dark:text-theme-muted font-medium cursor-not-allowed opacity-90 shadow-inner"
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[9px] font-extrabold uppercase px-2 py-1 rounded-lg tracking-wider flex items-center gap-1 shadow-sm">
+                    <span className="bg-emerald-100 dark:bg-emerald-900/40 text-theme-success dark:text-emerald-400 border border-theme-success/30 dark:border-emerald-800 text-[9px] font-extrabold uppercase px-2 py-1 rounded-lg tracking-wider flex items-center gap-1 shadow-sm">
                       <Check className="w-2.5 h-2.5" /> Verified
                     </span>
                   </div>
@@ -947,7 +947,7 @@ const Settings = ({
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Corporate Address</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Corporate Address</label>
                 <div className="relative">
                   <span className="absolute top-3.5 left-3.5 text-theme-muted"><MapPin className="w-4 h-4" /></span>
                   <textarea
@@ -1086,7 +1086,7 @@ const Settings = ({
                         document.documentElement.classList.remove('dark');
                         toast.success('Reset to BillQyro Classic default theme!');
                       }}
-                      className="w-full py-2 bg-transparent text-theme-muted hover:text-rose-500 text-[10px] font-bold text-center transition-all cursor-pointer block uppercase tracking-wider"
+                      className="w-full py-2 bg-transparent text-theme-muted hover:text-theme-danger text-[10px] font-bold text-center transition-all cursor-pointer block uppercase tracking-wider"
                     >
                       Reset to BillQyro Classic
                     </button>
@@ -1099,7 +1099,7 @@ const Settings = ({
                 <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-6">
                   <div>
                     <h3 className="text-xs font-black uppercase text-theme-muted tracking-wider">Theme Studio Live Mocks</h3>
-                    <p className="text-[9px] text-slate-450 dark:text-theme-muted font-semibold leading-relaxed mt-0.5">Real-time dynamic visualization of presets applied to core panels</p>
+                    <p className="text-[9px] text-theme-muted dark:text-theme-muted font-semibold leading-relaxed mt-0.5">Real-time dynamic visualization of presets applied to core panels</p>
                   </div>
 
                   {/* Previews Grid */}
@@ -1265,7 +1265,7 @@ const Settings = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Workspace Country</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Workspace Country</label>
                 <select
                   value={country}
                   onChange={(e) => handleCountryAutoConfigure(e.target.value)}
@@ -1278,7 +1278,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Interface UI Language</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Interface UI Language</label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
@@ -1292,7 +1292,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Currency Symbol</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Currency Symbol</label>
                 <input
                   type="text"
                   value={currency}
@@ -1303,7 +1303,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Currency Code</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Currency Code</label>
                 <input
                   type="text"
                   value={currencyCode}
@@ -1314,7 +1314,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Tax Label text</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Tax Label text</label>
                 <select
                   value={['GST', 'VAT', 'Tax', 'None'].includes(taxLabel) ? taxLabel : 'Custom'}
                   onChange={(e) => {
@@ -1342,7 +1342,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Date Format</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Date Format</label>
                 <select
                   value={dateFormat}
                   onChange={(e) => setDateFormat(e.target.value)}
@@ -1355,7 +1355,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Number Format</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Number Format</label>
                 <select
                   value={numberFormat}
                   onChange={(e) => setNumberFormat(e.target.value)}
@@ -1369,7 +1369,7 @@ const Settings = ({
 
               {country === 'Bangladesh' && (
                 <div>
-                  <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Default VAT / Tax Rate (%)</label>
+                  <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Default VAT / Tax Rate (%)</label>
                   <input
                     type="number"
                     value={vatTax}
@@ -1415,7 +1415,7 @@ const Settings = ({
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div>
-                    <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Primary Payment Gateway Method</label>
+                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Primary Payment Gateway Method</label>
                     <select
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
@@ -1436,7 +1436,7 @@ const Settings = ({
                   {/* Country based options */}
                   {country === 'India' && (
                     <div>
-                      <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">UPI ID</label>
+                      <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">UPI ID</label>
                       <input
                         type="text"
                         value={upiId}
@@ -1449,7 +1449,7 @@ const Settings = ({
 
                   {country === 'Bangladesh' && paymentMethod === 'bKash' && (
                     <div>
-                      <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">bKash Wallet Number</label>
+                      <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">bKash Wallet Number</label>
                       <input
                         type="text"
                         value={bkashNumber}
@@ -1462,7 +1462,7 @@ const Settings = ({
 
                   {country === 'Bangladesh' && paymentMethod === 'Nagad' && (
                     <div>
-                      <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Nagad Account Number</label>
+                      <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Nagad Account Number</label>
                       <input
                         type="text"
                         value={nagadNumber}
@@ -1475,7 +1475,7 @@ const Settings = ({
 
                   {country === 'Bangladesh' && paymentMethod === 'Rocket' && (
                     <div>
-                      <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Rocket Account Number (Optional)</label>
+                      <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Rocket Account Number (Optional)</label>
                       <input
                         type="text"
                         value={rocketNumber}
@@ -1488,7 +1488,7 @@ const Settings = ({
 
                   {country === 'Other' && (
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Manual / Bank Instructions / Custom QR link</label>
+                      <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Manual / Bank Instructions / Custom QR link</label>
                       <input
                         type="text"
                         value={customPaymentLink}
@@ -1500,7 +1500,7 @@ const Settings = ({
                   )}
 
                   <div>
-                    <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Payee / Account Name</label>
+                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Payee / Account Name</label>
                     <input
                       type="text"
                       value={payeeName}
@@ -1570,7 +1570,7 @@ const Settings = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Primary Invoice Layout Structure</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Primary Invoice Layout Structure</label>
                 <select
                   value={invoiceTemplate}
                   onChange={(e) => setInvoiceTemplate(e.target.value)}
@@ -1582,7 +1582,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Default Form Template Field Layout</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Default Form Template Field Layout</label>
                 <select
                   value={defaultBillingTemplate}
                   onChange={(e) => setDefaultBillingTemplate(e.target.value)}
@@ -1597,7 +1597,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Invoice Number Prefix</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Invoice Number Prefix</label>
                 <input
                   type="text"
                   value={invoicePrefix}
@@ -1608,7 +1608,7 @@ const Settings = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Tax ID / GST Number (Optional)</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Tax ID / GST Number (Optional)</label>
                 <input
                   type="text"
                   value={gstNumber}
@@ -1619,7 +1619,7 @@ const Settings = ({
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-2 uppercase tracking-wide flex items-center gap-2">
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-2 uppercase tracking-wide flex items-center gap-2">
                   <Palette className="w-3.5 h-3.5" /> Corporate Theme Accent Color
                 </label>
                 <div className="flex flex-wrap gap-3">
@@ -1647,7 +1647,7 @@ const Settings = ({
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Default Invoice Notes</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Default Invoice Notes</label>
                 <textarea
                   value={defaultNotes}
                   onChange={(e) => setDefaultNotes(e.target.value)}
@@ -1658,7 +1658,7 @@ const Settings = ({
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">Terms & Conditions</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Terms & Conditions</label>
                 <textarea
                   value={terms}
                   onChange={(e) => setTerms(e.target.value)}
@@ -1669,7 +1669,7 @@ const Settings = ({
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-theme-muted dark:text-slate-450 mb-1.5 uppercase tracking-wide">PDF Document Footer Note</label>
+                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">PDF Document Footer Note</label>
                 <input
                   type="text"
                   value={pdfFooter}
@@ -1711,7 +1711,7 @@ const Settings = ({
                 <div key={idx} className="flex items-start justify-between p-3.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl">
                   <div className="mr-3">
                     <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-slate-250 block">{item.label}</span>
-                    <span className="text-[9px] text-slate-450 dark:text-theme-muted font-semibold">{item.desc}</span>
+                    <span className="text-[9px] text-theme-muted dark:text-theme-muted font-semibold">{item.desc}</span>
                   </div>
                   <button
                     type="button"
@@ -1748,7 +1748,7 @@ const Settings = ({
                 <div key={idx} className="flex items-start justify-between p-3.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl">
                   <div className="mr-3">
                     <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-slate-250 block">{item.label}</span>
-                    <span className="text-[9px] text-slate-450 dark:text-theme-muted font-semibold">{item.desc}</span>
+                    <span className="text-[9px] text-theme-muted dark:text-theme-muted font-semibold">{item.desc}</span>
                   </div>
                   <button
                     type="button"
@@ -1783,13 +1783,13 @@ const Settings = ({
                   <div className="bg-theme-bg/50 dark:bg-theme-dark-bg/50 rounded-2xl p-6 border border-theme-border-soft dark:border-theme-border-soft relative overflow-hidden group hover:border-theme-accent/30 transition-all duration-300">
                     <div className="flex justify-between items-center mb-2">
                       <span className="font-semibold text-theme-text dark:text-theme-dark-text">LocalStorage Usage</span>
-                      <span className={`font-bold ${storageInfo.percentage > 95 ? 'text-red-500' : storageInfo.percentage > 80 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                      <span className={`font-bold ${storageInfo.percentage > 95 ? 'text-theme-danger' : storageInfo.percentage > 80 ? 'text-theme-warning' : 'text-theme-success'}`}>
                         {storageInfo.percentage}% ({storageInfo.kb} / {storageInfo.limitKb} KB)
                       </span>
                     </div>
                     <div className="w-full bg-theme-border-soft dark:bg-theme-border-soft/50 rounded-full h-3 overflow-hidden">
                       <div 
-                        className={`h-3 rounded-full transition-all duration-1000 ${storageInfo.percentage > 95 ? 'bg-red-500' : storageInfo.percentage > 80 ? 'bg-amber-500' : 'bg-emerald-500'}`} 
+                        className={`h-3 rounded-full transition-all duration-1000 ${storageInfo.percentage > 95 ? 'bg-red-500' : storageInfo.percentage > 80 ? 'bg-theme-warning/50' : 'bg-theme-success'}`} 
                         style={{ width: `${storageInfo.percentage}%` }}
                       ></div>
                     </div>
@@ -1801,9 +1801,9 @@ const Settings = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                     <button 
                       onClick={handleExport}
-                      className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors text-left"
+                      className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left"
                     >
-                      <Database className="text-emerald-500" size={24} />
+                      <Database className="text-theme-success" size={24} />
                       <div>
                         <div className="font-semibold text-theme-text dark:text-theme-dark-text">Download Full Backup</div>
                         <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Save a complete offline JSON backup of your workspace</div>
@@ -1811,7 +1811,7 @@ const Settings = ({
                     </button>
                     
                     <div className="flex flex-col gap-2">
-                      <div className="text-[10px] text-amber-600 dark:text-amber-500/80 font-bold uppercase tracking-wider px-1">
+                      <div className="text-[10px] text-theme-warning dark:text-theme-warning/80 font-bold uppercase tracking-wider px-1">
                         ⚠️ This will NOT delete invoices or customers. Recommendation: Download Backup first.
                       </div>
                       <button 
@@ -1830,9 +1830,9 @@ const Settings = ({
                       <>
                         <button 
                           onClick={handleCleanTemporaryData}
-                          className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors text-left"
+                          className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left"
                         >
-                          <RefreshCw className="text-emerald-500" size={24} />
+                          <RefreshCw className="text-theme-success" size={24} />
                           <div>
                             <div className="font-semibold text-theme-text dark:text-theme-dark-text">Clean Temporary Data</div>
                             <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Clear logs & old sync queue</div>
@@ -1841,9 +1841,9 @@ const Settings = ({
 
                         <button 
                           onClick={handleCleanDuplicateDrafts}
-                          className="flex items-center gap-3 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 transition-colors text-left"
+                          className="flex items-center gap-3 p-4 rounded-xl border border-amber-500/20 bg-theme-warning/50/5 hover:bg-theme-warning/10 transition-colors text-left"
                         >
-                          <Trash2 className="text-amber-500" size={24} />
+                          <Trash2 className="text-theme-warning" size={24} />
                           <div>
                             <div className="font-semibold text-theme-text dark:text-theme-dark-text">Clean Duplicate Drafts</div>
                             <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Remove empty/zero drafts</div>
@@ -1851,23 +1851,23 @@ const Settings = ({
                         </button>
                         <button 
                           onClick={handleClearAllLocalData}
-                          className="flex items-center gap-3 p-4 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 transition-colors text-left md:col-span-1"
+                          className="flex items-center gap-3 p-4 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-theme-danger/10 transition-colors text-left md:col-span-1"
                         >
-                          <ShieldAlert className="text-red-500" size={24} />
+                          <ShieldAlert className="text-theme-danger" size={24} />
                           <div>
-                            <div className="font-semibold text-red-600 dark:text-red-500">HARD RESET (Admin)</div>
-                            <div className="text-xs text-red-500/80">Completely wipe ALL local storage</div>
+                            <div className="font-semibold text-red-600 dark:text-theme-danger">HARD RESET (Admin)</div>
+                            <div className="text-xs text-theme-danger/80">Completely wipe ALL local storage</div>
                           </div>
                         </button>
 
                         <button 
                           onClick={handleEmptyTrash}
-                          className="flex items-center gap-3 p-4 rounded-xl border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition-colors text-left md:col-span-1"
+                          className="flex items-center gap-3 p-4 rounded-xl border border-rose-500/20 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left md:col-span-1"
                         >
-                          <Trash2 className="text-rose-500" size={24} />
+                          <Trash2 className="text-theme-danger" size={24} />
                           <div>
-                            <div className="font-semibold text-rose-600 dark:text-rose-500">Empty Trash Data</div>
-                            <div className="text-xs text-rose-500/80">Permanently delete all soft-deleted invoices</div>
+                            <div className="font-semibold text-theme-danger dark:text-theme-danger">Empty Trash Data</div>
+                            <div className="text-xs text-theme-danger/80">Permanently delete all soft-deleted invoices</div>
                           </div>
                         </button>
                       </>
@@ -1908,7 +1908,7 @@ const Settings = ({
                   BQ
                 </div>
                 <h3 className="text-lg font-extrabold text-theme-primary dark:text-theme-primary">BillQyro Standalone Application</h3>
-                <p className="text-xs text-theme-muted dark:text-slate-450 max-w-md mx-auto leading-relaxed font-semibold">
+                <p className="text-xs text-theme-muted dark:text-theme-muted max-w-md mx-auto leading-relaxed font-semibold">
                   Install BillQyro directly to your desktop or mobile home screen. Unlocks faster loading speeds, borderless full-screen workspace, and robust offline accounting access.
                 </p>
                 <button
@@ -1922,8 +1922,8 @@ const Settings = ({
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="p-5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/60 rounded-2xl flex gap-3">
-                  <div className="p-2 bg-theme-card dark:bg-theme-card rounded-xl text-amber-500 shadow-xs h-fit flex items-center justify-center">
+                <div className="p-5 bg-theme-warning/5 dark:bg-amber-950/20 border border-theme-warning/30 dark:border-amber-900/60 rounded-2xl flex gap-3">
+                  <div className="p-2 bg-theme-card dark:bg-theme-card rounded-xl text-theme-warning shadow-xs h-fit flex items-center justify-center">
                     <Info className="w-5 h-5" />
                   </div>
                   <div>
@@ -1953,7 +1953,7 @@ const Settings = ({
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-slate-650 dark:text-theme-muted uppercase">
                       🤖 Android Mobile (Chrome)
                     </div>
-                    <ol className="text-xs text-theme-muted dark:text-slate-450 font-semibold space-y-2 list-decimal list-inside">
+                    <ol className="text-xs text-theme-muted dark:text-theme-muted font-semibold space-y-2 list-decimal list-inside">
                       <li>Open BillQyro in <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Chrome</strong>.</li>
                       <li>Tap the <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Menu</strong> icon (three vertical dots).</li>
                       <li>Select <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Add to Home screen</strong> or <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Install app</strong>.</li>
@@ -1999,7 +1999,7 @@ const Settings = ({
               <span className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Local storage quota</span>
               <div className="flex items-center gap-2 mt-1">
                 <div className="w-24 h-1.5 bg-theme-border-soft dark:bg-theme-surface rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full transition-all duration-500 ${storageHealth.percentage > 80 ? 'bg-rose-500' : 'bg-theme-accent'}`} style={{ width: `${storageHealth.percentage}%` }}></div>
+                  <div className={`h-full rounded-full transition-all duration-500 ${storageHealth.percentage > 80 ? 'bg-theme-danger' : 'bg-theme-accent'}`} style={{ width: `${storageHealth.percentage}%` }}></div>
                 </div>
                 <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-theme-muted">{storageHealth.percentage}%</span>
               </div>
@@ -2032,7 +2032,7 @@ const Settings = ({
                     >
                       <span>{subTab.label}</span>
                       {pendingCount > 0 && (
-                        <span className="px-1.5 py-0.5 text-[9px] bg-rose-500 text-white rounded-full font-black animate-pulse">
+                        <span className="px-1.5 py-0.5 text-[9px] bg-theme-danger text-white rounded-full font-black animate-pulse">
                           {pendingCount}
                         </span>
                       )}
@@ -2045,7 +2045,7 @@ const Settings = ({
                 <div className="space-y-6">
                   {/* PLAN & FEATURE CONTROL SECTION */}
                   <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-5">
-                    <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-250 border-b border-slate-50 dark:border-theme-border-soft pb-3 flex items-center gap-2">
+                    <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-250 border-b border-theme-border-soft dark:border-theme-border-soft pb-3 flex items-center gap-2">
                       <Sliders className="w-4.5 h-4.5 text-theme-accent" />
                       <span>SaaS Plan & Feature control</span>
                     </h3>
@@ -2144,7 +2144,7 @@ const Settings = ({
                               toast.error("Failed to save global settings.");
                             }
                           }}
-                          className="mt-4 px-5 py-2 bg-theme-surface border border-theme-border-strong text-theme-primary hover:bg-theme-app dark:bg-theme-card dark:hover:bg-slate-800 text-[10px] font-black uppercase rounded-lg transition-colors cursor-pointer"
+                          className="mt-4 px-5 py-2 bg-theme-surface border border-theme-border-strong text-theme-primary hover:bg-theme-app dark:bg-theme-card dark:hover:bg-theme-card text-[10px] font-black uppercase rounded-lg transition-colors cursor-pointer"
                         >
                           Save Global Config
                         </button>
@@ -2186,20 +2186,20 @@ const Settings = ({
                     <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex flex-col justify-between space-y-3">
                       <div>
                         <h3 className="text-xs font-black text-rose-900 dark:text-rose-300 mb-1 flex items-center gap-2 uppercase tracking-wide">
-                          <Lock className="w-4 h-4 text-rose-500" /> Maintenance Mode Lock
+                          <Lock className="w-4 h-4 text-theme-danger" /> Maintenance Mode Lock
                         </h3>
                         <p className="text-[9px] text-theme-muted font-medium mb-3">Shut down standard users workspace, presenting lock screen.</p>
                         <div className="flex items-center justify-between p-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl">
                           <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-slate-250">Maintenance Lockout</span>
                           <button
                             onClick={() => setMaintenanceMode(!maintenanceMode)}
-                            className={`w-10 h-5 rounded-full relative transition-colors duration-300 focus:outline-none ${maintenanceMode ? 'bg-rose-500' : 'bg-theme-border-strong dark:bg-theme-surface'}`}
+                            className={`w-10 h-5 rounded-full relative transition-colors duration-300 focus:outline-none ${maintenanceMode ? 'bg-theme-danger' : 'bg-theme-border-strong dark:bg-theme-surface'}`}
                           >
                             <div className={`w-3.5 h-3.5 bg-theme-card dark:bg-theme-card rounded-full absolute top-0.5 transition-all duration-300 ${maintenanceMode ? 'left-6' : 'left-0.5'}`}></div>
                           </button>
                         </div>
                       </div>
-                      <button onClick={handleSave} className="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-rose-950/20 dark:text-rose-450">
+                      <button onClick={handleSave} className="w-full py-2 bg-theme-danger/5 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-rose-950/20 dark:text-rose-450">
                         Apply lockout state
                       </button>
                     </div>
@@ -2207,7 +2207,7 @@ const Settings = ({
 
                   {/* DATABASE BACKUP AND RESTORE */}
                   <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
-                    <h3 className="text-sm font-extrabold text-slate-850 dark:text-theme-secondary border-b border-slate-50 dark:border-theme-border-soft pb-3 flex items-center gap-2">
+                    <h3 className="text-sm font-extrabold text-slate-850 dark:text-theme-secondary border-b border-theme-border-soft dark:border-theme-border-soft pb-3 flex items-center gap-2">
                       <Database className="w-4.5 h-4.5 text-theme-accent" />
                       <span>Platform Data Backup & Restore</span>
                     </h3>
@@ -2246,7 +2246,7 @@ const Settings = ({
 
               {adminSubTab === 'users' && (
                 <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-5">
-                  <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-250 border-b border-slate-50 dark:border-theme-border-soft pb-3 flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-250 border-b border-theme-border-soft dark:border-theme-border-soft pb-3 flex items-center gap-2">
                     <Users className="w-4.5 h-4.5 text-theme-accent" />
                     <span>Registered Users Directory</span>
                   </h3>
@@ -2257,7 +2257,7 @@ const Settings = ({
                       <span className="text-xs text-theme-muted font-bold">Querying users list...</span>
                     </div>
                   ) : adminUsers.length === 0 ? (
-                    <div className="py-12 text-center text-xs text-slate-450 dark:text-theme-muted font-bold">
+                    <div className="py-12 text-center text-xs text-theme-muted dark:text-theme-muted font-bold">
                       No users registered in this directory.
                     </div>
                   ) : (
@@ -2289,7 +2289,7 @@ const Settings = ({
                               </td>
                               <td className="p-3.5 text-center">
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${user.blocked
-                                    ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/25 dark:text-rose-455'
+                                    ? 'bg-theme-danger/5 text-rose-700 dark:bg-rose-950/25 dark:text-rose-455'
                                     : 'bg-theme-accent-light text-theme-accent dark:bg-theme-accent-light/20 dark:text-theme-accent'
                                   }`}>
                                   {user.blocked ? 'Blocked' : 'Active'}
@@ -2300,7 +2300,7 @@ const Settings = ({
                                   onClick={() => handleToggleBlock(user.userId, user.blocked)}
                                   className={`px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider cursor-pointer active:scale-95 transition-all ${user.blocked
                                       ? 'bg-theme-accent hover:bg-theme-accent text-white shadow-md shadow-glow'
-                                      : 'bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/10'
+                                      : 'bg-theme-danger hover:bg-rose-600 text-white shadow-md shadow-rose-500/10'
                                     }`}
                                 >
                                   {user.blocked ? 'Unblock' : 'Block'}
@@ -2317,7 +2317,7 @@ const Settings = ({
 
               {adminSubTab === 'requests' && (
                 <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-5">
-                  <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-250 border-b border-slate-50 dark:border-theme-border-soft pb-3 flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-250 border-b border-theme-border-soft dark:border-theme-border-soft pb-3 flex items-center gap-2">
                     <CircleDollarSign className="w-4.5 h-4.5 text-theme-accent" />
                     <span>Manual Premium Upgrade Requests Queue</span>
                   </h3>
@@ -2328,7 +2328,7 @@ const Settings = ({
                       <span className="text-xs text-theme-muted font-bold">Querying request logs...</span>
                     </div>
                   ) : adminRequests.length === 0 ? (
-                    <div className="py-12 text-center text-xs text-slate-450 dark:text-theme-muted font-bold">
+                    <div className="py-12 text-center text-xs text-theme-muted dark:text-theme-muted font-bold">
                       No manual premium requests submitted.
                     </div>
                   ) : (
@@ -2350,8 +2350,8 @@ const Settings = ({
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${req.status === 'Approved'
                                   ? 'bg-theme-accent-light text-theme-accent dark:bg-theme-accent-light/20 dark:text-theme-accent'
                                   : req.status === 'Rejected'
-                                    ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/25 dark:text-rose-455'
-                                    : 'bg-amber-50 text-amber-700 dark:bg-amber-950/25 dark:text-amber-450 animate-pulse'
+                                    ? 'bg-theme-danger/5 text-rose-700 dark:bg-rose-950/25 dark:text-rose-455'
+                                    : 'bg-theme-warning/5 text-amber-700 dark:bg-amber-950/25 dark:text-amber-450 animate-pulse'
                                 }`}>
                                 {req.status}
                               </span>
@@ -2404,8 +2404,8 @@ const Settings = ({
                             )}
 
                             {req.status === 'Rejected' && req.rejectionReason && (
-                              <div className="text-[10px] text-rose-600 dark:text-rose-450 font-bold bg-rose-50/30 dark:bg-rose-950/10 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/20 max-w-md w-full">
-                                <span className="uppercase tracking-widest block text-[8px] text-rose-500 mb-1">Rejection Reason</span>
+                              <div className="text-[10px] text-theme-danger dark:text-rose-450 font-bold bg-theme-danger/5/30 dark:bg-rose-950/10 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/20 max-w-md w-full">
+                                <span className="uppercase tracking-widest block text-[8px] text-theme-danger mb-1">Rejection Reason</span>
                                 "{req.rejectionReason}"
                               </div>
                             )}
@@ -2414,7 +2414,7 @@ const Settings = ({
                               <div className="flex gap-2 w-full sm:w-auto sm:self-end">
                                 <button
                                   onClick={() => handleOpenRejectModal(req.requestId)}
-                                  className="flex-1 sm:flex-initial px-4 py-2 border border-rose-250 hover:bg-rose-50 text-rose-700 font-black text-[10px] rounded-xl uppercase tracking-wider cursor-pointer active:scale-95 transition-all"
+                                  className="flex-1 sm:flex-initial px-4 py-2 border border-rose-250 hover:bg-theme-danger/5 text-rose-700 font-black text-[10px] rounded-xl uppercase tracking-wider cursor-pointer active:scale-95 transition-all"
                                 >
                                   Reject
                                 </button>
@@ -2507,13 +2507,13 @@ const Settings = ({
                         key={provider}
                         type="button"
                         onClick={() => handleSetDbProvider(provider)}
-                        className={`flex-1 py-1.5 px-2 text-[10px] font-black uppercase rounded-lg border transition-all ${dbProvider === provider ? 'bg-theme-accent text-white border-theme-accent shadow-md cursor-default' : 'bg-transparent text-theme-muted border-theme-border-soft hover:bg-theme-app dark:hover:bg-slate-800 cursor-pointer'}`}
+                        className={`flex-1 py-1.5 px-2 text-[10px] font-black uppercase rounded-lg border transition-all ${dbProvider === provider ? 'bg-theme-accent text-white border-theme-accent shadow-md cursor-default' : 'bg-transparent text-theme-muted border-theme-border-soft hover:bg-theme-app dark:hover:bg-theme-card cursor-pointer'}`}
                       >
                         {provider === 'dual' ? 'Dual Sync' : provider}
                       </button>
                     ))}
                   </div>
-                  <div className="text-[10px] p-2.5 rounded-xl border font-bold text-center bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-400">
+                  <div className="text-[10px] p-2.5 rounded-xl border font-bold text-center bg-theme-surface border-slate-200 text-theme-muted dark:bg-theme-card/50 dark:border-slate-800 dark:text-theme-muted">
                     {dbProvider === 'firebase' ? 'Firebase Active' : dbProvider === 'supabase' ? 'Supabase Ready (Experimental - writes not ready)' : 'Dual Sync Not Enabled Yet'}
                   </div>
                 </div>
@@ -2521,8 +2521,8 @@ const Settings = ({
 
               {/* DANGER ZONE GRANULAR WIPES */}
               <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 border border-rose-100 dark:border-rose-950/20 shadow-premium space-y-3.5">
-                <h3 className="text-xs font-black text-rose-600 dark:text-rose-455 border-b border-rose-50 dark:border-rose-950/20 pb-3 flex items-center gap-2 uppercase tracking-wide">
-                  <Trash2 className="w-4.5 h-4.5 text-rose-500" />
+                <h3 className="text-xs font-black text-theme-danger dark:text-rose-455 border-b border-rose-50 dark:border-rose-950/20 pb-3 flex items-center gap-2 uppercase tracking-wide">
+                  <Trash2 className="w-4.5 h-4.5 text-theme-danger" />
                   <span>Granular Data Wipes</span>
                 </h3>
                 <div className="space-y-2">
@@ -2531,7 +2531,7 @@ const Settings = ({
                       key={type}
                       type="button"
                       onClick={() => handleGranularWipe(type)}
-                      className="w-full flex items-center justify-between px-3.5 py-2 border border-rose-100 dark:border-rose-900/20 bg-rose-50/20 dark:bg-rose-950/10 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-700 dark:text-rose-400 font-extrabold text-[10px] rounded-xl transition-all cursor-pointer"
+                      className="w-full flex items-center justify-between px-3.5 py-2 border border-rose-100 dark:border-rose-900/20 bg-theme-danger/5/20 dark:bg-rose-950/10 hover:bg-theme-danger/5 dark:hover:bg-rose-950/20 text-rose-700 dark:text-theme-danger font-extrabold text-[10px] rounded-xl transition-all cursor-pointer"
                     >
                       <span>Clear All {type}</span>
                       <Trash2 className="w-3 h-3 opacity-60" />
@@ -2563,7 +2563,7 @@ const Settings = ({
           <div className="relative max-w-3xl max-h-[85vh] w-full flex flex-col items-center bg-theme-card rounded-3xl p-4 overflow-hidden border border-slate-800">
             <button
               onClick={() => setSelectedScreenshot(null)}
-              className="absolute top-4 right-4 bg-slate-800/80 hover:bg-slate-700 text-white font-bold p-2.5 rounded-full cursor-pointer hover:scale-105 active:scale-95 transition-all"
+              className="absolute top-4 right-4 bg-theme-card/80 hover:bg-slate-700 text-white font-bold p-2.5 rounded-full cursor-pointer hover:scale-105 active:scale-95 transition-all"
             >
               ✕
             </button>
@@ -2583,7 +2583,7 @@ const Settings = ({
       {showRejectionModalFor && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
           <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 max-w-md w-full border border-theme-border-soft dark:border-theme-border-soft shadow-2xl space-y-4">
-            <h3 className="text-sm font-black text-rose-600 dark:text-rose-455 uppercase tracking-widest">Reject Upgrade Request</h3>
+            <h3 className="text-sm font-black text-theme-danger dark:text-rose-455 uppercase tracking-widest">Reject Upgrade Request</h3>
             <p className="text-xs text-slate-505 dark:text-theme-muted font-semibold leading-relaxed">
               Please specify the exact reason for rejecting this upgrade request. This reason will be stored in the request log for user visibility.
             </p>

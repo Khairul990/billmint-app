@@ -55,9 +55,9 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
       case 'synced':
         return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent-light/20 dark:text-theme-accent dark:border-theme-accent/30';
       case 'pending':
-        return 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
+        return 'bg-theme-warning/5 text-theme-warning border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
       case 'failed':
-        return 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
+        return 'bg-theme-danger/5 text-theme-danger border-rose-100 dark:bg-rose-950/20 dark:text-theme-danger dark:border-rose-900/30';
       case 'offline':
         return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-sky-950/20 dark:text-theme-accent dark:border-sky-900/30';
       default:
@@ -85,14 +85,14 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
       case 'Partially Paid':
         return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent/10 dark:text-theme-accent dark:border-theme-accent/30';
       case 'Pending':
-        return 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
+        return 'bg-theme-warning/5 text-amber-700 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
       case 'Overdue':
-        return 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
+        return 'bg-theme-danger/5 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-theme-danger dark:border-rose-900/30';
       case 'Cancelled':
         return 'bg-theme-surface dark:bg-theme-card text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-theme-border-soft/30';
       case 'Unpaid':
       default:
-        return 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
+        return 'bg-theme-danger/5 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-theme-danger dark:border-rose-900/30';
     }
   };
 
@@ -105,10 +105,10 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
       case 'In Progress':
         return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent/10 dark:text-theme-accent dark:border-theme-accent/30';
       case 'Cancelled':
-        return 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
+        return 'bg-theme-danger/5 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-theme-danger dark:border-rose-900/30';
       case 'Pending':
       default:
-        return 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
+        return 'bg-theme-warning/5 text-amber-700 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
     }
   };
 
@@ -197,7 +197,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                         transition={{ duration: 0.15 }}
                         className="absolute right-0 bottom-full mb-2 w-48 bg-theme-card dark:bg-theme-card/95 dark:bg-theme-card/95 backdrop-blur-md border border-theme-border-soft dark:border-theme-border-soft rounded-2xl p-2 shadow-2xl z-20 flex flex-col gap-1 text-[11px]"
                       >
-                        <div className="px-3 py-1 font-black text-[9px] text-theme-muted dark:text-theme-muted uppercase tracking-wider border-b border-slate-50 dark:border-theme-border-soft/60 mb-1">
+                        <div className="px-3 py-1 font-black text-[9px] text-theme-muted dark:text-theme-muted uppercase tracking-wider border-b border-theme-border-soft dark:border-theme-border-soft/60 mb-1">
                           Quick Share
                         </div>
 
@@ -240,9 +240,9 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                                 toast.error('Could not create live link. Please try again.');
                               }
                             }}
-                            className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-700 dark:hover:text-rose-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                            className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-danger/5 dark:hover:bg-rose-950/20 hover:text-rose-700 dark:hover:text-theme-danger rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
                           >
-                            <WhatsAppIcon className="w-3.5 h-3.5 text-rose-500" />
+                            <WhatsAppIcon className="w-3.5 h-3.5 text-theme-danger" />
                             <span>Send Reminder</span>
                           </button>
                         )}
@@ -313,9 +313,9 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                               toast.error('Could not create live link. Please try again.');
                             }
                           }}
-                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-amber-50 dark:hover:bg-amber-950/20 hover:text-amber-700 dark:hover:text-amber-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-warning/5 dark:hover:bg-amber-950/20 hover:text-amber-700 dark:hover:text-amber-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
                         >
-                          <Copy className="w-3.5 h-3.5 text-amber-500" />
+                          <Copy className="w-3.5 h-3.5 text-theme-warning" />
                           <span>Copy Summary</span>
                         </button>
                       </motion.div>
@@ -348,7 +348,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
             <button
               onClick={() => onDelete(invoice.id)}
               title={isDeleted ? "Permanently Delete" : "Move to Trash"}
-              className="p-2 text-theme-muted dark:text-theme-muted hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-all cursor-pointer"
+              className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-danger dark:hover:text-theme-danger hover:bg-theme-danger/5 dark:hover:bg-rose-950/30 rounded-xl transition-all cursor-pointer"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -362,7 +362,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                   });
                 }}
                 title={`Retry Sync. Error: ${invoice.syncError || 'Unknown'}`}
-                className="p-2 text-rose-600 dark:text-rose-400 hover:text-white dark:hover:text-white hover:bg-rose-600 dark:hover:bg-rose-600 rounded-xl transition-all cursor-pointer flex items-center gap-1"
+                className="p-2 text-theme-danger dark:text-theme-danger hover:text-white dark:hover:text-white hover:bg-rose-600 dark:hover:bg-rose-600 rounded-xl transition-all cursor-pointer flex items-center gap-1"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>

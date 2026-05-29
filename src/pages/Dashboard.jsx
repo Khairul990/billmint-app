@@ -222,12 +222,12 @@ const Dashboard = ({
           {/* Revenue */}
           <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-xl"><TrendingUp className="w-4 h-4" /></div>
+              <div className="p-2.5 bg-theme-success/10 text-theme-success rounded-xl"><TrendingUp className="w-4 h-4" /></div>
               <p className="text-xs font-extrabold text-theme-muted uppercase tracking-wider">Revenue</p>
             </div>
             <div>
               <h3 className="text-xl font-black text-theme-primary">{formatCurrency(totalRevenue, currencySymbol)}</h3>
-              <p className="text-[10px] font-bold text-emerald-500 mt-1">+12% vs last month</p>
+              <p className="text-[10px] font-bold text-theme-success mt-1">+12% vs last month</p>
             </div>
           </div>
 
@@ -246,19 +246,19 @@ const Dashboard = ({
           {/* Pending Due */}
           <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-rose-500/10 text-rose-500 rounded-xl"><AlertCircle className="w-4 h-4" /></div>
+              <div className="p-2.5 bg-theme-danger/10 text-theme-danger rounded-xl"><AlertCircle className="w-4 h-4" /></div>
               <p className="text-xs font-extrabold text-theme-muted uppercase tracking-wider">Pending</p>
             </div>
             <div>
-              <h3 className="text-xl font-black text-rose-500">{formatCurrency(totalDue, currencySymbol)}</h3>
-              <p className="text-[10px] font-bold text-rose-500/70 mt-1">Needs collection</p>
+              <h3 className="text-xl font-black text-theme-danger">{formatCurrency(totalDue, currencySymbol)}</h3>
+              <p className="text-[10px] font-bold text-theme-danger/70 mt-1">Needs collection</p>
             </div>
           </div>
 
           {/* Customers */}
           <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-indigo-500/10 text-indigo-500 rounded-xl"><Users className="w-4 h-4" /></div>
+              <div className="p-2.5 bg-theme-accent/10 text-theme-accent rounded-xl"><Users className="w-4 h-4" /></div>
               <p className="text-xs font-extrabold text-theme-muted uppercase tracking-wider">Customers</p>
             </div>
             <div>
@@ -293,7 +293,7 @@ const Dashboard = ({
                   </div>
                   <div className="text-right">
                     <p className="text-xs font-black text-theme-primary mb-1">{formatCurrency(inv.grandTotal, currencySymbol)}</p>
-                    <span className={`text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider ${inv.paymentStatus === 'Paid' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                    <span className={`text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider ${inv.paymentStatus === 'Paid' ? 'bg-theme-success/10 text-theme-success' : 'bg-theme-danger/10 text-theme-danger'}`}>
                       {inv.paymentStatus || 'Pending'}
                     </span>
                   </div>
@@ -335,7 +335,7 @@ const Dashboard = ({
                 <span className="text-[10px] font-bold text-theme-muted">Paid: <span className="text-theme-primary">{formatCurrency(totalPaid, currencySymbol)}</span></span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-amber-400"></span>
+                <span className="w-3 h-3 rounded-full bg-theme-warning"></span>
                 <span className="text-[10px] font-bold text-theme-muted">Due: <span className="text-theme-primary">{formatCurrency(totalDue, currencySymbol)}</span></span>
               </div>
             </div>
@@ -358,9 +358,9 @@ const Dashboard = ({
                   <div className="p-2 bg-theme-accent-light text-theme-accent rounded-xl"><Activity className="w-4 h-4" /></div>
                   <span className="text-xs font-bold text-theme-primary">Cloud Backup</span>
                 </div>
-                <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span className="text-[9px] font-extrabold text-emerald-600 uppercase tracking-wider">Active</span>
+                <div className="flex items-center gap-2 bg-theme-success/10 px-3 py-1 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-theme-success animate-pulse"></span>
+                  <span className="text-[9px] font-extrabold text-theme-success uppercase tracking-wider">Active</span>
                 </div>
               </div>
               {/* PDF Generator */}
@@ -369,9 +369,9 @@ const Dashboard = ({
                   <div className="p-2 bg-theme-accent-light text-theme-accent rounded-xl"><FileDown className="w-4 h-4" /></div>
                   <span className="text-xs font-bold text-theme-primary">PDF Engine</span>
                 </div>
-                <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span className="text-[9px] font-extrabold text-emerald-600 uppercase tracking-wider">Active</span>
+                <div className="flex items-center gap-2 bg-theme-success/10 px-3 py-1 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-theme-success animate-pulse"></span>
+                  <span className="text-[9px] font-extrabold text-theme-success uppercase tracking-wider">Active</span>
                 </div>
               </div>
               {/* Invoice System */}
@@ -380,9 +380,9 @@ const Dashboard = ({
                   <div className="p-2 bg-theme-accent-light text-theme-accent rounded-xl"><ReceiptText className="w-4 h-4" /></div>
                   <span className="text-xs font-bold text-theme-primary">Invoice DB</span>
                 </div>
-                <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span className="text-[9px] font-extrabold text-emerald-600 uppercase tracking-wider">Active</span>
+                <div className="flex items-center gap-2 bg-theme-success/10 px-3 py-1 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-theme-success animate-pulse"></span>
+                  <span className="text-[9px] font-extrabold text-theme-success uppercase tracking-wider">Active</span>
                 </div>
               </div>
             </div>

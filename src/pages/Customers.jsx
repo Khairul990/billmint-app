@@ -161,7 +161,7 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
                     </button>
                     <button
                       onClick={() => handleDelete(cust.id)}
-                      className="p-2 text-theme-muted hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                      className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all"
                       title="Delete Contact"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

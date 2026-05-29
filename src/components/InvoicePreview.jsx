@@ -54,10 +54,10 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       case 'Paid':
         return 'bg-theme-accent-light text-theme-primary border-theme-border-soft dark:bg-theme-accent-light/20 dark:text-theme-accent dark:border-theme-accent/30';
       case 'Pending':
-        return 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
+        return 'bg-theme-warning/5 text-amber-800 border-theme-warning/30 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
       case 'Unpaid':
       default:
-        return 'bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30';
+        return 'bg-theme-danger/5 text-rose-800 border-theme-danger/30 dark:bg-rose-950/20 dark:text-theme-danger dark:border-rose-900/30';
     }
   };
 
@@ -88,7 +88,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] uppercase font-black tracking-wider text-theme-muted dark:text-theme-muted">Order Dispatch Progress</span>
             {isCancelled ? (
-              <span className="text-[10px] px-2.5 py-0.5 rounded-full border bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30 font-extrabold uppercase tracking-wider animate-pulse">
+              <span className="text-[10px] px-2.5 py-0.5 rounded-full border bg-theme-danger/5 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-theme-danger dark:border-rose-900/30 font-extrabold uppercase tracking-wider animate-pulse">
                 Cancelled
               </span>
             ) : (
@@ -198,7 +198,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
             </div>
             <div className="flex items-center gap-1.5 justify-start md:justify-end">
               <Calendar className="w-3.5 h-3.5 text-theme-muted dark:text-theme-muted" />
-              <span className="text-rose-500 dark:text-rose-400">Due Date: {invoice.dueDate}</span>
+              <span className="text-theme-danger dark:text-theme-danger">Due Date: {invoice.dueDate}</span>
             </div>
           </div>
         </div>
@@ -238,7 +238,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40">
             {invoice.items && invoice.items.map((item, idx) => (
-              <tr key={idx} className="text-theme-primary dark:text-theme-muted hover:bg-theme-app dark:bg-theme-surface/50 dark:hover:bg-slate-800/20">
+              <tr key={idx} className="text-theme-primary dark:text-theme-muted hover:bg-theme-app dark:bg-theme-surface/50 dark:hover:bg-theme-card/20">
                 <td className="py-4 font-semibold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     {item.designNo && item.designNo !== 'N/A' && (
@@ -300,7 +300,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
             <span className="text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-bold">{formatCurrency(invoice.subtotal, currencySymbol, regionalPrefs.numberFormat)}</span>
           </div>
           {invoice.discountAmount > 0 && (
-            <div className="flex justify-between text-rose-500 dark:text-rose-450 font-bold">
+            <div className="flex justify-between text-theme-danger dark:text-rose-450 font-bold">
               <span>Discount</span>
               <span>-{formatCurrency(invoice.discountAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>

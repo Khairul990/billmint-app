@@ -114,7 +114,7 @@ const UIItemsMockup = () => (
             <div className="w-2/3 bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-lg p-3 shadow-sm space-y-2">
                 <div className="flex justify-between text-[10px]"><span className="text-theme-muted">Subtotal</span><span className="font-bold">₹1000</span></div>
                 <div className="flex justify-between text-[10px]"><span className="text-theme-muted">Paid</span><span className="font-bold text-theme-accent">₹500</span></div>
-                <div className="flex justify-between text-xs border-t border-theme-border-soft dark:border-theme-border-soft pt-1 mt-1"><span className="font-black">Due</span><span className="font-black text-rose-500">₹500</span></div>
+                <div className="flex justify-between text-xs border-t border-theme-border-soft dark:border-theme-border-soft pt-1 mt-1"><span className="font-black">Due</span><span className="font-black text-theme-danger">₹500</span></div>
             </div>
         </div>
     </div>
@@ -166,7 +166,7 @@ const UIDashboardMockup = () => (
             </div>
             <div className="flex-1 bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-lg p-3 shadow-sm">
                 <div className="text-[9px] text-theme-muted font-bold mb-1 uppercase tracking-wide">Pending</div>
-                <div className="text-sm font-black text-rose-500">₹3,200</div>
+                <div className="text-sm font-black text-theme-danger">₹3,200</div>
             </div>
         </div>
         <div className="flex-1 bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-lg p-4 flex items-end justify-between gap-2 shadow-sm">
@@ -245,7 +245,7 @@ const Guide = ({ setCurrentTab }) => {
             tab: 'invoices',
             tip: 'Status badges help you quickly understand customer/order progress.',
             Mockup: UIStatusMockup,
-            color: 'text-amber-600',
+            color: 'text-theme-warning',
             bg: 'bg-amber-100'
         },
         {
@@ -257,7 +257,7 @@ const Guide = ({ setCurrentTab }) => {
             tab: 'invoices',
             tip: 'PDF should use real invoice and business profile data.',
             Mockup: UIPDFMockup,
-            color: 'text-rose-600',
+            color: 'text-theme-danger',
             bg: 'bg-rose-100'
         },
         {
@@ -436,7 +436,7 @@ const Guide = ({ setCurrentTab }) => {
 
                             {/* Flow Step 5 */}
                             <div className="flex flex-col items-center gap-3 w-24">
-                                <div className="w-12 h-12 rounded-full bg-amber-50 border-2 border-amber-200 text-amber-600 flex items-center justify-center shadow-sm">
+                                <div className="w-12 h-12 rounded-full bg-theme-warning/5 border-2 border-theme-warning/30 text-theme-warning flex items-center justify-center shadow-sm">
                                     <CheckCircle2 className="w-5 h-5" />
                                 </div>
                                 <span className="text-[10px] font-black uppercase text-theme-primary dark:text-theme-muted tracking-tight leading-tight">Save Invoice</span>
@@ -445,7 +445,7 @@ const Guide = ({ setCurrentTab }) => {
 
                             {/* Flow Step 6 */}
                             <div className="flex flex-col items-center gap-3 w-24">
-                                <div className="w-12 h-12 rounded-full bg-rose-50 border-2 border-rose-200 text-rose-600 flex items-center justify-center shadow-sm">
+                                <div className="w-12 h-12 rounded-full bg-theme-danger/5 border-2 border-theme-danger/30 text-theme-danger flex items-center justify-center shadow-sm">
                                     <FileDown className="w-5 h-5" />
                                 </div>
                                 <span className="text-[10px] font-black uppercase text-theme-primary dark:text-theme-muted tracking-tight leading-tight">Download PDF</span>
@@ -608,7 +608,7 @@ const Guide = ({ setCurrentTab }) => {
                                 </div>
                                 <div className="flex justify-between border-b border-theme-border-soft dark:border-theme-border-soft pb-2">
                                     <span className="text-theme-muted">Due:</span>
-                                    <span className="text-rose-500 font-bold">₹500</span>
+                                    <span className="text-theme-danger font-bold">₹500</span>
                                 </div>
                                 <div className="flex justify-between pt-1">
                                     <span className="text-theme-muted">Status:</span>

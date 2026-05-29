@@ -322,7 +322,7 @@ const Invoices = ({
             onClick={() => setViewMode(viewMode === 'active' ? 'trash' : 'active')}
             className={`text-xs font-bold px-4 py-2.5 rounded-xl border transition-all ${
               viewMode === 'trash' 
-                ? 'bg-rose-50 text-rose-600 border-rose-200' 
+                ? 'bg-theme-danger/5 text-theme-danger border-theme-danger/30' 
                 : 'bg-theme-card text-theme-muted border-theme-border-soft hover:bg-theme-app'
             }`}
           >
@@ -544,10 +544,10 @@ const Invoices = ({
                          toast.error('Could not create live link. Please try again.');
                        }
                      }}
-                     className="p-2 text-theme-muted hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all flex items-center justify-center cursor-pointer"
+                     className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all flex items-center justify-center cursor-pointer"
                      title="Send Reminder via WhatsApp"
                   >
-                    <WhatsAppIcon className="w-4 h-4 text-rose-500" />
+                    <WhatsAppIcon className="w-4 h-4 text-theme-danger" />
                   </button>
                 )}
                 <button
@@ -586,10 +586,10 @@ const Invoices = ({
                        toast.error('Could not create live link. Please try again.');
                      }
                    }}
-                   className="p-2 text-theme-muted hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all flex items-center justify-center cursor-pointer"
+                   className="p-2 text-theme-muted hover:text-theme-warning hover:bg-theme-warning/5 rounded-xl transition-all flex items-center justify-center cursor-pointer"
                    title="Copy Invoice Text"
                 >
-                  <Copy className="w-4 h-4 text-amber-500" />
+                  <Copy className="w-4 h-4 text-theme-warning" />
                 </button>
 
                 <div className="w-px h-6 bg-theme-surface dark:bg-theme-card mx-1"></div>

@@ -27,7 +27,7 @@ const StatCard = ({ title, value, icon: Icon, trend, trendUp = true, accentColor
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
             trendUp 
               ? 'bg-theme-accent-light dark:bg-theme-accent-light/30 text-theme-accent dark:text-theme-accent' 
-              : 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400'
+              : 'bg-theme-danger/5 dark:bg-rose-950/30 text-theme-danger dark:text-theme-danger'
           }`}>
             {trend}
           </span>

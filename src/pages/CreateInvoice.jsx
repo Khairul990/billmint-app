@@ -597,7 +597,7 @@ const CreateInvoice = ({
             <div>
               <h3 className="font-bold text-sm text-theme-accent tracking-tight">Need a quick PDF?</h3>
               <p className="text-xs text-theme-accent/80 font-medium leading-relaxed mt-0.5">
-                Fill the required fields marked with <span className="text-rose-500 font-black mx-1">*</span>, tap <span className="font-black">Preview</span>, and download your bill.
+                Fill the required fields marked with <span className="text-theme-danger font-black mx-1">*</span>, tap <span className="font-black">Preview</span>, and download your bill.
               </p>
             </div>
           </div>
@@ -627,7 +627,7 @@ const CreateInvoice = ({
                     ? 'bg-[image:var(--accent-gradient)] text-white shadow-md shadow-theme-glow scale-105 z-10'
                     : currentStep > step.num
                       ? 'bg-theme-accent/10 text-theme-accent'
-                      : 'bg-transparent text-theme-muted hover:bg-slate-50 dark:hover:bg-slate-800'
+                      : 'bg-transparent text-theme-muted hover:bg-theme-surface dark:hover:bg-theme-card'
                 }`}
               >
                 {step.icon}
@@ -722,7 +722,7 @@ const CreateInvoice = ({
 
           {/* Metadata Grid */}
           <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
-            <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-slate-50 pb-3 flex items-center gap-2">
+            <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-theme-border-soft pb-3 flex items-center gap-2">
               <Calendar className="w-4 h-4 text-theme-accent" />
               <span>Invoicing Metadata</span>
             </h3>
@@ -763,7 +763,7 @@ const CreateInvoice = ({
 
           {/* Customer CRM Selector */}
           <div id="crm-section" className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4 relative scroll-mt-6">
-            <div className="flex items-center justify-between border-b border-slate-50 pb-3">
+            <div className="flex items-center justify-between border-b border-theme-border-soft pb-3">
               <div className="flex flex-col">
                 <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary flex items-center gap-2">
                   <User className="w-4 h-4 text-theme-accent" />
@@ -800,7 +800,7 @@ const CreateInvoice = ({
                   ))}
                 </select>
                 {customers.length === 0 && (
-                  <p className="text-[10px] text-amber-500 mt-1.5 font-bold flex items-center gap-1">
+                  <p className="text-[10px] text-theme-warning mt-1.5 font-bold flex items-center gap-1">
                     <Info className="w-3 h-3" /> No customers found. Add customer details manually below.
                   </p>
                 )}
@@ -907,7 +907,7 @@ const CreateInvoice = ({
             <div className="flex gap-2 flex-wrap pb-3 mb-1 border-b border-theme-border-soft dark:border-theme-border-soft">
               <span className="text-[10px] text-theme-muted font-bold uppercase tracking-wider py-1.5 mr-1">Quick Fill:</span>
               <button onClick={() => addQuickFillItem('Embroidery', 'Embroidery Work', 0)} className="px-3 py-1.5 bg-theme-accent-light text-theme-accent border border-theme-border-soft hover:bg-theme-accent-light rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">🧵 Embroidery Work</button>
-              <button onClick={() => addQuickFillItem('Repair', 'Repair Work', 0)} className="px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-100 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">🔧 Repair Work</button>
+              <button onClick={() => addQuickFillItem('Repair', 'Repair Work', 0)} className="px-3 py-1.5 bg-theme-warning/5 text-amber-700 border border-amber-100 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">🔧 Repair Work</button>
               <button onClick={() => addQuickFillItem('Design Work', 'Custom Design', 0)} className="px-3 py-1.5 bg-theme-accent-light text-theme-accent border border-theme-border-soft hover:bg-theme-accent-light rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">📝 Custom Design</button>
             </div>
 
@@ -1005,7 +1005,7 @@ const CreateInvoice = ({
                       {items.length > 1 && (
                         <button
                           onClick={() => removeItemRow(index)}
-                          className="flex items-center gap-1 text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-100 py-1.5 px-3 rounded-lg"
+                          className="flex items-center gap-1 text-[10px] font-bold text-theme-danger bg-theme-danger/5 border border-rose-100 py-1.5 px-3 rounded-lg"
                         >
                           <Trash2 className="w-3 h-3" />
                           <span>Remove</span>
@@ -1307,14 +1307,14 @@ const CreateInvoice = ({
                         </div>
                       </div>
                       <div>
-                        <label className="lg:hidden block mb-1 text-[10px] font-bold text-rose-400 uppercase tracking-wide">Discount ({currencySymbol})</label>
+                        <label className="lg:hidden block mb-1 text-[10px] font-bold text-theme-danger uppercase tracking-wide">Discount ({currencySymbol})</label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-rose-400 font-bold text-sm">-</span>
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-danger font-bold text-sm">-</span>
                           <input type="number" min="0" step="any"
                             value={item.discount ?? ''}
                             onChange={(e) => handleItemChange(index, 'discount', e.target.value)}
                             placeholder="0.00"
-                            className="w-full pl-6 pr-3 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-rose-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-rose-500/20 hover:border-rose-400 focus:border-rose-400 text-rose-600 font-extrabold text-sm transition-all placeholder:text-rose-200"
+                            className="w-full pl-6 pr-3 py-3.5 min-h-[52px] bg-theme-card dark:bg-theme-card border border-rose-100 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-rose-500/20 hover:border-rose-400 focus:border-rose-400 text-theme-danger font-extrabold text-sm transition-all placeholder:text-rose-200"
                           />
                         </div>
                       </div>
@@ -1358,10 +1358,10 @@ const CreateInvoice = ({
                         type="button"
                         onClick={() => removeItemRow(index)}
                         title="Remove item"
-                        className="flex flex-col items-center gap-1 text-theme-muted hover:text-rose-500 hover:bg-rose-50/80 transition-all p-2 rounded-xl group"
+                        className="flex flex-col items-center gap-1 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5/80 transition-all p-2 rounded-xl group"
                       >
                         <Trash2 className="w-4 h-4" />
-                        <span className="text-[9px] font-bold uppercase tracking-wide group-hover:text-rose-500">Del</span>
+                        <span className="text-[9px] font-bold uppercase tracking-wide group-hover:text-theme-danger">Del</span>
                       </button>
                     ) : (
                       <div className="w-10 h-10" />
@@ -1404,7 +1404,7 @@ const CreateInvoice = ({
                   <span className="font-extrabold text-theme-primary dark:text-theme-muted">{currencySymbol}{subtotal.toFixed(2)}</span>
                 </div>
                 {discountAmount > 0 && (
-                  <div className="flex justify-between text-[10px] font-semibold text-rose-500">
+                  <div className="flex justify-between text-[10px] font-semibold text-theme-danger">
                     <span>Discount:</span>
                     <span>-{currencySymbol}{discountAmount}</span>
                   </div>
@@ -1447,7 +1447,7 @@ const CreateInvoice = ({
           
           {/* Overrides & Payment */}
           <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
-            <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-slate-50 pb-3 flex items-center gap-2">
+            <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-theme-border-soft pb-3 flex items-center gap-2">
               <Coins className="w-4 h-4 text-theme-accent" />
               <span>Billing Overrides</span>
             </h3>
@@ -1548,7 +1548,7 @@ const CreateInvoice = ({
 
           {/* Tally calculations & Amount Paid details */}
           <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
-            <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-slate-50 pb-3 flex items-center gap-2">
+            <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-theme-border-soft pb-3 flex items-center gap-2">
               <FileText className="w-4 h-4 text-theme-accent" />
               <span>Step 4: Tally & Totals</span>
             </h3>
@@ -1560,7 +1560,7 @@ const CreateInvoice = ({
               </div>
               
               {discountAmount > 0 && (
-                <div className="flex justify-between text-rose-500">
+                <div className="flex justify-between text-theme-danger">
                   <span>Discount</span>
                   <span className="font-bold">-{currencySymbol}{parseFloat(discountAmount).toFixed(2)}</span>
                 </div>
@@ -1594,7 +1594,7 @@ const CreateInvoice = ({
               {/* Balance Due calculation */}
               <div className="flex justify-between items-center bg-theme-app dark:bg-theme-surface p-3 rounded-2xl">
                 <span className="text-[10px] uppercase font-bold text-theme-muted">Balance Outstanding</span>
-                <span className={`text-sm font-black ${balanceDue > 0 ? 'text-amber-600' : 'text-theme-accent'}`}>
+                <span className={`text-sm font-black ${balanceDue > 0 ? 'text-theme-warning' : 'text-theme-accent'}`}>
                   {currencySymbol}{balanceDue.toFixed(2)}
                 </span>
               </div>
@@ -1665,7 +1665,7 @@ const CreateInvoice = ({
                     });
                   }
                 }}
-                className="w-full py-4 bg-theme-card dark:bg-theme-card border border-theme-accent text-theme-accent rounded-xl font-bold hover:bg-theme-accent-light dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 text-[14px] shadow-sm cursor-pointer"
+                className="w-full py-4 bg-theme-card dark:bg-theme-card border border-theme-accent text-theme-accent rounded-xl font-bold hover:bg-theme-accent-light dark:hover:bg-theme-card transition-all flex items-center justify-center gap-2 text-[14px] shadow-sm cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 <span>Download PDF</span>
@@ -1759,10 +1759,10 @@ const CreateInvoice = ({
                   className="w-full py-4 bg-theme-surface dark:bg-theme-card text-theme-muted rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1 text-[14px] cursor-not-allowed border border-theme-border-soft/40"
                 >
                   <div className="flex items-center justify-center gap-2">
-                    <Link className="w-4 h-4 text-slate-350" />
+                    <Link className="w-4 h-4 text-theme-muted" />
                     <span>Copy Live Link</span>
                   </div>
-                  <span className="text-[10px] text-slate-450 font-medium">Save invoice first to create live link</span>
+                  <span className="text-[10px] text-theme-muted font-medium">Save invoice first to create live link</span>
                 </button>
               )}
 
@@ -1788,7 +1788,7 @@ const CreateInvoice = ({
         
         {/* CLOSE STEP 4 */}
         <div className="pt-2 border-t border-white/10 flex justify-start">
-          <button onClick={() => setCurrentStep(3)} className="text-[10px] font-bold text-slate-300 hover:text-white flex items-center gap-1">
+          <button onClick={() => setCurrentStep(3)} className="text-[10px] font-bold text-theme-muted hover:text-white flex items-center gap-1">
             <ArrowLeft className="w-3 h-3" /> Back to Payment
           </button>
         </div>
@@ -1973,7 +1973,7 @@ const CreateInvoice = ({
                 <div className="flex gap-2 flex-wrap pb-4 border-b border-theme-border-soft/60">
                   <span className="text-[11px] text-theme-muted font-black uppercase tracking-widest py-1.5 mr-2">Quick Fill:</span>
                   <button onClick={() => addQuickFillItem('Embroidery', 'Embroidery Work', 0)} className="px-3.5 py-1.5 bg-theme-card dark:bg-theme-card text-theme-accent border border-theme-border-soft hover:border-theme-accent hover:bg-theme-accent-light shadow-sm rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">🧵 Embroidery</button>
-                  <button onClick={() => addQuickFillItem('Repair', 'Repair Work', 0)} className="px-3.5 py-1.5 bg-theme-card dark:bg-theme-card text-amber-700 border border-amber-200 hover:border-amber-400 hover:bg-amber-50 shadow-sm rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">🔧 Repair</button>
+                  <button onClick={() => addQuickFillItem('Repair', 'Repair Work', 0)} className="px-3.5 py-1.5 bg-theme-card dark:bg-theme-card text-amber-700 border border-theme-warning/30 hover:border-amber-400 hover:bg-theme-warning/5 shadow-sm rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">🔧 Repair</button>
                   <button onClick={() => addQuickFillItem('Design Work', 'Custom Design', 0)} className="px-3.5 py-1.5 bg-theme-card dark:bg-theme-card text-theme-accent border border-theme-border-soft hover:border-theme-accent hover:bg-theme-accent-light shadow-sm rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">📝 Custom Design</button>
                 </div>
 
@@ -2184,7 +2184,7 @@ const CreateInvoice = ({
                             type="button"
                             onClick={() => removeItemRow(index)}
                             title="Remove item"
-                            className="flex-1 lg:flex-none flex items-center justify-center gap-1.5 p-3 min-h-[52px] text-rose-600 bg-rose-50 border border-rose-100 hover:bg-rose-100 rounded-[14px] transition-colors"
+                            className="flex-1 lg:flex-none flex items-center justify-center gap-1.5 p-3 min-h-[52px] text-theme-danger bg-theme-danger/5 border border-rose-100 hover:bg-rose-100 rounded-[14px] transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
                             <span className="lg:hidden text-xs font-bold">Remove</span>

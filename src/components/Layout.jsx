@@ -219,7 +219,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                               setIsAccountMenuOpen(false);
                               if(onLogout) onLogout();
                             }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors cursor-pointer"
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-theme-danger dark:text-theme-danger hover:bg-theme-danger/5 dark:hover:bg-theme-danger/10 rounded-xl transition-colors cursor-pointer"
                           >
                             <LogOut className="w-4 h-4" />
                             Log Out

@@ -36,6 +36,7 @@ import { auth, firebaseReady } from './utils/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { triggerSuccessFeedback } from './utils/feedback';
 
+const Landing = React.lazy(() => import('./pages/Landing'));
 const Login = React.lazy(() => import('./pages/Login'));
 const SetupBilling = React.lazy(() => import('./pages/SetupBilling'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
@@ -296,8 +297,15 @@ function App() {
           try {
             const adminGlobal = await getGlobalAdminSettings();
             if (adminGlobal) {
-              if (adminGlobal.defaultTheme) localStorage.setItem('billqyro_admin_default_theme', adminGlobal.defaultTheme);
-              if (adminGlobal.defaultMode) localStorage.setItem('billqyro_admin_default_mode', adminGlobal.defaultMode);
+              if (adminGlobal.defaultTheme) {
+                localStorage.setItem('billqyro_admin_default_theme', adminGlobal.defaultTheme);
+                document.documentElement.setAttribute('data-theme', adminGlobal.defaultTheme);
+              }
+              if (adminGlobal.defaultMode) {
+                localStorage.setItem('billqyro_admin_default_mode', adminGlobal.defaultMode);
+                if (adminGlobal.defaultMode === 'dark') document.documentElement.classList.add('dark');
+                else document.documentElement.classList.remove('dark');
+              }
             }
           } catch (e) { console.warn('Could not fetch admin settings on boot.'); }
 
@@ -488,7 +496,7 @@ function App() {
     if (unlinkedItems) {
       toast.custom(
         (t) => (
-          <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-amber-50 dark:bg-amber-950/40 shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-amber-500/30`}>
+          <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-theme-warning/5 dark:bg-amber-950/40 shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-amber-500/30`}>
             <div className="flex-1 w-0 p-4">
               <div className="flex items-start">
                 <div className="flex-shrink-0 pt-0.5">
@@ -507,7 +515,7 @@ function App() {
                   toast.dismiss(t.id);
                   setCurrentTab('products');
                 }}
-                className="w-full border border-transparent rounded-none rounded-r-xl p-4 flex items-center justify-center text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 focus:outline-none transition-colors"
+                className="w-full border border-transparent rounded-none rounded-r-xl p-4 flex items-center justify-center text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-theme-warning/10 focus:outline-none transition-colors"
               >
                 Link Products
               </button>
@@ -862,7 +870,7 @@ function App() {
             animate={{ scale: 1, opacity: 1 }}
             className="max-w-md bg-theme-card p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6"
           >
-            <div className="w-16 h-16 bg-rose-500/20 text-rose-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-rose-500/10">
+            <div className="w-16 h-16 bg-theme-danger/20 text-theme-danger rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-rose-500/10">
               <Lock className="w-8 h-8" />
             </div>
             <h1 className="text-2xl font-black tracking-tight text-white">Account Deactivated</h1>
@@ -880,7 +888,7 @@ function App() {
                 logout();
                 setIsAuthenticated(false);
               }}
-              className="w-full py-3 bg-slate-800 hover:bg-slate-750 text-white font-bold text-xs rounded-xl shadow-lg active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
+              className="w-full py-3 bg-theme-card hover:bg-slate-750 text-white font-bold text-xs rounded-xl shadow-lg active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
             >
               Sign Out of Account
             </button>
@@ -899,9 +907,9 @@ function App() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="max-w-md bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl"
+            className="max-w-md bg-theme-card p-8 rounded-3xl border border-slate-700 shadow-2xl"
           >
-            <div className="w-16 h-16 bg-rose-500/20 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-theme-danger/20 text-theme-danger rounded-2xl flex items-center justify-center mx-auto mb-6">
               <Lock className="w-8 h-8" />
             </div>
             <h1 className="text-2xl font-black text-white mb-3">App Under Maintenance</h1>
