@@ -1,0 +1,35 @@
+I have placed the BillQyro theme icon pack in the project.
+
+Do not generate new icons. Use only the provided icon files.
+Do not change Login UI logo or Welcome Board logo.
+Do not change website design or app logic.
+
+Icon folders are named by theme ID:
+- billqyro-classic
+- pink-premium
+- royal-indigo
+- emerald-business
+- rose-gold-luxe
+- midnight-blue
+- champagne-black
+- ruby-burgundy
+
+For each theme folder the available files are:
+- favicon.ico
+- favicon-16x16.png
+- favicon-32x32.png
+- icon-192x192.png
+- icon-512x512.png
+- apple-touch-icon.png
+
+Task:
+1. Keep all folders/files inside public/icons/themes/<themeId>/
+2. Keep the current normal public favicon/app icon files working.
+3. Add a simple helper function to update only the browser favicon and apple-touch-icon according to the active theme.
+4. Do not add 112 random files or overcomplicated logic. Use these provided folders only.
+5. PWA/mobile installed icon can remain based on manifest/default icon because phones cache PWA icons. Do not force risky PWA cache logic.
+6. Update index.html only if needed.
+7. Run npm run build.
+
+Safety:
+Do not touch Firebase, auth, invoice, PDF, customer, product, settings, subscription, storage, routes, login logo, welcome logo, or existing theme settings logic.
