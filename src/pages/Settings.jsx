@@ -546,6 +546,7 @@ const Settings = ({
       customPaymentLink,
 
       themeColor,
+      themePreset: themeColor,
       darkMode,
       brandColor,
       invoiceTemplate,

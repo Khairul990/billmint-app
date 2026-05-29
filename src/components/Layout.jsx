@@ -18,7 +18,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   // Theme and Mode state
   const [themeColor, setThemeColor] = useState(() => {
     // Migration: If old themePreset is "dark", default to "light" color (dark mode handled below)
-    const preset = businessSettings?.themePreset || businessSettings?.themeColor || localStorage.getItem('billqyro_theme_color') || 'light';
+    const preset = businessSettings?.themeColor || businessSettings?.themePreset || localStorage.getItem('billqyro_theme_color') || 'light';
     return preset === 'dark' ? 'light' : preset;
   });
   const [isDarkMode, setIsDarkMode] = useState(() => {
