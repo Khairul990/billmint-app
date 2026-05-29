@@ -32,7 +32,7 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
       </div>
 
       {/* Nav Menu */}
-      <nav className="flex-1 px-4 py-6 space-y-1">
+      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto no-scrollbar">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentTab === item.id || (item.id === 'invoices' && currentTab === 'create-invoice');
