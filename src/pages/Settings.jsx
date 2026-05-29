@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Building2,
   MapPin,
@@ -402,9 +402,11 @@ const Settings = ({
 
   const [showToast, setShowToast] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const isInitialized = useRef(false);
 
   useEffect(() => {
-    if (settings) {
+    if (settings && Object.keys(settings).length > 0 && !isInitialized.current) {
+      isInitialized.current = true;
       setBusinessName(settings.businessName || '');
       setLogoUrl(settings.logoUrl || '');
       setOwnerName(settings.ownerName || '');
