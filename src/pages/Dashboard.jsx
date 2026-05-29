@@ -28,6 +28,7 @@ import {
   Clock,
   Sparkles,
   FileText,
+  PieChart,
   Rocket,
   Check,
   Megaphone,
