@@ -589,207 +589,65 @@ const CreateInvoice = ({
           <button onClick={() => setShowBanner(false)} className="absolute top-2 right-2 text-theme-accent hover:text-theme-accent">
             <X className="w-4 h-4" />
           </button>
-          <div>
-            <h3 className="text-theme-accent font-bold text-sm flex items-center gap-2">
-              <Info className="w-4 h-4" />
-              Create your bill in 3 simple steps
-            </h3>
-            <p className="text-theme-accent text-xs mt-1 font-medium">Select or add customer, add invoice items, then save or download PDF.</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 shrink-0 pr-6 sm:pr-0">
-            <button type="button" onClick={() => setCurrentTab('guide')} className="px-3 py-1.5 bg-theme-card dark:bg-theme-card text-theme-accent text-xs font-bold rounded-lg border border-theme-border-soft hover:bg-theme-accent-light shadow-sm transition-all flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5" />
-              View Guide
-            </button>
-            <button type="button" onClick={() => document.getElementById('crm-section')?.scrollIntoView({behavior: 'smooth'})} className="px-3 py-1.5 bg-theme-accent text-white text-xs font-bold rounded-lg hover:opacity-90 shadow-sm transition-all flex items-center gap-1.5">
-              <UserPlus className="w-3.5 h-3.5" />
-              Add Customer
-            </button>
-            <button type="button" onClick={() => document.getElementById('items-section')?.scrollIntoView({behavior: 'smooth'})} className="px-3 py-1.5 bg-theme-accent text-white text-xs font-bold rounded-lg hover:opacity-90 shadow-sm transition-all flex items-center gap-1.5">
-              <Plus className="w-3.5 h-3.5" />
-              Add Item
-            </button>
+          <div className="flex gap-3">
+            <div className="p-2 bg-white rounded-xl shadow-sm text-theme-accent shrink-0">
+              <FileDown className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-theme-accent tracking-tight">Need a quick PDF?</h3>
+              <p className="text-xs text-theme-accent/80 font-medium leading-relaxed mt-0.5">
+                Fill the required fields marked with <span className="text-rose-500 font-black mx-1">*</span>, tap <span className="font-black">Preview</span>, and download your bill.
+              </p>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <button
-          onClick={() => setCurrentTab('invoices')}
-          className="flex items-center gap-2 text-xs font-bold text-theme-muted hover:text-theme-primary dark:text-theme-primary transition-all w-fit"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Invoices</span>
-        </button>
-        
-        <div className="flex flex-col">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">
-              {editingInvoice ? 'Edit Billing Sheet' : 'Create Invoicing Sheet'}
-            </h2>
-            <button
-              onClick={onQuickBillOpen}
-              className="bg-amber-100 hover:bg-amber-200 text-amber-700 font-bold text-[10px] px-2.5 py-1 rounded-md uppercase tracking-wider transition-colors border border-amber-200"
-            >
-              ⚡ Quick Bill
-            </button>
-          </div>
-          <div className="flex items-center gap-3 mt-1">
-            <button 
-              onClick={() => setCurrentTab('guide')}
-              className="text-theme-accent hover:text-theme-accent text-xs font-bold flex items-center gap-1 transition-colors w-fit"
-            >
-              <HelpCircle className="w-3.5 h-3.5" />
-              Need help?
-            </button>
-            <div className="w-px h-3 bg-theme-border-strong dark:bg-theme-surface"></div>
-            <label className="text-theme-accent hover:text-theme-accent text-xs font-bold flex items-center gap-1 transition-colors w-fit cursor-pointer">
-              <Download className="w-3.5 h-3.5 rotate-180" />
-              Import .billqyro
-              <input 
-                type="file" 
-                accept=".billqyro,.json" 
-                className="hidden" 
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = (event) => {
-                    try {
-                      const data = JSON.parse(event.target.result);
-                      if (data && (data.invoiceNumber || data.items)) {
-                        // Load into state
-                        if (data.invoiceNumber) setInvoiceNumber(data.invoiceNumber);
-                        if (data.date) setDate(data.date);
-                        if (data.dueDate) setDueDate(data.dueDate);
-                        if (data.customerName) setCustomerName(data.customerName);
-                        if (data.customerPhone) setCustomerPhone(data.customerPhone);
-                        if (data.customerEmail) setCustomerEmail(data.customerEmail);
-                        if (data.customerAddress) setCustomerAddress(data.customerAddress);
-                        if (data.items) setItems(data.items);
-                        if (data.taxPercentage !== undefined) setTaxPercentage(data.taxPercentage);
-                        if (data.discountAmount !== undefined) setDiscountAmount(data.discountAmount);
-                        if (data.amountPaid !== undefined) setAmountPaid(data.amountPaid);
-                        if (data.notes) setNotes(data.notes);
-                        if (data.terms) setTerms(data.terms);
-                        if (data.billType) setBillType(data.billType);
-                        toast.success('Backup loaded successfully!');
-                      } else {
-                        toast.error('Invalid backup format.');
-                      }
-                    } catch(err) {
-                      toast.error('Failed to parse backup file.');
-                    }
-                  };
-                  reader.readAsText(file);
-                }} 
-              />
-            </label>
-            <div className="w-px h-3 bg-theme-border-strong dark:bg-theme-surface"></div>
-            <button 
-              onClick={() => {
-                const payload = { invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, terms, paymentStatus, orderStatus, billType };
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                downloadAnchorNode.setAttribute("download", `${invoiceNumber || 'draft'}.billqyro`);
-                document.body.appendChild(downloadAnchorNode);
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
-                toast.success('Backup downloaded!');
-              }}
-              className="text-theme-accent hover:text-theme-accent text-xs font-bold flex items-center gap-1 transition-colors w-fit"
-            >
-              <Download className="w-3.5 h-3.5" />
-              Download Backup
-            </button>
-          </div>
+      {/* HEADER & PAGE TITLE */}
+      <div className="flex flex-col gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-theme-primary">Create Invoice</h1>
+          <p className="text-sm font-bold text-theme-muted mt-1">Configure and generate a new bill</p>
         </div>
-        
-        {/* Search Bar for Create Invoice Header */}
-        <div className="relative flex-1 max-w-sm hidden md:block">
-          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-muted pointer-events-none">
-            <Search className="w-4 h-4" />
-          </span>
-          <input
-            type="text"
-            placeholder="Search items, customers..."
-            className="w-full pl-10 pr-4 py-2 bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary dark:text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent shadow-sm transition-all"
-          />
+
+        {/* WIZARD PROGRESS BAR */}
+        <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-2 md:p-3 shadow-sm flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+          {[
+            { num: 1, label: 'Customer', icon: <User className="w-4 h-4" /> },
+            { num: 2, label: 'Items', icon: <Layers className="w-4 h-4" /> },
+            { num: 3, label: 'Payment', icon: <Coins className="w-4 h-4" /> },
+            { num: 4, label: 'Preview', icon: <Check className="w-4 h-4" /> }
+          ].map((step, idx, arr) => (
+            <div key={step.num} className="flex items-center flex-shrink-0 relative">
+              <button
+                onClick={() => setCurrentStep(step.num)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all font-bold text-xs ${
+                  currentStep === step.num
+                    ? 'bg-[image:var(--accent-gradient)] text-white shadow-md shadow-theme-glow scale-105 z-10'
+                    : currentStep > step.num
+                      ? 'bg-theme-accent/10 text-theme-accent'
+                      : 'bg-transparent text-theme-muted hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                {step.icon}
+                <span className="whitespace-nowrap">{step.label}</span>
+              </button>
+              {idx < arr.length - 1 && (
+                <div className="hidden sm:block w-4 md:w-8 h-px bg-theme-border-soft mx-2"></div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Stats Cards Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-theme-card dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft shadow-sm flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-theme-muted">
-            <BarChart3 className="w-4 h-4 text-theme-accent" />
-            <span className="text-xs font-bold uppercase tracking-wider">Total Invoices</span>
-          </div>
-          <span className="text-xl font-black text-theme-primary dark:text-theme-primary">{invoices.length}</span>
-        </div>
-        <div className="bg-theme-card dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft shadow-sm flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-theme-muted">
-            <Check className="w-4 h-4 text-theme-accent" />
-            <span className="text-xs font-bold uppercase tracking-wider">Paid Invoices</span>
-          </div>
-          <span className="text-xl font-black text-theme-primary dark:text-theme-primary">{invoices.filter(i => i.paymentStatus === 'Paid').length}</span>
-        </div>
-        <div className="bg-theme-card dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft shadow-sm flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-theme-muted">
-            <HelpCircle className="w-4 h-4 text-amber-500" />
-            <span className="text-xs font-bold uppercase tracking-wider">Pending Dues</span>
-          </div>
-          <span className="text-xl font-black text-theme-primary dark:text-theme-primary">{invoices.filter(i => i.balanceDue > 0).length}</span>
-        </div>
-        <div className="bg-theme-card dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft shadow-sm flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-theme-muted">
-            <Users className="w-4 h-4 text-theme-accent" />
-            <span className="text-xs font-bold uppercase tracking-wider">Total Clients</span>
-          </div>
-          <span className="text-xl font-black text-theme-primary dark:text-theme-primary">{customers.length}</span>
-        </div>
-      </div>
-
-      {/* WIZARD PROGRESS BAR */}
-      <div className="bg-theme-card border border-theme-border-soft rounded-3xl p-4 shadow-sm flex flex-wrap md:flex-nowrap items-center justify-between gap-2 md:gap-4 overflow-x-auto no-scrollbar">
-        {[
-          { num: 1, label: 'Details', icon: <User className="w-4 h-4" /> },
-          { num: 2, label: 'Items', icon: <Layers className="w-4 h-4" /> },
-          { num: 3, label: 'Payment', icon: <Coins className="w-4 h-4" /> },
-          { num: 4, label: 'Preview', icon: <Check className="w-4 h-4" /> }
-        ].map((step) => (
-          <div key={step.num} className="flex items-center gap-1 md:gap-2 flex-shrink-0 md:flex-1 relative">
-            <button
-              onClick={() => setCurrentStep(step.num)}
-              className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl transition-all font-bold text-xs ${
-                currentStep === step.num
-                  ? 'bg-[image:var(--accent-gradient)] text-white shadow-md shadow-theme-glow scale-105 z-10'
-                  : currentStep > step.num
-                    ? 'bg-theme-accent/10 text-theme-accent'
-                    : 'bg-slate-50 dark:bg-theme-surface text-theme-muted hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              {step.icon}
-              <span className="hidden sm:inline">Step {step.num}:</span> {step.label}
-            </button>
-            {step.num < 4 && (
-              <div className="hidden md:block h-[2px] flex-1 bg-slate-100 dark:bg-theme-surface mx-2 rounded-full overflow-hidden">
-                <div className={`h-full bg-theme-accent transition-all duration-500 ${currentStep > step.num ? 'w-full' : 'w-0'}`}></div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
+      {/* MAIN LAYOUT: LEFT FORM, RIGHT PREVIEW */}
       <div className="flex flex-col lg:flex-row gap-6 items-start relative">
         
-        {/* WIZARD FORM AREA */}
+        {/* LEFT COLUMN: WIZARD STEPS */}
         <div className="w-full lg:w-[65%] space-y-6">
           
           {/* STEP 1: CONFIGURATION & CRM */}
-          <div className={currentStep === 1 ? 'block space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300' : 'hidden'}>
+<div className={currentStep === 1 ? 'block space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300' : 'hidden'}>
           
           {/* Bill Type / Business Type Selector */}
           <div className="bg-gradient-to-br from-slate-900 to-[#0f2349] rounded-3xl p-5 md:p-6 border border-slate-700/40 shadow-xl space-y-4">

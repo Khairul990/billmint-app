@@ -192,473 +192,248 @@ const Dashboard = ({
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>
-      <motion.div
+      <motion.div 
         className="space-y-6 pb-24"
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
       >
-
-      {/* 0. WELCOME HERO BANNER */}
-      <motion.div variants={itemVariants} className="p-6 md:p-8 rounded-3xl bg-[image:var(--accent-gradient)] dark:bg-[image:none] dark:bg-theme-card dark:border-white/10 text-theme-button-text dark:text-white border border-theme-border-soft/10 relative overflow-hidden shadow-premium">
-        <div className="absolute -top-24 -right-24 w-60 h-60 bg-theme-accent-light rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-theme-accent-light rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-theme-card/10 border border-white/20 text-white text-[10px] font-black uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Workspace Authenticated</span>
-              </div>
-              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${subscription?.status === 'premium'
-                  ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
-                  : subscription?.expired
-                    ? 'bg-rose-500/15 border-rose-500/30 text-rose-400'
-                    : 'bg-theme-card/10 border-white/20 text-white'
-                }`}>
-                {subscription?.status === 'premium' ? 'Premium' : subscription?.expired ? 'Expired' : 'Free'}
-              </span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-              Welcome back, <span className="text-theme-button-text drop-shadow-md font-extrabold">{businessName}</span>
-            </h1>
-            <p className="text-xs text-theme-button-text/90 font-semibold">
-              Your professional invoicing workspace is loaded and ready. Let's make billing seamless today!
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={onQuickBillOpen}
-              className="flex items-center justify-center gap-1.5 bg-theme-card/10 hover:bg-theme-card/20 border border-white/20 text-white font-black text-xs px-4 py-3.5 rounded-2xl shadow-sm transition-all w-fit uppercase tracking-wider"
-            >
-              <Zap className="w-4 h-4 text-amber-400" />
-              <span>Quick Bill</span>
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setCurrentTab('create-invoice')}
-              className="flex items-center justify-center gap-2 bg-theme-card hover:bg-theme-app text-theme-primary font-black text-xs px-5 py-3.5 rounded-2xl shadow-md cursor-pointer w-fit uppercase tracking-wider"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Full Bill</span>
-            </motion.button>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* 0.05 TODAY'S QUICK SUMMARY (Horizontal Scroll for Mobile) */}
-      <motion.div variants={itemVariants} className="w-full overflow-x-auto pb-4 pt-2 hide-scrollbar flex gap-4 sm:grid sm:grid-cols-3">
-        <div className="min-w-[200px] flex-1 bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-premium flex flex-col justify-between hover:shadow-lg transition-all duration-300">
-          <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted mb-2">Today's Revenue</p>
-          <h3 className="text-2xl font-black text-theme-primary tracking-tight">
-            {formatCurrency(todayRevenue, currencySymbol)}
-          </h3>
-          <p className="text-xs font-semibold text-theme-muted mt-2">{todayBills} Bills Created</p>
-        </div>
         
-        <div className="min-w-[200px] flex-1 bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-premium flex flex-col justify-between hover:shadow-lg transition-all duration-300">
-          <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted mb-2">Today's Collection</p>
-          <h3 className="text-2xl font-black text-theme-primary tracking-tight">
-            {formatCurrency(todayCollection, currencySymbol)}
-          </h3>
-          <p className="text-xs font-semibold text-theme-muted mt-2">Cash Inflow</p>
+        {/* 1. HEADER & HERO */}
+        <div className="space-y-2">
+          <h1 className="text-2xl font-black text-theme-primary tracking-tight">Dashboard</h1>
+          <p className="text-sm text-theme-muted font-bold">Welcome back, here is your business summary.</p>
         </div>
 
-        <div className="min-w-[200px] flex-1 bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-premium flex flex-col justify-between hover:shadow-lg transition-all duration-300">
-          <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted mb-2">Pending Due</p>
-          <h3 className="text-2xl font-black text-theme-primary tracking-tight">
-            {formatCurrency(todayDue, currencySymbol)}
-          </h3>
-          <p className="text-xs font-semibold text-theme-muted mt-2">Uncollected Cash</p>
-        </div>
-      </motion.div>
-
-      {/* GLOBAL ANNOUNCEMENT BANNER */}
-      {businessSettings?.globalAnnouncement && (
-        <motion.div variants={itemVariants} className="bg-theme-app-soft border border-theme-border-soft rounded-3xl p-4 shadow-sm flex items-start gap-3">
-          <div className="bg-theme-card dark:bg-theme-card p-2 rounded-xl shadow-sm text-theme-accent mt-0.5">
-            <Megaphone className="w-5 h-5" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-xs font-black text-theme-accent uppercase tracking-widest mb-1">Announcement</h3>
-            <p className="text-xs font-semibold text-theme-primary dark:text-theme-muted whitespace-pre-wrap leading-relaxed">{businessSettings.globalAnnouncement}</p>
-          </div>
-        </motion.div>
-      )}
-
-      {/* 0.1 EMPTY STATE — NEW USER WELCOME (Shown when zero invoices) */}
-      {isNewUser && (
-        <motion.div variants={itemVariants} className="p-6 md:p-8 rounded-3xl bg-theme-card border border-theme-border-soft shadow-premium text-center relative overflow-hidden">
-          <div className="absolute -top-16 -right-16 w-48 h-48 bg-theme-accent-light rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-theme-accent-light rounded-full blur-3xl pointer-events-none"></div>
-
-          <div className="relative z-10 max-w-lg mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-3xl bg-[image:var(--accent-gradient)] text-theme-button-text border-0 flex items-center justify-center mx-auto shadow-glow">
-              <Rocket className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-xl md:text-2xl font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary tracking-tight">
-              Welcome to BillQyro
-            </h2>
-            <p className="text-xs text-theme-muted dark:text-theme-muted font-medium leading-relaxed">
-              Start by completing your business profile and creating your first bill.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-              <button
-                onClick={() => setCurrentTab('settings')}
-                className="inline-flex items-center gap-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-black text-xs px-6 py-3.5 rounded-2xl shadow-md hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>Open Settings</span>
-              </button>
-              <button
-                onClick={() => setCurrentTab('create-invoice')}
-                className="inline-flex items-center gap-2 bg-theme-card dark:bg-theme-card dark:bg-theme-card border-2 border-theme-border-soft dark:border-theme-border-soft hover:border-theme-accent text-theme-accent dark:text-theme-accent font-black text-xs px-6 py-3.5 rounded-2xl shadow-sm hover:shadow-md active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
-              >
-                <FileText className="w-4 h-4" />
-                <span>Create First Bill</span>
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-
-      {/* 0.15 CURRENT BILLING SETUP CARD */}
-      <motion.div variants={itemVariants} className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft/80 shadow-premium flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-theme-accent to-theme-accent-dark flex items-center justify-center shrink-0 shadow-glow">
-            <LayoutDashboard className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h3 className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1">Current Billing Setup</h3>
-            {tplInfo ? (
-              <>
-                <h4 className="text-xl font-black text-theme-primary dark:text-theme-primary mb-1">{tplInfo.name}</h4>
-                <p className="text-xs font-medium text-theme-muted dark:text-theme-muted leading-relaxed max-w-2xl">
-                  Your Create Bill form is prepared with <strong className="text-theme-primary dark:text-theme-muted">{tplInfo.fields}</strong>.
-                </p>
-              </>
-            ) : (
-              <>
-                <h4 className="text-xl font-black text-theme-primary dark:text-theme-primary mb-1">Not Set</h4>
-                <p className="text-xs font-medium text-theme-muted dark:text-theme-muted leading-relaxed">
-                  Choose your billing setup to create bills easily.
-                </p>
-              </>
-            )}
+        <div className="bg-[image:var(--accent-gradient)] rounded-3xl p-6 md:p-8 text-white shadow-premium relative overflow-hidden">
+          <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/20 blur-3xl rounded-full"></div>
+          <div className="relative z-10">
+            <h2 className="text-xl md:text-2xl font-black mb-2">Create professional invoices in seconds.</h2>
+            <p className="text-xs md:text-sm font-medium opacity-90 max-w-md">Send invoices on WhatsApp, collect payments faster, and track your business growth.</p>
+            <button onClick={() => setCurrentTab('create')} className="mt-5 bg-white text-theme-accent px-6 py-2.5 rounded-xl font-black text-xs shadow-lg hover:scale-105 transition-transform uppercase tracking-wider">
+              + New Bill
+            </button>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-          <button
-            onClick={() => setCurrentTab('setup-billing')}
-            className="px-5 py-2.5 bg-theme-surface dark:bg-theme-card hover:bg-theme-border-soft dark:hover:bg-slate-700 text-theme-primary dark:text-theme-muted font-bold text-xs rounded-xl transition-colors whitespace-nowrap"
-          >
-            Change Template
-          </button>
-          <button
-            onClick={() => setCurrentTab('create-invoice')}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-bold text-xs rounded-xl shadow-md transition-all whitespace-nowrap"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create Bill</span>
-          </button>
-        </div>
-      </motion.div>
 
-      {/* PWA INSTALLATION PROMOTION BANNER */}
-      {installPromptEvent && !isAppInstalled && (
-        <motion.div
-          variants={itemVariants}
-          className="p-6 rounded-3xl bg-theme-card border border-theme-border-soft shadow-premium flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent/5 rounded-full blur-2xl pointer-events-none"></div>
-
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-theme-accent to-theme-accent-dark flex items-center justify-center shrink-0 shadow-glow">
-              <Download className="w-6 h-6 text-white" />
+        {/* 2. STATS ROW (4 CARDS) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Revenue */}
+          <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-xl"><TrendingUp className="w-4 h-4" /></div>
+              <p className="text-xs font-extrabold text-theme-muted uppercase tracking-wider">Revenue</p>
             </div>
             <div>
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-theme-accent/10 text-theme-accent text-[9px] font-black uppercase tracking-wider mb-1">
-                STANDALONE APPLICATION AVAILABLE
-              </div>
-              <h4 className="text-lg font-black text-theme-primary dark:text-theme-primary mb-1">Install BillQyro App</h4>
-              <p className="text-xs font-medium text-theme-muted dark:text-theme-muted leading-relaxed max-w-xl">
-                Unlocks ultra-fast load speeds, robust offline workspace syncing, borderless layout window, and native system integration!
-              </p>
+              <h3 className="text-xl font-black text-theme-primary">{formatCurrency(totalRevenue, currencySymbol)}</h3>
+              <p className="text-[10px] font-bold text-emerald-500 mt-1">+12% vs last month</p>
             </div>
           </div>
 
-          <div className="flex gap-3 shrink-0">
-            <button
-              onClick={() => setCurrentTab('settings')}
-              className="px-5 py-2.5 bg-theme-surface dark:bg-theme-card hover:bg-theme-border-soft dark:hover:bg-slate-700 text-theme-primary dark:text-theme-muted dark:text-theme-muted font-bold text-xs rounded-xl transition-colors whitespace-nowrap cursor-pointer"
-            >
-              Learn More
-            </button>
-            <button
-              onClick={onInstallApp}
-              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-black text-xs rounded-xl shadow-md transition-all whitespace-nowrap cursor-pointer uppercase tracking-wider animate-pulse"
-            >
-              <Download className="w-4 h-4" />
-              <span>Install App</span>
-            </button>
-          </div>
-        </motion.div>
-      )}
-
-      {/* 0.2 HOW TO USE BILLQYRO GUIDE */}
-      <motion.div variants={itemVariants}>
-        <NewUserGuide setCurrentTab={setCurrentTab} isNewUser={isNewUser} />
-      </motion.div>
-
-      {/* 0.3 SETUP PROGRESS TRACKER */}
-      <SetupProgress
-        businessSettings={businessSettings}
-        customers={customers}
-        invoices={invoices}
-      />
-
-      {/* 1. STATS GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-        <StatCard
-          title="Today's Revenue"
-          value={formatCurrency(todayRevenue, currencySymbol)}
-          icon={DollarSign}
-          trend={`${todayBills} Bills Created`}
-          trendUp={true}
-          accentColor="bg-theme-accent-light text-theme-accent"
-        />
-        <StatCard
-          title="Today's Collection"
-          value={formatCurrency(todayCollection, currencySymbol)}
-          icon={TrendingUp}
-          trend="Cash Inflow"
-          trendUp={true}
-          accentColor="bg-theme-accent-light text-theme-accent"
-        />
-        <StatCard
-          title="Pending Due"
-          value={formatCurrency(todayDue, currencySymbol)}
-          icon={Hourglass}
-          trend="Uncollected Cash"
-          trendUp={false}
-          accentColor="bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400"
-        />
-        <StatCard
-          title="Total Customers"
-          value={totalCustomersCount}
-          icon={Users}
-          trend="In SaaS CRM"
-          trendUp={true}
-          accentColor="bg-theme-accent-light text-theme-accent"
-        />
-      </div>
-
-      {/* 2. MAIN DASHBOARD GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* LEFT COLUMN (Span 2) */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* Recent Invoices Card */}
-          <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-extrabold text-sm text-theme-primary tracking-tight">Recent Invoices</h3>
-                <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">LATEST TRANSACTIONS</p>
-              </div>
-              <button onClick={() => setCurrentTab('invoices')} className="text-[10px] font-black text-theme-accent hover:opacity-80 flex items-center gap-1 uppercase tracking-wider">
-                View All <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+          {/* Collection */}
+          <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 bg-blue-500/10 text-blue-500 rounded-xl"><CheckCircle2 className="w-4 h-4" /></div>
+              <p className="text-xs font-extrabold text-theme-muted uppercase tracking-wider">Collection</p>
             </div>
-            
-            <div className="space-y-3">
-              {recentInvoices.map((invoice) => (
-                <InvoiceCard compact={true}
-                  key={invoice.id}
-                  invoice={invoice}
-                  currencySymbol={currencySymbol}
-                  onView={onViewInvoice}
-                  onEdit={onEditInvoice}
-                  onDelete={onDeleteInvoice}
-                  onDownload={onDownloadPDF}
-                />
-              ))}
-              {recentInvoices.length === 0 && (
-                <div className="text-center py-6">
-                  <FileSpreadsheet className="w-8 h-8 text-theme-muted mx-auto mb-2 animate-pulse" />
-                  <h4 className="font-bold text-xs text-theme-muted">No invoices yet</h4>
-                </div>
-              )}
+            <div>
+              <h3 className="text-xl font-black text-theme-primary">{formatCurrency(totalPaid, currencySymbol)}</h3>
+              <p className="text-[10px] font-bold text-theme-muted mt-1">Total received</p>
             </div>
           </div>
 
-          {/* Business Summary Circular Chart Card */}
-          <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium flex flex-col md:flex-row gap-6 items-center">
-            <div className="flex-1">
-              <h3 className="font-extrabold text-sm text-theme-primary tracking-tight mb-1">Business Summary</h3>
-              <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mb-4">REVENUE BREAKDOWN</p>
-              
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-theme-accent"></div>
-                    <span className="text-xs font-bold text-theme-primary">Collected</span>
-                  </div>
-                  <span className="text-xs font-black text-theme-primary">{formatCurrency(totalPaid, currencySymbol)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
-                    <span className="text-xs font-bold text-theme-primary">Pending</span>
-                  </div>
-                  <span className="text-xs font-black text-amber-600 dark:text-amber-400">{formatCurrency(totalDue, currencySymbol)}</span>
-                </div>
-              </div>
+          {/* Pending Due */}
+          <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 bg-rose-500/10 text-rose-500 rounded-xl"><AlertCircle className="w-4 h-4" /></div>
+              <p className="text-xs font-extrabold text-theme-muted uppercase tracking-wider">Pending</p>
             </div>
-
-            {/* CSS Conic Gradient Donut Chart */}
-            <div className="relative w-32 h-32 flex-shrink-0">
-              <div 
-                className="w-full h-full rounded-full"
-                style={{
-                  background: `conic-gradient(var(--accent) ${totalRevenue > 0 ? (totalPaid/totalRevenue)*100 : 0}%, #fbbf24 0)`
-                }}
-              ></div>
-              <div className="absolute inset-2 rounded-full bg-theme-card flex items-center justify-center flex-col">
-                <span className="text-[9px] font-bold text-theme-muted uppercase">Total</span>
-                <span className="text-xs font-black text-theme-primary">{formatCurrency(totalRevenue, currencySymbol)}</span>
-              </div>
+            <div>
+              <h3 className="text-xl font-black text-rose-500">{formatCurrency(totalDue, currencySymbol)}</h3>
+              <p className="text-[10px] font-bold text-rose-500/70 mt-1">Needs collection</p>
             </div>
           </div>
 
-          {/* Unpaid WhatsApp Reminders Section */}
-          <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-theme-accent" />
-                  <span>Pending Reminders</span>
-                </h3>
-              </div>
-              <span className="text-[10px] font-black text-theme-muted bg-theme-surface py-1 px-2.5 rounded-full">
-                {unpaidInvoices.length} unpaid
-              </span>
+          {/* Customers */}
+          <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 bg-indigo-500/10 text-indigo-500 rounded-xl"><Users className="w-4 h-4" /></div>
+              <p className="text-xs font-extrabold text-theme-muted uppercase tracking-wider">Customers</p>
             </div>
-            
-            <div className="space-y-3.5 max-h-[300px] overflow-y-auto no-scrollbar">
-              {unpaidInvoices.map((inv) => (
-                <div key={inv.id} className="flex items-center justify-between p-3.5 bg-theme-app hover:bg-theme-surface rounded-2xl border border-theme-border-soft transition-all">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-black text-theme-primary">{inv.invoiceNumber}</span>
-                      <span className="text-[9px] bg-amber-50 text-amber-600 font-extrabold px-2 py-0.5 rounded uppercase">Due: {inv.dueDate || 'N/A'}</span>
-                    </div>
-                    <p className="text-[10px] text-theme-muted font-bold">{inv.customerName}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-black text-rose-500">{formatCurrency(inv.balanceDue, currencySymbol)}</span>
-                    <button onClick={() => sendWhatsAppReminder(inv)} className="bg-theme-accent text-white font-extrabold text-[10px] py-1.5 px-2.5 rounded-lg shadow-sm hover:opacity-90 transition-all uppercase">
-                      Remind
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {unpaidInvoices.length === 0 && (
-                <div className="text-center py-4 text-theme-muted"><CheckCircle2 className="w-6 h-6 text-theme-accent mx-auto mb-1"/><span className="text-[10px] font-bold">All accounts settled.</span></div>
-              )}
+            <div>
+              <h3 className="text-xl font-black text-theme-primary">{customers.length}</h3>
+              <p className="text-[10px] font-bold text-theme-muted mt-1">Active clients</p>
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN (Span 1) */}
-        <div className="space-y-6">
+        {/* 3. WIDGETS ROW 1 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Service Status Card */}
-          <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium">
-            <h3 className="font-extrabold text-sm text-theme-primary tracking-tight mb-4 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-theme-accent" /> Service Status
-            </h3>
+          {/* Recent Invoices Card (Left) */}
+          <div className="lg:col-span-2 bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
+                <ReceiptText className="w-4 h-4 text-theme-accent" /> Recent Invoices
+              </h3>
+              <button onClick={() => setCurrentTab('invoices')} className="text-[10px] font-black text-theme-accent hover:text-theme-primary transition-colors uppercase">View All</button>
+            </div>
             <div className="space-y-3">
-              {/* Cloud Backup */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-theme-accent-light text-theme-accent rounded-lg"><Activity className="w-3 h-3" /></div>
-                  <span className="text-xs font-bold text-theme-primary">Cloud Backup</span>
+              {recentInvoices.map((inv) => (
+                <div key={inv.id} className="group flex items-center justify-between p-3.5 bg-theme-app hover:bg-theme-surface rounded-2xl border border-theme-border-soft transition-all cursor-pointer" onClick={() => { setEditingInvoice(inv); setCurrentTab('create'); }}>
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-theme-surface group-hover:bg-theme-card flex items-center justify-center transition-colors">
+                      <FileText className="w-4 h-4 text-theme-muted group-hover:text-theme-accent transition-colors" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-theme-primary mb-0.5">{inv.customerName}</p>
+                      <p className="text-[10px] font-bold text-theme-muted">{inv.invoiceNumber} • {inv.date}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-black text-theme-primary mb-1">{formatCurrency(inv.grandTotal, currencySymbol)}</p>
+                    <span className={`text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider ${inv.paymentStatus === 'Paid' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                      {inv.paymentStatus || 'Pending'}
+                    </span>
+                  </div>
                 </div>
-                <span className="w-2 h-2 rounded-full bg-theme-accent animate-pulse"></span>
+              ))}
+              {recentInvoices.length === 0 && (
+                <div className="text-center py-8 text-theme-muted">
+                  <FileText className="w-8 h-8 mx-auto mb-2 opacity-50"/>
+                  <p className="text-xs font-bold">No invoices yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Business Summary Circular Chart Card (Right) */}
+          <div className="lg:col-span-1 bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium flex flex-col">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
+                <PieChart className="w-4 h-4 text-theme-accent" /> Business Summary
+              </h3>
+            </div>
+            <div className="flex-1 flex items-center justify-center py-4">
+              <div className="relative w-40 h-40 md:w-48 md:h-48">
+                <div 
+                  className="w-full h-full rounded-full"
+                  style={{
+                    background: `conic-gradient(var(--accent) ${totalRevenue > 0 ? (totalPaid/totalRevenue)*100 : 0}%, #fbbf24 0)`
+                  }}
+                ></div>
+                <div className="absolute inset-3 rounded-full bg-theme-card flex items-center justify-center flex-col shadow-inner">
+                  <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Total Rev</span>
+                  <span className="text-sm md:text-base font-black text-theme-primary mt-1">{formatCurrency(totalRevenue, currencySymbol)}</span>
+                </div>
               </div>
-              {/* PDF Generator */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-theme-accent-light text-theme-accent rounded-lg"><FileDown className="w-3 h-3" /></div>
-                  <span className="text-xs font-bold text-theme-primary">PDF Engine</span>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-theme-accent animate-pulse"></span>
+            </div>
+            <div className="flex justify-center gap-6 pt-4 border-t border-theme-border-soft">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-theme-accent"></span>
+                <span className="text-[10px] font-bold text-theme-muted">Paid: <span className="text-theme-primary">{formatCurrency(totalPaid, currencySymbol)}</span></span>
               </div>
-              {/* Invoice System */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-theme-accent-light text-theme-accent rounded-lg"><ReceiptText className="w-3 h-3" /></div>
-                  <span className="text-xs font-bold text-theme-primary">Invoice DB</span>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-theme-accent animate-pulse"></span>
-              </div>
-              {/* WhatsApp Sync */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-theme-accent-light text-theme-accent rounded-lg"><Send className="w-3 h-3" /></div>
-                  <span className="text-xs font-bold text-theme-primary">WhatsApp Sync</span>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-theme-accent animate-pulse"></span>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-amber-400"></span>
+                <span className="text-[10px] font-bold text-theme-muted">Due: <span className="text-theme-primary">{formatCurrency(totalDue, currencySymbol)}</span></span>
               </div>
             </div>
           </div>
 
-          {/* Recent Customers Card */}
-          <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium">
-            <div className="flex items-center justify-between mb-4">
+        </div>
+
+        {/* 4. WIDGETS ROW 2 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* Service Status Card (Left) */}
+          <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
+            <h3 className="font-extrabold text-sm text-theme-primary tracking-tight mb-5 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-theme-accent" /> Service Status
+            </h3>
+            <div className="space-y-4">
+              {/* Cloud Backup */}
+              <div className="flex items-center justify-between p-3 bg-theme-app rounded-2xl border border-theme-border-soft">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-theme-accent-light text-theme-accent rounded-xl"><Activity className="w-4 h-4" /></div>
+                  <span className="text-xs font-bold text-theme-primary">Cloud Backup</span>
+                </div>
+                <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="text-[9px] font-extrabold text-emerald-600 uppercase tracking-wider">Active</span>
+                </div>
+              </div>
+              {/* PDF Generator */}
+              <div className="flex items-center justify-between p-3 bg-theme-app rounded-2xl border border-theme-border-soft">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-theme-accent-light text-theme-accent rounded-xl"><FileDown className="w-4 h-4" /></div>
+                  <span className="text-xs font-bold text-theme-primary">PDF Engine</span>
+                </div>
+                <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="text-[9px] font-extrabold text-emerald-600 uppercase tracking-wider">Active</span>
+                </div>
+              </div>
+              {/* Invoice System */}
+              <div className="flex items-center justify-between p-3 bg-theme-app rounded-2xl border border-theme-border-soft">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-theme-accent-light text-theme-accent rounded-xl"><ReceiptText className="w-4 h-4" /></div>
+                  <span className="text-xs font-bold text-theme-primary">Invoice DB</span>
+                </div>
+                <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="text-[9px] font-extrabold text-emerald-600 uppercase tracking-wider">Active</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Customers Card (Right) */}
+          <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
+            <div className="flex items-center justify-between mb-5">
               <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
                 <Users className="w-4 h-4 text-theme-accent" /> Recent Clients
               </h3>
+              <button onClick={() => setCurrentTab('customers')} className="text-[10px] font-black text-theme-accent hover:text-theme-primary transition-colors uppercase">View All</button>
             </div>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {customers.slice(-4).reverse().map(c => (
-                <div key={c.id} className="flex items-center gap-3 p-2 hover:bg-theme-app rounded-xl transition-colors cursor-pointer" onClick={() => setCurrentTab('customers')}>
-                  <div className="w-8 h-8 rounded-full bg-[image:var(--accent-gradient)] flex items-center justify-center text-white font-black text-xs">
+                <div key={c.id} className="flex items-center gap-3 p-3 bg-theme-app hover:bg-theme-surface rounded-2xl border border-theme-border-soft transition-colors cursor-pointer" onClick={() => setCurrentTab('customers')}>
+                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] flex items-center justify-center text-white font-black text-sm shadow-md">
                     {c.name.charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-theme-primary leading-tight">{c.name}</p>
-                    <p className="text-[9px] font-bold text-theme-muted">{c.phone || 'No phone'}</p>
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-bold text-theme-primary leading-tight truncate">{c.name}</p>
+                    <p className="text-[9px] font-bold text-theme-muted mt-0.5 truncate">{c.phone || 'No phone'}</p>
                   </div>
                 </div>
               ))}
               {customers.length === 0 && (
-                <p className="text-[10px] font-bold text-theme-muted text-center">No clients added yet.</p>
+                <div className="col-span-full text-center py-8 text-theme-muted">
+                  <Users className="w-8 h-8 mx-auto mb-2 opacity-50"/>
+                  <p className="text-[10px] font-bold">No clients added yet</p>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Premium Plan Banner */}
-          <div className="bg-[image:var(--accent-gradient)] rounded-3xl p-5 text-white shadow-premium relative overflow-hidden">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/20 blur-xl rounded-full"></div>
-            <h3 className="font-black text-sm mb-1">Premium Support</h3>
-            <p className="text-[10px] font-medium opacity-90 mb-3">Access 24/7 dedicated SaaS billing support.</p>
-            <button onClick={() => setCurrentTab('subscription')} className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-md font-bold text-[10px] py-2 rounded-xl transition-all uppercase tracking-wider">
+        </div>
+
+        {/* 5. WIDGETS ROW 3 (Banner) */}
+        <div className="bg-[image:var(--accent-gradient)] rounded-3xl p-6 md:p-8 text-white shadow-premium relative overflow-hidden">
+          <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/20 blur-2xl rounded-full"></div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+            <div>
+              <h3 className="font-black text-lg md:text-xl mb-1">Upgrade to Premium</h3>
+              <p className="text-xs md:text-sm font-medium opacity-90">Get unlimited invoices, multi-user access, and 24/7 dedicated SaaS billing support.</p>
+            </div>
+            <button onClick={() => setCurrentTab('subscription')} className="bg-white text-theme-accent font-black text-xs py-3 px-8 rounded-xl shadow-lg hover:scale-105 transition-transform uppercase tracking-wider shrink-0">
               View Plans
             </button>
           </div>
-
         </div>
-      </div>
+
       </motion.div>
-</PullToRefresh>
+    </PullToRefresh>
   );
 };
 
