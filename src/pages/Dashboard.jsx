@@ -218,7 +218,7 @@ const Dashboard = ({
         </div>
 
         {/* 2. STATS ROW (4 CARDS) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Revenue */}
           <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
             <div className="flex items-center gap-3 mb-3">

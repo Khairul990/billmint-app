@@ -118,7 +118,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       />
 
       {/* Main Content Region */}
-      <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-0">
+      <div className="flex-1 flex flex-col min-w-0 w-full max-w-full pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0 overflow-x-hidden">
         
         {/* Header Block with Premium Dual-Theme Layout */}
         <header className="relative bg-theme-card/80 backdrop-blur-md border-b border-theme-border-soft px-6 py-8 md:py-10 text-theme-primary shadow-[0_1px_3px_rgba(7,13,25,0.01),0_10px_20px_-10px_rgba(7,13,25,0.02)] transition-all duration-300 z-30">
@@ -128,7 +128,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             <div className="absolute -bottom-10 left-10 w-48 h-48 bg-theme-accent-light dark:bg-theme-accent-light rounded-full blur-2xl"></div>
           </div>
 
-          <div className={`${currentTab === 'create-invoice' ? 'max-w-[1500px] lg:px-6' : 'max-w-6xl'} mx-auto flex items-center justify-between relative z-10`}>
+          <div className={`${currentTab === 'create-invoice' ? 'max-w-[1500px] lg:px-6' : 'max-w-6xl'} w-full mx-auto flex items-center justify-between relative z-10`}>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-theme-muted bg-theme-app px-2.5 py-0.5 rounded-full border border-theme-border-soft backdrop-blur-md">

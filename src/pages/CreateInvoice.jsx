@@ -1051,7 +1051,7 @@ const CreateInvoice = ({
             </div>
             
             <div className="w-full overflow-x-auto pb-4 -mx-1 px-1">
-              <div className="min-w-[900px] flex flex-col">
+              <div className="lg:min-w-[900px] flex flex-col">
                 {/* Column headers - desktop only */}
                 <div className="hidden lg:grid gap-2 text-[10px] font-black text-theme-muted uppercase tracking-wider px-3 pb-2 mb-0 border-b-2 border-theme-border-soft dark:border-theme-border-soft" style={{ gridTemplateColumns: getGridCols() }}>
                   <div className="text-center">#</div>
