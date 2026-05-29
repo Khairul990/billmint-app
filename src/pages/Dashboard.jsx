@@ -201,69 +201,69 @@ const Dashboard = ({
       >
         
         {/* 1. HEADER & HERO */}
-        <div className="space-y-2">
-          <h1 className="text-2xl font-black text-theme-primary tracking-tight">Dashboard</h1>
-          <p className="text-sm text-theme-muted font-bold">Welcome back, here is your business summary.</p>
+        <div className="space-y-0.5 md:space-y-2">
+          <h1 className="text-xl md:text-2xl font-black text-theme-primary tracking-tight">Dashboard</h1>
+          <p className="text-xs md:text-sm text-theme-muted font-bold">Welcome back, here is your business summary.</p>
         </div>
 
-        <div className="bg-[image:var(--accent-gradient)] rounded-3xl p-6 md:p-8 text-white shadow-premium relative overflow-hidden">
+        <div className="bg-[image:var(--accent-gradient)] rounded-2xl md:rounded-3xl p-5 md:p-8 text-white shadow-premium relative overflow-hidden">
           <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/20 blur-3xl rounded-full"></div>
           <div className="relative z-10">
-            <h2 className="text-xl md:text-2xl font-black mb-2">Create professional invoices in seconds.</h2>
-            <p className="text-xs md:text-sm font-medium opacity-90 max-w-md">Send invoices on WhatsApp, collect payments faster, and track your business growth.</p>
-            <button onClick={() => setCurrentTab('create')} className="mt-5 bg-white text-theme-accent px-6 py-2.5 rounded-xl font-black text-xs shadow-lg hover:scale-105 transition-transform uppercase tracking-wider">
+            <h2 className="text-lg md:text-2xl font-black mb-1.5 md:mb-2 leading-tight">Create professional invoices in seconds.</h2>
+            <p className="text-[10px] md:text-sm font-medium opacity-90 max-w-md leading-relaxed">Send invoices on WhatsApp, collect payments faster, and track your business growth.</p>
+            <button onClick={() => setCurrentTab('create')} className="mt-4 md:mt-5 bg-white text-theme-accent px-5 md:px-6 py-2 md:py-2.5 rounded-xl font-black text-[10px] md:text-xs shadow-lg hover:scale-105 transition-transform uppercase tracking-wider">
               + New Bill
             </button>
           </div>
         </div>
 
         {/* 2. STATS ROW (4 CARDS) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {/* Revenue */}
-          <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-theme-success/10 text-theme-success rounded-xl"><TrendingUp className="w-4 h-4" /></div>
-              <p className="text-xs font-extrabold text-theme-muted uppercase tracking-wider">Revenue</p>
+          <div className="bg-theme-card rounded-2xl md:rounded-3xl p-4 md:p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <div className="flex items-center gap-2.5 mb-2 md:mb-3">
+              <div className="p-2 md:p-2.5 bg-theme-success/10 text-theme-success rounded-lg md:rounded-xl"><TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4" /></div>
+              <p className="text-[10px] md:text-xs font-extrabold text-theme-muted uppercase tracking-wider">Revenue</p>
             </div>
             <div>
-              <h3 className="text-xl font-black text-theme-primary">{formatCurrency(totalRevenue, currencySymbol)}</h3>
-              <p className="text-[10px] font-bold text-theme-success mt-1">+12% vs last month</p>
+              <h3 className="text-lg md:text-xl font-black text-theme-primary">{formatCurrency(totalRevenue, currencySymbol)}</h3>
+              <p className="text-[9px] md:text-[10px] font-bold text-theme-success mt-1">+12% vs last month</p>
             </div>
           </div>
 
           {/* Collection */}
-          <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-blue-500/10 text-blue-500 rounded-xl"><CheckCircle2 className="w-4 h-4" /></div>
-              <p className="text-xs font-extrabold text-theme-muted uppercase tracking-wider">Collection</p>
+          <div className="bg-theme-card rounded-2xl md:rounded-3xl p-4 md:p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <div className="flex items-center gap-2.5 mb-2 md:mb-3">
+              <div className="p-2 md:p-2.5 bg-blue-500/10 text-blue-500 rounded-lg md:rounded-xl"><CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4" /></div>
+              <p className="text-[10px] md:text-xs font-extrabold text-theme-muted uppercase tracking-wider">Collection</p>
             </div>
             <div>
-              <h3 className="text-xl font-black text-theme-primary">{formatCurrency(totalPaid, currencySymbol)}</h3>
-              <p className="text-[10px] font-bold text-theme-muted mt-1">Total received</p>
+              <h3 className="text-lg md:text-xl font-black text-theme-primary">{formatCurrency(totalPaid, currencySymbol)}</h3>
+              <p className="text-[9px] md:text-[10px] font-bold text-theme-muted mt-1">Total received</p>
             </div>
           </div>
 
           {/* Pending Due */}
-          <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-theme-danger/10 text-theme-danger rounded-xl"><AlertCircle className="w-4 h-4" /></div>
-              <p className="text-xs font-extrabold text-theme-muted uppercase tracking-wider">Pending</p>
+          <div className="bg-theme-card rounded-2xl md:rounded-3xl p-4 md:p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <div className="flex items-center gap-2.5 mb-2 md:mb-3">
+              <div className="p-2 md:p-2.5 bg-theme-danger/10 text-theme-danger rounded-lg md:rounded-xl"><AlertCircle className="w-3.5 h-3.5 md:w-4 md:h-4" /></div>
+              <p className="text-[10px] md:text-xs font-extrabold text-theme-muted uppercase tracking-wider">Pending</p>
             </div>
             <div>
-              <h3 className="text-xl font-black text-theme-danger">{formatCurrency(totalDue, currencySymbol)}</h3>
-              <p className="text-[10px] font-bold text-theme-danger/70 mt-1">Needs collection</p>
+              <h3 className="text-lg md:text-xl font-black text-theme-danger">{formatCurrency(totalDue, currencySymbol)}</h3>
+              <p className="text-[9px] md:text-[10px] font-bold text-theme-danger/70 mt-1">Needs collection</p>
             </div>
           </div>
 
           {/* Customers */}
-          <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-theme-accent/10 text-theme-accent rounded-xl"><Users className="w-4 h-4" /></div>
-              <p className="text-xs font-extrabold text-theme-muted uppercase tracking-wider">Customers</p>
+          <div className="bg-theme-card rounded-2xl md:rounded-3xl p-4 md:p-5 border border-theme-border-soft shadow-premium hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <div className="flex items-center gap-2.5 mb-2 md:mb-3">
+              <div className="p-2 md:p-2.5 bg-theme-accent/10 text-theme-accent rounded-lg md:rounded-xl"><Users className="w-3.5 h-3.5 md:w-4 md:h-4" /></div>
+              <p className="text-[10px] md:text-xs font-extrabold text-theme-muted uppercase tracking-wider">Customers</p>
             </div>
             <div>
-              <h3 className="text-xl font-black text-theme-primary">{customers.length}</h3>
-              <p className="text-[10px] font-bold text-theme-muted mt-1">Active clients</p>
+              <h3 className="text-lg md:text-xl font-black text-theme-primary">{customers.length}</h3>
+              <p className="text-[9px] md:text-[10px] font-bold text-theme-muted mt-1">Active clients</p>
             </div>
           </div>
         </div>
