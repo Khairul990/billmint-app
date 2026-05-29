@@ -105,7 +105,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   };
 
   return (
-    <div className="min-h-screen bg-theme-app flex flex-col lg:flex-row w-full font-sans antialiased text-theme-primary transition-colors duration-300">
+    <div className="h-[100dvh] bg-theme-app flex flex-col lg:flex-row w-full font-sans antialiased text-theme-primary transition-colors duration-300 overflow-hidden">
       {/* Desktop Sidebar (Hidden on Mobile) */}
       <Sidebar
         currentTab={currentTab}
@@ -118,7 +118,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       />
 
       {/* Main Content Region */}
-      <div className="flex-1 flex flex-col min-w-0 w-full max-w-full pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0 overflow-x-hidden">
+      <div className="flex-1 flex flex-col min-w-0 w-full max-w-full pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0 overflow-y-auto overflow-x-hidden">
         
         {/* Header Block with Premium Dual-Theme Layout */}
         <header className="relative bg-theme-card/80 backdrop-blur-md border-b border-theme-border-soft px-6 py-8 md:py-10 text-theme-primary shadow-[0_1px_3px_rgba(7,13,25,0.01),0_10px_20px_-10px_rgba(7,13,25,0.02)] transition-all duration-300 z-30">
