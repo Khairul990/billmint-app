@@ -100,7 +100,7 @@ class ErrorBoundary extends React.Component {
 function App() {
 
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
-  const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(false);
+  const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(() => getAuthSession() !== null);
   const [isAuthenticated, setIsAuthenticated] = useState(getAuthSession() !== null);
   const [currentTab, setCurrentTab] = useState(() => {
     const saved = localStorage.getItem('billqyro_last_route');
