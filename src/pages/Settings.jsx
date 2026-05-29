@@ -65,6 +65,34 @@ import { getAdminEmail } from '../utils/adminAccess';
 import { firebaseReady } from '../utils/firebase';
 import { toast } from 'react-hot-toast';
 
+const compressImage = (file, maxWidth = 400) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const compressedBase64 = canvas.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/webp', 0.8);
+        resolve(compressedBase64);
+      };
+    };
+  });
+};
 
 const getThemePreviewColors = (preset) => {
   const isDark = document.documentElement.classList.contains('dark');
@@ -853,26 +881,24 @@ const Settings = ({
                     }`}
                   onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                   onDragLeave={() => setIsDragging(false)}
-                  onDrop={(e) => {
+                  onDrop={async (e) => {
                     e.preventDefault();
                     setIsDragging(false);
                     const file = e.dataTransfer.files[0];
                     if (file && file.type.startsWith('image/')) {
-                      const reader = new FileReader();
-                      reader.onload = (event) => setLogoUrl(event.target.result);
-                      reader.readAsDataURL(file);
+                      const compressedBase64 = await compressImage(file);
+                      setLogoUrl(compressedBase64);
                     }
                   }}
                 >
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const file = e.target.files[0];
                       if (file && file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = (event) => setLogoUrl(event.target.result);
-                        reader.readAsDataURL(file);
+                        const compressedBase64 = await compressImage(file);
+                        setLogoUrl(compressedBase64);
                       }
                     }}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
