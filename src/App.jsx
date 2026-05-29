@@ -101,7 +101,7 @@ class ErrorBoundary extends React.Component {
 function App() {
 
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
-  const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(() => getAuthSession() !== null);
+  const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(getAuthSession() !== null);
   const [currentTab, setCurrentTab] = useState(() => {
     const saved = localStorage.getItem('billqyro_last_route');
@@ -690,19 +690,23 @@ function App() {
 
   // --- TAB ROUTER SWITCHBOARD ---
   const renderTabContent = () => {
-    if (currentTab === 'setup-billing') {
+    const isProfileIncomplete = settings && !settings.profileSetupCompleted && !settings.businessName;
+    const activeTab = isProfileIncomplete ? 'setup-billing' : currentTab;
+
+    if (activeTab === 'setup-billing') {
       return (
         <SetupBilling
           businessSettings={settings}
           onSaveSettings={(newSettings) => {
             saveSettings(newSettings);
             setSettings(newSettings);
+            setCurrentTab('dashboard');
           }}
           setCurrentTab={setCurrentTab}
         />
       );
     }
-    switch (currentTab) {
+    switch (activeTab) {
       case 'dashboard':
         return (
           <Dashboard

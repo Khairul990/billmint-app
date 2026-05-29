@@ -799,6 +799,7 @@ function LoginPanel({ onLoginSuccess }) {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [cardHover, setCardHover] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -857,12 +858,13 @@ function LoginPanel({ onLoginSuccess }) {
           await setDoc(settingsRef, {
             email: user.email,
             contactEmail: user.email,
-            ownerName: '',
+            ownerName: name.trim(),
             businessName: '',
             phone: '',
             whatsapp: '',
             address: '',
             logoUrl: '',
+            profileSetupCompleted: false,
             createdAt: new Date().toISOString()
           }, { merge: true });
           
@@ -919,12 +921,13 @@ function LoginPanel({ onLoginSuccess }) {
           await setDoc(settingsRef, {
             email: user.email,
             contactEmail: user.email,
-            ownerName: '',
+            ownerName: name.trim(),
             businessName: '',
             phone: '',
             whatsapp: '',
             address: '',
             logoUrl: '',
+            profileSetupCompleted: false,
             createdAt: new Date().toISOString()
           }, { merge: true });
         }
@@ -1008,6 +1011,23 @@ function LoginPanel({ onLoginSuccess }) {
           className="mt-8 space-y-5"
           onSubmit={handleSubmit}
         >
+          {!isLoginMode && (
+            <motion.label initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }} className="block relative group">
+              <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent">Full Name</span>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <UserRound className="h-[18px] w-[18px] text-theme-muted group-focus-within:text-theme-accent transition-colors" />
+                </div>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your Name"
+                  className="h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-11 pr-4 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
+                />
+              </div>
+            </motion.label>
+          )}
           <motion.label initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="block relative group">
             <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent">Email address</span>
             <div className="relative">
