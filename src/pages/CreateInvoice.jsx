@@ -34,7 +34,8 @@ import {
   Maximize2,
   Printer,
   Link,
-  MoreHorizontal
+  MoreHorizontal,
+  ChevronDown
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber, autoIncrementString, formatCurrency } from '../utils/invoiceUtils';
@@ -108,6 +109,7 @@ const CreateInvoice = ({
   const [dueDate, setDueDate] = useState('');
   const [billType, setBillType] = useState(businessSettings?.defaultBillingTemplate || 'custom');
   const [pdfVisibleFields, setPdfVisibleFields] = useState(businessSettings?.pdfVisibleFields?.[businessSettings?.defaultBillingTemplate || 'custom'] || []);
+  const [showTopActions, setShowTopActions] = useState(false);
   const [showPdfSettings, setShowPdfSettings] = useState(false);
   const [isSheetExpanded, setIsSheetExpanded] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -576,9 +578,99 @@ const CreateInvoice = ({
     exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2, ease: 'easeIn' } }
   };
 
+  const handleDownloadPDF = () => {
+    if (!customerName) {
+      toast.error('Please add customer name before downloading PDF.');
+      return;
+    }
+    const cleanedItems = items.filter(item => 
+      (item.description && item.description.trim() !== '') || 
+      (item.designNo && item.designNo.trim() !== '') || 
+      (parseFloat(item.rate) > 0)
+    ).map(item => {
+      const qty = parseFloat(item.qty);
+      const rate = parseFloat(item.rate !== undefined ? item.rate : (item.unitPrice !== undefined ? item.unitPrice : item.price));
+      return {
+        ...item,
+        qty: isNaN(qty) ? 1 : qty,
+        rate: isNaN(rate) ? 0 : rate,
+        amount: (isNaN(qty) ? 1 : qty) * (isNaN(rate) ? 0 : rate)
+      };
+    });
+    if (cleanedItems.length === 0) {
+      toast.error('Please add at least one item before downloading PDF.');
+      return;
+    }
+    if (onDownloadPDF) {
+      onDownloadPDF({ 
+        id: editingInvoice?.id || 'inv-temp', 
+        invoiceNumber, 
+        date, 
+        dueDate, 
+        customerName, 
+        customerPhone, 
+        customerEmail, 
+        customerAddress, 
+        items: cleanedItems, 
+        taxPercentage, 
+        discountAmount, 
+        amountPaid, 
+        notes, 
+        terms, 
+        paymentStatus, 
+        orderStatus, 
+        subtotal, 
+        taxAmount, 
+        grandTotal, 
+        balanceDue 
+      });
+    }
+  };
+
+  const handleCopyLiveLink = async () => {
+    const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
+    if (!isLiveLinkEnabled) {
+      toast.error('Live Link is disabled. Enable it from Settings.');
+      return;
+    }
+    try {
+      const token = await ensureInvoicePublicToken(editingInvoice);
+      if (!token) {
+        toast.error('Could not create live link. Please save invoice and try again.');
+        return;
+      }
+      const liveLink = `${window.location.origin}/i/${token}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(liveLink);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = liveLink;
+        textArea.style.position = "fixed";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      toast.success('Live invoice link copied!');
+    } catch (err) {
+      toast.error('Could not create live link. Please save invoice and try again.');
+    }
+  };
+
+  const handleSendWhatsAppReminder = () => {
+    const regionalPrefs = editingInvoice?.regionalSettingsSnapshot || {
+      currency: currencySymbol,
+      numberFormat: businessSettings?.numberFormat || 'Indian'
+    };
+    const totalStr = formatCurrency(grandTotal, regionalPrefs.currency || currencySymbol, regionalPrefs.numberFormat);
+    const msg = `Hi ${customerName},\nHere is your invoice ${invoiceNumber} for ${totalStr}.`;
+    window.open(`https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
   return (
     <motion.div 
-      className="space-y-6 pb-20"
+      className="space-y-5 pb-8"
       variants={containerVariants}
       initial="hidden"
       animate="show"
@@ -605,17 +697,69 @@ const CreateInvoice = ({
       )}
 
       {/* HEADER & PAGE TITLE */}
-      <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-theme-primary">Create Invoice</h1>
+          <h1 className="text-2xl font-black text-theme-primary">{editingInvoice ? 'Edit Invoice' : 'Create Invoice'}</h1>
           <p className="text-sm font-bold text-theme-muted mt-1">Configure and generate a new bill</p>
         </div>
 
-
+        <div className="relative">
+          <button 
+            onClick={() => setShowTopActions(!showTopActions)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-theme-surface hover:bg-theme-border-soft text-theme-primary font-bold rounded-xl transition-all shadow-sm border border-theme-border-soft"
+          >
+            <span>Invoice Actions</span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${showTopActions ? 'rotate-180' : ''}`} />
+          </button>
+          
+          <AnimatePresence>
+            {showTopActions && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute top-full right-0 mt-2 w-56 bg-theme-card border border-theme-border-soft shadow-premium rounded-2xl p-2 z-50 flex flex-col gap-1"
+              >
+                <button onClick={() => { setShowTopActions(false); handleSave('Draft'); }} className="w-full text-left px-3 py-2 text-[13px] font-bold text-theme-primary hover:bg-theme-border-soft rounded-lg flex items-center gap-2 transition-all">
+                  <Save className="w-4 h-4 text-theme-muted" /> Save Draft
+                </button>
+                <button onClick={() => { setShowTopActions(false); setShowPreview(true); }} className="w-full text-left px-3 py-2 text-[13px] font-bold text-theme-primary hover:bg-theme-border-soft rounded-lg flex items-center gap-2 transition-all">
+                  <Eye className="w-4 h-4 text-theme-muted" /> Preview PDF
+                </button>
+                <button onClick={() => { setShowTopActions(false); handleDownloadPDF(); }} className="w-full text-left px-3 py-2 text-[13px] font-bold text-theme-primary hover:bg-theme-border-soft rounded-lg flex items-center gap-2 transition-all">
+                  <Download className="w-4 h-4 text-theme-muted" /> Download PDF
+                </button>
+                
+                <div className="h-px bg-theme-border-soft my-1" />
+                
+                <button 
+                  disabled={!editingInvoice}
+                  onClick={() => { setShowTopActions(false); if(editingInvoice) handleCopyLiveLink(); }}
+                  className={`w-full text-left px-3 py-2 text-[13px] font-bold flex items-center gap-2 rounded-lg transition-all ${editingInvoice ? 'text-theme-primary hover:bg-theme-border-soft' : 'text-theme-muted cursor-not-allowed opacity-50'}`}
+                >
+                  <Link className="w-4 h-4 text-theme-muted" /> Copy Live Link
+                </button>
+                <button 
+                  disabled={!editingInvoice || !customerPhone}
+                  onClick={() => { setShowTopActions(false); if(editingInvoice && customerPhone) handleSendWhatsAppReminder(); }}
+                  className={`w-full text-left px-3 py-2 text-[13px] font-bold flex items-center gap-2 rounded-lg transition-all ${editingInvoice && customerPhone ? 'text-theme-primary hover:bg-theme-border-soft' : 'text-theme-muted cursor-not-allowed opacity-50'}`}
+                >
+                  <Send className="w-4 h-4 text-theme-muted" /> Send WhatsApp Reminder
+                </button>
+                
+                <div className="h-px bg-theme-border-soft my-1" />
+                
+                <button onClick={() => { setShowTopActions(false); handleSave(); }} className="w-full text-left px-3 py-2 text-[13px] font-bold text-theme-button-text bg-theme-accent hover:opacity-90 rounded-lg flex items-center gap-2 transition-all shadow-sm">
+                  <Check className="w-4 h-4" /> Save Invoice
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* MAIN LAYOUT: LEFT FORM, RIGHT PREVIEW */}
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(380px,0.85fr)] gap-6 lg:gap-8 items-start relative mt-6 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(420px,0.9fr)] gap-6 lg:gap-8 items-start w-full">
         
         {/* LEFT COLUMN: WIZARD STEPS */}
         <div className="w-full space-y-6">
@@ -1574,190 +1718,85 @@ const CreateInvoice = ({
             </div>
           </div>
 
-          <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium space-y-3">
+          <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
             <h3 className="text-sm font-extrabold text-theme-primary border-b border-theme-border-soft pb-3 mb-4">Invoice Actions</h3>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 onClick={() => handleSave('Draft')}
-                className="w-full py-4 bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted rounded-xl font-bold hover:bg-theme-border-soft transition-all flex items-center justify-center gap-2 text-[14px]"
+                className="w-full h-[52px] bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted rounded-xl font-bold hover:bg-theme-border-soft transition-all flex items-center justify-center gap-2 text-[13px] border border-theme-border-soft/50 shadow-sm"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Draft</span>
               </button>
+              
               <button
                 onClick={() => setShowPreview(true)}
-                className="w-full py-4 bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted rounded-xl font-bold hover:bg-theme-border-soft transition-all flex items-center justify-center gap-2 text-[14px]"
+                className="w-full h-[52px] bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted rounded-xl font-bold hover:bg-theme-border-soft transition-all flex items-center justify-center gap-2 text-[13px] border border-theme-border-soft/50 shadow-sm"
               >
                 <Eye className="w-4 h-4" />
                 <span>Preview PDF</span>
               </button>
 
               <button
-                onClick={() => { 
-                  if (!customerName) {
-                    toast.error('Please add customer name before downloading PDF.');
-                    return;
-                  }
-                  const cleanedItems = items.filter(item => 
-                    (item.description && item.description.trim() !== '') || 
-                    (item.designNo && item.designNo.trim() !== '') || 
-                    (parseFloat(item.rate) > 0)
-                  ).map(item => {
-                    const qty = parseFloat(item.qty);
-                    const rate = parseFloat(item.rate !== undefined ? item.rate : (item.unitPrice !== undefined ? item.unitPrice : item.price));
-                    return {
-                      ...item,
-                      qty: isNaN(qty) ? 1 : qty,
-                      rate: isNaN(rate) ? 0 : rate,
-                      amount: (isNaN(qty) ? 1 : qty) * (isNaN(rate) ? 0 : rate)
-                    };
-                  });
-                  if (cleanedItems.length === 0) {
-                    toast.error('Please add at least one item before downloading PDF.');
-                    return;
-                  }
-                  if (onDownloadPDF) {
-                    onDownloadPDF({ 
-                      id: editingInvoice?.id || 'inv-temp', 
-                      invoiceNumber, 
-                      date, 
-                      dueDate, 
-                      customerName, 
-                      customerPhone, 
-                      customerEmail, 
-                      customerAddress, 
-                      items: cleanedItems, 
-                      taxPercentage, 
-                      discountAmount, 
-                      amountPaid, 
-                      notes, 
-                      terms, 
-                      paymentStatus, 
-                      orderStatus, 
-                      subtotal, 
-                      taxAmount, 
-                      grandTotal, 
-                      balanceDue 
-                    });
-                  }
-                }}
-                className="w-full py-4 bg-theme-card dark:bg-theme-card border border-theme-accent text-theme-accent rounded-xl font-bold hover:bg-theme-accent-light dark:hover:bg-theme-card transition-all flex items-center justify-center gap-2 text-[14px] shadow-sm cursor-pointer"
+                onClick={handleDownloadPDF}
+                className="w-full h-[52px] bg-theme-surface dark:bg-theme-card border border-theme-accent text-theme-accent rounded-xl font-bold hover:bg-theme-accent-light dark:hover:bg-theme-card transition-all flex items-center justify-center gap-2 text-[13px] shadow-sm cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 <span>Download PDF</span>
               </button>
+              
               <button
                 onClick={() => handleSave()}
-                className="w-full py-4 bg-theme-accent text-white rounded-xl font-bold hover:opacity-90 shadow-md transition-all flex items-center justify-center gap-2 text-[14px] cursor-pointer"
+                className="w-full h-[52px] bg-[image:var(--accent-gradient)] bg-theme-accent text-theme-button-text rounded-xl font-bold hover:opacity-90 shadow-md transition-all flex items-center justify-center gap-2 text-[13px] cursor-pointer"
               >
                 <Check className="w-4 h-4" />
                 <span>Save Invoice</span>
               </button>
 
-              {/* Copy Live Link Option */}
-              {editingInvoice ? (
-                <>
-                  <button
-                    onClick={async () => {
-                      const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
-                      if (!isLiveLinkEnabled) {
-                        toast.error('Live Link is disabled. Enable it from Settings.');
-                        return;
-                      }
-                      try {
-                        const token = await ensureInvoicePublicToken(editingInvoice);
-                        if (!token) {
-                          toast.error('Could not create live link. Please save invoice and try again.');
-                          return;
-                        }
-                        const liveLink = `${window.location.origin}/i/${token}`;
-                        if (navigator.clipboard && navigator.clipboard.writeText) {
-                          await navigator.clipboard.writeText(liveLink);
-                        } else {
-                          const textArea = document.createElement("textarea");
-                          textArea.value = liveLink;
-                          textArea.style.position = "fixed";
-                          document.body.appendChild(textArea);
-                          textArea.focus();
-                          textArea.select();
-                          document.execCommand('copy');
-                          document.body.removeChild(textArea);
-                        }
-                        toast.success('Live invoice link copied!');
-                      } catch (err) {
-                        toast.error('Could not create live link. Please save invoice and try again.');
-                      }
-                    }}
-                    className="w-full py-4 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-xl font-bold hover:opacity-90 shadow-md transition-all flex items-center justify-center gap-2 text-[14px] cursor-pointer"
-                  >
-                    <Link className="w-4 h-4" />
-                    <span>Copy Live Link</span>
-                  </button>
-
-                  <button
-                    onClick={async () => {
-                      const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
-                      if (!isLiveLinkEnabled) {
-                        toast.error('Live Link is disabled. Enable it from Settings.');
-                        return;
-                      }
-                      try {
-                        const token = await ensureInvoicePublicToken(editingInvoice);
-                        if (!token) {
-                          toast.error('Could not create live link. Please save invoice and try again.');
-                          return;
-                        }
-                        const liveLink = `${window.location.origin}/i/${token}`;
-                        const regionalPrefs = editingInvoice?.regionalSettingsSnapshot || {
-                          currency: currencySymbol,
-                          numberFormat: businessSettings?.numberFormat || 'Indian'
-                        };
-                        const totalStr = formatCurrency(grandTotal, regionalPrefs.currency || currencySymbol, regionalPrefs.numberFormat);
-                        const paidStr = formatCurrency(amountPaid, regionalPrefs.currency || currencySymbol, regionalPrefs.numberFormat);
-                        const dueStr = formatCurrency(balanceDue, regionalPrefs.currency || currencySymbol, regionalPrefs.numberFormat);
-                        const msg = `Your invoice is ready.\nInvoice No: ${invoiceNumber}\nTotal: ${totalStr}\nPaid: ${paidStr}\nBalance Due: ${dueStr}\nView & Pay: ${liveLink}`;
-                        window.open(`https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
-                      } catch (err) {
-                        toast.error('Could not create live link. Please save invoice and try again.');
-                      }
-                    }}
-                    className="w-full py-4 bg-[#25D366] text-white rounded-xl font-bold hover:bg-[#1ebd5a] shadow-md transition-all flex items-center justify-center gap-2 text-[14px] cursor-pointer"
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>Share Live Link on WhatsApp</span>
-                  </button>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  title="Save invoice first to create live link"
-                  className="w-full py-4 bg-theme-surface dark:bg-theme-card text-theme-muted rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1 text-[14px] cursor-not-allowed border border-theme-border-soft/40"
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <Link className="w-4 h-4 text-theme-muted" />
-                    <span>Copy Live Link</span>
-                  </div>
-                  <span className="text-[10px] text-theme-muted font-medium">Save invoice first to create live link</span>
-                </button>
-              )}
-
+              {/* Copy Live Link */}
               <button
-                onClick={() => {
-                  const regionalPrefs = editingInvoice?.regionalSettingsSnapshot || {
-                    currency: currencySymbol,
-                    numberFormat: businessSettings?.numberFormat || 'Indian'
-                  };
-                  const totalStr = formatCurrency(grandTotal, regionalPrefs.currency || currencySymbol, regionalPrefs.numberFormat);
-                  const msg = `Hi ${customerName},\nHere is your invoice ${invoiceNumber} for ${totalStr}.`;
-                  window.open(`https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
-                }}
-                className="w-full py-4 bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted dark:text-theme-secondary rounded-xl font-bold hover:bg-theme-border-soft dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-[14px]"
+                onClick={() => { if(editingInvoice) handleCopyLiveLink(); }}
+                disabled={!editingInvoice}
+                title={!editingInvoice ? "Save invoice first to create live link" : "Copy Live Link"}
+                className={`w-full h-[52px] rounded-xl font-bold flex flex-col items-center justify-center gap-1 text-[13px] transition-all shadow-sm border ${
+                  editingInvoice
+                    ? 'bg-theme-surface border-theme-border-soft text-theme-primary hover:bg-theme-border-soft cursor-pointer'
+                    : 'bg-theme-surface/50 border-theme-border-soft/40 text-theme-muted cursor-not-allowed'
+                }`}
               >
-                <Send className="w-4 h-4" />
-                <span>Send WhatsApp Reminder</span>
+                <div className="flex items-center justify-center gap-2">
+                  <Link className="w-4 h-4" />
+                  <span>Copy Live Link</span>
+                </div>
+                {!editingInvoice && (
+                  <span className="text-[9px] text-theme-muted font-medium leading-none">Save invoice first</span>
+                )}
+              </button>
+
+              {/* Send WhatsApp Reminder */}
+              <button
+                onClick={() => { if(editingInvoice && customerPhone) handleSendWhatsAppReminder(); }}
+                disabled={!editingInvoice || !customerPhone}
+                title={!editingInvoice ? "Save invoice first" : (!customerPhone ? "Customer phone required" : "Send reminder")}
+                className={`w-full h-[52px] rounded-xl font-bold flex flex-col items-center justify-center gap-1 text-[13px] transition-all shadow-sm border ${
+                  (editingInvoice && customerPhone)
+                    ? 'bg-[#25D366]/10 border-[#25D366]/30 text-[#128C7E] dark:text-[#25D366] hover:bg-[#25D366]/20 cursor-pointer'
+                    : 'bg-theme-surface/50 border-theme-border-soft/40 text-theme-muted cursor-not-allowed'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <Send className="w-4 h-4" />
+                  <span>WhatsApp Reminder</span>
+                </div>
+                {(!editingInvoice || !customerPhone) && (
+                  <span className="text-[9px] text-theme-muted font-medium leading-none">
+                    {!editingInvoice ? 'Save invoice first' : 'Add customer phone'}
+                  </span>
+                )}
               </button>
             </div>
+          </div>
           </div>
         </div>
         {/* CLOSE LEFT WIZARD COLUMN */}
