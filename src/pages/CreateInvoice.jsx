@@ -113,6 +113,7 @@ const CreateInvoice = ({
   const [showPdfSettings, setShowPdfSettings] = useState(false);
   const [isSheetExpanded, setIsSheetExpanded] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [isLivePreviewOpen, setIsLivePreviewOpen] = useState(false);
   const [isMoreActionsOpen, setIsMoreActionsOpen] = useState(false);
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -732,6 +733,12 @@ const CreateInvoice = ({
                 
                 <div className="h-px bg-theme-border-soft my-1" />
                 
+                <button onClick={() => { setShowTopActions(false); setIsLivePreviewOpen(true); }} className="w-full text-left px-3 py-2 text-[13px] font-bold text-theme-primary hover:bg-theme-border-soft rounded-lg flex items-center gap-2 transition-all">
+                  <Eye className="w-4 h-4 text-theme-accent" /> Live Preview
+                </button>
+
+                <div className="h-px bg-theme-border-soft my-1" />
+                
                 <button 
                   disabled={!editingInvoice}
                   onClick={() => { setShowTopActions(false); if(editingInvoice) handleCopyLiveLink(); }}
@@ -758,10 +765,10 @@ const CreateInvoice = ({
         </div>
       </div>
 
-      {/* MAIN LAYOUT: LEFT FORM, RIGHT PREVIEW */}
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(420px,0.9fr)] gap-6 lg:gap-8 items-start w-full">
+      {/* MAIN LAYOUT: CENTERED FORM */}
+      <div className="max-w-[1200px] mx-auto w-full px-4 sm:px-6 lg:px-8 pb-10">
         
-        {/* LEFT COLUMN: WIZARD STEPS */}
+        {/* CENTERED COLUMN: WIZARD STEPS */}
         <div className="w-full space-y-5">
           
           {/* STEP 1: CONFIGURATION & CRM */}
@@ -1647,25 +1654,77 @@ const CreateInvoice = ({
           </div>
         </div>
         </div>
-        {/* CLOSE LEFT WIZARD COLUMN */}
+        {/* CLOSE CENTERED COLUMN */}
+      </div>
 
-      {/* RIGHT COLUMN STICKY LIVE PREVIEW (Desktop Only, Stacked on Mobile) */}
-      <div className="w-full lg:sticky lg:top-28 self-start max-h-[calc(100vh-180px)] overflow-hidden bg-theme-card rounded-3xl border border-theme-border-soft shadow-premium">
-        <div className="bg-theme-accent-light px-4 py-3 flex items-center justify-between border-b border-theme-accent/20">
-          <div className="flex items-center gap-2">
-             <Eye className="w-4 h-4 text-theme-accent" />
-            <span className="text-xs font-bold text-theme-accent uppercase tracking-wider">Live Preview</span>
-          </div>
-          <span className="text-[10px] font-black bg-theme-accent text-white px-2 py-0.5 rounded-full shadow-glow">Auto-updating</span>
-        </div>
-        <div className="p-3 overflow-y-auto no-scrollbar h-[calc(100vh-240px)]">
-          <div className="scale-[0.75] lg:scale-[0.95] origin-top-left w-[133%] lg:w-[105%] transition-all">
-            <InvoicePreview invoice={{ invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, items, taxPercentage, discountAmount, amountPaid, notes, terms, paymentStatus, orderStatus, billType, pdfVisibleFields, businessSnapshot: businessSettings }} currencySymbol={currencySymbol} />
-          </div>
-        </div>
-      </div>
-      {/* CLOSE MAIN FLEX GRID */}
-      </div>
+      {/* LIVE PREVIEW MODAL */}
+      <AnimatePresence>
+        {isLivePreviewOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+            onClick={() => setIsLivePreviewOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-theme-card rounded-3xl shadow-2xl border border-theme-border-soft overflow-hidden"
+            >
+              {/* Modal Header */}
+              <div className="bg-theme-accent-light px-5 py-4 flex items-center justify-between border-b border-theme-accent/20 shrink-0">
+                <div className="flex items-center gap-3">
+                  <Eye className="w-5 h-5 text-theme-accent" />
+                  <h3 className="text-sm font-bold text-theme-accent uppercase tracking-wider">Live Invoice Preview</h3>
+                  <span className="text-[10px] font-black bg-theme-accent text-white px-2.5 py-1 rounded-full shadow-glow ml-2">Auto-updating</span>
+                </div>
+                <button
+                  onClick={() => setIsLivePreviewOpen(false)}
+                  className="p-1.5 hover:bg-theme-border-soft rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-theme-primary" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-1 overflow-y-auto no-scrollbar p-0 bg-gray-50/50 dark:bg-black/20">
+                <div className="mx-auto w-full max-w-[800px] scale-[0.85] sm:scale-95 md:scale-100 origin-top p-4 md:p-8">
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                    <InvoicePreview 
+                      invoice={{ 
+                        invoiceNumber, date, dueDate, customerName, customerPhone, 
+                        customerEmail, customerAddress, items, taxPercentage, discountAmount, 
+                        amountPaid, notes, terms, paymentStatus, orderStatus, billType, 
+                        pdfVisibleFields, businessSnapshot: businessSettings 
+                      }} 
+                      currencySymbol={currencySymbol} 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="bg-theme-app dark:bg-theme-surface p-4 flex gap-3 border-t border-theme-border-soft shrink-0 justify-end">
+                <button
+                  onClick={() => setIsLivePreviewOpen(false)}
+                  className="px-5 py-2.5 text-xs font-bold text-theme-primary hover:bg-theme-border-soft rounded-xl transition-all border border-theme-border-soft"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={handleDownloadPDF}
+                  className="px-5 py-2.5 bg-theme-accent hover:opacity-90 text-white rounded-xl text-xs font-black shadow-md flex items-center justify-center gap-2 transition-all"
+                >
+                  <Download className="w-4 h-4" /> Download PDF
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* SMART COMPOSITE RATE MODAL */}
       {showSmartRate && activeItemIndex !== null && (
