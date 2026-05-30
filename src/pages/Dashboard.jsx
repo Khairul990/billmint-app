@@ -206,7 +206,7 @@ const Dashboard = ({
           <p className="text-xs md:text-sm text-theme-muted font-bold">Welcome back, here is your business summary.</p>
         </div>
 
-        <div className="bg-[image:var(--accent-gradient)] rounded-2xl md:rounded-3xl p-5 md:p-8 text-white shadow-premium relative overflow-hidden">
+        <div className="bg-[image:var(--accent-gradient)] rounded-2xl md:rounded-3xl p-4 md:p-6 text-white shadow-premium relative overflow-hidden">
           <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/20 blur-3xl rounded-full"></div>
           <div className="relative z-10">
             <h2 className="text-lg md:text-2xl font-black mb-1.5 md:mb-2 leading-tight">Create professional invoices in seconds.</h2>
@@ -347,7 +347,7 @@ const Dashboard = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Service Status Card (Left) */}
-          <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
+          <div className="hidden lg:block bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
             <h3 className="font-extrabold text-sm text-theme-primary tracking-tight mb-5 flex items-center gap-2">
               <Activity className="w-4 h-4 text-theme-accent" /> Service Status
             </h3>
