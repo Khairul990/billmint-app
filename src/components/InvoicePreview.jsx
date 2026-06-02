@@ -1,4 +1,5 @@
 import React from 'react';
+import DynamicQRCode from './DynamicQRCode';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { ShieldCheck, Calendar, Hash, FileText } from 'lucide-react';
 
@@ -429,6 +430,25 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
             </div>
           );
         })()
+      )}
+
+      {/* 4.5. PAYMENT PROOFS */}
+      {invoice.paymentProofs && invoice.paymentProofs.length > 0 && (
+        <div className="mt-8 border border-theme-border-soft rounded-2xl p-6 bg-theme-surface/50">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-theme-muted mb-4 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-theme-accent" /> Payment Proofs
+          </h4>
+          <div className="flex flex-wrap gap-4">
+            {invoice.paymentProofs.map((proof, i) => (
+              <a key={i} href={proof.url} target="_blank" rel="noreferrer" className="relative w-24 h-24 rounded-xl border border-theme-border-soft overflow-hidden group shadow-sm hover:shadow-md transition-shadow block">
+                <img src={proof.url} alt={`Payment Proof ${i + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                  <span className="text-white text-[10px] font-bold">View</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* 5. BRAND FOOTER SIGNATURE */}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { isAdminUser } from './utils/adminAccess';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
+import { useThemeEngine } from './hooks/useThemeEngine';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Lock } from 'lucide-react';
 import Layout from './components/Layout';
@@ -30,11 +31,12 @@ import {
   syncFromFirestore,
   enableRealTimeSync,
   getGlobalAdminSettings
-} from './utils/storage';
+} from './services/dbEngine';
 import { downloadInvoicePDF } from './utils/pdfUtils';
-import { auth, firebaseReady } from './utils/firebase';
+import { auth, firebaseReady } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { triggerSuccessFeedback } from './utils/feedback';
+import { sendEmpireEvent, sendEmpireError, sendEmpireHealth } from './services/empireAgent';
 
 const Landing = React.lazy(() => import('./pages/Landing'));
 const Login = React.lazy(() => import('./pages/Login'));
@@ -74,6 +76,13 @@ class ErrorBoundary extends React.Component {
       }
     }
     
+    sendEmpireError({
+      errorType: "app_crash",
+      message: error?.toString() || "Unknown error",
+      severity: "Critical",
+      page: window.location.pathname
+    });
+
     this.setState({ errorInfo });
   }
 
@@ -102,7 +111,7 @@ function App() {
 
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
   const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(getAuthSession() !== null);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [currentTab, setCurrentTab] = useState(() => {
     const saved = localStorage.getItem('billqyro_last_route');
     if (saved) {
@@ -116,6 +125,11 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem('billqyro_last_route', currentTab);
+    sendEmpireEvent({
+      eventType: "page_view",
+      message: `Navigated to ${currentTab}`,
+      page: currentTab
+    });
   }, [currentTab]);
   const [userRole, setUserRole] = useState(() => localStorage.getItem('billqyro_user_role') || 'user');
 
@@ -144,15 +158,15 @@ function App() {
 
   useEffect(() => {
     const path = window.location.pathname;
-    const publicTokenMatch = path.match(/^\/i\/([a-zA-Z0-9_-]+)/);
+    const publicTokenMatch = path.match(/^\/invoice\/([a-zA-Z0-9_-]+)/);
     const urlParams = new URLSearchParams(window.location.search);
-    const tokenFromQuery = urlParams.get('i');
+    const tokenFromQuery = urlParams.get('uuid') || urlParams.get('i');
     const token = (publicTokenMatch ? publicTokenMatch[1] : null) || tokenFromQuery;
 
     if (token) {
       setPublicToken(token);
       setLoadingPublicInvoice(true);
-      import('./utils/storage').then(({ getInvoiceByPublicToken }) => {
+      import('./services/dbEngine').then(({ getInvoiceByPublicToken }) => {
         getInvoiceByPublicToken(token).then((inv) => {
           setPublicInvoice(inv);
           setLoadingPublicInvoice(false);
@@ -170,13 +184,26 @@ function App() {
   const [subscription, setSubscription] = useState(() => getSubscriptionStatus());
 
   
-  // Async Data Loader for IndexedDB
+  // --- 🚀 GLOBAL BOOT & LOADING STATE ---
+  const [isAppBooting, setIsAppBooting] = useState(true);
+
+  // Async Data Loader & Boot Sequence
   useEffect(() => {
     const loadLocalData = async () => {
-      setInvoices(await getInvoices());
-      setCustomers(await getCustomers());
-      setProducts(await getProducts());
-      setExpenses(await getExpenses());
+      sendEmpireEvent({ eventType: "app_opened", message: "BillQyro Web App Opened", page: "init" });
+      sendEmpireHealth({ status: "Healthy", healthScore: 100, note: "App initialized successfully" });
+      
+      try {
+        setInvoices(await getInvoices() || []);
+        setCustomers(await getCustomers() || []);
+        setProducts(await getProducts() || []);
+        setExpenses(await getExpenses() || []);
+      } catch (err) {
+        console.error("Error loading local data:", err);
+      } finally {
+        // Luxury delay for smooth Firebase auth resolution and UI transition
+        setTimeout(() => setIsAppBooting(false), 1500); 
+      }
     };
     loadLocalData();
   }, []);
@@ -188,6 +215,9 @@ function App() {
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
   const [isQuickBillOpen, setIsQuickBillOpen] = useState(false);
+
+  // Initialize Smart SVG Dynamic Theme Engine
+  useThemeEngine(settings);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -259,7 +289,7 @@ function App() {
             localStorage.setItem('billqyro_auth', JSON.stringify(session));
             
             // Re-sync with correct UID
-            import('./utils/storage').then(({ syncFromFirestore }) => {
+            import('./services/dbEngine').then(({ syncFromFirestore }) => {
               syncFromFirestore().then((synced) => {
                 if (synced) {
                   setInvoices(synced.invoices || []);
@@ -313,6 +343,7 @@ function App() {
           // Enable real-time multi-device sync
           enableRealTimeSync();
         } catch (e) {
+          sendEmpireError({ errorType: "sync_failed", message: "Could not sync Firestore on startup", severity: "Medium" });
           console.warn('Could not sync Firestore on startup. Falling back to LocalStorage.', e);
         }
       };
@@ -490,6 +521,13 @@ function App() {
     } else {
       toast.success('Invoice created successfully');
     }
+    
+    sendEmpireEvent({
+      eventType: "invoice_created",
+      message: "Invoice created in BillQyro",
+      page: "create-invoice",
+      metadata: { feature: "invoice", action: "created", privateDataIncluded: false }
+    });
 
     // Trigger haptic & audio feedback
     triggerSuccessFeedback();
@@ -564,6 +602,12 @@ function App() {
       } else {
         toast.success('Customer saved successfully');
       }
+      sendEmpireEvent({
+        eventType: "customer_added",
+        message: "Customer saved",
+        page: "customers",
+        metadata: { feature: "customer", action: "added", privateDataIncluded: false }
+      });
     } catch (error) {
       console.error(error);
       toast.error('Failed to save customer');
@@ -592,6 +636,12 @@ function App() {
       } else {
         toast.success('Product/Service saved successfully');
       }
+      sendEmpireEvent({
+        eventType: "product_added",
+        message: "Product saved",
+        page: "products",
+        metadata: { feature: "product", action: "added", privateDataIncluded: false }
+      });
     } catch (error) {
       console.error(error);
       toast.error('Failed to save product');
@@ -642,6 +692,12 @@ function App() {
       const updatedSettings = await saveSettings(payload);
       setSettings(updatedSettings);
       toast.success('Settings saved successfully');
+      sendEmpireEvent({
+        eventType: "settings_updated",
+        message: "App settings updated",
+        page: "settings",
+        metadata: { privateDataIncluded: false }
+      });
     } catch (error) {
       console.error(error);
       toast.error('Failed to save settings');
@@ -685,7 +741,21 @@ function App() {
       .then((ok) => {
         if (ok) {
           console.log(`Successfully generated vector PDF for ${invoice.invoiceNumber}`);
+          sendEmpireEvent({
+            eventType: "pdf_downloaded",
+            message: "Invoice PDF generated",
+            page: "invoice",
+            metadata: { feature: "pdf", action: "downloaded", privateDataIncluded: false }
+          });
         }
+      })
+      .catch((err) => {
+        sendEmpireError({
+          errorType: "pdf_failed",
+          message: err?.toString() || "PDF generation failed",
+          severity: "Medium",
+          page: "invoice"
+        });
       });
   };
 
@@ -714,6 +784,7 @@ function App() {
             invoices={invoices}
             customers={customers}
             products={products}
+            expenses={expenses}
             onViewInvoice={(inv) => {
               setEditingInvoice(inv);
               setCurrentTab('invoices');
@@ -945,62 +1016,106 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <PostLoginWelcome 
-        show={showWelcomeAnimation} 
-        userName={settings?.businessName || ''} 
-        onComplete={() => setShowWelcomeAnimation(false)} 
-      />
-      <Layout
-        currentTab={currentTab}
-        setCurrentTab={(tab) => {
-          if (tab !== 'create-invoice') {
-            setEditingInvoice(null);
-          }
-          setCurrentTab(tab);
-        }}
-        onLogout={handleLogout}
-        businessSettings={settings}
-        isAuthenticated={isAuthenticated}
-        userRole={userRole}
-        invoices={invoices}
-        subscription={subscription}
-        userEmail={getAuthSession()?.userEmail}
-        onQuickBillOpen={() => setIsQuickBillOpen(true)}
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentTab}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="w-full h-full"
+      <AnimatePresence mode="wait">
+        {isAppBooting ? (
+          <motion.div 
+            key="global-loader"
+            exit={{ opacity: 0, transition: { duration: 0.6, ease: 'easeInOut' } }}
+            className="fixed inset-0 z-[9999] bg-theme-main flex flex-col items-center justify-center font-sans"
           >
-            <React.Suspense fallback={
-              <div className="flex h-64 items-center justify-center">
-                <div className="w-10 h-10 border-4 border-theme-border-soft border-t-theme-accent rounded-full animate-spin"></div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              className="flex flex-col items-center"
+            >
+              {/* Premium Logo Pulse Effect */}
+              <div className="relative flex items-center justify-center w-24 h-24 mb-6">
+                <div className="absolute inset-0 bg-theme-accent/20 rounded-3xl animate-ping" style={{ animationDuration: '2s' }}></div>
+                <div className="absolute inset-0 bg-theme-accent/30 rounded-3xl blur-xl animate-pulse"></div>
+                <div className="relative z-10 w-20 h-20 bg-gradient-to-tr from-theme-accent to-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl border border-white/10">
+                  <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
               </div>
-            }>
-              {renderTabContent()}
-            </React.Suspense>
+              <h1 className="text-2xl font-black text-white tracking-tight">BillQyro</h1>
+              <p className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mt-2 animate-pulse">
+                Initializing Secure Workspace
+              </p>
+              
+              {/* Glassmorphism Skeleton Loader Bar */}
+              <div className="w-48 h-1 bg-theme-surface rounded-full mt-8 overflow-hidden shadow-inner">
+                <motion.div 
+                  initial={{ x: '-100%' }}
+                  animate={{ x: '200%' }}
+                  transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                  className="w-1/2 h-full bg-gradient-to-r from-transparent via-theme-accent to-transparent"
+                ></motion.div>
+              </div>
+            </motion.div>
           </motion.div>
-        </AnimatePresence>
-        
-        <QuickBillModal 
-          isOpen={isQuickBillOpen}
-          onClose={() => setIsQuickBillOpen(false)}
-          onSave={handleSaveInvoice}
-          businessSettings={settings}
-          invoices={invoices}
-        />
-      </Layout>
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          className: 'text-sm font-bold',
-          style: { borderRadius: '12px', background: '#fff', color: '#1e293b' }
-        }}
-      />
+        ) : (
+          <motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="w-full h-full">
+            <PostLoginWelcome 
+              show={showWelcomeAnimation} 
+              userName={settings?.businessName || ''} 
+              onComplete={() => setShowWelcomeAnimation(false)} 
+            />
+            <Layout
+              currentTab={currentTab}
+              setCurrentTab={(tab) => {
+                if (tab !== 'create-invoice') {
+                  setEditingInvoice(null);
+                }
+                setCurrentTab(tab);
+              }}
+              onLogout={handleLogout}
+              businessSettings={settings}
+              isAuthenticated={isAuthenticated}
+              userRole={userRole}
+              invoices={invoices}
+              subscription={subscription}
+              userEmail={getAuthSession()?.userEmail}
+              onQuickBillOpen={() => setIsQuickBillOpen(true)}
+            >
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentTab}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  className="w-full h-full"
+                >
+                  <React.Suspense fallback={
+                    <div className="flex h-64 items-center justify-center">
+                      <div className="w-10 h-10 border-4 border-theme-border-soft border-t-theme-accent rounded-full animate-spin"></div>
+                    </div>
+                  }>
+                    {renderTabContent()}
+                  </React.Suspense>
+                </motion.div>
+              </AnimatePresence>
+              
+              <QuickBillModal 
+                isOpen={isQuickBillOpen}
+                onClose={() => setIsQuickBillOpen(false)}
+                onSave={handleSaveInvoice}
+                businessSettings={settings}
+                invoices={invoices}
+              />
+            </Layout>
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                className: 'text-sm font-bold',
+                style: { borderRadius: '12px', background: '#fff', color: '#1e293b' }
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </ErrorBoundary>
   );
 }

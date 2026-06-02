@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
+import { toast } from 'react-hot-toast';
 import StatCard from '../components/StatCard';
 import InvoiceCard from '../components/InvoiceCard';
 import NewUserGuide from '../components/NewUserGuide';
@@ -36,9 +37,9 @@ import {
   Smartphone
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
-import { firebaseReady } from '../utils/firebase';
+import { firebaseReady } from '../services/firebaseConfig';
 import PullToRefresh from '../components/PullToRefresh';
-import { syncFromFirestore } from '../utils/storage';
+import { syncFromFirestore, getInvoices, getCustomers, getExpenses, getSettings } from '../services/dbEngine';
 
 /**
  * High-End SaaS Dashboard with SVG Charts & WhatsApp Reminders
@@ -47,6 +48,7 @@ const Dashboard = ({
   invoices = [],
   customers = [],
   products = [],
+  expenses = [],
   onViewInvoice,
   onEditInvoice,
   onDeleteInvoice,
@@ -109,7 +111,8 @@ const Dashboard = ({
       months.push({
         key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
         label: d.toLocaleString('default', { month: 'short' }),
-        total: 0
+        revenue: 0,
+        expenses: 0
       });
     }
 
@@ -118,7 +121,16 @@ const Dashboard = ({
       const invMonthKey = inv.date.substring(0, 7); // "YYYY-MM"
       const match = months.find(m => m.key === invMonthKey);
       if (match) {
-        match.total += (inv.grandTotal || 0);
+        match.revenue += (inv.grandTotal || 0);
+      }
+    });
+
+    expenses.forEach(exp => {
+      if (!exp.date) return;
+      const expMonthKey = exp.date.substring(0, 7);
+      const match = months.find(m => m.key === expMonthKey);
+      if (match) {
+        match.expenses += parseFloat(exp.amount || 0);
       }
     });
 
@@ -131,7 +143,7 @@ const Dashboard = ({
   const sendWhatsAppReminder = (invoice) => {
     const phone = invoice.customerPhone || '';
     if (!phone) {
-      alert('This customer does not have a saved phone number. Please edit their details in the CRM.');
+      toast.error('This customer does not have a saved phone number. Please edit their details in the CRM.');
       return;
     }
 
@@ -289,7 +301,7 @@ const Dashboard = ({
             </div>
             <div className="space-y-3">
               {recentInvoices.map((inv) => (
-                <div key={inv.id} className="group flex items-center justify-between p-3.5 bg-theme-app hover:bg-theme-surface rounded-2xl border border-theme-border-soft transition-all cursor-pointer" onClick={() => { setEditingInvoice(inv); setCurrentTab('create'); }}>
+                <div key={inv.id} className="group flex items-center justify-between p-3.5 bg-theme-app hover:bg-theme-surface rounded-2xl border border-theme-border-soft transition-all cursor-pointer" onClick={() => { onEditInvoice(inv); setCurrentTab('create'); }}>
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-theme-surface group-hover:bg-theme-card flex items-center justify-center transition-colors">
                       <FileText className="w-4 h-4 text-theme-muted group-hover:text-theme-accent transition-colors" />
@@ -316,36 +328,29 @@ const Dashboard = ({
             </div>
           </div>
 
-          {/* Business Summary Circular Chart Card (Right) */}
-          <div className="lg:col-span-1 bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium flex flex-col">
+          {/* Business Summary Chart Card (Right) */}
+          <div className="lg:col-span-1 bg-theme-card rounded-3xl p-5 md:p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
-                <PieChart className="w-4 h-4 text-theme-accent" /> Business Summary
+                <TrendingUp className="w-4 h-4 text-theme-accent" /> Revenue vs Expenses
               </h3>
             </div>
-            <div className="flex-1 flex items-center justify-center py-4">
-              <div className="relative w-40 h-40 md:w-48 md:h-48">
-                <div 
-                  className="w-full h-full rounded-full"
-                  style={{
-                    background: `conic-gradient(var(--accent) ${totalRevenue > 0 ? (totalPaid/totalRevenue)*100 : 0}%, #fbbf24 0)`
-                  }}
-                ></div>
-                <div className="absolute inset-3 rounded-full bg-theme-card flex items-center justify-center flex-col shadow-inner">
-                  <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Total Rev</span>
-                  <span className="text-sm md:text-base font-black text-theme-primary mt-1">{formatCurrency(totalRevenue, currencySymbol)}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-center gap-6 pt-4 border-t border-theme-border-soft">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-theme-accent"></span>
-                <span className="text-[10px] font-bold text-theme-muted">Paid: <span className="text-theme-primary">{formatCurrency(totalPaid, currencySymbol)}</span></span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-theme-warning"></span>
-                <span className="text-[10px] font-bold text-theme-muted">Due: <span className="text-theme-primary">{formatCurrency(totalDue, currencySymbol)}</span></span>
-              </div>
+            <div className="flex-1 w-full min-h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-slate-200 dark:text-slate-800" />
+                  <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} className="text-theme-muted" />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10 }} className="text-theme-muted" tickFormatter={(val) => `${val / 1000}k`} />
+                  <Tooltip 
+                    cursor={{ fill: 'transparent' }}
+                    contentStyle={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border-soft)', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}
+                    formatter={(value) => [formatCurrency(value, currencySymbol), '']}
+                  />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', paddingTop: '10px' }} />
+                  <Bar dataKey="revenue" name="Revenue" fill="var(--accent)" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Bar dataKey="expenses" name="Expenses" fill="var(--danger, #ef4444)" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 

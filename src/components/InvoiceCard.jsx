@@ -9,7 +9,7 @@ import {
   generateEmailShareLink,
   generateInvoiceShareText
 } from '../utils/shareUtils';
-import { ensureInvoicePublicToken } from '../utils/storage';
+import { ensureInvoicePublicToken } from '../services/dbEngine';
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
@@ -282,7 +282,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                                 toast.error('Could not create live link. Please try again.');
                                 return;
                               }
-                              const liveLink = `${window.location.origin}/i/${token}`;
+                              const liveLink = `${window.location.origin}/invoice/${token}`;
                               await navigator.clipboard.writeText(liveLink);
                               toast.success('Live Invoice Link copied to clipboard!');
                               setShowShareMenu(false);
@@ -357,7 +357,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
               <button
                 onClick={() => {
                   toast.loading('Retrying sync...', { id: 'retrySync' });
-                  import('../utils/storage').then(m => m.retrySyncInvoice(invoice.id)).then(res => {
+                  import('../services/dbEngine').then(m => m.retrySyncInvoice(invoice.id)).then(res => {
                     toast.dismiss('retrySync');
                   });
                 }}

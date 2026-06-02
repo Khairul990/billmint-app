@@ -21,8 +21,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
-import { getFirebaseUserId, submitPremiumRequest } from '../utils/storage';
-import { db, firebaseReady } from '../utils/firebase';
+import { getFirebaseUserId, submitPremiumRequest } from '../services/dbEngine';
+import { db, firebaseReady } from '../services/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 
 const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {

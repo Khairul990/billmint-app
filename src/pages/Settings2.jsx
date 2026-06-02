@@ -179,12 +179,12 @@ const Settings = ({
   isAppInstalled = false,
   onInstallApp
 }) => {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState('business_profile');
 
   const [storageInfo, setStorageInfo] = useState(null);
   
   useEffect(() => {
-    if (activeTab === 'storage') {
+    if (activeTab === 'data_backup') {
       try {
         setStorageInfo(getStorageUsage());
       } catch (e) {
@@ -337,13 +337,12 @@ const Settings = ({
   // Global Admin State
   const [adminGlobalTheme, setAdminGlobalTheme] = useState('pink');
   const [adminGlobalMode, setAdminGlobalMode] = useState('light');
-  const [globalSettings, setGlobalSettings] = useState(null);
 
   const fetchAdminData = async () => {
     if (!isAdmin) return;
     setLoadingAdminData(true);
     try {
-      const [users, requests, fetchedGlobalSettings] = await Promise.all([
+      const [users, requests, globalSettings] = await Promise.all([
         getAdminUsersList(),
         getAdminPremiumRequests(),
         getGlobalAdminSettings()
@@ -353,10 +352,9 @@ const Settings = ({
       const sortedRequests = (requests || []).sort((a, b) => b.createdAt - a.createdAt);
       setAdminRequests(sortedRequests);
       
-      if (fetchedGlobalSettings) {
-        setGlobalSettings(fetchedGlobalSettings);
-        if (fetchedGlobalSettings.defaultTheme) setAdminGlobalTheme(fetchedGlobalSettings.defaultTheme);
-        if (fetchedGlobalSettings.defaultMode) setAdminGlobalMode(fetchedGlobalSettings.defaultMode);
+      if (globalSettings) {
+        if (globalSettings.defaultTheme) setAdminGlobalTheme(globalSettings.defaultTheme);
+        if (globalSettings.defaultMode) setAdminGlobalMode(globalSettings.defaultMode);
       }
       
       setLoadingAdminData(false);
@@ -409,7 +407,7 @@ const Settings = ({
 
   const handleConfirmRejectRequest = async () => {
     if (!rejectionReasonInput.trim()) {
-      alert('Please specify a rejection reason.');
+      toast.error('Please specify a rejection reason.');
       return;
     }
     const requestId = showRejectionModalFor;
@@ -516,25 +514,25 @@ const Settings = ({
   const handleSave = (e) => {
     if (e) e.preventDefault();
     if (!businessName) {
-      alert('Please specify a Business Name.');
+      toast.error('Please specify a Business Name.');
       return;
     }
 
     if (paymentQrEnabled) {
       if (paymentMethod === 'UPI' && !upiId.trim()) {
-        alert('Please specify your UPI ID.');
+        toast.error('Please specify your UPI ID.');
         return;
       }
       if (paymentMethod === 'bKash' && !bkashNumber.trim()) {
-        alert('Please specify your bKash Number.');
+        toast.error('Please specify your bKash Number.');
         return;
       }
       if (paymentMethod === 'Nagad' && !nagadNumber.trim()) {
-        alert('Please specify your Nagad Number.');
+        toast.error('Please specify your Nagad Number.');
         return;
       }
       if (paymentMethod === 'Manual' && !customPaymentLink.trim()) {
-        alert('Please specify your Custom Payment Link / QR Text.');
+        toast.error('Please specify your Custom Payment Link / QR Text.');
         return;
       }
     }
@@ -634,7 +632,7 @@ const Settings = ({
       downloadAnchor.click();
       downloadAnchor.remove();
     } catch (error) {
-      alert(`Export failed: ${error.message}`);
+      toast.error(`Export failed: ${error.message}`);
     }
   };
 
@@ -648,12 +646,12 @@ const Settings = ({
         const parsedData = JSON.parse(event.target.result);
         if (onImportBackup) {
           onImportBackup(parsedData);
-          alert('Database successfully restored from backup!');
+          toast.success('Database successfully restored from backup!');
         } else {
-          alert('Import feature not properly wired in the system.');
+          toast.error('Import feature not properly wired in the system.');
         }
       } catch (error) {
-        alert(`Failed to import backup: ${error.message}`);
+        toast.error(`Failed to import backup: ${error.message}`);
       }
     };
     reader.readAsText(file);
@@ -662,7 +660,7 @@ const Settings = ({
   const handleResetData = () => {
     if (confirm('CAUTION: This will wipe out all invoices, customers, and catalog items, replacing them with default demo assets. Proceed?')) {
       onResetDemo();
-      alert('Database successfully reset to demo data!');
+      toast.success('Database successfully reset to demo data!');
     }
   };
 
@@ -723,27 +721,14 @@ const Settings = ({
       if (type === 'Customers') clearCustomers();
       if (type === 'Products') clearProducts();
       if (type === 'Expenses') clearExpenses();
-      alert(`${type} have been completely wiped.`);
+      toast.success(`${type} have been completely wiped.`);
       window.location.reload();
     }
   };
 
-  const handleExportData = async () => {
-    try {
-      await exportBackup();
-      toast.success('Backup exported successfully');
-    } catch (e) {
-      toast.error('Failed to export backup');
-    }
-  };
-
-  const handleImportData = async (e) => {
-    toast.error('Import is not fully implemented in this view yet.');
-  };
-
   const handleForceSync = () => {
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
-    alert('Forced local data to sync with Cloud (if configured).');
+    toast.success('Forced local data to sync with Cloud (if configured).');
   };
 
   // Firebase status
@@ -812,64 +797,45 @@ const Settings = ({
         </button>
       </div>
 
-      {/* Modern 5-Tab Selection Menu */}
-      <div className="flex bg-theme-surface dark:bg-theme-card dark:bg-theme-card/60 p-1.5 rounded-2xl mb-6 overflow-x-auto no-scrollbar gap-1">
-        {[
-          { id: 'profile', label: 'Profile', icon: Building2 },
-          { id: 'theme', label: 'Theme Studio', icon: Palette },
-          { id: 'regional', label: 'Regional', icon: Globe },
-          { id: 'payment', label: 'Payments', icon: QrCode },
-          { id: 'preferences', label: 'Invoices', icon: FileText },
-          { id: 'livelink', label: 'Links', icon: Link },
-          { id: 'premiumux', label: 'UX', icon: Smartphone },
-          { id: 'pwa', label: 'App', icon: Download },
-          { id: 'storage', label: 'Backup', icon: Database }
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isSelected = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all cursor-pointer border ${
-                isSelected 
-                  ? 'bg-[image:var(--accent-gradient)] border-theme-accent text-white shadow-md scale-105' 
-                  : 'bg-theme-app dark:bg-theme-surface/30 border-transparent text-theme-muted hover:bg-theme-card dark:hover:bg-theme-card hover:border-theme-border-soft hover:shadow-sm hover:text-theme-primary transition-all duration-300'
-              }`}
-            >
-              <Icon className={`w-5 h-5 mb-1.5 ${isSelected ? 'text-white' : 'text-theme-muted'}`} />
-              <span className={`text-[10px] font-bold tracking-wide uppercase ${isSelected ? 'text-white' : 'text-theme-muted'}`}>
-                {tab.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {/* Main Settings Layout */}
+      <div className="flex flex-col md:flex-row gap-6">
+        
+        {/* Sidebar Menu */}
+        <div className="w-full md:w-64 shrink-0">
+          <div className="flex flex-row md:flex-col bg-theme-surface dark:bg-theme-card/60 p-2 rounded-3xl overflow-x-auto no-scrollbar gap-2 md:sticky md:top-6">
+            {[
+              { id: 'business_profile', label: 'Business Profile', icon: Building2 },
+              { id: 'theme_studio', label: 'Theme Studio', icon: Palette },
+              { id: 'admin_console', label: 'Admin Console', icon: ShieldAlert },
+              { id: 'data_backup', label: 'Data Backup', icon: Database }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isSelected = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-3 p-4 rounded-2xl transition-all cursor-pointer whitespace-nowrap ${
+                    isSelected 
+                      ? 'bg-[image:var(--accent-gradient)] text-white shadow-md' 
+                      : 'bg-transparent text-theme-muted hover:bg-theme-card dark:hover:bg-theme-card hover:text-theme-primary'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 shrink-0 ${isSelected ? 'text-white' : 'text-theme-muted'}`} />
+                  <span className={`text-xs font-black tracking-wide uppercase ${isSelected ? 'text-white' : 'text-theme-muted'}`}>
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-      {/* Tabs Content Sections */}
-      <div className="space-y-6">
+        {/* Content Area */}
+        <div className="flex-1 space-y-6">
 
         {/* 1. BUSINESS PROFILE TAB */}
-        {activeTab === 'profile' && (
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-6 animate-fadeIn">
-            <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-              <div className="w-10 h-10 rounded-xl bg-theme-accent-light dark:bg-theme-accent-light/40 text-theme-accent dark:text-theme-accent flex items-center justify-center">
-                <Building2 className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Business Profile</h2>
-                <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Public Company Details</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Registered Business Name</label>
-                <input
-                  type="text"
-                  required
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
+        
                   placeholder="e.g. BillQyro Technologies"
                   className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-slate-805 dark:text-theme-primary font-bold"
                 />
@@ -1008,82 +974,7 @@ const Settings = ({
         )}
 
         {/* 1.5 BRAND THEME STUDIO TAB */}
-        {activeTab === 'theme' && (
-          <div className="space-y-6 animate-fadeIn">
-            {/* Studio Header */}
-            <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-theme-accent-light dark:bg-theme-accent-light/40 text-theme-accent dark:text-theme-accent flex items-center justify-center">
-                <Palette className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary">Brand Theme Studio</h2>
-                <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Customize the look of your BillQyro workspace and invoice PDF</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left Column: Preset Selectors & Controls */}
-              <div className="lg:col-span-5 space-y-5">
-                
-                {/* Light/Dark Mode Toggle */}
-                <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xs font-black uppercase text-theme-primary dark:text-theme-primary tracking-wider">Dark Mode</h3>
-                    <p className="text-[10px] text-theme-muted font-medium">Use a dark aesthetic across your dashboard.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDarkMode(!darkMode);
-                      // Instantly toggle the class so the preview is accurate
-                      if (!darkMode) {
-                        document.documentElement.classList.add('dark');
-                      } else {
-                        document.documentElement.classList.remove('dark');
-                      }
-                    }}
-                    className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${darkMode ? 'bg-theme-accent' : 'bg-theme-border-strong dark:bg-theme-surface'}`}
-                  >
-                    <span className={`absolute top-1 left-1 bg-theme-card w-4 h-4 rounded-full transition-transform duration-300 ${darkMode ? 'translate-x-6' : ''}`} />
-                  </button>
-                </div>
-
-                <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-5">
-                  <h3 className="text-xs font-black uppercase text-theme-muted tracking-wider">Select Brand Color</h3>
-                  
-                  {/* Theme Presets List */}
-                  <div className="space-y-3">
-                    {[
-                        { id: 'pink', name: 'Pink Premium', desc: 'Deep navy backgrounds with premium pink accents. Best for SaaS.', colors: ['#10122B', '#EC4899', '#FB7185'] },
-                        { id: 'indigo', name: 'Royal Indigo', desc: 'Deep indigo and vibrant purple for an elegant touch.', colors: ['#312E81', '#5B34D6', '#7C3AED'] },
-                        { id: 'emerald', name: 'Emerald Business', desc: 'Rich emerald greens for eco and finance sectors.', colors: ['#12372A', '#059669', '#34D399'] },
-                        { id: 'rose', name: 'Rose Gold Luxe', desc: 'Warm rose and gold accents on dark brown backgrounds.', colors: ['#3A1F1A', '#F43F5E', '#D4A44A'] },
-                        { id: 'midnight', name: 'Midnight Blue', desc: 'Deep blues and cyan for a professional marine look.', colors: ['#081A35', '#2563EB', '#38BDF8'] },
-                        { id: 'champagne', name: 'Champagne Black', desc: 'Elegant black and champagne gold for high-end feel.', colors: ['#1E1A15', '#D6A84F', '#F97316'] },
-                        { id: 'ruby', name: 'Ruby Burgundy', desc: 'Deep burgundy and ruby for a rich, vibrant aesthetic.', colors: ['#2B1220', '#BE185D', '#7C2D12'] }
-                      ].map((preset) => {
-                      const isSelected = themeColor === preset.id;
-                      return (
-                        <button
-                          key={preset.id}
-                          type="button"
-                          onClick={() => {
-                            setThemeColor(preset.id);
-                            document.documentElement.setAttribute('data-theme', preset.id);
-                            import('../utils/themeIcon').then(m => m.updateFaviconForTheme(preset.id));
-                          }}
-                          className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden cursor-pointer flex flex-col gap-2 ${
-                            isSelected 
-                              ? 'border-theme-accent bg-theme-accent/[0.03] shadow-premium glow-emerald' 
-                              : 'border-theme-border-soft/60 dark:border-theme-border-soft hover:border-slate-350 dark:hover:border-slate-700 bg-theme-app/50 dark:bg-theme-surface'
-                          }`}
-                        >
-                          <div className="flex justify-between items-center w-full">
-                            <span className="text-xs font-extrabold text-slate-850 dark:text-theme-primary">{preset.name}</span>
-                            <div className="flex gap-1 items-center">
-                              {preset.colors.map((c, i) => (
-                                <span key={i} className="w-3.5 h-3.5 rounded-full border border-white/20 shadow-sm" style={{ backgroundColor: c }}></span>
-                              ))}
+        
                             </div>
                           </div>
                           <p className="text-[10px] text-theme-muted dark:text-theme-muted font-semibold leading-relaxed pr-6">{preset.desc}</p>
@@ -1298,24 +1189,7 @@ const Settings = ({
         )}
 
         {/* 2. REGIONAL SETTINGS TAB */}
-        {activeTab === 'regional' && (
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-6 animate-fadeIn">
-            <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-              <div className="w-10 h-10 rounded-xl bg-theme-accent-light dark:bg-theme-accent-light/40 text-theme-accent dark:text-theme-accent flex items-center justify-center">
-                <Globe className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Regional Settings</h2>
-                <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Localization, currency, and language</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Workspace Country</label>
-                <select
-                  value={country}
-                  onChange={(e) => handleCountryAutoConfigure(e.target.value)}
+        
                   className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 >
                   <option value="India">🇮🇳 India</option>
@@ -1431,27 +1305,7 @@ const Settings = ({
         )}
 
         {/* 3. PAYMENT SETTINGS TAB */}
-        {activeTab === 'payment' && (
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-6 animate-fadeIn">
-            <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-              <div className="w-10 h-10 rounded-xl bg-theme-accent-light dark:bg-theme-accent-light/40 text-theme-accent dark:text-theme-accent flex items-center justify-center">
-                <QrCode className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Payment Settings</h2>
-                <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Automated billing QR configuration</p>
-              </div>
-            </div>
-
-            {/* Enable switch */}
-            <div className="flex items-center justify-between p-4 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-slate-750 rounded-2xl">
-              <div>
-                <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-theme-secondary block">Enable Automated Scan-to-Pay QR Code</span>
-                <span className="text-[10px] text-theme-muted font-medium">Embed automated scanning codes on bills and invoice pages</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPaymentQrEnabled(!paymentQrEnabled)}
+        
                 className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${paymentQrEnabled ? 'bg-theme-accent' : 'bg-theme-border-strong dark:bg-theme-surface'}`}
               >
                 <div className={`w-4 h-4 bg-theme-card dark:bg-theme-card rounded-full absolute top-1 transition-all duration-300 ${paymentQrEnabled ? 'left-7' : 'left-1'}`}></div>
@@ -1603,24 +1457,7 @@ const Settings = ({
         )}
 
         {/* 4. INVOICE PREFERENCES TAB */}
-        {activeTab === 'preferences' && (
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-6 animate-fadeIn">
-            <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-              <div className="w-10 h-10 rounded-xl bg-theme-accent-light dark:bg-theme-accent-light/40 text-theme-accent dark:text-theme-accent flex items-center justify-center">
-                <Palette className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Invoice Preferences</h2>
-                <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Invoice templates, numbering, and color accents</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Primary Invoice Layout Structure</label>
-                <select
-                  value={invoiceTemplate}
-                  onChange={(e) => setInvoiceTemplate(e.target.value)}
+        
                   className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 >
                   <option value="modern">Modern A4 Template Layout</option>
@@ -1730,39 +1567,7 @@ const Settings = ({
         )}
 
         {/* 5. CUSTOMER LIVE LINK SETTINGS TAB */}
-        {activeTab === 'livelink' && (
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-6 animate-fadeIn">
-            <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-              <div className="w-10 h-10 rounded-xl bg-theme-accent-light dark:bg-theme-accent-light/40 text-theme-accent dark:text-theme-accent flex items-center justify-center">
-                <Link className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Customer Live Link Settings</h2>
-                <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Configure what public customers see and interact with</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-              {/* Checkboxes */}
-              {[
-                { state: enableLiveLink, setter: setEnableLiveLink, label: 'Enable Secure Live Link', desc: 'Generate unique public url endpoints for customers' },
-                { state: showPaymentQrOnLink, setter: setShowPaymentQrOnLink, label: 'Show Payment QR Code', desc: 'Display scan-to-pay QR module on public invoice pages' },
-                { state: allowPdfDownload, setter: setAllowPdfDownload, label: 'Allow Customer PDF Download', desc: 'Allow client to print/download official invoice PDF documents' },
-                { state: allowPaymentProofSubmit, setter: setAllowPaymentProofSubmit, label: 'Allow Payment Proof Submission', desc: 'Render "I Have Paid" flow to submit payment proofs' },
-                { state: showPaidDueAmount, setter: setShowPaidDueAmount, label: 'Show Paid & Due Amounts', desc: 'Explicitly display amount collected vs balance due totals' },
-                { state: showContactButton, setter: setShowContactButton, label: 'Show Contact Support Button', desc: 'Embed rapid email/phone direct links for customers' },
-                { state: requireTransactionId, setter: setRequireTransactionId, label: 'Require Transaction Reference ID', desc: 'Make Transaction ID mandatory in the proof verification flow' },
-                { state: requirePaymentScreenshot, setter: setRequirePaymentScreenshot, label: 'Require Payment Screenshot Proof', desc: 'Make file upload mandatory to submit "I Have Paid"' }
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-start justify-between p-3.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl">
-                  <div className="mr-3">
-                    <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-slate-250 block">{item.label}</span>
-                    <span className="text-[9px] text-theme-muted dark:text-theme-muted font-semibold">{item.desc}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => item.setter(!item.state)}
+        
                     className={`w-9 h-5 rounded-full relative transition-colors duration-300 shrink-0 mt-0.5 focus:outline-none ${item.state ? 'bg-theme-accent' : 'bg-slate-350 dark:bg-theme-surface'}`}
                   >
                     <div className={`w-3 h-3 bg-theme-card dark:bg-theme-card rounded-full absolute top-1 transition-all duration-300 ${item.state ? 'left-5' : 'left-1'}`}></div>
@@ -1775,31 +1580,7 @@ const Settings = ({
         )}
 
         {/* 5.5 PREMIUM UX SETTINGS TAB */}
-        {activeTab === 'premiumux' && (
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-6 animate-fadeIn">
-            <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-              <div className="w-10 h-10 rounded-xl bg-theme-accent-light dark:bg-theme-accent-light/40 text-theme-accent dark:text-theme-accent flex items-center justify-center">
-                <Smartphone className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Premium Mobile UX</h2>
-                <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Configure haptic vibrations and premium sounds</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { state: enableHaptics, setter: setEnableHaptics, label: 'Enable Haptic Feedback', desc: 'Vibrate on success, errors, and key actions' },
-                { state: enableSounds, setter: setEnableSounds, label: 'Enable Premium Sounds', desc: 'Play satisfying audio cues when bills are saved' }
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-start justify-between p-3.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl">
-                  <div className="mr-3">
-                    <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-slate-250 block">{item.label}</span>
-                    <span className="text-[9px] text-theme-muted dark:text-theme-muted font-semibold">{item.desc}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => item.setter(!item.state)}
+        
                     className={`w-9 h-5 rounded-full relative transition-colors duration-300 shrink-0 mt-0.5 focus:outline-none ${item.state ? 'bg-theme-accent' : 'bg-slate-350 dark:bg-theme-surface'}`}
                   >
                     <div className={`w-3 h-3 bg-theme-card dark:bg-theme-card rounded-full absolute top-1 transition-all duration-300 ${item.state ? 'left-5' : 'left-1'}`}></div>
@@ -1812,113 +1593,7 @@ const Settings = ({
 
         
           {/* 7. STORAGE & HEALTH TAB */}
-          {activeTab === 'storage' && (
-            <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-6 animate-fadeIn">
-              <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-                <div className="p-3 rounded-2xl bg-gradient-to-br from-theme-accent/20 to-theme-accent2/20 text-theme-accent">
-                  <Database size={28} className="drop-shadow-sm" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-theme-text to-theme-text/70 dark:from-theme-dark-text dark:to-theme-dark-text/70">Data Backup & Storage</h2>
-                  <p className="text-theme-text-soft dark:text-theme-dark-text-soft text-sm">Monitor and manage your business data safely</p>
-                </div>
-              </div>
-
-              {storageInfo && (
-                <div className="space-y-4">
-
-                  <div className="bg-theme-bg/50 dark:bg-theme-dark-bg/50 rounded-2xl p-6 border border-theme-border-soft dark:border-theme-border-soft relative overflow-hidden group hover:border-theme-accent/30 transition-all duration-300">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold text-theme-text dark:text-theme-dark-text">LocalStorage Usage</span>
-                      <span className={`font-bold ${storageInfo.percentage > 95 ? 'text-theme-danger' : storageInfo.percentage > 80 ? 'text-theme-warning' : 'text-theme-success'}`}>
-                        {storageInfo.percentage}% ({storageInfo.kb} / {storageInfo.limitKb} KB)
-                      </span>
-                    </div>
-                    <div className="w-full bg-theme-border-soft dark:bg-theme-border-soft/50 rounded-full h-3 overflow-hidden">
-                      <div 
-                        className={`h-3 rounded-full transition-all duration-1000 ${storageInfo.percentage > 95 ? 'bg-red-500' : storageInfo.percentage > 80 ? 'bg-theme-warning/50' : 'bg-theme-success'}`} 
-                        style={{ width: `${storageInfo.percentage}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft mt-2">
-                      {storageInfo.percentage > 95 ? 'CRITICAL: Clear cache or delete items.' : storageInfo.percentage > 80 ? 'WARNING: Usage is getting high.' : 'SAFE: Storage is healthy.'}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                    <button 
-                      onClick={handleExport}
-                      className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left"
-                    >
-                      <Database className="text-theme-success" size={24} />
-                      <div>
-                        <div className="font-semibold text-theme-text dark:text-theme-dark-text">Download Full Backup</div>
-                        <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Save a complete offline JSON backup of your workspace</div>
-                      </div>
-                    </button>
-                    
-                    <div className="flex flex-col gap-2">
-                      <div className="text-[10px] text-theme-warning dark:text-theme-warning/80 font-bold uppercase tracking-wider px-1">
-                        ⚠️ This will NOT delete invoices or customers. Recommendation: Download Backup first.
-                      </div>
-                      <button 
-                        onClick={handleClearCacheOnly}
-                        className="flex items-center gap-3 p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 transition-colors text-left h-full"
-                      >
-                        <RotateCcw className="text-blue-500" size={24} />
-                        <div>
-                          <div className="font-semibold text-theme-text dark:text-theme-dark-text">Clear App Cache</div>
-                          <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Fixes UI bugs by resetting temporary local cache</div>
-                        </div>
-                      </button>
-                    </div>
-                    
-                    {isAdmin && (
-                      <>
-                        <button 
-                          onClick={handleCleanTemporaryData}
-                          className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left"
-                        >
-                          <RefreshCw className="text-theme-success" size={24} />
-                          <div>
-                            <div className="font-semibold text-theme-text dark:text-theme-dark-text">Clean Temporary Data</div>
-                            <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Clear logs & old sync queue</div>
-                          </div>
-                        </button>
-
-                        <button 
-                          onClick={handleCleanDuplicateDrafts}
-                          className="flex items-center gap-3 p-4 rounded-xl border border-amber-500/20 bg-theme-warning/50/5 hover:bg-theme-warning/10 transition-colors text-left"
-                        >
-                          <Trash2 className="text-theme-warning" size={24} />
-                          <div>
-                            <div className="font-semibold text-theme-text dark:text-theme-dark-text">Clean Duplicate Drafts</div>
-                            <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Remove empty/zero drafts</div>
-                          </div>
-                        </button>
-                        <button 
-                          onClick={handleClearAllLocalData}
-                          className="flex items-center gap-3 p-4 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-theme-danger/10 transition-colors text-left md:col-span-1"
-                        >
-                          <ShieldAlert className="text-theme-danger" size={24} />
-                          <div>
-                            <div className="font-semibold text-red-600 dark:text-theme-danger">HARD RESET (Admin)</div>
-                            <div className="text-xs text-theme-danger/80">Completely wipe ALL local storage</div>
-                          </div>
-                        </button>
-
-                        <button 
-                          onClick={handleEmptyTrash}
-                          className="flex items-center gap-3 p-4 rounded-xl border border-rose-500/20 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left md:col-span-1"
-                        >
-                          <Trash2 className="text-theme-danger" size={24} />
-                          <div>
-                            <div className="font-semibold text-theme-danger dark:text-theme-danger">Empty Trash Data</div>
-                            <div className="text-xs text-theme-danger/80">Permanently delete all soft-deleted invoices</div>
-                          </div>
-                        </button>
-                      </>
-                    )}
+          
                   </div>
                 </div>
               )}
@@ -1927,102 +1602,7 @@ const Settings = ({
 
 
           {/* 6. APP INSTALL / PWA TAB */}
-        {activeTab === 'pwa' && (
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-6 animate-fadeIn">
-            <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-              <div className="w-10 h-10 rounded-xl bg-theme-accent-light dark:bg-theme-accent-light/40 text-theme-accent dark:text-theme-accent flex items-center justify-center">
-                <Download className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Install BillQyro App</h2>
-                <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Run BillQyro as a premium standalone software</p>
-              </div>
-            </div>
-
-            {isAppInstalled ? (
-              <div className="p-6 bg-theme-accent-light dark:bg-theme-accent-light/20 border border-theme-accent/30 dark:border-theme-accent/60 rounded-3xl text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-tr from-theme-accent to-theme-accent-dark rounded-2xl flex items-center justify-center mx-auto shadow-md shadow-glow">
-                  <CheckCircle2 className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-lg font-extrabold text-theme-primary dark:text-theme-primary">BillQyro App is Installed!</h3>
-                <p className="text-xs text-theme-muted dark:text-theme-muted max-w-md mx-auto leading-relaxed font-semibold">
-                  You are running the standalone application with high-performance local database caching, full offline capabilities, and a borderless dedicated workspace window.
-                </p>
-              </div>
-            ) : installPromptEvent ? (
-              <div className="p-6 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-slate-850 rounded-3xl text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-tr from-theme-accent to-theme-accent-dark rounded-2xl flex items-center justify-center mx-auto shadow-glow text-white flex items-center justify-center font-black text-xl">
-                  BQ
-                </div>
-                <h3 className="text-lg font-extrabold text-theme-primary dark:text-theme-primary">BillQyro Standalone Application</h3>
-                <p className="text-xs text-theme-muted dark:text-theme-muted max-w-md mx-auto leading-relaxed font-semibold">
-                  Install BillQyro directly to your desktop or mobile home screen. Unlocks faster loading speeds, borderless full-screen workspace, and robust offline accounting access.
-                </p>
-                <button
-                  type="button"
-                  onClick={onInstallApp}
-                  className="inline-flex items-center gap-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-black text-xs px-6 py-4 rounded-2xl shadow-glow active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider animate-pulse"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Install BillQyro Now</span>
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div className="p-5 bg-theme-warning/5 dark:bg-amber-950/20 border border-theme-warning/30 dark:border-amber-900/60 rounded-2xl flex gap-3">
-                  <div className="p-2 bg-theme-card dark:bg-theme-card rounded-xl text-theme-warning shadow-xs h-fit flex items-center justify-center">
-                    <Info className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-black text-amber-900 dark:text-amber-300 uppercase tracking-widest mb-1">Manual Installation Guide</h4>
-                    <p className="text-[11px] font-semibold text-theme-muted dark:text-theme-muted leading-relaxed">
-                      Native one-click installation is not supported by your current browser environment (e.g. iOS Safari) or the app is already installed. Follow the quick instructions below to install manually!
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Apple iOS */}
-                  <div className="bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 p-5 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft space-y-3">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-slate-650 dark:text-theme-muted uppercase">
-                      🍎 Apple iOS (iPhone/iPad)
-                    </div>
-                    <ol className="text-xs text-theme-muted dark:text-theme-muted font-semibold space-y-2 list-decimal list-inside">
-                      <li>Open BillQyro in <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Safari</strong> browser.</li>
-                      <li>Tap the <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Share</strong> button (box with an up-arrow).</li>
-                      <li>Scroll and select <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Add to Home Screen</strong>.</li>
-                      <li>Tap <strong className="text-theme-accent dark:text-theme-accent font-black">Add</strong> in the top-right corner.</li>
-                    </ol>
-                  </div>
-
-                  {/* Android Chrome */}
-                  <div className="bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 p-5 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft space-y-3">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-slate-650 dark:text-theme-muted uppercase">
-                      🤖 Android Mobile (Chrome)
-                    </div>
-                    <ol className="text-xs text-theme-muted dark:text-theme-muted font-semibold space-y-2 list-decimal list-inside">
-                      <li>Open BillQyro in <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Chrome</strong>.</li>
-                      <li>Tap the <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Menu</strong> icon (three vertical dots).</li>
-                      <li>Select <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Add to Home screen</strong> or <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Install app</strong>.</li>
-                      <li>Confirm by tapping <strong className="text-theme-accent dark:text-theme-accent font-black">Install</strong>.</li>
-                    </ol>
-                  </div>
-
-                  {/* Desktop PCs */}
-                  <div className="bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 p-5 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft space-y-3">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-slate-655 dark:text-theme-muted uppercase">
-                      💻 Desktop Computers
-                    </div>
-                    <ol className="text-xs text-theme-muted dark:text-theme-muted font-semibold space-y-2 list-decimal list-inside">
-                      <li>Open BillQyro in <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Chrome</strong> or <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Edge</strong>.</li>
-                      <li>Look at the right side of the browser's address bar.</li>
-                      <li>Click the <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Install App</strong> icon (square with overlapping shapes).</li>
-                      <li>Click <strong className="text-theme-accent dark:text-theme-accent font-black">Install</strong> in the confirmation box.</li>
-                    </ol>
-                  </div>
-                </div>
-              </div>
-            )}
+        
           </div>
         )}
 
@@ -2660,6 +2240,8 @@ const Settings = ({
           </div>
         </div>
       )}
+    </div>
+      </div>
     </div>
   );
 };

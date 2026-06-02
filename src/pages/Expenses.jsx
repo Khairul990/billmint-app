@@ -12,9 +12,10 @@ import {
   Lightbulb
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
-import BottomSheet from '../components/BottomSheet';
+import CenteredModal from '../components/CenteredModal';
+import { toast } from 'react-hot-toast';
 import PullToRefresh from '../components/PullToRefresh';
-import { syncFromFirestore } from '../utils/storage';
+import { syncFromFirestore } from '../services/dbEngine';
 
 const CATEGORIES = [
   { name: 'Supplies', color: 'bg-theme-accent-light text-theme-accent', border: 'border-theme-border-soft' },
@@ -46,7 +47,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
   const handleAddExpense = (e) => {
     e.preventDefault();
     if (!title || !amount) {
-      alert('Please fill out all required fields.');
+      toast.error('Please fill out all required fields.');
       return;
     }
 
@@ -140,7 +141,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
       <div className="grid grid-cols-1 gap-6 items-start">
         
         {/* 3. LOG NEW EXPENSE DRAWER */}
-        <BottomSheet 
+        <CenteredModal 
           isOpen={showAddForm} 
           onClose={() => setShowAddForm(false)} 
           title="Log New Bill"
@@ -206,7 +207,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
               <span>Confirm Log Cost</span>
             </button>
           </form>
-        </BottomSheet>
+        </CenteredModal>
 
         {/* 4. EXPENSE ENTRIES REGISTRY */}
         <div className="w-full space-y-3">
@@ -217,7 +218,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
             </span>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
             <AnimatePresence>
               {expenses.map((exp) => {
                 const catInfo = CATEGORIES.find(c => c.name === exp.category) || CATEGORIES[5];
@@ -227,38 +228,49 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
                     layout
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, x: -30 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.2 }}
-                    className="bg-theme-card dark:bg-theme-card rounded-2xl p-4 border border-theme-border-soft dark:border-theme-border-soft/80 shadow-premium flex items-center justify-between gap-4"
+                    className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium hover:shadow-premium-hover transition-all duration-300 relative flex flex-col justify-between"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft flex items-center justify-center text-theme-muted shrink-0">
-                        <Calendar className="w-5 h-5 text-theme-accent" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-theme-primary dark:text-theme-muted leading-tight">{exp.title}</h4>
-                        <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                          <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${catInfo.color}`}>
-                            {exp.category}
-                          </span>
-                          <span className="text-[9px] text-theme-muted font-bold flex items-center gap-1">
-                            <Calendar className="w-2.5 h-2.5" />
-                            {exp.date}
-                          </span>
+                    <div>
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-theme-accent-light border border-theme-border-soft flex items-center justify-center font-extrabold text-theme-accent text-sm">
+                            <Receipt className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <h3 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary tracking-tight leading-tight">{exp.title}</h3>
+                            <span className="text-[10px] text-theme-muted font-bold uppercase tracking-widest mt-0.5 inline-block">Expense Entry</span>
+                          </div>
                         </div>
+
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => onDeleteExpense(exp.id)}
+                            className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all"
+                            title="Delete Expense"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-2 flex-wrap">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${catInfo.color} ${catInfo.border}`}>
+                          {exp.category}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-theme-app dark:bg-theme-surface text-theme-muted border border-theme-border-soft">
+                          <Calendar className="w-3 h-3" />
+                          {exp.date}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-black text-theme-primary dark:text-theme-primary">
+                    <div className="border-t border-theme-border-soft dark:border-theme-border-soft/60 pt-4 mt-5 flex justify-between items-center">
+                      <span className="text-[10px] text-theme-muted font-extrabold uppercase tracking-wider">Logged Amount</span>
+                      <span className="text-base font-black text-theme-accent">
                         {formatCurrency(exp.amount, currencySymbol)}
                       </span>
-                      <button
-                        onClick={() => onDeleteExpense(exp.id)}
-                        className="p-2 rounded-lg bg-theme-danger/5 border border-rose-100 text-theme-danger hover:text-theme-danger hover:bg-rose-100 transition-all"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
                     </div>
                   </motion.div>
                 );
@@ -266,10 +278,10 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
             </AnimatePresence>
 
             {expenses.length === 0 && (
-              <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-10 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
-                <Receipt className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-                <h4 className="font-bold text-theme-primary dark:text-theme-muted">No Operating Costs Logged</h4>
-                <p className="text-xs text-theme-muted font-semibold mt-1">
+              <div className="md:col-span-2 lg:col-span-3 bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
+                <Receipt className="w-12 h-12 text-slate-200 mx-auto mb-3 animate-pulse" />
+                <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">No Operating Costs Logged</h4>
+                <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
                   Keep overhead clean. Click Log Expense to add business expenses!
                 </p>
               </div>

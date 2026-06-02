@@ -1,7 +1,7 @@
-import { db, firebaseReady, auth } from './firebase';
+import { db, firebaseReady, auth } from './firebaseConfig';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot } from 'firebase/firestore';
-import { getAdminEmail } from './adminAccess';
-import { BillQyroDB } from './indexedDb';
+import { getAdminEmail } from '../utils/adminAccess';
+import { BillQyroDB } from './localDb';
 
 // --- OFFLINE SYNC QUEUE ENGINE & MIGRATOR ---
 export const migrateLocalStorageToIndexedDB = async () => {

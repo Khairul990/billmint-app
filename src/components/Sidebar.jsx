@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
-import { logout } from '../utils/storage';
+import { logout } from '../services/dbEngine';
 import Logo from './Logo';
 
 /**

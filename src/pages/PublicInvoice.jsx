@@ -21,7 +21,7 @@ import {
   Megaphone
 } from 'lucide-react';
 import { downloadInvoicePDF } from '../utils/pdfUtils';
-import { saveInvoicePublicly } from '../utils/storage';
+import { saveInvoicePublicly } from '../services/dbEngine';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../utils/invoiceUtils';
 

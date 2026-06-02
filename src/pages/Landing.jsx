@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, FileSpreadsheet, ShieldCheck, TrendingUp, Users } from 'lucide-react';
 import Logo from '../components/Logo';
-import { getGlobalAdminSettings } from '../utils/storage';
+import { getGlobalAdminSettings } from '../services/dbEngine';
 
 const Landing = ({ onLoginClick }) => {
   // Try to load the default theme on mount if not already set by admin inside App.jsx

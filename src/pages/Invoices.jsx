@@ -28,8 +28,8 @@ import {
   generateEmailShareLink, 
   generateInvoiceShareText 
 } from '../utils/shareUtils';
-import { ensureInvoicePublicToken, saveInvoice, syncFromFirestore } from '../utils/storage';
-import { db, firebaseReady } from '../utils/firebase';
+import { ensureInvoicePublicToken, saveInvoice, syncFromFirestore } from '../services/dbEngine';
+import { db, firebaseReady } from '../services/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import PullToRefresh from '../components/PullToRefresh';
 
@@ -405,7 +405,7 @@ const Invoices = ({
                   }
                 }}
                 onRestore={viewMode === 'trash' ? (id) => {
-                  import('../utils/storage').then(({ restoreInvoice }) => restoreInvoice(id)).then(() => {
+                  import('../services/dbEngine').then(({ restoreInvoice }) => restoreInvoice(id)).then(() => {
                     toast.success('Invoice restored!');
                     window.dispatchEvent(new Event('billqyro_sync'));
                   });

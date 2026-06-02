@@ -3,7 +3,7 @@ import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import { ReceiptText, LogOut, ShieldCheck, Sun, Moon, User } from 'lucide-react';
 import Logo from './Logo';
-import { getSettings, saveSettings } from '../utils/storage';
+import { getSettings, saveSettings } from '../services/dbEngine';
 import { updateFaviconForTheme } from '../utils/themeIcon';
 
 /**

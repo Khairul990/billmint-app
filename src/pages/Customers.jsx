@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import BottomSheet from '../components/BottomSheet';
 import PullToRefresh from '../components/PullToRefresh';
-import { syncFromFirestore } from '../utils/storage';
+import { syncFromFirestore } from '../services/dbEngine';
 
 /**
  * Customers CRM and Registry Page

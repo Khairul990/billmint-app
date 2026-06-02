@@ -9,12 +9,18 @@ import {
   Save, 
   Tag, 
   ReceiptText,
-  BadgeAlert
+  BadgeAlert,
+  Scissors,
+  Wrench,
+  Shirt,
+  Coffee,
+  Package
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
-import BottomSheet from '../components/BottomSheet';
+import CenteredModal from '../components/CenteredModal';
+import { toast } from 'react-hot-toast';
 import PullToRefresh from '../components/PullToRefresh';
-import { syncFromFirestore } from '../utils/storage';
+import { syncFromFirestore } from '../services/dbEngine';
 
 /**
  * Products and Services Catalog Page
@@ -66,11 +72,11 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
   const handleSave = (e) => {
     e.preventDefault();
     if (!name) {
-      alert('Please specify an item name.');
+      toast.error('Please specify an item name.');
       return;
     }
     if (parseFloat(price) < 0 || isNaN(parseFloat(price))) {
-      alert('Please specify a valid numeric price.');
+      toast.error('Please specify a valid numeric price.');
       return;
     }
 
@@ -92,9 +98,25 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
   };
 
   const handleDelete = (id) => {
-    if (confirm('Are you sure you want to delete this product/service? This action is permanent.')) {
-      onDeleteProduct(id);
-    }
+    toast((t) => (
+      <div>
+        <p className="font-bold mb-2">Delete this product/service? This is permanent.</p>
+        <div className="flex gap-2">
+          <button onClick={() => { onDeleteProduct(id); toast.dismiss(t.id); }} className="bg-theme-danger text-white px-3 py-1 rounded-lg text-xs font-bold">Delete</button>
+          <button onClick={() => toast.dismiss(t.id)} className="bg-theme-surface px-3 py-1 rounded-lg text-xs font-bold">Cancel</button>
+        </div>
+      </div>
+    ), { duration: 5000 });
+  };
+
+  const getCategoryIcon = (category) => {
+    const cat = category?.toLowerCase() || '';
+    if (cat.includes('embroidery') || cat.includes('stitch') || cat.includes('tailor')) return <Scissors className="w-4 h-4" />;
+    if (cat.includes('repair') || cat.includes('maintenance')) return <Wrench className="w-4 h-4" />;
+    if (cat.includes('cloth') || cat.includes('garment')) return <Shirt className="w-4 h-4" />;
+    if (cat.includes('food') || cat.includes('grocery') || cat.includes('cafe')) return <Coffee className="w-4 h-4" />;
+    if (cat.includes('product') || cat.includes('box')) return <Package className="w-4 h-4" />;
+    return <Tag className="w-4 h-4" />;
   };
 
   // Filter Catalog
@@ -159,7 +181,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-theme-accent-light border border-theme-border-soft flex items-center justify-center font-extrabold text-theme-accent text-sm">
-                      <Tag className="w-4 h-4" />
+                      {getCategoryIcon(prod.category)}
                     </div>
                     <div>
                       <h3 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary tracking-tight leading-tight">{prod.name}</h3>
@@ -239,7 +261,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
         </div>
 
         {/* DYNAMIC MODAL OVERLAY */}
-        <BottomSheet 
+        <CenteredModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           title={editingProduct ? 'Update Catalog Item' : 'Add Catalog Item'}
@@ -335,7 +357,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
               </button>
             </div>
           </form>
-        </BottomSheet>
+        </CenteredModal>
       </div>
     </PullToRefresh>
   );

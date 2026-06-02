@@ -22,7 +22,7 @@ import {
   Mail,
   Calendar,
   Eye,
-  Download,
+  Loader2, Download,
   Send,
   BarChart3,
   Search,
@@ -38,11 +38,12 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import useGeneratePDF from '../hooks/useGeneratePDF';
 import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber, autoIncrementString, formatCurrency } from '../utils/invoiceUtils';
 import InvoicePreview from '../components/InvoicePreview';
 import BottomSheet from '../components/BottomSheet';
 import AddCustomerSheet from '../components/AddCustomerSheet';
-import { ensureInvoicePublicToken } from '../utils/storage';
+import { ensureInvoicePublicToken } from '../services/dbEngine';
 
 const ALL_FIELDS_BY_TEMPLATE = {
   embroidery: [
@@ -102,6 +103,7 @@ const CreateInvoice = ({
   onQuickBillOpen
 }) => {
   const currencySymbol = businessSettings?.currency || '₹';
+  const { generatePDF, isGenerating } = useGeneratePDF();
 
   // --- STATE FOR MAIN INVOICE ---
   const [invoiceNumber, setInvoiceNumber] = useState('');
@@ -165,6 +167,26 @@ const CreateInvoice = ({
   const [taxPercentage, setTaxPercentage] = useState(18);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [amountPaid, setAmountPaid] = useState(0);
+  const [paymentProofs, setPaymentProofs] = useState(editingInvoice?.paymentProofs || []);
+
+  const handleProofUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('Image size should be less than 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPaymentProofs([...paymentProofs, { url: reader.result, date: new Date().toISOString() }]);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeProof = (index) => {
+    setPaymentProofs(paymentProofs.filter((_, i) => i !== index));
+  };
   const [notes, setNotes] = useState('');
   const [terms, setTerms] = useState('');
   const [saveCustomer, setSaveCustomer] = useState(true);
@@ -548,7 +570,7 @@ const CreateInvoice = ({
       grandTotal,
       publicToken: editingInvoice?.publicToken || null,
       paymentHistory: editingInvoice?.paymentHistory || [],
-      paymentProofs: editingInvoice?.paymentProofs || [],
+      paymentProofs: paymentProofs,
       businessSnapshot,
       paymentSettingsSnapshot,
       regionalSettingsSnapshot
@@ -556,6 +578,49 @@ const CreateInvoice = ({
 
     // Also pass saveCustomer flag so the parent can save the customer if requested
     onSaveInvoice(payload, saveCustomer && !selectedCustomerId);
+  };
+
+
+  const handleShareWhatsApp = () => {
+    if (!customerPhone) {
+      toast.error('Please enter customer phone number.');
+      return;
+    }
+    const cleanPhone = customerPhone.replace(/[^0-9+]/g, '');
+    const activeCurrency = businessSettings?.currency || '₹';
+    const msg = `Hello ${customerName || 'Customer'},
+
+Here is your invoice *${invoiceNumber || 'Draft'}* for ${activeCurrency}${grandTotal}.
+Amount Paid: ${activeCurrency}${amountPaid}
+Balance Due: *${activeCurrency}${balanceDue}*
+
+Thank you for your business!`;
+    window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  const handleShareEmail = () => {
+    if (!customerEmail) {
+      toast.error('Please enter customer email.');
+      return;
+    }
+    const activeCurrency = businessSettings?.currency || '₹';
+    const subject = `Invoice ${invoiceNumber || 'Draft'} from ${businessSettings?.businessName || 'Business'}`;
+    const body = `Hello ${customerName || 'Customer'},
+
+Please find the details of your invoice ${invoiceNumber || 'Draft'}.
+
+Total Amount: ${activeCurrency}${grandTotal}
+Amount Paid: ${activeCurrency}${amountPaid}
+Balance Due: ${activeCurrency}${balanceDue}
+
+Thank you for your business!`;
+    window.location.href = `mailto:${customerEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  const handlePdfClick = () => {
+    generatePDF({ 
+      items, invoiceNumber, date, dueDate, customerName, customerPhone, customerEmail, customerAddress, customerId, paymentType, paymentStatus, orderStatus, subtotal, taxPercentage, taxAmount, discountAmount, grandTotal, amountPaid, balanceDue, notes, terms, billType, businessSnapshot: businessSettings, paymentSettingsSnapshot: businessSettings, regionalSettingsSnapshot: businessSettings 
+    }, businessSettings);
   };
 
   const [showBanner, setShowBanner] = useState(true);
@@ -640,7 +705,7 @@ const CreateInvoice = ({
         toast.error('Could not create live link. Please save invoice and try again.');
         return;
       }
-      const liveLink = `${window.location.origin}/i/${token}`;
+      const liveLink = `${window.location.origin}/invoice/${token}`;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(liveLink);
       } else {
@@ -728,7 +793,7 @@ const CreateInvoice = ({
                   <Eye className="w-4 h-4 text-theme-muted" /> Preview PDF
                 </button>
                 <button onClick={() => { setShowTopActions(false); handleDownloadPDF(); }} className="w-full text-left px-3 py-2 text-[13px] font-bold text-theme-primary hover:bg-theme-border-soft rounded-lg flex items-center gap-2 transition-all">
-                  <Download className="w-4 h-4 text-theme-muted" /> Download PDF
+                  {isGenerating ? <Loader2 className="w-4 h-4 animate-spin text-theme-muted" /> : <Download className="w-4 h-4 text-theme-muted" />} Download PDF
                 </button>
                 
                 <div className="h-px bg-theme-border-soft my-1" />
@@ -1639,7 +1704,7 @@ const CreateInvoice = ({
             <button onClick={() => setShowPreview(true)} className="h-[44px] bg-theme-surface dark:bg-theme-card text-theme-primary rounded-xl font-bold hover:bg-theme-border-soft transition-all flex items-center justify-center gap-2 text-[12px] border border-theme-border-soft/50 shadow-sm">
               <Eye className="w-3.5 h-3.5" /> Preview PDF
             </button>
-            <button onClick={handleDownloadPDF} className="h-[44px] bg-theme-surface dark:bg-theme-card border border-theme-accent text-theme-accent rounded-xl font-bold hover:bg-theme-accent-light transition-all flex items-center justify-center gap-2 text-[12px] shadow-sm cursor-pointer">
+            <button onClick={handlePdfClick} disabled={isGenerating} className="h-[44px] bg-theme-surface dark:bg-theme-card border border-theme-accent text-theme-accent rounded-xl font-bold hover:bg-theme-accent-light transition-all flex items-center justify-center gap-2 text-[12px] shadow-sm cursor-pointer">
               <Download className="w-3.5 h-3.5" /> Download PDF
             </button>
             <button onClick={() => handleSave()} className="h-[44px] bg-[image:var(--accent-gradient)] text-theme-button-text rounded-xl font-bold hover:opacity-90 shadow-md transition-all flex items-center justify-center gap-2 text-[12px] cursor-pointer">
@@ -1715,10 +1780,11 @@ const CreateInvoice = ({
                   Close
                 </button>
                 <button
-                  onClick={handleDownloadPDF}
+                  onClick={handlePdfClick} disabled={isGenerating}
                   className="px-5 py-2.5 bg-theme-accent hover:opacity-90 text-white rounded-xl text-xs font-black shadow-md flex items-center justify-center gap-2 transition-all"
                 >
-                  <Download className="w-4 h-4" /> Download PDF
+                  {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    {isGenerating ? "Generating..." : "Download PDF"}
                 </button>
               </div>
             </motion.div>
@@ -2306,7 +2372,7 @@ const CreateInvoice = ({
                     className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all cursor-pointer"
                     title="Download PDF"
                   >
-                    <Download className="w-4 h-4" />
+                    {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                   </button>
                   <div className="w-px h-6 bg-theme-surface dark:bg-theme-card mx-1"></div>
                   <button
