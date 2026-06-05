@@ -21,9 +21,11 @@ import {
   Megaphone
 } from 'lucide-react';
 import { downloadInvoicePDF } from '../utils/pdfUtils';
-import { saveInvoicePublicly } from '../services/dbEngine';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../utils/invoiceUtils';
+import PaymentModal from '../components/PaymentModal';
+import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { db } from '../services/firebaseConfig';
 
 const PublicInvoice = ({ initialInvoice }) => {
   const [invoice, setInvoice] = useState(initialInvoice);
@@ -36,26 +38,7 @@ const PublicInvoice = ({ initialInvoice }) => {
   }, [initialInvoice]);
   
   // "I Have Paid" Form states
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [payMethod, setPayMethod] = useState('');
-  const [payAmount, setPayAmount] = useState('');
-  const [txnId, setTxnId] = useState('');
-  const [screenshot, setScreenshot] = useState('');
-  const [customerNote, setCustomerNote] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (invoice) {
-      setPayAmount(String(invoice.balanceDue || invoice.grandTotal || ''));
-      // Pre-select default payment method if available
-      const payPrefs = invoice.paymentSettingsSnapshot;
-      if (payPrefs?.paymentMethod) {
-        setPayMethod(payPrefs.paymentMethod);
-      } else {
-        setPayMethod('Manual');
-      }
-    }
-  }, [invoice]);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   if (!invoice) {
     const requestedToken = window.location.pathname.split('/').pop() || 'N/A';
@@ -177,76 +160,33 @@ const PublicInvoice = ({ initialInvoice }) => {
     )
   )}`;
 
-  // Handle Screenshot conversion to Base64
-  const handleScreenshotChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error('File size exceeds 2MB limit. Please upload a smaller screenshot.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setScreenshot(event.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Submit proof (TASK 5)
-  const handleSubmitProof = async (e) => {
-    e.preventDefault();
-    if (!payMethod) {
-      toast.error('Please select a payment method.');
-      return;
-    }
-    if (!payAmount || parseFloat(payAmount) <= 0) {
-      toast.error('Please specify a valid payment amount.');
-      return;
-    }
-    if (liveLinkPrefs.requireTransactionId && !txnId.trim()) {
-      toast.error('Transaction ID is required for verification.');
-      return;
-    }
-    if (liveLinkPrefs.requirePaymentScreenshot && !screenshot) {
-      toast.error('Please upload a payment screenshot proof.');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    const newProof = {
-      id: 'proof-' + Date.now(),
-      method: payMethod,
-      amount: parseFloat(payAmount),
-      transactionId: txnId.trim(),
-      screenshot: screenshot,
-      screenshotUrl: screenshot,
-      note: customerNote.trim(),
-      notes: customerNote.trim(),
-      status: 'Pending',
-      submittedAt: new Date().toISOString()
-    };
-
-    // Update locally and in cloud
+  // Handle payment modal close and success
+  const handlePaymentSuccess = async (screenshotUrl, method, amount) => {
+    setShowPaymentModal(false);
+    
+    // Optimistically update local state to show 'Pending Verification'
     const updatedInvoice = {
       ...invoice,
-      paymentStatus: 'Payment Submitted', // Trigger status badge color: purple/blue
-      paymentProofs: [...(invoice.paymentProofs || []), newProof]
+      paymentStatus: 'Pending Verification'
     };
-
-    const res = await saveInvoicePublicly(updatedInvoice);
-    setIsSubmitting(false);
-
-    if (res.status === 'success') {
-      setInvoice(updatedInvoice);
-      setShowPaymentForm(false);
-      setTxnId('');
-      setScreenshot('');
-      setCustomerNote('');
-      toast.success('Payment proof successfully submitted! Our team will verify and update your invoice shortly.', { duration: 5000 });
-    } else {
-      toast.error('Failed to submit proof. Please check your network connection.');
+    setInvoice(updatedInvoice);
+    
+    try {
+      // Update the public_invoice record with the new status and proof URL
+      if (db) {
+        const invoiceRef = doc(db, 'public_invoices', invoice.id);
+        await updateDoc(invoiceRef, {
+          paymentStatus: 'Pending Verification',
+          paymentProofs: arrayUnion({
+            screenshotUrl,
+            method,
+            amount,
+            submittedAt: new Date().toISOString()
+          })
+        });
+      }
+    } catch (err) {
+      console.error('Failed to update public invoice status:', err);
     }
   };
 
@@ -316,11 +256,11 @@ const PublicInvoice = ({ initialInvoice }) => {
 
           {liveLinkPrefs.allowPaymentProofSubmit && invoice.paymentStatus !== 'Paid' && (
             <button
-              onClick={() => setShowPaymentForm(!showPaymentForm)}
+              onClick={() => setShowPaymentModal(true)}
               className="flex items-center justify-center gap-2 py-2 px-5 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-black text-xs rounded-xl shadow-md transition-all cursor-pointer uppercase tracking-wider"
             >
               <Wallet className="w-4 h-4" />
-              <span>{showPaymentForm ? 'View Invoice' : 'I Have Paid'}</span>
+              <span>I Have Paid</span>
             </button>
           )}
         </div>
@@ -550,7 +490,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           <div className="w-full lg:w-[350px] shrink-0 space-y-6">
 
             {/* PAYMENT BOX GATEWAY (TASK 4) */}
-            {!showPaymentForm ? (
+            
               <div className="bg-theme-card text-white rounded-3xl border border-slate-800 shadow-premium p-6 space-y-5 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-36 h-36 bg-theme-accent-light rounded-full blur-2xl pointer-events-none"></div>
                 
@@ -663,7 +603,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                   {/* Direct payment proof link */}
                   {liveLinkPrefs.allowPaymentProofSubmit && (
                     <button
-                      onClick={() => setShowPaymentForm(true)}
+                      onClick={() => setShowPaymentModal(true)}
                       className="w-full flex items-center justify-center gap-1.5 py-3.5 bg-theme-card dark:bg-theme-surface/5 hover:bg-theme-card dark:bg-theme-card/10 text-white rounded-xl text-xs font-black tracking-widest uppercase transition-all border border-white/10 cursor-pointer hover:border-white/20 active:scale-98"
                     >
                       <span>I Have Completed Payment</span>

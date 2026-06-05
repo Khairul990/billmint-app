@@ -89,8 +89,8 @@ const Dashboard = ({
   const filteredInvoices = invoices.filter(inv => {
     const q = searchQuery.toLowerCase();
     return (
-      inv.invoiceNumber.toLowerCase().includes(q) ||
-      inv.customerName.toLowerCase().includes(q) ||
+      (inv.invoiceNumber || '').toLowerCase().includes(q) ||
+      (inv.customerName || '').toLowerCase().includes(q) ||
       (inv.paymentStatus && inv.paymentStatus.toLowerCase().includes(q))
     );
   });

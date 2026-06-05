@@ -258,10 +258,10 @@ const Invoices = ({
     // 2. Filter by Search Query
     const q = searchQuery.toLowerCase();
     const matchSearch = (
-      inv.invoiceNumber.toLowerCase().includes(q) ||
-      inv.customerName.toLowerCase().includes(q) ||
-      inv.paymentStatus.toLowerCase().includes(q) ||
-      inv.date.includes(q)
+      (inv.invoiceNumber || '').toLowerCase().includes(q) ||
+      (inv.customerName || '').toLowerCase().includes(q) ||
+      (inv.paymentStatus || '').toLowerCase().includes(q) ||
+      (inv.date || '').includes(q)
     );
 
     // 3. Filter by Status

@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,6 +15,7 @@ const firebaseConfig = {
 let app;
 let auth;
 let db;
+let storage;
 let firebaseReady = false;
 
 // Check if critical config variables are defined
@@ -26,6 +28,7 @@ if (hasConfig) {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
     auth = getAuth(app);
     db = getFirestore(app);
+    storage = getStorage(app);
     firebaseReady = true;
     window.billqyro_firebaseReady = true;
     console.log('Firebase initialized successfully!');
@@ -38,4 +41,4 @@ if (hasConfig) {
   console.log('Firebase credentials not set in environment. Running in graceful offline mode (LocalStorage).');
 }
 
-export { app, auth, db, firebaseReady };
+export { app, auth, db, storage, firebaseReady };

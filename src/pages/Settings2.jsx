@@ -1743,6 +1743,9 @@ const Settings = ({
                                 <option value="midnight">Midnight Blue</option>
                                 <option value="champagne">Champagne Black</option>
                                 <option value="ruby">Ruby Burgundy</option>
+                                <option value="ocean-blue">Ocean Blue</option>
+                                <option value="sunset-orange">Sunset Orange</option>
+                                <option value="forest-green">Forest Green</option>
                               </select>
                           </div>
                           <div>

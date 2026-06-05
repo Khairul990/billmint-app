@@ -215,7 +215,10 @@ const BusinessProfileTab = (props) => {
                         { id: 'rose', name: 'Rose Gold Luxe', desc: 'Warm rose and gold accents on dark brown backgrounds.', colors: ['#3A1F1A', '#F43F5E', '#D4A44A'] },
                         { id: 'midnight', name: 'Midnight Blue', desc: 'Deep blues and cyan for a professional marine look.', colors: ['#081A35', '#2563EB', '#38BDF8'] },
                         { id: 'champagne', name: 'Champagne Black', desc: 'Elegant black and champagne gold for high-end feel.', colors: ['#1E1A15', '#D6A84F', '#F97316'] },
-                        { id: 'ruby', name: 'Ruby Burgundy', desc: 'Deep burgundy and ruby for a rich, vibrant aesthetic.', colors: ['#2B1220', '#BE185D', '#7C2D12'] }
+                        { id: 'ruby', name: 'Ruby Burgundy', desc: 'Deep burgundy and ruby for a rich, vibrant aesthetic.', colors: ['#2B1220', '#BE185D', '#7C2D12'] },
+                        { id: 'ocean-blue', name: 'Ocean Blue', desc: 'Refreshing blue gradients for a clean look.', colors: ['#0C4A6E', '#0284C7', '#38BDF8'] },
+                        { id: 'sunset-orange', name: 'Sunset Orange', desc: 'Vibrant orange and red hues for an energetic vibe.', colors: ['#7C2D12', '#EA580C', '#F97316'] },
+                        { id: 'forest-green', name: 'Forest Green', desc: 'Natural greens for a calm, organic aesthetic.', colors: ['#14532D', '#16A34A', '#22C55E'] }
                       ].map((preset) => {
                       const isSelected = themeColor === preset.id;
                       return (

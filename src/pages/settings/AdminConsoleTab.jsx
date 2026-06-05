@@ -1,5 +1,71 @@
-import React from 'react';
-import { ShieldAlert, Users, TrendingUp, CheckCircle, XCircle, Eye, Settings as SettingsIcon, CloudLightning } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShieldAlert, Users, TrendingUp, CheckCircle, XCircle, Eye, Settings as SettingsIcon, CloudLightning, Hash, RotateCcw } from 'lucide-react';
+import { auth } from '../../services/firebaseConfig';
+import { getCounterStatus, resetCounter } from '../../services/invoiceNumberService';
+import { toast } from 'react-hot-toast';
+
+const InvoiceNumberSettings = () => {
+  const [counterStatus, setCounterStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchStatus = async () => {
+    try {
+      const userId = auth?.currentUser?.uid;
+      if (userId) {
+        const status = await getCounterStatus(userId);
+        setCounterStatus(status);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStatus();
+  }, []);
+
+  const handleReset = async () => {
+    if (window.confirm("Are you sure you want to reset the invoice counter to 0? This will start numbering from INV-[Year]-001 again.")) {
+      try {
+        const userId = auth?.currentUser?.uid;
+        if (userId) {
+          await resetCounter(userId);
+          toast.success("Invoice counter reset successfully!");
+          fetchStatus();
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to reset counter");
+      }
+    }
+  };
+
+  if (loading) return null;
+
+  return (
+    <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-5">
+      <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary border-b border-theme-border-soft pb-3 flex items-center gap-2">
+        <Hash className="w-4.5 h-4.5 text-theme-accent" />
+        <span>Auto-Numbering Settings</span>
+      </h3>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs text-theme-muted font-bold mb-1">Current Year Tracker: <span className="text-theme-primary font-black">{new Date().getFullYear()}</span></p>
+          <p className="text-xs text-theme-muted font-bold">Next Invoice Number: <span className="text-theme-accent font-black">INV-{new Date().getFullYear()}-{String((counterStatus?.count || 0) + 1).padStart(3, '0')}</span></p>
+        </div>
+        <button
+          onClick={handleReset}
+          className="flex items-center gap-2 px-4 py-2 bg-theme-danger/10 hover:bg-theme-danger/20 text-theme-danger font-bold text-[10px] uppercase rounded-xl transition-all shadow-sm border border-theme-danger/20"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span>Reset Counter</span>
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const AdminConsoleTab = (props) => {
   const { adminSubTab, setAdminSubTab, loadingAdminData, adminUsers, adminRequests, handleForceSync, globalSettings, adminGlobalTheme, setAdminGlobalTheme, adminGlobalMode, setAdminGlobalMode, updateGlobalAdminSettings, setSelectedScreenshot, setShowRejectionModalFor, rejectionReasonInput, setRejectionReasonInput, handleConfirmRejectRequest } = props;
@@ -284,6 +350,9 @@ const AdminConsoleTab = (props) => {
                       </button>
                     </div>
                   </div>
+                  </div>
+
+                  <InvoiceNumberSettings />
 
                   {/* BANNERS & ANNOUNCEMENTS */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
