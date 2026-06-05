@@ -14,7 +14,7 @@ import { updateFaviconForTheme } from '../utils/themeIcon';
  * @param {Function} onLogout - logout event callback
  * @param {Object} businessSettings - current active business details
  */
-const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen }) => {
+const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0 }) => {
   // Theme and Mode state
   const [themeColor, setThemeColor] = useState(() => {
     // Migration: If old themePreset is "dark", default to "light" color (dark mode handled below)
@@ -115,6 +115,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         isAuthenticated={isAuthenticated}
         userRole={userRole}
         userEmail={userEmail}
+        pendingPaymentsCount={pendingPaymentsCount}
       />
 
       {/* Main Content Region */}
@@ -254,7 +255,12 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       </div>
 
       {/* Mobile Floating Bottom Nav Menu (Hidden on Desktop) */}
-      <BottomNav currentTab={currentTab} setCurrentTab={setCurrentTab} onQuickBillOpen={onQuickBillOpen} />
+      <BottomNav 
+        currentTab={currentTab} 
+        setCurrentTab={setCurrentTab} 
+        onQuickBillOpen={onQuickBillOpen} 
+        pendingPaymentsCount={pendingPaymentsCount}
+      />
     </div>
   );
 };

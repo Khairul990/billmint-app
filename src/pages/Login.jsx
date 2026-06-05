@@ -1008,7 +1008,9 @@ function LoginPanel({ onLoginSuccess }) {
             {isLoginMode ? 'Welcome back' : 'Get started'}
           </h1>
           <p className="mt-2 text-sm font-semibold text-theme-muted">
-            {isLoginMode ? 'Sign in to manage your own customers, invoices, PDFs, links, and payments.' : 'Create an account to securely manage your business and sync your data.'}
+            {isLoginMode 
+              ? 'Sign in to manage your own customers, invoices, PDFs, links, and payments.' 
+              : 'New here? Create your account first, then complete the 1-minute setup wizard inside to get your shop ready.'}
           </p>
         </motion.div>
 

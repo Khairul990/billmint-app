@@ -2,6 +2,7 @@ import { db, firebaseReady, auth } from './firebaseConfig';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot } from 'firebase/firestore';
 import { getAdminEmail } from '../utils/adminAccess';
 import { BillQyroDB } from './localDb';
+import { generateVerificationCode } from './verificationCodeService';
 
 // --- OFFLINE SYNC QUEUE ENGINE & MIGRATOR ---
 export const migrateLocalStorageToIndexedDB = async () => {
@@ -1226,6 +1227,11 @@ export const saveInvoice = async (invoice) => {
   // 1. Ensure secure publicToken is generated
   if (!invoice.publicToken || invoice.publicToken === 'undefined' || invoice.publicToken === 'null' || invoice.publicToken === '') {
     invoice.publicToken = generateSecureToken();
+  }
+
+  // 1.5 Generate AI Verification Code if missing
+  if (!invoice.verificationCode) {
+    invoice.verificationCode = generateVerificationCode(invoice.invoiceNumber || 'INV');
   }
 
   // 2. Ensure snapshots are taken

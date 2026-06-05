@@ -37,10 +37,12 @@ import { auth, firebaseReady } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { triggerSuccessFeedback } from './utils/feedback';
 import { sendEmpireEvent, sendEmpireError, sendEmpireHealth } from './services/empireAgent';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from './services/firebaseConfig';
 
 const Landing = React.lazy(() => import('./pages/Landing'));
 const Login = React.lazy(() => import('./pages/Login'));
-const SetupBilling = React.lazy(() => import('./pages/SetupBilling'));
+const OnboardingWizard = React.lazy(() => import('./pages/onboarding/OnboardingWizard'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Invoices = React.lazy(() => import('./pages/Invoices'));
 const CreateInvoice = React.lazy(() => import('./pages/CreateInvoice'));
@@ -52,6 +54,7 @@ const Expenses = React.lazy(() => import('./pages/Expenses'));
 const Subscription = React.lazy(() => import('./pages/Subscription'));
 const MoreMenu = React.lazy(() => import('./pages/MoreMenu'));
 const PublicInvoice = React.lazy(() => import('./pages/PublicInvoice'));
+const PendingPayments = React.lazy(() => import('./pages/PendingPayments'));
 import QuickBillModal from './components/QuickBillModal';
 
 class ErrorBoundary extends React.Component {
@@ -183,6 +186,37 @@ function App() {
   const [expenses, setExpenses] = useState([]);
   const [subscription, setSubscription] = useState(() => getSubscriptionStatus());
 
+  // Real-time Pending Payments state
+  const [pendingPayments, setPendingPayments] = useState([]);
+  
+  useEffect(() => {
+    if (!isAuthenticated || !db || !auth) return;
+    
+    let unsubscribe = () => {};
+    
+    // Listen for auth state changes to get current user UID
+    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const q = query(
+          collection(db, 'payment_proofs'),
+          where('ownerId', '==', user.uid),
+          where('status', '==', 'pending')
+        );
+        
+        unsubscribe = onSnapshot(q, (snapshot) => {
+          const proofs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setPendingPayments(proofs);
+        });
+      } else {
+        setPendingPayments([]);
+      }
+    });
+    
+    return () => {
+      authUnsubscribe();
+      unsubscribe();
+    };
+  }, [isAuthenticated]);
   
   // --- 🚀 GLOBAL BOOT & LOADING STATE ---
   const [isAppBooting, setIsAppBooting] = useState(true);
@@ -403,7 +437,7 @@ function App() {
         setCurrentTab('dashboard');
       }
     } else {
-      setCurrentTab('setup-billing');
+      setCurrentTab('onboarding');
     }
   };
 
@@ -417,7 +451,7 @@ function App() {
           saveSettings(updated);
           setSettings(updated);
         } else {
-          setCurrentTab('setup-billing');
+          setCurrentTab('onboarding');
         }
       }
     }
@@ -762,11 +796,11 @@ function App() {
   // --- TAB ROUTER SWITCHBOARD ---
   const renderTabContent = () => {
     const isProfileIncomplete = settings && !settings.profileSetupCompleted && !settings.businessName;
-    const activeTab = isProfileIncomplete ? 'setup-billing' : currentTab;
+    const activeTab = isProfileIncomplete ? 'onboarding' : currentTab;
 
-    if (activeTab === 'setup-billing') {
+    if (activeTab === 'onboarding') {
       return (
-        <SetupBilling
+        <OnboardingWizard
           businessSettings={settings}
           onSaveSettings={(newSettings) => {
             saveSettings(newSettings);
@@ -802,6 +836,14 @@ function App() {
             onInstallApp={handleInstallApp}
             subscription={subscription}
             onQuickBillOpen={() => setIsQuickBillOpen(true)}
+            pendingPaymentsCount={pendingPayments.length}
+          />
+        );
+      case 'pending-payments':
+        return (
+          <PendingPayments 
+            setCurrentTab={setCurrentTab}
+            pendingPayments={pendingPayments}
           />
         );
       case 'invoices':
@@ -876,6 +918,7 @@ function App() {
             onLoginSuccess={handleLoginSuccess}
             businessSettings={settings}
             userRole={userRole}
+            pendingPaymentsCount={pendingPayments.length}
           />
         );
       case 'settings': {
@@ -1078,6 +1121,7 @@ function App() {
               subscription={subscription}
               userEmail={getAuthSession()?.userEmail}
               onQuickBillOpen={() => setIsQuickBillOpen(true)}
+              pendingPaymentsCount={pendingPayments.length}
             >
               <AnimatePresence mode="wait">
                 <motion.div

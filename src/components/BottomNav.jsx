@@ -6,7 +6,7 @@ import { LayoutDashboard, FileSpreadsheet, Users, MoreHorizontal } from 'lucide-
  * @param {string} currentTab - active state key
  * @param {Function} setCurrentTab - state update dispatcher
  */
-const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen }) => {
+const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPaymentsCount = 0 }) => {
   const tabs = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
     { id: 'invoices', label: 'Invoices', icon: FileSpreadsheet },
@@ -48,7 +48,14 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen }) => {
                 ? 'bg-[image:var(--accent-gradient)] text-white shadow-md shadow-theme-glow dark:shadow-none scale-110' 
                 : 'text-theme-muted dark:text-theme-muted hover:text-theme-muted dark:hover:text-theme-muted hover:bg-slate-100 dark:hover:bg-theme-card/30'
             }`}>
-              <Icon className="w-6 h-6" />
+              <div className="relative">
+                <Icon className="w-6 h-6" />
+                {tab.id === 'more' && pendingPaymentsCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse border-2 border-white dark:border-[#070c18]">
+                    {pendingPaymentsCount}
+                  </span>
+                )}
+              </div>
             </div>
             <span className={`text-[10px] font-semibold mt-1 tracking-tight ${
               isActive ? 'text-theme-accent dark:text-theme-accent font-bold' : 'text-theme-muted dark:text-theme-muted font-medium'

@@ -34,7 +34,8 @@ import {
   Check,
   Megaphone,
   Zap,
-  Smartphone
+  Smartphone,
+  Bell
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { firebaseReady } from '../services/firebaseConfig';
@@ -59,7 +60,8 @@ const Dashboard = ({
   isAppInstalled = false,
   onInstallApp,
   subscription = {},
-  onQuickBillOpen
+  onQuickBillOpen,
+  pendingPaymentsCount = 0
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
@@ -211,7 +213,29 @@ const Dashboard = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        
+        {/* PAYMENT PROOFS ALERT BANNER */}
+        {pendingPaymentsCount > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-red-500/5 cursor-pointer"
+            onClick={() => setCurrentTab('pending-payments')}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)] shrink-0">
+                <Bell className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-red-600 dark:text-red-400 font-bold text-sm">Review Required</h3>
+                <p className="text-red-600/80 dark:text-red-400/80 text-xs font-semibold">
+                  You have <span className="font-black text-red-600 dark:text-red-400">{pendingPaymentsCount}</span> pending payment proofs to verify.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="w-5 h-5 text-red-500 shrink-0" />
+          </motion.div>
+        )}
+
         {/* 1. HEADER & HERO */}
         <div className="space-y-0.5 md:space-y-2">
           <h1 className="text-xl md:text-2xl font-black text-theme-primary tracking-tight">Dashboard</h1>

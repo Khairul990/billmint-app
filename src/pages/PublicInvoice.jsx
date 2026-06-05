@@ -26,6 +26,7 @@ import { formatCurrency } from '../utils/invoiceUtils';
 import PaymentModal from '../components/PaymentModal';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
+import { analyzePaymentScreenshot } from '../services/screenshotAnalysisService';
 
 const PublicInvoice = ({ initialInvoice }) => {
   const [invoice, setInvoice] = useState(initialInvoice);
@@ -39,6 +40,92 @@ const PublicInvoice = ({ initialInvoice }) => {
   
   // "I Have Paid" Form states
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [payMethod, setPayMethod] = useState('Bank Transfer');
+  const [payAmount, setPayAmount] = useState('');
+  const [txnId, setTxnId] = useState('');
+  const [screenshot, setScreenshot] = useState(null);
+  const [screenshotFile, setScreenshotFile] = useState(null);
+  const [customerNote, setCustomerNote] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // AI Verification State
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
+
+  const handleScreenshotChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('File size exceeds 10MB limit.');
+        return;
+      }
+      setScreenshotFile(file);
+      setScreenshot(URL.createObjectURL(file));
+      
+      // AI Analysis Trigger
+      setIsAnalyzing(true);
+      try {
+        const expectedData = {
+          verificationCode: invoice.verificationCode,
+          grandTotal: invoice.balanceDue !== undefined ? invoice.balanceDue : invoice.grandTotal
+        };
+        const result = await analyzePaymentScreenshot(file, expectedData);
+        setAnalysisResult(result);
+        if (result.recommendation === 'reject') {
+           toast.error('Screenshot looks suspicious or invalid.');
+        } else if (result.recommendation === 'approve') {
+           toast.success('Screenshot auto-verified with high confidence!');
+        }
+      } catch (err) {
+        console.error('Analysis failed:', err);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    }
+  };
+
+  const handleSubmitProof = async (e) => {
+    e.preventDefault();
+    if (!screenshotFile) {
+      toast.error('Please upload a screenshot proof.');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    try {
+      // 1. Convert to Base64 for MVP (in production use Firebase Storage)
+      const reader = new FileReader();
+      reader.readAsDataURL(screenshotFile);
+      await new Promise(resolve => reader.onload = resolve);
+      const screenshotURL = reader.result;
+
+      // 2. Save proof to Firebase
+      const invoiceRef = doc(db, 'public_invoices', invoice.id);
+      await updateDoc(invoiceRef, {
+        paymentStatus: 'Pending Verification',
+        paymentProofs: arrayUnion({
+          screenshotUrl: screenshotURL,
+          method: payMethod,
+          amount: payAmount,
+          txnId: txnId,
+          note: customerNote,
+          analysis: analysisResult,
+          submittedAt: new Date().toISOString()
+        })
+      });
+      
+      toast.success('Payment proof submitted successfully!');
+      setShowPaymentModal(false);
+      
+      // Update local state
+      setInvoice(prev => ({ ...prev, paymentStatus: 'Pending Verification' }));
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to submit proof.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (!invoice) {
     const requestedToken = window.location.pathname.split('/').pop() || 'N/A';
@@ -150,11 +237,13 @@ const PublicInvoice = ({ initialInvoice }) => {
 
   // Generate UPI pay link (TASK 4)
   const dueAmount = invoice.balanceDue !== undefined ? invoice.balanceDue : invoice.grandTotal;
-  const upiLink = `upi://pay?pa=${paymentPrefs.upiId}&pn=${encodeURIComponent(paymentPrefs.payeeName || business.businessName)}&am=${dueAmount}&cu=INR&tn=Invoice%20${invoice.invoiceNumber}`;
+  const verifStr = invoice.verificationCode ? ` [Code: ${invoice.verificationCode}]` : '';
+  const txnNote = `Invoice ${invoice.invoiceNumber}${verifStr}`;
+  const upiLink = `upi://pay?pa=${paymentPrefs.upiId}&pn=${encodeURIComponent(paymentPrefs.payeeName || business.businessName)}&am=${dueAmount}&cu=INR&tn=${encodeURIComponent(txnNote)}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
     paymentPrefs.paymentMethod === 'UPI' ? upiLink : (
-      paymentPrefs.paymentMethod === 'bKash' ? `bKash: ${paymentPrefs.bkashNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}` : (
-        paymentPrefs.paymentMethod === 'Nagad' ? `Nagad: ${paymentPrefs.nagadNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}` :
+      paymentPrefs.paymentMethod === 'bKash' ? `bKash: ${paymentPrefs.bkashNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}${invoice.verificationCode ? `, Code: ${invoice.verificationCode}` : ''}` : (
+        paymentPrefs.paymentMethod === 'Nagad' ? `Nagad: ${paymentPrefs.nagadNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}${invoice.verificationCode ? `, Code: ${invoice.verificationCode}` : ''}` :
         paymentPrefs.customPaymentLink || 'Manual QR'
       )
     )
@@ -502,6 +591,14 @@ const PublicInvoice = ({ initialInvoice }) => {
                   <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">CHOOSE YOUR SETTLEMENT METHOD</p>
                 </div>
 
+                {invoice.verificationCode && (
+                  <div className="bg-theme-accent/10 border border-theme-accent/30 rounded-xl p-4 text-center">
+                    <p className="text-[10px] text-theme-accent uppercase tracking-widest font-black mb-1">Your Verification Code</p>
+                    <p className="text-3xl font-black tracking-widest text-white">{invoice.verificationCode}</p>
+                    <p className="text-[10px] mt-2 text-theme-muted">Include this code in your payment note/remarks to auto-verify your payment.</p>
+                  </div>
+                )}
+
                 {liveLinkPrefs.showPaymentQr && paymentPrefs.paymentQrEnabled && (
                   <div className="bg-theme-card dark:bg-theme-card p-3 rounded-2xl max-w-[180px] mx-auto shadow-md border border-slate-850">
                     <img 
@@ -708,6 +805,32 @@ const PublicInvoice = ({ initialInvoice }) => {
                         </div>
                       )}
                     </div>
+
+                    {/* AI Verification Status */}
+                    {isAnalyzing && (
+                      <div className="mt-2 text-[10px] flex items-center gap-2 text-theme-accent animate-pulse font-bold">
+                        <span className="w-3 h-3 rounded-full border-2 border-theme-accent border-t-transparent animate-spin"></span>
+                        AI Verification in progress...
+                      </div>
+                    )}
+                    
+                    {analysisResult && !isAnalyzing && (
+                      <div className={`mt-2 p-3 rounded-xl border text-[10px] font-bold ${
+                        analysisResult.recommendation === 'approve' 
+                          ? 'bg-green-500/10 border-green-500/30 text-green-400' 
+                          : analysisResult.recommendation === 'reject'
+                            ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                            : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                      }`}>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          <span className="uppercase tracking-wider">AI Analysis: {analysisResult.confidence}% Match</span>
+                        </div>
+                        {analysisResult.recommendation === 'approve' && <p>Screenshot Verified. All checks passed.</p>}
+                        {analysisResult.recommendation === 'manual_review' && <p>Partial match. Will require manual review.</p>}
+                        {analysisResult.recommendation === 'reject' && <p>Warning: Payment details could not be verified.</p>}
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -724,7 +847,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                   <div className="flex items-center gap-2 pt-2">
                     <button
                       type="button"
-                      onClick={() => setShowPaymentForm(false)}
+                      onClick={() => setShowPaymentModal(false)}
                       className="flex-1 py-3 bg-theme-surface dark:bg-theme-card hover:bg-theme-border-soft dark:bg-theme-card dark:hover:bg-slate-700 text-theme-primary dark:text-theme-muted dark:text-slate-250 font-bold rounded-xl transition-all cursor-pointer text-center"
                     >
                       Cancel

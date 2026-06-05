@@ -9,7 +9,8 @@ import {
   ShieldCheck, 
   User, 
   ExternalLink,
-  HelpCircle
+  HelpCircle,
+  Bell
 } from 'lucide-react';
 import { login } from '../services/dbEngine';
 
@@ -20,7 +21,8 @@ const MoreMenu = ({
   setCurrentTab, 
   isAuthenticated, 
   onLoginSuccess,
-  businessSettings
+  businessSettings,
+  pendingPaymentsCount = 0
 }) => {
 
   return (
@@ -58,6 +60,30 @@ const MoreMenu = ({
             </h4>
             <p className="text-[11px] text-theme-muted font-semibold truncate">
               Log machine threads, needles, bills, repairs
+            </p>
+          </div>
+        </button>
+
+        {/* Pending Payments page */}
+        <button
+          onClick={() => setCurrentTab('pending-payments')}
+          className="bg-theme-card dark:bg-theme-card hover:bg-theme-app dark:bg-theme-surface text-left p-5 rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full relative"
+        >
+          {pendingPaymentsCount > 0 && (
+            <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-[10px] font-black rounded-full shadow-lg shadow-red-500/30 animate-pulse flex items-center justify-center border-2 border-white dark:border-[#070c18]">
+              {pendingPaymentsCount}
+            </span>
+          )}
+          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shrink-0 ${pendingPaymentsCount > 0 ? 'bg-orange-500/10 text-orange-500 group-hover:bg-orange-100' : 'bg-theme-accent-light/50 text-theme-accent group-hover:bg-theme-accent-light'}`}>
+            <Bell className="w-6 h-6" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary tracking-tight flex items-center gap-1.5">
+              <span>Payment Proofs</span>
+              <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-theme-muted transition-opacity" />
+            </h4>
+            <p className="text-[11px] text-theme-muted font-semibold truncate">
+              Review customer payment screenshots
             </p>
           </div>
         </button>

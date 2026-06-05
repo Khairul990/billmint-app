@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell } from 'lucide-react';
 import { logout } from '../services/dbEngine';
 import Logo from './Logo';
 
@@ -12,13 +12,14 @@ import Logo from './Logo';
  * @param {Object} businessSettings - current active company name & logo
  * @param {boolean} isAuthenticated - whether currently logged in as admin
  */
-const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userEmail }) => {
+const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userEmail, pendingPaymentsCount = 0 }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'invoices', label: 'Invoices', icon: FileSpreadsheet },
     { id: 'customers', label: 'Customers', icon: Users },
     { id: 'expenses', label: 'Overhead Expenses', icon: TrendingDown },
     { id: 'products', label: 'Products & Catalog', icon: Layers },
+    { id: 'pending-payments', label: 'Payment Proofs', icon: Bell },
     { id: 'subscription', label: 'Subscription Plan', icon: Sparkles },
     { id: 'settings', label: 'Settings', icon: SettingsIcon },
     { id: 'guide', label: 'How to Use', icon: HelpCircle },
@@ -61,6 +62,12 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
                 isActive ? 'text-theme-button-text scale-110' : 'text-theme-sidebar-text/70 group-hover:text-theme-accent group-hover:scale-110'
               }`} />
               <span className="relative z-10">{item.label}</span>
+              
+              {item.id === 'pending-payments' && pendingPaymentsCount > 0 && (
+                <span className="relative z-10 ml-auto px-2 py-0.5 bg-red-500 text-white text-[10px] font-black rounded-full shadow-lg shadow-red-500/30 animate-pulse">
+                  {pendingPaymentsCount}
+                </span>
+              )}
             </motion.button>
           );
         })}

@@ -299,16 +299,18 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
 
   let qrText = '';
   if (qrEnabled) {
+    const verifStr = invoice.verificationCode ? ` [Code: ${invoice.verificationCode}]` : '';
     if (paymentMethod === 'UPI') {
       const upiId = businessSettings.upiId || '';
       const payeeName = businessSettings.payeeName || businessSettings.businessName || '';
-      qrText = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${dueAmount}&cu=${regionalPrefs.currencyCode || 'INR'}&tn=${invoice.invoiceNumber}`;
+      const txnNote = `Invoice ${invoice.invoiceNumber}${verifStr}`;
+      qrText = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${dueAmount}&cu=${regionalPrefs.currencyCode || 'INR'}&tn=${encodeURIComponent(txnNote)}`;
     } else if (paymentMethod === 'bKash') {
       const bkashNumber = businessSettings.bkashNumber || '';
-      qrText = `bKash Payment\nMerchant/Personal Number: ${bkashNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
+      qrText = `bKash Payment\nMerchant/Personal Number: ${bkashNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}${invoice.verificationCode ? `\nCode: ${invoice.verificationCode}` : ''}`;
     } else if (paymentMethod === 'Nagad') {
       const nagadNumber = businessSettings.nagadNumber || '';
-      qrText = `Nagad Payment\nNumber: ${nagadNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
+      qrText = `Nagad Payment\nNumber: ${nagadNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}${invoice.verificationCode ? `\nCode: ${invoice.verificationCode}` : ''}`;
     } else if (paymentMethod === 'Manual') {
       qrText = businessSettings.customPaymentLink || '';
     }
