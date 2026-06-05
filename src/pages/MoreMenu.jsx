@@ -10,9 +10,10 @@ import {
   User, 
   ExternalLink,
   HelpCircle,
-  Bell
+  Bell,
+  RefreshCcw
 } from 'lucide-react';
-import { login } from '../services/dbEngine';
+import { login, factoryResetAllData } from '../services/dbEngine';
 
 /**
  * Premium iOS-style consolidated submenu hub for mobile/responsive users
@@ -25,8 +26,14 @@ const MoreMenu = ({
   pendingPaymentsCount = 0
 }) => {
 
+  const handleFactoryReset = () => {
+    if (window.confirm("🚨 WARNING: Are you sure you want to completely factory reset your app? This will wipe all data, invoices, and settings, and return you to the onboarding screen like a new user. This action cannot be undone locally!")) {
+      factoryResetAllData();
+    }
+  };
+
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <div className="space-y-6 max-w-2xl mx-auto pb-10">
       
       {/* Dynamic SaaS Hub Greeting Header */}
       <div className="bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-3xl p-6 text-white shadow-premium relative overflow-hidden">
@@ -149,7 +156,7 @@ const MoreMenu = ({
         {/* How to Use Guide page */}
         <button
           onClick={() => setCurrentTab('guide')}
-          className="bg-theme-card dark:bg-theme-card hover:bg-theme-app dark:bg-theme-surface text-left p-5 rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full sm:col-span-2"
+          className="bg-theme-card dark:bg-theme-card hover:bg-theme-app dark:bg-theme-surface text-left p-5 rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full"
         >
           <div className="w-12 h-12 rounded-2xl bg-theme-accent-light text-theme-accent flex items-center justify-center group-hover:bg-theme-accent-light transition-colors shrink-0">
             <HelpCircle className="w-6 h-6" />
@@ -161,6 +168,24 @@ const MoreMenu = ({
             </h4>
             <p className="text-[11px] text-theme-muted font-semibold truncate">
               Learn to create invoices and manage customers
+            </p>
+          </div>
+        </button>
+
+        {/* Factory Reset button */}
+        <button
+          onClick={handleFactoryReset}
+          className="bg-rose-50 dark:bg-rose-950/20 hover:bg-rose-100 dark:hover:bg-rose-950/40 text-left p-5 rounded-3xl border border-rose-200 dark:border-rose-900/50 shadow-premium flex items-center gap-4 transition-all hover:scale-[1.01] group active:scale-[0.99] w-full sm:col-span-2 mt-4"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 dark:bg-rose-900/50 dark:text-rose-400 flex items-center justify-center group-hover:bg-rose-200 dark:group-hover:bg-rose-900 transition-colors shrink-0">
+            <RefreshCcw className="w-6 h-6 group-hover:rotate-180 transition-transform duration-500" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h4 className="font-extrabold text-sm text-rose-700 dark:text-rose-400 tracking-tight flex items-center gap-1.5">
+              <span>Factory Reset App</span>
+            </h4>
+            <p className="text-[11px] text-rose-600/80 dark:text-rose-400/80 font-semibold truncate">
+              Wipe all data and restart as a new user
             </p>
           </div>
         </button>

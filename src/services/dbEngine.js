@@ -708,6 +708,25 @@ export const logout = () => {
   }
 };
 
+export const factoryResetAllData = async () => {
+  localStorage.clear();
+  sessionStorage.clear();
+  try {
+    BillQyroDB.deleteDB('billqyro-offline-db');
+  } catch(e) {}
+  
+  if (firebaseReady) {
+    try {
+      const auth = getAuth();
+      if (auth.currentUser) {
+        await auth.signOut();
+      }
+    } catch(e) {}
+  }
+  
+  window.location.href = '/';
+};
+
 export const clearAllLocalData = async () => {
   localStorage.clear();
   sessionStorage.clear();
