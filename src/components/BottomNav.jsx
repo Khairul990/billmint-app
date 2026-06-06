@@ -1,5 +1,7 @@
 import React from 'react';
 import { LayoutDashboard, FileSpreadsheet, Users, MoreHorizontal } from 'lucide-react';
+import { triggerLightHaptic } from '../utils/feedback';
+import { t } from '../utils/i18n';
 
 /**
  * Mobile Bottom Navigation Menu
@@ -8,10 +10,10 @@ import { LayoutDashboard, FileSpreadsheet, Users, MoreHorizontal } from 'lucide-
  */
 const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPaymentsCount = 0 }) => {
   const tabs = [
-    { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
-    { id: 'invoices', label: 'Invoices', icon: FileSpreadsheet },
+    { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
+    { id: 'invoices', label: t('invoices'), icon: FileSpreadsheet },
     { id: 'create', isAction: true },
-    { id: 'customers', label: 'Clients', icon: Users },
+    { id: 'customers', label: t('customers'), icon: Users },
     { id: 'more', label: 'More', icon: MoreHorizontal },
   ];
 
@@ -22,7 +24,10 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
           return (
             <div key="action" className="relative -top-5 flex-1 flex justify-center">
               <button
-                onClick={onQuickBillOpen}
+                onClick={() => {
+                  triggerLightHaptic();
+                  onQuickBillOpen();
+                }}
                 className="w-14 h-14 bg-gradient-to-tr from-theme-accent to-theme-accent-dark rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(20,184,166,0.4)] border-[3px] border-white dark:border-[#070c18] transform active:scale-95 transition-all"
               >
                 <div className="w-6 h-6 font-bold text-2xl leading-none flex items-center justify-center -mt-1">+</div>
@@ -40,7 +45,10 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
         return (
           <button
             key={tab.id}
-            onClick={() => setCurrentTab(tab.id)}
+            onClick={() => {
+              triggerLightHaptic();
+              setCurrentTab(tab.id);
+            }}
             className="flex flex-col items-center justify-center flex-1 py-1.5 px-2 rounded-2xl transition-all cursor-pointer"
           >
             <div className={`p-1.5 rounded-xl transition-all duration-300 ${

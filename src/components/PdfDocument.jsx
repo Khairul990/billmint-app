@@ -1,6 +1,7 @@
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { formatCurrency } from '../utils/invoiceUtils';
+import { t } from '../utils/i18n';
 
 // Register Fonts
 Font.register({
@@ -323,7 +324,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
         {/* CRM Info */}
         <View style={styles.crmGrid}>
           <View style={styles.crmSection}>
-            <Text style={styles.sectionTitle}>Billed To</Text>
+            <Text style={styles.sectionTitle}>{t('bill_to')}</Text>
             <Text style={styles.customerName}>{invoice.customerName}</Text>
             <Text style={styles.metaText}>{invoice.customerAddress || 'No address provided'}</Text>
             <Text style={styles.metaText}>Phone: {invoice.customerPhone || 'N/A'}</Text>
@@ -343,10 +344,10 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
         {/* Items Table */}
         <View style={styles.table}>
           <View style={styles.tableHeaderRow}>
-            <Text style={[styles.tableHeaderCell, styles.colDesc]}>Item Description</Text>
+            <Text style={[styles.tableHeaderCell, styles.colDesc]}>{t('items')} Description</Text>
             <Text style={[styles.tableHeaderCell, styles.colQty]}>Qty</Text>
             <Text style={[styles.tableHeaderCell, styles.colRate]}>Unit Price</Text>
-            <Text style={[styles.tableHeaderCell, styles.colAmt]}>Total</Text>
+            <Text style={[styles.tableHeaderCell, styles.colAmt]}>{t('total')}</Text>
           </View>
           
           {(invoice.items || []).map((item, idx) => (
@@ -405,7 +406,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
             </View>
 
             <View style={styles.grandTotalRow}>
-              <Text style={styles.grandTotalLabel}>Grand Total</Text>
+              <Text style={styles.grandTotalLabel}>Grand {t('total')}</Text>
               <Text style={styles.grandTotalValue}>
                 {formatCurrency(invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}
               </Text>

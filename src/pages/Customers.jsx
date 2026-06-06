@@ -15,6 +15,7 @@ import {
 import BottomSheet from '../components/BottomSheet';
 import PullToRefresh from '../components/PullToRefresh';
 import { syncFromFirestore } from '../services/dbEngine';
+import CustomerLedger from '../components/customers/CustomerLedger';
 
 /**
  * Customers CRM and Registry Page
@@ -22,12 +23,13 @@ import { syncFromFirestore } from '../services/dbEngine';
  * @param {Function} onSaveCustomer - saves or edits customer in state/storage
  * @param {Function} onDeleteCustomer - deletes customer
  */
-const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
+const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCustomer }) => {
   const [searchQuery, setSearchQuery] = useState('');
   
   // Modals / Add-Edit states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
+  const [ledgerCustomer, setLedgerCustomer] = useState(null);
 
   // Form Fields
   const [name, setName] = useState('');
@@ -136,13 +138,14 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
           {filteredCustomers.map((cust) => (
             <div 
               key={cust.id}
-              className="bg-theme-card dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-3xl p-5 shadow-premium hover:shadow-premium-hover transition-all duration-300 relative flex flex-col justify-between"
+              onClick={() => setLedgerCustomer(cust)}
+              className="bg-theme-card dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-3xl p-5 shadow-premium hover:shadow-premium-hover transition-all duration-300 relative flex flex-col justify-between cursor-pointer group"
             >
               {/* Top section: Avatar and Actions */}
               <div>
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-theme-accent-light border border-theme-border-soft flex items-center justify-center font-extrabold text-theme-accent text-sm">
+                    <div className="w-10 h-10 rounded-xl bg-theme-accent-light border border-theme-border-soft flex items-center justify-center font-extrabold text-theme-accent text-sm group-hover:scale-105 transition-transform">
                       {cust.name.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
@@ -151,7 +154,7 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
                     </div>
                   </div>
 
-                  <div className="flex gap-1">
+                  <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => openEditModal(cust)}
                       className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light rounded-xl transition-all"
@@ -268,6 +271,13 @@ const Customers = ({ customers = [], onSaveCustomer, onDeleteCustomer }) => {
             </div>
           </form>
         </BottomSheet>
+
+        <CustomerLedger 
+          isOpen={!!ledgerCustomer}
+          onClose={() => setLedgerCustomer(null)}
+          customer={ledgerCustomer}
+          invoices={invoices}
+        />
       </div>
     </PullToRefresh>
   );

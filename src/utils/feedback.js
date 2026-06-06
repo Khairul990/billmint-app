@@ -61,3 +61,19 @@ export const triggerSuccessFeedback = () => {
   }
 }
 };
+
+export const triggerLightHaptic = () => {
+  let enableHaptics = true;
+  try {
+    const settings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
+    if (settings.enableHaptics === false) enableHaptics = false;
+  } catch (e) {}
+
+  if (enableHaptics) {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(10); // Very subtle tap
+      }
+    } catch (err) {}
+  }
+};

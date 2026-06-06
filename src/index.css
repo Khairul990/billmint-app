@@ -52,11 +52,11 @@ html {
   }
   
   .dark, .dark[data-theme="pink"], [data-theme="pink"].dark {
-    --app-bg: #07081C;
-    --app-bg-soft: #151735;
-    --surface: #07081C;
-    --surface-elevated: #151735;
-    --card-bg: #10122B;
+    --app-bg: #000000;
+    --app-bg-soft: #0A0A0A;
+    --surface: #000000;
+    --surface-elevated: #111111;
+    --card-bg: #0A0A0A;
     
     --text-primary: #FFF7FB;
     --text-secondary: #FFF7FB;
@@ -119,11 +119,11 @@ html {
   }
   
   .dark[data-theme="indigo"] {
-    --app-bg: #080712;
-    --app-bg-soft: #141026;
-    --surface: #080712;
-    --surface-elevated: #141026;
-    --card-bg: #1D1638;
+    --app-bg: #000000;
+    --app-bg-soft: #080808;
+    --surface: #000000;
+    --surface-elevated: #111111;
+    --card-bg: #0A0A0A;
     
     --text-primary: #F8F7FF;
     --text-secondary: #F8F7FF;
@@ -975,4 +975,13 @@ html {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent, #94a3b8);
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/70 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-xl;
+  }
+  .glass-panel-heavy {
+    @apply bg-white/80 dark:bg-black/60 backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-2xl;
+  }
 }

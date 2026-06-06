@@ -2,6 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell } from 'lucide-react';
 import { logout } from '../services/dbEngine';
+import { triggerLightHaptic } from '../utils/feedback';
+import { t } from '../utils/i18n';
 import Logo from './Logo';
 
 /**
@@ -14,14 +16,14 @@ import Logo from './Logo';
  */
 const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userEmail, pendingPaymentsCount = 0 }) => {
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'invoices', label: 'Invoices', icon: FileSpreadsheet },
-    { id: 'customers', label: 'Customers', icon: Users },
-    { id: 'expenses', label: 'Overhead Expenses', icon: TrendingDown },
-    { id: 'products', label: 'Products & Catalog', icon: Layers },
+    { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
+    { id: 'invoices', label: t('invoices'), icon: FileSpreadsheet },
+    { id: 'customers', label: t('customers'), icon: Users },
+    { id: 'expenses', label: t('expenses'), icon: TrendingDown },
+    { id: 'products', label: t('products'), icon: Layers },
     { id: 'pending-payments', label: 'Payment Proofs', icon: Bell },
     { id: 'subscription', label: 'Subscription Plan', icon: Sparkles },
-    { id: 'settings', label: 'Settings', icon: SettingsIcon },
+    { id: 'settings', label: t('settings'), icon: SettingsIcon },
     { id: 'guide', label: 'How to Use', icon: HelpCircle },
   ];
 
@@ -43,7 +45,10 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
               whileHover={{ scale: 1.02, x: 4 }}
               whileTap={{ scale: 0.98 }}
               key={item.id}
-              onClick={() => setCurrentTab(item.id)}
+              onClick={() => {
+                triggerLightHaptic();
+                setCurrentTab(item.id);
+              }}
               className={`relative w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors duration-300 group cursor-pointer ${
                 isActive 
                   ? 'text-theme-button-text' 

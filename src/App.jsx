@@ -880,6 +880,7 @@ function App() {
         return (
           <Customers
             customers={customers}
+            invoices={invoices}
             onSaveCustomer={handleSaveCustomer}
             onDeleteCustomer={handleDeleteCustomer}
           />

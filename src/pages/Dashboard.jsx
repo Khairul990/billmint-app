@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell } from 'recharts';
 import { toast } from 'react-hot-toast';
 import StatCard from '../components/StatCard';
 import InvoiceCard from '../components/InvoiceCard';
@@ -41,6 +41,7 @@ import { formatCurrency } from '../utils/invoiceUtils';
 import { firebaseReady } from '../services/firebaseConfig';
 import PullToRefresh from '../components/PullToRefresh';
 import { syncFromFirestore, getInvoices, getCustomers, getExpenses, getSettings } from '../services/dbEngine';
+import { t } from '../utils/i18n';
 
 /**
  * High-End SaaS Dashboard with SVG Charts & WhatsApp Reminders
@@ -141,6 +142,40 @@ const Dashboard = ({
 
   const monthlyData = getMonthlyData();
 
+  // --- TOP CUSTOMERS ---
+  const getTopCustomers = () => {
+    const customerTotals = {};
+    invoices.forEach(inv => {
+      const name = inv.customerName || 'Unknown';
+      customerTotals[name] = (customerTotals[name] || 0) + (parseFloat(inv.grandTotal) || 0);
+    });
+    
+    return Object.keys(customerTotals)
+      .map(name => ({ name, value: customerTotals[name] }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+  };
+  const topCustomersData = getTopCustomers();
+  const PIE_COLORS = ['#EC4899', '#8B5CF6', '#3B82F6', '#10B981', '#F59E0B'];
+
+  // --- BEST SELLING ITEMS ---
+  const getBestSellingItems = () => {
+    const itemTotals = {};
+    invoices.forEach(inv => {
+      (inv.items || []).forEach(item => {
+        const name = item.description || item.productName || item.serviceName || item.itemService || 'Unknown Item';
+        const qty = parseFloat(item.qty) || 1;
+        itemTotals[name] = (itemTotals[name] || 0) + qty;
+      });
+    });
+    
+    return Object.keys(itemTotals)
+      .map(name => ({ name, qty: itemTotals[name] }))
+      .sort((a, b) => b.qty - a.qty)
+      .slice(0, 5);
+  };
+  const bestSellingItems = getBestSellingItems();
+
   // --- WHATSAPP REMINDER DISPATCHER ---
   const sendWhatsAppReminder = (invoice) => {
     const phone = invoice.customerPhone || '';
@@ -238,8 +273,8 @@ const Dashboard = ({
 
         {/* 1. HEADER & HERO */}
         <div className="space-y-0.5 md:space-y-2">
-          <h1 className="text-xl md:text-2xl font-black text-theme-primary tracking-tight">Dashboard</h1>
-          <p className="text-xs md:text-sm text-theme-muted font-bold">Welcome back, here is your business summary.</p>
+          <h1 className="text-xl md:text-2xl font-black text-theme-primary tracking-tight">{t('dashboard')}</h1>
+          <p className="text-xs md:text-sm text-theme-muted font-bold">{t('welcome')}</p>
         </div>
 
         <div className="bg-[image:var(--accent-gradient)] rounded-2xl md:rounded-3xl p-4 md:p-6 text-white shadow-premium relative overflow-hidden">
@@ -248,7 +283,7 @@ const Dashboard = ({
             <h2 className="text-lg md:text-2xl font-black mb-1.5 md:mb-2 leading-tight">Create professional invoices in seconds.</h2>
             <p className="text-[10px] md:text-sm font-medium opacity-90 max-w-md leading-relaxed">Send invoices on WhatsApp, collect payments faster, and track your business growth.</p>
             <button onClick={() => setCurrentTab('create')} className="mt-4 md:mt-5 bg-white text-theme-accent px-5 md:px-6 py-2 md:py-2.5 rounded-xl font-black text-[10px] md:text-xs shadow-lg hover:scale-105 transition-transform uppercase tracking-wider">
-              + New Bill
+              {t('new_bill')}
             </button>
           </div>
         </div>
@@ -261,7 +296,7 @@ const Dashboard = ({
               <div className="p-2.5 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 rounded-full transition-transform duration-300 group-hover:scale-110">
                 <TrendingUp className="w-5 h-5" />
               </div>
-              <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">Revenue</p>
+              <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">{t('revenue')}</p>
             </div>
             <div>
               <h3 className="text-2xl md:text-3xl font-bold text-theme-primary tracking-tight">{formatCurrency(totalRevenue, currencySymbol)}</h3>
@@ -275,11 +310,11 @@ const Dashboard = ({
               <div className="p-2.5 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-full transition-transform duration-300 group-hover:scale-110">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
-              <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">Collection</p>
+              <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">{t('collection')}</p>
             </div>
             <div>
               <h3 className="text-2xl md:text-3xl font-bold text-theme-primary tracking-tight">{formatCurrency(totalPaid, currencySymbol)}</h3>
-              <p className="text-[10px] md:text-[11px] font-medium text-theme-muted mt-1.5">Total received</p>
+              <p className="text-[10px] md:text-[11px] font-medium text-theme-muted mt-1.5">{t('total_received')}</p>
             </div>
           </div>
 
@@ -289,11 +324,11 @@ const Dashboard = ({
               <div className="p-2.5 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 rounded-full transition-transform duration-300 group-hover:scale-110">
                 <AlertCircle className="w-5 h-5" />
               </div>
-              <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">Pending</p>
+              <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">{t('pending')}</p>
             </div>
             <div>
               <h3 className="text-2xl md:text-3xl font-bold text-theme-danger tracking-tight">{formatCurrency(totalDue, currencySymbol)}</h3>
-              <p className="text-[10px] md:text-[11px] font-medium text-theme-danger/70 mt-1.5">Needs collection</p>
+              <p className="text-[10px] md:text-[11px] font-medium text-theme-danger/70 mt-1.5">{t('needs_collection')}</p>
             </div>
           </div>
 
@@ -303,11 +338,11 @@ const Dashboard = ({
               <div className="p-2.5 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 rounded-full transition-transform duration-300 group-hover:scale-110">
                 <Users className="w-5 h-5" />
               </div>
-              <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">Customers</p>
+              <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">{t('customers')}</p>
             </div>
             <div>
               <h3 className="text-2xl md:text-3xl font-bold text-theme-primary tracking-tight">{customers.length}</h3>
-              <p className="text-[10px] md:text-[11px] font-medium text-theme-muted mt-1.5">Active clients</p>
+              <p className="text-[10px] md:text-[11px] font-medium text-theme-muted mt-1.5">{t('active_clients')}</p>
             </div>
           </div>
         </div>
@@ -319,9 +354,9 @@ const Dashboard = ({
           <div className="lg:col-span-2 bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
-                <ReceiptText className="w-4 h-4 text-theme-accent" /> Recent Invoices
+                <ReceiptText className="w-4 h-4 text-theme-accent" /> {t('recent_invoices')}
               </h3>
-              <button onClick={() => setCurrentTab('invoices')} className="text-[10px] font-black text-theme-accent hover:text-theme-primary transition-colors uppercase">View All</button>
+              <button onClick={() => setCurrentTab('invoices')} className="text-[10px] font-black text-theme-accent hover:text-theme-primary transition-colors uppercase">{t('view_all')}</button>
             </div>
             <div className="space-y-3">
               {recentInvoices.map((inv) => (
@@ -352,28 +387,37 @@ const Dashboard = ({
             </div>
           </div>
 
-          {/* Business Summary Chart Card (Right) */}
           <div className="lg:col-span-1 bg-theme-card rounded-3xl p-5 md:p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-theme-accent" /> Revenue vs Expenses
+                <TrendingUp className="w-4 h-4 text-theme-accent" /> {t('revenue_vs_expenses')}
               </h3>
             </div>
             <div className="flex-1 w-full min-h-[220px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-slate-200 dark:text-slate-800" />
                   <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} className="text-theme-muted" />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10 }} className="text-theme-muted" tickFormatter={(val) => `${val / 1000}k`} />
                   <Tooltip 
-                    cursor={{ fill: 'transparent' }}
+                    cursor={{ stroke: 'var(--accent)', strokeWidth: 1, strokeDasharray: '3 3' }}
                     contentStyle={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border-soft)', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}
                     formatter={(value) => [formatCurrency(value, currencySymbol), '']}
                   />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', paddingTop: '10px' }} />
-                  <Bar dataKey="revenue" name="Revenue" fill="var(--accent)" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                  <Bar dataKey="expenses" name="Expenses" fill="var(--danger, #ef4444)" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                </BarChart>
+                  <Area type="monotone" dataKey="revenue" name="Revenue" stroke="var(--accent)" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={3} />
+                  <Area type="monotone" dataKey="expenses" name="Expenses" stroke="#ef4444" fillOpacity={1} fill="url(#colorExpenses)" strokeWidth={3} />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
@@ -383,72 +427,69 @@ const Dashboard = ({
         {/* 4. WIDGETS ROW 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {/* Service Status Card (Left) */}
-          <div className="hidden lg:block bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
-            <h3 className="font-extrabold text-sm text-theme-primary tracking-tight mb-5 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-theme-accent" /> Service Status
-            </h3>
-            <div className="space-y-4">
-              {/* Cloud Backup */}
-              <div className="flex items-center justify-between p-3 bg-theme-app rounded-2xl border border-theme-border-soft">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-theme-accent-light text-theme-accent rounded-xl"><Activity className="w-4 h-4" /></div>
-                  <span className="text-xs font-bold text-theme-primary">Cloud Backup</span>
-                </div>
-                <div className="flex items-center gap-2 bg-theme-success/10 px-3 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-theme-success animate-pulse"></span>
-                  <span className="text-[9px] font-extrabold text-theme-success uppercase tracking-wider">Active</span>
-                </div>
-              </div>
-              {/* PDF Generator */}
-              <div className="flex items-center justify-between p-3 bg-theme-app rounded-2xl border border-theme-border-soft">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-theme-accent-light text-theme-accent rounded-xl"><FileDown className="w-4 h-4" /></div>
-                  <span className="text-xs font-bold text-theme-primary">PDF Engine</span>
-                </div>
-                <div className="flex items-center gap-2 bg-theme-success/10 px-3 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-theme-success animate-pulse"></span>
-                  <span className="text-[9px] font-extrabold text-theme-success uppercase tracking-wider">Active</span>
-                </div>
-              </div>
-              {/* Invoice System */}
-              <div className="flex items-center justify-between p-3 bg-theme-app rounded-2xl border border-theme-border-soft">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-theme-accent-light text-theme-accent rounded-xl"><ReceiptText className="w-4 h-4" /></div>
-                  <span className="text-xs font-bold text-theme-primary">Invoice DB</span>
-                </div>
-                <div className="flex items-center gap-2 bg-theme-success/10 px-3 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-theme-success animate-pulse"></span>
-                  <span className="text-[9px] font-extrabold text-theme-success uppercase tracking-wider">Active</span>
-                </div>
-              </div>
+          {/* Top Customers (Pie Chart) */}
+          <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium flex flex-col">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
+                <PieChart className="w-4 h-4 text-theme-accent" /> {t('top_customers')}
+              </h3>
+            </div>
+            <div className="flex-1 w-full min-h-[220px]">
+              {topCustomersData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={topCustomersData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {topCustomersData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border-soft)', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}
+                      formatter={(value) => [formatCurrency(value, currencySymbol), 'Revenue']}
+                    />
+                    <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-theme-muted text-xs font-bold">No data available</div>
+              )}
             </div>
           </div>
 
-          {/* Recent Customers Card (Right) */}
+          {/* Best Selling Items List */}
           <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
-                <Users className="w-4 h-4 text-theme-accent" /> Recent Clients
+                <Sparkles className="w-4 h-4 text-theme-accent" /> {t('best_selling')}
               </h3>
-              <button onClick={() => setCurrentTab('customers')} className="text-[10px] font-black text-theme-accent hover:text-theme-primary transition-colors uppercase">View All</button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {customers.slice(-4).reverse().map(c => (
-                <div key={c.id} className="flex items-center gap-3 p-3 bg-theme-app hover:bg-theme-surface rounded-2xl border border-theme-border-soft transition-colors cursor-pointer" onClick={() => setCurrentTab('customers')}>
-                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] flex items-center justify-center text-white font-black text-sm shadow-md">
-                    {c.name.charAt(0).toUpperCase()}
+            <div className="space-y-4">
+              {bestSellingItems.map((item, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-theme-app hover:bg-theme-surface rounded-2xl border border-theme-border-soft transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-theme-accent-light text-theme-accent flex items-center justify-center font-black text-xs">
+                      #{index + 1}
+                    </div>
+                    <span className="text-xs font-bold text-theme-primary line-clamp-1">{item.name}</span>
                   </div>
-                  <div className="overflow-hidden">
-                    <p className="text-xs font-bold text-theme-primary leading-tight truncate">{c.name}</p>
-                    <p className="text-[9px] font-bold text-theme-muted mt-0.5 truncate">{c.phone || 'No phone'}</p>
+                  <div className="text-right">
+                    <span className="text-[10px] font-black bg-theme-success/10 text-theme-success px-2 py-1 rounded-md">
+                      {item.qty} Sold
+                    </span>
                   </div>
                 </div>
               ))}
-              {customers.length === 0 && (
-                <div className="col-span-full text-center py-8 text-theme-muted">
-                  <Users className="w-8 h-8 mx-auto mb-2 opacity-50"/>
-                  <p className="text-[10px] font-bold">No clients added yet</p>
+              {bestSellingItems.length === 0 && (
+                <div className="text-center py-8 text-theme-muted">
+                  <p className="text-[10px] font-bold">No sales data yet</p>
                 </div>
               )}
             </div>
@@ -461,11 +502,11 @@ const Dashboard = ({
           <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/20 blur-2xl rounded-full"></div>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
             <div>
-              <h3 className="font-black text-lg md:text-xl mb-1">Upgrade to Premium</h3>
+              <h3 className="font-black text-lg md:text-xl mb-1">{t('upgrade')}</h3>
               <p className="text-xs md:text-sm font-medium opacity-90">Get unlimited invoices, multi-user access, and 24/7 dedicated SaaS billing support.</p>
             </div>
             <button onClick={() => setCurrentTab('subscription')} className="bg-white text-theme-accent font-black text-xs py-3 px-8 rounded-xl shadow-lg hover:scale-105 transition-transform uppercase tracking-wider shrink-0">
-              View Plans
+              {t('view_plans')}
             </button>
           </div>
         </div>

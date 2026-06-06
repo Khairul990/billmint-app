@@ -1037,7 +1037,6 @@ const Settings = ({
                     type="button"
                     onClick={() => {
                       setDarkMode(!darkMode);
-                      // Instantly toggle the class so the preview is accurate
                       if (!darkMode) {
                         document.documentElement.classList.add('dark');
                       } else {
@@ -1048,6 +1047,23 @@ const Settings = ({
                   >
                     <span className={`absolute top-1 left-1 bg-theme-card w-4 h-4 rounded-full transition-transform duration-300 ${darkMode ? 'translate-x-6' : ''}`} />
                   </button>
+                </div>
+
+                {/* Language Selector */}
+                <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-black uppercase text-theme-primary dark:text-theme-primary tracking-wider">Language</h3>
+                    <p className="text-[10px] text-theme-muted font-medium">App interface language</p>
+                  </div>
+                  <select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                    className="bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-lg px-3 py-1.5 text-xs font-bold text-theme-primary outline-none focus:ring-2 focus:ring-theme-accent/20 cursor-pointer"
+                  >
+                    <option value="en">English</option>
+                    <option value="bn">Bengali (বাংলা)</option>
+                    <option value="hi">Hindi (हिंदी)</option>
+                  </select>
                 </div>
 
                 <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-5">
