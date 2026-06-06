@@ -29,7 +29,7 @@ import {
   Clock,
   Sparkles,
   FileText,
-  PieChart,
+  PieChart as PieChartIcon,
   Rocket,
   Check,
   Megaphone,
@@ -431,7 +431,7 @@ const Dashboard = ({
           <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium flex flex-col">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
-                <PieChart className="w-4 h-4 text-theme-accent" /> {t('top_customers')}
+                <PieChartIcon className="w-4 h-4 text-theme-accent" /> {t('top_customers')}
               </h3>
             </div>
             <div className="flex-1 w-full min-h-[220px]">
