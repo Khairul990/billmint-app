@@ -5,6 +5,7 @@ import { InvoiceProvider } from '../contexts/InvoiceContext';
 import CreateInvoiceWizard from '../components/invoice/wizard/CreateInvoiceWizard';
 import QuickBillForm from '../components/invoice/quick/QuickBillForm';
 import LiveInvoicePreview from '../components/invoice/LiveInvoicePreview';
+import AIInvoiceScanner from '../components/invoice/AIInvoiceScanner';
 
 const CreateInvoiceLayout = ({ 
   customers, 
@@ -33,11 +34,13 @@ const CreateInvoiceLayout = ({
           <h1 className="text-2xl font-black text-theme-primary">Create Bill</h1>
           <p className="text-sm font-bold text-theme-muted mt-1">Choose your preferred billing mode</p>
         </div>
-        
-        <div className="flex p-1 bg-theme-surface rounded-xl border border-theme-border-soft w-full sm:w-auto">
-          <button
-            onClick={() => setBillingMode('quick')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto items-center">
+          <AIInvoiceScanner />
+          
+          <div className="flex p-1 bg-theme-surface rounded-xl border border-theme-border-soft">
+            <button
+              onClick={() => setBillingMode('quick')}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${
               billingMode === 'quick' 
                 ? 'bg-theme-card text-theme-accent shadow-sm border border-theme-border-soft' 
                 : 'text-theme-muted hover:text-theme-primary'
@@ -55,6 +58,7 @@ const CreateInvoiceLayout = ({
           >
             <LayoutTemplate className="w-4 h-4" /> Advanced Mode
           </button>
+          </div>
         </div>
       </div>
 

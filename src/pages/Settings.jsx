@@ -257,6 +257,9 @@ const Settings = ({
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [gstNumber, setGstNumber] = useState('');
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [twilioAccountSid, setTwilioAccountSid] = useState('');
+  const [twilioAuthToken, setTwilioAuthToken] = useState('');
 
   // Regional Settings States
   const [country, setCountry] = useState('India');
@@ -447,6 +450,9 @@ const Settings = ({
       setEmail(settings.email || '');
       setAddress(settings.address || '');
       setGstNumber(settings.gstNumber || '');
+      setGeminiApiKey(settings.geminiApiKey || '');
+      setTwilioAccountSid(settings.twilioAccountSid || '');
+      setTwilioAuthToken(settings.twilioAuthToken || '');
 
       setCountry(settings.country || 'India');
       setLanguage(settings.language || 'English');
@@ -551,6 +557,9 @@ const Settings = ({
       email,
       address,
       gstNumber,
+      geminiApiKey,
+      twilioAccountSid,
+      twilioAuthToken,
 
       country,
       language,
@@ -823,6 +832,8 @@ const Settings = ({
           { id: 'payment', label: 'Payments', icon: QrCode },
           { id: 'preferences', label: 'Invoices', icon: FileText },
           { id: 'livelink', label: 'Links', icon: Link },
+          { id: 'ai', label: 'AI & Bot', icon: Sparkles },
+          { id: 'team', label: 'Team', icon: Users },
           { id: 'premiumux', label: 'UX', icon: Smartphone },
           { id: 'pwa', label: 'App', icon: Download },
           { id: 'storage', label: 'Backup', icon: Database }
@@ -2659,6 +2670,89 @@ const Settings = ({
               />
             </div>
             <p className="text-theme-muted text-xs font-semibold mt-4 tracking-wide">Click close or press ✕ to exit preview</p>
+          </div>
+        </div>
+      )}
+
+      {/* AI & Integrations TAB */}
+      {activeTab === 'ai' && (
+        <div className="space-y-6 animate-fadeIn">
+          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft dark:border-theme-border-soft shadow-premium relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent-light blur-3xl opacity-30 rounded-full pointer-events-none"></div>
+            
+            <div className="flex items-center gap-4 mb-6 border-b border-theme-border-soft dark:border-theme-border-soft pb-4">
+              <div className="w-12 h-12 rounded-2xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-lg shadow-glow shrink-0">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg font-black text-theme-primary dark:text-theme-primary tracking-tight">AI & Integrations</h2>
+                <p className="text-[11px] font-bold text-theme-muted mt-0.5">Configure API Keys for Automations.</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5 ml-1">Gemini API Key (AI Scanner)</label>
+                <input
+                  type="password"
+                  value={geminiApiKey}
+                  onChange={(e) => setGeminiApiKey(e.target.value)}
+                  placeholder="AIzaSy..."
+                  className="w-full bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-2xl px-4 py-3.5 text-xs font-bold text-theme-primary placeholder-theme-muted focus:ring-2 focus:ring-theme-accent/20 outline-none transition-all shadow-inner-sm"
+                />
+                <p className="text-[10px] text-theme-muted font-medium mt-1.5 ml-1">Required to enable the AI Bill Scanner. Get a free key from Google AI Studio.</p>
+              </div>
+
+              <div className="pt-4 border-t border-theme-border-soft dark:border-theme-border-soft/60">
+                <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5 ml-1">Twilio Account SID (WhatsApp Bot)</label>
+                <input
+                  type="text"
+                  value={twilioAccountSid}
+                  onChange={(e) => setTwilioAccountSid(e.target.value)}
+                  placeholder="AC..."
+                  className="w-full bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-2xl px-4 py-3.5 text-xs font-bold text-theme-primary placeholder-theme-muted focus:ring-2 focus:ring-theme-accent/20 outline-none transition-all shadow-inner-sm mb-3"
+                />
+                
+                <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5 ml-1">Twilio Auth Token</label>
+                <input
+                  type="password"
+                  value={twilioAuthToken}
+                  onChange={(e) => setTwilioAuthToken(e.target.value)}
+                  placeholder="Your auth token..."
+                  className="w-full bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-2xl px-4 py-3.5 text-xs font-bold text-theme-primary placeholder-theme-muted focus:ring-2 focus:ring-theme-accent/20 outline-none transition-all shadow-inner-sm"
+                />
+                <p className="text-[10px] text-theme-muted font-medium mt-1.5 ml-1">Required to enable Automated Due-Date Reminders via WhatsApp.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TEAM MANAGEMENT TAB */}
+      {activeTab === 'team' && (
+        <div className="space-y-6 animate-fadeIn">
+          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft dark:border-theme-border-soft shadow-premium">
+            <div className="flex items-center gap-4 mb-6 border-b border-theme-border-soft dark:border-theme-border-soft pb-4">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                <Users className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg font-black text-theme-primary dark:text-theme-primary tracking-tight">Team Management</h2>
+                <p className="text-[11px] font-bold text-theme-muted mt-0.5">Invite cashiers and manage roles.</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-theme-app dark:bg-theme-surface p-4 rounded-2xl border border-theme-border-soft text-center">
+                <p className="text-xs text-theme-muted font-bold">Role-Based Access Control (RBAC) allows you to invite Cashiers who can only create bills, but cannot view your Dashboard or Expenses.</p>
+                <button
+                  className="mt-4 bg-[image:var(--accent-gradient)] text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => alert("Firebase Auth modification required: Please set up a Firebase Cloud Function to send email invites and assign custom claims for 'cashier' role.")}
+                >
+                  + Invite Cashier
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
