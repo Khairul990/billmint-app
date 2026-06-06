@@ -579,7 +579,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           <div className="w-full lg:w-[350px] shrink-0 space-y-6">
 
             {/* PAYMENT BOX GATEWAY (TASK 4) */}
-            
+            {!showPaymentModal ? (
               <div className="bg-theme-card text-white rounded-3xl border border-slate-800 shadow-premium p-6 space-y-5 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-36 h-36 bg-theme-accent-light rounded-full blur-2xl pointer-events-none"></div>
                 

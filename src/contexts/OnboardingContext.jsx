@@ -12,7 +12,7 @@ export const useOnboarding = () => {
 };
 
 export const OnboardingProvider = ({ children }) => {
-  const [onboardingStep, setOnboardingStep] = useState(1);
+  const [onboardingStep, setOnboardingStep] = useState(2);
   const [onboardingData, setOnboardingData] = useState(() => {
     // Initialize with existing settings if available
     const existing = getSettings() || {};
