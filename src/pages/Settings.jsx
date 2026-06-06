@@ -52,6 +52,60 @@ import {
   cleanDuplicateDrafts,
   cleanTemporaryData,
   clearCacheOnly,
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Building2,
+  MapPin,
+  FileText,
+  Save,
+  Image as ImageIcon,
+  Phone,
+  Mail,
+  User,
+  Check,
+  CheckCircle2,
+  Percent,
+  QrCode,
+  Palette,
+  LayoutTemplate,
+  Database,
+  Download,
+  Upload,
+  Wifi,
+  WifiOff,
+  ServerOff,
+  ShieldAlert,
+  RotateCcw,
+  RefreshCw,
+  BarChart3,
+  Users,
+  CircleDollarSign,
+  Clock,
+  HardDrive,
+  Megaphone,
+  Lock,
+  Trash2,
+  CloudLightning,
+  Globe,
+  Languages,
+  Sliders,
+  Sparkles,
+  Link,
+  Info,
+  Smartphone
+} from 'lucide-react';
+
+import {
+  exportBackup,
+  getAuthSession,
+  clearInvoices,
+  clearCustomers,
+  clearProducts,
+  clearExpenses,
+  getStorageUsage,
+  cleanDuplicateDrafts,
+  cleanTemporaryData,
+  clearCacheOnly,
   getAdminUsersList,
   getAdminPremiumRequests,
   updatePremiumRequestStatus,
@@ -59,7 +113,8 @@ import {
   getGlobalAdminSettings,
   updateGlobalAdminSettings,
   clearAllLocalData,
-  emptyTrash
+  emptyTrash,
+  resetAccountKeepAuth
 } from '../services/dbEngine';
 import { getAdminEmail } from '../utils/adminAccess';
 import { firebaseReady } from '../services/firebaseConfig';
@@ -180,6 +235,7 @@ const Settings = ({
   onInstallApp
 }) => {
   const [activeTab, setActiveTab] = useState('profile');
+  const [showResetModal, setShowResetModal] = useState(false);
 
   const [storageInfo, setStorageInfo] = useState(null);
   
@@ -1876,6 +1932,22 @@ const Settings = ({
                       </button>
                     </div>
                     
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[10px] text-theme-danger font-bold uppercase tracking-wider px-1">
+                        🚨 Danger Zone: Reset Account Data
+                      </div>
+                      <button 
+                        onClick={() => setShowResetModal(true)}
+                        className="flex items-center gap-3 p-4 rounded-xl border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 transition-colors text-left h-full"
+                      >
+                        <Trash2 className="text-red-500" size={24} />
+                        <div>
+                          <div className="font-semibold text-red-600 dark:text-red-400">Reset All Data</div>
+                          <div className="text-xs text-red-500/80">Wipe invoices, customers & settings and start fresh</div>
+                        </div>
+                      </button>
+                    </div>
+                    
                     {isAdmin && (
                       <>
                         <button 
@@ -2658,6 +2730,64 @@ const Settings = ({
                 className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md cursor-pointer"
               >
                 Reject Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset All Data Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 max-w-md w-full border border-red-500/30 shadow-2xl space-y-5">
+            <div className="flex items-center gap-3 border-b border-theme-border-soft pb-4">
+              <div className="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center">
+                <ShieldAlert className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-theme-primary dark:text-theme-primary">Reset Account Data</h3>
+                <p className="text-[10px] text-red-500 font-bold uppercase tracking-wider">Danger Zone</p>
+              </div>
+            </div>
+            
+            <p className="text-sm text-theme-muted font-medium leading-relaxed">
+              You are about to permanently wipe all your data including invoices, customers, products, and settings. 
+              You will start completely fresh. <strong className="text-theme-primary dark:text-theme-primary">This action cannot be undone.</strong>
+            </p>
+
+            <div className="bg-theme-app dark:bg-theme-surface p-4 rounded-2xl border border-theme-border-soft text-xs text-theme-muted font-medium space-y-2">
+              <p>💡 <strong className="text-theme-primary dark:text-theme-primary">Recommendation:</strong> Download a full backup of your data to your device before resetting.</p>
+            </div>
+
+            <div className="flex flex-col gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleExport}
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft hover:bg-slate-100 dark:hover:bg-slate-800 text-theme-primary text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Download Backup Data
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm("Are you absolutely sure you want to delete all data?")) {
+                    resetAccountKeepAuth();
+                  }
+                }}
+                className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Yes, Reset All Data
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowResetModal(false)}
+                className="w-full px-4 py-3 text-theme-muted hover:text-theme-primary text-sm font-bold rounded-xl transition-colors"
+              >
+                Cancel
               </button>
             </div>
           </div>

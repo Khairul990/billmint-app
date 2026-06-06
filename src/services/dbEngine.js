@@ -742,6 +742,60 @@ export const clearAllLocalData = async () => {
   }
 };
 
+export const wipeUserFirestoreData = async (userId) => {
+  if (!firebaseReady) return;
+  try {
+    const collectionsToEmpty = ['invoices', 'customers', 'products', 'expenses'];
+    for (const colName of collectionsToEmpty) {
+      const itemsRef = collection(db, colName, userId, 'items');
+      const snapshot = await getDocs(itemsRef);
+      const deletePromises = snapshot.docs.map(d => deleteDoc(d.ref));
+      await Promise.all(deletePromises);
+    }
+    
+    // Also delete the main user documents
+    await deleteDoc(doc(db, 'settings', userId));
+    await deleteDoc(doc(db, 'subscription', userId));
+    await deleteDoc(doc(db, 'users', userId));
+    await deleteDoc(doc(db, 'usersList', userId));
+    
+    console.log('[WIPE] Firestore data completely wiped for user:', userId);
+  } catch (error) {
+    console.error('[WIPE] Error wiping Firestore data:', error);
+  }
+};
+
+export const resetAccountKeepAuth = async () => {
+  const session = localStorage.getItem(KEYS.AUTH);
+  const userId = getFirebaseUserId();
+  
+  // Wipe cloud data if connected
+  if (firebaseReady && userId && userId !== 'demo-user') {
+    await wipeUserFirestoreData(userId);
+  }
+  
+  // Wipe all local storage
+  localStorage.clear();
+  sessionStorage.clear();
+  try {
+    await BillQyroDB.deleteDB('billqyro-offline-db');
+    const caches = await window.caches.keys();
+    for (const name of caches) {
+      await window.caches.delete(name);
+    }
+  } catch (e) {}
+  
+  // Restore auth
+  if (session) {
+    localStorage.setItem(KEYS.AUTH, session);
+  }
+  
+  // Re-initialize local state
+  initializeStorage();
+  
+  window.location.href = '/onboarding';
+};
+
 // --- SUBSCRIPTION ---
 export const getSubscriptionStatus = () => {
   initializeStorage();
