@@ -731,7 +731,11 @@ export const clearAllLocalData = async () => {
   localStorage.clear();
   sessionStorage.clear();
   try {
-    await BillQyroDB.deleteDB('billqyro-offline-db');
+    await BillQyroDB.clear('invoices');
+    await BillQyroDB.clear('customers');
+    await BillQyroDB.clear('products');
+    await BillQyroDB.clear('expenses');
+    await BillQyroDB.clear('syncQueue');
     const caches = await window.caches.keys();
     for (const name of caches) {
       await window.caches.delete(name);
@@ -749,7 +753,19 @@ export const wipeUserFirestoreData = async (userId) => {
     for (const colName of collectionsToEmpty) {
       const itemsRef = collection(db, colName, userId, 'items');
       const snapshot = await getDocs(itemsRef);
-      const deletePromises = snapshot.docs.map(d => deleteDoc(d.ref));
+      
+      const deletePromises = [];
+      snapshot.docs.forEach(d => {
+        deletePromises.push(deleteDoc(d.ref));
+        
+        // Also delete public copies for invoices
+        if (colName === 'invoices') {
+          const data = d.data();
+          if (data.publicToken) {
+            deletePromises.push(deleteDoc(doc(db, 'publicInvoices', data.publicToken)));
+          }
+        }
+      });
       await Promise.all(deletePromises);
     }
     
@@ -778,12 +794,18 @@ export const resetAccountKeepAuth = async () => {
   localStorage.clear();
   sessionStorage.clear();
   try {
-    await BillQyroDB.deleteDB('billqyro-offline-db');
+    await BillQyroDB.clear('invoices');
+    await BillQyroDB.clear('customers');
+    await BillQyroDB.clear('products');
+    await BillQyroDB.clear('expenses');
+    await BillQyroDB.clear('syncQueue');
     const caches = await window.caches.keys();
     for (const name of caches) {
       await window.caches.delete(name);
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error('Error clearing offline db', e);
+  }
   
   // Restore auth
   if (session) {
