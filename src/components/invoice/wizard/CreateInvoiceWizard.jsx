@@ -18,7 +18,7 @@ const STEPS = [
   { id: 4, title: '৪. প্রিভিউ ও সেভ' }
 ];
 
-const CreateInvoiceWizard = ({ onSaveInvoice, onDownloadPDF, setCurrentTab, customers }) => {
+const CreateInvoiceWizard = ({ onSaveInvoice, onDownloadPDF, setCurrentTab, customers, products }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const { state, dispatch, businessSettings } = useInvoice();
 
@@ -240,7 +240,7 @@ const CreateInvoiceWizard = ({ onSaveInvoice, onDownloadPDF, setCurrentTab, cust
             className="h-full"
           >
             {currentStep === 1 && <CustomerSelectionStep customers={customers} />}
-            {currentStep === 2 && <ItemsSelectionStep />}
+            {currentStep === 2 && <ItemsSelectionStep products={products} />}
             {currentStep === 3 && <PaymentDiscountStep />}
             {currentStep === 4 && <PreviewDownloadStep onDownloadPDF={onDownloadPDF} handleSave={handleSave} />}
           </motion.div>

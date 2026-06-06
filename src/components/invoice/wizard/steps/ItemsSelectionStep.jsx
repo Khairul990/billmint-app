@@ -20,6 +20,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import * as Icons from 'lucide-react';
+import ProductSearch from '../../ProductSearch';
 
 const CustomTemplateBuilder = ({ templateFields, setTemplateFields }) => {
   const addField = (type) => {
@@ -73,7 +74,7 @@ const CustomTemplateBuilder = ({ templateFields, setTemplateFields }) => {
   );
 };
 
-const SortableItem = ({ id, item, index, handleItemChange, removeItemRow, templateFields, currencySymbol }) => {
+const SortableItem = ({ id, item, index, handleItemChange, removeItemRow, templateFields, currencySymbol, products }) => {
   const {
     attributes,
     listeners,
@@ -118,13 +119,32 @@ const SortableItem = ({ id, item, index, handleItemChange, removeItemRow, templa
               <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider">{field.label}</label>
               
               {field.type === 'text' && (
-                <input
-                  type="text"
-                  value={item[field.id] || ''}
-                  onChange={(e) => handleItemChange(index, field.id, e.target.value)}
-                  className="w-full px-4 py-2.5 bg-theme-card border border-theme-border-soft rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary transition-all"
-                  placeholder={field.labelEn}
-                />
+                <>
+                  {['item', 'product', 'service', 'description'].includes(field.id) ? (
+                    <ProductSearch 
+                      value={item[field.id] || ''}
+                      onChange={(val) => handleItemChange(index, field.id, val)}
+                      onSelectProduct={(p) => {
+                        handleItemChange(index, field.id, p.name);
+                        if (p.price) {
+                          // Try to set rate/price if field exists
+                          const rateField = templateFields.find(f => ['rate', 'mrp', 'price'].includes(f.id));
+                          if (rateField) handleItemChange(index, rateField.id, p.price);
+                        }
+                      }}
+                      products={products}
+                      placeholder={field.labelEn || "Search product..."}
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={item[field.id] || ''}
+                      onChange={(e) => handleItemChange(index, field.id, e.target.value)}
+                      className="w-full px-4 py-2.5 bg-theme-card border border-theme-border-soft rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary transition-all"
+                      placeholder={field.labelEn}
+                    />
+                  )}
+                </>
               )}
               
               {field.type === 'number' && (
@@ -174,7 +194,7 @@ const SortableItem = ({ id, item, index, handleItemChange, removeItemRow, templa
   );
 };
 
-const ItemsSelectionStep = () => {
+const ItemsSelectionStep = ({ products = [] }) => {
   const { state, dispatch, businessSettings } = useInvoice();
   const { items, selectedTemplate, templateFields } = state;
   const currencySymbol = businessSettings?.currency || '₹';
@@ -312,6 +332,7 @@ const ItemsSelectionStep = () => {
                     removeItemRow={removeItemRow}
                     templateFields={templateFields}
                     currencySymbol={currencySymbol}
+                    products={products}
                 />
                 ))}
             </SortableContext>

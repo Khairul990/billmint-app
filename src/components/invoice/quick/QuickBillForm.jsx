@@ -1,0 +1,230 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Plus, Trash2, Save, Check } from 'lucide-react';
+import { useInvoice } from '../../../contexts/InvoiceContext';
+import ProductSearch from '../ProductSearch';
+
+const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
+  const { state, dispatch, businessSettings } = useInvoice();
+  const currencySymbol = businessSettings?.currency || '₹';
+
+  // Customer selection
+  const handleCustomerSelect = (e) => {
+    const custId = e.target.value;
+    if (custId) {
+      const cust = customers.find(c => c.id === custId);
+      if (cust) {
+        dispatch({ type: 'SET_CUSTOMER', payload: { id: cust.id, name: cust.name, phone: cust.phone || '', address: cust.address || '', email: cust.email || '' } });
+      }
+    } else {
+      dispatch({ type: 'SET_CUSTOMER', payload: { id: '', name: '', phone: '', address: '', email: '' } });
+    }
+  };
+
+  const handleCustomerNameChange = (e) => {
+    dispatch({ type: 'SET_CUSTOMER', payload: { ...state.customer, name: e.target.value, id: '' } });
+  };
+
+  const handleCustomerPhoneChange = (e) => {
+    dispatch({ type: 'SET_CUSTOMER', payload: { ...state.customer, phone: e.target.value } });
+  };
+
+  // Items
+  const handleItemChange = (index, field, value) => {
+    const newItems = [...state.items];
+    const isNumField = ['rate', 'price', 'mrp', 'qty', 'amount'].includes(field);
+    const val = isNumField ? (value === '' ? '' : (parseFloat(value) || 0)) : value;
+    
+    newItems[index][field] = val;
+
+    // Auto calculate amount
+    const qty = parseFloat(newItems[index].qty) || 1;
+    const rate = parseFloat(newItems[index].rate || newItems[index].price || 0);
+    newItems[index].amount = qty * rate;
+
+    dispatch({ type: 'SET_ITEMS', payload: newItems });
+  };
+
+  const handleAddItem = () => {
+    dispatch({ type: 'SET_ITEMS', payload: [...state.items, { id: `item-${Date.now()}`, item: '', rate: 0, qty: 1, amount: 0 }] });
+  };
+
+  const removeItem = (index) => {
+    const newItems = state.items.filter((_, i) => i !== index);
+    dispatch({ type: 'SET_ITEMS', payload: newItems });
+  };
+
+  // Save
+  const handleSave = (statusOverride = 'Paid') => {
+    if (!state.customer.name) {
+      alert("Please add a customer name");
+      return;
+    }
+
+    const cleanedItems = state.items.filter(i => i.item || i.rate > 0).map(i => ({
+      ...i,
+      qty: parseFloat(i.qty) || 1,
+      rate: parseFloat(i.rate) || 0,
+      amount: (parseFloat(i.qty) || 1) * (parseFloat(i.rate) || 0)
+    }));
+
+    if (cleanedItems.length === 0) {
+      alert("Please add at least one item");
+      return;
+    }
+
+    const payload = {
+      ...state,
+      items: cleanedItems,
+      customerId: state.customer.id || null,
+      customerName: state.customer.name,
+      customerPhone: state.customer.phone,
+      paymentStatus: statusOverride,
+      businessSnapshot: businessSettings,
+      paymentSettingsSnapshot: businessSettings,
+      regionalSettingsSnapshot: businessSettings
+    };
+
+    onSaveInvoice(payload, !state.customer.id, false);
+  };
+
+  return (
+    <div className="bg-theme-card rounded-2xl border border-theme-border-soft shadow-lg overflow-hidden flex flex-col h-full">
+      <div className="p-4 border-b border-theme-border-soft bg-theme-surface">
+        <h2 className="text-lg font-black text-theme-primary">⚡ Quick Bill</h2>
+      </div>
+
+      <div className="p-4 flex-1 overflow-y-auto space-y-6">
+        {/* Customer Section */}
+        <div className="space-y-3">
+          <label className="text-xs font-bold text-theme-muted uppercase tracking-wider">Customer Details</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Customer Name"
+                value={state.customer.name || ''}
+                onChange={handleCustomerNameChange}
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary"
+              />
+              {customers.length > 0 && (
+                <select 
+                  onChange={handleCustomerSelect}
+                  className="absolute right-0 top-0 bottom-0 opacity-0 cursor-pointer w-10"
+                >
+                  <option value="">New Customer</option>
+                  {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              )}
+            </div>
+            <input
+              type="text"
+              placeholder="Phone (Optional)"
+              value={state.customer.phone || ''}
+              onChange={handleCustomerPhoneChange}
+              className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary"
+            />
+          </div>
+        </div>
+
+        {/* Items Section */}
+        <div className="space-y-3">
+          <div className="flex justify-between items-end">
+            <label className="text-xs font-bold text-theme-muted uppercase tracking-wider">Items</label>
+          </div>
+          
+          <div className="space-y-2">
+            {state.items.map((item, index) => (
+              <div key={item.id} className="flex gap-2 items-start bg-theme-surface p-2 rounded-xl border border-theme-border-soft">
+                <div className="flex-1">
+                  <ProductSearch 
+                    value={item.item || ''}
+                    onChange={(val) => handleItemChange(index, 'item', val)}
+                    onSelectProduct={(p) => {
+                      handleItemChange(index, 'item', p.name);
+                      if (p.price) handleItemChange(index, 'rate', p.price);
+                    }}
+                    products={products}
+                    placeholder="Search or enter item name..."
+                  />
+                </div>
+                <div className="w-20">
+                  <input
+                    type="number"
+                    placeholder="Qty"
+                    value={item.qty === 0 ? '' : item.qty}
+                    onChange={(e) => handleItemChange(index, 'qty', e.target.value)}
+                    className="w-full px-3 py-2.5 bg-theme-card border border-theme-border-soft rounded-xl text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary"
+                  />
+                </div>
+                <div className="w-28 relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-muted text-xs font-bold">{currencySymbol}</span>
+                  <input
+                    type="number"
+                    placeholder="Rate"
+                    value={item.rate === 0 ? '' : item.rate}
+                    onChange={(e) => handleItemChange(index, 'rate', e.target.value)}
+                    className="w-full pl-7 pr-3 py-2.5 bg-theme-card border border-theme-border-soft rounded-xl text-sm font-bold text-right focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeItem(index)}
+                  className="p-3 text-theme-danger hover:bg-theme-danger/10 rounded-xl transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+          
+          <button
+            type="button"
+            onClick={handleAddItem}
+            className="w-full py-3 border-2 border-dashed border-theme-border-strong hover:border-theme-accent text-theme-muted hover:text-theme-accent rounded-xl flex items-center justify-center gap-2 text-sm font-bold transition-colors"
+          >
+            <Plus className="w-4 h-4" /> Add Item
+          </button>
+        </div>
+        
+        {/* Discount Section (Simplified) */}
+        <div className="flex items-center gap-4 border-t border-theme-border-soft pt-4">
+          <div className="flex-1">
+             <label className="text-[10px] font-bold text-theme-muted uppercase tracking-wider block mb-1">Discount</label>
+             <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-muted text-xs font-bold">{currencySymbol}</span>
+                <input
+                  type="number"
+                  value={state.totals.discountAmount || ''}
+                  onChange={(e) => dispatch({ type: 'SET_DISCOUNT_AMOUNT', payload: parseFloat(e.target.value) || 0 })}
+                  className="w-full pl-7 pr-3 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary"
+                  placeholder="0.00"
+                />
+             </div>
+          </div>
+          <div className="flex-1 text-right">
+             <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1">Grand Total</p>
+             <p className="text-3xl font-black text-theme-primary">{currencySymbol}{state.totals.grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-4 border-t border-theme-border-soft bg-theme-surface flex gap-3">
+        <button
+          onClick={() => handleSave('Draft')}
+          className="flex-1 py-3.5 bg-theme-card border border-theme-border-strong hover:bg-theme-border-soft text-theme-primary rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+        >
+          <Save className="w-4 h-4" /> Save Draft
+        </button>
+        <button
+          onClick={() => handleSave('Paid')}
+          className="flex-[2] py-3.5 bg-theme-success text-white hover:opacity-90 rounded-xl font-black shadow-lg flex items-center justify-center gap-2 transition-all"
+        >
+          <Check className="w-5 h-5" /> Generate Bill
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default QuickBillForm;
