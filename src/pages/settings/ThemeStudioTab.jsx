@@ -52,59 +52,88 @@ const ThemeStudioTab = (props) => {
                   {/* Theme Presets List */}
                   <div className="space-y-3">
                     {[
-                        { id: 'pink', name: 'Pink Premium', desc: 'Deep navy backgrounds with premium pink accents. Best for SaaS.', colors: ['#10122B', '#EC4899', '#FB7185'] },
-                        { id: 'indigo', name: 'Royal Indigo', desc: 'Deep indigo and vibrant purple for an elegant touch.', colors: ['#312E81', '#5B34D6', '#7C3AED'] },
-                        { id: 'emerald', name: 'Emerald Business', desc: 'Rich emerald greens for eco and finance sectors.', colors: ['#12372A', '#059669', '#34D399'] },
-                        { id: 'rose', name: 'Rose Gold Luxe', desc: 'Warm rose and gold accents on dark brown backgrounds.', colors: ['#3A1F1A', '#F43F5E', '#D4A44A'] },
-                        { id: 'midnight', name: 'Midnight Blue', desc: 'Deep blues and cyan for a professional marine look.', colors: ['#081A35', '#2563EB', '#38BDF8'] },
-                        { id: 'champagne', name: 'Champagne Black', desc: 'Elegant black and champagne gold for high-end feel.', colors: ['#1E1A15', '#D6A84F', '#F97316'] },
-                        { id: 'ruby', name: 'Ruby Burgundy', desc: 'Deep burgundy and ruby for a rich, vibrant aesthetic.', colors: ['#2B1220', '#BE185D', '#7C2D12'] },
-                        { id: 'ocean-blue', name: 'Ocean Blue', desc: 'Refreshing blue gradients for a clean look.', colors: ['#0C4A6E', '#0284C7', '#38BDF8'] },
-                        { id: 'sunset-orange', name: 'Sunset Orange', desc: 'Vibrant orange and red hues for an energetic vibe.', colors: ['#7C2D12', '#EA580C', '#F97316'] },
-                        { id: 'forest-green', name: 'Forest Green', desc: 'Natural greens for a calm, organic aesthetic.', colors: ['#14532D', '#16A34A', '#22C55E'] },
-                        { id: 'golden-luxury', name: 'Golden Luxury', desc: 'Dark brown backgrounds with rich gold for a luxurious feel.', colors: ['#1a1510', '#d4af37', '#aa8c2c'] },
-                        { id: 'purple-haze', name: 'Purple Haze', desc: 'Deep purple backgrounds with vibrant amethyst accents.', colors: ['#1a0f1f', '#a855f7', '#9333ea'] },
-                        { id: 'crimson-red', name: 'Crimson Red', desc: 'Intense crimson red accents on a dark red-black canvas.', colors: ['#1f0a0a', '#dc2626', '#b91c1c'] },
-                        { id: 'silver-elite', name: 'Silver Elite', desc: 'Monochrome silver and slate for an elite corporate vibe.', colors: ['#0f1419', '#94a3b8', '#64748b'] },
-                        { id: 'cyber-blue', name: 'Cyber Blue', desc: 'Neon cyan accents on deep space blue backgrounds.', colors: ['#0a0e27', '#00ffff', '#00cccc'], neon: true }
+                        { id: 'obsidian-gold', name: 'Obsidian Gold', desc: 'Ultra Premium Executive', colors: ['#B8860B', '#1F2937', '#FFF9EC', '#1A1A1A', '#6B5B3E'] },
+                        { id: 'arctic-teal', name: 'Arctic Teal', desc: 'Clean Premium Business', colors: ['#009E7F', '#0F766E', '#F4FFFD', '#10201D', '#4B6F68'] },
+                        { id: 'sapphire-noir', name: 'Sapphire Noir', desc: 'Financial Corporate', colors: ['#2563EB', '#1E3A8A', '#F7FAFF', '#0F172A', '#4B5D7A'] },
+                        { id: 'rose-platinum', name: 'Rose Platinum', desc: 'Luxury Elegant', colors: ['#C75C75', '#8B3A4A', '#FFF7FA', '#2A1118', '#7A4B58'] },
+                        { id: 'carbon-violet', name: 'Carbon Violet', desc: 'Modern Tech Startup', colors: ['#7C3AFF', '#4C1D95', '#FAF7FF', '#1E1238', '#67548A'] },
+                        { id: 'graphite-copper', name: 'Graphite Copper', desc: 'Industrial Luxury', colors: ['#B76535', '#4B2A1A', '#FFF8F2', '#24130C', '#7A5642'] },
+                        { id: 'arctic-diamond', name: 'Arctic Diamond', desc: 'Luxury White & Ice Blue', colors: ['#60A5FA', '#CBD5E1', '#F3F7FC', '#0F172A', '#64748B'] },
+                        { id: 'emerald-royal', name: 'Emerald Royal', desc: 'Emerald & Gold Finance', colors: ['#10B981', '#D4AF37', '#F0FDF4', '#052E16', '#4B635A'] },
+                        { id: 'midnight-ruby', name: 'Midnight Ruby', desc: 'Ruby Red Luxury', colors: ['#C0392B', '#7F1D1D', '#FFF1F2', '#2B0D0D', '#7C4A4A'] },
+                        { id: 'titanium-blue', name: 'Titanium Blue', desc: 'Modern SaaS Stripe Style', colors: ['#2563EB', '#94A3B8', '#F8FAFC', '#0F172A', '#64748B'] }
                       ].map((preset) => {
-                      const isSelected = themeColor === preset.id;
-                      return (
-                        <button
-                          key={preset.id}
-                          type="button"
-                          onClick={() => {
-                            setThemeColor(preset.id);
-                            document.documentElement.setAttribute('data-theme', preset.id);
-                            import('../utils/themeIcon').then(m => m.updateFaviconForTheme(preset.id));
-                          }}
-                          className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden cursor-pointer flex flex-col gap-2 ${
-                            isSelected 
-                              ? 'border-theme-accent bg-theme-accent/[0.03] shadow-premium glow-emerald' 
-                              : 'border-theme-border-soft/60 dark:border-theme-border-soft hover:border-slate-350 dark:hover:border-slate-700 bg-theme-app/50 dark:bg-theme-surface'
-                          }`}
-                        >
-                          <div className="flex justify-between items-center w-full">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-extrabold text-slate-850 dark:text-theme-primary">{preset.name}</span>
-                              {preset.neon && (
-                                <span className="px-1.5 py-0.5 bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded text-[8px] font-black uppercase tracking-widest shadow-[0_0_8px_rgba(0,255,255,0.4)] animate-pulse">
-                                  Neon
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex gap-1 items-center">
+                        const isSelected = themeColor === preset.id;
+                        const lightColors = getThemePreviewColors(preset.id, 'light');
+                        const darkColors = getThemePreviewColors(preset.id, 'dark');
+
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => {
+                              setThemeColor(preset.id);
+                              document.documentElement.setAttribute('data-theme', preset.id);
+                              import('../utils/themeIcon').then(m => m.updateFaviconForTheme(preset.id));
+                            }}
+                            className={`w-full text-left rounded-2xl border transition-all duration-300 relative overflow-hidden cursor-pointer flex flex-col ${
+                              isSelected 
+                                ? 'border-theme-accent bg-theme-accent/[0.03] shadow-premium ring-1 ring-theme-accent' 
+                                : 'border-theme-border-soft/60 dark:border-theme-border-soft hover:border-theme-border-strong bg-theme-app/50 dark:bg-theme-surface hover:shadow-md'
+                            }`}
+                          >
+                            <div className="flex w-full h-1.5 opacity-90">
                               {preset.colors.map((c, i) => (
-                                <span key={i} className="w-3.5 h-3.5 rounded-full border border-white/20 shadow-sm" style={{ backgroundColor: c }}></span>
+                                <div key={i} className="flex-1 h-full" style={{ backgroundColor: c }}></div>
                               ))}
                             </div>
-                          </div>
-                          <p className="text-[10px] text-theme-muted dark:text-theme-muted font-semibold leading-relaxed pr-6">{preset.desc}</p>
-                          {isSelected && (
-                            <span className="absolute bottom-2 right-2 w-4 h-4 rounded-full bg-theme-accent text-white flex items-center justify-center text-[8px] font-bold">✓</span>
-                        </button>
-                      );
-                    })}
+                            
+                            <div className="p-4 w-full space-y-3">
+                              <div className="flex justify-between items-center w-full">
+                                <span className="text-xs font-extrabold text-theme-primary dark:text-theme-primary">{preset.name}</span>
+                                {isSelected && (
+                                  <span className="w-4 h-4 rounded-full bg-theme-accent text-white flex items-center justify-center text-[8px] font-bold shadow-sm shadow-theme-accent/30">✓</span>
+                                )}
+                              </div>
+                              <p className="text-[10px] text-theme-muted dark:text-theme-muted font-semibold leading-relaxed">{preset.desc}</p>
+                              
+                              <div className="mt-3 flex rounded-xl overflow-hidden border border-black/10 dark:border-white/10 shadow-inner">
+                                
+                                <div className="flex-1 p-2 flex gap-1.5" style={{ backgroundColor: lightColors.background }}>
+                                  <div className="w-5 rounded shadow-sm p-1 space-y-1" style={{ backgroundColor: lightColors.sidebar }}>
+                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: lightColors.accent }}></div>
+                                    <div className="w-full h-0.5 rounded-full opacity-30" style={{ backgroundColor: lightColors.text }}></div>
+                                  </div>
+                                  <div className="flex-1 space-y-1">
+                                    <div className="w-full h-5 rounded shadow-sm p-1 flex items-end justify-center gap-0.5" style={{ backgroundColor: lightColors.card }}>
+                                      <div className="w-1 h-2 rounded-t-sm" style={{ backgroundColor: lightColors.btnFrom }}></div>
+                                      <div className="w-1 h-3 rounded-t-sm" style={{ backgroundColor: lightColors.btnTo }}></div>
+                                      <div className="w-1 h-2 rounded-t-sm" style={{ backgroundColor: lightColors.btnFrom }}></div>
+                                    </div>
+                                    <div className="w-full h-2 rounded shadow-sm" style={{ background: `linear-gradient(90deg, ${lightColors.btnFrom}, ${lightColors.btnTo})` }}></div>
+                                  </div>
+                                </div>
+
+                                <div className="flex-1 p-2 flex gap-1.5 border-l border-white/10" style={{ backgroundColor: darkColors.background }}>
+                                  <div className="w-5 rounded shadow-sm p-1 space-y-1" style={{ backgroundColor: darkColors.sidebar }}>
+                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: darkColors.accent }}></div>
+                                    <div className="w-full h-0.5 rounded-full opacity-30" style={{ backgroundColor: darkColors.text }}></div>
+                                  </div>
+                                  <div className="flex-1 space-y-1">
+                                    <div className="w-full h-5 rounded shadow-sm p-1 flex items-end justify-center gap-0.5" style={{ backgroundColor: darkColors.card }}>
+                                      <div className="w-1 h-2 rounded-t-sm" style={{ backgroundColor: darkColors.btnFrom }}></div>
+                                      <div className="w-1 h-3 rounded-t-sm" style={{ backgroundColor: darkColors.btnTo }}></div>
+                                      <div className="w-1 h-2 rounded-t-sm" style={{ backgroundColor: darkColors.btnFrom }}></div>
+                                    </div>
+                                    <div className="w-full h-2 rounded shadow-sm" style={{ background: `linear-gradient(90deg, ${darkColors.btnFrom}, ${darkColors.btnTo})` }}></div>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
                   </div>
 
                   {/* Actions buttons */}

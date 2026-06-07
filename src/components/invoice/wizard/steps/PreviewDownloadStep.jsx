@@ -218,7 +218,7 @@ const PreviewDownloadStep = ({ handleSave }) => {
             <span className="text-sm font-bold text-theme-primary">Live Preview</span>
             <span className="text-xs font-medium text-theme-muted px-2 py-1 bg-theme-surface rounded-lg">A4 Size</span>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-100 dark:bg-slate-900 flex justify-center">
+          <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-theme-app dark:bg-theme-card flex justify-center">
             <div className="w-full max-w-[800px] origin-top scale-[0.6] sm:scale-[0.8] md:scale-90 lg:scale-100 transition-transform">
               <InvoicePreview {...previewProps} isPreviewMode={true} />
             </div>

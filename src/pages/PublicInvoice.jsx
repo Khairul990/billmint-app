@@ -27,6 +27,7 @@ import PaymentModal from '../components/PaymentModal';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
 import { analyzePaymentScreenshot } from '../services/screenshotAnalysisService';
+import { sendPaymentReceiptEmail, verifyTransactionId } from '../services/cloudFunctions';
 
 const PublicInvoice = ({ initialInvoice }) => {
   const [invoice, setInvoice] = useState(initialInvoice);
@@ -113,6 +114,19 @@ const PublicInvoice = ({ initialInvoice }) => {
           submittedAt: new Date().toISOString()
         })
       });
+
+      // --- Cloud Function Stub Integrations ---
+      // 1. Verify Transaction ID remotely
+      if (txnId) {
+        const verifyRes = await verifyTransactionId(txnId, invoice.balanceDue !== undefined ? invoice.balanceDue : invoice.grandTotal);
+        console.log('[STUB] Verification Result:', verifyRes);
+      }
+      
+      // 2. Mock sending an acknowledgment email to the customer
+      if (invoice.customerEmail) {
+        await sendPaymentReceiptEmail(invoice.id, invoice.customerEmail);
+      }
+      // -----------------------------------------
       
       toast.success('Payment proof submitted successfully!');
       setShowPaymentModal(false);
@@ -138,8 +152,8 @@ const PublicInvoice = ({ initialInvoice }) => {
         </p>
         
         {/* Dynamic Diagnostics Box for Developer Debugging */}
-        <div className="w-full max-w-lg bg-theme-card border border-slate-800 rounded-3xl p-5 text-left font-mono text-[11px] text-theme-muted space-y-2.5 shadow-2xl">
-          <div className="font-extrabold text-theme-accent border-b border-slate-800 pb-2 uppercase text-[10px] tracking-wider flex items-center justify-between">
+        <div className="w-full max-w-lg bg-theme-card border border-theme-border-soft rounded-3xl p-5 text-left font-mono text-[11px] text-theme-muted space-y-2.5 shadow-2xl">
+          <div className="font-extrabold text-theme-accent border-b border-theme-border-soft pb-2 uppercase text-[10px] tracking-wider flex items-center justify-between">
             <span>System Diagnostics (DEBUG)</span>
             <span className="bg-theme-accent-dark text-theme-accent px-2 py-0.5 rounded-full text-[8px] font-black">Live</span>
           </div>
@@ -154,7 +168,7 @@ const PublicInvoice = ({ initialInvoice }) => {
             </span>
           </div>
           {window.billqyro_lastError && (
-            <div className="border-t border-slate-800 pt-2.5 mt-2.5">
+            <div className="border-t border-theme-border-soft pt-2.5 mt-2.5">
               <span className="text-theme-danger font-bold block mb-1">Query Error / Status:</span>
               <pre className="whitespace-pre-wrap bg-theme-app p-3 rounded-xl border border-rose-950/40 text-rose-300 select-all font-semibold max-h-40 overflow-y-auto leading-relaxed">{window.billqyro_lastError}</pre>
             </div>
@@ -235,6 +249,81 @@ const PublicInvoice = ({ initialInvoice }) => {
     setTimeout(() => setCopiedText(''), 2000);
   };
 
+  const activeTemplate = liveLinkPrefs.selectedLiveLinkTemplate || 'classic';
+
+  const getTemplateStyles = () => {
+    switch (activeTemplate) {
+      case 'modern':
+        return {
+          container: "bg-theme-card dark:bg-theme-card rounded-3xl border-0 shadow-2xl p-6 md:p-8 space-y-6 relative overflow-hidden",
+          header: "border-b-2 border-indigo-100 dark:border-indigo-900/50 pb-6",
+          addressBox: "bg-indigo-50/50 dark:bg-indigo-950/20 border-0 rounded-2xl p-5",
+          tableHeader: "bg-gradient-to-r from-indigo-600 to-purple-600 text-white",
+          totalsBox: "bg-indigo-50/30 dark:bg-indigo-950/10 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-5"
+        };
+      case 'mobile':
+        return {
+          container: "bg-theme-card text-white rounded-[2rem] border-4 border-theme-border-soft shadow-2xl p-5 space-y-5 relative overflow-hidden",
+          header: "border-b border-theme-border-soft pb-5",
+          addressBox: "bg-theme-surface border border-theme-border-strong rounded-2xl p-4",
+          tableHeader: "bg-theme-surface text-theme-primary",
+          totalsBox: "bg-theme-surface border border-theme-border-strong rounded-2xl p-4",
+          textOverride: "text-theme-primary"
+        };
+      case 'retail':
+        return {
+          container: "bg-[#fcfbf7] dark:bg-amber-950/20 rounded-none border-x-0 border-y-4 border-dashed border-theme-border-strong dark:border-theme-border-strong shadow-sm p-6 md:p-8 space-y-6 relative overflow-hidden font-mono",
+          header: "border-b-2 border-dashed border-theme-border-strong dark:border-theme-border-strong pb-6 sm:text-center flex-col sm:items-center",
+          addressBox: "bg-transparent border-0 border-b border-dashed border-theme-border-soft dark:border-theme-border-soft rounded-none p-2",
+          tableHeader: "bg-theme-app dark:bg-theme-surface text-theme-primary dark:text-theme-primary border-y-2 border-dashed border-theme-border-strong dark:border-theme-border-strong",
+          totalsBox: "bg-transparent border-0 rounded-none p-2"
+        };
+      case 'corporate':
+        return {
+          container: "bg-white dark:bg-theme-card rounded-xl border border-theme-border-soft dark:border-theme-border-soft shadow-lg p-8 md:p-10 space-y-8 relative overflow-hidden font-sans",
+          header: "border-b-4 border-theme-border-soft dark:border-theme-border-soft pb-8",
+          addressBox: "bg-theme-app dark:bg-theme-surface/50 border-l-4 border-theme-border-soft dark:border-theme-border-soft rounded-r-xl rounded-l-none p-5",
+          tableHeader: "bg-theme-card dark:bg-theme-surface text-white",
+          totalsBox: "bg-theme-app dark:bg-theme-surface/50 border border-theme-border-soft dark:border-theme-border-strong rounded-xl p-6"
+        };
+      case 'boutique':
+        return {
+          container: "bg-rose-50/30 dark:bg-rose-950/20 rounded-3xl border border-rose-100 dark:border-rose-900/50 shadow-xl p-6 md:p-10 space-y-8 relative overflow-hidden font-serif",
+          header: "border-b border-rose-200 dark:border-rose-900/50 pb-8 sm:text-center flex-col sm:items-center",
+          addressBox: "bg-white/60 dark:bg-theme-card/60 border border-rose-100 dark:border-rose-900/30 rounded-3xl p-6 shadow-sm",
+          tableHeader: "bg-rose-900 dark:bg-rose-950 text-rose-50",
+          totalsBox: "bg-white/60 dark:bg-theme-card/60 border border-rose-100 dark:border-rose-900/30 rounded-3xl p-6 shadow-sm"
+        };
+      case 'clinic':
+        return {
+          container: "bg-white dark:bg-theme-card rounded-2xl border-t-8 border-t-blue-500 border-x border-b border-theme-border-soft dark:border-theme-border-soft shadow-lg p-6 md:p-8 space-y-6 relative overflow-hidden",
+          header: "border-b border-blue-100 dark:border-blue-900/30 pb-6",
+          addressBox: "bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-xl p-5",
+          tableHeader: "bg-blue-600 dark:bg-blue-800 text-white",
+          totalsBox: "bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-xl p-5"
+        };
+      case 'repair':
+        return {
+          container: "bg-zinc-50 dark:bg-zinc-900 rounded-xl border-l-8 border-l-yellow-500 border-y border-r border-zinc-200 dark:border-zinc-800 shadow-md p-6 md:p-8 space-y-6 relative overflow-hidden",
+          header: "border-b border-zinc-200 dark:border-zinc-800 pb-6",
+          addressBox: "bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-4 shadow-sm",
+          tableHeader: "bg-zinc-800 dark:bg-zinc-950 text-yellow-500 border-b-2 border-yellow-500",
+          totalsBox: "bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-4 shadow-sm"
+        };
+      case 'classic':
+      default:
+        return {
+          container: "bg-theme-card dark:bg-theme-card rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium p-6 md:p-8 space-y-6 relative overflow-hidden",
+          header: "border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-6",
+          addressBox: "bg-theme-app dark:bg-theme-surface/50 dark:bg-theme-app/20 border border-theme-border-soft dark:border-theme-border-soft rounded-2xl p-4",
+          tableHeader: "bg-[#071B3A] text-white",
+          totalsBox: "bg-theme-app dark:bg-theme-surface dark:bg-theme-app/20 border border-theme-border-soft/40 dark:border-theme-border-soft rounded-2xl p-4"
+        };
+    }
+  };
+
+  const tplStyles = getTemplateStyles();
+
   // Generate UPI pay link (TASK 4)
   const dueAmount = invoice.balanceDue !== undefined ? invoice.balanceDue : invoice.grandTotal;
   const verifStr = invoice.verificationCode ? ` [Code: ${invoice.verificationCode}]` : '';
@@ -309,12 +398,12 @@ const PublicInvoice = ({ initialInvoice }) => {
       case 'Cancelled':
         return 'bg-theme-surface dark:bg-theme-card text-theme-muted dark:bg-theme-card dark:text-theme-muted border border-theme-border-soft dark:border-theme-border-soft';
       default:
-        return 'bg-theme-surface dark:bg-theme-card text-slate-650';
+        return 'bg-theme-surface dark:bg-theme-card text-theme-primary';
     }
   };
 
   return (
-    <div className="min-h-screen bg-theme-app dark:bg-theme-surface dark:bg-theme-app py-10 px-4 md:px-6 flex flex-col items-center justify-between font-sans antialiased text-theme-primary dark:text-theme-primary dark:text-slate-250">
+    <div className="min-h-screen bg-theme-app dark:bg-theme-surface dark:bg-theme-app py-10 px-4 md:px-6 flex flex-col items-center justify-between font-sans antialiased text-theme-primary dark:text-theme-primary dark:text-theme-primary">
       
       {/* Top Floating Control Bar */}
       <div className="max-w-4xl w-full flex items-center justify-between gap-4 mb-6 z-10 bg-theme-card dark:bg-theme-card/70 dark:bg-theme-card/70 p-4 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft backdrop-blur-md shadow-sm">
@@ -336,7 +425,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           {liveLinkPrefs.allowCustomerPdfDownload && (
             <button
               onClick={handleDownloadPDF}
-              className="flex items-center justify-center gap-2 py-2 px-4 bg-theme-surface dark:bg-theme-card hover:bg-theme-border-soft dark:bg-theme-card dark:hover:bg-slate-700 text-theme-primary dark:text-theme-muted dark:text-slate-250 font-bold text-xs rounded-xl transition-all cursor-pointer"
+              className="flex items-center justify-center gap-2 py-2 px-4 bg-theme-surface dark:bg-theme-card hover:bg-theme-border-soft dark:bg-theme-card dark:hover:bg-theme-surface text-theme-primary dark:text-theme-muted dark:text-theme-primary font-bold text-xs rounded-xl transition-all cursor-pointer"
             >
               <FileDown className="w-4 h-4" />
               <span className="hidden sm:inline">Download PDF</span>
@@ -358,13 +447,13 @@ const PublicInvoice = ({ initialInvoice }) => {
       <div className="max-w-4xl w-full flex flex-col lg:flex-row gap-6 items-start relative">
 
         {/* --- LEFT: DYNAMIC INVOICE DISPLAY CARD (Strictly Read-Only) --- */}
-        <div className="w-full lg:flex-1 bg-theme-card dark:bg-theme-card rounded-3xl border border-theme-border-soft dark:border-theme-border-soft shadow-premium p-6 md:p-8 space-y-6 relative overflow-hidden">
+        <div className={`w-full lg:flex-1 ${tplStyles.container}`}>
           
           {/* Elegant top color band */}
-          <div className="absolute top-0 left-0 w-full h-2.5 bg-[image:var(--accent-gradient)]"></div>
+          {activeTemplate === 'classic' && <div className="absolute top-0 left-0 w-full h-2.5 bg-[image:var(--accent-gradient)]"></div>}
 
           {/* Invoice Meta header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-6">
+          <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-3 ${tplStyles.header}`}>
             <div className="space-y-1">
               <h2 className="text-2xl font-black text-theme-primary dark:text-theme-primary tracking-tight flex items-center gap-2">
                 <span>Invoice</span>
@@ -384,14 +473,14 @@ const PublicInvoice = ({ initialInvoice }) => {
               </div>
               <div>
                 <span className="text-[10px] text-theme-muted block uppercase font-black">Due Date</span>
-                <span className="text-slate-750 dark:text-theme-muted font-bold">{invoice.dueDate || 'N/A'}</span>
+                <span className="text-theme-primary dark:text-theme-muted font-bold">{invoice.dueDate || 'N/A'}</span>
               </div>
             </div>
           </div>
 
           {/* Business & Customer Address segment */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs font-semibold text-slate-550 dark:text-theme-muted">
-            <div className="space-y-2 p-4 bg-theme-app dark:bg-theme-surface/50 dark:bg-theme-app/20 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs font-semibold text-theme-primary dark:text-theme-muted">
+            <div className={`space-y-2 ${tplStyles.addressBox}`}>
               <span className="text-[10px] text-theme-muted uppercase font-black tracking-widest block">Invoiced From</span>
               <strong className="text-theme-primary dark:text-theme-primary text-sm block">{business.businessName}</strong>
               {business.ownerName && <p className="text-[11px]">Owner: {business.ownerName}</p>}
@@ -401,7 +490,7 @@ const PublicInvoice = ({ initialInvoice }) => {
               {business.gstNumber && <p className="text-[10px] font-black text-theme-accent mt-2 uppercase">{taxLabelText}: {business.gstNumber}</p>}
             </div>
 
-            <div className="space-y-2 p-4 bg-theme-app dark:bg-theme-surface/50 dark:bg-theme-app/20 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft">
+            <div className={`space-y-2 ${tplStyles.addressBox}`}>
               <span className="text-[10px] text-theme-muted uppercase font-black tracking-widest block">Invoiced To</span>
               <strong className="text-theme-primary dark:text-theme-primary text-sm block">{invoice.customerName}</strong>
               {invoice.customerPhone && <p className="text-[11px]">Phone: {invoice.customerPhone}</p>}
@@ -414,7 +503,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           <div className="border border-theme-border-soft dark:border-theme-border-soft rounded-2xl overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
-                <thead className="bg-[#071B3A] text-white text-[10px] uppercase font-black tracking-wider">
+                <thead className={`text-[10px] uppercase font-black tracking-wider ${tplStyles.tableHeader}`}>
                   <tr>
                     <th className="py-3.5 px-4 text-center w-[60px]">S.N.</th>
                     {invoice.billType === 'grocery' ? (
@@ -461,7 +550,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-semibold text-theme-primary dark:text-theme-muted">
                   {invoice.items.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-theme-app dark:bg-theme-surface/50 dark:hover:bg-slate-850/30">
+                    <tr key={idx} className="hover:bg-theme-app dark:bg-theme-surface/50 dark:hover:bg-theme-surface/30">
                       <td className="py-3 px-4 text-center text-theme-muted font-bold">{idx + 1}</td>
                       {invoice.billType === 'grocery' ? (
                         <>
@@ -512,11 +601,11 @@ const PublicInvoice = ({ initialInvoice }) => {
 
           {/* Totals & Notes block */}
           <div className="flex flex-col sm:flex-row gap-6 justify-between items-start pt-4 border-t border-theme-border-soft dark:border-theme-border-soft/80">
-            <div className="w-full sm:w-[50%] p-4 bg-theme-app dark:bg-theme-surface dark:bg-theme-app/20 border border-theme-border-soft/40 dark:border-theme-border-soft rounded-2xl text-xs font-semibold text-theme-muted">
+            <div className={`w-full sm:w-[50%] text-xs font-semibold text-theme-muted ${tplStyles.totalsBox}`}>
               <span className="text-[10px] text-theme-muted font-black uppercase tracking-wider block mb-1.5">Invoice Notes & Terms</span>
               <p className="whitespace-pre-wrap leading-relaxed">{invoice.notes || 'Thank you for your business!'}</p>
               {invoice.terms && (
-                <div className="mt-3 pt-3 border-t border-theme-border-soft dark:border-theme-border-soft dark:border-slate-850">
+                <div className="mt-3 pt-3 border-t border-theme-border-soft dark:border-theme-border-soft dark:border-theme-border-soft">
                   <span className="text-[9px] text-theme-muted font-black uppercase block mb-1">Terms</span>
                   <p className="whitespace-pre-wrap leading-relaxed">{invoice.terms}</p>
                 </div>
@@ -524,22 +613,22 @@ const PublicInvoice = ({ initialInvoice }) => {
             </div>
 
             <div className="w-full sm:w-[40%] text-xs font-semibold text-theme-muted space-y-2">
-              <div className="flex justify-between py-1.5 border-b border-theme-border-soft dark:border-slate-850">
+              <div className="flex justify-between py-1.5 border-b border-theme-border-soft dark:border-theme-border-soft">
                 <span className="text-theme-muted">Subtotal</span>
-                <span className="text-slate-850 dark:text-theme-secondary">{formatVal(invoice.subtotal)}</span>
+                <span className="text-theme-primary dark:text-theme-secondary">{formatVal(invoice.subtotal)}</span>
               </div>
               
               {invoice.discountAmount > 0 && (
-                <div className="flex justify-between py-1.5 border-b border-theme-border-soft dark:border-slate-850">
+                <div className="flex justify-between py-1.5 border-b border-theme-border-soft dark:border-theme-border-soft">
                   <span className="text-theme-muted">Discount</span>
                   <span className="text-theme-danger">-{formatVal(invoice.discountAmount)}</span>
                 </div>
               )}
 
               {invoice.taxAmount > 0 && (
-                <div className="flex justify-between py-1.5 border-b border-theme-border-soft dark:border-slate-850">
+                <div className="flex justify-between py-1.5 border-b border-theme-border-soft dark:border-theme-border-soft">
                   <span className="text-theme-muted">{taxLabelText} ({invoice.taxPercentage}%)</span>
-                  <span className="text-slate-850 dark:text-theme-secondary">{formatVal(invoice.taxAmount)}</span>
+                  <span className="text-theme-primary dark:text-theme-secondary">{formatVal(invoice.taxAmount)}</span>
                 </div>
               )}
 
@@ -550,7 +639,7 @@ const PublicInvoice = ({ initialInvoice }) => {
 
               {liveLinkPrefs.showPaidDueAmount && (
                 <>
-                  <div className="flex justify-between py-1.5 border-b border-theme-border-soft dark:border-slate-850 px-1 text-theme-accent dark:text-theme-accent">
+                  <div className="flex justify-between py-1.5 border-b border-theme-border-soft dark:border-theme-border-soft px-1 text-theme-accent dark:text-theme-accent">
                     <span>Amount Paid</span>
                     <span className="font-extrabold">{formatVal(invoice.amountPaid || 0)}</span>
                   </div>
@@ -580,7 +669,7 @@ const PublicInvoice = ({ initialInvoice }) => {
 
             {/* PAYMENT BOX GATEWAY (TASK 4) */}
             {!showPaymentModal ? (
-              <div className="bg-theme-card text-white rounded-3xl border border-slate-800 shadow-premium p-6 space-y-5 relative overflow-hidden">
+              <div className="bg-theme-card text-white rounded-3xl border border-theme-border-soft shadow-premium p-6 space-y-5 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-36 h-36 bg-theme-accent-light rounded-full blur-2xl pointer-events-none"></div>
                 
                 <div>
@@ -600,7 +689,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                 )}
 
                 {liveLinkPrefs.showPaymentQr && paymentPrefs.paymentQrEnabled && (
-                  <div className="bg-theme-card dark:bg-theme-card p-3 rounded-2xl max-w-[180px] mx-auto shadow-md border border-slate-850">
+                  <div className="bg-theme-card dark:bg-theme-card p-3 rounded-2xl max-w-[180px] mx-auto shadow-md border border-theme-border-soft">
                     <img 
                       src={qrCodeUrl} 
                       alt="Scan to Pay QR" 
@@ -773,7 +862,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                       value={txnId}
                       onChange={(e) => setTxnId(e.target.value)}
                       placeholder="e.g. TXN10003028"
-                      className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-slate-805 dark:text-theme-primary font-bold"
+                      className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary font-bold"
                     />
                   </div>
 
@@ -840,7 +929,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                       onChange={(e) => setCustomerNote(e.target.value)}
                       placeholder="Add any details for the verification clerk..."
                       rows="2"
-                      className="w-full px-4 py-2 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-slate-850 dark:text-theme-secondary resize-none text-xs"
+                      className="w-full px-4 py-2 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-secondary resize-none text-xs"
                     />
                   </div>
 
@@ -848,7 +937,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                     <button
                       type="button"
                       onClick={() => setShowPaymentModal(false)}
-                      className="flex-1 py-3 bg-theme-surface dark:bg-theme-card hover:bg-theme-border-soft dark:bg-theme-card dark:hover:bg-slate-700 text-theme-primary dark:text-theme-muted dark:text-slate-250 font-bold rounded-xl transition-all cursor-pointer text-center"
+                      className="flex-1 py-3 bg-theme-surface dark:bg-theme-card hover:bg-theme-border-soft dark:bg-theme-card dark:hover:bg-theme-surface text-theme-primary dark:text-theme-muted dark:text-theme-primary font-bold rounded-xl transition-all cursor-pointer text-center"
                     >
                       Cancel
                     </button>

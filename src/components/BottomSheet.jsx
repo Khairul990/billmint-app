@@ -45,7 +45,7 @@ const BottomSheet = ({ isOpen, onClose, title, children }) => {
                   <h3 className="text-lg font-black text-theme-primary dark:text-theme-primary tracking-tight">{title}</h3>
                   <button
                     onClick={onClose}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-theme-surface dark:bg-theme-card text-theme-muted dark:text-theme-muted hover:bg-theme-border-soft dark:hover:bg-slate-700 transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-theme-surface dark:bg-theme-card text-theme-muted dark:text-theme-muted hover:bg-theme-border-soft dark:hover:bg-theme-surface transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>

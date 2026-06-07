@@ -241,6 +241,8 @@ const styles = StyleSheet.create({
 const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
   if (!invoice) return null;
 
+  const templateId = businessSettings?.selectedPdfTemplate || 'classic';
+
   const regionalPrefs = invoice.regionalSettingsSnapshot || {
     country: businessSettings?.country || 'India',
     currency: businessSettings?.currency || '₹',
@@ -277,28 +279,42 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
     }
   };
 
+  // Dynamic Theme Colors
+  let tPrimary = '#0f172a';
+  let tBg = '#ffffff';
+  let tAccent = '#4f46e5';
+  let tText = '#334155';
+  
+  if (templateId === 'modern') { tPrimary = '#1e293b'; tAccent = '#3b82f6'; }
+  else if (templateId === 'minimal') { tPrimary = '#000000'; tAccent = '#000000'; tText = '#000000'; }
+  else if (templateId === 'professional') { tPrimary = '#1e3a8a'; tAccent = '#1d4ed8'; }
+  else if (templateId === 'retail') { tPrimary = '#0f172a'; tAccent = '#eab308'; }
+  else if (templateId === 'embroidery') { tPrimary = '#831843'; tAccent = '#ec4899'; }
+  else if (templateId === 'doctor') { tPrimary = '#064e3b'; tAccent = '#10b981'; }
+  else if (templateId === 'repair') { tPrimary = '#451a03'; tAccent = '#f97316'; }
+
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      <Page size="A4" style={[styles.page, { color: tText }]}>
         
         {/* Header: Brand & Invoice Info */}
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, templateId === 'modern' ? { backgroundColor: tPrimary, padding: 20, color: '#fff', marginHorizontal: -40, marginTop: -40, marginBottom: 40 } : {}]}>
           <View style={styles.brandContainer}>
             {businessPrefs.logoUrl ? (
               <Image src={businessPrefs.logoUrl} style={styles.logo} />
             ) : (
-              <View style={styles.logoFallback}>
+              <View style={[styles.logoFallback, { backgroundColor: tAccent }]}>
                 <Text>{businessPrefs.businessName?.charAt(0) || 'B'}</Text>
               </View>
             )}
             <View>
-              <Text style={styles.businessName}>{businessPrefs.businessName}</Text>
+              <Text style={[styles.businessName, templateId === 'modern' ? { color: '#fff' } : { color: tPrimary }]}>{businessPrefs.businessName}</Text>
               {businessPrefs.gstNumber ? (
-                <Text style={styles.metaText}>{regionalPrefs.taxLabel}: {businessPrefs.gstNumber}</Text>
+                <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>{regionalPrefs.taxLabel}: {businessPrefs.gstNumber}</Text>
               ) : null}
-              <Text style={styles.metaText}>{businessPrefs.address}</Text>
-              <Text style={styles.metaText}>Ph: {businessPrefs.phone}</Text>
-              <Text style={styles.metaText}>{businessPrefs.email}</Text>
+              <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>{businessPrefs.address}</Text>
+              <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>Ph: {businessPrefs.phone}</Text>
+              <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>{businessPrefs.email}</Text>
             </View>
           </View>
 
@@ -307,16 +323,18 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
               <Text>{invoice.paymentStatus}</Text>
             </View>
             <View style={styles.invoiceRow}>
-              <Text style={styles.invoiceLabel}>Invoice:</Text>
-              <Text style={styles.invoiceValue}>{invoice.invoiceNumber}</Text>
+              <Text style={[styles.invoiceLabel, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>
+                {invoice.billType === 'Estimate' ? 'Estimate:' : invoice.billType === 'Quotation' ? 'Quote:' : 'Invoice:'}
+              </Text>
+              <Text style={[styles.invoiceValue, templateId === 'modern' ? { color: '#fff' } : { color: tPrimary }]}>{invoice.invoiceNumber}</Text>
             </View>
             <View style={styles.invoiceRow}>
-              <Text style={styles.invoiceLabel}>Date:</Text>
-              <Text style={styles.invoiceValue}>{invoice.date}</Text>
+              <Text style={[styles.invoiceLabel, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>Date:</Text>
+              <Text style={[styles.invoiceValue, templateId === 'modern' ? { color: '#fff' } : { color: tPrimary }]}>{invoice.date}</Text>
             </View>
             <View style={styles.invoiceRow}>
-              <Text style={styles.invoiceLabel}>Due Date:</Text>
-              <Text style={styles.invoiceValue}>{invoice.dueDate}</Text>
+              <Text style={[styles.invoiceLabel, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>Due Date:</Text>
+              <Text style={[styles.invoiceValue, templateId === 'modern' ? { color: '#fff' } : { color: tPrimary }]}>{invoice.dueDate}</Text>
             </View>
           </View>
         </View>
@@ -324,8 +342,8 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
         {/* CRM Info */}
         <View style={styles.crmGrid}>
           <View style={styles.crmSection}>
-            <Text style={styles.sectionTitle}>{t('bill_to')}</Text>
-            <Text style={styles.customerName}>{invoice.customerName}</Text>
+            <Text style={[styles.sectionTitle, { color: tAccent }]}>{t('bill_to')}</Text>
+            <Text style={[styles.customerName, { color: tPrimary }]}>{invoice.customerName}</Text>
             <Text style={styles.metaText}>{invoice.customerAddress || 'No address provided'}</Text>
             <Text style={styles.metaText}>Phone: {invoice.customerPhone || 'N/A'}</Text>
             <Text style={styles.metaText}>Email: {invoice.customerEmail || 'N/A'}</Text>
@@ -343,7 +361,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
 
         {/* Items Table */}
         <View style={styles.table}>
-          <View style={styles.tableHeaderRow}>
+          <View style={[styles.tableHeaderRow, templateId === 'minimal' ? { borderTopWidth: 1, borderTopColor: '#000', paddingTop: 8, borderBottomColor: '#000' } : { borderBottomColor: tAccent }]}>
             <Text style={[styles.tableHeaderCell, styles.colDesc]}>{t('items')} Description</Text>
             <Text style={[styles.tableHeaderCell, styles.colQty]}>Qty</Text>
             <Text style={[styles.tableHeaderCell, styles.colRate]}>Unit Price</Text>
@@ -351,9 +369,9 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
           </View>
           
           {(invoice.items || []).map((item, idx) => (
-            <View key={idx} style={styles.tableRow}>
+            <View key={idx} style={[styles.tableRow, templateId === 'minimal' ? { borderBottomColor: '#ccc' } : {}]}>
               <View style={styles.colDesc}>
-                <Text style={{ fontWeight: 'bold', color: '#0f172a', marginBottom: 3 }}>
+                <Text style={{ fontWeight: 'bold', color: tPrimary, marginBottom: 3 }}>
                   {item.description || item.name || item.productName || item.serviceName || item.itemService || item.designNo || 'Item'}
                 </Text>
                 {item.workType && <Text style={{ fontSize: 8, color: '#64748b' }}>Work Type: {item.workType}</Text>}
@@ -406,21 +424,30 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
             </View>
 
             <View style={styles.grandTotalRow}>
-              <Text style={styles.grandTotalLabel}>Grand {t('total')}</Text>
-              <Text style={styles.grandTotalValue}>
+              <Text style={[styles.grandTotalLabel, { color: tPrimary }]}>Grand {t('total')}</Text>
+              <Text style={[styles.grandTotalValue, { color: tAccent }]}>
                 {formatCurrency(invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}
               </Text>
             </View>
           </View>
         </View>
 
+        {/* Doctor Disclaimer */}
+        {templateId === 'doctor' && (
+          <View style={{ marginTop: 20, padding: 10, borderLeftWidth: 3, borderLeftColor: tAccent, backgroundColor: tBg }}>
+            <Text style={{ fontSize: 8, color: tPrimary, fontStyle: 'italic' }}>
+              Disclaimer: This document is for billing purposes only and does not constitute medical advice or a formal prescription unless explicitly signed by a registered practitioner.
+            </Text>
+          </View>
+        )}
+
         {/* Payment / QR Section */}
         {paymentPrefs?.paymentQrEnabled && paymentPrefs?.showQrInPreview && qrCodeBase64 && (
           <View style={styles.paymentSection}>
             <Image src={qrCodeBase64} style={styles.qrCode} />
             <View style={styles.paymentDetails}>
-              <Text style={styles.sectionTitle}>Scan to View Live Invoice</Text>
-              <Text style={styles.paymentTitle}>{paymentPrefs.payeeName}</Text>
+              <Text style={[styles.sectionTitle, { color: tAccent }]}>Scan to View Live Invoice</Text>
+              <Text style={[styles.paymentTitle, { color: tPrimary }]}>{paymentPrefs.payeeName}</Text>
               <Text style={styles.metaText}>Due Amount: {formatCurrency(invoice.balanceDue || invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
               <Text style={styles.metaText}>Invoice Number: {invoice.invoiceNumber}</Text>
               {paymentPrefs.paymentNote && (

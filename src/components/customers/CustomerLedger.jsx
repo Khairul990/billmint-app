@@ -10,15 +10,19 @@ import {
   MessageCircle,
   CheckCircle2,
   Calendar,
-  Clock
+  Clock,
+  Banknote,
+  Save,
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { saveInvoice } from '../../services/dbEngine';
 
 /**
  * Customer Ledger Modal
  * Displays a comprehensive view of a customer's history and metrics.
  */
-const CustomerLedger = ({ isOpen, onClose, customer, invoices = [] }) => {
+const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymbol = '₹' }) => {
   if (!isOpen || !customer) return null;
 
   // 1. Filter invoices for this customer
@@ -38,11 +42,55 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [] }) => {
   const timeline = [...customerInvoices].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0
+    const formattedNum = new Intl.NumberFormat('en-IN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
     }).format(amount || 0);
+    return `${currencySymbol} ${formattedNum}`;
+  };
+
+  const [updatingInvoiceId, setUpdatingInvoiceId] = React.useState(null);
+  const [paymentAmount, setPaymentAmount] = React.useState('');
+  const [paymentMethod, setPaymentMethod] = React.useState('Cash');
+  const [paymentNote, setPaymentNote] = React.useState('');
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  const handleUpdatePayment = async (inv) => {
+    setIsSaving(true);
+    try {
+      const newPaid = (parseFloat(inv.amountPaid) || 0) + parseFloat(paymentAmount);
+      const grandTotal = parseFloat(inv.total || inv.grandTotal);
+      
+      let newStatus = 'Partial';
+      if (newPaid >= grandTotal) {
+        newStatus = 'Paid';
+      } else if (newPaid === 0) {
+        newStatus = 'Unpaid';
+      }
+
+      const updatedInvoice = {
+        ...inv,
+        amountPaid: newPaid,
+        balanceDue: Math.max(0, grandTotal - newPaid),
+        paymentStatus: newStatus,
+        paymentMethod: paymentMethod,
+        paymentNote: paymentNote,
+        paymentDate: new Date().toISOString()
+      };
+
+      await saveInvoice(updatedInvoice);
+      setUpdatingInvoiceId(null);
+      setPaymentAmount('');
+      setPaymentNote('');
+      // We don't have a direct way to trigger a re-render of App.jsx invoices here unless we pass a callback, 
+      // but dbEngine's onSnapshot handles live updates if online, or the user can refresh/re-open.
+      alert('Payment updated successfully! The ledger will reflect changes shortly.');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update payment');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const generateWhatsAppReminder = () => {
@@ -200,10 +248,84 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [] }) => {
                             
                             {!isPaid && (
                               <span className="text-[10px] font-bold text-rose-500 flex items-center gap-1">
-                                <Clock className="w-3 h-3" /> Due
+                                <Clock className="w-3 h-3" /> Due {formatCurrency(inv.balanceDue || (inv.total - (inv.amountPaid || 0)))}
                               </span>
                             )}
                           </div>
+
+                          {!isPaid && (
+                            <div className="mt-3 pt-3 border-t border-theme-border-soft">
+                              {updatingInvoiceId === inv.id ? (
+                                <div className="space-y-3">
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Amount ({formatCurrency(inv.balanceDue || (inv.total - (inv.amountPaid || 0)))})</label>
+                                      <div className="relative">
+                                        <Banknote className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-success" />
+                                        <input
+                                          type="number"
+                                          value={paymentAmount}
+                                          onChange={e => setPaymentAmount(e.target.value)}
+                                          className="w-full pl-8 pr-2 py-2 bg-theme-surface border border-theme-border-soft rounded-lg text-xs font-bold text-theme-primary focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all"
+                                          placeholder="Enter amount"
+                                          max={inv.balanceDue || (inv.total - (inv.amountPaid || 0))}
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Method</label>
+                                      <select
+                                        value={paymentMethod}
+                                        onChange={e => setPaymentMethod(e.target.value)}
+                                        className="w-full px-2 py-2 bg-theme-surface border border-theme-border-soft rounded-lg text-xs font-bold text-theme-primary focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all"
+                                      >
+                                        <option value="Cash">Cash</option>
+                                        <option value="Bank Transfer">Bank Transfer</option>
+                                        <option value="UPI / QR">UPI / QR</option>
+                                        <option value="Credit Card">Credit Card</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="text"
+                                      value={paymentNote}
+                                      onChange={e => setPaymentNote(e.target.value)}
+                                      placeholder="Payment Note (e.g. Txn ID)"
+                                      className="flex-1 px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-lg text-xs font-medium text-theme-primary focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all"
+                                    />
+                                  </div>
+                                  <div className="flex gap-2 justify-end">
+                                    <button
+                                      onClick={() => setUpdatingInvoiceId(null)}
+                                      className="px-3 py-1.5 rounded-lg text-xs font-bold text-theme-muted hover:bg-theme-surface transition-colors"
+                                      disabled={isSaving}
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button
+                                      onClick={() => handleUpdatePayment(inv)}
+                                      disabled={!paymentAmount || isSaving}
+                                      className="px-4 py-1.5 bg-theme-success hover:bg-emerald-600 text-white rounded-lg text-xs font-bold shadow-md shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-1.5 transition-all"
+                                    >
+                                      {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                                      Update
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setUpdatingInvoiceId(inv.id);
+                                    setPaymentAmount(inv.balanceDue || (inv.total - (inv.amountPaid || 0)));
+                                  }}
+                                  className="w-full py-2 bg-theme-surface hover:bg-emerald-50 dark:hover:bg-emerald-500/10 border border-theme-border-soft hover:border-emerald-200 dark:hover:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
+                                >
+                                  <Banknote className="w-3.5 h-3.5" /> Record Payment
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );

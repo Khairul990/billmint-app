@@ -1,110 +1,211 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { logout } from '../services/dbEngine';
 import { triggerLightHaptic } from '../utils/feedback';
 import { t } from '../utils/i18n';
 import Logo from './Logo';
 
 /**
- * Desktop Sidebar Navigation
- * @param {string} currentTab - active state key
- * @param {Function} setCurrentTab - state update dispatcher
- * @param {Function} onLogout - logout event handler
- * @param {Object} businessSettings - current active company name & logo
- * @param {boolean} isAuthenticated - whether currently logged in as admin
+ * Premium Collapsible Desktop Sidebar Navigation
+ * - Expanded: 240px with full text, logo, user card
+ * - Collapsed: 72px with icons only + tooltips
+ * - Persists collapsed state via localStorage
  */
 const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userEmail, pendingPaymentsCount = 0 }) => {
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('billqyro_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleCollapsed = () => {
+    setIsCollapsed(prev => {
+      const next = !prev;
+      try { localStorage.setItem('billqyro_sidebar_collapsed', String(next)); } catch {}
+      return next;
+    });
+  };
+
   const menuItems = [
     { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
     { id: 'invoices', label: t('invoices'), icon: FileSpreadsheet },
+    { id: 'estimates', label: 'Estimates & Quotes', icon: FileSpreadsheet },
+    { id: 'marketplace', label: 'Template Marketplace', icon: Store },
+    { id: 'pdf-templates', label: 'PDF Templates', icon: Palette },
+    { id: 'live-link-templates', label: 'Live Link Studio', icon: Smartphone },
     { id: 'customers', label: t('customers'), icon: Users },
+    { id: 'reports', label: 'Reports', icon: PieChart },
     { id: 'expenses', label: t('expenses'), icon: TrendingDown },
+    { id: 'backup-restore', label: 'Backup & Restore', icon: Database },
     { id: 'products', label: t('products'), icon: Layers },
+    { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen },
     { id: 'pending-payments', label: 'Payment Proofs', icon: Bell },
     { id: 'subscription', label: 'Subscription Plan', icon: Sparkles },
     { id: 'settings', label: t('settings'), icon: SettingsIcon },
-    { id: 'guide', label: 'How to Use', icon: HelpCircle },
+    { id: 'help-center', label: 'Help Center', icon: HelpCircle },
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 bg-theme-sidebar border-r border-theme-border-soft/10 h-full z-30 shadow-2xl transition-all duration-300 overflow-hidden">
+    <aside
+      className="hidden lg:flex flex-col h-full z-30 overflow-hidden shrink-0 border-r border-theme-border-soft/40 bg-theme-sidebar/80 backdrop-blur-xl shadow-[4px_0_24px_-6px_rgba(0,0,0,0.08)]"
+      style={{
+        width: isCollapsed ? 72 : 240,
+        minWidth: isCollapsed ? 72 : 240,
+        transition: 'width 300ms cubic-bezier(0.4,0,0.2,1), min-width 300ms cubic-bezier(0.4,0,0.2,1)',
+      }}
+    >
       {/* Brand Header */}
-      <div className="shrink-0 p-6 border-b border-theme-border-soft/10 flex items-center">
-        <Logo type="horizontal" forceWhiteText={false} />
+      <div className="shrink-0 border-b border-theme-border-soft/20 flex items-center justify-between overflow-hidden"
+        style={{ padding: isCollapsed ? '16px 12px' : '20px 20px', transition: 'padding 300ms ease' }}
+      >
+        {isCollapsed ? (
+          <div className="w-full flex justify-center">
+            <Logo type="icon" className="w-9 h-9" />
+          </div>
+        ) : (
+          <Logo type="horizontal" forceWhiteText={false} />
+        )}
+      </div>
+
+      {/* Collapse Toggle */}
+      <div className="shrink-0 flex justify-end px-2 py-1.5">
+        <button
+          onClick={toggleCollapsed}
+          className="w-8 h-8 rounded-xl flex items-center justify-center text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light/15 transition-all duration-200 cursor-pointer"
+          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {isCollapsed ? <ChevronsRight className="w-4 h-4" /> : <ChevronsLeft className="w-4 h-4" />}
+        </button>
       </div>
 
       {/* Nav Menu */}
-      <nav className="flex-1 min-h-0 px-4 py-6 space-y-1 overflow-y-auto no-scrollbar">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = currentTab === item.id || (item.id === 'invoices' && currentTab === 'create-invoice');
-          
-          return (
-            <motion.button
-              whileHover={{ scale: 1.02, x: 4 }}
-              whileTap={{ scale: 0.98 }}
-              key={item.id}
-              onClick={() => {
-                triggerLightHaptic();
-                setCurrentTab(item.id);
-              }}
-              className={`relative w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors duration-300 group cursor-pointer ${
-                isActive 
-                  ? 'text-theme-button-text' 
-                  : 'text-theme-sidebar-text/70 hover:text-theme-button-text hover:bg-theme-accent-light/10'
-              }`}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="activeSidebar"
-                  className="absolute inset-0 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-xl shadow-glow"
-                  initial={false}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-              )}
-              <Icon className={`relative z-10 w-5 h-5 transition-transform duration-300 ${
-                isActive ? 'text-theme-button-text scale-110' : 'text-theme-sidebar-text/70 group-hover:text-theme-accent group-hover:scale-110'
-              }`} />
-              <span className="relative z-10">{item.label}</span>
-              
-              {item.id === 'pending-payments' && pendingPaymentsCount > 0 && (
-                <span className="relative z-10 ml-auto px-2 py-0.5 bg-red-500 text-white text-[10px] font-black rounded-full shadow-lg shadow-red-500/30 animate-pulse">
-                  {pendingPaymentsCount}
-                </span>
-              )}
-            </motion.button>
-          );
-        })}
+      <nav className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden no-scrollbar"
+        style={{ padding: isCollapsed ? '8px 8px' : '8px 12px', transition: 'padding 300ms ease' }}
+      >
+        <div className="space-y-0.5">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentTab === item.id || (item.id === 'invoices' && currentTab === 'create-invoice');
+
+            return (
+              <div key={item.id} className="relative group">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    triggerLightHaptic();
+                    setCurrentTab(item.id);
+                  }}
+                  className={`relative w-full flex items-center rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer overflow-hidden ${
+                    isCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3.5 py-2.5'
+                  } ${
+                    isActive
+                      ? 'text-theme-button-text shadow-lg'
+                      : 'text-theme-sidebar-text/65 hover:text-theme-sidebar-text hover:bg-theme-accent-light/10'
+                  }`}
+                >
+                  {/* Active gradient background pill */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeSidebar"
+                      className="absolute inset-0 bg-[image:var(--accent-gradient)] rounded-xl"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                      style={{ boxShadow: '0 4px 16px -2px var(--accent-glow)' }}
+                    />
+                  )}
+
+                  {/* Left accent bar for active state */}
+                  {isActive && !isCollapsed && (
+                    <motion.div
+                      layoutId="activeBar"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-white/60"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                  )}
+
+                  <Icon className={`relative z-10 w-[18px] h-[18px] shrink-0 transition-transform duration-200 ${
+                    isActive ? 'text-theme-button-text' : 'group-hover:scale-110 group-hover:text-theme-accent'
+                  }`} />
+
+                  {/* Label - only show when expanded */}
+                  {!isCollapsed && (
+                    <span className="relative z-10 truncate whitespace-nowrap text-[13px]"
+                      style={{ opacity: isCollapsed ? 0 : 1, transition: 'opacity 200ms ease' }}
+                    >
+                      {item.label}
+                    </span>
+                  )}
+
+                  {/* Badge */}
+                  {item.id === 'pending-payments' && pendingPaymentsCount > 0 && (
+                    <span className={`relative z-10 px-1.5 py-0.5 bg-red-500 text-white text-[9px] font-black rounded-full shadow-lg shadow-red-500/30 animate-pulse ${
+                      isCollapsed ? 'absolute top-1 right-1' : 'ml-auto'
+                    }`}>
+                      {pendingPaymentsCount}
+                    </span>
+                  )}
+                </motion.button>
+
+                {/* Tooltip when collapsed */}
+                {isCollapsed && (
+                  <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-theme-card dark:bg-theme-card text-theme-primary text-xs font-bold rounded-lg shadow-xl border border-theme-border-soft whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-[100]">
+                    {item.label}
+                    <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-theme-card" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </nav>
 
-      {/* Sidebar Footer with Business Account Summary & Logout */}
-      <div className="shrink-0 p-4 border-t border-theme-border-soft/10 flex flex-col gap-3 bg-theme-sidebar">
-        <div className="flex items-center gap-3 p-3 bg-theme-accent-light/10 border border-theme-border-soft rounded-xl">
+      {/* Sidebar Footer */}
+      <div className="shrink-0 border-t border-theme-border-soft/20 bg-theme-sidebar/50"
+        style={{ padding: isCollapsed ? '12px 8px' : '12px 12px', transition: 'padding 300ms ease' }}
+      >
+        {/* User Card */}
+        <div className={`flex items-center rounded-xl border border-theme-border-soft/40 bg-theme-accent-light/8 overflow-hidden ${
+          isCollapsed ? 'justify-center p-2' : 'gap-2.5 p-2.5'
+        }`}
+          style={{ transition: 'all 300ms ease' }}
+        >
           {businessSettings?.logoUrl ? (
             <img
               src={businessSettings.logoUrl}
               alt="Logo"
-              className="w-9 h-9 rounded-lg object-cover shadow-sm bg-theme-card dark:bg-theme-card"
+              className="w-8 h-8 rounded-lg object-cover shadow-sm bg-theme-card shrink-0"
             />
           ) : (
-            <div className="w-9 h-9 rounded-lg bg-theme-accent-light text-theme-accent font-bold flex items-center justify-center text-sm">
+            <div className="w-8 h-8 rounded-lg bg-[image:var(--accent-gradient)] text-theme-button-text font-bold flex items-center justify-center text-xs shrink-0 shadow-sm">
               {businessSettings?.businessName?.charAt(0) || 'B'}
             </div>
           )}
-          <div className="min-w-0 flex-1">
-            <h4 className="text-xs font-bold text-theme-sidebar-text truncate">{businessSettings?.businessName || 'My Business'}</h4>
-            <p className="text-[10px] text-theme-sidebar-text/70 font-medium truncate">{businessSettings?.email || userEmail || 'No email provided'}</p>
-          </div>
+          {!isCollapsed && (
+            <div className="min-w-0 flex-1">
+              <h4 className="text-[11px] font-bold text-theme-sidebar-text truncate leading-tight">
+                {businessSettings?.businessName || 'My Business'}
+              </h4>
+              <p className="text-[9px] text-theme-sidebar-text/55 font-medium truncate leading-tight">
+                {businessSettings?.email || userEmail || 'No email'}
+              </p>
+            </div>
+          )}
         </div>
 
+        {/* Logout Button */}
         {isAuthenticated && (
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-theme-danger hover:bg-theme-danger/10 hover:text-red-300 transition-all animate-fadeIn cursor-pointer"
+            className={`w-full flex items-center rounded-xl text-sm font-semibold text-theme-danger/80 hover:bg-theme-danger/8 hover:text-theme-danger transition-all cursor-pointer mt-1.5 ${
+              isCollapsed ? 'justify-center px-0 py-2.5' : 'gap-2.5 px-3.5 py-2.5'
+            }`}
           >
-            <LogOut className="w-4 h-4" />
-            <span>Log out</span>
+            <LogOut className="w-4 h-4 shrink-0" />
+            {!isCollapsed && <span className="text-xs">Log out</span>}
           </button>
         )}
       </div>

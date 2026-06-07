@@ -82,7 +82,7 @@ const InteractiveTutorial = ({ businessSettings, onSaveSettings, setCurrentTab }
       <motion.div className="max-w-4xl w-full bg-theme-card border border-theme-border-soft rounded-3xl shadow-premium overflow-hidden flex flex-col md:flex-row">
         
         {/* Video Simulation Section */}
-        <div className="md:w-1/2 bg-slate-900 p-8 flex flex-col items-center justify-center relative overflow-hidden text-center min-h-[300px]">
+        <div className="md:w-1/2 bg-theme-card p-8 flex flex-col items-center justify-center relative overflow-hidden text-center min-h-[300px]">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/50 to-purple-900/50 z-0"></div>
           <motion.div 
             className="z-10 bg-white/10 p-4 rounded-full backdrop-blur-md border border-white/20 mb-4 cursor-pointer hover:scale-110 transition-transform"
@@ -106,7 +106,7 @@ const InteractiveTutorial = ({ businessSettings, onSaveSettings, setCurrentTab }
                 <div 
                   key={task.id} 
                   onClick={() => handleTaskClick(task.id)}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-theme-border-soft bg-theme-surface hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                  className="flex items-center gap-4 p-4 rounded-2xl border border-theme-border-soft bg-theme-surface hover:bg-theme-app dark:hover:bg-theme-surface cursor-pointer transition-colors"
                 >
                   {task.completed ? (
                     <CheckCircle2 className="w-6 h-6 text-green-500" />

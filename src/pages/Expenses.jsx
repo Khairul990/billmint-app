@@ -279,7 +279,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
 
             {expenses.length === 0 && (
               <div className="md:col-span-2 lg:col-span-3 bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
-                <Receipt className="w-12 h-12 text-slate-200 mx-auto mb-3 animate-pulse" />
+                <Receipt className="w-12 h-12 text-theme-primary mx-auto mb-3 animate-pulse" />
                 <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">No Operating Costs Logged</h4>
                 <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
                   Keep overhead clean. Click Log Expense to add business expenses!

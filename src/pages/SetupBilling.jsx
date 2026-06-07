@@ -69,8 +69,8 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
     {
       id: 'grocery',
       title: 'Grocery / Mudi Shop',
-      icon: <ShoppingBasket className="w-5 h-5 text-orange-500" />,
-      color: 'bg-orange-50 border-orange-200 hover:border-orange-500 dark:bg-orange-950/20 dark:border-orange-900',
+      icon: <ShoppingBasket className="w-5 h-5 text-theme-warning" />,
+      color: 'bg-theme-warning/10 border-theme-warning/20 hover:border-theme-warning',
       description: 'Product Name, Unit, Quantity, Unit Price, Amount'
     },
     {
@@ -279,8 +279,8 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
             <div className="w-12 h-12 bg-theme-card dark:bg-theme-card/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center font-bold text-white text-lg">
               {step === 1 && <Globe className="w-6 h-6 text-theme-accent" />}
               {step === 2 && <Building2 className="w-6 h-6 text-theme-accent" />}
-              {step === 3 && <QrCode className="w-6 h-6 text-rose-300" />}
-              {step === 4 && <Sparkles className="w-6 h-6 text-amber-300" />}
+              {step === 3 && <QrCode className="w-6 h-6 text-theme-accent" />}
+              {step === 4 && <Sparkles className="w-6 h-6 text-theme-warning" />}
             </div>
           </div>
         </div>
@@ -393,7 +393,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                   <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase">Corporate Logo (Optional)</label>
                   <div
                     className={`relative border-2 border-dashed rounded-xl p-4.5 text-center transition-all ${
-                      isDragging ? 'border-theme-accent bg-theme-accent-light/30 dark:bg-theme-accent-light/20' : 'border-theme-border-soft bg-theme-app dark:bg-theme-surface hover:bg-theme-surface dark:bg-theme-card dark:border-theme-border-soft dark:bg-theme-surface/40 dark:hover:bg-slate-850'
+                      isDragging ? 'border-theme-accent bg-theme-accent-light/30 dark:bg-theme-accent-light/20' : 'border-theme-border-soft bg-theme-app dark:bg-theme-surface hover:bg-theme-surface dark:bg-theme-card dark:border-theme-border-soft dark:bg-theme-surface/40 dark:hover:bg-theme-surface'
                     }`}
                     onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                     onDragLeave={() => setIsDragging(false)}
@@ -433,7 +433,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                       <button
                         type="button"
                         onClick={() => setLogoUrl('')}
-                        className="p-1.5 bg-theme-danger/5 text-theme-danger hover:bg-rose-100 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 bg-theme-danger/5 text-theme-danger hover:bg-theme-danger/10 rounded-lg transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -479,7 +479,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
               {/* Payment Enable toggle */}
               <div className="flex items-center justify-between p-3.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl">
                 <div>
-                  <span className="text-xs font-black text-theme-primary dark:text-theme-muted dark:text-slate-250 block">Enable Automated Scan-to-Pay QR Codes</span>
+                  <span className="text-xs font-black text-theme-primary dark:text-theme-muted dark:text-theme-primary block">Enable Automated Scan-to-Pay QR Codes</span>
                   <span className="text-[9px] text-theme-muted font-bold">Embed a QR payment code and deep link inside digital invoices for immediate payment.</span>
                 </div>
                 <button 
@@ -609,7 +609,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                           value={customPaymentLink}
                           onChange={(e) => setCustomPaymentLink(e.target.value)}
                           placeholder="e.g. https://paypal.me/yourbusiness or bank details"
-                          className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-slate-850 dark:text-slate-250"
+                          className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary"
                         />
                       </div>
                     </>
@@ -623,7 +623,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                       value={paymentNote}
                       onChange={(e) => setPaymentNote(e.target.value)}
                       placeholder="Showed beneath the payment QR code module."
-                      className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-slate-850 dark:text-theme-secondary text-xs"
+                      className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-secondary text-xs"
                     />
                   </div>
 
@@ -661,19 +661,19 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                   <span className="text-[9px] text-theme-muted font-extrabold uppercase mr-1">Suggested for you:</span>
                   {country === 'India' && (
                     <>
-                      <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-slate-750'}`}>English</button>
-                      <button type="button" onClick={() => setLanguage('Hindi')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Hindi' ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-slate-750'}`}>Hindi</button>
-                      <button type="button" onClick={() => setLanguage('Bengali')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Bengali' ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-slate-750'}`}>Bengali</button>
+                      <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-theme-border-soft'}`}>English</button>
+                      <button type="button" onClick={() => setLanguage('Hindi')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Hindi' ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-theme-border-soft'}`}>Hindi</button>
+                      <button type="button" onClick={() => setLanguage('Bengali')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Bengali' ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-theme-border-soft'}`}>Bengali</button>
                     </>
                   )}
                   {country === 'Bangladesh' && (
                     <>
-                      <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-slate-750'}`}>English</button>
-                      <button type="button" onClick={() => setLanguage('Bengali')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Bengali' ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-slate-750'}`}>Bengali</button>
+                      <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-theme-border-soft'}`}>English</button>
+                      <button type="button" onClick={() => setLanguage('Bengali')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'Bengali' ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-theme-border-soft'}`}>Bengali</button>
                     </>
                   )}
                   {country === 'Other' && (
-                    <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-slate-750'}`}>English</button>
+                    <button type="button" onClick={() => setLanguage('English')} className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-all ${language === 'English' ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-theme-border-soft'}`}>English</button>
                   )}
                 </div>
               </div>

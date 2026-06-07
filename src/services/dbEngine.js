@@ -53,10 +53,62 @@ export const queueSyncTransaction = async (action, storeName, docId, data) => {
     storeName, // 'invoices', 'customers', 'products', 'expenses'
     docId,
     data,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    retryCount: 0,
+    lastRetryAt: 0
   };
   await BillQyroDB.put('syncQueue', tx);
   console.log('[SYNC QUEUE] Queued transaction offline:', tx);
+};
+
+// --- CORE LOGGING SYSTEM ---
+export const logError = async (error, context = '') => {
+  try {
+    const errorLog = {
+      id: 'err-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+      message: error?.message || String(error),
+      stack: error?.stack || null,
+      context,
+      timestamp: Date.now(),
+      userAgent: navigator.userAgent
+    };
+    await BillQyroDB.put('errorLogs', errorLog);
+    console.error(`[SYSTEM ERROR] ${context}:`, error);
+  } catch (e) {
+    console.error('Failed to write to errorLogs', e);
+  }
+};
+
+export const logAudit = async (action, entityType, entityId, before = null, after = null) => {
+  try {
+    const user = getAuthSession() || { uid: 'anonymous', email: 'unknown' };
+    let deviceInfo = 'Unknown Device';
+    try {
+      deviceInfo = navigator.userAgent;
+    } catch(e){}
+
+    const auditEntry = {
+      id: 'aud-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+      userId: user.uid,
+      userEmail: user.email,
+      action,
+      entityType,
+      entityId,
+      before,
+      after,
+      createdAt: Date.now(),
+      actorRole: user.email === getAdminEmail() ? 'admin' : 'user',
+      deviceInfo
+    };
+    
+    await BillQyroDB.put('auditLogs', auditEntry);
+    console.log(`[AUDIT] ${action} on ${entityType}/${entityId}`);
+    
+    // Also queue audit logs for sync so they go to cloud
+    await queueSyncTransaction('save', 'auditLogs', auditEntry.id, auditEntry);
+  } catch (e) {
+    await logError(e, 'logAudit');
+  }
 };
 
 export const syncOfflineTransactions = async () => {
@@ -115,9 +167,18 @@ export const syncOfflineTransactions = async () => {
         if (syncSuccess) {
           await BillQyroDB.delete('syncQueue', tx.id);
           console.log('[SYNC QUEUE] Successfully synced transaction:', tx.id);
+        } else {
+          // Update retry logic
+          tx.retryCount = (tx.retryCount || 0) + 1;
+          tx.lastRetryAt = Date.now();
+          await BillQyroDB.put('syncQueue', tx);
         }
       } catch (err) {
         console.error('[SYNC QUEUE] Failed to sync transaction:', tx.id, err);
+        tx.retryCount = (tx.retryCount || 0) + 1;
+        tx.lastRetryAt = Date.now();
+        await BillQyroDB.put('syncQueue', tx);
+        await logError(err, 'syncOfflineTransactions');
       }
     }
 
@@ -246,6 +307,10 @@ const DEFAULT_SETTINGS = {
   taxLabel: 'GSTIN',
   rocketNumber: '',
   vatTax: '',
+  invoicePrefix: 'INV-',
+  nextInvoiceNumber: 1,
+  estimatePrefix: 'EST-',
+  nextEstimateNumber: 1,
   customerLiveLinkSettings: {
     enableLiveInvoiceLink: true,
     showPaymentQr: true,
@@ -496,6 +561,12 @@ const firestoreSave = async (collectionName, docId, data) => {
     }
     
     console.error(`Firestore save failed for ${pathStr}:`, error);
+    
+    // Silently fail for optional audit logs instead of spamming toast notifications and retrying forever
+    if (collectionName === 'auditLogs') {
+      return { status: 'success' }; // Trick the sync queue into dropping it
+    }
+    
     toast.error(`Sync Blocked! Path: ${pathStr} | User: ${userId} | Code: ${error.code || 'UNKNOWN'} | Reason: ${error.message || 'Permission Denied'}`, { duration: 6000 });
     return { status: 'failed', error };
   }
@@ -567,8 +638,39 @@ export const initializeStorage = () => {
     } catch (e) { /* ignore */ }
   });
 
+  // Migrate legacy invoices lacking an invoiceNumber
+  let settings = null;
+  let migratedNumbers = false;
+  currentInvoices.forEach(inv => {
+    if (!inv.invoiceNumber) {
+      if (!settings) settings = JSON.parse(localStorage.getItem(KEYS.SETTINGS)) || DEFAULT_SETTINGS;
+      const isEstimate = inv.billType === 'Estimate';
+      const prefix = isEstimate ? (settings.estimatePrefix || 'EST-') : (settings.invoicePrefix || 'INV-');
+      let nextNum = isEstimate ? (settings.nextEstimateNumber || 1) : (settings.nextInvoiceNumber || 1);
+      
+      let uniqueStr = `${prefix}${String(nextNum).padStart(4, '0')}`;
+      while (currentInvoices.some(existing => existing.invoiceNumber === uniqueStr)) {
+        nextNum++;
+        uniqueStr = `${prefix}${String(nextNum).padStart(4, '0')}`;
+      }
+      
+      inv.invoiceNumber = uniqueStr;
+      if (isEstimate) {
+        settings.nextEstimateNumber = nextNum + 1;
+      } else {
+        settings.nextInvoiceNumber = nextNum + 1;
+      }
+      migratedNumbers = true;
+    }
+  });
+
+  if (migratedNumbers) {
+    localStorage.setItem(KEYS.INVOICES, JSON.stringify(currentInvoices));
+    if (settings) localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
+  }
+
   if (!localStorage.getItem(KEYS.INVOICES)) {
-    localStorage.setItem(KEYS.INVOICES, JSON.stringify([]));
+    localStorage.setItem(KEYS.INVOICES, JSON.stringify(currentInvoices));
   }
   if (!localStorage.getItem(KEYS.EXPENSES)) {
     localStorage.setItem(KEYS.EXPENSES, JSON.stringify([]));
@@ -1046,17 +1148,23 @@ export const saveSettings = (settings) => {
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
   firestoreSave('settings', 'business', settings);
   registerOrUpdateUserList(settings);
+  logAudit('settings_updated', 'settings', 'business', null, settings);
   return settings;
 };
 
 // --- EXPENSES ---
-export const getExpenses = async () => {
+export const getExpenses = async (includeDeleted = false) => {
   initializeStorage();
   try {
     const data = await BillQyroDB.getAll('expenses');
-    if (data && data.length > 0) return data;
+    if (data && data.length > 0) {
+      let filtered = data;
+      if (!includeDeleted) filtered = data.filter(e => !e.isDeleted);
+      return filtered.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
+    }
   } catch(e) {}
-  return JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [];
+  const localData = JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [];
+  return includeDeleted ? localData : localData.filter(e => !e.isDeleted);
 };
 
 export const saveExpense = async (expense) => {
@@ -1110,15 +1218,44 @@ export const saveExpense = async (expense) => {
   return { updatedExpenses: expenses, firebaseStatus };
 };
 
-export const deleteExpense = async (id) => {
-  const expenses = await getExpenses();
+export const deleteExpense = async (id, permanent = false) => {
+  const expenses = await getExpenses(true);
+  const idx = expenses.findIndex(e => e.id === id);
+  if (idx === -1) return { updatedExpenses: expenses.filter(e => !e.isDeleted), firebaseStatus: 'failed' };
+  
+  const expenseToDelete = expenses[idx];
+
+  if (!permanent) {
+    expenses[idx].isDeleted = true;
+    expenses[idx].deletedAt = new Date().toISOString();
+    expenses[idx].syncStatus = 'pending';
+    const filtered = expenses.filter(e => !e.isDeleted);
+    updateLocalCache(KEYS.EXPENSES, expenses);
+    await BillQyroDB.put('expenses', expenses[idx]);
+    
+    let firebaseStatus = 'pending';
+    if (firebaseReady) {
+      if (navigator.onLine) {
+        try {
+          await firestoreSave('expenses', id, expenses[idx]);
+          firebaseStatus = 'success';
+          expenses[idx].syncStatus = 'synced';
+          updateLocalCache(KEYS.EXPENSES, expenses);
+          await BillQyroDB.put('expenses', expenses[idx]);
+        } catch(e) { firebaseStatus = 'failed'; }
+      } else {
+        queueSyncTransaction('save', 'expenses', id, expenses[idx]).catch(e => console.error(e));
+        firebaseStatus = 'failed';
+      }
+    }
+    return { updatedExpenses: filtered, firebaseStatus };
+  }
+
+  // Permanent Delete
   const filtered = expenses.filter(e => e.id !== id);
   updateLocalCache(KEYS.EXPENSES, filtered);
-
-  // Delete from IndexedDB
   await BillQyroDB.delete('expenses', id);
 
-  // Sync / queue (Non-blocking)
   let firebaseStatus = 'success';
   if (firebaseReady) {
     if (navigator.onLine) {
@@ -1128,17 +1265,18 @@ export const deleteExpense = async (id) => {
       firebaseStatus = 'failed';
     }
   }
-  return { updatedExpenses: filtered, firebaseStatus };
+  return { updatedExpenses: filtered.filter(e => !e.isDeleted), firebaseStatus };
 };
 
 // --- CUSTOMERS ---
-export const getCustomers = async () => {
+export const getCustomers = async (includeDeleted = false) => {
   initializeStorage();
   try {
     const data = await BillQyroDB.getAll('customers');
-    if (data && data.length > 0) return data;
+    if (data && data.length > 0) return includeDeleted ? data : data.filter(c => !c.isDeleted);
   } catch(e) {}
-  return JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [];
+  const localData = JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [];
+  return includeDeleted ? localData : localData.filter(c => !c.isDeleted);
 };
 
 export const saveCustomer = async (customer) => {
@@ -1147,12 +1285,15 @@ export const saveCustomer = async (customer) => {
     const index = customers.findIndex(c => c.id === customer.id);
     if (index !== -1) {
       customers[index] = customer;
+      logAudit('customer_updated', 'customer', customer.id, null, customer);
     } else {
       customers.push(customer);
+      logAudit('customer_created', 'customer', customer.id, null, customer);
     }
   } else {
     customer.id = 'c-' + Date.now();
     customers.push(customer);
+    logAudit('customer_created', 'customer', customer.id, null, customer);
   }
   updateLocalCache(KEYS.CUSTOMERS, customers);
 
@@ -1192,15 +1333,46 @@ export const saveCustomer = async (customer) => {
   return { updatedCustomers: customers, firebaseStatus };
 };
 
-export const deleteCustomer = async (id) => {
-  const customers = await getCustomers();
+export const deleteCustomer = async (id, permanent = false) => {
+  const customers = await getCustomers(true);
+  const idx = customers.findIndex(c => c.id === id);
+  if (idx === -1) return { updatedCustomers: customers.filter(c => !c.isDeleted), firebaseStatus: 'failed' };
+  
+  const customerToDelete = customers[idx];
+
+  if (!permanent) {
+    customers[idx].isDeleted = true;
+    customers[idx].deletedAt = new Date().toISOString();
+    customers[idx].syncStatus = 'pending';
+    const filtered = customers.filter(c => !c.isDeleted);
+    updateLocalCache(KEYS.CUSTOMERS, customers);
+    await BillQyroDB.put('customers', customers[idx]);
+    logAudit('customer_deleted', 'customer', id, customerToDelete, null);
+
+    let firebaseStatus = 'pending';
+    if (firebaseReady) {
+      if (navigator.onLine) {
+        try {
+          await firestoreSave('customers', id, customers[idx]);
+          firebaseStatus = 'success';
+          customers[idx].syncStatus = 'synced';
+          updateLocalCache(KEYS.CUSTOMERS, customers);
+          await BillQyroDB.put('customers', customers[idx]);
+        } catch(e) { firebaseStatus = 'failed'; }
+      } else {
+        queueSyncTransaction('save', 'customers', id, customers[idx]).catch(e => console.error(e));
+        firebaseStatus = 'failed';
+      }
+    }
+    return { updatedCustomers: filtered, firebaseStatus };
+  }
+
+  // Permanent Delete
   const filtered = customers.filter(c => c.id !== id);
   updateLocalCache(KEYS.CUSTOMERS, filtered);
-
-  // Delete from IndexedDB
   await BillQyroDB.delete('customers', id);
+  logAudit('customer_permanently_deleted', 'customer', id, customerToDelete, null);
 
-  // Sync / queue (Non-blocking)
   let firebaseStatus = 'success';
   if (firebaseReady) {
     if (navigator.onLine) {
@@ -1210,17 +1382,18 @@ export const deleteCustomer = async (id) => {
       firebaseStatus = 'failed';
     }
   }
-  return { updatedCustomers: filtered, firebaseStatus };
+  return { updatedCustomers: filtered.filter(c => !c.isDeleted), firebaseStatus };
 };
 
 // --- PRODUCTS ---
-export const getProducts = async () => {
+export const getProducts = async (includeDeleted = false) => {
   initializeStorage();
   try {
     const data = await BillQyroDB.getAll('products');
-    if (data && data.length > 0) return data;
+    if (data && data.length > 0) return includeDeleted ? data : data.filter(p => !p.isDeleted);
   } catch(e) {}
-  return JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [];
+  const localData = JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [];
+  return includeDeleted ? localData : localData.filter(p => !p.isDeleted);
 };
 
 export const saveProduct = async (product) => {
@@ -1229,12 +1402,15 @@ export const saveProduct = async (product) => {
     const index = products.findIndex(p => p.id === product.id);
     if (index !== -1) {
       products[index] = product;
+      logAudit('product_updated', 'product', product.id, null, product);
     } else {
       products.push(product);
+      logAudit('product_created', 'product', product.id, null, product);
     }
   } else {
     product.id = 'p-' + Date.now();
     products.push(product);
+    logAudit('product_created', 'product', product.id, null, product);
   }
   updateLocalCache(KEYS.PRODUCTS, products);
 
@@ -1274,15 +1450,46 @@ export const saveProduct = async (product) => {
   return { updatedProducts: products, firebaseStatus };
 };
 
-export const deleteProduct = async (id) => {
-  const products = await getProducts();
+export const deleteProduct = async (id, permanent = false) => {
+  const products = await getProducts(true);
+  const idx = products.findIndex(p => p.id === id);
+  if (idx === -1) return { updatedProducts: products.filter(p => !p.isDeleted), firebaseStatus: 'failed' };
+  
+  const productToDelete = products[idx];
+
+  if (!permanent) {
+    products[idx].isDeleted = true;
+    products[idx].deletedAt = new Date().toISOString();
+    products[idx].syncStatus = 'pending';
+    const filtered = products.filter(p => !p.isDeleted);
+    updateLocalCache(KEYS.PRODUCTS, products);
+    await BillQyroDB.put('products', products[idx]);
+    logAudit('product_deleted', 'product', id, productToDelete, null);
+
+    let firebaseStatus = 'pending';
+    if (firebaseReady) {
+      if (navigator.onLine) {
+        try {
+          await firestoreSave('products', id, products[idx]);
+          firebaseStatus = 'success';
+          products[idx].syncStatus = 'synced';
+          updateLocalCache(KEYS.PRODUCTS, products);
+          await BillQyroDB.put('products', products[idx]);
+        } catch(e) { firebaseStatus = 'failed'; }
+      } else {
+        queueSyncTransaction('save', 'products', id, products[idx]).catch(e => console.error(e));
+        firebaseStatus = 'failed';
+      }
+    }
+    return { updatedProducts: filtered, firebaseStatus };
+  }
+
+  // Permanent Delete
   const filtered = products.filter(p => p.id !== id);
   updateLocalCache(KEYS.PRODUCTS, filtered);
-
-  // Delete from IndexedDB
   await BillQyroDB.delete('products', id);
+  logAudit('product_permanently_deleted', 'product', id, productToDelete, null);
 
-  // Sync / queue (Non-blocking)
   let firebaseStatus = 'success';
   if (firebaseReady) {
     if (navigator.onLine) {
@@ -1292,19 +1499,24 @@ export const deleteProduct = async (id) => {
       firebaseStatus = 'failed';
     }
   }
-  return { updatedProducts: filtered, firebaseStatus };
+  return { updatedProducts: filtered.filter(p => !p.isDeleted), firebaseStatus };
 };
 
 // --- INVOICES ---
-export const getInvoices = async () => {
+export const getInvoices = async (includeDeleted = false) => {
   initializeStorage();
   try {
     const data = await BillQyroDB.getAll('invoices');
     if (data && data.length > 0) {
-      return data.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+      let filtered = data;
+      if (!includeDeleted) {
+        filtered = data.filter(inv => !inv.isDeleted);
+      }
+      return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch(e) {}
-  return JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
+  const localData = JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
+  return includeDeleted ? localData : localData.filter(inv => !inv.isDeleted);
 };
 
 const generateSecureToken = () => {
@@ -1331,6 +1543,36 @@ export const saveInvoice = async (invoice) => {
 
   // 2. Ensure snapshots are taken
   const activeSettings = getSettings() || DEFAULT_SETTINGS;
+
+  // Auto-generate invoice/estimate number if missing
+  if (!invoice.invoiceNumber) {
+    const isEstimate = invoice.billType === 'Estimate';
+    const prefix = isEstimate 
+      ? (activeSettings.estimatePrefix || 'EST-') 
+      : (activeSettings.invoicePrefix || 'INV-');
+    
+    let nextNum = isEstimate 
+      ? (activeSettings.nextEstimateNumber || 1) 
+      : (activeSettings.nextInvoiceNumber || 1);
+    
+    // Check for duplicates
+    let uniqueStr = `${prefix}${String(nextNum).padStart(4, '0')}`;
+    while (invoices.some(inv => inv.invoiceNumber === uniqueStr)) {
+      nextNum++;
+      uniqueStr = `${prefix}${String(nextNum).padStart(4, '0')}`;
+    }
+    
+    invoice.invoiceNumber = uniqueStr;
+    
+    // Update settings with the next number
+    if (isEstimate) {
+      activeSettings.nextEstimateNumber = nextNum + 1;
+    } else {
+      activeSettings.nextInvoiceNumber = nextNum + 1;
+    }
+    saveSettings(activeSettings); // Save the updated sequence counter
+  }
+
   if (!invoice.businessSnapshot) {
     invoice.businessSnapshot = {
       businessName: activeSettings.businessName || '',
@@ -1402,10 +1644,12 @@ export const saveInvoice = async (invoice) => {
     if (index !== -1) {
       invoice.updatedAt = timestamp;
       invoices[index] = invoice;
+      logAudit('invoice_updated', 'invoice', invoice.id, invoices[index], invoice);
     } else {
       invoice.createdAt = timestamp;
       invoice.updatedAt = timestamp;
       invoices.push(invoice);
+      logAudit('invoice_created', 'invoice', invoice.id, null, invoice);
     }
   } else {
     // Also if it's a temp ID like Date.now().toString(), override it
@@ -1413,6 +1657,7 @@ export const saveInvoice = async (invoice) => {
     invoice.createdAt = timestamp;
     invoice.updatedAt = timestamp;
     invoices.push(invoice);
+    logAudit('invoice_created', 'invoice', invoice.id, null, invoice);
   }
 
   // Double-save corresponding Customer to DB as well
@@ -1738,11 +1983,14 @@ export const deleteInvoice = async (id, permanent = false) => {
   }
 
   // Permanent Delete
+  const invoiceToDelete = invoices.find(inv => inv.id === id);
   const filtered = invoices.filter(inv => inv.id !== id);
   updateLocalCache(KEYS.INVOICES, filtered);
 
   // Delete from IndexedDB
   await BillQyroDB.delete('invoices', id);
+
+  logAudit('invoice_deleted_or_voided', 'invoice', id, invoiceToDelete, null);
 
   // Sync / queue (Non-blocking)
   let firebaseStatus = 'success';

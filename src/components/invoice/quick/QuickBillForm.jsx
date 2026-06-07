@@ -54,8 +54,7 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
     dispatch({ type: 'SET_ITEMS', payload: newItems });
   };
 
-  // Save
-  const handleSave = (statusOverride = 'Paid') => {
+  const handleSave = (statusOverride) => {
     if (!state.customer.name) {
       alert("Please add a customer name");
       return;
@@ -79,7 +78,10 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
       customerId: state.customer.id || null,
       customerName: state.customer.name,
       customerPhone: state.customer.phone,
-      paymentStatus: statusOverride,
+      paymentStatus: statusOverride === 'Draft' ? 'Draft' : state.settings.paymentStatus,
+      paymentMethod: state.settings.paymentMethod || 'Cash',
+      amountPaid: state.totals.amountPaid || 0,
+      balanceDue: state.totals.balanceDue || state.totals.grandTotal,
       businessSnapshot: businessSettings,
       paymentSettingsSnapshot: businessSettings,
       regionalSettingsSnapshot: businessSettings
@@ -187,8 +189,7 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
           </button>
         </div>
         
-        {/* Discount Section (Simplified) */}
-        <div className="flex items-center gap-4 border-t border-theme-border-soft pt-4">
+        <div className="grid grid-cols-2 gap-4 border-t border-theme-border-soft pt-4">
           <div className="flex-1">
              <label className="text-[10px] font-bold text-theme-muted uppercase tracking-wider block mb-1">Discount</label>
              <div className="relative">
@@ -196,15 +197,44 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
                 <input
                   type="number"
                   value={state.totals.discountAmount || ''}
-                  onChange={(e) => dispatch({ type: 'SET_DISCOUNT_AMOUNT', payload: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) => dispatch({ type: 'UPDATE_TOTALS', payload: { discountAmount: parseFloat(e.target.value) || 0 } })}
                   className="w-full pl-7 pr-3 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary"
                   placeholder="0.00"
                 />
              </div>
           </div>
-          <div className="flex-1 text-right">
+          <div className="flex-1">
+             <label className="text-[10px] font-bold text-theme-success uppercase tracking-wider block mb-1">Amount Paid</label>
+             <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-success text-xs font-bold">{currencySymbol}</span>
+                <input
+                  type="number"
+                  value={state.totals.amountPaid || ''}
+                  onChange={(e) => dispatch({ type: 'UPDATE_TOTALS', payload: { amountPaid: parseFloat(e.target.value) || 0 } })}
+                  className="w-full pl-7 pr-3 py-2.5 bg-theme-surface border border-theme-success/30 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-theme-success/50 text-theme-success"
+                  placeholder="0.00"
+                />
+             </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex-1 max-w-[150px]">
+             <label className="text-[10px] font-bold text-theme-muted uppercase tracking-wider block mb-1">Pay Method</label>
+             <select
+               value={state.settings.paymentMethod || 'Cash'}
+               onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { paymentMethod: e.target.value } })}
+               className="w-full px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary"
+             >
+               <option value="Cash">Cash</option>
+               <option value="Bank Transfer">Bank Transfer</option>
+               <option value="UPI / QR">UPI / QR</option>
+               <option value="Credit Card">Credit Card</option>
+             </select>
+          </div>
+          <div className="text-right">
              <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1">Grand Total</p>
-             <p className="text-3xl font-black text-theme-primary">{currencySymbol}{state.totals.grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+             <p className="text-2xl font-black text-theme-primary">{currencySymbol}{state.totals.grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
           </div>
         </div>
       </div>
@@ -217,7 +247,7 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
           <Save className="w-4 h-4" /> Save Draft
         </button>
         <button
-          onClick={() => handleSave('Paid')}
+          onClick={() => handleSave('Final')}
           className="flex-[2] py-3.5 bg-theme-success text-white hover:opacity-90 rounded-xl font-black shadow-lg flex items-center justify-center gap-2 transition-all"
         >
           <Check className="w-5 h-5" /> Generate Bill

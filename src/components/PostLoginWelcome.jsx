@@ -370,7 +370,7 @@ function ProgressSteps({ show = false, activeStep = -1, reduceMotion = false }) 
             : "border-theme-soft dark:border-white/5 bg-theme-surface dark:bg-theme-card/40 text-theme-secondary backdrop-blur-2xl shadow-md";
           const iconClassName = done
             ? "bg-theme-accent text-white shadow-md"
-            : "bg-slate-100 dark:bg-theme-accent/15 text-theme-muted dark:text-theme-secondary";
+            : "bg-theme-app dark:bg-theme-accent/15 text-theme-muted dark:text-theme-secondary";
 
           return (
             <motion.div

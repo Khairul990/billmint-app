@@ -251,7 +251,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
 
           {filteredProducts.length === 0 && (
             <div className="md:col-span-2 lg:col-span-3 bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
-              <Layers className="w-12 h-12 text-slate-200 mx-auto mb-3 animate-pulse" />
+              <Layers className="w-12 h-12 text-theme-primary mx-auto mb-3 animate-pulse" />
               <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">Inventory Empty</h4>
               <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
                 Populate items, packages, or services inside the catalog to make selecting products during invoice generation immediate.

@@ -83,7 +83,7 @@ function ShowcaseCard({ icon: Icon, title, sub, children }) {
 function DemoInput({ width }) {
   return (
     <div className="h-10 rounded-2xl border border-theme-border-soft bg-theme-card px-4 py-3">
-      <div className="h-2 rounded-full bg-slate-600/45" style={{ width }} />
+      <div className="h-2 rounded-full bg-theme-surface/45" style={{ width }} />
     </div>
   );
 }
@@ -210,7 +210,7 @@ function DashStat({ label, value, active = false }) {
 
 function ActionTile({ icon: Icon, text, active = false }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[9px] font-black", active ? "bg-theme-accent text-slate-950" : "bg-theme-surface text-theme-muted")}>
+    <div className={cn("flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[9px] font-black", active ? "bg-theme-accent text-theme-primary" : "bg-theme-surface text-theme-muted")}>
       <Icon size={13} />
       {text}
     </div>
@@ -223,7 +223,7 @@ function DashboardCard() {
       <div className="h-full overflow-hidden rounded-[1.4rem] border border-theme-border-soft bg-theme-surface">
         <div className="flex h-full">
           <div className="w-[76px] border-r border-theme-border-soft bg-theme-card p-2.5">
-            <div className="mb-4 grid h-7 w-7 place-items-center rounded-lg bg-theme-accent text-[10px] font-black text-slate-950">BQ</div>
+            <div className="mb-4 grid h-7 w-7 place-items-center rounded-lg bg-theme-accent text-[10px] font-black text-theme-primary">BQ</div>
             <div className="space-y-2">
               <SideMini active label="Dash" />
               <SideMini label="Bills" />
@@ -780,7 +780,7 @@ function ShowcasePanel() {
                 title={`${step.title} - ${step.sub}`}
                 className={cn(
                   "grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs transition",
-                  isActive && "border-theme-accent bg-theme-accent text-slate-950 shadow-lg shadow-theme-glow",
+                  isActive && "border-theme-accent bg-theme-accent text-theme-primary shadow-lg shadow-theme-glow",
                   isDone && !isActive && "border-theme-accent/40 bg-theme-accent-light text-theme-accent",
                   !isDone && !isActive && "border-theme-border-soft bg-theme-surface text-theme-muted"
                 )}
@@ -1128,7 +1128,7 @@ function LoginPanel({ onLoginSuccess }) {
             disabled={isSigningIn}
             className="flex h-[52px] w-full items-center justify-center gap-3 rounded-[22px] border border-theme-border-soft bg-theme-surface text-sm font-bold text-theme-muted transition-all hover:bg-theme-card hover:text-theme-primary hover:shadow-[0_0_15px_rgba(0,0,0,0.05)] disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            <span className="grid h-6 w-6 place-items-center rounded-full bg-slate-100 text-xs font-black text-slate-900">G</span>
+            <span className="grid h-6 w-6 place-items-center rounded-full bg-theme-app text-xs font-black text-theme-primary">G</span>
             {isSigningIn && !email && !password ? "Connecting to Google..." : "Continue with Google"}
           </motion.button>
 

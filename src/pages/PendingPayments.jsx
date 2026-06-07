@@ -187,7 +187,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [] }) => {
                 {payment.screenshotUrl && (
                   <button
                     onClick={() => setSelectedProof(payment)}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 mb-4 bg-theme-surface hover:bg-slate-100 dark:hover:bg-theme-surface/80 rounded-xl text-theme-accent font-bold text-xs transition-colors border border-theme-border-soft"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 mb-4 bg-theme-surface hover:bg-theme-app dark:hover:bg-theme-surface/80 rounded-xl text-theme-accent font-bold text-xs transition-colors border border-theme-border-soft"
                   >
                     <ImageIcon className="w-4 h-4" />
                     View Proof Screenshot
@@ -230,7 +230,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [] }) => {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-theme-card rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-700/50 flex flex-col max-h-[90vh]"
+              className="bg-theme-card rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-theme-border-strong/50 flex flex-col max-h-[90vh]"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-4 border-b border-theme-border-soft flex justify-between items-center bg-theme-surface">

@@ -14,8 +14,8 @@ const Landing = ({ onLoginClick }) => {
           document.documentElement.setAttribute('data-theme', adminGlobal.defaultTheme);
           import('../utils/themeIcon').then(m => m.updateFaviconForTheme(adminGlobal.defaultTheme));
         } else if (!document.documentElement.hasAttribute('data-theme')) {
-          document.documentElement.setAttribute('data-theme', 'pink');
-          import('../utils/themeIcon').then(m => m.updateFaviconForTheme('pink'));
+          document.documentElement.setAttribute('data-theme', 'classic');
+          import('../utils/themeIcon').then(m => m.updateFaviconForTheme('classic'));
         }
       } catch (e) {
         // Silent fallback

@@ -40,7 +40,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
         const isActive = 
           currentTab === tab.id || 
           (tab.id === 'invoices' && currentTab === 'create-invoice') ||
-          (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings'].includes(currentTab));
+          (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings', 'help-center', 'estimates', 'pdf-templates', 'live-link-templates', 'marketplace', 'backup-restore'].includes(currentTab));
         
         return (
           <button
@@ -54,7 +54,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
             <div className={`p-1.5 rounded-xl transition-all duration-300 ${
               isActive 
                 ? 'bg-[image:var(--accent-gradient)] text-white shadow-md shadow-theme-glow dark:shadow-none scale-110' 
-                : 'text-theme-muted dark:text-theme-muted hover:text-theme-muted dark:hover:text-theme-muted hover:bg-slate-100 dark:hover:bg-theme-card/30'
+                : 'text-theme-muted dark:text-theme-muted hover:text-theme-muted dark:hover:text-theme-muted hover:bg-theme-app dark:hover:bg-theme-card/30'
             }`}>
               <div className="relative">
                 <Icon className="w-6 h-6" />

@@ -1,1 +1,413 @@
-  /* 9. Sunset Orange */\n  [data-theme="sunset-orange"] {\n    --app-bg: #fff5f0;\n    --app-bg-soft: #fff5f0;\n    --surface: #ffffff;\n    --surface-elevated: #ffffff;\n    --card-bg: #ffffff;\n    --text-primary: #1a0f0f;\n    --text-secondary: #1a0f0f;\n    --text-muted: #1a0f0f99;\n    --button-text: #FFFFFF;\n    --border-soft: rgba(255, 107, 53, 0.15);\n    --border-strong: rgba(255, 107, 53, 0.3);\n    --accent: #ff6b35;\n    --accent-light: rgba(255, 107, 53, 0.08);\n    --accent-dark: #e05320;\n    --accent-gradient: linear-gradient(135deg, #ff6b35, #e05320);\n    --accent-glow: rgba(255, 107, 53, 0.25);\n    --sidebar-bg: #fff5f0;\n    --sidebar-active: rgba(255, 107, 53, 0.1);\n    --sidebar-text: #1a0f0f;\n    --input-bg: #ffffff;\n    --chart-primary: #ff6b35;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n  }\n  .dark[data-theme="sunset-orange"] {\n    --app-bg: #1a0f0f;\n    --app-bg-soft: #2d1b1b;\n    --surface: #1a0f0f;\n    --surface-elevated: #2d1b1b;\n    --card-bg: #3d2626;\n    --text-primary: #ffe5db;\n    --text-secondary: #ffe5db;\n    --text-muted: rgba(255, 255, 255, 0.5);\n    --button-text: #FFFFFF;\n    --border-soft: rgba(255, 107, 53, 0.15);\n    --border-strong: rgba(255, 107, 53, 0.3);\n    --accent: #ff6b35;\n    --accent-light: rgba(255, 107, 53, 0.15);\n    --accent-dark: #e05320;\n    --accent-gradient: linear-gradient(135deg, #ff6b35, #e05320);\n    --accent-glow: rgba(255, 107, 53, 0.3);\n    --sidebar-bg: #1a0f0f;\n    --sidebar-active: rgba(255, 107, 53, 0.15);\n    --sidebar-text: #ffe5db;\n    --input-bg: #3d2626;\n    --chart-primary: #ff6b35;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n  }\n  [data-theme="sunset-orange"] .gradient-bg {\n    background: linear-gradient(135deg, #1a0f0f 0%, #2d1b1b 100%);\n  }\n  /* 10. Forest Green */\n  [data-theme="forest-green"] {\n    --app-bg: #f0fdf4;\n    --app-bg-soft: #f0fdf4;\n    --surface: #ffffff;\n    --surface-elevated: #ffffff;\n    --card-bg: #ffffff;\n    --text-primary: #0d1b0d;\n    --text-secondary: #0d1b0d;\n    --text-muted: #0d1b0d99;\n    --button-text: #FFFFFF;\n    --border-soft: rgba(82, 183, 136, 0.15);\n    --border-strong: rgba(82, 183, 136, 0.3);\n    --accent: #52b788;\n    --accent-light: rgba(82, 183, 136, 0.08);\n    --accent-dark: #40916c;\n    --accent-gradient: linear-gradient(135deg, #52b788, #40916c);\n    --accent-glow: rgba(82, 183, 136, 0.25);\n    --sidebar-bg: #f0fdf4;\n    --sidebar-active: rgba(82, 183, 136, 0.1);\n    --sidebar-text: #0d1b0d;\n    --input-bg: #ffffff;\n    --chart-primary: #52b788;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n  }\n  .dark[data-theme="forest-green"] {\n    --app-bg: #0d1b0d;\n    --app-bg-soft: #1a2f1a;\n    --surface: #0d1b0d;\n    --surface-elevated: #1a2f1a;\n    --card-bg: #2d4a2d;\n    --text-primary: #d8f3dc;\n    --text-secondary: #d8f3dc;\n    --text-muted: rgba(255, 255, 255, 0.5);\n    --button-text: #FFFFFF;\n    --border-soft: rgba(82, 183, 136, 0.15);\n    --border-strong: rgba(82, 183, 136, 0.3);\n    --accent: #52b788;\n    --accent-light: rgba(82, 183, 136, 0.15);\n    --accent-dark: #40916c;\n    --accent-gradient: linear-gradient(135deg, #52b788, #40916c);\n    --accent-glow: rgba(82, 183, 136, 0.3);\n    --sidebar-bg: #0d1b0d;\n    --sidebar-active: rgba(82, 183, 136, 0.15);\n    --sidebar-text: #d8f3dc;\n    --input-bg: #2d4a2d;\n    --chart-primary: #52b788;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n  }\n  [data-theme="forest-green"] .gradient-bg {\n    background: linear-gradient(135deg, #0d1b0d 0%, #1a2f1a 100%);\n  }\n  /* 11. Golden Luxury */\n  [data-theme="golden-luxury"] {\n    --app-bg: #fffef0;\n    --app-bg-soft: #fffef0;\n    --surface: #ffffff;\n    --surface-elevated: #ffffff;\n    --card-bg: #ffffff;\n    --text-primary: #1a1510;\n    --text-secondary: #1a1510;\n    --text-muted: #1a151099;\n    --button-text: #FFFFFF;\n    --border-soft: rgba(212, 175, 55, 0.15);\n    --border-strong: rgba(212, 175, 55, 0.3);\n    --accent: #d4af37;\n    --accent-light: rgba(212, 175, 55, 0.08);\n    --accent-dark: #aa8c2c;\n    --accent-gradient: linear-gradient(135deg, #d4af37, #aa8c2c);\n    --accent-glow: rgba(212, 175, 55, 0.25);\n    --sidebar-bg: #fffef0;\n    --sidebar-active: rgba(212, 175, 55, 0.1);\n    --sidebar-text: #1a1510;\n    --input-bg: #ffffff;\n    --chart-primary: #d4af37;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n  }\n  .dark[data-theme="golden-luxury"] {\n    --app-bg: #1a1510;\n    --app-bg-soft: #2d2415;\n    --surface: #1a1510;\n    --surface-elevated: #2d2415;\n    --card-bg: #3d3520;\n    --text-primary: #fff8dc;\n    --text-secondary: #fff8dc;\n    --text-muted: rgba(255, 255, 255, 0.5);\n    --button-text: #FFFFFF;\n    --border-soft: rgba(212, 175, 55, 0.15);\n    --border-strong: rgba(212, 175, 55, 0.3);\n    --accent: #d4af37;\n    --accent-light: rgba(212, 175, 55, 0.15);\n    --accent-dark: #aa8c2c;\n    --accent-gradient: linear-gradient(135deg, #d4af37, #aa8c2c);\n    --accent-glow: rgba(212, 175, 55, 0.3);\n    --sidebar-bg: #1a1510;\n    --sidebar-active: rgba(212, 175, 55, 0.15);\n    --sidebar-text: #fff8dc;\n    --input-bg: #3d3520;\n    --chart-primary: #d4af37;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n  }\n  [data-theme="golden-luxury"] .gradient-bg {\n    background: linear-gradient(135deg, #1a1510 0%, #2d2415 100%);\n  }\n  /* 12. Purple Haze */\n  [data-theme="purple-haze"] {\n    --app-bg: #faf5ff;\n    --app-bg-soft: #faf5ff;\n    --surface: #ffffff;\n    --surface-elevated: #ffffff;\n    --card-bg: #ffffff;\n    --text-primary: #1a0f1f;\n    --text-secondary: #1a0f1f;\n    --text-muted: #1a0f1f99;\n    --button-text: #FFFFFF;\n    --border-soft: rgba(168, 85, 247, 0.15);\n    --border-strong: rgba(168, 85, 247, 0.3);\n    --accent: #a855f7;\n    --accent-light: rgba(168, 85, 247, 0.08);\n    --accent-dark: #9333ea;\n    --accent-gradient: linear-gradient(135deg, #a855f7, #9333ea);\n    --accent-glow: rgba(168, 85, 247, 0.25);\n    --sidebar-bg: #faf5ff;\n    --sidebar-active: rgba(168, 85, 247, 0.1);\n    --sidebar-text: #1a0f1f;\n    --input-bg: #ffffff;\n    --chart-primary: #a855f7;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n  }\n  .dark[data-theme="purple-haze"] {\n    --app-bg: #1a0f1f;\n    --app-bg-soft: #2d1b3d;\n    --surface: #1a0f1f;\n    --surface-elevated: #2d1b3d;\n    --card-bg: #3d2652;\n    --text-primary: #f3e8ff;\n    --text-secondary: #f3e8ff;\n    --text-muted: rgba(255, 255, 255, 0.5);\n    --button-text: #FFFFFF;\n    --border-soft: rgba(168, 85, 247, 0.15);\n    --border-strong: rgba(168, 85, 247, 0.3);\n    --accent: #a855f7;\n    --accent-light: rgba(168, 85, 247, 0.15);\n    --accent-dark: #9333ea;\n    --accent-gradient: linear-gradient(135deg, #a855f7, #9333ea);\n    --accent-glow: rgba(168, 85, 247, 0.3);\n    --sidebar-bg: #1a0f1f;\n    --sidebar-active: rgba(168, 85, 247, 0.15);\n    --sidebar-text: #f3e8ff;\n    --input-bg: #3d2652;\n    --chart-primary: #a855f7;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n  }\n  [data-theme="purple-haze"] .gradient-bg {\n    background: linear-gradient(135deg, #1a0f1f 0%, #2d1b3d 100%);\n  }\n  /* 13. Crimson Red */\n  [data-theme="crimson-red"] {\n    --app-bg: #fef2f2;\n    --app-bg-soft: #fef2f2;\n    --surface: #ffffff;\n    --surface-elevated: #ffffff;\n    --card-bg: #ffffff;\n    --text-primary: #1f0a0a;\n    --text-secondary: #1f0a0a;\n    --text-muted: #1f0a0a99;\n    --button-text: #FFFFFF;\n    --border-soft: rgba(220, 38, 38, 0.15);\n    --border-strong: rgba(220, 38, 38, 0.3);\n    --accent: #dc2626;\n    --accent-light: rgba(220, 38, 38, 0.08);\n    --accent-dark: #b91c1c;\n    --accent-gradient: linear-gradient(135deg, #dc2626, #b91c1c);\n    --accent-glow: rgba(220, 38, 38, 0.25);\n    --sidebar-bg: #fef2f2;\n    --sidebar-active: rgba(220, 38, 38, 0.1);\n    --sidebar-text: #1f0a0a;\n    --input-bg: #ffffff;\n    --chart-primary: #dc2626;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n  }\n  .dark[data-theme="crimson-red"] {\n    --app-bg: #1f0a0a;\n    --app-bg-soft: #3d1515;\n    --surface: #1f0a0a;\n    --surface-elevated: #3d1515;\n    --card-bg: #522020;\n    --text-primary: #fee2e2;\n    --text-secondary: #fee2e2;\n    --text-muted: rgba(255, 255, 255, 0.5);\n    --button-text: #FFFFFF;\n    --border-soft: rgba(220, 38, 38, 0.15);\n    --border-strong: rgba(220, 38, 38, 0.3);\n    --accent: #dc2626;\n    --accent-light: rgba(220, 38, 38, 0.15);\n    --accent-dark: #b91c1c;\n    --accent-gradient: linear-gradient(135deg, #dc2626, #b91c1c);\n    --accent-glow: rgba(220, 38, 38, 0.3);\n    --sidebar-bg: #1f0a0a;\n    --sidebar-active: rgba(220, 38, 38, 0.15);\n    --sidebar-text: #fee2e2;\n    --input-bg: #522020;\n    --chart-primary: #dc2626;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n  }\n  [data-theme="crimson-red"] .gradient-bg {\n    background: linear-gradient(135deg, #1f0a0a 0%, #3d1515 100%);\n  }\n  /* 14. Silver Elite */\n  [data-theme="silver-elite"] {\n    --app-bg: #f8fafc;\n    --app-bg-soft: #f8fafc;\n    --surface: #ffffff;\n    --surface-elevated: #ffffff;\n    --card-bg: #ffffff;\n    --text-primary: #0f1419;\n    --text-secondary: #0f1419;\n    --text-muted: #0f141999;\n    --button-text: #FFFFFF;\n    --border-soft: rgba(148, 163, 184, 0.15);\n    --border-strong: rgba(148, 163, 184, 0.3);\n    --accent: #94a3b8;\n    --accent-light: rgba(148, 163, 184, 0.08);\n    --accent-dark: #64748b;\n    --accent-gradient: linear-gradient(135deg, #94a3b8, #64748b);\n    --accent-glow: rgba(148, 163, 184, 0.25);\n    --sidebar-bg: #f8fafc;\n    --sidebar-active: rgba(148, 163, 184, 0.1);\n    --sidebar-text: #0f1419;\n    --input-bg: #ffffff;\n    --chart-primary: #94a3b8;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n  }\n  .dark[data-theme="silver-elite"] {\n    --app-bg: #0f1419;\n    --app-bg-soft: #1a2029;\n    --surface: #0f1419;\n    --surface-elevated: #1a2029;\n    --card-bg: #2d3748;\n    --text-primary: #f1f5f9;\n    --text-secondary: #f1f5f9;\n    --text-muted: rgba(255, 255, 255, 0.5);\n    --button-text: #FFFFFF;\n    --border-soft: rgba(148, 163, 184, 0.15);\n    --border-strong: rgba(148, 163, 184, 0.3);\n    --accent: #94a3b8;\n    --accent-light: rgba(148, 163, 184, 0.15);\n    --accent-dark: #64748b;\n    --accent-gradient: linear-gradient(135deg, #94a3b8, #64748b);\n    --accent-glow: rgba(148, 163, 184, 0.3);\n    --sidebar-bg: #0f1419;\n    --sidebar-active: rgba(148, 163, 184, 0.15);\n    --sidebar-text: #f1f5f9;\n    --input-bg: #2d3748;\n    --chart-primary: #94a3b8;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n  }\n  [data-theme="silver-elite"] .gradient-bg {\n    background: linear-gradient(135deg, #0f1419 0%, #1a2029 100%);\n  }\n  /* 15. Cyber Blue */\n  [data-theme="cyber-blue"] {\n    --app-bg: #e0f7ff;\n    --app-bg-soft: #e0f7ff;\n    --surface: #ffffff;\n    --surface-elevated: #ffffff;\n    --card-bg: #ffffff;\n    --text-primary: #0a0e27;\n    --text-secondary: #0a0e27;\n    --text-muted: #0a0e2799;\n    --button-text: #FFFFFF;\n    --border-soft: rgba(0, 255, 255, 0.15);\n    --border-strong: rgba(0, 255, 255, 0.3);\n    --accent: #00ffff;\n    --accent-light: rgba(0, 255, 255, 0.08);\n    --accent-dark: #00cccc;\n    --accent-gradient: linear-gradient(135deg, #00ffff, #00cccc);\n    --accent-glow: rgba(0, 255, 255, 0.25);\n    --sidebar-bg: #e0f7ff;\n    --sidebar-active: rgba(0, 255, 255, 0.1);\n    --sidebar-text: #0a0e27;\n    --input-bg: #ffffff;\n    --chart-primary: #00ffff;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n    --glow-sm: 0 0 10px #00ffff;\n    --glow-md: 0 0 20px #00ffff, 0 0 30px #00ffff;\n    --glow-lg: 0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 90px #00ffff;\n  }\n  .dark[data-theme="cyber-blue"] {\n    --app-bg: #0a0e27;\n    --app-bg-soft: #0f1429;\n    --surface: #0a0e27;\n    --surface-elevated: #0f1429;\n    --card-bg: #1a1f3a;\n    --text-primary: #e0ffff;\n    --text-secondary: #e0ffff;\n    --text-muted: rgba(255, 255, 255, 0.5);\n    --button-text: #FFFFFF;\n    --border-soft: rgba(0, 255, 255, 0.15);\n    --border-strong: rgba(0, 255, 255, 0.3);\n    --accent: #00ffff;\n    --accent-light: rgba(0, 255, 255, 0.15);\n    --accent-dark: #00cccc;\n    --accent-gradient: linear-gradient(135deg, #00ffff, #00cccc);\n    --accent-glow: rgba(0, 255, 255, 0.3);\n    --sidebar-bg: #0a0e27;\n    --sidebar-active: rgba(0, 255, 255, 0.15);\n    --sidebar-text: #e0ffff;\n    --input-bg: #1a1f3a;\n    --chart-primary: #00ffff;\n    --status-success: #10B981;\n    --status-warning: #F59E0B;\n    --status-danger: #EF4444;\n    --glow-sm: 0 0 10px #00ffff;\n    --glow-md: 0 0 20px #00ffff, 0 0 30px #00ffff;\n    --glow-lg: 0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 90px #00ffff;\n  }\n  [data-theme="cyber-blue"] .gradient-bg {\n    background: linear-gradient(135deg, #0a0e27 0%, #0f1429 100%);\n  }\n  /* Cyber Blue special effects */\n  .dark[data-theme="cyber-blue"] .btn-primary,\n  .dark[data-theme="cyber-blue"] button.bg-theme-accent {\n    box-shadow: var(--glow-md);\n    transition: box-shadow 0.3s ease;\n  }\n  .dark[data-theme="cyber-blue"] .btn-primary:hover,\n  .dark[data-theme="cyber-blue"] button.bg-theme-accent:hover {\n    box-shadow: var(--glow-lg);\n  }\n  .dark[data-theme="cyber-blue"] .card,\n  .dark[data-theme="cyber-blue"] .bg-theme-surface {\n    border: 1px solid var(--accent);\n    box-shadow: var(--glow-sm);\n  }
+/* 9. Sunset Orange */
+  [data-theme="sunset-orange"] {
+    --app-bg: #fff5f0;
+    --app-bg-soft: #fff5f0;
+    --surface: #ffffff;
+    --surface-elevated: #ffffff;
+    --card-bg: #ffffff;
+    --text-primary: #1a0f0f;
+    --text-secondary: #1a0f0f;
+    --text-muted: #1a0f0f99;
+    --button-text: #FFFFFF;
+    --border-soft: rgba(255, 107, 53, 0.15);
+    --border-strong: rgba(255, 107, 53, 0.3);
+    --accent: #ff6b35;
+    --accent-light: rgba(255, 107, 53, 0.08);
+    --accent-dark: #e05320;
+    --accent-gradient: linear-gradient(135deg, #ff6b35, #e05320);
+    --accent-glow: rgba(255, 107, 53, 0.25);
+    --sidebar-bg: #fff5f0;
+    --sidebar-active: rgba(255, 107, 53, 0.1);
+    --sidebar-text: #1a0f0f;
+    --input-bg: #ffffff;
+    --chart-primary: #ff6b35;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  .dark[data-theme="sunset-orange"] {
+    --app-bg: #1a0f0f;
+    --app-bg-soft: #2d1b1b;
+    --surface: #1a0f0f;
+    --surface-elevated: #2d1b1b;
+    --card-bg: #3d2626;
+    --text-primary: #ffe5db;
+    --text-secondary: #ffe5db;
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --button-text: #FFFFFF;
+    --border-soft: rgba(255, 107, 53, 0.15);
+    --border-strong: rgba(255, 107, 53, 0.3);
+    --accent: #ff6b35;
+    --accent-light: rgba(255, 107, 53, 0.15);
+    --accent-dark: #e05320;
+    --accent-gradient: linear-gradient(135deg, #ff6b35, #e05320);
+    --accent-glow: rgba(255, 107, 53, 0.3);
+    --sidebar-bg: #1a0f0f;
+    --sidebar-active: rgba(255, 107, 53, 0.15);
+    --sidebar-text: #ffe5db;
+    --input-bg: #3d2626;
+    --chart-primary: #ff6b35;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  [data-theme="sunset-orange"] .gradient-bg {
+    background: linear-gradient(135deg, #1a0f0f 0%, #2d1b1b 100%);
+  }
+  /* 10. Forest Green */
+  [data-theme="forest-green"] {
+    --app-bg: #f0fdf4;
+    --app-bg-soft: #f0fdf4;
+    --surface: #ffffff;
+    --surface-elevated: #ffffff;
+    --card-bg: #ffffff;
+    --text-primary: #0d1b0d;
+    --text-secondary: #0d1b0d;
+    --text-muted: #0d1b0d99;
+    --button-text: #FFFFFF;
+    --border-soft: rgba(82, 183, 136, 0.15);
+    --border-strong: rgba(82, 183, 136, 0.3);
+    --accent: #52b788;
+    --accent-light: rgba(82, 183, 136, 0.08);
+    --accent-dark: #40916c;
+    --accent-gradient: linear-gradient(135deg, #52b788, #40916c);
+    --accent-glow: rgba(82, 183, 136, 0.25);
+    --sidebar-bg: #f0fdf4;
+    --sidebar-active: rgba(82, 183, 136, 0.1);
+    --sidebar-text: #0d1b0d;
+    --input-bg: #ffffff;
+    --chart-primary: #52b788;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  .dark[data-theme="forest-green"] {
+    --app-bg: #0d1b0d;
+    --app-bg-soft: #1a2f1a;
+    --surface: #0d1b0d;
+    --surface-elevated: #1a2f1a;
+    --card-bg: #2d4a2d;
+    --text-primary: #d8f3dc;
+    --text-secondary: #d8f3dc;
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --button-text: #FFFFFF;
+    --border-soft: rgba(82, 183, 136, 0.15);
+    --border-strong: rgba(82, 183, 136, 0.3);
+    --accent: #52b788;
+    --accent-light: rgba(82, 183, 136, 0.15);
+    --accent-dark: #40916c;
+    --accent-gradient: linear-gradient(135deg, #52b788, #40916c);
+    --accent-glow: rgba(82, 183, 136, 0.3);
+    --sidebar-bg: #0d1b0d;
+    --sidebar-active: rgba(82, 183, 136, 0.15);
+    --sidebar-text: #d8f3dc;
+    --input-bg: #2d4a2d;
+    --chart-primary: #52b788;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  [data-theme="forest-green"] .gradient-bg {
+    background: linear-gradient(135deg, #0d1b0d 0%, #1a2f1a 100%);
+  }
+  /* 11. Golden Luxury */
+  [data-theme="golden-luxury"] {
+    --app-bg: #fffef0;
+    --app-bg-soft: #fffef0;
+    --surface: #ffffff;
+    --surface-elevated: #ffffff;
+    --card-bg: #ffffff;
+    --text-primary: #1a1510;
+    --text-secondary: #1a1510;
+    --text-muted: #1a151099;
+    --button-text: #FFFFFF;
+    --border-soft: rgba(212, 175, 55, 0.15);
+    --border-strong: rgba(212, 175, 55, 0.3);
+    --accent: #d4af37;
+    --accent-light: rgba(212, 175, 55, 0.08);
+    --accent-dark: #aa8c2c;
+    --accent-gradient: linear-gradient(135deg, #d4af37, #aa8c2c);
+    --accent-glow: rgba(212, 175, 55, 0.25);
+    --sidebar-bg: #fffef0;
+    --sidebar-active: rgba(212, 175, 55, 0.1);
+    --sidebar-text: #1a1510;
+    --input-bg: #ffffff;
+    --chart-primary: #d4af37;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  .dark[data-theme="golden-luxury"] {
+    --app-bg: #1a1510;
+    --app-bg-soft: #2d2415;
+    --surface: #1a1510;
+    --surface-elevated: #2d2415;
+    --card-bg: #3d3520;
+    --text-primary: #fff8dc;
+    --text-secondary: #fff8dc;
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --button-text: #FFFFFF;
+    --border-soft: rgba(212, 175, 55, 0.15);
+    --border-strong: rgba(212, 175, 55, 0.3);
+    --accent: #d4af37;
+    --accent-light: rgba(212, 175, 55, 0.15);
+    --accent-dark: #aa8c2c;
+    --accent-gradient: linear-gradient(135deg, #d4af37, #aa8c2c);
+    --accent-glow: rgba(212, 175, 55, 0.3);
+    --sidebar-bg: #1a1510;
+    --sidebar-active: rgba(212, 175, 55, 0.15);
+    --sidebar-text: #fff8dc;
+    --input-bg: #3d3520;
+    --chart-primary: #d4af37;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  [data-theme="golden-luxury"] .gradient-bg {
+    background: linear-gradient(135deg, #1a1510 0%, #2d2415 100%);
+  }
+  /* 12. Purple Haze */
+  [data-theme="purple-haze"] {
+    --app-bg: #faf5ff;
+    --app-bg-soft: #faf5ff;
+    --surface: #ffffff;
+    --surface-elevated: #ffffff;
+    --card-bg: #ffffff;
+    --text-primary: #1a0f1f;
+    --text-secondary: #1a0f1f;
+    --text-muted: #1a0f1f99;
+    --button-text: #FFFFFF;
+    --border-soft: rgba(168, 85, 247, 0.15);
+    --border-strong: rgba(168, 85, 247, 0.3);
+    --accent: #a855f7;
+    --accent-light: rgba(168, 85, 247, 0.08);
+    --accent-dark: #9333ea;
+    --accent-gradient: linear-gradient(135deg, #a855f7, #9333ea);
+    --accent-glow: rgba(168, 85, 247, 0.25);
+    --sidebar-bg: #faf5ff;
+    --sidebar-active: rgba(168, 85, 247, 0.1);
+    --sidebar-text: #1a0f1f;
+    --input-bg: #ffffff;
+    --chart-primary: #a855f7;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  .dark[data-theme="purple-haze"] {
+    --app-bg: #1a0f1f;
+    --app-bg-soft: #2d1b3d;
+    --surface: #1a0f1f;
+    --surface-elevated: #2d1b3d;
+    --card-bg: #3d2652;
+    --text-primary: #f3e8ff;
+    --text-secondary: #f3e8ff;
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --button-text: #FFFFFF;
+    --border-soft: rgba(168, 85, 247, 0.15);
+    --border-strong: rgba(168, 85, 247, 0.3);
+    --accent: #a855f7;
+    --accent-light: rgba(168, 85, 247, 0.15);
+    --accent-dark: #9333ea;
+    --accent-gradient: linear-gradient(135deg, #a855f7, #9333ea);
+    --accent-glow: rgba(168, 85, 247, 0.3);
+    --sidebar-bg: #1a0f1f;
+    --sidebar-active: rgba(168, 85, 247, 0.15);
+    --sidebar-text: #f3e8ff;
+    --input-bg: #3d2652;
+    --chart-primary: #a855f7;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  [data-theme="purple-haze"] .gradient-bg {
+    background: linear-gradient(135deg, #1a0f1f 0%, #2d1b3d 100%);
+  }
+  /* 13. Crimson Red */
+  [data-theme="crimson-red"] {
+    --app-bg: #fef2f2;
+    --app-bg-soft: #fef2f2;
+    --surface: #ffffff;
+    --surface-elevated: #ffffff;
+    --card-bg: #ffffff;
+    --text-primary: #1f0a0a;
+    --text-secondary: #1f0a0a;
+    --text-muted: #1f0a0a99;
+    --button-text: #FFFFFF;
+    --border-soft: rgba(220, 38, 38, 0.15);
+    --border-strong: rgba(220, 38, 38, 0.3);
+    --accent: #dc2626;
+    --accent-light: rgba(220, 38, 38, 0.08);
+    --accent-dark: #b91c1c;
+    --accent-gradient: linear-gradient(135deg, #dc2626, #b91c1c);
+    --accent-glow: rgba(220, 38, 38, 0.25);
+    --sidebar-bg: #fef2f2;
+    --sidebar-active: rgba(220, 38, 38, 0.1);
+    --sidebar-text: #1f0a0a;
+    --input-bg: #ffffff;
+    --chart-primary: #dc2626;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  .dark[data-theme="crimson-red"] {
+    --app-bg: #1f0a0a;
+    --app-bg-soft: #3d1515;
+    --surface: #1f0a0a;
+    --surface-elevated: #3d1515;
+    --card-bg: #522020;
+    --text-primary: #fee2e2;
+    --text-secondary: #fee2e2;
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --button-text: #FFFFFF;
+    --border-soft: rgba(220, 38, 38, 0.15);
+    --border-strong: rgba(220, 38, 38, 0.3);
+    --accent: #dc2626;
+    --accent-light: rgba(220, 38, 38, 0.15);
+    --accent-dark: #b91c1c;
+    --accent-gradient: linear-gradient(135deg, #dc2626, #b91c1c);
+    --accent-glow: rgba(220, 38, 38, 0.3);
+    --sidebar-bg: #1f0a0a;
+    --sidebar-active: rgba(220, 38, 38, 0.15);
+    --sidebar-text: #fee2e2;
+    --input-bg: #522020;
+    --chart-primary: #dc2626;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  [data-theme="crimson-red"] .gradient-bg {
+    background: linear-gradient(135deg, #1f0a0a 0%, #3d1515 100%);
+  }
+  /* 14. Silver Elite */
+  [data-theme="silver-elite"] {
+    --app-bg: #f8fafc;
+    --app-bg-soft: #f8fafc;
+    --surface: #ffffff;
+    --surface-elevated: #ffffff;
+    --card-bg: #ffffff;
+    --text-primary: #0f1419;
+    --text-secondary: #0f1419;
+    --text-muted: #0f141999;
+    --button-text: #FFFFFF;
+    --border-soft: rgba(148, 163, 184, 0.15);
+    --border-strong: rgba(148, 163, 184, 0.3);
+    --accent: #94a3b8;
+    --accent-light: rgba(148, 163, 184, 0.08);
+    --accent-dark: #64748b;
+    --accent-gradient: linear-gradient(135deg, #94a3b8, #64748b);
+    --accent-glow: rgba(148, 163, 184, 0.25);
+    --sidebar-bg: #f8fafc;
+    --sidebar-active: rgba(148, 163, 184, 0.1);
+    --sidebar-text: #0f1419;
+    --input-bg: #ffffff;
+    --chart-primary: #94a3b8;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  .dark[data-theme="silver-elite"] {
+    --app-bg: #0f1419;
+    --app-bg-soft: #1a2029;
+    --surface: #0f1419;
+    --surface-elevated: #1a2029;
+    --card-bg: #2d3748;
+    --text-primary: #f1f5f9;
+    --text-secondary: #f1f5f9;
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --button-text: #FFFFFF;
+    --border-soft: rgba(148, 163, 184, 0.15);
+    --border-strong: rgba(148, 163, 184, 0.3);
+    --accent: #94a3b8;
+    --accent-light: rgba(148, 163, 184, 0.15);
+    --accent-dark: #64748b;
+    --accent-gradient: linear-gradient(135deg, #94a3b8, #64748b);
+    --accent-glow: rgba(148, 163, 184, 0.3);
+    --sidebar-bg: #0f1419;
+    --sidebar-active: rgba(148, 163, 184, 0.15);
+    --sidebar-text: #f1f5f9;
+    --input-bg: #2d3748;
+    --chart-primary: #94a3b8;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  [data-theme="silver-elite"] .gradient-bg {
+    background: linear-gradient(135deg, #0f1419 0%, #1a2029 100%);
+  }
+  /* 15. Cyber Blue */
+  [data-theme="cyber-blue"] {
+    --app-bg: #e0f7ff;
+    --app-bg-soft: #e0f7ff;
+    --surface: #ffffff;
+    --surface-elevated: #ffffff;
+    --card-bg: #ffffff;
+    --text-primary: #0a0e27;
+    --text-secondary: #0a0e27;
+    --text-muted: #0a0e2799;
+    --button-text: #FFFFFF;
+    --border-soft: rgba(0, 255, 255, 0.15);
+    --border-strong: rgba(0, 255, 255, 0.3);
+    --accent: #00ffff;
+    --accent-light: rgba(0, 255, 255, 0.08);
+    --accent-dark: #00cccc;
+    --accent-gradient: linear-gradient(135deg, #00ffff, #00cccc);
+    --accent-glow: rgba(0, 255, 255, 0.25);
+    --sidebar-bg: #e0f7ff;
+    --sidebar-active: rgba(0, 255, 255, 0.1);
+    --sidebar-text: #0a0e27;
+    --input-bg: #ffffff;
+    --chart-primary: #00ffff;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+    --glow-sm: 0 0 10px #00ffff;
+    --glow-md: 0 0 20px #00ffff, 0 0 30px #00ffff;
+    --glow-lg: 0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 90px #00ffff;
+  }
+  .dark[data-theme="cyber-blue"] {
+    --app-bg: #0a0e27;
+    --app-bg-soft: #0f1429;
+    --surface: #0a0e27;
+    --surface-elevated: #0f1429;
+    --card-bg: #1a1f3a;
+    --text-primary: #e0ffff;
+    --text-secondary: #e0ffff;
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --button-text: #FFFFFF;
+    --border-soft: rgba(0, 255, 255, 0.15);
+    --border-strong: rgba(0, 255, 255, 0.3);
+    --accent: #00ffff;
+    --accent-light: rgba(0, 255, 255, 0.15);
+    --accent-dark: #00cccc;
+    --accent-gradient: linear-gradient(135deg, #00ffff, #00cccc);
+    --accent-glow: rgba(0, 255, 255, 0.3);
+    --sidebar-bg: #0a0e27;
+    --sidebar-active: rgba(0, 255, 255, 0.15);
+    --sidebar-text: #e0ffff;
+    --input-bg: #1a1f3a;
+    --chart-primary: #00ffff;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+    --glow-sm: 0 0 10px #00ffff;
+    --glow-md: 0 0 20px #00ffff, 0 0 30px #00ffff;
+    --glow-lg: 0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 90px #00ffff;
+  }
+  [data-theme="cyber-blue"] .gradient-bg {
+    background: linear-gradient(135deg, #0a0e27 0%, #0f1429 100%);
+  }
+  /* Cyber Blue special effects */
+  .dark[data-theme="cyber-blue"] .btn-primary,
+  .dark[data-theme="cyber-blue"] .bg-theme-accent {
+    box-shadow: var(--glow-md);
+    transition: box-shadow 0.3s ease;
+  }
+  .dark[data-theme="cyber-blue"] .btn-primary:hover,
+  .dark[data-theme="cyber-blue"] .bg-theme-accent:hover {
+    box-shadow: var(--glow-lg);
+  }
+  .dark[data-theme="cyber-blue"] .card,
+  .dark[data-theme="cyber-blue"] .bg-theme-surface {
+    border: 1px solid var(--accent);
+    box-shadow: var(--glow-sm);
+  }

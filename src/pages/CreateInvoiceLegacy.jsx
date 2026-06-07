@@ -43,7 +43,7 @@ import { calculateTotals, generateNextInvoiceNumber, getNextDesignNumber, autoIn
 import InvoicePreview from '../components/InvoicePreview';
 import BottomSheet from '../components/BottomSheet';
 import AddCustomerSheet from '../components/AddCustomerSheet';
-import { ensureInvoicePublicToken } from '../services/dbEngine';
+import { ensureInvoicePublicToken, logAudit } from '../services/dbEngine';
 
 const ALL_FIELDS_BY_TEMPLATE = {
   embroidery: [
@@ -347,6 +347,7 @@ const CreateInvoice = ({
   };
 
   const handleItemChange = (index, field, value) => {
+    if (paymentStatus === 'PAID' || paymentStatus === 'Paid' || paymentStatus === 'VOID') return;
     const updated = [...items];
     const isNumField = ['qty', 'rate', 'price', 'unitPrice', 'discount', 'partsCost', 'labourCharge'].includes(field);
     const val = isNumField ? (value === '' ? '' : (parseFloat(value) || 0)) : value;
@@ -358,6 +359,7 @@ const CreateInvoice = ({
 
   // --- ADD ITEM ROW ---
   const addItemRow = () => {
+    if (paymentStatus === 'PAID' || paymentStatus === 'Paid' || paymentStatus === 'VOID') return;
     const nextDesignNo = items.length > 0 ? autoIncrementString(items[items.length - 1].designNo, items) : '';
     setItems([
       ...items,
@@ -388,6 +390,7 @@ const CreateInvoice = ({
   };
 
   const addQuickFillItem = (workType, description, rate) => {
+    if (paymentStatus === 'PAID' || paymentStatus === 'Paid' || paymentStatus === 'VOID') return;
     const lastItem = items[items.length - 1];
     if (items.length > 0 && !lastItem.description && !lastItem.designNo && lastItem.rate === 0) {
       const updated = [...items];
@@ -420,6 +423,7 @@ const CreateInvoice = ({
 
   // --- DUPLICATE ROW ---
   const handleDuplicateItem = (index) => {
+    if (paymentStatus === 'PAID' || paymentStatus === 'Paid' || paymentStatus === 'VOID') return;
     const original = items[index];
     const nextDesignNo = autoIncrementString(original.designNo, items);
     const duplicated = {
@@ -434,6 +438,7 @@ const CreateInvoice = ({
 
   // --- REMOVE ROW ---
   const removeItemRow = (index) => {
+    if (paymentStatus === 'PAID' || paymentStatus === 'Paid' || paymentStatus === 'VOID') return;
     if (items.length === 1) return;
     const updated = items.filter((_, idx) => idx !== index).map((item, idx) => ({
       ...item,
@@ -448,6 +453,33 @@ const CreateInvoice = ({
     const item = items[index];
     setSmartCharges(item.smartRate || { repair: 0, punching: 0, embroidery: 0, other: 0 });
     setShowSmartRate(true);
+  };
+
+  // --- PAYMENT STATUS ACTIONS ---
+  const handleMarkAsPaid = () => {
+    setPaymentStatus('PAID');
+    setAmountPaid(grandTotal);
+    logAudit('invoice_payment_marked_paid', 'invoice', editingInvoice?.id || 'new');
+    toast.success('Marked as PAID. Invoice is now locked.');
+  };
+
+  const handleMarkAsUnpaid = () => {
+    if (window.confirm('Are you sure you want to unlock this invoice and mark as Unpaid? This action will be audited.')) {
+      setPaymentStatus('Pending');
+      setAmountPaid(0);
+      logAudit('invoice_payment_marked_unpaid', 'invoice', editingInvoice?.id || 'new');
+      toast.success('Invoice unlocked and marked as Pending.');
+    }
+  };
+
+  const handleVoidInvoice = () => {
+    const reason = window.prompt('Reason for voiding this invoice:');
+    if (reason !== null) {
+      setPaymentStatus('VOID');
+      setOrderStatus('Cancelled');
+      logAudit('invoice_voided', 'invoice', editingInvoice?.id || 'new', null, { reason });
+      toast.success('Invoice VOIDED and locked.');
+    }
   };
 
   // --- APPLY SMART RATE VALUES ---
@@ -1625,13 +1657,29 @@ Thank you for your business!`;
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-3 text-xs font-semibold text-theme-muted">
-            <div>
-              <label className="block mb-1 text-theme-muted">Payment Status</label>
-              <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)} className="w-full px-3 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary font-extrabold">
-                <option value="Paid">Paid</option>
-                <option value="Pending">Pending</option>
-                <option value="Unpaid">Unpaid</option>
-              </select>
+            <div className="flex flex-col gap-2">
+              <label className="block text-theme-muted">Payment Status</label>
+              {(paymentStatus === 'PAID' || paymentStatus === 'Paid' || paymentStatus === 'VOID') ? (
+                <div className="w-full px-3 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl text-theme-primary font-extrabold opacity-70 flex justify-between items-center">
+                  <span>{paymentStatus.toUpperCase()}</span>
+                  {paymentStatus !== 'VOID' && (
+                    <button onClick={handleMarkAsUnpaid} className="text-[10px] text-theme-danger hover:underline">Mark Unpaid</button>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 w-full">
+                  <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)} className="w-full px-3 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary font-extrabold">
+                    <option value="Paid">Paid</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Unpaid">Unpaid</option>
+                    <option value="Partially Paid">Partially Paid</option>
+                  </select>
+                  <button type="button" onClick={handleMarkAsPaid} className="px-3 py-2.5 bg-green-500/10 text-green-600 rounded-xl text-xs font-bold whitespace-nowrap hover:bg-green-500/20">Mark PAID</button>
+                </div>
+              )}
+              {editingInvoice && paymentStatus !== 'VOID' && (
+                <button type="button" onClick={handleVoidInvoice} className="text-left text-[10px] font-bold text-theme-danger hover:underline w-max">Void Invoice</button>
+              )}
             </div>
             <div>
               <label className="block mb-1 text-theme-muted">Order Status</label>
@@ -1648,14 +1696,14 @@ Thank you for your business!`;
                 <Percent className="w-3 h-3" />
                 <span>GST/Tax Rate (%)</span>
               </label>
-              <input type="number" min="0" max="100" value={taxPercentage} onChange={(e) => setTaxPercentage(e.target.value)} className="w-full px-3 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary font-bold" />
+              <input type="number" min="0" max="100" value={taxPercentage} disabled={paymentStatus === 'PAID' || paymentStatus === 'Paid' || paymentStatus === 'VOID'} onChange={(e) => setTaxPercentage(e.target.value)} className={`w-full px-3 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary font-bold ${paymentStatus === 'PAID' || paymentStatus === 'Paid' || paymentStatus === 'VOID' ? 'opacity-60 cursor-not-allowed' : ''}`} />
             </div>
             <div>
               <label className="block mb-1 text-theme-muted flex items-center gap-1">
                 <Coins className="w-3 h-3" />
                 <span>Flat Discount ({currencySymbol})</span>
               </label>
-              <input type="number" min="0" value={discountAmount} onChange={(e) => setDiscountAmount(e.target.value)} className="w-full px-3 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary font-bold" />
+              <input type="number" min="0" value={discountAmount} disabled={paymentStatus === 'PAID' || paymentStatus === 'Paid' || paymentStatus === 'VOID'} onChange={(e) => setDiscountAmount(e.target.value)} className={`w-full px-3 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary font-bold ${paymentStatus === 'PAID' || paymentStatus === 'Paid' || paymentStatus === 'VOID' ? 'opacity-60 cursor-not-allowed' : ''}`} />
             </div>
             <div>
               <label className="block mb-1 text-theme-muted">Amount Paid ({currencySymbol})</label>

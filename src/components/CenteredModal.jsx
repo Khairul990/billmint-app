@@ -42,7 +42,7 @@ const CenteredModal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-xl'
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-theme-surface dark:bg-theme-surface text-theme-muted dark:text-theme-muted hover:bg-theme-border-soft dark:hover:bg-slate-700 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-theme-surface dark:bg-theme-surface text-theme-muted dark:text-theme-muted hover:bg-theme-border-soft dark:hover:bg-theme-surface transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>

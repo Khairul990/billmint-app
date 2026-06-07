@@ -95,7 +95,7 @@ const SetupProgress = ({ businessSettings = {}, customers = [], invoices = [] })
                             r="16"
                             fill="none"
                             stroke="currentColor"
-                            className="text-slate-100 dark:text-theme-primary dark:text-theme-primary"
+                            className="text-theme-primary dark:text-theme-primary dark:text-theme-primary"
                             strokeWidth="3"
                         />
                         {/* Progress arc */}

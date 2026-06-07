@@ -40,7 +40,11 @@ export const useThemeEngine = (businessSettings) => {
     const root = document.documentElement;
 
     // Default built-in theme
-    const themeName = businessSettings?.themeColor || 'pink';
+    const validThemes = ['obsidian-gold', 'arctic-teal', 'sapphire-noir', 'rose-platinum', 'carbon-violet', 'graphite-copper', 'arctic-diamond', 'emerald-royal', 'midnight-ruby', 'titanium-blue'];
+    let themeName = businessSettings?.themeColor || 'obsidian-gold';
+    if (!validThemes.includes(themeName)) {
+      themeName = 'obsidian-gold';
+    }
     
     if (isPremium && hasCustomTheme) {
       // 1. Dynamic SVG Smart Theme Engine (Custom Brand Color)

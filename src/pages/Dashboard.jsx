@@ -253,21 +253,21 @@ const Dashboard = ({
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-red-500/5 cursor-pointer"
             onClick={() => setCurrentTab('pending-payments')}
+            className="bg-theme-danger/10 border border-theme-danger/30 rounded-2xl p-4 flex items-center justify-between shadow-premium cursor-pointer"
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)] shrink-0">
+              <div className="w-10 h-10 rounded-full bg-theme-danger text-white flex items-center justify-center animate-pulse shadow-premium shrink-0">
                 <Bell className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-red-600 dark:text-red-400 font-bold text-sm">Review Required</h3>
-                <p className="text-red-600/80 dark:text-red-400/80 text-xs font-semibold">
-                  You have <span className="font-black text-red-600 dark:text-red-400">{pendingPaymentsCount}</span> pending payment proofs to verify.
+                <h3 className="text-theme-danger font-bold text-sm">Review Required</h3>
+                <p className="text-theme-danger/80 text-xs font-semibold">
+                  You have <span className="font-black text-theme-danger">{pendingPaymentsCount}</span> pending payment proofs to verify.
                 </p>
               </div>
             </div>
-            <ArrowRight className="w-5 h-5 text-red-500 shrink-0" />
+            <ArrowRight className="w-5 h-5 text-theme-danger shrink-0" />
           </motion.div>
         )}
 
@@ -291,23 +291,23 @@ const Dashboard = ({
         {/* 2. STATS ROW (4 CARDS) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Revenue */}
-          <div className="bg-theme-card rounded-2xl p-4 md:p-5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col justify-between group">
+          <div className="bg-theme-card rounded-2xl p-4 md:p-5 border border-theme-border-soft shadow-premium hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col justify-between group">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 rounded-full transition-transform duration-300 group-hover:scale-110">
+              <div className="p-2.5 bg-theme-success/10 text-theme-success rounded-full transition-transform duration-300 group-hover:scale-110">
                 <TrendingUp className="w-5 h-5" />
               </div>
               <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">{t('revenue')}</p>
             </div>
             <div>
               <h3 className="text-2xl md:text-3xl font-bold text-theme-primary tracking-tight">{formatCurrency(totalRevenue, currencySymbol)}</h3>
-              <p className="text-[10px] md:text-[11px] font-medium text-green-600 dark:text-green-400 mt-1.5">+12% vs last month</p>
+              <p className="text-[10px] md:text-[11px] font-medium text-theme-success mt-1.5">+12% vs last month</p>
             </div>
           </div>
 
           {/* Collection */}
-          <div className="bg-theme-card rounded-2xl p-4 md:p-5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col justify-between group">
+          <div className="bg-theme-card rounded-2xl p-4 md:p-5 border border-theme-border-soft shadow-premium hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col justify-between group">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-full transition-transform duration-300 group-hover:scale-110">
+              <div className="p-2.5 bg-theme-accent/10 text-theme-accent rounded-full transition-transform duration-300 group-hover:scale-110">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">{t('collection')}</p>
@@ -319,9 +319,9 @@ const Dashboard = ({
           </div>
 
           {/* Pending Due */}
-          <div className="bg-theme-card rounded-2xl p-4 md:p-5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col justify-between group">
+          <div className="bg-theme-card rounded-2xl p-4 md:p-5 border border-theme-border-soft shadow-premium hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col justify-between group">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 rounded-full transition-transform duration-300 group-hover:scale-110">
+              <div className="p-2.5 bg-theme-warning/10 text-theme-warning rounded-full transition-transform duration-300 group-hover:scale-110">
                 <AlertCircle className="w-5 h-5" />
               </div>
               <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">{t('pending')}</p>
@@ -333,9 +333,9 @@ const Dashboard = ({
           </div>
 
           {/* Customers */}
-          <div className="bg-theme-card rounded-2xl p-4 md:p-5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col justify-between group">
+          <div className="bg-theme-card rounded-2xl p-4 md:p-5 border border-theme-border-soft shadow-premium hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col justify-between group">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 rounded-full transition-transform duration-300 group-hover:scale-110">
+              <div className="p-2.5 bg-theme-accent/10 text-theme-accent rounded-full transition-transform duration-300 group-hover:scale-110">
                 <Users className="w-5 h-5" />
               </div>
               <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">{t('customers')}</p>
@@ -387,7 +387,7 @@ const Dashboard = ({
             </div>
           </div>
 
-          <div className="lg:col-span-1 bg-theme-card rounded-3xl p-5 md:p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
+          <div className="lg:col-span-1 bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium flex flex-col">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-theme-accent" /> {t('revenue_vs_expenses')}
@@ -406,7 +406,7 @@ const Dashboard = ({
                       <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-slate-200 dark:text-slate-800" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-soft)" />
                   <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} className="text-theme-muted" />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10 }} className="text-theme-muted" tickFormatter={(val) => `${val / 1000}k`} />
                   <Tooltip 

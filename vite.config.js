@@ -11,7 +11,10 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ['favicon.ico', 'favicon-16x16.png', 'favicon-32x32.png', 'apple-touch-icon.png', 'offline.html'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        maximumFileSizeToCacheInBytes: 5000000 // 5MB limit
+        maximumFileSizeToCacheInBytes: 5000000, // 5MB limit
+        navigateFallbackDenylist: [/^\/__/, /^\/api\//, /^\/publicInvoices\//],
+        ignoreURLParametersMatching: [/^token/, /^secret/, /^auth/],
+        cleanupOutdatedCaches: true
       },
       manifest: {
         name: 'BillQyro',

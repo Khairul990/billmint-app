@@ -78,21 +78,21 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
   const getStatusStyle = (status) => {
     switch (status) {
       case 'Paid':
-        return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent-light/20 dark:text-theme-accent dark:border-theme-accent/30';
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50';
       case 'Payment Submitted':
       case 'Payment Submitted / Pending Verification':
         return 'bg-purple-50 text-purple-700 border-purple-100 dark:bg-theme-accent-light dark:text-purple-400 dark:border-purple-900/30';
       case 'Partially Paid':
-        return 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent/10 dark:text-theme-accent dark:border-theme-accent/30';
-      case 'Pending':
-        return 'bg-theme-warning/5 text-amber-700 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
+      case 'Partial':
+        return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50';
       case 'Overdue':
-        return 'bg-theme-danger/5 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-theme-danger dark:border-rose-900/30';
+        return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900/50';
       case 'Cancelled':
         return 'bg-theme-surface dark:bg-theme-card text-theme-muted border-theme-border-soft dark:bg-theme-card dark:text-theme-muted dark:border-theme-border-soft/30';
       case 'Unpaid':
+      case 'Pending':
       default:
-        return 'bg-theme-danger/5 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-theme-danger dark:border-rose-900/30';
+        return 'bg-theme-app text-theme-secondary border-theme-border-soft dark:bg-theme-surface/60 dark:text-theme-primary dark:border-theme-border-strong/50';
     }
   };
 
@@ -140,15 +140,22 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
               )}
             </div>
             <p className="text-sm font-semibold text-theme-primary dark:text-theme-muted mt-1.5 line-clamp-1 break-all pr-2">{invoice.customerName}</p>
-            <p className="text-xs text-theme-muted dark:text-theme-muted mt-0.5">Due: {invoice.dueDate}</p>
+            <p className="text-[10px] text-theme-muted dark:text-theme-muted mt-0.5">Due: {invoice.dueDate || 'N/A'}</p>
           </div>
         </div>
 
         {/* Right Section: Price & Quick CTA Buttons */}
         <div className={`flex ${compact ? 'flex-row items-center justify-between border-t pt-3' : 'md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 pt-3 md:pt-0'} border-theme-border-soft dark:border-theme-border-soft/80`}>
-          <span className={`text-lg font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-150 ${compact ? '' : 'md:text-right'}`}>
-            {formatCurrency(invoice.grandTotal, currencySymbol)}
-          </span>
+          <div className={`flex flex-col ${compact ? '' : 'md:items-end'}`}>
+            <span className={`text-lg font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-primary`}>
+              {formatCurrency(invoice.grandTotal, currencySymbol)}
+            </span>
+            {(invoice.balanceDue > 0) && (
+              <span className="text-[10px] text-rose-500 font-bold uppercase tracking-wider">
+                Due: {formatCurrency(invoice.balanceDue, currencySymbol)}
+              </span>
+            )}
+          </div>
 
           <div className="flex items-center gap-2 mt-2">
             {!isDeleted && (

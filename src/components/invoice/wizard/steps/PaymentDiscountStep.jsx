@@ -12,6 +12,10 @@ const PaymentDiscountStep = () => {
     dispatch({ type: 'UPDATE_TOTALS', payload: { [field]: value } });
   };
 
+  const handleMetaChange = (field, value) => {
+    dispatch({ type: 'UPDATE_META', payload: { [field]: value } });
+  };
+
   const handleSettingChange = (field, value) => {
     dispatch({ type: 'UPDATE_SETTINGS', payload: { [field]: value } });
   };
@@ -68,6 +72,16 @@ const PaymentDiscountStep = () => {
               </div>
             </div>
 
+            <div className="space-y-1.5 pt-2 border-t border-theme-border-soft">
+              <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider">Due Date</label>
+              <input
+                type="date"
+                value={state.dueDate || ''}
+                onChange={(e) => handleMetaChange('dueDate', e.target.value)}
+                className="w-full px-3 py-2.5 bg-theme-card border border-theme-border-soft focus:border-theme-accent rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 transition-all text-theme-primary"
+              />
+            </div>
+
             <div className="flex justify-between items-center py-3 border-t border-b border-theme-border-soft">
               <span className="text-sm font-bold text-theme-accent uppercase tracking-wider">Grand Total</span>
               <motion.span 
@@ -116,7 +130,11 @@ const PaymentDiscountStep = () => {
               <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider">Payment Status</label>
               <div className="px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-theme-primary flex items-center justify-between pointer-events-none">
                 <span>{settings.paymentStatus}</span>
-                <div className={`w-2.5 h-2.5 rounded-full ${settings.paymentStatus === 'Paid' ? 'bg-theme-success' : settings.paymentStatus === 'Pending' ? 'bg-theme-danger' : 'bg-theme-warning'}`} />
+                <div className={`w-2.5 h-2.5 rounded-full ${
+                  settings.paymentStatus === 'Paid' ? 'bg-theme-success' : 
+                  settings.paymentStatus === 'Partial' ? 'bg-theme-warning' : 
+                  settings.paymentStatus === 'Overdue' ? 'bg-rose-500' : 'bg-theme-muted'
+                }`} />
               </div>
             </div>
             <div className="space-y-1.5">
@@ -134,7 +152,37 @@ const PaymentDiscountStep = () => {
             </div>
           </div>
 
-          <div className="space-y-1.5 flex-1 flex flex-col min-h-[120px]">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider">Payment Method</label>
+              <select
+                value={settings.paymentMethod || 'Cash'}
+                onChange={(e) => handleSettingChange('paymentMethod', e.target.value)}
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent transition-all text-theme-primary appearance-none"
+              >
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="UPI / QR">UPI / QR</option>
+                <option value="Credit Card">Credit Card</option>
+                <option value="Check">Check</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div className="space-y-1.5 flex-1 flex flex-col">
+              <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider">Payment Note</label>
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={settings.paymentNote || ''}
+                  onChange={(e) => handleSettingChange('paymentNote', e.target.value)}
+                  className="w-full h-full px-3 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent transition-all text-theme-primary"
+                  placeholder="e.g. Txn ID / Check No"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-1.5 flex-1 flex flex-col min-h-[100px]">
             <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider">Notes to Customer</label>
             <div className="relative flex-1">
               <FileText className="absolute left-3 top-3 w-4 h-4 text-theme-muted" />

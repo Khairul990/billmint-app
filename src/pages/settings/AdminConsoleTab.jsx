@@ -95,7 +95,7 @@ const AdminConsoleTab = (props) => {
                 </p>
               </div>
             ) : installPromptEvent ? (
-              <div className="p-6 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-slate-850 rounded-3xl text-center space-y-4">
+              <div className="p-6 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-3xl text-center space-y-4">
                 <div className="w-16 h-16 bg-gradient-to-tr from-theme-accent to-theme-accent-dark rounded-2xl flex items-center justify-center mx-auto shadow-glow text-white flex items-center justify-center font-black text-xl">
                   BQ
                 </div>
@@ -129,7 +129,7 @@ const AdminConsoleTab = (props) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Apple iOS */}
                   <div className="bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 p-5 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft space-y-3">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-slate-650 dark:text-theme-muted uppercase">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-theme-primary dark:text-theme-muted uppercase">
                       🍎 Apple iOS (iPhone/iPad)
                     </div>
                     <ol className="text-xs text-theme-muted dark:text-theme-muted font-semibold space-y-2 list-decimal list-inside">
@@ -142,7 +142,7 @@ const AdminConsoleTab = (props) => {
 
                   {/* Android Chrome */}
                   <div className="bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 p-5 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft space-y-3">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-slate-650 dark:text-theme-muted uppercase">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-theme-primary dark:text-theme-muted uppercase">
                       🤖 Android Mobile (Chrome)
                     </div>
                     <ol className="text-xs text-theme-muted dark:text-theme-muted font-semibold space-y-2 list-decimal list-inside">
@@ -155,7 +155,7 @@ const AdminConsoleTab = (props) => {
 
                   {/* Desktop PCs */}
                   <div className="bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 p-5 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft space-y-3">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-slate-655 dark:text-theme-muted uppercase">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-theme-primary dark:text-theme-muted uppercase">
                       💻 Desktop Computers
                     </div>
                     <ol className="text-xs text-theme-muted dark:text-theme-muted font-semibold space-y-2 list-decimal list-inside">
@@ -215,8 +215,8 @@ const AdminConsoleTab = (props) => {
                       type="button"
                       onClick={() => setAdminSubTab(subTab.id)}
                       className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${isSelected
-                          ? 'bg-theme-card dark:bg-theme-card dark:bg-theme-surface text-theme-accent dark:text-theme-accent shadow-sm border border-theme-border-soft dark:border-theme-border-soft dark:border-slate-650'
-                          : 'text-slate-505 hover:text-theme-primary dark:text-theme-muted dark:text-theme-muted dark:hover:text-slate-200'
+                          ? 'bg-theme-card dark:bg-theme-card dark:bg-theme-surface text-theme-accent dark:text-theme-accent shadow-sm border border-theme-border-soft dark:border-theme-border-soft dark:border-theme-border-soft'
+                          : 'text-theme-primary hover:text-theme-primary dark:text-theme-muted dark:text-theme-muted dark:hover:text-theme-primary'
                         }`}
                     >
                       <span>{subTab.label}</span>
@@ -233,12 +233,12 @@ const AdminConsoleTab = (props) => {
                 <div className="space-y-6">
                   {/* PLAN & FEATURE CONTROL SECTION */}
                   <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-5">
-                    <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-250 border-b border-theme-border-soft dark:border-theme-border-soft pb-3 flex items-center gap-2">
+                    <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-primary border-b border-theme-border-soft dark:border-theme-border-soft pb-3 flex items-center gap-2">
                       <Sliders className="w-4.5 h-4.5 text-theme-accent" />
                       <span>SaaS Plan & Feature control</span>
                     </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-slate-550 dark:text-theme-muted">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-theme-primary dark:text-theme-muted">
                       <div>
                         <label className="block mb-1.5 text-theme-muted uppercase text-[9px] font-black tracking-wider">Free Monthly Invoice Limit</label>
                         <input
@@ -264,7 +264,7 @@ const AdminConsoleTab = (props) => {
                           <select
                             value={feat.state}
                             onChange={(e) => feat.setter(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-slate-805 dark:text-theme-primary font-bold"
+                            className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary font-bold"
                           >
                             <option value="Free">Free (Standard tier allowed)</option>
                             <option value="Premium">Premium Only (Requires Growth upgrade)</option>
@@ -295,9 +295,9 @@ const AdminConsoleTab = (props) => {
                             <select
                               value={adminGlobalTheme}
                               onChange={(e) => setAdminGlobalTheme(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-slate-805 dark:text-theme-primary font-bold"
+                              className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary font-bold"
                             >
-                              <option value="pink">Pink Premium</option>
+                              <option value="classic">BillQyro Classic</option>
                                 <option value="indigo">Royal Indigo</option>
                                 <option value="emerald">Emerald Business</option>
                                 <option value="rose">Rose Gold Luxe</option>
@@ -311,7 +311,7 @@ const AdminConsoleTab = (props) => {
                             <select
                               value={adminGlobalMode}
                               onChange={(e) => setAdminGlobalMode(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-slate-805 dark:text-theme-primary font-bold"
+                              className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary font-bold"
                             >
                               <option value="light">Light Mode</option>
                               <option value="dark">Dark Mode</option>
@@ -381,7 +381,7 @@ const AdminConsoleTab = (props) => {
                         </h3>
                         <p className="text-[9px] text-theme-muted font-medium mb-3">Shut down standard users workspace, presenting lock screen.</p>
                         <div className="flex items-center justify-between p-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl">
-                          <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-slate-250">Maintenance Lockout</span>
+                          <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-theme-primary">Maintenance Lockout</span>
                           <button
                             onClick={() => setMaintenanceMode(!maintenanceMode)}
                             className={`w-10 h-5 rounded-full relative transition-colors duration-300 focus:outline-none ${maintenanceMode ? 'bg-theme-danger' : 'bg-theme-border-strong dark:bg-theme-surface'}`}
@@ -398,7 +398,7 @@ const AdminConsoleTab = (props) => {
 
                   {/* DATABASE BACKUP AND RESTORE */}
                   <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-4">
-                    <h3 className="text-sm font-extrabold text-slate-850 dark:text-theme-secondary border-b border-theme-border-soft dark:border-theme-border-soft pb-3 flex items-center gap-2">
+                    <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-secondary border-b border-theme-border-soft dark:border-theme-border-soft pb-3 flex items-center gap-2">
                       <Database className="w-4.5 h-4.5 text-theme-accent" />
                       <span>Platform Data Backup & Restore</span>
                     </h3>
@@ -435,7 +435,7 @@ const AdminConsoleTab = (props) => {
                 </div>
               {adminSubTab === 'users' && (
                 <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-5">
-                  <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-250 border-b border-theme-border-soft dark:border-theme-border-soft pb-3 flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-primary border-b border-theme-border-soft dark:border-theme-border-soft pb-3 flex items-center gap-2">
                     <Users className="w-4.5 h-4.5 text-theme-accent" />
                     <span>Registered Users Directory</span>
                   </h3>
@@ -453,7 +453,7 @@ const AdminConsoleTab = (props) => {
                     <div className="overflow-x-auto rounded-2xl border border-theme-border-soft dark:border-theme-border-soft">
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
-                          <tr className="bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/60 text-slate-550 dark:text-theme-muted font-black uppercase tracking-wider border-b border-theme-border-soft dark:border-theme-border-soft">
+                          <tr className="bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/60 text-theme-primary dark:text-theme-muted font-black uppercase tracking-wider border-b border-theme-border-soft dark:border-theme-border-soft">
                             <th className="p-3.5">User Email</th>
                             <th className="p-3.5">Business Name</th>
                             <th className="p-3.5">Country</th>
@@ -464,14 +464,14 @@ const AdminConsoleTab = (props) => {
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50 font-medium">
                           {adminUsers.map((user) => (
-                            <tr key={user.userId} className="hover:bg-theme-app dark:bg-theme-surface/50 dark:hover:bg-slate-850/20 transition-all">
+                            <tr key={user.userId} className="hover:bg-theme-app dark:bg-theme-surface/50 dark:hover:bg-theme-surface/20 transition-all">
                               <td className="p-3.5 font-bold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">{user.email}</td>
                               <td className="p-3.5 text-theme-muted dark:text-theme-muted">{user.businessName || '—'}</td>
                               <td className="p-3.5 text-theme-muted dark:text-theme-muted">{user.country || 'India'}</td>
                               <td className="p-3.5">
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${user.planStatus === 'premium'
                                     ? 'bg-theme-accent-light text-theme-accent dark:bg-theme-accent-light/20 dark:text-theme-accent'
-                                    : 'bg-slate-105 text-theme-muted dark:bg-theme-card dark:text-theme-muted'
+                                    : 'bg-theme-surface text-theme-muted dark:bg-theme-card dark:text-theme-muted'
                                   }`}>
                                   {user.planStatus || 'free'}
                                 </span>
@@ -503,7 +503,7 @@ const AdminConsoleTab = (props) => {
                 </div>
               {adminSubTab === 'requests' && (
                 <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-5">
-                  <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-slate-250 border-b border-theme-border-soft dark:border-theme-border-soft pb-3 flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-primary border-b border-theme-border-soft dark:border-theme-border-soft pb-3 flex items-center gap-2">
                     <CircleDollarSign className="w-4.5 h-4.5 text-theme-accent" />
                     <span>Manual Premium Upgrade Requests Queue</span>
                   </h3>
@@ -560,7 +560,7 @@ const AdminConsoleTab = (props) => {
                             </div>
                             <div>
                               <span className="text-[9px] text-theme-muted uppercase tracking-widest block mb-0.5">TXN Reference ID</span>
-                              <span className="text-slate-805 dark:text-theme-secondary font-mono font-bold select-all">{req.transactionId}</span>
+                              <span className="text-theme-primary dark:text-theme-secondary font-mono font-bold select-all">{req.transactionId}</span>
                             </div>
                           </div>
 
@@ -618,7 +618,7 @@ const AdminConsoleTab = (props) => {
             <div className="space-y-6">
 
               {/* REAL-TIME SYSTEM STATISTICS CARD */}
-              <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 border border-slate-850 shadow-xl text-white">
+              <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 border border-theme-border-soft shadow-xl text-white">
                 <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
                   <div>
                     <h3 className="text-xs font-black uppercase tracking-wider text-theme-muted">Administration Overview</h3>
@@ -691,7 +691,7 @@ const AdminConsoleTab = (props) => {
                       </button>
                     ))}
                   </div>
-                  <div className="text-[10px] p-2.5 rounded-xl border font-bold text-center bg-theme-surface border-slate-200 text-theme-muted dark:bg-theme-card/50 dark:border-slate-800 dark:text-theme-muted">
+                  <div className="text-[10px] p-2.5 rounded-xl border font-bold text-center bg-theme-surface border-theme-border-soft text-theme-muted dark:bg-theme-card/50 dark:border-theme-border-soft dark:text-theme-muted">
                     {dbProvider === 'firebase' ? 'Firebase Active' : dbProvider === 'supabase' ? 'Supabase Ready (Experimental - writes not ready)' : 'Dual Sync Not Enabled Yet'}
                   </div>
                 </div>
@@ -736,10 +736,10 @@ const AdminConsoleTab = (props) => {
       {/* Lightbox for screenshots */}
       {selectedScreenshot && (
         <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="relative max-w-3xl max-h-[85vh] w-full flex flex-col items-center bg-theme-card rounded-3xl p-4 overflow-hidden border border-slate-800">
+          <div className="relative max-w-3xl max-h-[85vh] w-full flex flex-col items-center bg-theme-card rounded-3xl p-4 overflow-hidden border border-theme-border-soft">
             <button
               onClick={() => setSelectedScreenshot(null)}
-              className="absolute top-4 right-4 bg-theme-card/80 hover:bg-slate-700 text-white font-bold p-2.5 rounded-full cursor-pointer hover:scale-105 active:scale-95 transition-all"
+              className="absolute top-4 right-4 bg-theme-card/80 hover:bg-theme-surface text-white font-bold p-2.5 rounded-full cursor-pointer hover:scale-105 active:scale-95 transition-all"
             >
               ✕
             </button>
@@ -758,7 +758,7 @@ const AdminConsoleTab = (props) => {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
           <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 max-w-md w-full border border-theme-border-soft dark:border-theme-border-soft shadow-2xl space-y-4">
             <h3 className="text-sm font-black text-theme-danger dark:text-rose-455 uppercase tracking-widest">Reject Upgrade Request</h3>
-            <p className="text-xs text-slate-505 dark:text-theme-muted font-semibold leading-relaxed">
+            <p className="text-xs text-theme-primary dark:text-theme-muted font-semibold leading-relaxed">
               Please specify the exact reason for rejecting this upgrade request. This reason will be stored in the request log for user visibility.
             </p>
             <textarea
@@ -772,7 +772,7 @@ const AdminConsoleTab = (props) => {
               <button
                 type="button"
                 onClick={() => setShowRejectionModalFor(null)}
-                className="px-4 py-2 border border-theme-border-soft dark:border-slate-750 text-slate-505 dark:text-theme-muted hover:bg-theme-app dark:bg-theme-surface dark:hover:bg-slate-850 text-xs font-bold rounded-xl cursor-pointer"
+                className="px-4 py-2 border border-theme-border-soft dark:border-theme-border-soft text-theme-primary dark:text-theme-muted hover:bg-theme-app dark:bg-theme-surface dark:hover:bg-theme-surface text-xs font-bold rounded-xl cursor-pointer"
               >
                 Cancel
               </button>

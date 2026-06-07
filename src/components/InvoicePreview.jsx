@@ -189,7 +189,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
           </div>
           
           <div className="space-y-1 text-xs font-semibold text-theme-muted dark:text-theme-muted">
-            <div className="flex items-center gap-1.5 justify-start md:justify-end text-slate-950 dark:text-theme-secondary text-sm">
+            <div className="flex items-center gap-1.5 justify-start md:justify-end text-theme-primary dark:text-theme-secondary text-sm">
               <Hash className="w-3.5 h-3.5 text-theme-accent" />
               <span>Invoice: <strong className="font-extrabold">{invoice.invoiceNumber}</strong></span>
             </div>
@@ -209,7 +209,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-8 border-b border-theme-border-soft dark:border-theme-border-soft text-xs">
         <div>
           <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block mb-2">Billed To</span>
-          <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary dark:text-slate-250">{invoice.customerName}</h4>
+          <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary dark:text-theme-primary">{invoice.customerName}</h4>
           <div className="text-theme-muted dark:text-theme-muted space-y-1 mt-2 max-w-xs leading-relaxed font-medium">
             <p>{invoice.customerAddress || 'No address provided'}</p>
             <p>Phone: {invoice.customerPhone || 'N/A'}</p>
@@ -349,7 +349,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
           const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodedQrText}`;
 
           return (
-            <div className="mt-8 p-6 md:p-8 rounded-3xl bg-gradient-to-br from-theme-surface to-theme-card text-white shadow-xl relative overflow-hidden border border-slate-700/50 dark:border-theme-border-soft/80">
+            <div className="mt-8 p-6 md:p-8 rounded-3xl bg-gradient-to-br from-theme-surface to-theme-card text-white shadow-xl relative overflow-hidden border border-theme-border-strong/50 dark:border-theme-border-soft/80">
               {/* Subtle background glow */}
               <div className="absolute -right-20 -bottom-20 w-60 h-60 bg-theme-accent/10 rounded-full blur-3xl pointer-events-none"></div>
               <div className="absolute -left-20 -top-20 w-60 h-60 bg-theme-accent-light rounded-full blur-3xl pointer-events-none"></div>
@@ -383,25 +383,25 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
                     {paymentMethod === 'UPI' && paymentPrefs.upiId && (
                       <div className="text-theme-muted">
                         <span className="font-bold text-[9px] uppercase tracking-wider block text-theme-muted">UPI ID</span>
-                        <span className="font-mono text-slate-200 font-semibold break-all">{paymentPrefs.upiId}</span>
+                        <span className="font-mono text-theme-primary font-semibold break-all">{paymentPrefs.upiId}</span>
                       </div>
                     )}
                     {paymentMethod === 'bKash' && paymentPrefs.bkashNumber && (
                       <div className="text-theme-muted">
                         <span className="font-bold text-[9px] uppercase tracking-wider block text-theme-muted">bKash Number</span>
-                        <span className="font-mono text-slate-200 font-semibold break-all">{paymentPrefs.bkashNumber}</span>
+                        <span className="font-mono text-theme-primary font-semibold break-all">{paymentPrefs.bkashNumber}</span>
                       </div>
                     )}
                     {paymentMethod === 'Nagad' && paymentPrefs.nagadNumber && (
                       <div className="text-theme-muted">
                         <span className="font-bold text-[9px] uppercase tracking-wider block text-theme-muted">Nagad Number</span>
-                        <span className="font-mono text-slate-200 font-semibold break-all">{paymentPrefs.nagadNumber}</span>
+                        <span className="font-mono text-theme-primary font-semibold break-all">{paymentPrefs.nagadNumber}</span>
                       </div>
                     )}
                     {paymentMethod === 'Manual' && paymentPrefs.customPaymentLink && (
                       <div className="text-theme-muted col-span-2">
                         <span className="font-bold text-[9px] uppercase tracking-wider block text-theme-muted">Payment Details / Link</span>
-                        <span className="font-mono text-slate-200 font-semibold break-all truncate block max-w-md">{paymentPrefs.customPaymentLink}</span>
+                        <span className="font-mono text-theme-primary font-semibold break-all truncate block max-w-md">{paymentPrefs.customPaymentLink}</span>
                       </div>
                     )}
                     
@@ -414,7 +414,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
 
                     <div className="text-theme-muted">
                       <span className="font-bold text-[9px] uppercase tracking-wider block text-theme-muted">Invoice Number</span>
-                      <span className="font-semibold text-slate-200">{invoice.invoiceNumber}</span>
+                      <span className="font-semibold text-theme-primary">{invoice.invoiceNumber}</span>
                     </div>
                   </div>
 

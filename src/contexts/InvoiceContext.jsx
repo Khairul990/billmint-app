@@ -34,8 +34,10 @@ const initialState = {
   settings: {
     notes: '',
     terms: '',
-    paymentStatus: 'Pending',
-    orderStatus: 'Pending'
+    paymentStatus: 'Unpaid',
+    orderStatus: 'Pending',
+    paymentMethod: 'Cash',
+    paymentNote: ''
   },
   paymentProofs: [],
   saveCustomer: true,
@@ -111,9 +113,19 @@ const invoiceReducer = (state, action) => {
       if (amountPaid >= grandTotal && grandTotal > 0) {
         paymentStatus = 'Paid';
       } else if (amountPaid === 0) {
-        paymentStatus = 'Pending';
+        paymentStatus = 'Unpaid';
       } else if (amountPaid > 0 && amountPaid < grandTotal) {
-        paymentStatus = 'Partially Paid';
+        paymentStatus = 'Partial';
+      }
+
+      // Check for Overdue
+      if (paymentStatus !== 'Paid' && state.dueDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const due = new Date(state.dueDate);
+        if (today > due && (grandTotal - amountPaid) > 0) {
+          paymentStatus = 'Overdue';
+        }
       }
 
       return {
@@ -230,8 +242,10 @@ export const InvoiceProvider = ({ children, editingInvoice, invoices, businessSe
           settings: {
             notes: editingInvoice.notes || '',
             terms: editingInvoice.terms || '',
-            paymentStatus: editingInvoice.paymentStatus || 'Pending',
-            orderStatus: editingInvoice.orderStatus || 'Pending'
+            paymentStatus: editingInvoice.paymentStatus || 'Unpaid',
+            orderStatus: editingInvoice.orderStatus || 'Pending',
+            paymentMethod: editingInvoice.paymentMethod || 'Cash',
+            paymentNote: editingInvoice.paymentNote || ''
           },
           paymentProofs: editingInvoice.paymentProofs || []
         }
@@ -278,8 +292,10 @@ export const InvoiceProvider = ({ children, editingInvoice, invoices, businessSe
           settings: {
             notes: businessSettings?.defaultNotes || 'Thank you for choosing BillQyro! Payment is expected within due date.',
             terms: businessSettings?.terms || '',
-            paymentStatus: 'Pending',
-            orderStatus: 'Pending'
+            paymentStatus: 'Unpaid',
+            orderStatus: 'Pending',
+            paymentMethod: 'Cash',
+            paymentNote: ''
           }
         }
       });

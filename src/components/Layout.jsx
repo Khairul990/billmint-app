@@ -27,6 +27,18 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   });
 
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Close dropdown on outside click or tab change
   useEffect(() => {
@@ -138,6 +150,11 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-theme-accent dark:text-theme-accent bg-theme-accent-light border border-theme-accent/15 dark:border-theme-border-soft px-2.5 py-0.5 rounded-full">
                   <ShieldCheck className="w-3.5 h-3.5" /> Secure
                 </span>
+                {!isOnline && (
+                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-red-500 bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 rounded-full animate-pulse">
+                    <span className="w-2 h-2 bg-red-500 rounded-full animate-ping"></span> Offline Mode
+                  </span>
+                )}
               </div>
               <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mt-2 text-theme-primary">
                 {getPageTitle(currentTab)}

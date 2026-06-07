@@ -45,8 +45,11 @@ const Login = React.lazy(() => import('./pages/Login'));
 const OnboardingWizard = React.lazy(() => import('./pages/onboarding/OnboardingWizard'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Invoices = React.lazy(() => import('./pages/Invoices'));
+const Estimates = React.lazy(() => import('./pages/Estimates'));
+const PdfTemplateStudio = React.lazy(() => import('./pages/PdfTemplateStudio'));
+const LiveLinkTemplateStudio = React.lazy(() => import('./pages/LiveLinkTemplateStudio'));
 const CreateInvoice = React.lazy(() => import('./pages/CreateInvoice'));
-const Guide = React.lazy(() => import('./pages/Guide'));
+const HelpCenter = React.lazy(() => import('./pages/HelpCenter'));
 const Customers = React.lazy(() => import('./pages/Customers'));
 const Products = React.lazy(() => import('./pages/Products'));
 const Settings = React.lazy(() => import('./pages/Settings'));
@@ -55,6 +58,17 @@ const Subscription = React.lazy(() => import('./pages/Subscription'));
 const MoreMenu = React.lazy(() => import('./pages/MoreMenu'));
 const PublicInvoice = React.lazy(() => import('./pages/PublicInvoice'));
 const PendingPayments = React.lazy(() => import('./pages/PendingPayments'));
+const DueLedger = React.lazy(() => import('./pages/DueLedger'));
+const TemplateMarketplace = React.lazy(() => import('./pages/TemplateMarketplace'));
+const BackupRestore = React.lazy(() => import('./pages/BackupRestore'));
+const Reports = React.lazy(() => import('./pages/Reports'));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = React.lazy(() => import('./pages/TermsOfService'));
+const RefundPolicy = React.lazy(() => import('./pages/RefundPolicy'));
+const DataDeletion = React.lazy(() => import('./pages/DataDeletion'));
+const Support = React.lazy(() => import('./pages/Support'));
+const SystemHealth = React.lazy(() => import('./pages/SystemHealth'));
+const AuditLogs = React.lazy(() => import('./pages/AuditLogs'));
 import QuickBillModal from './components/QuickBillModal';
 
 class ErrorBoundary extends React.Component {
@@ -240,10 +254,35 @@ function App() {
       }
     };
     loadLocalData();
+
+    const handleSync = async () => {
+      try {
+        setInvoices(await getInvoices() || []);
+        setCustomers(await getCustomers() || []);
+        setProducts(await getProducts() || []);
+        setExpenses(await getExpenses() || []);
+      } catch (err) {
+        console.error("Error reloading data on sync:", err);
+      }
+    };
+    window.addEventListener('billqyro_sync', handleSync);
+    
+    const handleNavigate = (e) => {
+      if (e.detail) {
+        setCurrentTab(e.detail);
+      }
+    };
+    window.addEventListener('navigate_tab', handleNavigate);
+
+    return () => {
+      window.removeEventListener('billqyro_sync', handleSync);
+      window.removeEventListener('navigate_tab', handleNavigate);
+    };
   }, []);
 
   // Workspace Contexts
   const [editingInvoice, setEditingInvoice] = useState(null);
+  const [showPaywallModal, setShowPaywallModal] = useState(false);
 
   // PWA Installer States
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
@@ -480,8 +519,7 @@ function App() {
     const isNew = !payload.id || !invoices.some(inv => inv.id === payload.id);
     const freeLimit = settings?.freeInvoiceLimit !== undefined ? settings.freeInvoiceLimit : 15;
     if (isNew && subscription.status !== 'premium' && invoices.length >= freeLimit) {
-      toast.error(`Free tier limit reached: You can create a maximum of ${freeLimit} invoices. Please upgrade to the Premium Plan to unlock unlimited invoicing!`, { duration: 5050 });
-      setCurrentTab('subscription');
+      setShowPaywallModal(true);
       return;
     }
     let unlinkedItems = false;
@@ -846,6 +884,34 @@ function App() {
             pendingPayments={pendingPayments}
           />
         );
+      case 'help-center':
+        return (
+          <HelpCenter />
+        );
+      case 'system-health':
+        return (
+          <SystemHealth setCurrentTab={setCurrentTab} />
+        );
+      case 'audit-logs':
+        return (
+          <AuditLogs setCurrentTab={setCurrentTab} />
+        );
+      case 'due-ledger':
+        return (
+          <DueLedger 
+            customers={customers} 
+            invoices={invoices} 
+            businessSettings={settings}
+          />
+        );
+      case 'reports':
+        return (
+          <Reports 
+            invoices={invoices} 
+            customers={customers} 
+            businessSettings={settings}
+          />
+        );
       case 'invoices':
         return (
           <Invoices
@@ -856,6 +922,19 @@ function App() {
             onDownloadPDF={handleDownloadPDF}
             setCurrentTab={setCurrentTab}
             businessSettings={settings}
+          />
+        );
+      case 'estimates':
+        return (
+          <Estimates
+            invoices={invoices}
+            editingInvoice={editingInvoice}
+            onEditInvoice={setEditingInvoice}
+            onDeleteInvoice={handleDeleteInvoice}
+            onDownloadPDF={handleDownloadPDF}
+            setCurrentTab={setCurrentTab}
+            businessSettings={settings}
+            onSaveInvoice={handleSaveInvoice}
           />
         );
       case 'create-invoice':
@@ -873,8 +952,9 @@ function App() {
           />
         );
       case 'guide':
+        // Legacy fallback
         return (
-          <Guide setCurrentTab={setCurrentTab} />
+          <HelpCenter />
         );
       case 'customers':
         return (
@@ -911,6 +991,46 @@ function App() {
             businessSettings={settings}
           />
         );
+      case 'admin-panel':
+        return <AdminPanel currentTab={currentTab} setCurrentTab={setCurrentTab} />;
+      case 'pdf-templates':
+        return (
+          <PdfTemplateStudio 
+            businessSettings={settings} 
+            setSettings={setSettings} 
+            setCurrentTab={setCurrentTab}
+            subscription={subscription}
+          />
+        );
+      case 'live-link-templates':
+        return (
+          <LiveLinkTemplateStudio 
+            settings={settings}
+            onSaveSettings={handleSaveSettings}
+            subscription={subscription}
+            setCurrentTab={setCurrentTab}
+          />
+        );
+      case 'marketplace':
+        return (
+          <TemplateMarketplace
+            settings={settings}
+            onSaveSettings={handleSaveSettings}
+            subscription={subscription}
+            setCurrentTab={setCurrentTab}
+          />
+        );
+      case 'backup-restore':
+        return (
+          <BackupRestore
+            settings={settings}
+            invoices={invoices}
+            customers={customers}
+            products={products}
+            expenses={expenses}
+            onImportBackup={handleImportBackup}
+          />
+        );
       case 'more':
         return (
           <MoreMenu
@@ -922,6 +1042,16 @@ function App() {
             pendingPaymentsCount={pendingPayments.length}
           />
         );
+      case 'privacy':
+        return <PrivacyPolicy setCurrentTab={setCurrentTab} />;
+      case 'terms':
+        return <TermsOfService setCurrentTab={setCurrentTab} />;
+      case 'refund':
+        return <RefundPolicy setCurrentTab={setCurrentTab} />;
+      case 'data-deletion':
+        return <DataDeletion onBack={() => setCurrentTab('more')} />;
+      case 'support':
+        return <Support onBack={() => setCurrentTab('more')} />;
       case 'settings': {
         const session = getAuthSession();
         return (
@@ -988,7 +1118,7 @@ function App() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="max-w-md bg-theme-card p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6"
+            className="max-w-md bg-theme-card p-8 rounded-3xl border border-theme-border-soft shadow-2xl space-y-6"
           >
             <div className="w-16 h-16 bg-theme-danger/20 text-theme-danger rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-rose-500/10">
               <Lock className="w-8 h-8" />
@@ -997,7 +1127,7 @@ function App() {
             <p className="text-theme-muted text-xs font-semibold leading-relaxed">
               Your BillQyro workspace has been temporarily blocked by the platform administrator due to policy guidelines or outstanding billing concerns.
             </p>
-            <div className="p-4 bg-slate-850/50 rounded-2xl border border-slate-800/80 text-left space-y-2">
+            <div className="p-4 bg-theme-surface/50 rounded-2xl border border-theme-border-soft/80 text-left space-y-2">
               <span className="text-[10px] text-theme-muted uppercase font-black block tracking-widest">Administrator Notice</span>
               <p className="text-[11px] text-theme-muted font-semibold leading-relaxed">
                 If you believe this is an error or wish to request immediate reactivation, please contact support at <strong className="text-theme-accent select-all">{settings.email || 'support@billqyro.com'}</strong> or email your account manager directly.
@@ -1008,7 +1138,7 @@ function App() {
                 logout();
                 setIsAuthenticated(false);
               }}
-              className="w-full py-3 bg-theme-card hover:bg-slate-750 text-white font-bold text-xs rounded-xl shadow-lg active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
+              className="w-full py-3 bg-theme-card hover:bg-theme-surface text-white font-bold text-xs rounded-xl shadow-lg active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
             >
               Sign Out of Account
             </button>
@@ -1027,7 +1157,7 @@ function App() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="max-w-md bg-theme-card p-8 rounded-3xl border border-slate-700 shadow-2xl"
+            className="max-w-md bg-theme-card p-8 rounded-3xl border border-theme-border-strong shadow-2xl"
           >
             <div className="w-16 h-16 bg-theme-danger/20 text-theme-danger rounded-2xl flex items-center justify-center mx-auto mb-6">
               <Lock className="w-8 h-8" />
@@ -1158,6 +1288,52 @@ function App() {
                 style: { borderRadius: '12px', background: '#fff', color: '#1e293b' }
               }}
             />
+            
+            {/* Paywall Modal */}
+            <AnimatePresence>
+              {showPaywallModal && (
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+                  <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    exit={{ opacity: 0 }} 
+                    className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                    onClick={() => setShowPaywallModal(false)}
+                  />
+                  <motion.div
+                    initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                    className="bg-theme-card relative z-10 w-full max-w-md p-8 rounded-3xl shadow-2xl border border-theme-border-soft text-center"
+                  >
+                    <div className="w-16 h-16 mx-auto bg-[image:var(--accent-gradient)] rounded-2xl flex items-center justify-center mb-6 shadow-glow">
+                      <Lock className="w-8 h-8 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-black text-theme-primary mb-2">Limit Reached</h2>
+                    <p className="text-sm font-semibold text-theme-muted mb-6">
+                      You've hit your free tier limit of {settings?.freeInvoiceLimit || 15} invoices. Upgrade to the Premium Plan for unlimited invoicing and exclusive SaaS features.
+                    </p>
+                    <div className="space-y-3">
+                      <button
+                        onClick={() => {
+                          setShowPaywallModal(false);
+                          setCurrentTab('subscription');
+                        }}
+                        className="w-full py-3.5 bg-[image:var(--accent-gradient)] text-white font-black uppercase tracking-wider rounded-xl hover:opacity-90 transition-all shadow-md active:scale-95"
+                      >
+                        Upgrade Now
+                      </button>
+                      <button
+                        onClick={() => setShowPaywallModal(false)}
+                        className="w-full py-3.5 bg-transparent border border-theme-border-soft text-theme-muted font-bold rounded-xl hover:text-theme-primary hover:bg-theme-surface transition-all active:scale-95"
+                      >
+                        Not Right Now
+                      </button>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

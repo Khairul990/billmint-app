@@ -205,12 +205,12 @@ themes.forEach((t, i) => {
 // Cyber blue neon effects
 out.push(`  /* Cyber Blue special effects */`);
 out.push(`  .dark[data-theme="cyber-blue"] .btn-primary,`);
-out.push(`  .dark[data-theme="cyber-blue"] button.bg-theme-accent {`);
+out.push(`  .dark[data-theme="cyber-blue"] .bg-theme-accent {`);
 out.push(`    box-shadow: var(--glow-md);`);
 out.push(`    transition: box-shadow 0.3s ease;`);
 out.push(`  }`);
 out.push(`  .dark[data-theme="cyber-blue"] .btn-primary:hover,`);
-out.push(`  .dark[data-theme="cyber-blue"] button.bg-theme-accent:hover {`);
+out.push(`  .dark[data-theme="cyber-blue"] .bg-theme-accent:hover {`);
 out.push(`    box-shadow: var(--glow-lg);`);
 out.push(`  }`);
 out.push(`  .dark[data-theme="cyber-blue"] .card,`);

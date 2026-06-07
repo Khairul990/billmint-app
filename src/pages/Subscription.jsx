@@ -185,12 +185,12 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
 
       {/* PENDING NOTIFICATION BANNER */}
       {pendingReq && (
-        <div className="p-5 bg-theme-warning/5 dark:bg-amber-950/20 border border-amber-250 dark:border-amber-900/30 rounded-3xl flex gap-3.5 animate-pulse shadow-sm">
+        <div className="p-5 bg-theme-warning/5 border border-theme-warning/30 rounded-3xl flex gap-3.5 animate-pulse shadow-sm">
           <div className="p-2.5 bg-theme-card dark:bg-theme-card rounded-xl text-theme-warning shadow-sm h-fit">
             <Clock className="w-5.5 h-5.5" />
           </div>
           <div>
-            <span className="text-[9px] font-black uppercase text-theme-warning dark:text-amber-450 tracking-wider">Awaiting Manual Activation</span>
+            <span className="text-[9px] font-black uppercase text-theme-warning tracking-wider">Awaiting Manual Activation</span>
             <h4 className="text-xs font-black text-theme-primary dark:text-theme-primary dark:text-theme-secondary mt-0.5">Upgrade Request Under Review</h4>
             <p className="text-[11px] text-theme-muted dark:text-theme-muted font-semibold leading-relaxed mt-1">
               Your transfer of <strong className="text-theme-accent dark:text-theme-accent">{pendingReq.plan} ({pendingReq.paidAmount} {country === 'India' ? 'INR' : country === 'Bangladesh' ? 'BDT' : 'USD'})</strong> with Transaction ID <strong className="font-mono text-theme-primary dark:text-theme-muted">{pendingReq.transactionId}</strong> is currently being verified. Your workspace will automatically unlock upon administrator approval.
@@ -212,7 +212,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
           
           <div className="space-y-4">
             <div>
-              <h3 className="font-extrabold text-theme-primary dark:text-theme-muted dark:text-slate-250 text-sm uppercase tracking-wider">Free Starter</h3>
+              <h3 className="font-extrabold text-theme-primary dark:text-theme-muted dark:text-theme-primary text-sm uppercase tracking-wider">Free Starter</h3>
               <p className="text-[10px] text-theme-muted font-bold mt-1">BASIC TRANSITION BILLING</p>
             </div>
             
@@ -285,7 +285,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                 onClick={() => setShowUpgradeForm(true)}
                 className={`w-full py-4 text-white rounded-2xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 transition-all cursor-pointer ${
                   pendingReq 
-                    ? 'bg-theme-card border border-slate-700/50 text-theme-muted cursor-not-allowed' 
+                    ? 'bg-theme-card border border-theme-border-strong/50 text-theme-muted cursor-not-allowed' 
                     : 'bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 hover:shadow-lg hover:shadow-glow active:scale-[0.98]'
                 }`}
               >
@@ -320,7 +320,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
               <button 
                 type="button" 
                 onClick={() => setShowUpgradeForm(false)}
-                className="p-1 text-theme-muted hover:text-theme-muted dark:hover:text-slate-200 bg-theme-app dark:bg-theme-surface dark:bg-theme-card rounded-lg"
+                className="p-1 text-theme-muted hover:text-theme-muted dark:hover:text-theme-primary bg-theme-app dark:bg-theme-surface dark:bg-theme-card rounded-lg"
               >
                 ✕
               </button>
@@ -367,7 +367,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                           <span className="font-black text-[9px] uppercase">bKash Personal / SendMoney</span>
                           <span className="font-mono font-black select-all">01700-123456</span>
                         </div>
-                        <div className="p-2 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-lg flex justify-between items-center">
+                        <div className="p-2 bg-theme-warning/10 border border-theme-warning/20 text-theme-warning rounded-lg flex justify-between items-center">
                           <span className="font-black text-[9px] uppercase">Nagad Personal / SendMoney</span>
                           <span className="font-mono font-black select-all">01900-123456</span>
                         </div>

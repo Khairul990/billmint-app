@@ -12,7 +12,7 @@ const NewUserGuide = ({ setCurrentTab, isNewUser }) => {
     // We'll give it a prominent gradient if they are a new user.
     
     return (
-        <div className={`rounded-3xl p-6 md:p-8 border shadow-premium relative overflow-hidden transition-all duration-300 ${isNewUser ? 'bg-gradient-to-br from-slate-900 to-[#071B3A] text-white border-slate-800' : 'bg-theme-card dark:bg-theme-card text-theme-primary dark:text-theme-primary dark:text-theme-secondary border-theme-border-soft dark:border-theme-border-soft/80'}`}>
+        <div className={`rounded-3xl p-6 md:p-8 border shadow-premium relative overflow-hidden transition-all duration-300 ${isNewUser ? 'bg-gradient-to-br from-slate-900 to-[#071B3A] text-white border-theme-border-soft' : 'bg-theme-card dark:bg-theme-card text-theme-primary dark:text-theme-primary dark:text-theme-secondary border-theme-border-soft dark:border-theme-border-soft/80'}`}>
             
             {isNewUser && (
                 <>

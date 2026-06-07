@@ -138,7 +138,7 @@ const BusinessDetailsForm = () => {
           </div>
 
           <div className="flex justify-between pt-6 border-t border-theme-border-soft mt-6">
-            <button type="button" onClick={prevStep} className="px-6 py-3 rounded-xl font-bold text-theme-muted bg-theme-surface hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 text-sm">
+            <button type="button" onClick={prevStep} className="px-6 py-3 rounded-xl font-bold text-theme-muted bg-theme-surface hover:bg-theme-app dark:hover:bg-theme-surface transition-colors flex items-center gap-2 text-sm">
               <ChevronLeft className="w-4 h-4" /> Back
             </button>
             <button type="submit" className="px-8 py-3 rounded-xl font-black text-white bg-[image:var(--accent-gradient)] shadow-glow hover:opacity-90 transition-opacity flex items-center gap-2 text-sm uppercase tracking-wider">

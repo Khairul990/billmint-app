@@ -7,16 +7,81 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Rules for users collection and their private subcollections (like invoices)
-    match /users/{userId} {
-      allow read, write: if isAuth() && request.auth.uid == userId;
-      
-      match /invoices/{invoiceId} {
-        allow read, write: if isAuth() && request.auth.uid == userId;
-      }
+    // Helper to check if user is owner
+    function isOwner(userId) {
+      return isAuth() && request.auth.uid == userId;
+    }
+
+    // Helper to check if user is Super Admin
+    function isAdmin() {
+      return isAuth() && request.auth.token.email == 'khairul2052007@gmail.com';
+    }
+
+    // -------------------------------------------------------------------------
+    // Private Workspace Data (Subcollections under user ID)
+    // -------------------------------------------------------------------------
+
+    match /invoices/{userId}/items/{itemId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    match /customers/{userId}/items/{itemId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    match /products/{userId}/items/{itemId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    match /expenses/{userId}/items/{itemId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    match /auditLogs/{userId}/items/{itemId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    match /errorLogs/{userId}/items/{itemId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // -------------------------------------------------------------------------
+    // Settings and Profiles
+    // -------------------------------------------------------------------------
+
+    match /settings/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
     }
     
-    // Rules for publicInvoices
+    match /invoice_counters/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    match /subscription/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // UsersList - Role escalation protection
+    match /usersList/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Super admin can do anything
+      allow write: if isAdmin();
+      
+      // Normal users cannot set dangerous role/subscription fields
+      allow create: if isOwner(userId)
+        && !request.resource.data.keys().hasAny(['role', 'isAdmin', 'plan', 'permissions', 'subscription', 'businessId']);
+        
+      allow update: if isOwner(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin', 'plan', 'permissions', 'subscription', 'businessId']);
+        
+      allow delete: if isOwner(userId);
+    }
+
+    // -------------------------------------------------------------------------
+    // Public Assets (Live Invoice Links)
+    // -------------------------------------------------------------------------
+
     match /publicInvoices/{publicToken} {
       // Anyone can read a public invoice
       allow read: if true;
@@ -24,14 +89,13 @@ service cloud.firestore {
       // Only authenticated owners can create or delete public invoices fully
       allow create, delete: if isAuth();
       
-      // Unauthenticated users (customers) can only update payment proofs and paymentStatus
+      // Unauthenticated users (customers) can only update payment proofs
       allow update: if isAuth() || (
-        // The diff shows that only paymentProofs and paymentStatus fields are modified
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['paymentProofs', 'paymentStatus'])
       );
     }
 
-    // Rules for legacy public_invoices
+    // Legacy fallback
     match /public_invoices/{publicToken} {
       allow read: if true;
       allow create, delete: if isAuth();
@@ -40,47 +104,25 @@ service cloud.firestore {
       );
     }
 
-    // Payment proofs - anyone can create, only owner can read/update
-    match /payment_proofs/{proofId} {
-      allow create: if true; // Customers can submit
-      allow read, update: if isAuth() && request.auth.uid == resource.data.ownerId;
-    }
-    
-    // Rules for other collections to maintain backward compatibility
-    match /settings/{userId} {
-      allow read, write: if isAuth() && request.auth.uid == userId;
-    }
-    match /invoice_counters/{userId} {
-      allow read, write: if isAuth() && request.auth.uid == userId;
-    }
-    match /subscription/{userId} {
-      allow read, write: if isAuth() && request.auth.uid == userId;
-    }
-    match /customers/{userId}/items/{customerId} {
-      allow read, write: if isAuth() && request.auth.uid == userId;
-    }
-    match /invoices/{userId}/items/{invoiceId} {
-      allow read, write: if isAuth() && request.auth.uid == userId;
-    }
-    match /products/{userId}/items/{productId} {
-      allow read, write: if isAuth() && request.auth.uid == userId;
-    }
-    match /expenses/{userId}/items/{expenseId} {
-      allow read, write: if isAuth() && request.auth.uid == userId;
-    }
+    // -------------------------------------------------------------------------
+    // Admin & Billing
+    // -------------------------------------------------------------------------
+
     match /premiumRequests/{requestId} {
       // Users can only read/write their own requests
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
-      allow read: if isAuth() && (resource.data.userId == request.auth.uid || request.auth.token.email == 'khairul2052007@gmail.com');
-      allow update, delete: if isAuth() && request.auth.token.email == 'khairul2052007@gmail.com';
+      allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
     }
-    match /usersList/{userId} {
-      allow write: if isAuth() && request.auth.uid == userId;
-      allow read: if isAuth() && (request.auth.uid == userId || request.auth.token.email == 'khairul2052007@gmail.com');
-    }
+    
     match /platformConfig/{configId} {
       allow read: if isAuth();
-      allow write: if isAuth() && request.auth.token.email == 'khairul2052007@gmail.com';
+      allow write: if isAdmin();
+    }
+    
+    match /globalAdminSettings/{configId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
     }
   }
 }

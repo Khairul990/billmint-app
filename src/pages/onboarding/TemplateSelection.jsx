@@ -8,7 +8,7 @@ const templatesList = [
   { id: 'doctor', label: 'Doctor / Clinic', icon: Stethoscope, color: 'text-blue-500', bg: 'bg-blue-500/10 border-blue-500/30' },
   { id: 'retail', label: 'Shopping Mall', icon: Store, color: 'text-purple-500', bg: 'bg-purple-500/10 border-purple-500/30' },
   { id: 'grocery', label: 'Small Shop / Grocery', icon: ShoppingBasket, color: 'text-orange-500', bg: 'bg-orange-500/10 border-orange-500/30' },
-  { id: 'repair', label: 'Service / Repair', icon: Wrench, color: 'text-slate-500', bg: 'bg-slate-500/10 border-slate-500/30' },
+  { id: 'repair', label: 'Service / Repair', icon: Wrench, color: 'text-theme-muted', bg: 'bg-theme-surface/10 border-theme-border-soft/30' },
   { id: 'embroidery', label: 'Embroidery / Tailor', icon: Scissors, color: 'text-pink-500', bg: 'bg-pink-500/10 border-pink-500/30' },
   { id: 'custom', label: 'Custom (General)', icon: PenTool, color: 'text-emerald-500', bg: 'bg-emerald-500/10 border-emerald-500/30' },
   { id: 'all', label: 'All Templates', icon: LayoutTemplate, color: 'text-theme-accent', bg: 'bg-theme-accent/10 border-theme-accent/30' }
@@ -48,7 +48,7 @@ const TemplateSelection = () => {
                   className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center justify-center text-center gap-3 ${
                     isSelected 
                       ? `${tpl.bg} shadow-md scale-105` 
-                      : 'border-theme-border-soft bg-theme-surface hover:bg-slate-50 dark:hover:bg-slate-800'
+                      : 'border-theme-border-soft bg-theme-surface hover:bg-theme-app dark:hover:bg-theme-surface'
                   }`}
                 >
                   <div className={`p-3 rounded-xl bg-theme-card shadow-sm ${isSelected ? tpl.color : 'text-theme-muted'}`}>
@@ -91,7 +91,7 @@ const TemplateSelection = () => {
           </AnimatePresence>
 
           <div className="flex justify-between pt-6 border-t border-theme-border-soft mt-6">
-            <button type="button" onClick={prevStep} className="px-6 py-3 rounded-xl font-bold text-theme-muted bg-theme-surface hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 text-sm">
+            <button type="button" onClick={prevStep} className="px-6 py-3 rounded-xl font-bold text-theme-muted bg-theme-surface hover:bg-theme-app dark:hover:bg-theme-surface transition-colors flex items-center gap-2 text-sm">
               <ChevronLeft className="w-4 h-4" /> Back
             </button>
             <button type="submit" className="px-8 py-3 rounded-xl font-black text-white bg-[image:var(--accent-gradient)] shadow-glow hover:opacity-90 transition-opacity flex items-center gap-2 text-sm uppercase tracking-wider">
