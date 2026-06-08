@@ -13,6 +13,11 @@ import Logo from './Logo';
  * - Persists collapsed state via localStorage
  */
 const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userEmail, pendingPaymentsCount = 0 }) => {
+  // Determine active workspace and its enabled modules
+  const activeWsId = businessSettings?.activeWorkspaceId;
+  const activeWorkspace = businessSettings?.businessWorkspaces?.find(ws => ws.id === activeWsId) || {};
+  const enabledModules = activeWorkspace.enabledModules || [];
+
   const [isCollapsed, setIsCollapsed] = useState(() => {
     try {
       return localStorage.getItem('billqyro_sidebar_collapsed') === 'true';
@@ -29,7 +34,7 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
     });
   };
 
-  const menuItems = [
+  let menuItems = [
     { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
     { id: 'invoices', label: t('invoices'), icon: FileSpreadsheet },
     { id: 'estimates', label: 'Estimates & Quotes', icon: FileSpreadsheet },
@@ -47,6 +52,15 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
     { id: 'settings', label: t('settings'), icon: SettingsIcon },
     { id: 'help-center', label: 'Help Center', icon: HelpCircle },
   ];
+  // Filter items based on enabledModules (if any)
+  if (enabledModules.length) {
+    menuItems = menuItems.filter(item => {
+      if (item.id === 'products' && !enabledModules.includes('products')) return false;
+      if (item.id === 'due-ledger' && !enabledModules.includes('dueLedger')) return false;
+      // Additional module checks can be added here
+      return true;
+    });
+  }
 
   return (
     <aside

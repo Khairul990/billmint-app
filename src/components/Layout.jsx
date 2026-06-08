@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import { ReceiptText, LogOut, ShieldCheck, Sun, Moon, User } from 'lucide-react';
+import WorkspaceSwitcher from './WorkspaceSwitcher';
 import Logo from './Logo';
 import { getSettings, saveSettings } from '../services/dbEngine';
 import { updateFaviconForTheme } from '../utils/themeIcon';
@@ -14,7 +15,7 @@ import { updateFaviconForTheme } from '../utils/themeIcon';
  * @param {Function} onLogout - logout event callback
  * @param {Object} businessSettings - current active business details
  */
-const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0 }) => {
+const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace }) => {
   // Theme and Mode state
   const [themeColor, setThemeColor] = useState(() => {
     // Migration: If old themePreset is "dark", default to "light" color (dark mode handled below)
@@ -128,6 +129,8 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         userRole={userRole}
         userEmail={userEmail}
         pendingPaymentsCount={pendingPaymentsCount}
+        businessWorkspaces={businessWorkspaces}
+        activeWorkspaceId={activeWorkspaceId}
       />
 
       {/* Main Content Region */}
@@ -150,6 +153,12 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-theme-accent dark:text-theme-accent bg-theme-accent-light border border-theme-accent/15 dark:border-theme-border-soft px-2.5 py-0.5 rounded-full">
                   <ShieldCheck className="w-3.5 h-3.5" /> Secure
                 </span>
+                {/* Workspace Switcher */}
+                <WorkspaceSwitcher
+                  businessWorkspaces={businessWorkspaces}
+                  activeWorkspaceId={activeWorkspaceId}
+                  setActiveWorkspace={setActiveWorkspace}
+                />
                 {!isOnline && (
                   <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-red-500 bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 rounded-full animate-pulse">
                     <span className="w-2 h-2 bg-red-500 rounded-full animate-ping"></span> Offline Mode

@@ -196,9 +196,43 @@ function App() {
   const [invoices, setInvoices] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
-  const [settings, setSettings] = useState(() => getSettings());
+  // Settings with workspace support
+  const [settings, setSettings] = useState(() => {
+    const s = getSettings() || {};
+    if (!s.businessWorkspaces) {
+      // Initialize default workspace
+      const defaultWs = {
+        id: 'ws_default_001',
+        name: 'Default Workspace',
+        type: 'default',
+        enabledModules: ['billing', 'customers', 'products', 'dueLedger', 'reports'],
+      };
+      s.businessWorkspaces = [defaultWs];
+      s.activeWorkspaceId = defaultWs.id;
+    } else if (!s.activeWorkspaceId && s.businessWorkspaces.length) {
+      s.activeWorkspaceId = s.businessWorkspaces[0].id;
+    }
+    // Persist defaults if newly added
+    saveSettings(s);
+    return s;
+  });
   const [expenses, setExpenses] = useState([]);
   const [subscription, setSubscription] = useState(() => getSubscriptionStatus());
+  // Workspace state
+  const [businessWorkspaces, setBusinessWorkspaces] = useState(settings.businessWorkspaces || []);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState(settings.activeWorkspaceId || (settings.businessWorkspaces && settings.businessWorkspaces[0]?.id));
+
+  // Update settings when workspaces change
+  useEffect(() => {
+    const updated = { ...settings, businessWorkspaces, activeWorkspaceId };
+    saveSettings(updated);
+    // Notify other components
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  }, [businessWorkspaces, activeWorkspaceId]);
+
+  const setActiveWorkspace = (id) => {
+    setActiveWorkspaceId(id);
+  };
 
   // Real-time Pending Payments state
   const [pendingPayments, setPendingPayments] = useState([]);
@@ -1230,7 +1264,7 @@ function App() {
             </motion.div>
           </motion.div>
         ) : (
-          <motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="w-full h-full">
+<motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="w-full h-full">
             <PostLoginWelcome 
               show={showWelcomeAnimation} 
               userName={settings?.businessName || ''} 
@@ -1253,6 +1287,9 @@ function App() {
               userEmail={getAuthSession()?.userEmail}
               onQuickBillOpen={() => setIsQuickBillOpen(true)}
               pendingPaymentsCount={pendingPayments.length}
+              businessWorkspaces={businessWorkspaces}
+              activeWorkspaceId={activeWorkspaceId}
+              setActiveWorkspace={setActiveWorkspace}
             >
               <AnimatePresence mode="wait">
                 <motion.div
