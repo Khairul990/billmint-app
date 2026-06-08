@@ -68,7 +68,6 @@ export default defineConfig(({ mode }) => ({
       mangle: false, // Prevents Windows Defender false positive detections
     },
     rollupOptions: {
-      external: ['pako/lib/zlib/zstream.js', 'pako/lib/zlib/deflate.js', 'pako/lib/zlib/inflate.js', 'pako/lib/zlib/gzip.js', 'pako/lib/zlib/gunzip.js', 'pako/lib/zlib/raw.js', 'pako/lib/zlib/raw-deflate.js', 'pako/lib/zlib/raw-inflate.js', 'pako/lib/zlib/constants.js'],
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
