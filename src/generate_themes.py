@@ -107,6 +107,82 @@ themes = [
         "dark_text": "#e0ffff",
         "is_neon": True
     }
+    },
+    {
+        "id": "deep-bluish-green",
+        "name": "Deep Bluish Green",
+        "accent": "#0f9d58",
+        "accent_dark": "#0a7d48",
+        "accent_rgb": "15, 157, 88",
+        "dark_bg": "#0a0c0a",
+        "dark_surface": "#151a15",
+        "dark_card": "#263126",
+        "light_bg": "#e0f7e9",
+        "light_surface": "#ffffff",
+        "light_card": "#ffffff",
+        "light_text": "#0a0c0a",
+        "dark_text": "#dfffe5"
+    },
+    {
+        "id": "deep-blue-premium",
+        "name": "Deep Blue Premium",
+        "accent": "#1e40af",
+        "accent_dark": "#172d7e",
+        "accent_rgb": "30, 64, 175",
+        "dark_bg": "#0a0c1a",
+        "dark_surface": "#151a31",
+        "dark_card": "#263155",
+        "light_bg": "#e0e8ff",
+        "light_surface": "#ffffff",
+        "light_card": "#ffffff",
+        "light_text": "#0a0c1a",
+        "dark_text": "#dfe7ff"
+    },
+    {
+        "id": "crimson-business",
+        "name": "Crimson Business",
+        "accent": "#b91c1c",
+        "accent_dark": "#991313",
+        "accent_rgb": "185, 28, 28",
+        "dark_bg": "#1a0808",
+        "dark_surface": "#301010",
+        "dark_card": "#462020",
+        "light_bg": "#fef2f2",
+        "light_surface": "#ffffff",
+        "light_card": "#ffffff",
+        "light_text": "#1a0808",
+        "dark_text": "#ffe5e5"
+    },
+    {
+        "id": "luxury-brown",
+        "name": "Luxury Brown",
+        "accent": "#8b5e3c",
+        "accent_dark": "#6b4629",
+        "accent_rgb": "139,94,60",
+        "dark_bg": "#130e0a",
+        "dark_surface": "#261c13",
+        "dark_card": "#3b2a1f",
+        "light_bg": "#fff8f0",
+        "light_surface": "#ffffff",
+        "light_card": "#ffffff",
+        "light_text": "#130e0a",
+        "dark_text": "#f5e9e0"
+    },
+    {
+        "id": "noir-black",
+        "name": "Noir Black",
+        "accent": "#212121",
+        "accent_dark": "#111111",
+        "accent_rgb": "33,33,33",
+        "dark_bg": "#0a0a0a",
+        "dark_surface": "#0f0f0f",
+        "dark_card": "#151515",
+        "light_bg": "#f5f5f5",
+        "light_surface": "#ffffff",
+        "light_card": "#ffffff",
+        "light_text": "#0a0a0a",
+        "dark_text": "#e0e0e0"
+    }
 ]
 
 out = []
@@ -214,10 +290,16 @@ out.append(f'    border: 1px solid var(--accent);')
 out.append(f'    box-shadow: var(--glow-sm);')
 out.append(f'  }}')
 
-with open("e:\\Khair_Murafiq_Empire\\BillQyro\\src\\generate_themes.py", "w") as f:
-    f.write("\n".join([
-        "themes = " + str(themes),
-        "out = " + str(out),
-        "with open('e:\\\\Khair_Murafiq_Empire\\\\BillQyro\\\\src\\\\themes.css', 'w') as fh:",
-        "    fh.write('\\n'.join(out))"
-    ]))
+import os
+
+# Determine the directory of this script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Path to the output CSS file
+THEME_CSS_PATH = os.path.join(BASE_DIR, "themes.css")
+
+# Write the generated CSS to the file
+with open(THEME_CSS_PATH, "w", encoding="utf-8") as css_file:
+    css_file.write("\n".join(out))
+
+print(f"✅ Themes generated and written to {THEME_CSS_PATH}")

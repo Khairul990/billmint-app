@@ -302,7 +302,7 @@ const Invoices = ({
   return (
     <PullToRefresh onRefresh={handleRefresh}>
       <motion.div 
-        className="space-y-6 pb-24"
+        className="space-y-6 pb-32"
         variants={containerVariants}
         initial="hidden"
         animate="show"
@@ -366,21 +366,21 @@ const Invoices = ({
 
         {/* Right Side: Search */}
         <div className="relative w-full md:w-80">
-          <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted pointer-events-none">
-            <Search className="w-4 h-4" />
+          <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-theme-muted pointer-events-none">
+            <Search className="w-5 h-5" />
           </span>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search invoice number, client..."
-            className="w-full pl-10 pr-4 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent focus:bg-theme-card dark:bg-theme-card transition-all text-theme-primary dark:text-theme-primary"
+            className="w-full pl-12 pr-4 py-4 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent focus:bg-theme-card dark:bg-theme-card transition-all text-theme-primary dark:text-theme-primary"
           />
         </div>
       </div>
 
       {/* INVOICE GRID LIST */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {filteredInvoices.map((invoice) => (
           <motion.div key={invoice.id} variants={itemVariants}>
               <InvoiceCard
@@ -432,6 +432,17 @@ const Invoices = ({
             </div>
           )}
       </div>
+
+      {/* Floating Create Invoice button for mobile */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => { onEditInvoice(null); setCurrentTab('create-invoice'); }}
+        className="fixed bottom-4 right-4 md:hidden flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-sm px-4 py-3 rounded-full shadow-lg z-20"
+      >
+        <Plus className="w-5 h-5" />
+        <span>Create Invoice</span>
+      </motion.button>
 
       {/* DYNAMIC ELEVEN-STAR PREVIEW MODAL OVERLAY */}
       {viewingInvoice && createPortal(

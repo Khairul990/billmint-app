@@ -113,7 +113,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
   };
 
   return (
-    <div className="bg-theme-card dark:bg-theme-card rounded-2xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft/80 shadow-premium hover:shadow-premium-hover transition-all duration-300">
+    <div className="bg-theme-card dark:bg-theme-card rounded-2xl p-5 md:p-5 border border-theme-border-soft dark:border-theme-border-soft/80 shadow-premium hover:shadow-premium-hover transition-all duration-300">
       <div className={`flex flex-col ${compact ? '' : 'md:flex-row md:items-center'} justify-between gap-4`}>
         {/* Top/Left Section: Metadata */}
         <div className="flex items-center gap-3">
@@ -122,7 +122,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-theme-primary dark:text-theme-primary dark:text-theme-secondary text-sm md:text-base">{invoice.invoiceNumber}</span>
+              <span className="font-bold text-theme-primary dark:text-theme-primary text-base md:text-lg">{invoice.invoiceNumber}</span>
             </div>
             <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
               <span className={`text-[9px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getStatusStyle(invoice.paymentStatus)}`}>
@@ -147,7 +147,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
         {/* Right Section: Price & Quick CTA Buttons */}
         <div className={`flex ${compact ? 'flex-row items-center justify-between border-t pt-3' : 'md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 pt-3 md:pt-0'} border-theme-border-soft dark:border-theme-border-soft/80`}>
           <div className={`flex flex-col ${compact ? '' : 'md:items-end'}`}>
-            <span className={`text-lg font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-primary`}>
+            <span className={`text-xl md:text-2xl font-extrabold text-theme-primary dark:text-theme-primary`}>
               {formatCurrency(invoice.grandTotal, currencySymbol)}
             </span>
             {(invoice.balanceDue > 0) && (
