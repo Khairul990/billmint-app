@@ -44,7 +44,7 @@ export const migrateLocalStorageToIndexedDB = async () => {
 };
 
 export const queueSyncTransaction = async (action, storeName, docId, data) => {
-  const userId = getFirebaseUserId();
+  const userId = getRealUserId();
   const transactionId = 'tx-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
   const tx = {
     id: transactionId,
@@ -115,7 +115,11 @@ export const syncOfflineTransactions = async () => {
   if (!firebaseReady || !navigator.onLine) return;
 
   try {
-    const userId = getFirebaseUserId();
+    const userId = getRealUserId();
+    if (!userId) {
+      console.warn('[SYNC QUEUE] Skipped offline sync. No real UID detected.');
+      return;
+    }
     const queue = await BillQyroDB.getAll('syncQueue');
     const userQueue = queue.filter(tx => tx.userId === userId || !tx.userId);
     
@@ -210,7 +214,7 @@ export const GLOBAL_KEYS = {
 
 export const getScopedKey = (baseKey) => {
   if (baseKey === GLOBAL_KEYS.AUTH) return baseKey;
-  const uid = getFirebaseUserId();
+  const uid = getRealUserId();
   // Ensure we don't scope if there's no valid uid
   return uid ? `${baseKey}_${uid}` : baseKey;
 };
@@ -227,11 +231,8 @@ export const KEYS = {
 };
 
 export const migrateGlobalToScopedStorage = async () => {
-  const uid = getFirebaseUserId();
-  if (!uid || uid === 'demo-user') return;
-
-  const migrationKey = `billqyro_storage_migrated_${uid}`;
-  if (localStorage.getItem(migrationKey) === 'true') return;
+  const uid = getRealUserId();
+  if (!uid) return { status: 'failed', message: 'No real UID found' };
 
   console.log('[MIGRATION] Starting safe global to scoped storage migration for:', uid);
 
@@ -280,8 +281,8 @@ export const migrateGlobalToScopedStorage = async () => {
     }
   }
 
-  localStorage.setItem(migrationKey, 'true');
   console.log(`[MIGRATION] Completed. Migrated collections safely.`);
+  return { status: 'success', migratedCount };
 };
 
 const updateLocalCache = (key, items) => {
@@ -504,7 +505,7 @@ const DEFAULT_SUBSCRIPTION = {
 };
 
 // Safe Firebase User ID generator based on auth session email
-export const getFirebaseUserId = () => {
+export const getRealUserId = () => {
   if (firebaseReady && auth?.currentUser?.uid) {
     return auth.currentUser.uid;
   }
@@ -515,13 +516,9 @@ export const getFirebaseUserId = () => {
       if (data && data.uid) {
         return data.uid;
       }
-      if (data && data.userEmail) {
-        if (data.userEmail === 'demo@billqyro.com') return 'demo-user';
-        return data.userEmail.replace(/[^a-zA-Z0-9]/g, '_');
-      }
     } catch (e) { /* ignore */ }
   }
-  return 'demo-user';
+  return null;
 };
 
 import { toast } from 'react-hot-toast';
@@ -530,7 +527,11 @@ import { toast } from 'react-hot-toast';
 const firestoreSave = async (collectionName, docId, data) => {
   if (!firebaseReady) return { status: 'disabled' };
   try {
-    const userId = getFirebaseUserId();
+    const userId = getRealUserId();
+    if (!userId) {
+      console.warn(`[SYNC] Skipped cloud sync for ${collectionName}. No real UID detected. Data saved locally only.`);
+      return { status: 'local-only' };
+    }
     let docRef;
     let pathStr = '';
     
@@ -549,7 +550,7 @@ const firestoreSave = async (collectionName, docId, data) => {
     console.log(`Firestore successfully saved to ${pathStr} for user: ${userId}`);
     return { status: 'success' };
   } catch (error) {
-    const userId = getFirebaseUserId();
+    const userId = getRealUserId();
     let pathStr = '';
     
     if (collectionName === 'settings' || collectionName === 'subscription' || collectionName === 'users') {
@@ -576,7 +577,11 @@ const firestoreSave = async (collectionName, docId, data) => {
 const firestoreDelete = async (collectionName, docId) => {
   if (!firebaseReady) return;
   try {
-    const userId = getFirebaseUserId();
+    const userId = getRealUserId();
+    if (!userId) {
+      console.warn(`[SYNC] Skipped cloud delete for ${collectionName}. No real UID detected. Deleted locally only.`);
+      return;
+    }
     let docRef;
     if (collectionName === 'settings' || collectionName === 'subscription' || collectionName === 'users') {
       docRef = doc(db, collectionName, userId);
@@ -725,7 +730,7 @@ export const resetToDemoData = () => {
 
   // If Firebase is enabled, also populate Firestore in the background for demo
   if (firebaseReady) {
-    const userId = getFirebaseUserId();
+    const userId = getRealUserId();
     firestoreSave('settings', userId, demoSettings);
     SEED_CUSTOMERS.forEach(c => firestoreSave('customers', c.id, c));
     SEED_PRODUCTS.forEach(p => firestoreSave('products', p.id, p));
@@ -780,13 +785,15 @@ export const login = (email, password) => {
 
     // Save login event to users/{userId}
     if (firebaseReady) {
-      const userId = getFirebaseUserId();
-      firestoreSave('users', userId, {
-        userId,
-        email: sessionEmail,
-        lastLogin: new Date().toISOString(),
-        role: 'administrator'
-      });
+      const userId = getRealUserId();
+      if (userId) {
+        firestoreSave('users', userId, {
+          userId,
+          email: sessionEmail,
+          lastLogin: new Date().toISOString(),
+          role: 'administrator'
+        });
+      }
     }
     return true;
   }
@@ -885,10 +892,10 @@ export const wipeUserFirestoreData = async (userId) => {
 
 export const resetAccountKeepAuth = async () => {
   const session = localStorage.getItem(KEYS.AUTH);
-  const userId = getFirebaseUserId();
+  const userId = getRealUserId();
   
   // Wipe cloud data if connected
-  if (firebaseReady && userId && userId !== 'demo-user') {
+  if (firebaseReady && userId) {
     await wipeUserFirestoreData(userId);
   }
   
@@ -936,7 +943,7 @@ export const getSubscriptionStatus = () => {
 
       // Silently update Firestore to free/expired as well
       if (firebaseReady) {
-        const userId = getFirebaseUserId();
+        const userId = getRealUserId();
         setDoc(doc(db, 'subscription', userId), expiredSub, { merge: true });
         setDoc(doc(db, 'usersList', userId), { planStatus: 'free' }, { merge: true });
         setDoc(doc(db, 'settings', userId), { planStatus: 'free' }, { merge: true });
@@ -962,7 +969,7 @@ export const saveSubscriptionStatus = (status) => {
 // --- USER REGISTRY & PREMIUM PIPELINE ---
 export const registerOrUpdateUserList = async (activeSettings) => {
   if (!firebaseReady) return;
-  const userId = getFirebaseUserId();
+  const userId = getRealUserId();
   if (!userId) return;
 
   const authSession = getAuthSession();
@@ -992,7 +999,7 @@ export const submitPremiumRequest = async (plan, paidAmount, paymentMethod, tran
   if (!firebaseReady) {
     throw new Error('You must be connected to the internet to submit a premium activation request.');
   }
-  const userId = getFirebaseUserId();
+  const userId = getRealUserId();
   if (!userId) throw new Error('User session not found.');
 
   const authSession = getAuthSession();
@@ -1627,15 +1634,15 @@ export const saveInvoice = async (invoice) => {
   if (!invoice.paymentHistory) invoice.paymentHistory = [];
   if (!invoice.paymentProofs) invoice.paymentProofs = [];
 
-  invoice.userId = getFirebaseUserId();
+  invoice.userId = getRealUserId() || 'local-user';
 
   const timestamp = new Date().toISOString();
   const sessionStr = localStorage.getItem(GLOBAL_KEYS.AUTH);
   const session = sessionStr ? JSON.parse(sessionStr) : null;
-  const userEmail = session?.userEmail || session?.email || 'demo-user';
+  const userEmail = session?.userEmail || session?.email || 'local-user';
   const settings = getSettings();
   
-  invoice.createdByUid = getFirebaseUserId();
+  invoice.createdByUid = invoice.userId;
   invoice.createdByEmail = userEmail;
   invoice.businessContactEmail = settings?.email || userEmail;
 
@@ -1869,7 +1876,7 @@ export const ensureInvoicePublicToken = async (invoice) => {
       console.log('[DEBUG] ensureInvoicePublicToken - Force writing public copy to publicInvoices/' + token);
       await firestoreSave('publicInvoices', token, invoice);
 
-      const userId = getFirebaseUserId();
+      const userId = getRealUserId();
       if (userId && invoice.id) {
         console.log('[DEBUG] ensureInvoicePublicToken - Force writing private copy to invoices/' + userId + '/items/' + invoice.id);
         await setDoc(doc(db, 'invoices', userId, 'items', invoice.id), invoice);
@@ -2063,7 +2070,7 @@ export const importRestore = async (backupData) => {
 
   // If Firebase is enabled, batch update Firestore as well
   if (firebaseReady) {
-    const userId = getFirebaseUserId();
+    const userId = getRealUserId();
     firestoreSave('settings', userId, backupData.settings);
     backupData.customers.forEach(c => firestoreSave('customers', c.id, c));
     backupData.products.forEach(p => firestoreSave('products', p.id, p));
@@ -2134,7 +2141,7 @@ let unsubscribes = [];
 export const enableRealTimeSync = () => {
   if (!firebaseReady) return;
 
-  const userId = getFirebaseUserId();
+  const userId = getRealUserId();
   console.log('Enabling Real-Time Sync for workspace:', userId);
 
   // Clear any existing listeners
@@ -2177,7 +2184,7 @@ export const syncFromFirestore = async () => {
   }
   try {
     await migrateGlobalToScopedStorage();
-    const userId = getFirebaseUserId();
+    const userId = getRealUserId();
     console.log("Syncing data from Firestore for user: " + userId);
 
     // 1. Flush offline transactions first to avoid overwriting them
