@@ -131,7 +131,7 @@ function App() {
 
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
   const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!getAuthSession());
   const [currentTab, setCurrentTab] = useState(() => {
     const saved = localStorage.getItem('billqyro_last_route');
     if (saved) {
@@ -417,6 +417,8 @@ function App() {
               });
             });
           }
+        } else {
+          setIsAuthenticated(false);
         }
       });
       return () => unsubscribe();

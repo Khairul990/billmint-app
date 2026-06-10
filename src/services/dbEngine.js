@@ -761,6 +761,11 @@ export const getAuthSession = () => {
       logout();
       return null;
     }
+    // Strict valid user check (no demo or missing email)
+    if (firebaseReady && (!data.uid || data.uid === 'demo-user' || !data.userEmail || data.userEmail === 'No email')) {
+      logout();
+      return null;
+    }
     return data;
   } catch (e) {
     return null;
