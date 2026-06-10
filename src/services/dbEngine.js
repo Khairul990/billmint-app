@@ -2148,10 +2148,19 @@ export const enableRealTimeSync = () => {
   unsubscribes.forEach(unsub => unsub());
   const syncCollection = (collectionName, storageKey) => {
     const colRef = collection(db, collectionName, userId, 'items');
-    const unsub = onSnapshot(colRef, (snapshot) => {
+    const unsub = onSnapshot(colRef, async (snapshot) => {
       const items = [];
-      snapshot.forEach(doc => items.push(doc.data()));
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        data.syncStatus = 'synced';
+        items.push(data);
+      });
       localStorage.setItem(storageKey, JSON.stringify(items));
+      // Update IndexedDB to keep it consistent
+      await BillQyroDB.clear(collectionName);
+      for (const item of items) {
+        await BillQyroDB.put(collectionName, item);
+      }
       window.dispatchEvent(new CustomEvent('billqyro_sync'));
     });
     unsubscribes.push(unsub);
@@ -2183,20 +2192,38 @@ export const syncFromFirestore = async () => {
     return null;
   }
   try {
-    await migrateGlobalToScopedStorage();
     const userId = getRealUserId();
+    if (!userId) return null;
+    // Backup local data before clearing cache
+    const backupSuccess = await backupLocalData();
+    if (!backupSuccess) {
+      toast.error('Backup failed, sync cancelled');
+      console.error('Backup of local data failed. Aborting sync.');
+      return;
+    }
+    toast.success('Local data backed up on this device');
     console.log("Syncing data from Firestore for user: " + userId);
 
-    // 1. Flush offline transactions first to avoid overwriting them
+    // 1. Flush offline transactions first to avoid losing offline work
     if (navigator.onLine) {
       await syncOfflineTransactions();
     }
 
+    // 2. Clear current scoped device cache before applying cloud data
+    // This prevents old device data from lingering and mixing with Cloud truth
+    clearCacheOnly();
+    await BillQyroDB.clear('customers');
+    await BillQyroDB.clear('products');
+    await BillQyroDB.clear('invoices');
+    await BillQyroDB.clear('expenses');
+
+    // 3. Apply Settings
     const settingsDoc = await getDoc(doc(db, 'settings', userId));
     if (settingsDoc.exists()) {
       localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settingsDoc.data()));
     }
 
+    // 4. Apply Customers
     const customersSnap = await getDocs(collection(db, 'customers', userId, 'items'));
     const customers = [];
     customersSnap.forEach(docSnap => {
@@ -2255,7 +2282,7 @@ export const syncFromFirestore = async () => {
     }
 
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
-
+    toast.success('Cloud data synced successfully');
     return {
       settings: JSON.parse(localStorage.getItem(KEYS.SETTINGS)),
       customers: JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [],
@@ -2266,6 +2293,7 @@ export const syncFromFirestore = async () => {
     };
   } catch (error) {
     console.error("Error syncing from Firestore:", error);
+    toast.error('Sync failed: ' + error.message);
     throw error;
   }
 };
@@ -2306,4 +2334,22 @@ export const clearCacheOnly = () => {
   localStorage.removeItem(KEYS.PRODUCTS);
   localStorage.removeItem(KEYS.EXPENSES);
   return {status: 'success'};
+};
+
+// Backup local scoped data before destructive operations
+export const backupLocalData = async () => {
+  try {
+    // Create backups for each scoped key
+    const keys = [KEYS.SETTINGS, KEYS.CUSTOMERS, KEYS.PRODUCTS, KEYS.INVOICES, KEYS.EXPENSES, KEYS.SUBSCRIPTION];
+    keys.forEach(k => {
+      const data = localStorage.getItem(k);
+      if (data !== null) {
+        localStorage.setItem(`${k}_backup`, data);
+      }
+    });
+    return true;
+  } catch (e) {
+    console.error('Backup local data error:', e);
+    return false;
+  }
 };

@@ -287,7 +287,12 @@ function App() {
         console.error("Error loading local data:", err);
       } finally {
         // Luxury delay for smooth Firebase auth resolution and UI transition
-        setTimeout(() => setIsAppBooting(false), 1500); 
+        setTimeout(() => {
+          const session = localStorage.getItem('billqyro_auth');
+          if (!session || !navigator.onLine) {
+            setIsAppBooting(false);
+          }
+        }, 1500); 
       }
     };
     loadLocalData();
@@ -455,6 +460,8 @@ function App() {
         } catch (e) {
           sendEmpireError({ errorType: "sync_failed", message: "Could not sync Firestore on startup", severity: "Medium" });
           console.warn('Could not sync Firestore on startup. Falling back to LocalStorage.', e);
+        } finally {
+          setIsAppBooting(false);
         }
       };
       runSync();

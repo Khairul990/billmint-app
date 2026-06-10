@@ -101,6 +101,28 @@ const SystemHealth = ({ setCurrentTab }) => {
 
   const [hasBackedUp, setHasBackedUp] = useState(false);
 
+  const handleReplaceWithCloud = async () => {
+    if (!hasBackedUp) {
+      toast.error('Please backup your data before replacing with cloud data.');
+      return;
+    }
+    if (!window.confirm('This will clear all local cache on this device and replace it with data from the cloud. Proceed?')) {
+      return;
+    }
+    try {
+      const { clearCacheOnly, syncFromFirestore } = await import('../services/dbEngine');
+      // Clear local cache first
+      clearCacheOnly();
+      // Sync from Firestore (cloud as source of truth)
+      await syncFromFirestore();
+      toast.success('Device data refreshed from cloud. Reloading...');
+      setTimeout(() => window.location.reload(true), 1500);
+    } catch (e) {
+      console.error('Failed to replace device data with cloud:', e);
+      toast.error('Failed to replace data. See console for details.');
+    }
+  };
+
   const handleMigrate = async () => {
     if (!hasBackedUp) {
       toast.error('Please backup your data first before migrating.');
@@ -283,6 +305,14 @@ const SystemHealth = ({ setCurrentTab }) => {
           >
             <h4 className="font-bold text-red-500 group-hover:text-red-600 mb-1">Clear Device Cache</h4>
             <p className="text-xs text-red-400/80 font-medium">Wipe local device data only</p>
+          </button>
+
+          <button 
+            onClick={handleReplaceWithCloud}
+            className="p-4 rounded-2xl border border-green-500/30 bg-green-500/5 hover:bg-green-500/10 transition-colors text-left group"
+          >
+            <h4 className="font-bold text-green-500 group-hover:text-green-600 mb-1">Replace This Device With Cloud Data</h4>
+            <p className="text-xs text-green-400/80 font-medium">Clear local cache and load fresh cloud data</p>
           </button>
         </div>
       </div>
