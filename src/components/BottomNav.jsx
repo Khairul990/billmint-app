@@ -8,12 +8,27 @@ import { t } from '../utils/i18n';
  * @param {string} currentTab - active state key
  * @param {Function} setCurrentTab - state update dispatcher
  */
-const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPaymentsCount = 0 }) => {
+const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPaymentsCount = 0, businessSettings }) => {
+  // Dynamic terminology
+  const activeWsId = businessSettings?.activeWorkspaceId;
+  const activeWorkspace = businessSettings?.businessWorkspaces?.find(ws => ws.id === activeWsId) || {};
+  const wsType = activeWorkspace.type || 'retail';
+
+  const getCustomerLabel = () => {
+    switch(wsType) {
+      case 'doctor': return 'Patients';
+      case 'teacher': return 'Students';
+      case 'freelance':
+      case 'service': return 'Clients';
+      default: return t('customers');
+    }
+  };
+
   const tabs = [
     { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
     { id: 'invoices', label: t('invoices'), icon: FileSpreadsheet },
     { id: 'create', isAction: true },
-    { id: 'customers', label: t('customers'), icon: Users },
+    { id: 'customers', label: getCustomerLabel(), icon: Users },
     { id: 'more', label: 'More', icon: MoreHorizontal },
   ];
 

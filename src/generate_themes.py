@@ -182,6 +182,51 @@ themes = [
         "light_card": "#ffffff",
         "light_text": "#0a0a0a",
         "dark_text": "#e0e0e0"
+    },
+    {
+        "id": "crimson-gold",
+        "name": "Crimson Gold",
+        "accent": "#d4af37",
+        "accent_dark": "#aa8c2c",
+        "accent_rgb": "212, 175, 55",
+        "dark_bg": "#1c0a0f",
+        "dark_surface": "#2d1118",
+        "dark_card": "#3d1720",
+        "light_bg": "#fcf5f7",
+        "light_surface": "#ffffff",
+        "light_card": "#ffffff",
+        "light_text": "#1c0a0f",
+        "dark_text": "#fde8ed"
+    },
+    {
+        "id": "royal-black",
+        "name": "Royal Black",
+        "accent": "#eab308",
+        "accent_dark": "#ca8a04",
+        "accent_rgb": "234, 179, 8",
+        "dark_bg": "#050505",
+        "dark_surface": "#121212",
+        "dark_card": "#1c1c1c",
+        "light_bg": "#fafafa",
+        "light_surface": "#ffffff",
+        "light_card": "#ffffff",
+        "light_text": "#050505",
+        "dark_text": "#f5f5f5"
+    },
+    {
+        "id": "luxury-cream",
+        "name": "Luxury Cream",
+        "accent": "#b48c59",
+        "accent_dark": "#937042",
+        "accent_rgb": "180, 140, 89",
+        "dark_bg": "#1c1a17",
+        "dark_surface": "#2b2823",
+        "dark_card": "#38342e",
+        "light_bg": "#fdfbf7",
+        "light_surface": "#ffffff",
+        "light_card": "#ffffff",
+        "light_text": "#26231e",
+        "dark_text": "#f5eedc"
     }
 ]
 

@@ -69,6 +69,9 @@ const DataDeletion = React.lazy(() => import('./pages/DataDeletion'));
 const Support = React.lazy(() => import('./pages/Support'));
 const SystemHealth = React.lazy(() => import('./pages/SystemHealth'));
 const AuditLogs = React.lazy(() => import('./pages/AuditLogs'));
+const WorkspaceManager = React.lazy(() => import('./pages/WorkspaceManager'));
+const Appointments = React.lazy(() => import('./pages/Appointments'));
+const Orders = React.lazy(() => import('./pages/Orders'));
 import QuickBillModal from './components/QuickBillModal';
 
 class ErrorBoundary extends React.Component {
@@ -1017,6 +1020,10 @@ function App() {
             businessSettings={settings}
           />
         );
+      case 'appointments':
+        return <Appointments />;
+      case 'orders':
+        return <Orders />;
       case 'subscription':
         return (
           <Subscription
@@ -1086,6 +1093,17 @@ function App() {
         return <DataDeletion onBack={() => setCurrentTab('more')} />;
       case 'support':
         return <Support onBack={() => setCurrentTab('more')} />;
+      case 'workspace-manager':
+        return (
+          <WorkspaceManager
+            businessWorkspaces={businessWorkspaces}
+            activeWorkspaceId={activeWorkspaceId}
+            setActiveWorkspace={setActiveWorkspace}
+            settings={settings}
+            onSaveSettings={handleSaveSettings}
+            setCurrentTab={setCurrentTab}
+          />
+        );
       case 'settings': {
         const session = getAuthSession();
         return (

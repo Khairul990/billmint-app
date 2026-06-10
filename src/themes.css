@@ -678,6 +678,176 @@
   --input-bg: #151515;
   --chart-primary: #212121;
   --status-success: #10B981;
+  --status-danger: #EF4444;
+}
+
+/* 21. Crimson Gold */
+[data-theme="crimson-gold"] {
+  --app-bg: #fcf5f7;
+  --app-bg-soft: #fcf5f7;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --card-bg: #ffffff;
+  --text-primary: #1c0a0f;
+  --text-secondary: #1c0a0f;
+  --text-muted: #1c0a0f99;
+  --button-text: #FFFFFF;
+  --border-soft: rgba(212, 175, 55, 0.15);
+  --border-strong: rgba(212, 175, 55, 0.3);
+  --accent: #d4af37;
+  --accent-light: rgba(212, 175, 55, 0.08);
+  --accent-dark: #aa8c2c;
+  --accent-gradient: linear-gradient(135deg, #d4af37, #aa8c2c);
+  --accent-glow: rgba(212, 175, 55, 0.25);
+  --sidebar-bg: #fcf5f7;
+  --sidebar-active: rgba(212, 175, 55, 0.1);
+  --sidebar-text: #1c0a0f;
+  --input-bg: #ffffff;
+  --chart-primary: #d4af37;
+  --status-success: #10B981;
   --status-warning: #F59E0B;
   --status-danger: #EF4444;
+}
+.dark[data-theme="crimson-gold"] {
+  --app-bg: #1c0a0f;
+  --app-bg-soft: #2d1118;
+  --surface: #1c0a0f;
+  --surface-elevated: #2d1118;
+  --card-bg: #3d1720;
+  --text-primary: #fde8ed;
+  --text-secondary: #fde8ed;
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --button-text: #FFFFFF;
+  --border-soft: rgba(212, 175, 55, 0.15);
+  --border-strong: rgba(212, 175, 55, 0.3);
+  --accent: #d4af37;
+  --accent-light: rgba(212, 175, 55, 0.15);
+  --accent-dark: #aa8c2c;
+  --accent-gradient: linear-gradient(135deg, #d4af37, #aa8c2c);
+  --accent-glow: rgba(212, 175, 55, 0.3);
+  --sidebar-bg: #1c0a0f;
+  --sidebar-active: rgba(212, 175, 55, 0.15);
+  --sidebar-text: #fde8ed;
+  --input-bg: #3d1720;
+  --chart-primary: #d4af37;
+  --status-success: #10B981;
+  --status-warning: #F59E0B;
+  --status-danger: #EF4444;
+}
+[data-theme="crimson-gold"] .gradient-bg {
+  background: linear-gradient(135deg, #1c0a0f 0%, #2d1118 100%);
+}
+
+/* 22. Royal Black */
+[data-theme="royal-black"] {
+  --app-bg: #fafafa;
+  --app-bg-soft: #fafafa;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --card-bg: #ffffff;
+  --text-primary: #050505;
+  --text-secondary: #050505;
+  --text-muted: #05050599;
+  --button-text: #FFFFFF;
+  --border-soft: rgba(234, 179, 8, 0.15);
+  --border-strong: rgba(234, 179, 8, 0.3);
+  --accent: #eab308;
+  --accent-light: rgba(234, 179, 8, 0.08);
+  --accent-dark: #ca8a04;
+  --accent-gradient: linear-gradient(135deg, #eab308, #ca8a04);
+  --accent-glow: rgba(234, 179, 8, 0.25);
+  --sidebar-bg: #fafafa;
+  --sidebar-active: rgba(234, 179, 8, 0.1);
+  --sidebar-text: #050505;
+  --input-bg: #ffffff;
+  --chart-primary: #eab308;
+  --status-success: #10B981;
+  --status-warning: #F59E0B;
+  --status-danger: #EF4444;
+}
+.dark[data-theme="royal-black"] {
+  --app-bg: #050505;
+  --app-bg-soft: #121212;
+  --surface: #050505;
+  --surface-elevated: #121212;
+  --card-bg: #1c1c1c;
+  --text-primary: #f5f5f5;
+  --text-secondary: #f5f5f5;
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --button-text: #FFFFFF;
+  --border-soft: rgba(234, 179, 8, 0.15);
+  --border-strong: rgba(234, 179, 8, 0.3);
+  --accent: #eab308;
+  --accent-light: rgba(234, 179, 8, 0.15);
+  --accent-dark: #ca8a04;
+  --accent-gradient: linear-gradient(135deg, #eab308, #ca8a04);
+  --accent-glow: rgba(234, 179, 8, 0.3);
+  --sidebar-bg: #050505;
+  --sidebar-active: rgba(234, 179, 8, 0.15);
+  --sidebar-text: #f5f5f5;
+  --input-bg: #1c1c1c;
+  --chart-primary: #eab308;
+  --status-success: #10B981;
+  --status-warning: #F59E0B;
+  --status-danger: #EF4444;
+}
+[data-theme="royal-black"] .gradient-bg {
+  background: linear-gradient(135deg, #050505 0%, #121212 100%);
+}
+
+/* 23. Luxury Cream */
+[data-theme="luxury-cream"] {
+  --app-bg: #fdfbf7;
+  --app-bg-soft: #fdfbf7;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --card-bg: #ffffff;
+  --text-primary: #26231e;
+  --text-secondary: #26231e;
+  --text-muted: #26231e99;
+  --button-text: #FFFFFF;
+  --border-soft: rgba(180, 140, 89, 0.15);
+  --border-strong: rgba(180, 140, 89, 0.3);
+  --accent: #b48c59;
+  --accent-light: rgba(180, 140, 89, 0.08);
+  --accent-dark: #937042;
+  --accent-gradient: linear-gradient(135deg, #b48c59, #937042);
+  --accent-glow: rgba(180, 140, 89, 0.25);
+  --sidebar-bg: #fdfbf7;
+  --sidebar-active: rgba(180, 140, 89, 0.1);
+  --sidebar-text: #26231e;
+  --input-bg: #ffffff;
+  --chart-primary: #b48c59;
+  --status-success: #10B981;
+  --status-warning: #F59E0B;
+  --status-danger: #EF4444;
+}
+.dark[data-theme="luxury-cream"] {
+  --app-bg: #1c1a17;
+  --app-bg-soft: #2b2823;
+  --surface: #1c1a17;
+  --surface-elevated: #2b2823;
+  --card-bg: #38342e;
+  --text-primary: #f5eedc;
+  --text-secondary: #f5eedc;
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --button-text: #FFFFFF;
+  --border-soft: rgba(180, 140, 89, 0.15);
+  --border-strong: rgba(180, 140, 89, 0.3);
+  --accent: #b48c59;
+  --accent-light: rgba(180, 140, 89, 0.15);
+  --accent-dark: #937042;
+  --accent-gradient: linear-gradient(135deg, #b48c59, #937042);
+  --accent-glow: rgba(180, 140, 89, 0.3);
+  --sidebar-bg: #1c1a17;
+  --sidebar-active: rgba(180, 140, 89, 0.15);
+  --sidebar-text: #f5eedc;
+  --input-bg: #38342e;
+  --chart-primary: #b48c59;
+  --status-success: #10B981;
+  --status-warning: #F59E0B;
+  --status-danger: #EF4444;
+}
+[data-theme="luxury-cream"] .gradient-bg {
+  background: linear-gradient(135deg, #1c1a17 0%, #2b2823 100%);
 }

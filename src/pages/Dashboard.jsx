@@ -271,15 +271,21 @@ const Dashboard = ({
           </motion.div>
         )}
 
-        {/* 1. HEADER & QUICK ACTIONS */}
-        <div className="space-y-6 md:space-y-4">
-          <div className="space-y-0.5 md:space-y-2">
-            <h1 className="text-xl md:text-2xl font-black text-theme-primary tracking-tight">{t('dashboard')}</h1>
-            <p className="text-xs md:text-sm text-theme-muted font-bold">{t('welcome')}</p>
+        {/* 1. COMPACT HEADER */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg md:text-xl font-black text-theme-primary tracking-tight">{businessName}</h1>
+              <span className="bg-theme-accent/10 text-theme-accent px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider">
+                {businessSettings?.activeWorkspaceName || 'Main Workspace'}
+              </span>
+            </div>
+            <p className="text-[10px] md:text-xs text-theme-muted font-bold">{t('welcome')}, {businessSettings?.ownerName || 'Admin'}</p>
           </div>
+        </div>
 
-          {/* Quick Action Grid */}
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        {/* 2. QUICK ACTIONS (2x2 Mobile) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <button
               onClick={() => setCurrentTab('create')}
               className="flex flex-col items-center justify-center p-4 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white rounded-xl shadow-md hover:scale-105 transition-transform"
@@ -309,10 +315,9 @@ const Dashboard = ({
               <span className="text-xs font-medium text-theme-primary">Collect Payment</span>
             </button>
           </div>
-        </div>
 
-        {/* 2. STATS ROW (4 CARDS) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* 3. STATS ROW (2x2 Grid on Mobile, 4x1 on Desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {/* Revenue */}
           <div className="bg-theme-card rounded-2xl p-4 md:p-5 border border-theme-border-soft shadow-premium hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col justify-between group">
             <div className="flex items-center gap-3 mb-3">
@@ -370,9 +375,8 @@ const Dashboard = ({
           </div>
         </div>
 
-        {/* 3. WIDGETS ROW 1 */}
+        {/* 4. RECENT INVOICES & REVENUE CHART (Desktop Grid) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Recent Invoices Card (Left) */}
           <div className="lg:col-span-2 bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
@@ -409,8 +413,8 @@ const Dashboard = ({
             </div>
           </div>
 
-          {/* Revenue vs Expenses Chart (hide on mobile) */}
-          <div className="lg:col-span-1 bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium flex flex-col hidden md:block">
+          {/* Revenue vs Expenses Chart (hidden on mobile) */}
+          <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium flex-col hidden md:flex">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-theme-accent" /> {t('revenue_vs_expenses')}
@@ -446,10 +450,10 @@ const Dashboard = ({
           </div>
         </div>
 
-        {/* 4. WIDGETS ROW 2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 5. WIDGETS ROW 2 (Desktop Only Charts) */}
+        <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Top Customers (Pie Chart) */}
-          <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium flex flex-col">
+          <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium flex-col flex">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
                 <PieChartIcon className="w-4 h-4 text-theme-accent" /> {t('top_customers')}
@@ -517,7 +521,7 @@ const Dashboard = ({
           </div>
         </div>
 
-        {/* 5. WIDGETS ROW 3 (Banner) */}
+        {/* 6. UPGRADE BANNER */}
         <div className="bg-[image:var(--accent-gradient)] rounded-3xl p-6 md:p-8 text-white shadow-premium relative overflow-hidden">
           <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/20 blur-3xl rounded-full" />
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">

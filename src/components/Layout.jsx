@@ -286,6 +286,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         setCurrentTab={setCurrentTab} 
         onQuickBillOpen={onQuickBillOpen} 
         pendingPaymentsCount={pendingPaymentsCount}
+        businessSettings={businessSettings}
       />
     </div>
   );

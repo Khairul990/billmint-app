@@ -578,3 +578,25 @@ input[type=range]::-webkit-slider-runnable-track {
 .dark input[type=range]::-webkit-slider-runnable-track {
   background: var(--border-soft);
 }
+
+/* Mobile Experience Best Practices */
+button, input, select, textarea, .touch-target {
+  min-height: 44px;
+}
+
+/* Specific overrides for small icons where 44px looks broken, use padding instead of height */
+button.icon-only {
+  min-height: auto;
+  padding: 10px;
+}
+
+body {
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+}
+
+/* No desktop squeeze */
+.main-content-wrapper {
+  min-width: 320px;
+}

@@ -34,6 +34,18 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
     });
   };
 
+  const wsType = activeWorkspace.type || 'retail';
+
+  const getCustomerLabel = () => {
+    switch(wsType) {
+      case 'doctor': return 'Patients';
+      case 'teacher': return 'Students';
+      case 'freelance':
+      case 'service': return 'Clients';
+      default: return t('customers');
+    }
+  };
+
   let menuItems = [
     { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
     { id: 'invoices', label: t('invoices'), icon: FileSpreadsheet },
@@ -41,7 +53,9 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
     { id: 'marketplace', label: 'Template Marketplace', icon: Store },
     { id: 'pdf-templates', label: 'PDF Templates', icon: Palette },
     { id: 'live-link-templates', label: 'Live Link Studio', icon: Smartphone },
-    { id: 'customers', label: t('customers'), icon: Users },
+    { id: 'customers', label: getCustomerLabel(), icon: Users },
+    ...(wsType === 'doctor' ? [{ id: 'appointments', label: 'Appointments', icon: Users }] : []),
+    ...(['retail', 'service', 'tailor'].includes(wsType) ? [{ id: 'orders', label: 'Orders', icon: Store }] : []),
     { id: 'reports', label: 'Reports', icon: PieChart },
     { id: 'expenses', label: t('expenses'), icon: TrendingDown },
     { id: 'backup-restore', label: 'Backup & Restore', icon: Database },
