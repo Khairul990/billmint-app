@@ -40,8 +40,13 @@ export const useThemeEngine = (businessSettings) => {
     const root = document.documentElement;
 
     // Default built-in theme
-    const validThemes = ['obsidian-gold', 'arctic-teal', 'sapphire-noir', 'rose-platinum', 'carbon-violet', 'graphite-copper', 'arctic-diamond', 'emerald-royal', 'midnight-ruby', 'titanium-blue'];
-    let themeName = businessSettings?.themeColor || 'obsidian-gold';
+    const validThemes = ['obsidian-gold', 'arctic-teal', 'sapphire-noir', 'rose-platinum', 'carbon-violet', 'graphite-copper', 'arctic-diamond', 'emerald-royal', 'midnight-ruby', 'titanium-blue', 'pink', 'indigo', 'emerald', 'rose', 'midnight', 'champagne', 'ruby', 'ocean-blue', 'sunset-orange', 'forest-green'];
+    let themeName = businessSettings?.themeColor;
+    
+    if (!themeName || !validThemes.includes(themeName)) {
+      themeName = localStorage.getItem('billqyro_admin_default_theme') || 'obsidian-gold';
+    }
+    
     if (!validThemes.includes(themeName)) {
       themeName = 'obsidian-gold';
     }

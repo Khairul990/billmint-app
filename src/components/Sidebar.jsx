@@ -71,7 +71,11 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
     menuItems = menuItems.filter(item => {
       if (item.id === 'products' && !enabledModules.includes('products')) return false;
       if (item.id === 'due-ledger' && !enabledModules.includes('dueLedger')) return false;
-      // Additional module checks can be added here
+      if (item.id === 'customers' && !enabledModules.includes('customers')) return false;
+      if (item.id === 'estimates' && !enabledModules.includes('estimates')) return false;
+      if (item.id === 'expenses' && !enabledModules.includes('expenses')) return false;
+      if (item.id === 'reports' && !enabledModules.includes('reports')) return false;
+      if (item.id === 'invoices' && !enabledModules.includes('billing')) return false;
       return true;
     });
   }

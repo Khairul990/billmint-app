@@ -446,13 +446,17 @@ function App() {
               if (adminGlobal) {
                 if (adminGlobal.defaultTheme) {
                   localStorage.setItem('billqyro_admin_default_theme', adminGlobal.defaultTheme);
-                  document.documentElement.setAttribute('data-theme', adminGlobal.defaultTheme);
-                  import('./utils/themeIcon').then(m => m.updateFaviconForTheme(adminGlobal.defaultTheme));
+                  if (!synced?.settings?.themeColor && !synced?.settings?.brandColor) {
+                    document.documentElement.setAttribute('data-theme', adminGlobal.defaultTheme);
+                    import('./utils/themeIcon').then(m => m.updateFaviconForTheme(adminGlobal.defaultTheme));
+                  }
                 }
               if (adminGlobal.defaultMode) {
                 localStorage.setItem('billqyro_admin_default_mode', adminGlobal.defaultMode);
-                if (adminGlobal.defaultMode === 'dark') document.documentElement.classList.add('dark');
-                else document.documentElement.classList.remove('dark');
+                if (!synced?.settings?.displayMode) {
+                  if (adminGlobal.defaultMode === 'dark') document.documentElement.classList.add('dark');
+                  else document.documentElement.classList.remove('dark');
+                }
               }
             }
           } catch (e) { console.warn('Could not fetch admin settings on boot.'); }
@@ -470,25 +474,15 @@ function App() {
     }
   }, [isAuthenticated]);
 
-  // Listen for Real-Time cloud updates triggered by storage.js
-  useEffect(() => {
-    const handleSync = async () => {
-      setInvoices(await getInvoices());
-      setCustomers(await getCustomers());
-      setProducts(await getProducts());
-      setSettings(getSettings());
-      setExpenses(await getExpenses());
-      setSubscription(getSubscriptionStatus());
-    };
 
-    window.addEventListener('billqyro_sync', handleSync);
-    return () => window.removeEventListener('billqyro_sync', handleSync);
-  }, []);
 
   // --- AUTH BRIDGE ---
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
-    setShowWelcomeAnimation(true);
+    if (!sessionStorage.getItem('billqyro_welcome_shown')) {
+      setShowWelcomeAnimation(true);
+      sessionStorage.setItem('billqyro_welcome_shown', 'true');
+    }
     setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
 
     getInvoices().then(setInvoices);
@@ -528,19 +522,26 @@ function App() {
 
   // Onboarding Interceptor for Authenticated Session Boot
   useEffect(() => {
-    if (isAuthenticated && settings) {
+    if (isAuthenticated && settings && !isAppBooting) {
       const isLegacyConfigured = !!(settings.businessName && settings.businessName.trim());
       if (!settings.setupCompleted) {
         if (isLegacyConfigured) {
           const updated = { ...settings, setupCompleted: true };
           saveSettings(updated);
           setSettings(updated);
+          if (currentTab === 'onboarding') {
+            setCurrentTab('dashboard');
+          }
         } else {
           setCurrentTab('onboarding');
         }
+      } else {
+        if (currentTab === 'onboarding') {
+          setCurrentTab('dashboard');
+        }
       }
     }
-  }, [isAuthenticated, settings]);
+  }, [isAuthenticated, settings, isAppBooting, currentTab]);
 
   const handleLogout = async () => {
     try {

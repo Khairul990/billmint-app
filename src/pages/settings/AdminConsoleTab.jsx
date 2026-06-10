@@ -680,7 +680,7 @@ const AdminConsoleTab = (props) => {
                 </h3>
                 <div className="space-y-2">
                   <div className="flex gap-2 mb-2">
-                    {['firebase', 'supabase', 'dual'].map(provider => (
+                    {['firebase'].map(provider => (
                       <button
                         key={provider}
                         type="button"

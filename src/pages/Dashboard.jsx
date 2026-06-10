@@ -291,28 +291,28 @@ const Dashboard = ({
               className="flex flex-col items-center justify-center p-4 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white rounded-xl shadow-md hover:scale-105 transition-transform"
             >
               <Plus className="w-6 h-6 mb-1" />
-              <span className="text-xs font-medium">Create Invoice</span>
+              <span className="text-xs font-medium text-center">Create Invoice</span>
             </button>
             <button
               onClick={() => setCurrentTab('customers')}
               className="flex flex-col items-center justify-center p-4 bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:bg-theme-app transition-colors"
             >
               <Users className="w-6 h-6 mb-1 text-theme-primary" />
-              <span className="text-xs font-medium text-theme-primary">Add Customer</span>
+              <span className="text-xs font-medium text-theme-primary text-center">Add Customer</span>
             </button>
             <button
               onClick={() => setCurrentTab('products')}
               className="flex flex-col items-center justify-center p-4 bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:bg-theme-app transition-colors"
             >
               <FileSpreadsheet className="w-6 h-6 mb-1 text-theme-primary" />
-              <span className="text-xs font-medium text-theme-primary">Add Product</span>
+              <span className="text-xs font-medium text-theme-primary text-center">Add Product</span>
             </button>
             <button
               onClick={() => setCurrentTab('pending-payments')}
               className="flex flex-col items-center justify-center p-4 bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:bg-theme-app transition-colors"
             >
               <Bell className="w-6 h-6 mb-1 text-theme-primary" />
-              <span className="text-xs font-medium text-theme-primary">Collect Payment</span>
+              <span className="text-xs font-medium text-theme-primary text-center">Collect Payment</span>
             </button>
           </div>
 
