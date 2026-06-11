@@ -1247,61 +1247,70 @@ function App() {
             </motion.div>
           </motion.div>
         ) : (
-<motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="w-full h-full">
+          <motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="w-full h-full">
             <PostLoginWelcome 
               show={showWelcomeAnimation} 
               userName={settings?.businessName || ''} 
               onComplete={() => setShowWelcomeAnimation(false)} 
             />
-            <Layout
-              currentTab={currentTab}
-              setCurrentTab={(tab) => {
-                if (tab !== 'create-invoice') {
-                  setEditingInvoice(null);
-                }
-                setCurrentTab(tab);
-              }}
-              onLogout={handleLogout}
-              businessSettings={settings}
-              isAuthenticated={isAuthenticated}
-              userRole={userRole}
-              invoices={invoices}
-              subscription={subscription}
-              userEmail={getAuthSession()?.userEmail}
-              onQuickBillOpen={() => setIsQuickBillOpen(true)}
-              pendingPaymentsCount={pendingPayments.length}
-              businessWorkspaces={businessWorkspaces}
-              activeWorkspaceId={activeWorkspaceId}
-              setActiveWorkspace={setActiveWorkspace}
-              syncSource="cloud"
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentTab}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
-                  className="w-full h-full"
-                >
-                  <React.Suspense fallback={
-                    <div className="flex h-64 items-center justify-center">
-                      <div className="w-10 h-10 border-4 border-theme-border-soft border-t-theme-accent rounded-full animate-spin"></div>
-                    </div>
-                  }>
-                    {renderTabContent()}
-                  </React.Suspense>
-                </motion.div>
-              </AnimatePresence>
-              
-              <QuickBillModal 
-                isOpen={isQuickBillOpen}
-                onClose={() => setIsQuickBillOpen(false)}
-                onSave={handleSaveInvoice}
-                businessSettings={settings}
+            {currentTab === 'onboarding' ? (
+              <OnboardingWizard 
+                onComplete={() => setCurrentTab('dashboard')} 
+                businessSettings={settings} 
+                onSaveSettings={handleSaveSettings}
                 invoices={invoices}
               />
-            </Layout>
+            ) : (
+              <Layout
+                currentTab={currentTab}
+                setCurrentTab={(tab) => {
+                  if (tab !== 'create-invoice') {
+                    setEditingInvoice(null);
+                  }
+                  setCurrentTab(tab);
+                }}
+                onLogout={handleLogout}
+                businessSettings={settings}
+                isAuthenticated={isAuthenticated}
+                userRole={userRole}
+                invoices={invoices}
+                subscription={subscription}
+                userEmail={getAuthSession()?.userEmail}
+                onQuickBillOpen={() => setIsQuickBillOpen(true)}
+                pendingPaymentsCount={pendingPayments.length}
+                businessWorkspaces={businessWorkspaces}
+                activeWorkspaceId={activeWorkspaceId}
+                setActiveWorkspace={setActiveWorkspace}
+                syncSource="cloud"
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentTab}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className="w-full h-full"
+                  >
+                    <React.Suspense fallback={
+                      <div className="flex h-64 items-center justify-center">
+                        <div className="w-10 h-10 border-4 border-theme-border-soft border-t-theme-accent rounded-full animate-spin"></div>
+                      </div>
+                    }>
+                      {renderTabContent()}
+                    </React.Suspense>
+                  </motion.div>
+                </AnimatePresence>
+                
+                <QuickBillModal 
+                  isOpen={isQuickBillOpen}
+                  onClose={() => setIsQuickBillOpen(false)}
+                  onSave={handleSaveInvoice}
+                  businessSettings={settings}
+                  invoices={invoices}
+                />
+              </Layout>
+            )}
             <Toaster
               position="bottom-right"
               toastOptions={{
