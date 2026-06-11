@@ -132,6 +132,7 @@ function App() {
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
   const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!getAuthSession());
+  const [syncStatus, setSyncStatus] = useState('Synced');
   const [currentTab, setCurrentTab] = useState(() => {
     const saved = localStorage.getItem('billqyro_last_route');
     if (saved) {
@@ -316,6 +317,23 @@ function App() {
     };
     window.addEventListener('billqyro_sync', handleSync);
     
+    // --- Pro Sync Engine Event Bus ---
+    const handleSettingsUpdated = (e) => {
+      if (e.detail) setSettings(e.detail);
+    };
+    const handleDataUpdated = async (e) => {
+      const col = e.detail?.collectionName;
+      if (col === 'invoices') setInvoices(await getInvoices() || []);
+      if (col === 'customers') setCustomers(await getCustomers() || []);
+      if (col === 'products') setProducts(await getProducts() || []);
+    };
+    const handleSyncStatus = (e) => {
+      if (e.detail) setSyncStatus(e.detail);
+    };
+    window.addEventListener('billqyro:settings-updated', handleSettingsUpdated);
+    window.addEventListener('billqyro:data-updated', handleDataUpdated);
+    window.addEventListener('billqyro:sync-status', handleSyncStatus);
+    
     const handleNavigate = (e) => {
       if (e.detail) {
         setCurrentTab(e.detail);
@@ -325,6 +343,9 @@ function App() {
 
     return () => {
       window.removeEventListener('billqyro_sync', handleSync);
+      window.removeEventListener('billqyro:settings-updated', handleSettingsUpdated);
+      window.removeEventListener('billqyro:data-updated', handleDataUpdated);
+      window.removeEventListener('billqyro:sync-status', handleSyncStatus);
       window.removeEventListener('navigate_tab', handleNavigate);
     };
   }, []);
@@ -1325,6 +1346,22 @@ function App() {
                 style: { borderRadius: '12px', background: '#fff', color: '#1e293b' }
               }}
             />
+            {isAuthenticated && (
+              <div className="fixed bottom-4 left-4 z-[99999] pointer-events-none">
+                <div className={`px-3 py-1.5 rounded-full shadow-lg border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${
+                  syncStatus === 'Synced' ? 'bg-theme-success/10 text-theme-success border-theme-success/20' : 
+                  syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-theme-accent/10 text-theme-accent border-theme-accent/20 animate-pulse' : 
+                  'bg-theme-warning/10 text-theme-warning border-theme-warning/20'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full ${
+                    syncStatus === 'Synced' ? 'bg-theme-success' : 
+                    syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-theme-accent animate-ping' : 
+                    'bg-theme-warning'
+                  }`} />
+                  {syncStatus}
+                </div>
+              </div>
+            )}
             
             {/* Paywall Modal */}
             <AnimatePresence>

@@ -522,63 +522,31 @@ export const getRealUserId = () => {
 
 import { toast } from 'react-hot-toast';
 
-import { getDeviceId } from './syncEngine';
+import { getDeviceId, pushDataUpdate } from './syncEngine';
 
 // Background Firestore Save Helper
 const firestoreSave = async (collectionName, docId, data) => {
   if (!firebaseReady) return { status: 'disabled' };
-  try {
-    const userId = getRealUserId();
-    if (!userId) {
-      console.warn(`[SYNC] Skipped cloud sync for ${collectionName}. No real UID detected. Data saved locally only.`);
-      return { status: 'local-only' };
-    }
-
-    const payload = {
-      ...data,
-      updatedAt: new Date().toISOString(),
-      updatedByDeviceId: getDeviceId(),
-    };
-
-    let docRef;
-    let pathStr = '';
-    
-    if (collectionName === 'settings' || collectionName === 'subscription' || collectionName === 'users') {
-      pathStr = `${collectionName}/${userId}`;
-      docRef = doc(db, collectionName, userId);
-    } else if (collectionName === 'publicInvoices') {
-      pathStr = `publicInvoices/${docId}`;
-      docRef = doc(db, 'publicInvoices', docId);
-    } else {
-      pathStr = `${collectionName}/${userId}/items/${docId}`;
-      docRef = doc(db, collectionName, userId, 'items', docId);
-    }
-    
-    await setDoc(docRef, payload);
-    console.log(`Firestore successfully saved to ${pathStr} for user: ${userId}`);
-    return { status: 'success' };
-  } catch (error) {
-    const userId = getRealUserId();
-    let pathStr = '';
-    
-    if (collectionName === 'settings' || collectionName === 'subscription' || collectionName === 'users') {
-      pathStr = `${collectionName}/${userId}`;
-    } else if (collectionName === 'publicInvoices') {
-      pathStr = `publicInvoices/${docId}`;
-    } else {
-      pathStr = `${collectionName}/${userId}/items/${docId}`;
-    }
-    
-    console.error(`Firestore save failed for ${pathStr}:`, error);
-    
-    // Silently fail for optional audit logs instead of spamming toast notifications and retrying forever
-    if (collectionName === 'auditLogs') {
-      return { status: 'success' }; // Trick the sync queue into dropping it
-    }
-    
-    toast.error(`Sync Blocked! Path: ${pathStr} | User: ${userId} | Code: ${error.code || 'UNKNOWN'} | Reason: ${error.message || 'Permission Denied'}`, { duration: 6000 });
-    return { status: 'failed', error };
+  const userId = getRealUserId();
+  if (!userId) {
+    console.warn(`[SYNC] Skipped cloud sync for ${collectionName}. No real UID detected. Data saved locally only.`);
+    return { status: 'local-only' };
   }
+  
+  if (collectionName === 'auditLogs' || collectionName === 'usersList') {
+    // Audit logs bypass the new Sync Engine Queue because we don't care if they drop offline
+    try {
+      let docRef = (collectionName === 'auditLogs') ? doc(db, collectionName, userId, 'items', docId) : doc(db, collectionName, userId);
+      await setDoc(docRef, data);
+      return { status: 'success' };
+    } catch (e) {
+      return { status: 'failed', error: e };
+    }
+  }
+
+  // Push to advanced Sync Engine for debouncing & offline queue
+  pushDataUpdate(collectionName, userId, docId, data);
+  return { status: 'queued' };
 };
 
 // Background Firestore Delete Helper
