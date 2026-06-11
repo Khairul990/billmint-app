@@ -447,8 +447,15 @@ function App() {
             }
           } catch (e) { console.warn('Could not fetch admin settings on boot.'); }
 
-          // Enable real-time multi-device sync
-          enableRealTimeSync();
+          // Enable real-time multi-device sync via new Sync Engine
+          import('./services/syncEngine').then(({ startRealTimeSync }) => {
+            const userId = auth.currentUser?.uid;
+            if (userId) {
+              startRealTimeSync(userId, (newSettings) => {
+                setSettings(newSettings);
+              });
+            }
+          });
         } catch (e) {
           sendEmpireError({ errorType: "sync_failed", message: "Could not sync Firestore on startup", severity: "Medium" });
           console.warn('Could not sync Firestore on startup. Falling back to LocalStorage.', e);

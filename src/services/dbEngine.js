@@ -285,7 +285,7 @@ export const migrateGlobalToScopedStorage = async () => {
   return { status: 'success', migratedCount };
 };
 
-const updateLocalCache = (key, items) => {
+export const updateLocalCache = (key, items) => {
   const sorted = [...items].sort((a,b) => {
     const da = a.createdAt ? new Date(a.createdAt) : 0;
     const db = b.createdAt ? new Date(b.createdAt) : 0;
@@ -522,6 +522,8 @@ export const getRealUserId = () => {
 
 import { toast } from 'react-hot-toast';
 
+import { getDeviceId } from './syncEngine';
+
 // Background Firestore Save Helper
 const firestoreSave = async (collectionName, docId, data) => {
   if (!firebaseReady) return { status: 'disabled' };
@@ -531,6 +533,13 @@ const firestoreSave = async (collectionName, docId, data) => {
       console.warn(`[SYNC] Skipped cloud sync for ${collectionName}. No real UID detected. Data saved locally only.`);
       return { status: 'local-only' };
     }
+
+    const payload = {
+      ...data,
+      updatedAt: new Date().toISOString(),
+      updatedByDeviceId: getDeviceId(),
+    };
+
     let docRef;
     let pathStr = '';
     
@@ -545,7 +554,7 @@ const firestoreSave = async (collectionName, docId, data) => {
       docRef = doc(db, collectionName, userId, 'items', docId);
     }
     
-    await setDoc(docRef, data);
+    await setDoc(docRef, payload);
     console.log(`Firestore successfully saved to ${pathStr} for user: ${userId}`);
     return { status: 'success' };
   } catch (error) {
