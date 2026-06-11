@@ -272,6 +272,17 @@ function App() {
   // --- 🚀 GLOBAL BOOT & LOADING STATE ---
   const [isAppBooting, setIsAppBooting] = useState(true);
 
+  // Safety timeout to ensure app never gets stuck on boot screen
+  useEffect(() => {
+    if (isAppBooting) {
+      const timeout = setTimeout(() => {
+        console.warn('[BOOT TIMEOUT] 7 seconds reached, forcing app load.');
+        setIsAppBooting(false);
+      }, 7000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isAppBooting]);
+
   // Async Data Loader & Boot Sequence
   useEffect(() => {
     const loadLocalData = async () => {
@@ -285,15 +296,9 @@ function App() {
         setExpenses(await getExpenses() || []);
       } catch (err) {
         console.error("Error loading local data:", err);
-      } finally {
-        // Luxury delay for smooth Firebase auth resolution and UI transition
-        setTimeout(() => {
-          const session = localStorage.getItem('billqyro_auth');
-          if (!session || !navigator.onLine) {
-            setIsAppBooting(false);
-          }
-        }, 1500); 
       }
+      // Removing the arbitrary setTimeout that forces isAppBooting(false).
+      // We will let onAuthStateChanged and syncFromFirestore handle it cleanly.
     };
     loadLocalData();
 
@@ -303,6 +308,8 @@ function App() {
         setCustomers(await getCustomers() || []);
         setProducts(await getProducts() || []);
         setExpenses(await getExpenses() || []);
+        const latestSettings = getSettings();
+        if (latestSettings) setSettings(latestSettings);
       } catch (err) {
         console.error("Error reloading data on sync:", err);
       }
@@ -379,49 +386,26 @@ function App() {
   useEffect(() => {
     if (firebaseReady && auth) {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
+        console.log("Firebase authReady: ", user ? `User found (uid: ${user.uid})` : "No real user found");
         if (user) {
-          // Check if we already have a session, if not create one
           const session = getAuthSession();
-          if (!session) {
-            // Re-create the session in localStorage so the app works seamlessly
-            const email = user.email || '';
-            const settings = getSettings() || {};
-
-            const newSession = {
-              timestamp: Date.now(),
-              token: 'billqyro-secure-session',
-              userEmail: email,
-              uid: user.uid
-            };
-
-            localStorage.setItem('billqyro_auth', JSON.stringify(newSession));
-
-            setIsAuthenticated(true);
-            setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
-          } else if (session.uid !== user.uid) {
-            // Upgrade existing session with UID
-            session.uid = user.uid;
-            localStorage.setItem('billqyro_auth', JSON.stringify(session));
-            
-            // Re-sync with correct UID
-            import('./services/dbEngine').then(({ syncFromFirestore }) => {
-              syncFromFirestore().then((synced) => {
-                if (synced) {
-                  setInvoices(synced.invoices || []);
-                  setCustomers(synced.customers || []);
-                  setProducts(synced.products || []);
-                  if (synced.settings) setSettings(synced.settings);
-                  setExpenses(synced.expenses || []);
-                  if (synced.subscription) setSubscription(synced.subscription);
-                }
-              });
-            });
-          }
+          const newSession = {
+            timestamp: Date.now(),
+            token: 'billqyro-secure-session',
+            userEmail: user.email || '',
+            uid: user.uid
+          };
+          localStorage.setItem('billqyro_auth', JSON.stringify(newSession));
+          setIsAuthenticated(true);
+          setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
         } else {
           setIsAuthenticated(false);
+          setIsAppBooting(false); // Force exit loading state if no real user exists
         }
       });
       return () => unsubscribe();
+    } else {
+      setIsAppBooting(false);
     }
   }, []);
 
@@ -429,28 +413,30 @@ function App() {
   useEffect(() => {
     if (isAuthenticated) {
       const runSync = async () => {
+        console.log('Sync start: Attempting to sync from Firestore');
         try {
           const synced = await syncFromFirestore();
+          console.log('Sync result: ', synced ? 'Success' : 'Failed/Null');
           if (synced) {
-            setInvoices(synced.invoices || []);
-            setCustomers(synced.customers || []);
-            setProducts(synced.products || []);
+            if (synced.invoices) setInvoices(synced.invoices);
+            if (synced.customers) setCustomers(synced.customers);
+            if (synced.products) setProducts(synced.products);
             if (synced.settings) setSettings(synced.settings);
-            setExpenses(synced.expenses || []);
+            if (synced.expenses) setExpenses(synced.expenses);
             if (synced.subscription) setSubscription(synced.subscription);
           }
           
           // Fetch global admin settings for defaults
           try {
             const adminGlobal = await getGlobalAdminSettings();
-              if (adminGlobal) {
-                if (adminGlobal.defaultTheme) {
-                  localStorage.setItem('billqyro_admin_default_theme', adminGlobal.defaultTheme);
-                  if (!synced?.settings?.themeColor && !synced?.settings?.brandColor) {
-                    document.documentElement.setAttribute('data-theme', adminGlobal.defaultTheme);
-                    import('./utils/themeIcon').then(m => m.updateFaviconForTheme(adminGlobal.defaultTheme));
-                  }
+            if (adminGlobal) {
+              if (adminGlobal.defaultTheme) {
+                localStorage.setItem('billqyro_admin_default_theme', adminGlobal.defaultTheme);
+                if (!synced?.settings?.themeColor && !synced?.settings?.brandColor) {
+                  document.documentElement.setAttribute('data-theme', adminGlobal.defaultTheme);
+                  import('./utils/themeIcon').then(m => m.updateFaviconForTheme(adminGlobal.defaultTheme));
                 }
+              }
               if (adminGlobal.defaultMode) {
                 localStorage.setItem('billqyro_admin_default_mode', adminGlobal.defaultMode);
                 if (!synced?.settings?.displayMode) {
@@ -467,7 +453,7 @@ function App() {
           sendEmpireError({ errorType: "sync_failed", message: "Could not sync Firestore on startup", severity: "Medium" });
           console.warn('Could not sync Firestore on startup. Falling back to LocalStorage.', e);
         } finally {
-          setIsAppBooting(false);
+          setIsAppBooting(false); // ALWAYS EXIT BOOT
         }
       };
       runSync();
@@ -478,70 +464,39 @@ function App() {
 
   // --- AUTH BRIDGE ---
   const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
     if (!sessionStorage.getItem('billqyro_welcome_shown')) {
       setShowWelcomeAnimation(true);
       sessionStorage.setItem('billqyro_welcome_shown', 'true');
     }
-    setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
-
-    getInvoices().then(setInvoices);
-    getCustomers().then(setCustomers);
-    getProducts().then(setProducts);
-    const currentSettings = getSettings() || {};
-    setSettings(currentSettings);
-    getExpenses().then(setExpenses);
-    setSubscription(getSubscriptionStatus());
-
-    // Setup & Onboarding Routing
-    const hasSeenGuide = localStorage.getItem('billqyro_seen_guide');
-    const isLegacyConfigured = !!(currentSettings.businessName && currentSettings.businessName.trim());
-
-    if (currentSettings.setupCompleted) {
-      if (!hasSeenGuide) {
-        localStorage.setItem('billqyro_seen_guide', 'true');
-        setCurrentTab('guide');
-      } else {
-        setCurrentTab('dashboard');
-      }
-    } else if (isLegacyConfigured) {
-      // Legacy user already has settings, silently mark setupCompleted: true to not block them
-      const updated = { ...currentSettings, setupCompleted: true };
-      saveSettings(updated);
-      setSettings(updated);
-      if (!hasSeenGuide) {
-        localStorage.setItem('billqyro_seen_guide', 'true');
-        setCurrentTab('guide');
-      } else {
-        setCurrentTab('dashboard');
-      }
-    } else {
-      setCurrentTab('onboarding');
-    }
+    // Auth state changes (isAuthenticated, sync) are handled reactively by onAuthStateChanged.
   };
 
   // Onboarding Interceptor for Authenticated Session Boot
   useEffect(() => {
-    if (isAuthenticated && settings && !isAppBooting) {
+    // Wait until boot and sync is completely finished
+    if (isAuthenticated && !isAppBooting && settings) {
+      console.log("Onboarding Check:", { setupCompleted: settings.setupCompleted, currentTab });
       const isLegacyConfigured = !!(settings.businessName && settings.businessName.trim());
-      if (!settings.setupCompleted) {
-        if (isLegacyConfigured) {
-          const updated = { ...settings, setupCompleted: true };
-          saveSettings(updated);
-          setSettings(updated);
-          if (currentTab === 'onboarding') {
-            setCurrentTab('dashboard');
-          }
-        } else {
+      
+      if (!settings.setupCompleted && !isLegacyConfigured) {
+        if (currentTab !== 'onboarding') {
           setCurrentTab('onboarding');
         }
-      } else {
+      } else if (!settings.setupCompleted && isLegacyConfigured) {
+        // Silently upgrade legacy users to completed setup
+        const updated = { ...settings, setupCompleted: true };
+        saveSettings(updated);
+        setSettings(updated);
+        if (currentTab === 'onboarding') {
+          setCurrentTab('dashboard');
+        }
+      } else if (settings.setupCompleted) {
         if (currentTab === 'onboarding') {
           setCurrentTab('dashboard');
         }
       }
     }
-  }, [isAuthenticated, settings, isAppBooting, currentTab]);
+  }, [isAuthenticated, isAppBooting, settings, currentTab]);
 
   const handleLogout = async () => {
     try {
@@ -1318,6 +1273,7 @@ function App() {
               businessWorkspaces={businessWorkspaces}
               activeWorkspaceId={activeWorkspaceId}
               setActiveWorkspace={setActiveWorkspace}
+              syncSource="cloud"
             >
               <AnimatePresence mode="wait">
                 <motion.div

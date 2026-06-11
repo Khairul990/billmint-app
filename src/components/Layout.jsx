@@ -15,7 +15,7 @@ import { updateFaviconForTheme } from '../utils/themeIcon';
  * @param {Function} onLogout - logout event callback
  * @param {Object} businessSettings - current active business details
  */
-const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace }) => {
+const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncSource }) => {
   // Theme and Mode state
   const [themeColor, setThemeColor] = useState(() => {
     // Migration: If old themePreset is "dark", default to "light" color (dark mode handled below)
@@ -159,9 +159,13 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   activeWorkspaceId={activeWorkspaceId}
                   setActiveWorkspace={setActiveWorkspace}
                 />
-                {!isOnline && (
+                {!isOnline ? (
                   <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-red-500 bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 rounded-full animate-pulse">
                     <span className="w-2 h-2 bg-red-500 rounded-full animate-ping"></span> Offline Mode
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full"></span> Cloud Synced
                   </span>
                 )}
               </div>

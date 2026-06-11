@@ -1,5 +1,5 @@
 import { db, firebaseReady, auth } from './firebaseConfig';
-import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer } from 'firebase/firestore';
 import { getAdminEmail } from '../utils/adminAccess';
 import { BillQyroDB } from './localDb';
 import { generateVerificationCode } from './verificationCodeService';
@@ -286,13 +286,12 @@ export const migrateGlobalToScopedStorage = async () => {
 };
 
 const updateLocalCache = (key, items) => {
-  const cacheLimit = 20;
   const sorted = [...items].sort((a,b) => {
     const da = a.createdAt ? new Date(a.createdAt) : 0;
     const db = b.createdAt ? new Date(b.createdAt) : 0;
     return db - da;
   });
-  localStorage.setItem(key, JSON.stringify(sorted.slice(0, cacheLimit)));
+  localStorage.setItem(key, JSON.stringify(sorted));
 };
 
 const DEFAULT_SETTINGS = {
@@ -761,8 +760,8 @@ export const getAuthSession = () => {
       logout();
       return null;
     }
-    // Strict valid user check (no demo or missing email)
-    if (firebaseReady && (!data.uid || data.uid === 'demo-user' || !data.userEmail || data.userEmail === 'No email')) {
+    // Strict valid user check (no demo or missing uid/email)
+    if (!data.uid || data.uid === 'demo-user' || !data.userEmail || data.userEmail === 'No email') {
       logout();
       return null;
     }
@@ -772,38 +771,7 @@ export const getAuthSession = () => {
   }
 };
 
-export const login = (email, password) => {
-  const activeSettings = getSettings() || DEFAULT_SETTINGS;
-  const targetPasscode = activeSettings.adminPasscode || '1118';
-  const targetEmail = activeSettings.adminEmail || getAdminEmail();
 
-  const inputEmail = String(email).toLowerCase().trim();
-  const inputPass = String(password).trim();
-
-  const isEmailMatch = inputEmail === targetEmail.toLowerCase();
-  const isPasscodeMatch = inputPass === targetPasscode;
-
-  if (isEmailMatch && isPasscodeMatch) {
-    const sessionEmail = inputEmail; // email is already validated
-    const session = { timestamp: Date.now(), token: 'billqyro-secure-session', userEmail: sessionEmail };
-    localStorage.setItem(KEYS.AUTH, JSON.stringify(session));
-
-    // Save login event to users/{userId}
-    if (firebaseReady) {
-      const userId = getRealUserId();
-      if (userId) {
-        firestoreSave('users', userId, {
-          userId,
-          email: sessionEmail,
-          lastLogin: new Date().toISOString(),
-          role: 'administrator'
-        });
-      }
-    }
-    return true;
-  }
-  return false;
-};
 
 export const logout = () => {
   localStorage.removeItem(KEYS.AUTH);
@@ -2199,6 +2167,15 @@ export const syncFromFirestore = async () => {
   try {
     const userId = getRealUserId();
     if (!userId) return null;
+    
+    // Check for UID drift / stale caching
+    const lastUid = localStorage.getItem('billqyro_last_uid');
+    if (lastUid && lastUid !== userId) {
+      console.warn('UID has changed. Wiping local device data to prevent leakage.');
+      await clearAllLocalData();
+    }
+    localStorage.setItem('billqyro_last_uid', userId);
+
     // Backup local data before clearing cache
     const backupSuccess = await backupLocalData();
     if (!backupSuccess) {
@@ -2214,7 +2191,15 @@ export const syncFromFirestore = async () => {
       await syncOfflineTransactions();
     }
 
-    // 2. Clear current scoped device cache before applying cloud data
+    // 2. Fetch all cloud data first (from SERVER explicitly) to prevent stale cache serving
+    const settingsDoc = await getDocFromServer(doc(db, 'settings', userId));
+    const customersSnap = await getDocsFromServer(collection(db, 'customers', userId, 'items'));
+    const invoicesSnap = await getDocsFromServer(collection(db, 'invoices', userId, 'items'));
+    const productsSnap = await getDocsFromServer(collection(db, 'products', userId, 'items'));
+    const expensesSnap = await getDocsFromServer(collection(db, 'expenses', userId, 'items'));
+    const subDoc = await getDocFromServer(doc(db, 'subscription', userId));
+
+    // 3. Clear current scoped device cache before applying cloud data
     // This prevents old device data from lingering and mixing with Cloud truth
     clearCacheOnly();
     await BillQyroDB.clear('customers');
@@ -2222,14 +2207,12 @@ export const syncFromFirestore = async () => {
     await BillQyroDB.clear('invoices');
     await BillQyroDB.clear('expenses');
 
-    // 3. Apply Settings
-    const settingsDoc = await getDoc(doc(db, 'settings', userId));
+    // 4. Apply Settings
     if (settingsDoc.exists()) {
       localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settingsDoc.data()));
     }
 
-    // 4. Apply Customers
-    const customersSnap = await getDocs(collection(db, 'customers', userId, 'items'));
+    // 5. Apply Customers
     const customers = [];
     customersSnap.forEach(docSnap => {
       const data = docSnap.data();
@@ -2241,23 +2224,20 @@ export const syncFromFirestore = async () => {
       updateLocalCache(KEYS.CUSTOMERS, customers);
     }
 
+    // 6. Apply Invoices
     const invoicesMap = new Map();
-    try {
-      const snap1 = await getDocs(collection(db, 'invoices', userId, 'items'));
-      snap1.forEach(docSnap => {
-        const data = docSnap.data();
-        data.syncStatus = 'synced';
-        invoicesMap.set(docSnap.id, data);
-      });
-    } catch(e) {}
-    
+    invoicesSnap.forEach(docSnap => {
+      const data = docSnap.data();
+      data.syncStatus = 'synced';
+      invoicesMap.set(docSnap.id, data);
+    });
     const invoices = Array.from(invoicesMap.values());
     if (invoices.length > 0) {
       for(const i of invoices) await BillQyroDB.put('invoices', i);
       updateLocalCache(KEYS.INVOICES, invoices);
     }
 
-    const productsSnap = await getDocs(collection(db, 'products', userId, 'items'));
+    // 7. Apply Products
     const products = [];
     productsSnap.forEach(docSnap => {
       const data = docSnap.data();
@@ -2269,7 +2249,7 @@ export const syncFromFirestore = async () => {
       updateLocalCache(KEYS.PRODUCTS, products);
     }
 
-    const expensesSnap = await getDocs(collection(db, 'expenses', userId, 'items'));
+    // 8. Apply Expenses
     const expenses = [];
     expensesSnap.forEach(docSnap => {
       const data = docSnap.data();
@@ -2281,7 +2261,7 @@ export const syncFromFirestore = async () => {
       updateLocalCache(KEYS.EXPENSES, expenses);
     }
 
-    const subDoc = await getDoc(doc(db, 'subscription', userId));
+    // 9. Apply Subscription
     if (subDoc.exists()) {
       localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(subDoc.data()));
     }

@@ -873,19 +873,8 @@ function LoginPanel({ onLoginSuccess }) {
           onLoginSuccess();
         }
       } else {
-        if (isLoginMode) {
-          const isOk = login(email.trim(), password.trim());
-          if (isOk) {
-            localStorage.setItem('billqyro_admin_unlocked', 'true');
-            onLoginSuccess();
-          } else {
-            setError('Invalid credentials');
-            setIsSigningIn(false);
-          }
-        } else {
-          setError('Firebase not configured. Cannot create account offline.');
-          setIsSigningIn(false);
-        }
+        setError('Firebase not configured. Cannot login or create account offline.');
+        setIsSigningIn(false);
       }
     } catch (err) {
       console.error('Firebase auth error', err);
@@ -895,12 +884,6 @@ function LoginPanel({ onLoginSuccess }) {
       setError(errorMsg);
       setIsSigningIn(false);
     }
-  };
-
-  const handleGuestLogin = () => {
-    // Zero-Crash Policy: Guest Mode uses Local IndexedDB only
-    toast.success('Entering Workspace in Offline/Guest Mode');
-    if (onLoginSuccess) onLoginSuccess();
   };
 
   const handleGoogleLogin = async () => {
@@ -1130,19 +1113,6 @@ function LoginPanel({ onLoginSuccess }) {
           >
             <span className="grid h-6 w-6 place-items-center rounded-full bg-theme-app text-xs font-black text-theme-primary">G</span>
             {isSigningIn && !email && !password ? "Connecting to Google..." : "Continue with Google"}
-          </motion.button>
-
-          <motion.button 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ delay: 0.85, duration: 0.5 }} 
-            type="button" 
-            onClick={handleGuestLogin}
-            disabled={isSigningIn}
-            className="mt-3 flex h-[52px] w-full items-center justify-center gap-3 rounded-[22px] border border-theme-border-soft bg-transparent text-sm font-bold text-theme-muted transition-all hover:bg-theme-surface hover:text-theme-primary hover:shadow-[0_0_15px_rgba(0,0,0,0.05)] disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            <UserRound className="w-4 h-4 text-theme-muted" />
-            Continue as Guest (Offline Mode)
           </motion.button>
         </form>
 
