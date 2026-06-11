@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWorkspace }) => {
+const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWorkspace, setCurrentTab }) => {
   const [open, setOpen] = useState(false);
   const activeWorkspace = businessWorkspaces.find(ws => ws.id === activeWorkspaceId) || {};
 
@@ -32,6 +32,17 @@ const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWor
                 {ws.name}
               </button>
             ))}
+            <div className="border-t border-theme-border-soft mt-1 pt-1">
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  if (setCurrentTab) setCurrentTab('onboarding');
+                }}
+                className="block w-full text-left px-4 py-2 text-sm text-theme-accent font-bold hover:bg-theme-accent/10"
+              >
+                + Add Business
+              </button>
+            </div>
           </div>
         </div>
       )}

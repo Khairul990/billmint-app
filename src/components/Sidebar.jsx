@@ -46,36 +46,53 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
     }
   };
 
+  const getInvoiceLabel = () => {
+    switch(wsType) {
+      case 'teacher': return 'Fee Receipts';
+      case 'doctor': return 'Bills';
+      default: return t('invoices');
+    }
+  };
+
   let menuItems = [
     { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
-    { id: 'invoices', label: t('invoices'), icon: FileSpreadsheet },
+    { id: 'invoices', label: getInvoiceLabel(), icon: FileSpreadsheet, module: 'billing' },
     { id: 'estimates', label: 'Estimates & Quotes', icon: FileSpreadsheet },
     { id: 'marketplace', label: 'Template Marketplace', icon: Store },
     { id: 'pdf-templates', label: 'PDF Templates', icon: Palette },
     { id: 'live-link-templates', label: 'Live Link Studio', icon: Smartphone },
-    { id: 'customers', label: getCustomerLabel(), icon: Users },
-    ...(wsType === 'doctor' ? [{ id: 'appointments', label: 'Appointments', icon: Users }] : []),
-    ...(['retail', 'service', 'tailor'].includes(wsType) ? [{ id: 'orders', label: 'Orders', icon: Store }] : []),
-    { id: 'reports', label: 'Reports', icon: PieChart },
-    { id: 'expenses', label: t('expenses'), icon: TrendingDown },
+    { id: 'customers', label: getCustomerLabel(), icon: Users, module: 'customers' },
+    { id: 'patients', label: 'Patient Records', icon: Users, module: 'patients' },
+    { id: 'students', label: 'Student Directory', icon: Users, module: 'students' },
+    { id: 'clients', label: 'Client Roster', icon: Users, module: 'clients' },
+    { id: 'appointments', label: 'Appointments', icon: Users, module: 'appointments' },
+    { id: 'measurements', label: 'Measurements', icon: Scissors, module: 'measurements' },
+    { id: 'designBook', label: 'Design Book', icon: Palette, module: 'designBook' },
+    { id: 'devices', label: 'Device Management', icon: Wrench, module: 'devices' },
+    { id: 'serviceJobs', label: 'Service Jobs', icon: Wrench, module: 'serviceJobs' },
+    { id: 'projects', label: 'Projects', icon: Briefcase, module: 'projects' },
+    { id: 'orders', label: 'Orders', icon: Store, module: 'orders' },
+    { id: 'delivery', label: 'Delivery Tracking', icon: Store, module: 'delivery' },
+    { id: 'reports', label: 'Reports', icon: PieChart, module: 'reports' },
+    { id: 'expenses', label: t('expenses'), icon: TrendingDown, module: 'expenses' },
     { id: 'backup-restore', label: 'Backup & Restore', icon: Database },
-    { id: 'products', label: t('products'), icon: Layers },
-    { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen },
-    { id: 'pending-payments', label: 'Payment Proofs', icon: Bell },
+    { id: 'products', label: t('products'), icon: Layers, module: 'products' },
+    { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen, module: 'dueLedger' },
+    { id: 'pending-payments', label: 'Payment Proofs', icon: Bell, module: 'paymentProofs' },
     { id: 'subscription', label: 'Subscription Plan', icon: Sparkles },
     { id: 'settings', label: t('settings'), icon: SettingsIcon },
     { id: 'help-center', label: 'Help Center', icon: HelpCircle },
   ];
+
   // Filter items based on enabledModules (if any)
   if (enabledModules.length) {
     menuItems = menuItems.filter(item => {
-      if (item.id === 'products' && !enabledModules.includes('products')) return false;
-      if (item.id === 'due-ledger' && !enabledModules.includes('dueLedger')) return false;
-      if (item.id === 'customers' && !enabledModules.includes('customers')) return false;
-      if (item.id === 'estimates' && !enabledModules.includes('estimates')) return false;
-      if (item.id === 'expenses' && !enabledModules.includes('expenses')) return false;
-      if (item.id === 'reports' && !enabledModules.includes('reports')) return false;
-      if (item.id === 'invoices' && !enabledModules.includes('billing')) return false;
+      // If the item has a 'module' property, check if it's enabled
+      if (item.module && !enabledModules.includes(item.module)) {
+        // Special case: if wsType is 'billing_only' and module is 'customers', we still show it because it's recommended
+        if (wsType === 'billing_only' && item.module === 'customers') return true;
+        return false;
+      }
       return true;
     });
   }

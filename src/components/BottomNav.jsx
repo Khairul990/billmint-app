@@ -24,9 +24,17 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
     }
   };
 
+  const getInvoiceLabel = () => {
+    switch(wsType) {
+      case 'teacher': return 'Fee Receipts';
+      case 'doctor': return 'Bills';
+      default: return t('invoices');
+    }
+  };
+
   const tabs = [
     { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
-    { id: 'invoices', label: t('invoices'), icon: FileSpreadsheet },
+    { id: 'invoices', label: getInvoiceLabel(), icon: FileSpreadsheet },
     { id: 'create', isAction: true },
     { id: 'customers', label: getCustomerLabel(), icon: Users },
     { id: 'more', label: 'More', icon: MoreHorizontal },

@@ -117,42 +117,52 @@ const MoreMenu = ({
           description="Invoice & Live Link layouts" 
           onClick={() => setCurrentTab('marketplace')} 
         />
-        <SettingsItem 
-          icon={Layers} 
-          title="Products" 
-          description="Manage inventory & catalog" 
-          onClick={() => setCurrentTab('products')} 
-        />
+        {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('products')) && (
+          <SettingsItem 
+            icon={Layers} 
+            title="Products" 
+            description="Manage inventory & catalog" 
+            onClick={() => setCurrentTab('products')} 
+          />
+        )}
       </div>
 
       {/* Finance Section */}
       <SectionTitle title="Finance" />
       <div className="bg-theme-card rounded-3xl border border-theme-border-soft shadow-premium">
-        <SettingsItem 
-          icon={PieChart} 
-          title="Reports" 
-          description="Sales, tax, and analytics" 
-          onClick={() => setCurrentTab('reports')} 
-        />
-        <SettingsItem 
-          icon={BookOpen} 
-          title="Due Ledger" 
-          description="Track customer balances" 
-          onClick={() => setCurrentTab('due-ledger')} 
-        />
-        <SettingsItem 
-          icon={TrendingDown} 
-          title="Expenses" 
-          description="Overhead and operational costs" 
-          onClick={() => setCurrentTab('expenses')} 
-        />
-        <SettingsItem 
-          icon={Bell} 
-          title="Payment Proofs" 
-          description="Review collected payments" 
-          onClick={() => setCurrentTab('pending-payments')} 
-          alertCount={pendingPaymentsCount}
-        />
+        {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('reports')) && (
+          <SettingsItem 
+            icon={PieChart} 
+            title="Reports" 
+            description="Sales, tax, and analytics" 
+            onClick={() => setCurrentTab('reports')} 
+          />
+        )}
+        {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('dueLedger')) && (
+          <SettingsItem 
+            icon={BookOpen} 
+            title="Due Ledger" 
+            description="Track customer balances" 
+            onClick={() => setCurrentTab('due-ledger')} 
+          />
+        )}
+        {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('expenses')) && (
+          <SettingsItem 
+            icon={TrendingDown} 
+            title="Expenses" 
+            description="Overhead and operational costs" 
+            onClick={() => setCurrentTab('expenses')} 
+          />
+        )}
+        {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('paymentProofs')) && (
+          <SettingsItem 
+            icon={Bell} 
+            title="Payment Proofs" 
+            description="Review collected payments" 
+            onClick={() => setCurrentTab('pending-payments')} 
+            alertCount={pendingPaymentsCount}
+          />
+        )}
       </div>
 
       {/* System Section */}

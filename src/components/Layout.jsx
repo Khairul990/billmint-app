@@ -158,6 +158,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   businessWorkspaces={businessWorkspaces}
                   activeWorkspaceId={activeWorkspaceId}
                   setActiveWorkspace={setActiveWorkspace}
+                  setCurrentTab={setCurrentTab}
                 />
                 {!isOnline ? (
                   <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-red-500 bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 rounded-full animate-pulse">

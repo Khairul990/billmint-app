@@ -286,6 +286,7 @@ const Dashboard = ({
 
         {/* 2. QUICK ACTIONS (2x2 Mobile) */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('billing')) && (
             <button
               onClick={() => setCurrentTab('create')}
               className="flex flex-col items-center justify-center p-4 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white rounded-xl shadow-md hover:scale-105 transition-transform"
@@ -293,13 +294,19 @@ const Dashboard = ({
               <Plus className="w-6 h-6 mb-1" />
               <span className="text-xs font-medium text-center">Create Invoice</span>
             </button>
+          )}
+          {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('customers') || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('patients') || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('students') || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('clients')) && (
             <button
               onClick={() => setCurrentTab('customers')}
               className="flex flex-col items-center justify-center p-4 bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:bg-theme-app transition-colors"
             >
               <Users className="w-6 h-6 mb-1 text-theme-primary" />
-              <span className="text-xs font-medium text-theme-primary text-center">Add Customer</span>
+              <span className="text-xs font-medium text-theme-primary text-center">
+                Add {businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type === 'doctor' ? 'Patient' : businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type === 'teacher' ? 'Student' : businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type === 'freelance' ? 'Client' : 'Customer'}
+              </span>
             </button>
+          )}
+          {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('products')) && (
             <button
               onClick={() => setCurrentTab('products')}
               className="flex flex-col items-center justify-center p-4 bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:bg-theme-app transition-colors"
@@ -307,6 +314,8 @@ const Dashboard = ({
               <FileSpreadsheet className="w-6 h-6 mb-1 text-theme-primary" />
               <span className="text-xs font-medium text-theme-primary text-center">Add Product</span>
             </button>
+          )}
+          {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('paymentProofs')) && (
             <button
               onClick={() => setCurrentTab('pending-payments')}
               className="flex flex-col items-center justify-center p-4 bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:bg-theme-app transition-colors"
@@ -314,7 +323,8 @@ const Dashboard = ({
               <Bell className="w-6 h-6 mb-1 text-theme-primary" />
               <span className="text-xs font-medium text-theme-primary text-center">Collect Payment</span>
             </button>
-          </div>
+          )}
+        </div>
 
           {/* 3. STATS ROW (2x2 Grid on Mobile, 4x1 on Desktop) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
