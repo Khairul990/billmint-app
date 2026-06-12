@@ -24,9 +24,8 @@ import { downloadInvoicePDF } from '../utils/pdfUtils';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../utils/invoiceUtils';
 import PaymentModal from '../components/PaymentModal';
-import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion, collection, addDoc } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
-import { analyzePaymentScreenshot } from '../services/screenshotAnalysisService';
 import { sendPaymentReceiptEmail, verifyTransactionId } from '../services/cloudFunctions';
 
 const PublicInvoice = ({ initialInvoice }) => {
@@ -46,12 +45,10 @@ const PublicInvoice = ({ initialInvoice }) => {
   const [txnId, setTxnId] = useState('');
   const [screenshot, setScreenshot] = useState(null);
   const [screenshotFile, setScreenshotFile] = useState(null);
+  const [payerName, setPayerName] = useState('');
+  const [payerPhone, setPayerPhone] = useState('');
   const [customerNote, setCustomerNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // AI Verification State
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState(null);
 
   const handleScreenshotChange = async (e) => {
     const file = e.target.files[0];
@@ -62,26 +59,6 @@ const PublicInvoice = ({ initialInvoice }) => {
       }
       setScreenshotFile(file);
       setScreenshot(URL.createObjectURL(file));
-      
-      // AI Analysis Trigger
-      setIsAnalyzing(true);
-      try {
-        const expectedData = {
-          verificationCode: invoice.verificationCode,
-          grandTotal: invoice.balanceDue !== undefined ? invoice.balanceDue : invoice.grandTotal
-        };
-        const result = await analyzePaymentScreenshot(file, expectedData);
-        setAnalysisResult(result);
-        if (result.recommendation === 'reject') {
-           toast.error('Screenshot looks suspicious or invalid.');
-        } else if (result.recommendation === 'approve') {
-           toast.success('Screenshot auto-verified with high confidence!');
-        }
-      } catch (err) {
-        console.error('Analysis failed:', err);
-      } finally {
-        setIsAnalyzing(false);
-      }
     }
   };
 
@@ -100,7 +77,31 @@ const PublicInvoice = ({ initialInvoice }) => {
       await new Promise(resolve => reader.onload = resolve);
       const screenshotURL = reader.result;
 
-      // 2. Save proof to Firebase
+      // 2. Save proof to Firebase payment_proofs collection
+      if (!invoice.id) {
+        throw new Error("Missing invoice ID");
+      }
+
+      const proofData = {
+        invoiceId: invoice.id,
+        publicInvoiceId: invoice.id,
+        businessOwnerUid: invoice.userId || invoice.businessSnapshot?.ownerUid || 'unknown',
+        customerName: invoice.customerName || 'Unknown Customer',
+        payerName: payerName || '',
+        payerPhone: payerPhone || '',
+        amount: parseFloat(payAmount) || 0,
+        transactionId: txnId || '',
+        note: customerNote || '',
+        screenshotUrl: screenshotURL,
+        paymentMethod: payMethod,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      await addDoc(collection(db, 'payment_proofs'), proofData);
+
+      // Also mark public invoice as pending verification
       const invoiceRef = doc(db, 'public_invoices', invoice.id);
       await updateDoc(invoiceRef, {
         paymentStatus: 'Pending Verification',
@@ -109,8 +110,6 @@ const PublicInvoice = ({ initialInvoice }) => {
           method: payMethod,
           amount: payAmount,
           txnId: txnId,
-          note: customerNote,
-          analysis: analysisResult,
           submittedAt: new Date().toISOString()
         })
       });
@@ -815,6 +814,28 @@ const PublicInvoice = ({ initialInvoice }) => {
                 <form onSubmit={handleSubmitProof} className="space-y-4">
                   
                   <div>
+                    <label className="block mb-1 text-theme-muted font-bold uppercase text-[9px] tracking-wider">Payer Name (Optional)</label>
+                    <input
+                      type="text"
+                      value={payerName}
+                      onChange={(e) => setPayerName(e.target.value)}
+                      placeholder="Your full name"
+                      className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-theme-muted font-bold uppercase text-[9px] tracking-wider">Payer Phone (Optional)</label>
+                    <input
+                      type="text"
+                      value={payerPhone}
+                      onChange={(e) => setPayerPhone(e.target.value)}
+                      placeholder="Your phone number"
+                      className="w-full px-4 py-2.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary dark:text-theme-primary font-bold"
+                    />
+                  </div>
+                  
+                  <div>
                     <label className="block mb-1 text-theme-muted font-bold uppercase text-[9px] tracking-wider">Settlement Method *</label>
                     <select
                       required
@@ -895,31 +916,11 @@ const PublicInvoice = ({ initialInvoice }) => {
                       )}
                     </div>
 
-                    {/* AI Verification Status */}
-                    {isAnalyzing && (
-                      <div className="mt-2 text-[10px] flex items-center gap-2 text-theme-accent animate-pulse font-bold">
-                        <span className="w-3 h-3 rounded-full border-2 border-theme-accent border-t-transparent animate-spin"></span>
-                        AI Verification in progress...
-                      </div>
-                    )}
-                    
-                    {analysisResult && !isAnalyzing && (
-                      <div className={`mt-2 p-3 rounded-xl border text-[10px] font-bold ${
-                        analysisResult.recommendation === 'approve' 
-                          ? 'bg-green-500/10 border-green-500/30 text-green-400' 
-                          : analysisResult.recommendation === 'reject'
-                            ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-                            : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                      }`}>
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <ShieldCheck className="w-3.5 h-3.5" />
-                          <span className="uppercase tracking-wider">AI Analysis: {analysisResult.confidence}% Match</span>
-                        </div>
-                        {analysisResult.recommendation === 'approve' && <p>Screenshot Verified. All checks passed.</p>}
-                        {analysisResult.recommendation === 'manual_review' && <p>Partial match. Will require manual review.</p>}
-                        {analysisResult.recommendation === 'reject' && <p>Warning: Payment details could not be verified.</p>}
-                      </div>
-                    )}
+                    {/* Fraud Check Badge */}
+                    <div className="mt-3 p-2.5 rounded-xl border bg-theme-surface dark:bg-theme-card text-[10px] font-bold border-theme-border-strong text-theme-muted flex items-center justify-center gap-2 shadow-sm">
+                      <ShieldCheck className="w-4 h-4 text-theme-accent opacity-70" />
+                      <span className="uppercase tracking-wider">Fraud check coming soon</span>
+                    </div>
                   </div>
 
                   <div>

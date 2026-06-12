@@ -302,7 +302,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         </header>
 
         {/* Dynamic Page Content Shell */}
-        <main className={`flex-1 ${currentTab === 'create-invoice' ? 'max-w-[1500px] lg:px-6' : 'max-w-6xl'} w-full mx-auto p-4 md:px-6 md:py-6`}>
+        <main className={`flex-1 ${currentTab === 'create-invoice' ? 'max-w-[1500px] lg:px-6' : currentTab === 'dashboard' ? 'max-w-[1600px]' : 'max-w-6xl'} w-full mx-auto p-4 md:px-6 md:py-6`}>
           {children}
         </main>
       </div>

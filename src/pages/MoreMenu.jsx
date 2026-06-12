@@ -25,7 +25,7 @@ import {
   Info,
   MessageSquare
 } from 'lucide-react';
-import { login, factoryResetAllData } from '../services/dbEngine';
+import { factoryResetAllData } from '../services/dbEngine';
 
 /**
  * Android Settings Style More Menu

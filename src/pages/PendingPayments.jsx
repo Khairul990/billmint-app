@@ -38,7 +38,22 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [] }) => {
         const publicInvRef = doc(db, 'public_invoices', payment.invoiceId);
         const pInvDoc = await getDoc(publicInvRef);
         if (pInvDoc.exists()) {
-           await updateDoc(publicInvRef, { status: 'paid' });
+           const pData = pInvDoc.data();
+           const grandTotal = pData.grandTotal || 0;
+           const currentPaid = parseFloat(pData.amountPaid) || 0;
+           const paymentAmount = parseFloat(payment.amount) || 0;
+           const newPaid = currentPaid + paymentAmount;
+           const newBalance = Math.max(0, grandTotal - newPaid);
+           let newStatus = pData.paymentStatus;
+           if (newBalance <= 0) newStatus = 'Paid';
+           else if (newPaid > 0) newStatus = 'Partially Paid';
+           
+           await updateDoc(publicInvRef, { 
+             paymentStatus: newStatus,
+             status: newStatus,
+             amountPaid: newPaid,
+             balanceDue: newBalance
+           });
         }
 
         // 3. Update Local / Sync Private Invoice
@@ -47,12 +62,26 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [] }) => {
         const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
         
         if (existingInvoice) {
+          const paymentAmount = parseFloat(payment.amount) || 0;
+          const currentPaid = parseFloat(existingInvoice.amountPaid) || 0;
+          const newPaidAmount = currentPaid + paymentAmount;
+          const grandTotal = parseFloat(existingInvoice.grandTotal) || 0;
+          const newBalance = Math.max(0, grandTotal - newPaidAmount);
+          
+          let newStatus = existingInvoice.status;
+          if (newBalance <= 0) {
+            newStatus = 'Paid';
+          } else if (newPaidAmount > 0) {
+            newStatus = 'Partially Paid';
+          }
+
           const updatedInvoice = {
             ...existingInvoice,
-            status: 'paid',
-            amountPaid: existingInvoice.grandTotal,
-            balanceDue: 0,
-            paymentMethod: payment.paymentMethod || 'UPI'
+            status: newStatus,
+            paymentStatus: newStatus,
+            amountPaid: newPaidAmount,
+            balanceDue: newBalance,
+            paymentMethod: payment.paymentMethod || existingInvoice.paymentMethod || 'UPI'
           };
           
           await saveInvoice(updatedInvoice);
@@ -61,7 +90,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [] }) => {
         }
       }
 
-      toast.success('Payment approved and invoice marked as paid!');
+      toast.success('Payment approved and invoice updated!');
       setSelectedProof(null);
       
     } catch (error) {

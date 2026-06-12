@@ -72,6 +72,15 @@ const AuditLogs = React.lazy(() => import('./pages/AuditLogs'));
 const WorkspaceManager = React.lazy(() => import('./pages/WorkspaceManager'));
 const Appointments = React.lazy(() => import('./pages/Appointments'));
 const Orders = React.lazy(() => import('./pages/Orders'));
+const Patients = React.lazy(() => import('./pages/business/Patients'));
+const Students = React.lazy(() => import('./pages/business/Students'));
+const Clients = React.lazy(() => import('./pages/business/Clients'));
+const Measurements = React.lazy(() => import('./pages/business/Measurements'));
+const DesignBook = React.lazy(() => import('./pages/business/DesignBook'));
+const Devices = React.lazy(() => import('./pages/business/Devices'));
+const ServiceJobs = React.lazy(() => import('./pages/business/ServiceJobs'));
+const Projects = React.lazy(() => import('./pages/business/Projects'));
+const Delivery = React.lazy(() => import('./pages/business/Delivery'));
 import QuickBillModal from './components/QuickBillModal';
 
 class ErrorBoundary extends React.Component {
@@ -1017,6 +1026,24 @@ function App() {
         return <Appointments />;
       case 'orders':
         return <Orders />;
+      case 'patients':
+        return <Patients />;
+      case 'students':
+        return <Students />;
+      case 'clients':
+        return <Clients />;
+      case 'measurements':
+        return <Measurements />;
+      case 'designBook':
+        return <DesignBook />;
+      case 'devices':
+        return <Devices />;
+      case 'serviceJobs':
+        return <ServiceJobs />;
+      case 'projects':
+        return <Projects />;
+      case 'delivery':
+        return <Delivery />;
       case 'subscription':
         return (
           <Subscription

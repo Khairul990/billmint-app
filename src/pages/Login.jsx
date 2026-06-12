@@ -27,7 +27,7 @@ import {
 import { auth, firebaseReady, db } from '../services/firebaseConfig';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { login } from '../services/dbEngine';
+
 import Logo from '../components/Logo';
 
 const STEPS = [

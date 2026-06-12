@@ -72,7 +72,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
               triggerLightHaptic();
               setCurrentTab(tab.id);
             }}
-            className="flex flex-col items-center justify-center flex-1 py-1.5 px-2 rounded-2xl transition-all cursor-pointer"
+            className="flex flex-col items-center justify-center flex-1 py-1.5 px-2 rounded-2xl transition-all cursor-pointer min-w-[44px] min-h-[44px]"
           >
             <div className={`p-1.5 rounded-xl transition-all duration-300 ${
               isActive 
