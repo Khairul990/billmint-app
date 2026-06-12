@@ -138,7 +138,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       <div className="flex-1 flex flex-col min-w-0 w-full max-w-full pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0 overflow-y-auto overflow-x-hidden">
         
         {/* Header Block with Premium Dual-Theme Layout */}
-        <header className="relative bg-theme-card/80 backdrop-blur-md border-b border-theme-border-soft px-6 py-8 md:py-10 text-theme-primary shadow-[0_1px_3px_rgba(7,13,25,0.01),0_10px_20px_-10px_rgba(7,13,25,0.02)] transition-all duration-300 z-30">
+        <header className="relative bg-theme-card/80 backdrop-blur-md border-b border-theme-border-soft px-6 py-8 md:py-10 text-theme-primary shadow-[0_1px_3px_rgba(7,13,25,0.01),0_10px_20px_-10px_rgba(7,13,25,0.02)] transition-colors duration-200 z-30">
           {/* Subtle Ambient Background Gradients wrapped to prevent overflow spill */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-0 right-0 w-64 h-64 bg-theme-surface dark:bg-theme-surface/5 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
@@ -163,7 +163,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 />
                 {/* Sync Status Badge */}
                 <div className="relative group">
-                  <span className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full transition-all ${
+                  <span className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full transition-colors ${
                     syncStatus === 'Synced' ? 'text-emerald-500 bg-emerald-500/10 border border-emerald-500/20' : 
                     syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500 bg-blue-500/10 border border-blue-500/20 animate-pulse' : 
                     syncStatus === 'Offline' ? 'text-red-500 bg-red-500/10 border border-red-500/20' :
@@ -205,7 +205,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <button
                 onClick={toggleTheme}
                 type="button"
-                className="w-10 h-10 rounded-2xl bg-theme-app border border-theme-border-soft flex items-center justify-center text-theme-primary hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
+                className="w-10 h-10 rounded-2xl bg-theme-app border border-theme-border-soft flex items-center justify-center text-theme-primary hover:scale-105 active:scale-95 transition-transform shadow-sm cursor-pointer"
                 title={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
               >
                 {!isDarkMode ? (
@@ -219,7 +219,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div className="relative flex items-center">
                 <button
                   onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
-                  className="w-10 h-10 rounded-2xl bg-theme-app border border-theme-border-soft flex items-center justify-center text-theme-primary hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
+                  className="w-10 h-10 rounded-2xl bg-theme-app border border-theme-border-soft flex items-center justify-center text-theme-primary hover:scale-105 active:scale-95 transition-transform shadow-sm cursor-pointer"
                   title="Account Settings"
                 >
                   <User className="w-5 h-5" />
@@ -232,7 +232,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                       className="fixed inset-0 z-40" 
                       onClick={() => setIsAccountMenuOpen(false)}
                     />
-                    <div className="absolute top-14 right-0 w-72 bg-theme-card dark:bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft dark:border-theme-border-soft z-50 overflow-hidden flex flex-col animate-fadeIn">
+                    <div className="absolute top-14 right-0 w-72 bg-theme-card dark:bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft dark:border-theme-border-soft z-50 overflow-hidden flex flex-col">
                       <div className="p-4 bg-theme-app dark:bg-theme-surface border-b border-theme-border-soft dark:border-theme-border-soft">
                         <p className="text-sm font-bold text-theme-primary dark:text-theme-primary dark:text-theme-primary truncate">
                           {businessSettings?.businessName || 'My Business'}
@@ -251,7 +251,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                         </div>
                         <div className="w-full bg-theme-surface dark:bg-theme-card rounded-full h-1.5 mb-3">
                           <div 
-                            className="bg-[image:var(--accent-gradient)] text-theme-button-text border-0 h-1.5 rounded-full" 
+                            className="bg-[image:var(--accent-gradient)] text-theme-button-text border-0 h-1.5 rounded-full transition-all duration-300" 
                             style={{ width: `${Math.min((invoices.length / (subscription?.status === 'premium' ? 100 : (businessSettings?.freeInvoiceLimit || 15))) * 100, 100)}%` }}
                           ></div>
                         </div>
@@ -261,7 +261,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                               setCurrentTab('subscription');
                               setIsAccountMenuOpen(false);
                             }}
-                            className="w-full py-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 text-xs font-bold rounded-xl shadow-sm transition-all"
+                            className="w-full py-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 text-xs font-bold rounded-xl shadow-sm transition-opacity"
                           >
                             Upgrade to Premium
                           </button>
@@ -302,7 +302,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         </header>
 
         {/* Dynamic Page Content Shell */}
-        <main className={`flex-1 ${currentTab === 'create-invoice' ? 'max-w-[1500px] lg:px-6' : 'max-w-6xl'} w-full mx-auto p-4 md:px-6 md:py-6 transition-opacity duration-300 animate-fadeIn`}>
+        <main className={`flex-1 ${currentTab === 'create-invoice' ? 'max-w-[1500px] lg:px-6' : 'max-w-6xl'} w-full mx-auto p-4 md:px-6 md:py-6`}>
           {children}
         </main>
       </div>

@@ -25,6 +25,11 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
       return false;
     }
   });
+  
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const toggleCollapsed = () => {
     setIsCollapsed(prev => {
@@ -103,12 +108,12 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
       style={{
         width: isCollapsed ? 72 : 240,
         minWidth: isCollapsed ? 72 : 240,
-        transition: 'width 300ms cubic-bezier(0.4,0,0.2,1), min-width 300ms cubic-bezier(0.4,0,0.2,1)',
+        transition: isMounted ? 'width 180ms cubic-bezier(0.4,0,0.2,1), min-width 180ms cubic-bezier(0.4,0,0.2,1)' : 'none',
       }}
     >
       {/* Brand Header */}
       <div className="shrink-0 border-b border-theme-border-soft/20 flex items-center justify-between overflow-hidden"
-        style={{ padding: isCollapsed ? '16px 12px' : '20px 20px', transition: 'padding 300ms ease' }}
+        style={{ padding: isCollapsed ? '16px 12px' : '20px 20px', transition: isMounted ? 'padding 180ms ease' : 'none' }}
       >
         {isCollapsed ? (
           <div className="w-full flex justify-center">
@@ -132,7 +137,7 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
 
       {/* Nav Menu */}
       <nav className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden no-scrollbar"
-        style={{ padding: isCollapsed ? '8px 8px' : '8px 12px', transition: 'padding 300ms ease' }}
+        style={{ padding: isCollapsed ? '8px 8px' : '8px 12px', transition: isMounted ? 'padding 180ms ease' : 'none' }}
       >
         <div className="space-y-0.5">
           {menuItems.map((item) => {
@@ -214,13 +219,13 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
 
       {/* Sidebar Footer */}
       <div className="shrink-0 border-t border-theme-border-soft/20 bg-theme-sidebar/50"
-        style={{ padding: isCollapsed ? '12px 8px' : '12px 12px', transition: 'padding 300ms ease' }}
+        style={{ padding: isCollapsed ? '12px 8px' : '12px 12px', transition: isMounted ? 'padding 180ms ease' : 'none' }}
       >
         {/* User Card */}
         <div className={`flex items-center rounded-xl border border-theme-border-soft/40 bg-theme-accent-light/8 overflow-hidden ${
           isCollapsed ? 'justify-center p-2' : 'gap-2.5 p-2.5'
         }`}
-          style={{ transition: 'all 300ms ease' }}
+          style={{ transition: isMounted ? 'all 180ms ease' : 'none' }}
         >
           {businessSettings?.logoUrl ? (
             <img

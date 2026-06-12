@@ -1239,7 +1239,7 @@ function App() {
         {isAppBooting ? (
           <motion.div 
             key="global-loader"
-            exit={{ opacity: 0, transition: { duration: 0.6, ease: 'easeInOut' } }}
+            exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeOut' } }}
             className="fixed inset-0 z-[9999] bg-theme-main flex flex-col items-center justify-center font-sans"
           >
             <motion.div 
@@ -1275,7 +1275,7 @@ function App() {
             </motion.div>
           </motion.div>
         ) : (
-          <motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="w-full h-full">
+          <motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="w-full h-full">
             <PostLoginWelcome 
               show={showWelcomeAnimation} 
               userName={settings?.businessName || ''} 
@@ -1315,14 +1315,14 @@ function App() {
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentTab}
-                    initial={{ opacity: 0, y: 12 }}
+                    initial={{ opacity: 0, y: 3 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="w-full h-full"
+                    exit={{ opacity: 0, y: -3 }}
+                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                    className="w-full h-full flex flex-col"
                   >
                     <React.Suspense fallback={
-                      <div className="flex h-64 items-center justify-center">
+                      <div className="flex flex-1 min-h-[calc(100vh-250px)] items-center justify-center">
                         <div className="w-10 h-10 border-4 border-theme-border-soft border-t-theme-accent rounded-full animate-spin"></div>
                       </div>
                     }>

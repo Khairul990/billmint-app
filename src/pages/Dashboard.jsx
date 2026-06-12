@@ -252,12 +252,7 @@ const Dashboard = ({
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>
-      <motion.div
-        className="space-y-8 pb-32 md:pb-24 max-w-[1600px] w-full mx-auto px-4 lg:px-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
+      <div className="space-y-8 pb-32 md:pb-24 max-w-[1600px] w-full mx-auto px-4 lg:px-6">
         {/* PAYMENT PROOFS ALERT BANNER */}
         {pendingPaymentsCount > 0 && (
           <motion.div
@@ -573,7 +568,7 @@ const Dashboard = ({
             </button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </PullToRefresh>
   );
 };
