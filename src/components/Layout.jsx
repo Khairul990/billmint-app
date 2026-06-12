@@ -6,6 +6,7 @@ import WorkspaceSwitcher from './WorkspaceSwitcher';
 import Logo from './Logo';
 import { getSettings, saveSettings } from '../services/dbEngine';
 import { updateFaviconForTheme } from '../utils/themeIcon';
+import { flushSyncQueue } from '../services/syncEngine';
 
 /**
  * Global App Layout Shell
@@ -15,7 +16,7 @@ import { updateFaviconForTheme } from '../utils/themeIcon';
  * @param {Function} onLogout - logout event callback
  * @param {Object} businessSettings - current active business details
  */
-const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncSource }) => {
+const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncSource, syncStatus }) => {
   // Theme and Mode state
   const [themeColor, setThemeColor] = useState(() => {
     // Migration: If old themePreset is "dark", default to "light" color (dark mode handled below)
@@ -144,7 +145,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             <div className="absolute -bottom-10 left-10 w-48 h-48 bg-theme-accent-light dark:bg-theme-accent-light rounded-full blur-2xl"></div>
           </div>
 
-          <div className={`${currentTab === 'create-invoice' ? 'max-w-[1500px] lg:px-6' : 'max-w-6xl'} w-full mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10`}>
+          <div className="max-w-[1600px] w-full mx-auto px-4 lg:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-theme-muted bg-theme-app px-2.5 py-0.5 rounded-full border border-theme-border-soft backdrop-blur-md">
@@ -160,15 +161,36 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   setActiveWorkspace={setActiveWorkspace}
                   setCurrentTab={setCurrentTab}
                 />
-                {!isOnline ? (
-                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-red-500 bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 rounded-full animate-pulse">
-                    <span className="w-2 h-2 bg-red-500 rounded-full animate-ping"></span> Offline Mode
+                {/* Sync Status Badge */}
+                <div className="relative group">
+                  <span className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full transition-all ${
+                    syncStatus === 'Synced' ? 'text-emerald-500 bg-emerald-500/10 border border-emerald-500/20' : 
+                    syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500 bg-blue-500/10 border border-blue-500/20 animate-pulse' : 
+                    syncStatus === 'Offline' ? 'text-red-500 bg-red-500/10 border border-red-500/20' :
+                    'text-amber-500 bg-amber-500/10 border border-amber-500/20' // Pending or Error
+                  }`}>
+                    <span className={`w-2 h-2 rounded-full ${
+                      syncStatus === 'Synced' ? 'bg-emerald-500' : 
+                      syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-ping' : 
+                      syncStatus === 'Offline' ? 'bg-red-500' :
+                      'bg-amber-500'
+                    }`}></span> 
+                    {syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}
                   </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                    <span className="w-2 h-2 bg-emerald-500 rounded-full"></span> Cloud Synced
-                  </span>
-                )}
+
+                  {/* Retry Button Dropdown */}
+                  {(syncStatus === 'Pending Sync' || syncStatus === 'Sync Error') && (
+                    <div className="absolute top-full left-0 mt-1 hidden group-hover:block z-50">
+                      <button
+                        onClick={flushSyncQueue}
+                        className="text-[10px] font-bold uppercase tracking-wider bg-theme-card border border-theme-border-soft px-3 py-1.5 rounded shadow-lg text-theme-primary hover:bg-theme-accent hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        Retry Sync
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
               <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mt-2 text-theme-primary">
                 {getPageTitle(currentTab)}

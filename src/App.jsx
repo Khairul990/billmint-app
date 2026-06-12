@@ -1310,6 +1310,7 @@ function App() {
                 activeWorkspaceId={activeWorkspaceId}
                 setActiveWorkspace={setActiveWorkspace}
                 syncSource="cloud"
+                syncStatus={syncStatus}
               >
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -1346,22 +1347,7 @@ function App() {
                 style: { borderRadius: '12px', background: '#fff', color: '#1e293b' }
               }}
             />
-            {isAuthenticated && (
-              <div className="fixed bottom-4 left-4 z-[99999] pointer-events-none">
-                <div className={`px-3 py-1.5 rounded-full shadow-lg border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${
-                  syncStatus === 'Synced' ? 'bg-theme-success/10 text-theme-success border-theme-success/20' : 
-                  syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-theme-accent/10 text-theme-accent border-theme-accent/20 animate-pulse' : 
-                  'bg-theme-warning/10 text-theme-warning border-theme-warning/20'
-                }`}>
-                  <div className={`w-2 h-2 rounded-full ${
-                    syncStatus === 'Synced' ? 'bg-theme-success' : 
-                    syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-theme-accent animate-ping' : 
-                    'bg-theme-warning'
-                  }`} />
-                  {syncStatus}
-                </div>
-              </div>
-            )}
+            {/* Sync Badge moved to Layout Header */}
             
             {/* Paywall Modal */}
             <AnimatePresence>

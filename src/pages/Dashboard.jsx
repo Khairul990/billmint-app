@@ -142,6 +142,16 @@ const Dashboard = ({
 
   const monthlyData = getMonthlyData();
 
+  // --- DYNAMIC BUSINESS LABELS ---
+  const getLabels = () => {
+    const type = businessSettings?.businessType;
+    if (type === 'Doctor / Clinic') return { clients: 'Patients', invoices: 'Bills', items: 'Services', due: 'Pending Balance' };
+    if (type === 'Teacher / Tuition') return { clients: 'Students', invoices: 'Fee Receipts', items: 'Courses', due: 'Due Fees' };
+    if (type === 'Tailor / Fashion' || type === 'Embroidery / Designer') return { clients: 'Customers', invoices: 'Order Slips', items: 'Designs', due: 'Due Payment' };
+    return { clients: 'Customers', invoices: 'Invoices', items: 'Products/Services', due: 'Pending Due' };
+  };
+  const labels = getLabels();
+
   // --- TOP CUSTOMERS ---
   const getTopCustomers = () => {
     const customerTotals = {};
@@ -243,7 +253,7 @@ const Dashboard = ({
   return (
     <PullToRefresh onRefresh={handleRefresh}>
       <motion.div
-        className="space-y-8 pb-32 md:pb-24"
+        className="space-y-8 pb-32 md:pb-24 max-w-[1600px] w-full mx-auto px-4 lg:px-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
@@ -271,16 +281,35 @@ const Dashboard = ({
           </motion.div>
         )}
 
-        {/* 1. COMPACT HEADER */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg md:text-xl font-black text-theme-primary tracking-tight">{businessName}</h1>
-              <span className="bg-theme-accent/10 text-theme-accent px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider">
-                {businessSettings?.activeWorkspaceName || 'Main Workspace'}
-              </span>
+        {/* 1. TOP HERO SUMMARY CARD */}
+        <div className="bg-gradient-to-br from-theme-accent to-theme-accent-dark rounded-3xl p-6 md:p-10 shadow-premium text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+          <div className="absolute -right-10 -top-10 w-64 h-64 bg-white/10 blur-3xl rounded-full"></div>
+          
+          <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <h1 className="text-2xl md:text-4xl font-black tracking-tight">{businessName}</h1>
+                <span className="bg-white/20 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-sm">
+                  {businessSettings?.activeWorkspaceName || 'Main Workspace'}
+                </span>
+              </div>
+              <p className="text-sm md:text-base font-semibold text-white/80 max-w-xl">
+                {t('welcome')}, {businessSettings?.ownerName || 'Admin'}. Here is your financial overview for today.
+              </p>
             </div>
-            <p className="text-[10px] md:text-xs text-theme-muted font-bold">{t('welcome')}, {businessSettings?.ownerName || 'Admin'}</p>
+            
+            <div className="flex items-center gap-6 bg-black/20 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+              <div>
+                <p className="text-xs font-bold text-white/70 uppercase tracking-wider mb-1">Today's Revenue</p>
+                <p className="text-2xl font-black">{formatCurrency(todayRevenue, currencySymbol)}</p>
+              </div>
+              <div className="w-px h-10 bg-white/20"></div>
+              <div>
+                <p className="text-xs font-bold text-white/70 uppercase tracking-wider mb-1">Pending Due</p>
+                <p className="text-2xl font-black text-amber-300">{formatCurrency(todayDue, currencySymbol)}</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -292,7 +321,7 @@ const Dashboard = ({
               className="flex flex-col items-center justify-center p-4 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white rounded-xl shadow-md hover:scale-105 transition-transform"
             >
               <Plus className="w-6 h-6 mb-1" />
-              <span className="text-xs font-medium text-center">Create Invoice</span>
+              <span className="text-xs font-medium text-center">Create {labels.invoices}</span>
             </button>
           )}
           {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('customers') || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('patients') || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('students') || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('clients')) && (
@@ -302,7 +331,7 @@ const Dashboard = ({
             >
               <Users className="w-6 h-6 mb-1 text-theme-primary" />
               <span className="text-xs font-medium text-theme-primary text-center">
-                Add {businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type === 'doctor' ? 'Patient' : businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type === 'teacher' ? 'Student' : businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type === 'freelance' ? 'Client' : 'Customer'}
+                Add {labels.clients}
               </span>
             </button>
           )}
@@ -312,7 +341,7 @@ const Dashboard = ({
               className="flex flex-col items-center justify-center p-4 bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:bg-theme-app transition-colors"
             >
               <FileSpreadsheet className="w-6 h-6 mb-1 text-theme-primary" />
-              <span className="text-xs font-medium text-theme-primary text-center">Add Product</span>
+              <span className="text-xs font-medium text-theme-primary text-center">Add {labels.items}</span>
             </button>
           )}
           {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('paymentProofs')) && (
@@ -362,7 +391,7 @@ const Dashboard = ({
               <div className="p-2.5 bg-theme-warning/10 text-theme-warning rounded-full transition-transform duration-300 group-hover:scale-110">
                 <AlertCircle className="w-5 h-5" />
               </div>
-              <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">{t('pending')}</p>
+              <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">{labels.due}</p>
             </div>
             <div>
               <h3 className="text-3xl md:text-2xl font-bold text-theme-danger tracking-tight">{formatCurrency(totalDue, currencySymbol)}</h3>
@@ -370,17 +399,17 @@ const Dashboard = ({
             </div>
           </div>
 
-          {/* Customers */}
+          {/* Total Customers */}
           <div className="bg-theme-card rounded-2xl p-4 md:p-5 border border-theme-border-soft shadow-premium hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col justify-between group">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-theme-accent/10 text-theme-accent rounded-full transition-transform duration-300 group-hover:scale-110">
+              <div className="p-2.5 bg-blue-500/10 text-blue-500 rounded-full transition-transform duration-300 group-hover:scale-110">
                 <Users className="w-5 h-5" />
               </div>
-              <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">{t('customers')}</p>
+              <p className="text-[11px] md:text-xs font-semibold text-theme-muted uppercase tracking-wider">Total {labels.clients}</p>
             </div>
             <div>
-              <h3 className="text-3xl md:text-2xl font-bold text-theme-primary tracking-tight">{customers.length}</h3>
-              <p className="text-[10px] md:text-[11px] font-medium text-theme-muted mt-1.5">{t('active_clients')}</p>
+              <h3 className="text-3xl md:text-2xl font-bold text-theme-primary tracking-tight">{totalCustomersCount}</h3>
+              <p className="text-[10px] md:text-[11px] font-medium text-blue-500/70 mt-1.5">Registered Active</p>
             </div>
           </div>
         </div>

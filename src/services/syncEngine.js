@@ -45,12 +45,18 @@ export const enqueueSync = (collectionName, userId, docId, data) => {
   window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Pending Sync' }));
 };
 
-export const processSyncQueue = async () => {
-  if (!navigator.onLine || !firebaseReady) return;
+export const flushSyncQueue = async () => {
+  if (!navigator.onLine || !firebaseReady) {
+    if (!navigator.onLine) {
+       window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Offline' }));
+    }
+    return;
+  }
   
   const q = getQueue();
   if (q.length === 0) return;
   
+  console.log(`[SYNC ENGINE] Flushing Queue. Length: ${q.length}`);
   let successCount = 0;
   window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Syncing...' }));
   
@@ -66,7 +72,7 @@ export const processSyncQueue = async () => {
       await setDoc(docRef, item.data, { merge: true });
       successCount++;
     } catch (e) {
-      console.error(`[SYNC ENGINE] Failed to process queue item for ${item.collectionName}:`, e);
+      console.error(`[SYNC ENGINE] Failed to process queue item for ${item.collectionName}. Reason:`, e);
       remaining.push(item);
     }
   }
@@ -75,11 +81,11 @@ export const processSyncQueue = async () => {
   if (remaining.length === 0) {
     window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Synced' }));
   } else {
-    window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Pending Sync' }));
+    window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Sync Error' }));
   }
 };
 
-window.addEventListener('online', processSyncQueue);
+window.addEventListener('online', flushSyncQueue);
 
 // --- Debounce Mechanism ---
 const debounceTimers = {};
@@ -214,7 +220,7 @@ export const startRealTimeSync = (userId) => {
   syncCollection('customers', KEYS.CUSTOMERS);
   
   // Process any offline queue on start
-  processSyncQueue();
+  flushSyncQueue();
 };
 
 export const stopRealTimeSync = () => {
