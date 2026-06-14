@@ -3,9 +3,8 @@ import React from 'react';
 const ShineBorder = ({
   children,
   className = '',
-  borderWidth = 2,
-  duration = 3,
-  gradient = 'from-theme-accent via-theme-danger to-theme-success',
+  borderWidth = 3,
+  duration = 4,
 }) => {
   return (
     <div
@@ -13,10 +12,13 @@ const ShineBorder = ({
       style={{ padding: borderWidth }}
     >
       {/* Animated Gradient Layer */}
-      <div className="absolute inset-0 rounded-3xl overflow-hidden">
+      <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
         <div
-          className={`absolute -inset-[100%] animate-spin bg-[conic-gradient(from_0deg,var(--tw-gradient-stops))] ${gradient} blur-md opacity-80`}
-          style={{ animationDuration: `${duration}s` }}
+          className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] animate-spin opacity-100"
+          style={{ 
+            animationDuration: `${duration}s`,
+            backgroundImage: `conic-gradient(from 0deg, transparent 0%, var(--accent) 30%, #f43f5e 50%, #0ea5e9 70%, transparent 100%)`
+          }}
         />
       </div>
 
