@@ -127,10 +127,11 @@ const Sidebar = ({
         )}
       </div>
 
-      {/* User Card (Moved to top) */}
-      <div className="shrink-0 border-b border-theme-border-soft/20 px-3 py-3">
-        <div className={`flex items-center rounded-xl border border-theme-border-soft/40 bg-theme-accent-light/8 overflow-hidden ${
-          isCollapsed ? 'justify-center p-2' : 'gap-2.5 p-2.5'
+      {/* User Card & Collapse Toggle */}
+      <div className={`shrink-0 border-b border-theme-border-soft/20 flex ${isCollapsed ? 'flex-col items-center py-2 gap-2' : 'flex-row items-center justify-between px-3 py-2'}`}>
+        {/* User Card */}
+        <div className={`flex items-center rounded-xl overflow-hidden ${
+          isCollapsed ? 'justify-center p-1' : 'gap-2.5 p-1 min-w-0 flex-1'
         }`}
           style={{ transition: isMounted ? 'all 180ms ease' : 'none' }}
         >
@@ -156,17 +157,17 @@ const Sidebar = ({
             </div>
           )}
         </div>
-      </div>
 
-      {/* Collapse Toggle */}
-      <div className="shrink-0 flex justify-end px-2 py-1.5">
-        <button
-          onClick={toggleCollapsed}
-          className="w-8 h-8 rounded-xl flex items-center justify-center text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light/15 transition-all duration-200 cursor-pointer"
-          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {isCollapsed ? <ChevronsRight className="w-4 h-4" /> : <ChevronsLeft className="w-4 h-4" />}
-        </button>
+        {/* Collapse Toggle */}
+        <div className="shrink-0 flex items-center justify-center">
+          <button
+            onClick={toggleCollapsed}
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light/15 transition-all duration-200 cursor-pointer"
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? <ChevronsRight className="w-4 h-4" /> : <ChevronsLeft className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
 
       {/* Nav Menu */}
