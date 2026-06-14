@@ -165,8 +165,55 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
           <div className="max-w-[1600px] w-full mx-auto px-4 lg:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
             
-            {/* LEFT: Branding & Workspace (Moved to Sidebar) */}
-            <div className="hidden md:block w-48 shrink-0"></div>
+            {/* LEFT: Workspace Info */}
+            <div className="flex items-start md:items-center gap-3">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-theme-muted bg-theme-app px-2.5 py-0.5 rounded-full border border-theme-border-soft backdrop-blur-md hidden sm:block">
+                    Active Workspace
+                  </span>
+                  <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-theme-accent bg-theme-accent-light border border-theme-accent/15 px-2 py-0.5 rounded-full">
+                    <ShieldCheck className="w-3 h-3" /> Secure
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <WorkspaceSwitcher
+                    businessWorkspaces={businessWorkspaces}
+                    activeWorkspaceId={activeWorkspaceId}
+                    setActiveWorkspace={setActiveWorkspace}
+                    setCurrentTab={setCurrentTab}
+                  />
+                  {/* Sync Status Badge */}
+                  <div className="relative group ml-2">
+                    <span className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
+                      syncStatus === 'Synced' ? 'text-emerald-500 bg-emerald-500/10 border border-emerald-500/20' : 
+                      syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500 bg-blue-500/10 border border-blue-500/20 animate-pulse' : 
+                      syncStatus === 'Offline' ? 'text-red-500 bg-red-500/10 border border-red-500/20' :
+                      'text-amber-500 bg-amber-500/10 border border-amber-500/20'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        syncStatus === 'Synced' ? 'bg-emerald-500' : 
+                        syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-ping' : 
+                        syncStatus === 'Offline' ? 'bg-red-500' :
+                        'bg-amber-500'
+                      }`}></span> 
+                      {syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}
+                    </span>
+                    {(syncStatus === 'Pending Sync' || syncStatus === 'Sync Error') && (
+                      <div className="absolute top-full left-0 mt-1 hidden group-hover:block z-50">
+                        <button
+                          onClick={flushSyncQueue}
+                          className="text-[10px] font-bold uppercase tracking-wider bg-theme-card border border-theme-border-soft px-3 py-1.5 rounded shadow-lg text-theme-primary hover:bg-theme-accent hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                          Retry Sync
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* CENTER: Global Search Bar */}
             <div className="flex-1 max-w-xl hidden md:block px-4">
@@ -191,7 +238,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             {/* RIGHT: Actions & Profile */}
             <div className="flex items-center gap-2 sm:gap-3 justify-end">
               {/* Mobile Search Icon */}
-              <button className="md:hidden w-10 h-10 rounded-2xl bg-theme-app border border-theme-border-soft flex items-center justify-center text-theme-primary shadow-sm">
+              <button className="md:hidden w-11 h-11 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group">
                 <Search className="w-5 h-5" />
               </button>
 
@@ -199,7 +246,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div className="relative">
                 <button 
                   onClick={() => setIsNotificationMenuOpen(!isNotificationMenuOpen)}
-                  className="relative w-10 h-10 rounded-2xl bg-theme-app border border-theme-border-soft flex items-center justify-center text-theme-primary hover:scale-105 active:scale-95 transition-transform shadow-sm cursor-pointer"
+                  className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group"
                 >
                   <Bell className="w-5 h-5" />
                   <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-theme-danger rounded-full border border-theme-app animate-pulse"></span>
@@ -252,7 +299,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <button
                 onClick={toggleTheme}
                 type="button"
-                className="w-10 h-10 rounded-2xl bg-theme-app border border-theme-border-soft flex items-center justify-center text-theme-primary hover:scale-105 active:scale-95 transition-transform shadow-sm cursor-pointer"
+                className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group"
                 title={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
               >
                 {!isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-400 animate-pulse" />}
@@ -261,7 +308,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               {/* Settings Action */}
               <button
                 onClick={() => setCurrentTab('settings')}
-                className="hidden sm:flex w-10 h-10 rounded-2xl bg-theme-app border border-theme-border-soft items-center justify-center text-theme-primary hover:scale-105 active:scale-95 transition-transform shadow-sm cursor-pointer"
+                className="hidden sm:flex w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group"
                 title="Settings"
               >
                 <SettingsIcon className="w-5 h-5" />
@@ -271,7 +318,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div className="relative flex items-center">
                 <button
                   onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
-                  className="w-10 h-10 rounded-2xl bg-[image:var(--accent-gradient)] shadow-premium text-theme-button-text flex items-center justify-center hover:scale-105 active:scale-95 transition-transform cursor-pointer overflow-hidden border border-white/10"
+                  className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-[image:var(--accent-gradient)] shadow-premium text-theme-button-text flex items-center justify-center hover:scale-105 active:scale-95 transition-transform cursor-pointer overflow-hidden border border-white/10"
                   title="Account Settings"
                 >
                   {businessSettings?.logoUrl ? (
