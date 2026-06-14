@@ -20,7 +20,7 @@ const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWor
       <button
         onClick={() => setOpen(!open)}
         disabled={isSwitching}
-        className="inline-flex items-center justify-center w-full rounded-md border border-theme-accent/30 shadow-sm px-3 py-1.5 bg-theme-surface text-sm font-bold text-theme-primary hover:bg-theme-card hover:border-theme-accent/50 focus:outline-none transition-colors"
+        className="inline-flex items-center justify-center w-full rounded-md border border-theme-accent/50 shadow-sm px-3 py-1.5 bg-theme-surface text-sm font-bold text-theme-primary hover:bg-theme-card hover:border-theme-accent/70 focus:outline-none transition-colors"
         title="Switch Workspace"
       >
         {isSwitching ? (
@@ -36,7 +36,7 @@ const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWor
         )}
       </button>
       {open && (
-        <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-theme-card border border-theme-accent/20 focus:outline-none z-20">
+        <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-theme-card border border-theme-accent/50 focus:outline-none z-20">
           <div className="py-1">
             {businessWorkspaces.map(ws => (
               <button

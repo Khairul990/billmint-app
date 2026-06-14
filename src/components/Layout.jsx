@@ -156,7 +156,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       <div className="flex flex-col flex-1 h-full min-w-0 bg-theme-app transition-colors duration-300 relative z-10">
         
         {/* Header Block with Premium Dual-Theme Layout */}
-        <header className="sticky top-0 z-40 bg-theme-card/80 backdrop-blur-xl border-b border-theme-accent/20 px-4 sm:px-6 py-4 md:py-5 text-theme-primary shadow-sm transition-all duration-300">
+        <header className="sticky top-0 z-40 bg-theme-card/80 backdrop-blur-xl border-b border-theme-accent/50 px-4 sm:px-6 py-4 md:py-5 text-theme-primary shadow-sm transition-all duration-300">
           {/* Subtle Ambient Background Gradients wrapped to prevent overflow spill */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-0 right-0 w-64 h-64 bg-theme-surface dark:bg-theme-surface/5 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
@@ -225,7 +225,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   ref={searchInputRef}
                   type="text"
                   placeholder="Search invoices, customers, products..."
-                  className="block w-full pl-10 pr-14 py-2.5 bg-theme-surface border border-theme-accent/20 rounded-full text-sm font-semibold shadow-sm text-theme-primary placeholder-theme-secondary focus:bg-theme-card focus:outline-none focus:ring-2 focus:ring-theme-accent/50 focus:border-theme-accent transition-all duration-300 hover:shadow-md hover:border-theme-accent/40"
+                  className="block w-full pl-10 pr-14 py-2.5 bg-theme-surface border border-theme-accent/50 rounded-full text-sm font-semibold shadow-sm text-theme-primary placeholder-theme-secondary focus:bg-theme-card focus:outline-none focus:ring-2 focus:ring-theme-accent/50 focus:border-theme-accent transition-all duration-300 hover:shadow-md hover:border-theme-accent/70"
                 />
                 <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
                   <span className="text-[10px] font-bold text-theme-muted bg-theme-surface px-1.5 py-0.5 rounded-md border border-theme-border-soft shadow-sm">
