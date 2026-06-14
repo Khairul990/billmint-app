@@ -279,11 +279,11 @@ const PublicInvoice = ({ initialInvoice }) => {
         };
       case 'corporate':
         return {
-          container: "bg-white dark:bg-theme-card rounded-xl border border-theme-border-soft dark:border-theme-border-soft shadow-lg p-8 md:p-10 space-y-8 relative overflow-hidden font-sans",
-          header: "border-b-4 border-theme-border-soft dark:border-theme-border-soft pb-8",
-          addressBox: "bg-theme-app dark:bg-theme-surface/50 border-l-4 border-theme-border-soft dark:border-theme-border-soft rounded-r-xl rounded-l-none p-5",
-          tableHeader: "bg-theme-card dark:bg-theme-surface text-white",
-          totalsBox: "bg-theme-app dark:bg-theme-surface/50 border border-theme-border-soft dark:border-theme-border-strong rounded-xl p-6"
+          container: "bg-theme-card rounded-xl border border-theme-border-soft shadow-lg p-8 md:p-10 space-y-8 relative overflow-hidden font-sans",
+          header: "border-b-4 border-theme-border-soft pb-8",
+          addressBox: "bg-theme-surface/50 border-l-4 border-theme-border-soft rounded-r-xl rounded-l-none p-5",
+          tableHeader: "bg-theme-surface text-theme-primary",
+          totalsBox: "bg-theme-surface/50 border border-theme-border-strong rounded-xl p-6"
         };
       case 'boutique':
         return {
@@ -295,7 +295,7 @@ const PublicInvoice = ({ initialInvoice }) => {
         };
       case 'clinic':
         return {
-          container: "bg-white dark:bg-theme-card rounded-2xl border-t-8 border-t-blue-500 border-x border-b border-theme-border-soft dark:border-theme-border-soft shadow-lg p-6 md:p-8 space-y-6 relative overflow-hidden",
+          container: "bg-theme-card rounded-2xl border-t-8 border-t-blue-500 border-x border-b border-theme-border-soft shadow-lg p-6 md:p-8 space-y-6 relative overflow-hidden",
           header: "border-b border-blue-100 dark:border-blue-900/30 pb-6",
           addressBox: "bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-xl p-5",
           tableHeader: "bg-blue-600 dark:bg-blue-800 text-white",
@@ -303,11 +303,11 @@ const PublicInvoice = ({ initialInvoice }) => {
         };
       case 'repair':
         return {
-          container: "bg-zinc-50 dark:bg-zinc-900 rounded-xl border-l-8 border-l-yellow-500 border-y border-r border-zinc-200 dark:border-zinc-800 shadow-md p-6 md:p-8 space-y-6 relative overflow-hidden",
-          header: "border-b border-zinc-200 dark:border-zinc-800 pb-6",
-          addressBox: "bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-4 shadow-sm",
-          tableHeader: "bg-zinc-800 dark:bg-zinc-950 text-yellow-500 border-b-2 border-yellow-500",
-          totalsBox: "bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-4 shadow-sm"
+          container: "bg-theme-surface rounded-xl border-l-8 border-l-yellow-500 border-y border-r border-theme-border-strong shadow-md p-6 md:p-8 space-y-6 relative overflow-hidden",
+          header: "border-b border-theme-border-strong pb-6",
+          addressBox: "bg-theme-card border border-theme-border-soft rounded-lg p-4 shadow-sm",
+          tableHeader: "bg-theme-app text-yellow-500 border-b-2 border-yellow-500",
+          totalsBox: "bg-theme-card border border-theme-border-soft rounded-lg p-4 shadow-sm"
         };
       case 'classic':
       default:

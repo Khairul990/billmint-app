@@ -210,7 +210,7 @@ const Sidebar = ({
                   {isActive && !isCollapsed && (
                     <motion.div
                       layoutId="activeBar"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-white/60"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-theme-button-text/60"
                       initial={false}
                       transition={{ type: "spring", stiffness: 350, damping: 30 }}
                     />
