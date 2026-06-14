@@ -137,7 +137,7 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 w-full space-y-6">
       <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-6 mb-6">
         <div className="w-12 h-12 rounded-2xl bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-950/30 dark:text-fuchsia-400 flex items-center justify-center shadow-sm">
           <Smartphone className="w-6 h-6" />

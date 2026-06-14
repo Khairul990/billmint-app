@@ -169,7 +169,7 @@ const TemplateMarketplace = ({ settings, onSaveSettings, subscription, setCurren
   });
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 animate-fade-in">
+    <div className="p-4 md:p-8 w-full space-y-6 animate-fade-in">
       {/* Header */}
       <div className="bg-gradient-to-r from-theme-accent/10 to-transparent dark:from-theme-accent/5 p-6 rounded-3xl border border-theme-border-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
