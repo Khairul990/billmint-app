@@ -153,7 +153,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       />
 
       {/* Main Content Region */}
-      <div className="flex flex-col flex-1 h-full min-w-0 bg-theme-app transition-colors duration-300 relative z-10">
+      <div className="flex-1 flex flex-col min-w-0 w-full max-w-full pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0 overflow-y-auto overflow-x-hidden bg-theme-app transition-colors duration-300 relative z-10">
         
         {/* Header Block with Premium Dual-Theme Layout */}
         <header className="sticky top-0 z-40 bg-theme-card/80 backdrop-blur-xl border-b border-theme-accent/50 px-4 sm:px-6 py-4 md:py-5 text-theme-primary shadow-sm transition-all duration-300">
