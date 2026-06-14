@@ -85,7 +85,6 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
     { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen, module: 'dueLedger' },
     { id: 'pending-payments', label: 'Payment Proofs', icon: Bell, module: 'paymentProofs' },
     { id: 'subscription', label: 'Subscription Plan', icon: Sparkles },
-    { id: 'settings', label: t('settings'), icon: SettingsIcon },
     { id: 'help-center', label: 'Help Center', icon: HelpCircle },
   ];
 
