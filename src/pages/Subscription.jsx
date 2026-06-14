@@ -18,8 +18,10 @@ import {
   CheckCircle,
   XCircle,
   HelpCircle,
-  AlertCircle
+  AlertCircle,
+  Flame
 } from 'lucide-react';
+import ShineBorder from '../components/ShineBorder';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { getRealUserId, submitPremiumRequest } from '../services/dbEngine';
 import { db, firebaseReady } from '../services/firebaseConfig';
@@ -241,19 +243,31 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
         </div>
  
         {/* PREMIUM MEMBERSHIP CARD */}
-        <div className="bg-[image:var(--accent-gradient)] text-white rounded-3xl p-6 shadow-premium flex flex-col justify-between relative overflow-hidden border border-theme-border-soft/20">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-theme-accent-light rounded-full blur-3xl pointer-events-none"></div>
-          {isPremium && (
-            <span className="absolute top-4 right-4 text-[9px] font-extrabold uppercase bg-theme-accent text-white px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 border border-white/20">
-              <Sparkles className="w-2.5 h-2.5" /> Active Plan
-            </span>
-          )}
- 
-          <div className="space-y-4 relative z-10">
-            <div className="flex items-center gap-2">
-              <h3 className="font-extrabold text-theme-accent text-sm uppercase tracking-wider">Premium Growth</h3>
-              <span className="text-[8px] font-extrabold bg-theme-accent-light text-theme-accent border border-theme-border-soft px-2 py-0.5 rounded-full uppercase tracking-wider">SaaS Tier</span>
-            </div>
+        <ShineBorder 
+          duration={3} 
+          gradient="from-theme-accent via-fuchsia-500 to-blue-500"
+          className="h-full"
+        >
+          <div className="bg-[image:var(--accent-gradient)] h-full text-white rounded-[calc(1.5rem-2px)] p-6 shadow-premium flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-theme-accent-light rounded-full blur-3xl pointer-events-none"></div>
+            {isPremium && (
+              <span className="absolute top-4 right-4 z-20 text-[9px] font-extrabold uppercase bg-theme-accent text-white px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 border border-white/20">
+                <Sparkles className="w-2.5 h-2.5" /> Active Plan
+              </span>
+            )}
+  
+            <div className="space-y-4 relative z-10">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-extrabold text-theme-accent text-sm uppercase tracking-wider">Premium Growth</h3>
+                  <span className="text-[8px] font-extrabold bg-theme-accent-light text-theme-accent border border-theme-border-soft px-2 py-0.5 rounded-full uppercase tracking-wider">SaaS Tier</span>
+                </div>
+                {!isPremium && (
+                  <span className="py-1 px-2.5 text-[9px] font-black uppercase tracking-wider bg-theme-warning/10 text-theme-warning border border-theme-warning/20 rounded-full flex items-center gap-1 shadow-sm">
+                    <Flame size={12} /> Recommend
+                  </span>
+                )}
+              </div>
             
             <div className="border-t border-b border-white/5 py-4">
               <h4 className="text-3xl font-black text-white tracking-tight">
@@ -294,7 +308,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
               </button>
             )}
           </div>
-        </div>
+        </ShineBorder>
  
       </div>
 
