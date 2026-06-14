@@ -308,6 +308,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
               </button>
             )}
           </div>
+        </div>
         </ShineBorder>
  
       </div>
