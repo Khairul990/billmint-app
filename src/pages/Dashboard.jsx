@@ -32,7 +32,8 @@ const Dashboard = ({
   subscription = {},
   onQuickBillOpen,
   pendingPaymentsCount = 0,
-  syncStatus = 'Synced'
+  syncStatus = 'Synced',
+  isLoading = false
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -215,17 +216,29 @@ const Dashboard = ({
               <div className="flex items-center gap-4 md:gap-6 bg-black/20 backdrop-blur-md p-4 rounded-2xl border border-white/10 overflow-x-auto no-scrollbar w-full lg:w-auto shrink-0">
                 <div className="shrink-0">
                   <p className="text-[10px] md:text-xs font-bold text-white/70 uppercase tracking-wider mb-1">{isEmbroidery ? 'Orders' : "Today's Revenue"}</p>
-                  <p className="text-xl md:text-2xl font-black">{isEmbroidery ? todayBills : formatCurrency(todayRevenue, currencySymbol)}</p>
+                  {isLoading ? (
+                    <div className="w-20 h-8 bg-white/20 animate-pulse rounded-lg mt-1"></div>
+                  ) : (
+                    <p className="text-xl md:text-2xl font-black">{isEmbroidery ? todayBills : formatCurrency(todayRevenue, currencySymbol)}</p>
+                  )}
                 </div>
                 <div className="w-px h-10 bg-white/20 shrink-0"></div>
                 <div className="shrink-0">
                   <p className="text-[10px] md:text-xs font-bold text-white/70 uppercase tracking-wider mb-1">{isEmbroidery ? 'Delivery' : 'Collection'}</p>
-                  <p className="text-xl md:text-2xl font-black">{formatCurrency(todayCollection, currencySymbol)}</p>
+                  {isLoading ? (
+                    <div className="w-20 h-8 bg-white/20 animate-pulse rounded-lg mt-1"></div>
+                  ) : (
+                    <p className="text-xl md:text-2xl font-black">{formatCurrency(todayCollection, currencySymbol)}</p>
+                  )}
                 </div>
                 <div className="w-px h-10 bg-white/20 shrink-0"></div>
                 <div className="shrink-0">
                   <p className="text-[10px] md:text-xs font-bold text-white/70 uppercase tracking-wider mb-1">{isEmbroidery ? 'Due' : 'Pending Due'}</p>
-                  <p className="text-xl md:text-2xl font-black text-amber-300">{formatCurrency(todayDue, currencySymbol)}</p>
+                  {isLoading ? (
+                    <div className="w-20 h-8 bg-white/20 animate-pulse rounded-lg mt-1"></div>
+                  ) : (
+                    <p className="text-xl md:text-2xl font-black text-amber-300">{formatCurrency(todayDue, currencySymbol)}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -267,10 +280,24 @@ const Dashboard = ({
 
               {/* KPI Cards (4 cards) */}
               <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard title="Revenue" value={formatCurrency(totalRevenue, currencySymbol)} icon={TrendingUp} trend="+12%" accentColor="bg-theme-success/10 text-theme-success" />
-                <StatCard title="Collection" value={formatCurrency(totalPaid, currencySymbol)} icon={CheckCircle2} trend="Good" accentColor="bg-theme-accent/10 text-theme-accent" />
-                <StatCard title={labels.due} value={formatCurrency(totalDue, currencySymbol)} icon={AlertCircle} trend="Action Needed" trendUp={false} accentColor="bg-theme-danger/10 text-theme-danger" />
-                <StatCard title={`Total ${labels.clients}`} value={totalCustomersCount} icon={Users} trend="Active" accentColor="bg-blue-500/10 text-blue-500" />
+                {isLoading ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft animate-pulse flex flex-col justify-between h-[110px]">
+                      <div className="w-8 h-8 bg-theme-surface rounded-lg mb-2"></div>
+                      <div>
+                        <div className="w-16 h-3 bg-theme-surface rounded-md mb-2"></div>
+                        <div className="w-24 h-6 bg-theme-surface rounded-md"></div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <StatCard title="Revenue" value={formatCurrency(totalRevenue, currencySymbol)} icon={TrendingUp} trend="+12%" accentColor="bg-theme-success/10 text-theme-success" />
+                    <StatCard title="Collection" value={formatCurrency(totalPaid, currencySymbol)} icon={CheckCircle2} trend="Good" accentColor="bg-theme-accent/10 text-theme-accent" />
+                    <StatCard title={labels.due} value={formatCurrency(totalDue, currencySymbol)} icon={AlertCircle} trend="Action Needed" trendUp={false} accentColor="bg-theme-danger/10 text-theme-danger" />
+                    <StatCard title={`Total ${labels.clients}`} value={totalCustomersCount} icon={Users} trend="Active" accentColor="bg-blue-500/10 text-blue-500" />
+                  </>
+                )}
               </div>
 
               {/* Chart (Hidden Mobile) */}
@@ -350,34 +377,54 @@ const Dashboard = ({
                   </button>
                 </div>
                 <div className="space-y-3">
-                  {recentInvoices.map((inv) => (
-                    <div key={inv.id} className="group flex items-center justify-between p-3 bg-theme-app hover:bg-theme-surface rounded-2xl border border-theme-border-soft transition-all cursor-pointer" onClick={() => { onEditInvoice(inv); setCurrentTab('create'); }}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-theme-card group-hover:bg-theme-surface flex items-center justify-center transition-colors shadow-sm">
-                          <FileText className="w-4 h-4 text-theme-accent" />
+                  {isLoading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <div key={`skel-inv-${i}`} className="flex items-center justify-between p-3 bg-theme-app rounded-2xl border border-theme-border-soft animate-pulse">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-theme-surface"></div>
+                          <div>
+                            <div className="w-24 h-4 bg-theme-surface rounded-md mb-1.5"></div>
+                            <div className="w-16 h-3 bg-theme-surface rounded-md"></div>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-xs font-black text-theme-primary mb-0.5 line-clamp-1">{inv.customerName}</p>
-                          <p className="text-[10px] font-bold text-theme-muted">{inv.invoiceNumber} • {inv.date}</p>
+                        <div className="text-right flex flex-col items-end">
+                          <div className="w-16 h-4 bg-theme-surface rounded-md mb-1.5"></div>
+                          <div className="w-12 h-3 bg-theme-surface rounded-md"></div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs font-black text-theme-primary mb-1">{formatCurrency(inv.grandTotal, currencySymbol)}</p>
-                        <span className={`text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider ${inv.paymentStatus === 'Paid' ? 'bg-theme-success/10 text-theme-success' : 'bg-theme-danger/10 text-theme-danger'}`}> {inv.paymentStatus || 'Pending'} </span>
-                      </div>
-                    </div>
-                  ))}
-                  {recentInvoices.length === 0 && (
-                    <div className="text-center py-8">
-                      <div className="w-12 h-12 bg-theme-app rounded-full flex items-center justify-center mx-auto mb-3">
-                        <FileText className="w-6 h-6 text-theme-muted" />
-                      </div>
-                      <p className="text-xs font-bold text-theme-primary mb-1">No {labels.invoices.toLowerCase()} yet</p>
-                      <p className="text-[10px] text-theme-muted mb-3">Create your first {labels.invoices.toLowerCase()} to start tracking.</p>
-                      <button onClick={() => setCurrentTab('create')} className="text-[10px] font-bold bg-theme-accent/10 text-theme-accent px-3 py-1.5 rounded-lg hover:bg-theme-accent hover:text-white transition-colors">
-                        Create {labels.invoices}
-                      </button>
-                    </div>
+                    ))
+                  ) : (
+                    <>
+                      {recentInvoices.map((inv) => (
+                        <div key={inv.id} className="group flex items-center justify-between p-3 bg-theme-app hover:bg-theme-surface rounded-2xl border border-theme-border-soft transition-all cursor-pointer" onClick={() => { onEditInvoice(inv); setCurrentTab('create'); }}>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-theme-card group-hover:bg-theme-surface flex items-center justify-center transition-colors shadow-sm">
+                              <FileText className="w-4 h-4 text-theme-accent" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-black text-theme-primary mb-0.5 line-clamp-1">{inv.customerName}</p>
+                              <p className="text-[10px] font-bold text-theme-muted">{inv.invoiceNumber} • {inv.date}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs font-black text-theme-primary mb-1">{formatCurrency(inv.grandTotal, currencySymbol)}</p>
+                            <span className={`text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider ${inv.paymentStatus === 'Paid' ? 'bg-theme-success/10 text-theme-success' : 'bg-theme-danger/10 text-theme-danger'}`}> {inv.paymentStatus || 'Pending'} </span>
+                          </div>
+                        </div>
+                      ))}
+                      {recentInvoices.length === 0 && (
+                        <div className="text-center py-8">
+                          <div className="w-12 h-12 bg-theme-app rounded-full flex items-center justify-center mx-auto mb-3">
+                            <FileText className="w-6 h-6 text-theme-muted" />
+                          </div>
+                          <p className="text-xs font-bold text-theme-primary mb-1">No {labels.invoices.toLowerCase()} yet</p>
+                          <p className="text-[10px] text-theme-muted mb-3">Create your first {labels.invoices.toLowerCase()} to start tracking.</p>
+                          <button onClick={() => setCurrentTab('create')} className="text-[10px] font-bold bg-theme-accent/10 text-theme-accent px-3 py-1.5 rounded-lg hover:bg-theme-accent hover:text-white transition-colors">
+                            Create {labels.invoices}
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -393,7 +440,9 @@ const Dashboard = ({
                 <PieChartIcon className="w-4 h-4 text-theme-accent" /> Top {labels.clients}
               </h3>
               <div className="flex-1 w-full min-h-[220px]">
-                {topCustomersData.length > 0 ? (
+                {isLoading ? (
+                  <div className="w-48 h-48 rounded-full border-8 border-theme-surface border-t-theme-accent/20 animate-spin mx-auto mt-4"></div>
+                ) : topCustomersData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={topCustomersData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
@@ -423,26 +472,40 @@ const Dashboard = ({
                 <Sparkles className="w-4 h-4 text-theme-accent" /> Best Selling {labels.items}
               </h3>
               <div className="space-y-3">
-                {bestSellingItems.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-theme-app hover:bg-theme-surface rounded-2xl border border-theme-border-soft transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center font-black text-xs">
-                        #{index + 1}
+                {isLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <div key={`skel-item-${i}`} className="flex items-center justify-between p-3 bg-theme-app rounded-2xl border border-theme-border-soft animate-pulse">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-theme-surface"></div>
+                        <div className="w-24 h-4 bg-theme-surface rounded-md"></div>
                       </div>
-                      <span className="text-xs font-bold text-theme-primary line-clamp-1">{item.name}</span>
+                      <div className="w-16 h-5 bg-theme-surface rounded-md"></div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-[10px] font-black bg-theme-success/10 text-theme-success px-2 py-1 rounded-md">
-                        {item.qty} Sold
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                {bestSellingItems.length === 0 && (
-                  <div className="text-center py-10 text-theme-muted flex flex-col items-center">
-                    <ShoppingBag className="w-8 h-8 text-theme-muted mb-2 opacity-50" />
-                    <p className="text-[10px] font-bold">No sales data yet</p>
-                  </div>
+                  ))
+                ) : (
+                  <>
+                    {bestSellingItems.map((item, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-theme-app hover:bg-theme-surface rounded-2xl border border-theme-border-soft transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center font-black text-xs">
+                            #{index + 1}
+                          </div>
+                          <span className="text-xs font-bold text-theme-primary line-clamp-1">{item.name}</span>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="text-[10px] font-black bg-theme-success/10 text-theme-success px-2 py-1 rounded-md">
+                            {item.qty} Sold
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                    {bestSellingItems.length === 0 && (
+                      <div className="text-center py-10 text-theme-muted flex flex-col items-center">
+                        <ShoppingBag className="w-8 h-8 text-theme-muted mb-2 opacity-50" />
+                        <p className="text-[10px] font-bold">No sales data yet</p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>

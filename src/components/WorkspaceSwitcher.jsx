@@ -3,22 +3,37 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 
 const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWorkspace, setCurrentTab }) => {
   const [open, setOpen] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
   const activeWorkspace = businessWorkspaces.find(ws => ws.id === activeWorkspaceId) || {};
 
   const handleSelect = (id) => {
+    setIsSwitching(true);
     setActiveWorkspace(id);
     setOpen(false);
+    setTimeout(() => {
+      setIsSwitching(false);
+    }, 600); // 600ms premium transition feel
   };
 
   return (
-    <div className="relative inline-block text-left mr-4">
+    <div className="relative inline-block text-left mr-4 z-50">
       <button
         onClick={() => setOpen(!open)}
-        className="inline-flex justify-center w-full rounded-md border border-theme-border-soft/20 shadow-sm px-3 py-2 bg-theme-card text-sm font-medium text-theme-primary hover:bg-theme-accent-light/10 focus:outline-none"
+        disabled={isSwitching}
+        className="inline-flex items-center justify-center w-full rounded-md border border-theme-border-soft/50 shadow-sm px-3 py-1.5 bg-theme-app text-sm font-bold text-theme-primary hover:bg-theme-surface focus:outline-none transition-colors"
         title="Switch Workspace"
       >
-        {activeWorkspace.name || 'Workspace'}
-        {open ? <ChevronUp className="ml-2 w-4 h-4" /> : <ChevronDown className="ml-2 w-4 h-4" />}
+        {isSwitching ? (
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 border-2 border-theme-accent border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-[11px] animate-pulse">Switching...</span>
+          </div>
+        ) : (
+          <>
+            {activeWorkspace.name || 'Workspace'}
+            {open ? <ChevronUp className="ml-2 w-4 h-4 text-theme-muted" /> : <ChevronDown className="ml-2 w-4 h-4 text-theme-muted" />}
+          </>
+        )}
       </button>
       {open && (
         <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-theme-card ring-1 ring-black ring-opacity-5 focus:outline-none z-20">

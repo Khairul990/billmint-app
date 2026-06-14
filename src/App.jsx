@@ -294,16 +294,23 @@ function App() {
   }, [isAuthenticated]);
   
   // --- 🚀 GLOBAL BOOT & LOADING STATE ---
-  const [isAppBooting, setIsAppBooting] = useState(true);
+  const [isAppBooting, setIsAppBooting] = useState(() => {
+    const hasAuth = !!localStorage.getItem('billqyro_auth');
+    const hasSettings = !!localStorage.getItem('billqyro_settings');
+    // If it's a known returning user, skip the full-screen boot completely
+    if (hasAuth && hasSettings) return false;
+    return true;
+  });
+  const [isDataHydrating, setIsDataHydrating] = useState(true);
   const [cloudSyncDone, setCloudSyncDone] = useState(false);
 
   // Safety timeout to ensure app never gets stuck on boot screen
   useEffect(() => {
     if (isAppBooting) {
       const timeout = setTimeout(() => {
-        console.warn('[BOOT TIMEOUT] 7 seconds reached, forcing app load.');
+        console.warn('[BOOT TIMEOUT] 500ms reached, forcing app load.');
         setIsAppBooting(false);
-      }, 7000);
+      }, 500); // Changed from 7000 to 500ms for premium fast feel
       return () => clearTimeout(timeout);
     }
   }, [isAppBooting]);
@@ -321,9 +328,9 @@ function App() {
         setExpenses(await getExpenses() || []);
       } catch (err) {
         console.error("Error loading local data:", err);
+      } finally {
+        setIsDataHydrating(false);
       }
-      // Removing the arbitrary setTimeout that forces isAppBooting(false).
-      // We will let onAuthStateChanged and syncFromFirestore handle it cleanly.
     };
     loadLocalData();
 
@@ -446,11 +453,13 @@ function App() {
         } else {
           setIsAuthenticated(false);
           setIsAppBooting(false); // Force exit loading state if no real user exists
+          setIsDataHydrating(false);
         }
       });
       return () => unsubscribe();
     } else {
       setIsAppBooting(false);
+      setIsDataHydrating(false);
     }
   }, []);
 
@@ -930,6 +939,7 @@ function App() {
             subscription={subscription}
             onQuickBillOpen={() => setIsQuickBillOpen(true)}
             pendingPaymentsCount={pendingPayments.length}
+            isLoading={isDataHydrating}
           />
         );
       case 'pending-payments':
