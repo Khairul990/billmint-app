@@ -127,6 +127,36 @@ const Sidebar = ({
         )}
       </div>
 
+      {/* User Card (Moved to top) */}
+      <div className="shrink-0 border-b border-theme-border-soft/20 px-3 py-3">
+        <div className={`flex items-center rounded-xl border border-theme-border-soft/40 bg-theme-accent-light/8 overflow-hidden ${
+          isCollapsed ? 'justify-center p-2' : 'gap-2.5 p-2.5'
+        }`}
+          style={{ transition: isMounted ? 'all 180ms ease' : 'none' }}
+        >
+          {businessSettings?.logoUrl ? (
+            <img
+              src={businessSettings.logoUrl}
+              alt="Logo"
+              className="w-8 h-8 rounded-lg object-cover shadow-sm bg-theme-card shrink-0"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-lg bg-[image:var(--accent-gradient)] text-theme-button-text font-bold flex items-center justify-center text-xs shrink-0 shadow-sm">
+              {businessSettings?.businessName?.charAt(0) || 'B'}
+            </div>
+          )}
+          {!isCollapsed && (
+            <div className="min-w-0 flex-1">
+              <h4 className="text-[11px] font-bold text-theme-sidebar-text truncate leading-tight">
+                {businessSettings?.businessName || 'My Business'}
+              </h4>
+              <p className="text-[9px] text-theme-sidebar-text/55 font-medium truncate leading-tight">
+                {businessSettings?.email || userEmail || 'No email'}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Collapse Toggle */}
       <div className="shrink-0 flex justify-end px-2 py-1.5">
@@ -225,35 +255,6 @@ const Sidebar = ({
       <div className="shrink-0 border-t border-theme-border-soft/20 bg-theme-sidebar/50"
         style={{ padding: isCollapsed ? '12px 8px' : '12px 12px', transition: isMounted ? 'padding 180ms ease' : 'none' }}
       >
-        {/* User Card */}
-        <div className={`flex items-center rounded-xl border border-theme-border-soft/40 bg-theme-accent-light/8 overflow-hidden ${
-          isCollapsed ? 'justify-center p-2' : 'gap-2.5 p-2.5'
-        }`}
-          style={{ transition: isMounted ? 'all 180ms ease' : 'none' }}
-        >
-          {businessSettings?.logoUrl ? (
-            <img
-              src={businessSettings.logoUrl}
-              alt="Logo"
-              className="w-8 h-8 rounded-lg object-cover shadow-sm bg-theme-card shrink-0"
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-lg bg-[image:var(--accent-gradient)] text-theme-button-text font-bold flex items-center justify-center text-xs shrink-0 shadow-sm">
-              {businessSettings?.businessName?.charAt(0) || 'B'}
-            </div>
-          )}
-          {!isCollapsed && (
-            <div className="min-w-0 flex-1">
-              <h4 className="text-[11px] font-bold text-theme-sidebar-text truncate leading-tight">
-                {businessSettings?.businessName || 'My Business'}
-              </h4>
-              <p className="text-[9px] text-theme-sidebar-text/55 font-medium truncate leading-tight">
-                {businessSettings?.email || userEmail || 'No email'}
-              </p>
-            </div>
-          )}
-        </div>
-
         {/* Logout Button */}
         {isAuthenticated && (
           <button
