@@ -107,7 +107,7 @@ const Sidebar = ({
 
   return (
     <aside
-      className="hidden lg:flex flex-col h-full z-30 overflow-hidden shrink-0 border-r border-theme-border-soft/40 bg-theme-sidebar/80 backdrop-blur-xl shadow-[4px_0_24px_-6px_rgba(0,0,0,0.08)]"
+      className="hidden lg:flex flex-col h-full z-30 overflow-hidden shrink-0 border-r border-theme-accent/20 bg-theme-sidebar/80 backdrop-blur-xl shadow-[4px_0_24px_-6px_rgba(0,0,0,0.08)]"
       style={{
         width: isCollapsed ? 72 : 240,
         minWidth: isCollapsed ? 72 : 240,
@@ -115,7 +115,7 @@ const Sidebar = ({
       }}
     >
       {/* Brand Header */}
-      <div className="shrink-0 border-b border-theme-border-soft/20 flex items-center justify-between overflow-hidden"
+      <div className="shrink-0 border-b border-theme-accent/20 flex items-center justify-between overflow-hidden"
         style={{ padding: isCollapsed ? '16px 12px' : '20px 20px', transition: isMounted ? 'padding 180ms ease' : 'none' }}
       >
         {isCollapsed ? (
@@ -128,7 +128,7 @@ const Sidebar = ({
       </div>
 
       {/* User Card & Collapse Toggle */}
-      <div className={`shrink-0 border-b border-theme-border-soft/20 flex ${isCollapsed ? 'flex-col items-center py-2 gap-2' : 'flex-row items-center justify-between px-3 py-2'}`}>
+      <div className={`shrink-0 border-b border-theme-accent/20 flex ${isCollapsed ? 'flex-col items-center py-2 gap-2' : 'flex-row items-center justify-between px-3 py-2'}`}>
         {/* User Card */}
         <div className={`flex items-center rounded-xl overflow-hidden ${
           isCollapsed ? 'justify-center p-1' : 'gap-2.5 p-1 min-w-0 flex-1'
@@ -253,7 +253,7 @@ const Sidebar = ({
       </nav>
 
       {/* Sidebar Footer */}
-      <div className="shrink-0 border-t border-theme-border-soft/20 bg-theme-sidebar/50"
+      <div className="shrink-0 border-t border-theme-accent/10 bg-theme-sidebar/50"
         style={{ padding: isCollapsed ? '12px 8px' : '16px 12px', transition: isMounted ? 'padding 180ms ease' : 'none' }}
       >
         <button
