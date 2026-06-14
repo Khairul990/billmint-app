@@ -1,12 +1,38 @@
 const themeFolderMap = {
-  classic: 'billqyro-classic',
-  pink: 'pink-premium',
-  emerald: 'emerald-business',
-  indigo: 'royal-indigo',
-  rose: 'rose-gold-luxe',
-  midnight: 'midnight-blue',
-  ruby: 'ruby-burgundy',
-  champagne: 'champagne-black'
+  // Original 8 folders
+  'classic': 'billqyro-classic',
+  'pink': 'pink-premium',
+  'emerald': 'emerald-business',
+  'indigo': 'royal-indigo',
+  'rose': 'rose-gold-luxe',
+  'midnight': 'midnight-blue',
+  'ruby': 'ruby-burgundy',
+  'champagne': 'champagne-black',
+
+  // Map the new 20 valid themes to the closest matching physical folder
+  'obsidian-gold': 'champagne-black',
+  'arctic-teal': 'emerald-business',
+  'sapphire-noir': 'midnight-blue',
+  'rose-platinum': 'rose-gold-luxe',
+  'carbon-violet': 'royal-indigo',
+  'graphite-copper': 'champagne-black',
+  'arctic-diamond': 'billqyro-classic',
+  'emerald-royal': 'emerald-business',
+  'midnight-ruby': 'ruby-burgundy',
+  'titanium-blue': 'midnight-blue',
+  'ocean-blue': 'billqyro-classic',
+  'sunset-orange': 'ruby-burgundy',
+  'forest-green': 'emerald-business',
+  'deep-bluish-green': 'emerald-business',
+  'deep-blue-premium': 'midnight-blue',
+  'crimson-business': 'ruby-burgundy',
+  'luxury-brown': 'champagne-black',
+  'noir-black': 'champagne-black',
+  'cyber-blue': 'billqyro-classic',
+  'silver-elite': 'billqyro-classic',
+  'crimson-red': 'ruby-burgundy',
+  'purple-haze': 'royal-indigo',
+  'golden-luxury': 'champagne-black'
 };
 
 export const updateFaviconForTheme = (themeId) => {

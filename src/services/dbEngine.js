@@ -1125,6 +1125,29 @@ export const getSettings = () => {
       settings.email = '';
     }
   }
+
+  // Ensure default theme is locked to the account instead of floating, 
+  // preventing it from randomly changing if the admin default changes later.
+  if (settings) {
+    let shouldSave = false;
+    const validThemes = ['obsidian-gold', 'arctic-teal', 'sapphire-noir', 'rose-platinum', 'carbon-violet', 'graphite-copper', 'arctic-diamond', 'emerald-royal', 'midnight-ruby', 'titanium-blue', 'pink', 'indigo', 'emerald', 'rose', 'midnight', 'champagne', 'ruby', 'ocean-blue', 'sunset-orange', 'forest-green', 'deep-bluish-green', 'deep-blue-premium', 'crimson-business', 'luxury-brown', 'noir-black', 'cyber-blue', 'silver-elite', 'crimson-red', 'purple-haze', 'golden-luxury'];
+    
+    if (!settings.themeColor || !validThemes.includes(settings.themeColor)) {
+      settings.themeColor = localStorage.getItem('billqyro_admin_default_theme') || 'obsidian-gold';
+      shouldSave = true;
+    }
+
+    if (shouldSave) {
+      localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
+      // Using direct firestore push bypassing syncEngine because this is a core init fix
+      const { pushDataUpdate } = require('./syncEngine');
+      const userId = getRealUserId();
+      if (userId && firebaseReady) {
+         pushDataUpdate('settings', userId, userId, settings);
+      }
+    }
+  }
+
   return settings;
 };
 

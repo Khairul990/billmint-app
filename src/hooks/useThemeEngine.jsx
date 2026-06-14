@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { updateFaviconForTheme } from '../utils/themeIcon';
 
 // Helper to convert HEX to RGB
 const hexToRgb = (hex) => {
@@ -76,6 +77,9 @@ export const useThemeEngine = (businessSettings) => {
         
         // Apply a subtle tint to the active sidebar items
         root.style.setProperty('--sidebar-active', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
+        
+        // Ensure favicon reflects standard theme even if custom color is used
+        updateFaviconForTheme(themeName);
       }
     } else {
       // 2. Pre-built Theme (Free/Pro users)
@@ -90,6 +94,7 @@ export const useThemeEngine = (businessSettings) => {
       root.style.removeProperty('--sidebar-active');
       
       root.setAttribute('data-theme', themeName);
+      updateFaviconForTheme(themeName);
     }
   }, [businessSettings?.themeColor, businessSettings?.brandColor, businessSettings?.themeType, businessSettings?.plan]);
 };
