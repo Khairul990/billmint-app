@@ -610,3 +610,17 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Magic UI Animated Theme Toggler View Transitions */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+[data-magicui-theme-vt="active"]::view-transition-old(root) {
+  z-index: 1;
+}
+[data-magicui-theme-vt="active"]::view-transition-new(root) {
+  z-index: 2;
+  clip-path: var(--magicui-theme-vt-clip-from);
+}

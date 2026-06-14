@@ -9,6 +9,7 @@ import { updateFaviconForTheme } from '../utils/themeIcon';
 import { flushSyncQueue } from '../services/syncEngine';
 import { motion } from 'framer-motion';
 import AnimatedBorderTrail from './AnimatedBorderTrail';
+import { AnimatedThemeToggler } from './AnimatedThemeToggler';
 
 /**
  * Global App Layout Shell
@@ -300,15 +301,20 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               </div>
 
               {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                type="button"
+              <AnimatedThemeToggler
                 className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden"
+                variant="circle"
+                theme={isDarkMode ? "dark" : "light"}
+                onThemeChange={(newTheme) => {
+                  const newDarkMode = newTheme === "dark";
+                  if (newDarkMode !== isDarkMode) {
+                    toggleTheme();
+                  }
+                }}
                 title={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
               >
                 <AnimatedBorderTrail />
-                {!isDarkMode ? <Moon className="w-5 h-5 relative z-10" /> : <Sun className="w-5 h-5 text-amber-400 animate-pulse relative z-10" />}
-              </button>
+              </AnimatedThemeToggler>
 
               {/* Settings Action */}
               <button
