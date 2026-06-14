@@ -7,6 +7,27 @@ import Logo from './Logo';
 import { getSettings, saveSettings } from '../services/dbEngine';
 import { updateFaviconForTheme } from '../utils/themeIcon';
 import { flushSyncQueue } from '../services/syncEngine';
+import { motion } from 'framer-motion';
+
+const AnimatedBorderTrail = ({ borderRadius = 16, duration = 3, size = 20 }) => (
+  <div
+    className="pointer-events-none absolute -inset-px rounded-[inherit] border-2 border-transparent border-solid [mask-clip:padding-box,border-box] [mask-composite:intersect] [mask-image:linear-gradient(transparent,transparent),linear-gradient(#000,#000)]"
+  >
+    <motion.div
+      className="absolute aspect-square bg-gradient-to-r from-transparent via-theme-accent to-theme-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      animate={{ offsetDistance: ["0%", "100%"] }}
+      style={{
+        width: size,
+        offsetPath: `rect(0 auto auto 0 round ${borderRadius}px)`,
+      }}
+      transition={{
+        repeat: Number.POSITIVE_INFINITY,
+        duration: duration,
+        ease: "linear",
+      }}
+    />
+  </div>
+);
 
 /**
  * Global App Layout Shell
@@ -238,18 +259,20 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             {/* RIGHT: Actions & Profile */}
             <div className="flex items-center gap-2 sm:gap-3 justify-end">
               {/* Mobile Search Icon */}
-              <button className="md:hidden w-11 h-11 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group">
-                <Search className="w-5 h-5" />
+              <button className="md:hidden w-11 h-11 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden">
+                <AnimatedBorderTrail />
+                <Search className="w-5 h-5 relative z-10" />
               </button>
 
               {/* Notifications Dropdown */}
               <div className="relative">
                 <button 
                   onClick={() => setIsNotificationMenuOpen(!isNotificationMenuOpen)}
-                  className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group"
+                  className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden"
                 >
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-theme-danger rounded-full border border-theme-app animate-pulse"></span>
+                  <AnimatedBorderTrail />
+                  <Bell className="w-5 h-5 relative z-10" />
+                  <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-theme-danger rounded-full border border-theme-app animate-pulse z-20"></span>
                 </button>
                 
                 {isNotificationMenuOpen && (
@@ -299,32 +322,35 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <button
                 onClick={toggleTheme}
                 type="button"
-                className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group"
+                className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden"
                 title={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
               >
-                {!isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-400 animate-pulse" />}
+                <AnimatedBorderTrail />
+                {!isDarkMode ? <Moon className="w-5 h-5 relative z-10" /> : <Sun className="w-5 h-5 text-amber-400 animate-pulse relative z-10" />}
               </button>
 
               {/* Settings Action */}
               <button
                 onClick={() => setCurrentTab('settings')}
-                className="hidden sm:flex w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group"
+                className="hidden sm:flex w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden"
                 title="Settings"
               >
-                <SettingsIcon className="w-5 h-5" />
+                <AnimatedBorderTrail />
+                <SettingsIcon className="w-5 h-5 relative z-10" />
               </button>
 
               {/* Premium Account Dropdown Container */}
               <div className="relative flex items-center">
                 <button
                   onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
-                  className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-[image:var(--accent-gradient)] shadow-premium text-theme-button-text flex items-center justify-center hover:scale-105 active:scale-95 transition-transform cursor-pointer overflow-hidden border border-white/10"
+                  className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-[image:var(--accent-gradient)] shadow-premium text-theme-button-text flex items-center justify-center hover:scale-105 active:scale-95 transition-transform cursor-pointer overflow-hidden border border-white/10 group relative"
                   title="Account Settings"
                 >
+                  <AnimatedBorderTrail />
                   {businessSettings?.logoUrl ? (
-                    <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                    <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover relative z-10" />
                   ) : (
-                    <span className="font-black text-lg">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
+                    <span className="font-black text-lg relative z-10">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
                   )}
                 </button>
 
