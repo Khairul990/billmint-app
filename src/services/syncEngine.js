@@ -108,7 +108,9 @@ export const pushDataUpdate = (collectionName, userId, docId, data) => {
   
   window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Saving...' }));
 
-  // Debounce actual firestore push by 300ms
+  // [COST AWARENESS] Debounce actual firestore push by 1000ms.
+  // Multiple rapid changes to the same document within 1s become ONE write.
+  // Estimated Write Source: 1 write per doc per 1000ms of continuous edits.
   debounceTimers[key] = setTimeout(async () => {
     if (!firebaseReady || !navigator.onLine) {
       enqueueSync(collectionName, userId, docId, payload);
@@ -130,7 +132,7 @@ export const pushDataUpdate = (collectionName, userId, docId, data) => {
       enqueueSync(collectionName, userId, docId, payload);
     }
     delete debounceTimers[key];
-  }, 300);
+  }, 1000);
 
   return true;
 };
@@ -150,6 +152,8 @@ export const startRealTimeSync = (userId) => {
   const deviceId = getDeviceId();
 
   // 1. Settings Listener
+  // [COST AWARENESS] Real-time listener for critical collections only.
+  // Estimated Read Source: 1 read per settings update. Keeps UI perfectly synced without refresh.
   const settingsUnsub = onSnapshot(doc(db, 'settings', userId), (docSnap) => {
     if (docSnap.exists()) {
       const cloudSettings = docSnap.data();
@@ -174,7 +178,14 @@ export const startRealTimeSync = (userId) => {
   unsubscribes.push(settingsUnsub);
 
   // 2. Collections Listener Generator
+  // [COST AWARENESS] Stopped onSnapshot for high volume collections (invoices, customers).
+  // They only sync on explicit actions (create/update/delete) or app boot.
+  // This massively reduces document reads during normal operation.
   const syncCollection = (collectionName, storageKey) => {
+    if (['invoices', 'customers', 'products', 'expenses'].includes(collectionName)) {
+      return; // Do NOT attach onSnapshot to save free-tier limits
+    }
+
     const colRef = collection(db, collectionName, userId, 'items');
     const unsub = onSnapshot(colRef, async (snapshot) => {
       const localItemsStr = localStorage.getItem(storageKey);
@@ -216,8 +227,8 @@ export const startRealTimeSync = (userId) => {
     unsubscribes.push(unsub);
   };
 
-  syncCollection('invoices', KEYS.INVOICES);
-  syncCollection('customers', KEYS.CUSTOMERS);
+  // syncCollection('invoices', KEYS.INVOICES); // Disabled for free-tier optimization
+  // syncCollection('customers', KEYS.CUSTOMERS); // Disabled for free-tier optimization
   
   // Process any offline queue on start
   flushSyncQueue();

@@ -235,16 +235,30 @@ function App() {
   const [businessWorkspaces, setBusinessWorkspaces] = useState(settings.businessWorkspaces || []);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState(settings.activeWorkspaceId || (settings.businessWorkspaces && settings.businessWorkspaces[0]?.id));
 
-  // Update settings when workspaces change
+  // Keep workspaces in sync with cloud settings updates
   useEffect(() => {
-    const updated = { ...settings, businessWorkspaces, activeWorkspaceId };
-    saveSettings(updated);
-    // Notify other components
-    window.dispatchEvent(new CustomEvent('billqyro_sync'));
-  }, [businessWorkspaces, activeWorkspaceId]);
+    if (settings.businessWorkspaces && JSON.stringify(settings.businessWorkspaces) !== JSON.stringify(businessWorkspaces)) {
+      setBusinessWorkspaces(settings.businessWorkspaces);
+    }
+    if (settings.activeWorkspaceId && settings.activeWorkspaceId !== activeWorkspaceId) {
+      setActiveWorkspaceId(settings.activeWorkspaceId);
+    }
+  }, [settings]);
+
+  // Handle local workspace changes
+  const updateWorkspaceState = (newWorkspaces, newActiveId) => {
+    setBusinessWorkspaces(newWorkspaces);
+    setActiveWorkspaceId(newActiveId);
+    setSettings(prev => {
+      const updated = { ...prev, businessWorkspaces: newWorkspaces, activeWorkspaceId: newActiveId };
+      saveSettings(updated);
+      window.dispatchEvent(new CustomEvent('billqyro_sync'));
+      return updated;
+    });
+  };
 
   const setActiveWorkspace = (id) => {
-    setActiveWorkspaceId(id);
+    updateWorkspaceState(businessWorkspaces, id);
   };
 
   // Real-time Pending Payments state
@@ -281,6 +295,7 @@ function App() {
   
   // --- 🚀 GLOBAL BOOT & LOADING STATE ---
   const [isAppBooting, setIsAppBooting] = useState(true);
+  const [cloudSyncDone, setCloudSyncDone] = useState(false);
 
   // Safety timeout to ensure app never gets stuck on boot screen
   useEffect(() => {
@@ -491,6 +506,7 @@ function App() {
           console.warn('Could not sync Firestore on startup. Falling back to LocalStorage.', e);
         } finally {
           setIsAppBooting(false); // ALWAYS EXIT BOOT
+          setCloudSyncDone(true);
         }
       };
       runSync();
@@ -511,7 +527,7 @@ function App() {
   // Onboarding Interceptor for Authenticated Session Boot
   useEffect(() => {
     // Wait until boot and sync is completely finished
-    if (isAuthenticated && !isAppBooting && settings) {
+    if (isAuthenticated && !isAppBooting && settings && cloudSyncDone) {
       console.log("Onboarding Check:", { setupCompleted: settings.setupCompleted, currentTab });
       const isLegacyConfigured = !!(settings.businessName && settings.businessName.trim());
       
