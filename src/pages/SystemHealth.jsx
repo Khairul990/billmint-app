@@ -79,24 +79,37 @@ const SystemHealth = ({ setCurrentTab }) => {
     };
   }, []);
 
-  const handleBackup = () => {
-    const dataToExport = {
-      version: '3.0.0',
-      timestamp: new Date().toISOString(),
-      localStorage: { ...localStorage }
-    };
-    
-    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `billqyro_backup_${new Date().getTime()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success('Backup downloaded successfully');
-    setHasBackedUp(true);
+  const handleBackup = async () => {
+    try {
+      const invoices = await BillQyroDB.getAll('invoices');
+      const customers = await BillQyroDB.getAll('customers');
+      const products = await BillQyroDB.getAll('products');
+      const expenses = await BillQyroDB.getAll('expenses');
+      const syncQueue = await BillQyroDB.getAll('syncQueue');
+
+      const dataToExport = {
+        version: '3.0.0',
+        timestamp: new Date().toISOString(),
+        localStorage: { ...localStorage },
+        indexedDB: {
+          invoices, customers, products, expenses, syncQueue
+        }
+      };
+      
+      const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `billqyro_backup_${new Date().getTime()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('Backup downloaded successfully');
+      setHasBackedUp(true);
+    } catch (e) {
+      toast.error('Backup failed: ' + e.message);
+    }
   };
 
   const [hasBackedUp, setHasBackedUp] = useState(false);
@@ -106,10 +119,27 @@ const SystemHealth = ({ setCurrentTab }) => {
       toast.error('Please backup your data before replacing with cloud data.');
       return;
     }
-    if (!window.confirm('This will clear all local cache on this device and replace it with data from the cloud. Proceed?')) {
-      return;
-    }
+
     try {
+      const queue = await BillQyroDB.getAll('syncQueue');
+      if (queue && queue.length > 0) {
+        toast.loading('Flushing offline queue to cloud first...', { id: 'flush-toast' });
+        const { syncOfflineTransactions } = await import('../services/dbEngine');
+        await syncOfflineTransactions();
+        
+        const newQueue = await BillQyroDB.getAll('syncQueue');
+        if (newQueue && newQueue.length > 0) {
+          toast.dismiss('flush-toast');
+          toast.error(`Cannot replace. ${newQueue.length} items failed to sync to cloud. Check your network or retry later.`);
+          return;
+        }
+        toast.success('Queue flushed successfully!', { id: 'flush-toast' });
+      }
+
+      if (!window.confirm('This will clear all local cache on this device and replace it with data from the cloud. Proceed?')) {
+        return;
+      }
+
       const { clearCacheOnly, syncFromFirestore } = await import('../services/dbEngine');
       // Clear local cache first
       clearCacheOnly();

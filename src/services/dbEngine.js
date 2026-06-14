@@ -46,15 +46,26 @@ export const migrateLocalStorageToIndexedDB = async () => {
 export const queueSyncTransaction = async (action, storeName, docId, data) => {
   const userId = getRealUserId();
   const transactionId = 'tx-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  let deviceId = 'Unknown Device';
+  try {
+    deviceId = localStorage.getItem('billqyro_device_id') || 'Unknown Device';
+  } catch(e){}
+
   const tx = {
     id: transactionId,
     userId,
     action, // 'save' or 'delete'
-    storeName, // 'invoices', 'customers', 'products', 'expenses'
-    docId,
+    collectionName: storeName, // Protected queue field
+    storeName, // Legacy
+    recordId: docId, // Protected queue field
+    docId, // Legacy
     data,
+    deviceId, // Protected queue field
+    status: 'pending', // Protected queue field
     createdAt: Date.now(),
-    retryCount: 0,
+    updatedAt: Date.now(), // Protected queue field
+    retries: 0, // Protected queue field
+    retryCount: 0, // Legacy
     lastRetryAt: 0
   };
   await BillQyroDB.put('syncQueue', tx);
@@ -134,13 +145,20 @@ export const syncOfflineTransactions = async () => {
       try {
         let syncSuccess = false;
         if (tx.action === 'save') {
-          const r1 = await firestoreSave(tx.storeName, tx.docId, tx.data);
-          syncSuccess = r1?.status === 'success';
+          // Direct Firestore write, bypassing pushDataUpdate debounce for queue reliability
+          let docRef;
+          if (tx.storeName === 'settings' || tx.storeName === 'subscription') {
+            docRef = doc(db, tx.storeName, tx.userId);
+          } else {
+            docRef = doc(db, tx.storeName, tx.userId, 'items', tx.docId);
+          }
+          await setDoc(docRef, tx.data, { merge: true });
+          syncSuccess = true;
 
           if (tx.storeName === 'invoices') {
-            // Also save to publicInvoices
-            const r2 = await firestoreSave('publicInvoices', tx.data.publicToken, tx.data);
-            syncSuccess = syncSuccess && r2?.status === 'success';
+            // Also save to publicInvoices directly
+            const publicDocRef = doc(db, 'publicInvoices', tx.data.publicToken);
+            await setDoc(publicDocRef, tx.data, { merge: true });
           }
 
           // Update local syncStatus to 'synced' on success
@@ -163,7 +181,16 @@ export const syncOfflineTransactions = async () => {
             }
           }
         } else if (tx.action === 'delete') {
-          await firestoreDelete(tx.storeName, tx.docId);
+          let docRef;
+          if (tx.storeName === 'settings' || tx.storeName === 'subscription') {
+            docRef = doc(db, tx.storeName, tx.userId);
+          } else {
+            docRef = doc(db, tx.storeName, tx.userId, 'items', tx.docId);
+          }
+          await deleteDoc(docRef);
+          if (tx.storeName === 'invoices' && tx.data?.publicToken) {
+            await deleteDoc(doc(db, 'publicInvoices', tx.data.publicToken));
+          }
           syncSuccess = true;
         }
 
@@ -1142,35 +1169,23 @@ export const saveExpense = async (expense) => {
   // Save to IndexedDB
   await BillQyroDB.put('expenses', expense);
 
-  // Sync / queue + syncStatus tracking (Non-blocking)
+  // Sync / queue + syncStatus tracking
   let firebaseStatus = 'pending';
+  expense.syncStatus = 'pending';
+  updateLocalCache(KEYS.EXPENSES, expenses);
+  await BillQyroDB.put('expenses', expense);
+
+  await queueSyncTransaction('save', 'expenses', expense.id, expense);
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+
   if (firebaseReady) {
     if (navigator.onLine) {
-      expense.syncStatus = 'pending';
-      updateLocalCache(KEYS.EXPENSES, expenses);
-      await BillQyroDB.put('expenses', expense);
-
-      firestoreSave('expenses', expense.id, expense).then(async (res) => {
-        const currentExpenses = JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [];
-        const updateIdx = currentExpenses.findIndex(e => e.id === expense.id);
-        if (updateIdx !== -1) {
-          currentExpenses[updateIdx].syncStatus = res?.status === 'success' ? 'synced' : 'failed';
-          localStorage.setItem(KEYS.EXPENSES, JSON.stringify(currentExpenses));
-          await BillQyroDB.put('expenses', currentExpenses[updateIdx]);
-          window.dispatchEvent(new CustomEvent('billqyro_sync'));
-        }
-      }).catch(err => console.error(err));
+      syncOfflineTransactions().catch(e => console.error(e));
     } else {
-      expense.syncStatus = 'pending';
-      queueSyncTransaction('save', 'expenses', expense.id, expense).catch(e => console.error(e));
       firebaseStatus = 'failed';
-      updateLocalCache(KEYS.EXPENSES, expenses);
-      await BillQyroDB.put('expenses', expense);
     }
   } else {
-    expense.syncStatus = 'offline';
-    updateLocalCache(KEYS.EXPENSES, expenses);
-    await BillQyroDB.put('expenses', expense);
+    firebaseStatus = 'offline';
   }
   return { updatedExpenses: expenses, firebaseStatus };
 };
@@ -1191,19 +1206,17 @@ export const deleteExpense = async (id, permanent = false) => {
     await BillQyroDB.put('expenses', expenses[idx]);
     
     let firebaseStatus = 'pending';
+    await queueSyncTransaction('save', 'expenses', id, expenses[idx]);
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+
     if (firebaseReady) {
       if (navigator.onLine) {
-        try {
-          await firestoreSave('expenses', id, expenses[idx]);
-          firebaseStatus = 'success';
-          expenses[idx].syncStatus = 'synced';
-          updateLocalCache(KEYS.EXPENSES, expenses);
-          await BillQyroDB.put('expenses', expenses[idx]);
-        } catch(e) { firebaseStatus = 'failed'; }
+        syncOfflineTransactions().catch(e => console.error(e));
       } else {
-        queueSyncTransaction('save', 'expenses', id, expenses[idx]).catch(e => console.error(e));
         firebaseStatus = 'failed';
       }
+    } else {
+      firebaseStatus = 'offline';
     }
     return { updatedExpenses: filtered, firebaseStatus };
   }
@@ -1213,14 +1226,17 @@ export const deleteExpense = async (id, permanent = false) => {
   updateLocalCache(KEYS.EXPENSES, filtered);
   await BillQyroDB.delete('expenses', id);
 
-  let firebaseStatus = 'success';
+  let firebaseStatus = 'pending';
+  await queueSyncTransaction('delete', 'expenses', id, null);
+
   if (firebaseReady) {
     if (navigator.onLine) {
-      firestoreDelete('expenses', id).catch(e => console.error(e));
+      syncOfflineTransactions().catch(e => console.error(e));
     } else {
-      queueSyncTransaction('delete', 'expenses', id).catch(e => console.error(e));
       firebaseStatus = 'failed';
     }
+  } else {
+    firebaseStatus = 'offline';
   }
   return { updatedExpenses: filtered.filter(e => !e.isDeleted), firebaseStatus };
 };
@@ -1257,35 +1273,23 @@ export const saveCustomer = async (customer) => {
   // Save to IndexedDB
   await BillQyroDB.put('customers', customer);
 
-  // Sync / queue + syncStatus tracking (Non-blocking)
+  // Sync / queue + syncStatus tracking
   let firebaseStatus = 'pending';
+  customer.syncStatus = 'pending';
+  updateLocalCache(KEYS.CUSTOMERS, customers);
+  await BillQyroDB.put('customers', customer);
+
+  await queueSyncTransaction('save', 'customers', customer.id, customer);
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+
   if (firebaseReady) {
     if (navigator.onLine) {
-      customer.syncStatus = 'pending';
-      updateLocalCache(KEYS.CUSTOMERS, customers);
-      await BillQyroDB.put('customers', customer);
-
-      firestoreSave('customers', customer.id, customer).then(async (res) => {
-        const currentCustomers = JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [];
-        const updateIdx = currentCustomers.findIndex(c => c.id === customer.id);
-        if (updateIdx !== -1) {
-          currentCustomers[updateIdx].syncStatus = res?.status === 'success' ? 'synced' : 'failed';
-          localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(currentCustomers));
-          await BillQyroDB.put('customers', currentCustomers[updateIdx]);
-          window.dispatchEvent(new CustomEvent('billqyro_sync'));
-        }
-      }).catch(err => console.error(err));
+      syncOfflineTransactions().catch(e => console.error(e));
     } else {
-      customer.syncStatus = 'pending';
-      queueSyncTransaction('save', 'customers', customer.id, customer).catch(e => console.error(e));
       firebaseStatus = 'failed';
-      updateLocalCache(KEYS.CUSTOMERS, customers);
-      await BillQyroDB.put('customers', customer);
     }
   } else {
-    customer.syncStatus = 'offline';
-    updateLocalCache(KEYS.CUSTOMERS, customers);
-    await BillQyroDB.put('customers', customer);
+    firebaseStatus = 'offline';
   }
   return { updatedCustomers: customers, firebaseStatus };
 };
@@ -1307,19 +1311,17 @@ export const deleteCustomer = async (id, permanent = false) => {
     logAudit('customer_deleted', 'customer', id, customerToDelete, null);
 
     let firebaseStatus = 'pending';
+    await queueSyncTransaction('save', 'customers', id, customers[idx]);
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+
     if (firebaseReady) {
       if (navigator.onLine) {
-        try {
-          await firestoreSave('customers', id, customers[idx]);
-          firebaseStatus = 'success';
-          customers[idx].syncStatus = 'synced';
-          updateLocalCache(KEYS.CUSTOMERS, customers);
-          await BillQyroDB.put('customers', customers[idx]);
-        } catch(e) { firebaseStatus = 'failed'; }
+        syncOfflineTransactions().catch(e => console.error(e));
       } else {
-        queueSyncTransaction('save', 'customers', id, customers[idx]).catch(e => console.error(e));
         firebaseStatus = 'failed';
       }
+    } else {
+      firebaseStatus = 'offline';
     }
     return { updatedCustomers: filtered, firebaseStatus };
   }
@@ -1330,14 +1332,17 @@ export const deleteCustomer = async (id, permanent = false) => {
   await BillQyroDB.delete('customers', id);
   logAudit('customer_permanently_deleted', 'customer', id, customerToDelete, null);
 
-  let firebaseStatus = 'success';
+  let firebaseStatus = 'pending';
+  await queueSyncTransaction('delete', 'customers', id, customerToDelete);
+
   if (firebaseReady) {
     if (navigator.onLine) {
-      firestoreDelete('customers', id).catch(e => console.error(e));
+      syncOfflineTransactions().catch(e => console.error(e));
     } else {
-      queueSyncTransaction('delete', 'customers', id).catch(e => console.error(e));
       firebaseStatus = 'failed';
     }
+  } else {
+    firebaseStatus = 'offline';
   }
   return { updatedCustomers: filtered.filter(c => !c.isDeleted), firebaseStatus };
 };
@@ -1374,35 +1379,23 @@ export const saveProduct = async (product) => {
   // Save to IndexedDB
   await BillQyroDB.put('products', product);
 
-  // Sync / queue + syncStatus tracking (Non-blocking)
+  // Sync / queue + syncStatus tracking
   let firebaseStatus = 'pending';
+  product.syncStatus = 'pending';
+  updateLocalCache(KEYS.PRODUCTS, products);
+  await BillQyroDB.put('products', product);
+
+  await queueSyncTransaction('save', 'products', product.id, product);
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+
   if (firebaseReady) {
     if (navigator.onLine) {
-      product.syncStatus = 'pending';
-      updateLocalCache(KEYS.PRODUCTS, products);
-      await BillQyroDB.put('products', product);
-
-      firestoreSave('products', product.id, product).then(async (res) => {
-        const currentProducts = JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [];
-        const updateIdx = currentProducts.findIndex(p => p.id === product.id);
-        if (updateIdx !== -1) {
-          currentProducts[updateIdx].syncStatus = res?.status === 'success' ? 'synced' : 'failed';
-          localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(currentProducts));
-          await BillQyroDB.put('products', currentProducts[updateIdx]);
-          window.dispatchEvent(new CustomEvent('billqyro_sync'));
-        }
-      }).catch(err => console.error(err));
+      syncOfflineTransactions().catch(e => console.error(e));
     } else {
-      product.syncStatus = 'pending';
-      queueSyncTransaction('save', 'products', product.id, product).catch(e => console.error(e));
       firebaseStatus = 'failed';
-      updateLocalCache(KEYS.PRODUCTS, products);
-      await BillQyroDB.put('products', product);
     }
   } else {
-    product.syncStatus = 'offline';
-    updateLocalCache(KEYS.PRODUCTS, products);
-    await BillQyroDB.put('products', product);
+    firebaseStatus = 'offline';
   }
   return { updatedProducts: products, firebaseStatus };
 };
@@ -1424,19 +1417,17 @@ export const deleteProduct = async (id, permanent = false) => {
     logAudit('product_deleted', 'product', id, productToDelete, null);
 
     let firebaseStatus = 'pending';
+    await queueSyncTransaction('save', 'products', id, products[idx]);
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+
     if (firebaseReady) {
       if (navigator.onLine) {
-        try {
-          await firestoreSave('products', id, products[idx]);
-          firebaseStatus = 'success';
-          products[idx].syncStatus = 'synced';
-          updateLocalCache(KEYS.PRODUCTS, products);
-          await BillQyroDB.put('products', products[idx]);
-        } catch(e) { firebaseStatus = 'failed'; }
+        syncOfflineTransactions().catch(e => console.error(e));
       } else {
-        queueSyncTransaction('save', 'products', id, products[idx]).catch(e => console.error(e));
         firebaseStatus = 'failed';
       }
+    } else {
+      firebaseStatus = 'offline';
     }
     return { updatedProducts: filtered, firebaseStatus };
   }
@@ -1447,14 +1438,17 @@ export const deleteProduct = async (id, permanent = false) => {
   await BillQyroDB.delete('products', id);
   logAudit('product_permanently_deleted', 'product', id, productToDelete, null);
 
-  let firebaseStatus = 'success';
+  let firebaseStatus = 'pending';
+  await queueSyncTransaction('delete', 'products', id, productToDelete);
+
   if (firebaseReady) {
     if (navigator.onLine) {
-      firestoreDelete('products', id).catch(e => console.error(e));
+      syncOfflineTransactions().catch(e => console.error(e));
     } else {
-      queueSyncTransaction('delete', 'products', id).catch(e => console.error(e));
       firebaseStatus = 'failed';
     }
+  } else {
+    firebaseStatus = 'offline';
   }
   return { updatedProducts: filtered.filter(p => !p.isDeleted), firebaseStatus };
 };
@@ -1634,47 +1628,29 @@ export const saveInvoice = async (invoice) => {
   // Save to IndexedDB
   await BillQyroDB.put('invoices', invoice);
 
-  // Sync / queue + syncStatus tracking (Non-blocking)
+  // Sync / queue + syncStatus tracking
+  // ALWAYS Queue First to prevent data loss
+  invoice.syncStatus = 'pending';
+  const idx = invoices.findIndex(inv => inv.id === invoice.id);
+  if (idx !== -1) invoices[idx] = invoice;
+  updateLocalCache(KEYS.INVOICES, invoices);
+  await BillQyroDB.put('invoices', invoice);
+  
+  await queueSyncTransaction('save', 'invoices', invoice.id, invoice);
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+
   let firebaseStatus = 'pending';
   if (firebaseReady) {
     if (navigator.onLine) {
-      invoice.syncStatus = 'pending';
-      const idx = invoices.findIndex(inv => inv.id === invoice.id);
-      if (idx !== -1) invoices[idx] = invoice;
-      updateLocalCache(KEYS.INVOICES, invoices);
-      await BillQyroDB.put('invoices', invoice);
-
-      // Fire and forget
-      Promise.all([
-        firestoreSave('invoices', invoice.id, invoice),
-        firestoreSave('publicInvoices', invoice.publicToken, invoice)
-      ]).then(async ([r1, r2]) => {
-        const currentInvoices = JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
-        const updateIdx = currentInvoices.findIndex(inv => inv.id === invoice.id);
-        if (updateIdx !== -1) {
-          currentInvoices[updateIdx].syncStatus = (r1?.status === 'success' && r2?.status === 'success') ? 'synced' : 'failed';
-          localStorage.setItem(KEYS.INVOICES, JSON.stringify(currentInvoices));
-          await BillQyroDB.put('invoices', currentInvoices[updateIdx]);
-          window.dispatchEvent(new CustomEvent('billqyro_sync'));
-        }
+      // Fire and forget via flush queue
+      syncOfflineTransactions().then(() => {
+        // Will dispatch its own events and clean queue
       }).catch(err => console.error('Firestore async save error:', err));
     } else {
-      invoice.syncStatus = 'pending';
-      queueSyncTransaction('save', 'invoices', invoice.id, invoice).catch(e => console.error(e));
       firebaseStatus = 'failed';
-      // Persist syncStatus back to localStorage + IndexedDB
-      const idx = invoices.findIndex(inv => inv.id === invoice.id);
-      if (idx !== -1) invoices[idx] = invoice;
-      updateLocalCache(KEYS.INVOICES, invoices);
-      await BillQyroDB.put('invoices', invoice);
     }
   } else {
-    invoice.syncStatus = 'offline';
-    // Persist syncStatus back to localStorage + IndexedDB
-    const idx = invoices.findIndex(inv => inv.id === invoice.id);
-    if (idx !== -1) invoices[idx] = invoice;
-    updateLocalCache(KEYS.INVOICES, invoices);
-    await BillQyroDB.put('invoices', invoice);
+    firebaseStatus = 'offline';
   }
 
   return {
@@ -1918,22 +1894,17 @@ export const deleteInvoice = async (id, permanent = false) => {
       await BillQyroDB.put('invoices', invoices[idx]);
 
       let firebaseStatus = 'pending';
+      await queueSyncTransaction('save', 'invoices', id, invoices[idx]);
+      window.dispatchEvent(new CustomEvent('billqyro_sync'));
+
       if (firebaseReady) {
         if (navigator.onLine) {
-          try {
-            await firestoreSave('invoices', id, invoices[idx]);
-            await firestoreSave('publicInvoices', invoices[idx].publicToken, invoices[idx]);
-            firebaseStatus = 'success';
-            invoices[idx].syncStatus = 'synced';
-            updateLocalCache(KEYS.INVOICES, invoices);
-            await BillQyroDB.put('invoices', invoices[idx]);
-          } catch (e) {
-            firebaseStatus = 'failed';
-          }
+          syncOfflineTransactions().catch(e => console.error(e));
         } else {
-          queueSyncTransaction('save', 'invoices', id, invoices[idx]).catch(e => console.error(e));
           firebaseStatus = 'failed';
         }
+      } else {
+        firebaseStatus = 'offline';
       }
       return { updatedInvoices: invoices, firebaseStatus };
     }
@@ -1950,15 +1921,17 @@ export const deleteInvoice = async (id, permanent = false) => {
   logAudit('invoice_deleted_or_voided', 'invoice', id, invoiceToDelete, null);
 
   // Sync / queue (Non-blocking)
-  let firebaseStatus = 'success';
+  let firebaseStatus = 'pending';
+  await queueSyncTransaction('delete', 'invoices', id, invoiceToDelete);
+
   if (firebaseReady) {
     if (navigator.onLine) {
-      firestoreDelete('invoices', id).catch(e => console.error(e));
-      firestoreDelete('publicInvoices', id).catch(e => console.error(e));
+      syncOfflineTransactions().catch(e => console.error(e));
     } else {
-      queueSyncTransaction('delete', 'invoices', id).catch(e => console.error(e));
       firebaseStatus = 'failed';
     }
+  } else {
+    firebaseStatus = 'offline';
   }
 
   return {

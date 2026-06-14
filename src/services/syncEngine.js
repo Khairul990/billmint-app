@@ -1,7 +1,7 @@
 import { db, firebaseReady, auth } from './firebaseConfig';
 import { doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
 import { BillQyroDB } from './localDb';
-import { KEYS } from './dbEngine';
+import { KEYS, queueSyncTransaction, syncOfflineTransactions } from './dbEngine';
 
 export const getDeviceId = () => {
   let id = localStorage.getItem('billqyro_device_id');
@@ -25,23 +25,9 @@ export const cloudWins = (localRecord, cloudRecord) => {
 };
 
 // --- Sync Queue & Offline Support ---
-const SYNC_QUEUE_KEY = 'billqyro_sync_queue';
-
-const getQueue = () => {
-  const q = localStorage.getItem(SYNC_QUEUE_KEY);
-  return q ? JSON.parse(q) : [];
-};
-
-const saveQueue = (q) => {
-  localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(q));
-};
-
 export const enqueueSync = (collectionName, userId, docId, data) => {
-  const q = getQueue();
-  // Remove existing pending update for same doc to avoid duplicates
-  const filtered = q.filter(item => !(item.collectionName === collectionName && item.docId === docId));
-  filtered.push({ collectionName, userId, docId, data, timestamp: Date.now() });
-  saveQueue(filtered);
+  // Deprecated localStorage queue, forwarding to robust IndexedDB queue
+  queueSyncTransaction('save', collectionName, docId, data).catch(e => console.error(e));
   window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Pending Sync' }));
 };
 
@@ -53,34 +39,21 @@ export const flushSyncQueue = async () => {
     return;
   }
   
-  const q = getQueue();
-  if (q.length === 0) return;
-  
-  console.log(`[SYNC ENGINE] Flushing Queue. Length: ${q.length}`);
-  let successCount = 0;
-  window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Syncing...' }));
-  
-  const remaining = [];
-  for (const item of q) {
-    try {
-      let docRef;
-      if (item.collectionName === 'settings' || item.collectionName === 'subscription') {
-        docRef = doc(db, item.collectionName, item.userId);
-      } else {
-        docRef = doc(db, item.collectionName, item.userId, 'items', item.docId);
-      }
-      await setDoc(docRef, item.data, { merge: true });
-      successCount++;
-    } catch (e) {
-      console.error(`[SYNC ENGINE] Failed to process queue item for ${item.collectionName}. Reason:`, e);
-      remaining.push(item);
+  try {
+    window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Syncing...' }));
+    await syncOfflineTransactions();
+    
+    // Check if the queue was fully cleared
+    const queue = await BillQyroDB.getAll('syncQueue');
+    const pendingItems = queue.filter(tx => tx.userId === userId || !tx.userId);
+    
+    if (pendingItems.length === 0) {
+      window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Synced' }));
+    } else {
+      window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Sync Error' }));
     }
-  }
-  
-  saveQueue(remaining);
-  if (remaining.length === 0) {
-    window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Synced' }));
-  } else {
+  } catch (e) {
+    console.error('[SYNC ENGINE] Failed to flush queue:', e);
     window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Sync Error' }));
   }
 };
