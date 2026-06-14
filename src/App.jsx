@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Lock } from 'lucide-react';
 import Layout from './components/Layout';
 import PostLoginWelcome from './components/PostLoginWelcome';
+import ClassicLoader from './components/ClassicLoader';
 import {
   getAuthSession,
   logout,
@@ -1176,7 +1177,7 @@ function App() {
   if (loadingPublicInvoice) {
     return (
       <div className="min-h-screen bg-theme-main flex flex-col items-center justify-center p-6 text-center text-white font-sans">
-        <span className="w-10 h-10 border-4 border-theme-accent border-t-transparent rounded-full animate-spin"></span>
+        <ClassicLoader />
         <p className="text-theme-muted text-xs font-bold uppercase mt-4 tracking-widest animate-pulse">Loading secure digital invoice...</p>
       </div>
     );
@@ -1186,7 +1187,7 @@ function App() {
     return (
       <React.Suspense fallback={
         <div className="flex h-screen items-center justify-center">
-          <div className="w-10 h-10 border-4 border-theme-border-soft border-t-indigo-600 rounded-full animate-spin"></div>
+          <ClassicLoader />
         </div>
       }>
         <PublicInvoice initialInvoice={publicInvoice} />
@@ -1199,7 +1200,7 @@ function App() {
     return (
       <React.Suspense fallback={
         <div className="flex h-screen items-center justify-center">
-          <div className="w-10 h-10 border-4 border-theme-border-soft border-t-indigo-600 rounded-full animate-spin"></div>
+          <ClassicLoader />
         </div>
       }>
         <Login onLoginSuccess={handleLoginSuccess} />
@@ -1376,7 +1377,7 @@ function App() {
                   >
                     <React.Suspense fallback={
                       <div className="flex flex-1 min-h-[calc(100vh-250px)] items-center justify-center">
-                        <div className="w-10 h-10 border-4 border-theme-border-soft border-t-theme-accent rounded-full animate-spin"></div>
+                        <ClassicLoader />
                       </div>
                     }>
                       {renderTabContent()}
