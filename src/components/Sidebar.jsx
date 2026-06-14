@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase } from 'lucide-react';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck } from 'lucide-react';
 import { logout } from '../services/dbEngine';
 import { triggerLightHaptic } from '../utils/feedback';
 import { t } from '../utils/i18n';
 import Logo from './Logo';
+import WorkspaceSwitcher from './WorkspaceSwitcher';
 
 /**
  * Premium Collapsible Desktop Sidebar Navigation
@@ -12,7 +13,10 @@ import Logo from './Logo';
  * - Collapsed: 72px with icons only + tooltips
  * - Persists collapsed state via localStorage
  */
-const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userEmail, pendingPaymentsCount = 0 }) => {
+const Sidebar = ({ 
+  currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userEmail, pendingPaymentsCount = 0,
+  businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncStatus, flushSyncQueue 
+}) => {
   // Determine active workspace and its enabled modules
   const activeWsId = businessSettings?.activeWorkspaceId;
   const activeWorkspace = businessSettings?.businessWorkspaces?.find(ws => ws.id === activeWsId) || {};
@@ -120,6 +124,85 @@ const Sidebar = ({ currentTab, setCurrentTab, onLogout, businessSettings, isAuth
           </div>
         ) : (
           <Logo type="horizontal" forceWhiteText={false} />
+        )}
+      </div>
+
+      {/* Workspace Switcher & Business Profile (Moved from Header) */}
+      <div className="shrink-0 overflow-hidden border-b border-theme-border-soft/20"
+        style={{ padding: isCollapsed ? '12px 8px' : '16px 20px', transition: isMounted ? 'padding 180ms ease' : 'none' }}
+      >
+        {isCollapsed ? (
+          <div className="flex flex-col items-center gap-2">
+            {businessSettings?.logoUrl ? (
+              <img src={businessSettings.logoUrl} alt="Logo" className="w-10 h-10 rounded-xl object-cover shadow-sm bg-theme-card" />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-theme-button-text font-black flex items-center justify-center text-lg shadow-sm">
+                {businessSettings?.businessName?.charAt(0) || 'B'}
+              </div>
+            )}
+            <div className="relative group w-full flex justify-center">
+              <span className={`w-2 h-2 rounded-full ${
+                syncStatus === 'Synced' ? 'bg-emerald-500' : 
+                syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-ping' : 
+                syncStatus === 'Offline' ? 'bg-red-500' : 'bg-amber-500'
+              }`}></span>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3 w-full">
+            <div className="flex items-center gap-3">
+              {businessSettings?.logoUrl ? (
+                <img src={businessSettings.logoUrl} alt="Logo" className="w-10 h-10 rounded-xl object-cover shadow-sm bg-theme-card shrink-0" />
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-theme-button-text font-black flex items-center justify-center text-lg shadow-sm shrink-0">
+                  {businessSettings?.businessName?.charAt(0) || 'B'}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-sm font-extrabold text-theme-primary truncate block w-full">
+                    {businessSettings?.businessName || 'My Business'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-theme-accent bg-theme-accent-light border border-theme-accent/15 px-1.5 py-0.5 rounded-md shrink-0">
+                    <ShieldCheck className="w-3 h-3" /> Secure
+                  </span>
+                  <div className="relative group shrink-0">
+                    <span className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md transition-colors ${
+                      syncStatus === 'Synced' ? 'text-emerald-500 bg-emerald-500/10 border border-emerald-500/20' : 
+                      syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500 bg-blue-500/10 border border-blue-500/20 animate-pulse' : 
+                      syncStatus === 'Offline' ? 'text-red-500 bg-red-500/10 border border-red-500/20' :
+                      'text-amber-500 bg-amber-500/10 border border-amber-500/20'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        syncStatus === 'Synced' ? 'bg-emerald-500' : 
+                        syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-ping' : 
+                        syncStatus === 'Offline' ? 'bg-red-500' : 'bg-amber-500'
+                      }`}></span>
+                      {syncStatus === 'Synced' ? 'Cloud' : syncStatus}
+                    </span>
+                    {(syncStatus === 'Pending Sync' || syncStatus === 'Sync Error') && (
+                      <div className="absolute top-full left-0 mt-1 hidden group-hover:block z-50">
+                        <button onClick={flushSyncQueue} className="text-[10px] font-bold uppercase tracking-wider bg-theme-card border border-theme-border-soft px-3 py-1.5 rounded shadow-lg text-theme-primary hover:bg-theme-accent hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Retry Sync
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="w-full">
+              <WorkspaceSwitcher
+                businessWorkspaces={businessWorkspaces}
+                activeWorkspaceId={activeWorkspaceId}
+                setActiveWorkspace={setActiveWorkspace}
+                setCurrentTab={setCurrentTab}
+              />
+            </div>
+          </div>
         )}
       </div>
 

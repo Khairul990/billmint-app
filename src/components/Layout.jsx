@@ -147,6 +147,9 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         pendingPaymentsCount={pendingPaymentsCount}
         businessWorkspaces={businessWorkspaces}
         activeWorkspaceId={activeWorkspaceId}
+        setActiveWorkspace={setActiveWorkspace}
+        syncStatus={syncStatus}
+        flushSyncQueue={flushSyncQueue}
       />
 
       {/* Main Content Region */}
@@ -162,67 +165,8 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
           <div className="max-w-[1600px] w-full mx-auto px-4 lg:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
             
-            {/* LEFT: Branding & Workspace */}
-            <div className="flex flex-col md:flex-row md:items-center gap-3">
-              <div className="flex items-center gap-3">
-                <div className="hidden sm:flex">
-                  {businessSettings?.logoUrl ? (
-                    <img src={businessSettings.logoUrl} alt="Logo" className="w-10 h-10 rounded-xl object-cover shadow-sm bg-theme-card" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-theme-button-text font-black flex items-center justify-center text-lg shadow-sm">
-                      {businessSettings?.businessName?.charAt(0) || 'B'}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-extrabold text-theme-primary truncate max-w-[150px] hidden sm:block">
-                      {businessSettings?.businessName || 'My Business'}
-                    </span>
-                    <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-theme-accent bg-theme-accent-light border border-theme-accent/15 px-2 py-0.5 rounded-full">
-                      <ShieldCheck className="w-3 h-3" /> Secure
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <WorkspaceSwitcher
-                      businessWorkspaces={businessWorkspaces}
-                      activeWorkspaceId={activeWorkspaceId}
-                      setActiveWorkspace={setActiveWorkspace}
-                      setCurrentTab={setCurrentTab}
-                    />
-                    {/* Sync Status Badge */}
-                    <div className="relative group">
-                      <span className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
-                        syncStatus === 'Synced' ? 'text-emerald-500 bg-emerald-500/10 border border-emerald-500/20' : 
-                        syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500 bg-blue-500/10 border border-blue-500/20 animate-pulse' : 
-                        syncStatus === 'Offline' ? 'text-red-500 bg-red-500/10 border border-red-500/20' :
-                        'text-amber-500 bg-amber-500/10 border border-amber-500/20'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${
-                          syncStatus === 'Synced' ? 'bg-emerald-500' : 
-                          syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-ping' : 
-                          syncStatus === 'Offline' ? 'bg-red-500' :
-                          'bg-amber-500'
-                        }`}></span> 
-                        {syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}
-                      </span>
-                      {/* Retry Button Dropdown */}
-                      {(syncStatus === 'Pending Sync' || syncStatus === 'Sync Error') && (
-                        <div className="absolute top-full left-0 mt-1 hidden group-hover:block z-50">
-                          <button
-                            onClick={flushSyncQueue}
-                            className="text-[10px] font-bold uppercase tracking-wider bg-theme-card border border-theme-border-soft px-3 py-1.5 rounded shadow-lg text-theme-primary hover:bg-theme-accent hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                            Retry Sync
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* LEFT: Branding & Workspace (Moved to Sidebar) */}
+            <div className="hidden md:block w-48 shrink-0"></div>
 
             {/* CENTER: Global Search Bar */}
             <div className="flex-1 max-w-xl hidden md:block px-4">
