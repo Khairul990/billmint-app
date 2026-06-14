@@ -13,6 +13,8 @@ import {
 import { formatCurrency } from '../utils/invoiceUtils';
 import PullToRefresh from '../components/PullToRefresh';
 import { syncFromFirestore } from '../services/dbEngine';
+import { getGlobalAdminSettings } from '../services/dbEngine';
+import AnimatedBorderTrail from '../components/AnimatedBorderTrail';
 import { t } from '../utils/i18n';
 
 const Dashboard = ({
@@ -367,8 +369,9 @@ const Dashboard = ({
               </div>
 
               {/* Recent Invoices */}
-              <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium">
-                <div className="flex items-center justify-between mb-4">
+              <div className="bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium relative group">
+                <AnimatedBorderTrail borderRadius={24} duration={6} size={120} />
+                <div className="flex items-center justify-between mb-4 relative z-10">
                   <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2">
                     <ReceiptText className="w-4 h-4 text-theme-accent" /> Recent {labels.invoices}
                   </h3>
@@ -435,8 +438,9 @@ const Dashboard = ({
           {/* BOTTOM SECTION (Desktop 2-Col, Mobile 1-Col) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
             {/* Top Customers */}
-            <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium flex flex-col">
-              <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2 mb-4">
+            <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium flex flex-col relative group">
+              <AnimatedBorderTrail borderRadius={24} duration={6} size={120} />
+              <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2 mb-4 relative z-10">
                 <PieChartIcon className="w-4 h-4 text-theme-accent" /> Top {labels.clients}
               </h3>
               <div className="flex-1 w-full min-h-[220px]">
@@ -467,8 +471,9 @@ const Dashboard = ({
             </div>
 
             {/* Best Selling Items */}
-            <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium">
-              <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2 mb-4">
+            <div className="bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft shadow-premium relative group">
+              <AnimatedBorderTrail borderRadius={24} duration={6} size={120} />
+              <h3 className="font-extrabold text-sm text-theme-primary tracking-tight flex items-center gap-2 mb-4 relative z-10">
                 <Sparkles className="w-4 h-4 text-theme-accent" /> Best Selling {labels.items}
               </h3>
               <div className="space-y-3">
