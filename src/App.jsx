@@ -140,6 +140,23 @@ class ErrorBoundary extends React.Component {
 
 
 
+const AdminRouteGuard = ({ setCurrentTab, children }) => {
+  const session = getAuthSession();
+  
+  useEffect(() => {
+    if (!isAdminUser(session)) {
+      toast.error('Unauthorized access. Owner privileges required.');
+      setCurrentTab('dashboard');
+    }
+  }, [session, setCurrentTab]);
+
+  if (!isAdminUser(session)) {
+    return <div className="flex h-screen bg-theme-main items-center justify-center"><ClassicLoader /></div>;
+  }
+
+  return children;
+};
+
 function App() {
 
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
@@ -1086,8 +1103,7 @@ function App() {
         return (
           <PremiumPricing setCurrentTab={setCurrentTab} />
         );
-      case 'admin-panel':
-        return <AdminPanel currentTab={currentTab} setCurrentTab={setCurrentTab} />;
+
       case 'pdf-templates':
         return (
           <PdfTemplateStudio 
@@ -1322,6 +1338,9 @@ function App() {
     }
   }
 
+  const path = window.location.pathname;
+  const showAdminRoute = path === '/km-admin' || currentTab === 'admin-panel';
+
   return (
     <ErrorBoundary>
       <AnimatePresence mode="wait">
@@ -1362,6 +1381,27 @@ function App() {
                 ></motion.div>
               </div>
             </motion.div>
+          </motion.div>
+        ) : showAdminRoute ? (
+          <motion.div key="admin-route" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full">
+            <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
+              <AdminRouteGuard setCurrentTab={(tab) => {
+                setCurrentTab(tab);
+                if (window.location.pathname === '/km-admin') {
+                  window.history.replaceState({}, '', '/');
+                }
+              }}>
+                <AdminPanel 
+                  currentTab={currentTab} 
+                  setCurrentTab={(tab) => {
+                    setCurrentTab(tab);
+                    if (window.location.pathname === '/km-admin') {
+                      window.history.replaceState({}, '', '/');
+                    }
+                  }} 
+                />
+              </AdminRouteGuard>
+            </React.Suspense>
           </motion.div>
         ) : (
           <motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="w-full h-full">
