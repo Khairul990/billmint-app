@@ -115,6 +115,12 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
     
+    match /payment_proofs/{proofId} {
+      allow create: if isAuth() && request.resource.data.ownerId == request.auth.uid;
+      allow read: if isAuth() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+    
     match /platformConfig/{configId} {
       allow read: if isAuth();
       allow write: if isAdmin();

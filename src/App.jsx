@@ -82,6 +82,9 @@ const Devices = React.lazy(() => import('./pages/business/Devices'));
 const ServiceJobs = React.lazy(() => import('./pages/business/ServiceJobs'));
 const Projects = React.lazy(() => import('./pages/business/Projects'));
 const Delivery = React.lazy(() => import('./pages/business/Delivery'));
+const AdminPanel = React.lazy(() => import('./pages/admin/AdminPanel'));
+const PremiumPricing = React.lazy(() => import('./pages/PremiumPricing'));
+const PaymentDueScreen = React.lazy(() => import('./pages/PaymentDueScreen'));
 import QuickBillModal from './components/QuickBillModal';
 
 class ErrorBoundary extends React.Component {
@@ -1073,11 +1076,7 @@ function App() {
         return <Delivery />;
       case 'subscription':
         return (
-          <Subscription
-            currentSubscription={subscription}
-            onUpgrade={handleSaveSubscription}
-            businessSettings={settings}
-          />
+          <PremiumPricing setCurrentTab={setCurrentTab} />
         );
       case 'admin-panel':
         return <AdminPanel currentTab={currentTab} setCurrentTab={setCurrentTab} />;
@@ -1244,6 +1243,34 @@ function App() {
           </motion.div>
         </div>
       );
+    }
+  }
+
+  // --- Account Soft Lock Interceptor (Due Limit) ---
+  const freeLimit = settings?.freeInvoiceLimit || 15;
+  const pendingAmountLimit = settings?.maximumPendingDue || 100;
+  const chargePerBill = settings?.chargePerBill || 5;
+  
+  if (subscription?.status !== 'premium' && invoices.length > freeLimit) {
+    const chargeableBills = invoices.length - freeLimit;
+    const pendingAmount = chargeableBills * chargePerBill;
+    
+    if (pendingAmount >= pendingAmountLimit) {
+      const session = getAuthSession();
+      if (!isAdminUser(session)) {
+        return (
+          <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
+            <PaymentDueScreen 
+              pendingAmount={pendingAmount} 
+              chargeableBills={chargeableBills}
+              onLogout={() => {
+                logout();
+                setIsAuthenticated(false);
+              }} 
+            />
+          </React.Suspense>
+        );
+      }
     }
   }
 
