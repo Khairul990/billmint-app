@@ -791,15 +791,6 @@ const Settings = ({
 
   return (
     <div className="max-w-4xl mx-auto pb-12 relative font-sans text-theme-primary dark:text-theme-primary dark:text-theme-secondary">
-
-      {/* DEVELOPMENT DEBUG BLOCK */}
-      {isAdmin && (
-        <div className="bg-theme-card text-[10px] text-green-400 p-2 mb-4 rounded font-mono break-all dark:bg-theme-card dark:border dark:border-theme-border-soft flex justify-between">
-          <span>Logged in as: {loggedInEmail} | Admin access: {isAdmin ? 'true' : 'false'}</span>
-          <span>Target Admin: {getAdminEmail()}</span>
-        </div>
-      )}
-
       {/* Toast Notification */}
       {showToast && (
         <div className="fixed top-6 right-6 bg-theme-accent text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
