@@ -147,11 +147,11 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!getAuthSession());
   const [syncStatus, setSyncStatus] = useState('Synced');
   const [currentTab, setCurrentTab] = useState(() => {
+    if (window.location.pathname === '/km-admin') {
+      return 'admin-panel';
+    }
     const saved = localStorage.getItem('billqyro_last_route');
-    if (saved) {
-      const adminRoutes = ['settings', 'more']; // routes requiring admin unlock or just checking role isn't enough, wait
-      // Actually settings is accessible to regular users sometimes? No, settings is for everyone, but some tabs in settings might be admin.
-      // But wait, the admin route in previous conversation was `more` or `settings`? Let's just restore `saved`.
+    if (saved && saved !== 'admin-panel') {
       return saved;
     }
     return 'dashboard';
@@ -159,6 +159,14 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem('billqyro_last_route', currentTab);
+    
+    // Sync URL for km-admin to act like a real route
+    if (currentTab === 'admin-panel') {
+      window.history.replaceState({}, '', '/km-admin');
+    } else if (window.location.pathname === '/km-admin') {
+      window.history.replaceState({}, '', '/');
+    }
+
     sendEmpireEvent({
       eventType: "page_view",
       message: `Navigated to ${currentTab}`,
