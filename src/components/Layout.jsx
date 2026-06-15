@@ -166,7 +166,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             <div className="absolute -bottom-10 left-10 w-48 h-48 bg-theme-accent-light dark:bg-theme-accent-light rounded-full blur-2xl"></div>
           </div>
 
-          <div className="max-w-[1600px] w-full mx-auto px-4 lg:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+          <div className="max-w-full w-full mx-auto px-4 lg:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
             
             {/* LEFT: Workspace Info */}
             <div className="flex items-start md:items-center gap-3">
@@ -454,7 +454,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         </header>
 
         {/* Dynamic Page Content Shell */}
-        <main className="flex-1 w-full max-w-none xl:max-w-[1600px] mx-auto p-4 md:px-6 md:py-6">
+        <main className="flex-1 min-w-0 w-full max-w-full mx-auto p-4 md:px-6 md:py-6">
           {children}
         </main>
       </div>

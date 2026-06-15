@@ -160,7 +160,7 @@ const Dashboard = ({
   return (
     <PullToRefresh onRefresh={handleRefresh}>
       <div className="pb-32 md:pb-12 w-full">
-        <div className="max-w-[1600px] w-full mx-auto space-y-6">
+        <div className="max-w-full w-full mx-auto space-y-6">
           
           {/* PAYMENT ALERTS */}
           {pendingPaymentsCount > 0 && (

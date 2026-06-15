@@ -27,7 +27,7 @@ const CreateInvoiceLayout = ({
   }, [billingMode]);
 
   return (
-    <div className="max-w-[1600px] mx-auto w-full">
+    <div className="max-w-full mx-auto w-full">
       {/* Mode Toggle Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
