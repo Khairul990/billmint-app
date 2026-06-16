@@ -1043,7 +1043,19 @@ function App() {
   const activeCustomers = isDemoSessionActive ? demoCustomers : customers;
   const activeProducts = isDemoSessionActive ? demoProducts : products;
   const activeExpenses = isDemoSessionActive ? demoExpenses : expenses;
-  const activeSettings = (isDemoSessionActive && demoSettings) ? demoSettings : settings;
+  
+  let activeSettings = (isDemoSessionActive && demoSettings) ? demoSettings : settings;
+  if (isDemoSessionActive && isVideoCreatorMode && activeSettings) {
+    activeSettings = {
+      ...activeSettings,
+      businessName: activeSettings.businessName || 'Demo Corp',
+      ownerName: 'Demo Owner',
+      email: 'hello@democorp.local',
+      phone: '+1 555-0199',
+      logoUrl: '',
+      whatsapp: '+1 555-0199'
+    };
+  }
 
   // --- TAB ROUTER SWITCHBOARD ---
   const renderTabContent = () => {
@@ -1347,16 +1359,36 @@ function App() {
   }
 
   // Show onboarding/login if not authenticated
+  const isDemoJourneyActive = localStorage.getItem('billqyro_demo_journey_mode') === 'true';
+  const isDemoLoggedIn = localStorage.getItem('billqyro_demo_logged_in') === 'true';
+
   if (!isAuthenticated) {
-    return (
-      <React.Suspense fallback={
-        <div className="flex h-screen items-center justify-center">
-          <ClassicLoader />
-        </div>
-      }>
-        <Login onLoginSuccess={handleLoginSuccess} />
-      </React.Suspense>
-    );
+    if (isDemoSessionActive && isDemoJourneyActive && !isDemoLoggedIn) {
+      return (
+        <React.Suspense fallback={
+          <div className="flex h-screen items-center justify-center">
+            <ClassicLoader />
+          </div>
+        }>
+          <DemoLogin onDemoLoginSuccess={() => {
+            setShowWelcomeAnimation(true);
+            window.dispatchEvent(new Event('storage'));
+          }} />
+        </React.Suspense>
+      );
+    }
+
+    if (!isDemoSessionActive || (isDemoJourneyActive && !isDemoLoggedIn)) {
+      return (
+        <React.Suspense fallback={
+          <div className="flex h-screen items-center justify-center">
+            <ClassicLoader />
+          </div>
+        }>
+          <Login onLoginSuccess={handleLoginSuccess} />
+        </React.Suspense>
+      );
+    }
   }
 
   // --- Account Blocked Interceptor ---
@@ -1539,9 +1571,21 @@ function App() {
                   <AlertTriangle className="w-4 h-4 mr-2"/> DEMO MODE ACTIVE — Real data is safe. {isVideoCreatorMode && " | Video Creator Masking ON"}
                 </span>
                 <button onClick={() => {
-                  localStorage.removeItem('billqyro_demo_session_active');
-                  localStorage.removeItem('billqyro_demo_video_creator');
-                  window.location.reload();
+                  if (window.confirm("Exit Demo Mode and return to Owner Test Lab?")) {
+                    if (window.confirm("Do you want to clear the Demo Sandbox data as well?")) {
+                      localStorage.removeItem('billqyro_demo_customers');
+                      localStorage.removeItem('billqyro_demo_invoices');
+                      localStorage.removeItem('billqyro_demo_products');
+                      localStorage.removeItem('billqyro_demo_reports');
+                      localStorage.removeItem('billqyro_demo_payments');
+                      localStorage.removeItem('billqyro_demo_settings');
+                      localStorage.removeItem('billqyro_demo_logged_in');
+                    }
+                    localStorage.removeItem('billqyro_demo_session_active');
+                    localStorage.removeItem('billqyro_demo_journey_mode');
+                    localStorage.removeItem('billqyro_demo_video_creator');
+                    window.location.href = '/km-admin';
+                  }
                 }} className="bg-amber-950 hover:bg-amber-900 text-amber-500 px-3 py-1 rounded-md text-xs transition-colors">Exit Demo</button>
               </div>
             )}

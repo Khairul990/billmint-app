@@ -196,6 +196,24 @@ const OwnerTestLab = () => {
     window.dispatchEvent(new Event('storage'));
   };
 
+  const startDemoJourney = () => {
+    if (window.confirm("Start Full Demo Journey? This will clear old demo data and simulate a completely new user experience.")) {
+      localStorage.removeItem('billqyro_demo_customers');
+      localStorage.removeItem('billqyro_demo_invoices');
+      localStorage.removeItem('billqyro_demo_products');
+      localStorage.removeItem('billqyro_demo_reports');
+      localStorage.removeItem('billqyro_demo_payments');
+      localStorage.removeItem('billqyro_demo_settings');
+      localStorage.removeItem('billqyro_demo_logged_in');
+      
+      localStorage.setItem('billqyro_demo_session_active', 'true');
+      localStorage.setItem('billqyro_demo_journey_mode', 'true');
+      
+      toast.success('Starting Full Demo Journey...', { icon: '🚀' });
+      window.location.href = '/';
+    }
+  };
+
   const handleDemoProof = (id, action) => {
     const updated = demoPayments.map(p => {
       if (p.id === id) p.status = action;
@@ -344,6 +362,15 @@ const OwnerTestLab = () => {
               className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl flex justify-center items-center transition-all disabled:opacity-50"
             >
               <Eye className="w-4 h-4 mr-2" /> Open Demo Workspace <ArrowRight className="w-4 h-4 ml-2" />
+            </button>
+          </div>
+          
+          <div className="ml-11 mt-4 w-[calc(100%-2.75rem)]">
+            <button 
+              onClick={startDemoJourney}
+              className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-amber-950 font-black rounded-xl flex justify-center items-center transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)]"
+            >
+              <Users className="w-5 h-5 mr-2" /> Start Full Demo Journey
             </button>
           </div>
         </div>
