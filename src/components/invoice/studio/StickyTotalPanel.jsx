@@ -1,0 +1,101 @@
+import React from 'react';
+import { useInvoice } from '../../../contexts/InvoiceContext';
+import { motion } from 'framer-motion';
+import { Settings2, Calculator, Check, Loader2 } from 'lucide-react';
+import SmartPaymentSection from './SmartPaymentSection';
+import { ShimmerButton } from '../../magicui/shimmer-button';
+
+const StickyTotalPanel = ({ onFinalize, isSaving }) => {
+  const { state, dispatch } = useInvoice();
+
+  return (
+    <div className="lg:w-80 shrink-0 border-l border-theme-border-soft bg-theme-surface flex flex-col h-[calc(100vh-4rem)] sticky top-16 z-40 shadow-[-10px_0_30px_rgba(0,0,0,0.03)] hidden lg:flex">
+      
+      <div className="p-4 border-b border-theme-border-soft flex items-center justify-between bg-theme-app/50 backdrop-blur-md">
+        <h2 className="text-sm font-black uppercase tracking-wider text-theme-primary flex items-center gap-2">
+          <Calculator className="w-4 h-4 text-theme-accent" /> Summary
+        </h2>
+        <button className="p-1.5 text-theme-muted hover:text-theme-accent transition-colors rounded-lg hover:bg-theme-accent/10" title="Advanced Options">
+          <Settings2 className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+        
+        {/* Subtotal & Advanced Math */}
+        <div className="space-y-3 mb-6">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-bold text-theme-muted">Subtotal</span>
+            <span className="font-black text-theme-primary">₹{state.totals.subtotal.toLocaleString()}</span>
+          </div>
+
+          {/* Tax Input */}
+          <div className="flex items-center justify-between text-sm group">
+            <span className="font-bold text-theme-muted flex items-center gap-1.5">
+              Tax
+              <div className="relative">
+                <input 
+                  type="number" 
+                  value={state.totals.taxPercentage} 
+                  onChange={(e) => dispatch({ type: 'UPDATE_TOTALS', payload: { taxPercentage: parseFloat(e.target.value) || 0 } })}
+                  className="w-12 bg-theme-app border border-theme-border-soft rounded px-1.5 py-0.5 text-xs text-center font-bold focus:border-theme-accent outline-none transition-colors"
+                />
+                <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] text-theme-muted pointer-events-none">%</span>
+              </div>
+            </span>
+            <span className="font-black text-theme-primary">₹{state.totals.taxAmount.toLocaleString()}</span>
+          </div>
+
+          {/* Discount Input */}
+          <div className="flex items-center justify-between text-sm group">
+            <span className="font-bold text-theme-muted">Discount (₹)</span>
+            <div className="relative flex items-center">
+              <span className="text-theme-muted text-xs mr-1 font-bold">-₹</span>
+              <input 
+                type="number" 
+                value={state.totals.discountAmount || ''} 
+                onChange={(e) => dispatch({ type: 'UPDATE_TOTALS', payload: { discountAmount: parseFloat(e.target.value) || 0 } })}
+                className="w-20 bg-theme-app border border-theme-border-soft rounded px-1.5 py-0.5 text-xs text-right font-bold focus:border-theme-accent outline-none transition-colors text-theme-success"
+                placeholder="0"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Grand Total Big Display */}
+        <div className="bg-[image:var(--accent-gradient)] rounded-2xl p-4 shadow-glow mb-6 relative overflow-hidden">
+          <div className="absolute -right-4 -top-4 w-16 h-16 bg-white/20 rounded-full blur-xl pointer-events-none" />
+          <p className="text-xs font-black uppercase tracking-widest text-white/80 mb-1 relative z-10">Grand Total</p>
+          <p className="text-3xl font-black text-white tracking-tight relative z-10">₹{state.totals.grandTotal.toLocaleString()}</p>
+        </div>
+
+        <SmartPaymentSection />
+
+        {/* Balance Due Display */}
+        <div className="mt-2 p-3 bg-theme-danger/5 border border-theme-danger/20 rounded-xl flex items-center justify-between">
+          <span className="text-xs font-bold text-theme-danger uppercase tracking-wider">Balance Due</span>
+          <span className="text-lg font-black text-theme-danger">₹{state.totals.balanceDue.toLocaleString()}</span>
+        </div>
+
+      </div>
+
+      <div className="p-4 border-t border-theme-border-soft bg-theme-app/90 backdrop-blur-md">
+        <ShimmerButton
+          onClick={onFinalize}
+          disabled={isSaving}
+          className="w-full h-12 shadow-glow"
+          shimmerColor="#ffffff"
+          background="var(--accent-gradient)"
+        >
+          <div className="flex items-center justify-center gap-2 text-white font-black">
+            {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
+            Generate Invoice
+          </div>
+        </ShimmerButton>
+      </div>
+
+    </div>
+  );
+};
+
+export default StickyTotalPanel;
