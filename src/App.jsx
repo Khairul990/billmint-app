@@ -1203,9 +1203,15 @@ function App() {
             onInstallApp={handleInstallApp}
           />
         );
-      }
       default:
-        return <div className="text-center font-bold text-theme-muted p-10">404 Tab Not Found</div>;
+        // Automatically recover from invalid tabs stored in localStorage
+        setTimeout(() => setCurrentTab('dashboard'), 0);
+        return (
+          <div className="flex flex-col items-center justify-center h-full text-center p-10">
+            <ClassicLoader />
+            <p className="text-theme-muted font-bold mt-4 animate-pulse">Recovering workspace...</p>
+          </div>
+        );
     }
   };
 
