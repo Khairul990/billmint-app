@@ -9,7 +9,7 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
   const [attempts, setAttempts] = useState(0);
 
   const MAX_ATTEMPTS = 5;
-  const CORRECT_PIN = import.meta.env.VITE_ADMIN_PIN || '0000';
+  const CORRECT_PIN = import.meta.env.VITE_ADMIN_PIN || '1234';
 
   useEffect(() => {
     if (pin.length === 4) {
