@@ -158,6 +158,13 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       {/* Main Content Region */}
       <div className="flex-1 flex flex-col min-w-0 w-full max-w-full pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0 overflow-y-auto overflow-x-hidden bg-theme-app transition-colors duration-300 relative z-10">
         
+        {localStorage.getItem('billqyro_demo_session_active') === 'true' && (
+          <div className="bg-amber-500 text-amber-950 font-black text-xs py-1.5 text-center uppercase tracking-widest z-50 relative shadow-md flex items-center justify-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-900 animate-pulse"></span>
+            DEMO MODE ACTIVE — Real data is safe
+          </div>
+        )}
+
         {/* Header Block with Premium Dual-Theme Layout */}
         <header className="sticky top-0 z-40 bg-theme-card/80 backdrop-blur-xl border-b border-theme-accent/50 px-4 sm:px-6 py-4 md:py-5 text-theme-primary shadow-sm transition-all duration-300">
           {/* Subtle Ambient Background Gradients wrapped to prevent overflow spill */}
@@ -187,33 +194,42 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                     setCurrentTab={setCurrentTab}
                   />
                   {/* Sync Status Badge */}
-                  <div className="relative group ml-2">
-                    <span className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
-                      syncStatus === 'Synced' ? 'text-emerald-500 bg-emerald-500/10 border border-emerald-500/20' : 
-                      syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500 bg-blue-500/10 border border-blue-500/20 animate-pulse' : 
-                      syncStatus === 'Offline' ? 'text-red-500 bg-red-500/10 border border-red-500/20' :
-                      'text-amber-500 bg-amber-500/10 border border-amber-500/20'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        syncStatus === 'Synced' ? 'bg-emerald-500' : 
-                        syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-ping' : 
-                        syncStatus === 'Offline' ? 'bg-red-500' :
-                        'bg-amber-500'
-                      }`}></span> 
-                      {syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}
-                    </span>
-                    {(syncStatus === 'Pending Sync' || syncStatus === 'Sync Error') && (
-                      <div className="absolute top-full left-0 mt-1 hidden group-hover:block z-50">
-                        <button
-                          onClick={flushSyncQueue}
-                          className="text-[10px] font-bold uppercase tracking-wider bg-theme-card border border-theme-border-soft px-3 py-1.5 rounded shadow-lg text-theme-primary hover:bg-theme-accent hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                          Retry Sync
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  {localStorage.getItem('billqyro_demo_session_active') === 'true' ? (
+                    <div className="relative group ml-2">
+                      <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors text-amber-500 bg-amber-500/10 border border-amber-500/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> 
+                        LOCAL SANDBOX
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="relative group ml-2">
+                      <span className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
+                        syncStatus === 'Synced' ? 'text-emerald-500 bg-emerald-500/10 border border-emerald-500/20' : 
+                        syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500 bg-blue-500/10 border border-blue-500/20 animate-pulse' : 
+                        syncStatus === 'Offline' ? 'text-red-500 bg-red-500/10 border border-red-500/20' :
+                        'text-amber-500 bg-amber-500/10 border border-amber-500/20'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          syncStatus === 'Synced' ? 'bg-emerald-500' : 
+                          syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-ping' : 
+                          syncStatus === 'Offline' ? 'bg-red-500' :
+                          'bg-amber-500'
+                        }`}></span> 
+                        {syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}
+                      </span>
+                      {(syncStatus === 'Pending Sync' || syncStatus === 'Sync Error') && (
+                        <div className="absolute top-full left-0 mt-1 hidden group-hover:block z-50">
+                          <button
+                            onClick={flushSyncQueue}
+                            className="text-[10px] font-bold uppercase tracking-wider bg-theme-card border border-theme-border-soft px-3 py-1.5 rounded shadow-lg text-theme-primary hover:bg-theme-accent hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            Retry Sync
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

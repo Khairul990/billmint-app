@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Beaker, Users, FileText, RefreshCw, Loader, AlertTriangle, Trash2, Video, BarChart2, CheckCircle2, Play, ArrowLeft, Power, Box, ArrowRight, Eye, ShieldCheck, XCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import { generateSmartDemoData } from '../../utils/demoDataGenerator';
 
 const OwnerTestLab = () => {
   const [isGenerating, setIsGenerating] = useState('');
@@ -46,104 +47,36 @@ const OwnerTestLab = () => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  const getPersonaItems = (persona) => {
-    switch (persona) {
-      case 'Doctor': return {
-        productNames: ['Consultation Fee', 'Medicine Follow-up', 'Blood Test', 'Full Body Checkup'],
-        customerPrefix: 'Patient'
-      };
-      case 'Teacher': return {
-        productNames: ['Monthly Tuition Fee', 'Registration Fee', 'Study Material', 'Exam Fee'],
-        customerPrefix: 'Student'
-      };
-      case 'Embroidery': return {
-        productNames: ['Custom Stitching', 'Bridal Design', 'Thread Work', 'Pattern Digitizing'],
-        customerPrefix: 'Client'
-      };
-      case 'Tailor': return {
-        productNames: ['Suit Alteration', 'Custom Shirt', 'Wedding Dress', 'Pant Stitching'],
-        customerPrefix: 'Client'
-      };
-      case 'Retail': return {
-        productNames: ['Cotton T-Shirt', 'Denim Jeans', 'Leather Belt', 'Sneakers'],
-        customerPrefix: 'Customer'
-      };
-      case 'Service': return {
-        productNames: ['AC Repair', 'Laptop Servicing', 'Plumbing Job', 'Electrical Repair'],
-        customerPrefix: 'Client'
-      };
-      case 'Freelancer': return {
-        productNames: ['Website Design', 'SEO Optimization', 'Logo Creation', 'Consulting Hour'],
-        customerPrefix: 'Client'
-      };
-      default: return {
-        productNames: ['Premium Service', 'Basic Package', 'Consultation', 'Add-on Support'],
-        customerPrefix: 'Customer'
-      };
-    }
-  };
-
   const generateDemoData = async () => {
     setIsGenerating('all');
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    const personaData = getPersonaItems(stats.persona);
+    const { products, customers, invoices, payments } = generateSmartDemoData(stats.persona);
 
-    // 1. Generate Products
-    const fakeProducts = personaData.productNames.map((name, i) => ({
-      id: `test-prod-${Date.now()}-${i}`,
-      name: name,
-      price: Math.floor(500 + Math.random() * 5000),
-      isTestData: true,
-      createdAt: new Date().toISOString()
-    }));
-    localStorage.setItem('billqyro_demo_products', JSON.stringify(fakeProducts));
-
-    // 2. Generate Customers
-    const fakeCustomers = Array.from({ length: 50 }).map((_, i) => ({
-      id: `test-cust-${Date.now()}-${i}`,
-      name: `${personaData.customerPrefix} ${Math.floor(Math.random() * 900) + 100}`,
-      phone: `+91 90000${Math.floor(10000 + Math.random() * 90000)}`,
-      email: `demo${i+1}@example.com`,
-      address: `123 Demo St, City ${i % 5}`,
-      businessType: stats.persona !== 'None' ? stats.persona : 'General',
-      isTestData: true,
-      createdAt: new Date().toISOString()
-    }));
-    localStorage.setItem('billqyro_demo_customers', JSON.stringify(fakeCustomers));
-
-    // 3. Generate Invoices
-    const fakeInvoices = Array.from({ length: 100 }).map((_, i) => {
-      const isPaid = Math.random() > 0.4;
-      const product = fakeProducts[i % fakeProducts.length];
-      const total = product.price * (Math.floor(Math.random() * 3) + 1);
-      return {
-        id: `test-inv-${Date.now()}-${i}`,
-        invoiceNumber: `DEMO-${1000 + i}`,
-        customerId: fakeCustomers[i % fakeCustomers.length].id,
-        customerName: fakeCustomers[i % fakeCustomers.length].name,
-        totalAmount: total,
-        paidAmount: isPaid ? total : (Math.random() > 0.5 ? Math.floor(total / 2) : 0),
-        status: isPaid ? 'paid' : (Math.random() > 0.5 ? 'partial' : 'unpaid'),
-        date: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toISOString(),
-        items: [{ name: product.name, price: product.price, quantity: total/product.price }],
-        isTestData: true
-      };
-    });
-    localStorage.setItem('billqyro_demo_invoices', JSON.stringify(fakeInvoices));
+    localStorage.setItem('billqyro_demo_products', JSON.stringify(products));
+    localStorage.setItem('billqyro_demo_customers', JSON.stringify(customers));
+    localStorage.setItem('billqyro_demo_invoices', JSON.stringify(invoices));
+    localStorage.setItem('billqyro_demo_payments', JSON.stringify(payments));
     
-    // Auto-generate reports
+    // Auto-generate reports metadata
     let totalSales = 0, pendingDue = 0, paidAmount = 0;
-    fakeInvoices.forEach(inv => {
+    invoices.forEach(inv => {
       totalSales += inv.totalAmount;
       paidAmount += inv.paidAmount;
       pendingDue += (inv.totalAmount - inv.paidAmount);
     });
-    localStorage.setItem('billqyro_demo_reports', JSON.stringify({
+    
+    const reportsPayload = {
       totalSales, pendingDue, paidAmount,
-      customerCount: 50, invoiceCount: 100,
+      customerCount: customers.length, invoiceCount: invoices.length,
       generatedAt: new Date().toISOString()
-    }));
+    };
+    localStorage.setItem('billqyro_demo_reports', JSON.stringify(reportsPayload));
+    
+    loadStats();
+    toast.success(`Complete realistic ${stats.persona} sandbox generated!`, { icon: '🧪' });
+    setIsGenerating('');
+  };
     
     loadStats();
     toast.success('Complete realistic demo sandbox generated!', { icon: '🧪' });
@@ -307,6 +240,32 @@ const OwnerTestLab = () => {
           </button>
         </div>
 
+        {/* Demo Preview Reports */}
+        {stats.reports && (() => {
+          const rep = JSON.parse(localStorage.getItem('billqyro_demo_reports') || '{}');
+          return (
+            <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-indigo-500/30">
+              <h3 className="text-indigo-400 font-bold text-lg mb-4 flex items-center">
+                <BarChart2 className="w-5 h-5 mr-2" /> Demo Preview Reports
+              </h3>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-700/50">
+                  <p className="text-slate-400 text-xs font-bold uppercase mb-1">Total Collection</p>
+                  <p className="text-white text-xl font-black">₹{rep.paidAmount?.toLocaleString()}</p>
+                </div>
+                <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-700/50">
+                  <p className="text-rose-400 text-xs font-bold uppercase mb-1">Pending Due</p>
+                  <p className="text-white text-xl font-black">₹{rep.pendingDue?.toLocaleString()}</p>
+                </div>
+                <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-700/50">
+                  <p className="text-slate-400 text-xs font-bold uppercase mb-1">Total Sales</p>
+                  <p className="text-white text-xl font-black">₹{rep.totalSales?.toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Step 3: Video Creator Mode */}
         <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
           <div className="flex items-center justify-between mb-4">
@@ -329,18 +288,31 @@ const OwnerTestLab = () => {
           </button>
         </div>
 
-        {/* Step 4 & 5: Demo Session Control & Open */}
+        {/* Step 4 & 5: Demo Session Control & Guided Journey */}
         <div className={`backdrop-blur-md p-6 rounded-3xl border transition-all ${demoActive ? 'bg-amber-500/10 border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.1)]' : 'bg-[#1e293b]/60 border-slate-700/50'}`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${demoActive ? 'bg-amber-500 text-amber-950' : 'bg-slate-700 text-white'}`}>4</div>
-              <h3 className={`${demoActive ? 'text-amber-400' : 'text-white'} font-bold text-lg`}>Global Demo Session</h3>
+              <h3 className={`${demoActive ? 'text-amber-400' : 'text-white'} font-bold text-lg`}>Guided Demo Journey</h3>
             </div>
             {demoActive && <span className="bg-amber-500 text-amber-950 px-3 py-1 rounded-full text-xs font-bold animate-pulse">LIVE</span>}
           </div>
           <p className="ml-11 text-slate-400 text-sm mb-4">
-            Start the session to globally isolate reads/writes, then open the workspace to test it like a real user.
+            Follow the guided journey to experience BillQyro from a new user's perspective, or open the workspace directly.
           </p>
+
+          {/* Guided Checklist UI */}
+          <div className="ml-11 mb-6 p-4 bg-black/20 rounded-xl border border-slate-700/50">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Journey Flow Preview</h4>
+            <div className="flex flex-wrap gap-2">
+              {['Login Demo', 'Welcome Board', 'Business Setup', 'Dashboard', 'Create Invoice', 'Download PDF', 'Live Link', 'View Reports'].map((step, idx) => (
+                <div key={idx} className="flex items-center text-xs font-semibold text-slate-300">
+                  <span className="text-emerald-500 mr-1.5">•</span> {step}
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="ml-11 flex flex-col md:flex-row gap-4 w-[calc(100%-2.75rem)]">
             <button 
               onClick={toggleDemoSession}
@@ -351,7 +323,7 @@ const OwnerTestLab = () => {
                   : 'bg-emerald-500 hover:bg-emerald-400 text-emerald-950'
               }`}
             >
-              <Power className="w-4 h-4 mr-2" /> {demoActive ? 'End Session' : 'Start Demo Session'}
+              <Power className="w-4 h-4 mr-2" /> {demoActive ? 'End Session' : 'Direct Demo Mode'}
             </button>
             <button 
               onClick={() => {
@@ -361,16 +333,16 @@ const OwnerTestLab = () => {
               disabled={!demoActive}
               className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl flex justify-center items-center transition-all disabled:opacity-50"
             >
-              <Eye className="w-4 h-4 mr-2" /> Open Demo Workspace <ArrowRight className="w-4 h-4 ml-2" />
+              <Eye className="w-4 h-4 mr-2" /> Open Dashboard <ArrowRight className="w-4 h-4 ml-2" />
             </button>
           </div>
           
-          <div className="ml-11 mt-4 w-[calc(100%-2.75rem)]">
+          <div className="ml-11 mt-4 w-[calc(100%-2.75rem)] relative group">
             <button 
               onClick={startDemoJourney}
-              className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-amber-950 font-black rounded-xl flex justify-center items-center transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)]"
+              className="w-full py-4 bg-[image:var(--accent-gradient)] hover:brightness-110 text-white font-black rounded-xl flex justify-center items-center transition-all shadow-glow"
             >
-              <Users className="w-5 h-5 mr-2" /> Start Full Demo Journey
+              <Play className="w-5 h-5 mr-2" fill="currentColor" /> START FULL GUIDED JOURNEY
             </button>
           </div>
         </div>

@@ -45,7 +45,8 @@ export const migrateLocalStorageToIndexedDB = async () => {
 
 export const queueSyncTransaction = async (action, storeName, docId, data) => {
   if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
-    console.warn('Blocked real data operation during Demo Mode: queueSyncTransaction');
+    console.warn('[DEMO GUARD] Blocked real data operation during Demo Mode: queueSyncTransaction');
+    toast.error('Blocked real operation in Demo Mode');
     return null;
   }
   const userId = getRealUserId();
@@ -571,7 +572,8 @@ import { getDeviceId, pushDataUpdate } from './syncEngine';
 // Background Firestore Save Helper
 const firestoreSave = async (collectionName, docId, data) => {
   if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
-    console.warn('Blocked real data operation during Demo Mode: firestoreSave');
+    console.warn('[DEMO GUARD] Blocked real data operation during Demo Mode: firestoreSave');
+    toast.error('Blocked real operation in Demo Mode');
     return null;
   }
   if (!firebaseReady) return { status: 'disabled' };
@@ -599,7 +601,11 @@ const firestoreSave = async (collectionName, docId, data) => {
 
 // Background Firestore Delete Helper
 const firestoreDelete = async (collectionName, docId) => {
-  if (localStorage.getItem('billqyro_demo_session_active') === 'true') return;
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    console.warn('[DEMO GUARD] Blocked real data operation during Demo Mode: firestoreDelete');
+    toast.error('Blocked real operation in Demo Mode');
+    return;
+  }
   if (!firebaseReady) return;
   try {
     const userId = getRealUserId();
