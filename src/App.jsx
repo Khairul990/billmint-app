@@ -961,6 +961,12 @@ function App() {
 
   // Settings
   const handleSaveSettings = async (payload) => {
+    if (isDemoSessionActive) {
+      localStorage.setItem('billqyro_demo_settings', JSON.stringify(payload));
+      toast.success('Settings saved to Demo Session');
+      window.dispatchEvent(new Event('storage'));
+      return;
+    }
     try {
       const updatedSettings = await saveSettings(payload);
       setSettings(updatedSettings);
@@ -1284,7 +1290,7 @@ function App() {
             businessWorkspaces={businessWorkspaces}
             activeWorkspaceId={activeWorkspaceId}
             setActiveWorkspace={setActiveWorkspace}
-            settings={settings}
+            settings={activeSettings}
             onSaveSettings={handleSaveSettings}
             setCurrentTab={setCurrentTab}
           />
@@ -1293,18 +1299,19 @@ function App() {
         const session = getAuthSession();
         return (
           <Settings
-            settings={settings}
+            settings={activeSettings}
             onSaveSettings={handleSaveSettings}
             isAdmin={isAdminUser(session)}
             onResetDemo={handleResetDemo}
             onImportBackup={handleImportBackup}
-            invoices={invoices}
-            customers={customers}
+            invoices={activeInvoices}
+            customers={activeCustomers}
             installPromptEvent={installPromptEvent}
             isAppInstalled={isAppInstalled}
             onInstallApp={handleInstallApp}
           />
         );
+      }
       default:
         // Automatically recover from invalid tabs stored in localStorage
         setTimeout(() => setCurrentTab('dashboard'), 0);
