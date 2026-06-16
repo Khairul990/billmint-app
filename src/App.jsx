@@ -43,6 +43,7 @@ import { db } from './services/firebaseConfig';
 
 const Landing = React.lazy(() => import('./pages/Landing'));
 const Login = React.lazy(() => import('./pages/Login'));
+const DemoLogin = React.lazy(() => import('./pages/DemoLogin'));
 const OnboardingWizard = React.lazy(() => import('./pages/onboarding/OnboardingWizard'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Invoices = React.lazy(() => import('./pages/Invoices'));
@@ -161,7 +162,13 @@ function App() {
 
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
   const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(() => !!getAuthSession());
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const realAuth = !!getAuthSession();
+    const demoAuth = localStorage.getItem('billqyro_demo_session_active') === 'true' && 
+                     localStorage.getItem('billqyro_demo_journey_mode') === 'true' && 
+                     localStorage.getItem('billqyro_demo_logged_in') === 'true';
+    return realAuth || demoAuth;
+  });
   const [syncStatus, setSyncStatus] = useState('Synced');
   const [isDemoSessionActive, setIsDemoSessionActive] = useState(false);
   const [isVideoCreatorMode, setIsVideoCreatorMode] = useState(false);
@@ -1362,33 +1369,32 @@ function App() {
   const isDemoJourneyActive = localStorage.getItem('billqyro_demo_journey_mode') === 'true';
   const isDemoLoggedIn = localStorage.getItem('billqyro_demo_logged_in') === 'true';
 
-  if (!isAuthenticated) {
-    if (isDemoSessionActive && isDemoJourneyActive && !isDemoLoggedIn) {
-      return (
-        <React.Suspense fallback={
-          <div className="flex h-screen items-center justify-center">
-            <ClassicLoader />
-          </div>
-        }>
-          <DemoLogin onDemoLoginSuccess={() => {
-            setShowWelcomeAnimation(true);
-            window.dispatchEvent(new Event('storage'));
-          }} />
-        </React.Suspense>
-      );
-    }
+  if (isDemoSessionActive && isDemoJourneyActive && !isDemoLoggedIn) {
+    return (
+      <React.Suspense fallback={
+        <div className="flex h-screen items-center justify-center">
+          <ClassicLoader />
+        </div>
+      }>
+        <DemoLogin onDemoLoginSuccess={() => {
+          setIsAuthenticated(true);
+          setShowWelcomeAnimation(true);
+          window.dispatchEvent(new Event('storage'));
+        }} />
+      </React.Suspense>
+    );
+  }
 
-    if (!isDemoSessionActive || (isDemoJourneyActive && !isDemoLoggedIn)) {
-      return (
-        <React.Suspense fallback={
-          <div className="flex h-screen items-center justify-center">
-            <ClassicLoader />
-          </div>
-        }>
-          <Login onLoginSuccess={handleLoginSuccess} />
-        </React.Suspense>
-      );
-    }
+  if (!isAuthenticated && (!isDemoSessionActive || !isDemoJourneyActive)) {
+    return (
+      <React.Suspense fallback={
+        <div className="flex h-screen items-center justify-center">
+          <ClassicLoader />
+        </div>
+      }>
+        <Login onLoginSuccess={handleLoginSuccess} />
+      </React.Suspense>
+    );
   }
 
   // --- Account Blocked Interceptor ---
