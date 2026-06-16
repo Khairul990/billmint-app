@@ -44,7 +44,10 @@ export const migrateLocalStorageToIndexedDB = async () => {
 };
 
 export const queueSyncTransaction = async (action, storeName, docId, data) => {
-  if (localStorage.getItem('billqyro_demo_session_active') === 'true') return;
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    console.warn('Blocked real data operation during Demo Mode: queueSyncTransaction');
+    return null;
+  }
   const userId = getRealUserId();
   const transactionId = 'tx-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
   let deviceId = 'Unknown Device';
@@ -124,6 +127,10 @@ export const logAudit = async (action, entityType, entityId, before = null, afte
 };
 
 export const syncOfflineTransactions = async () => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    console.warn('Blocked real data operation during Demo Mode: syncOfflineTransactions');
+    return null;
+  }
   if (!firebaseReady || !navigator.onLine) return;
 
   try {
@@ -563,7 +570,10 @@ import { getDeviceId, pushDataUpdate } from './syncEngine';
 
 // Background Firestore Save Helper
 const firestoreSave = async (collectionName, docId, data) => {
-  if (localStorage.getItem('billqyro_demo_session_active') === 'true') return { status: 'queued' };
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    console.warn('Blocked real data operation during Demo Mode: firestoreSave');
+    return null;
+  }
   if (!firebaseReady) return { status: 'disabled' };
   const userId = getRealUserId();
   if (!userId) {
@@ -1310,6 +1320,10 @@ export const getCustomers = async (includeDeleted = false) => {
 };
 
 export const saveCustomer = async (customer) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    console.warn('Blocked real data operation during Demo Mode: saveCustomer');
+    return { updatedCustomers: [], firebaseStatus: 'blocked' };
+  }
   const customers = await getCustomers();
   if (customer.id) {
     const index = customers.findIndex(c => c.id === customer.id);
@@ -1419,6 +1433,10 @@ export const getProducts = async (includeDeleted = false) => {
 };
 
 export const saveProduct = async (product) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    console.warn('Blocked real data operation during Demo Mode: saveProduct');
+    return { updatedProducts: [], firebaseStatus: 'blocked' };
+  }
   const products = await getProducts();
   if (product.id) {
     const index = products.findIndex(p => p.id === product.id);
@@ -1543,6 +1561,10 @@ const generateSecureToken = () => {
 };
 
 export const saveInvoice = async (invoice) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    console.warn('Blocked real data operation during Demo Mode: saveInvoice');
+    return { updatedInvoices: [], firebaseStatus: 'blocked' };
+  }
   const invoices = await getInvoices();
 
   // 1. Ensure secure publicToken is generated
@@ -1882,15 +1904,14 @@ export const ensureInvoicePublicToken = async (invoice) => {
 };
 
 export const saveInvoicePublicly = async (invoice) => {
-  const invoices = await getInvoices();
-  const index = invoices.findIndex(inv => inv.id === invoice.id || inv.publicToken === invoice.publicToken);
-  if (index !== -1) {
-    invoices[index] = invoice;
-    updateLocalCache(KEYS.INVOICES, invoices);
-    window.dispatchEvent(new CustomEvent('billqyro_sync'));
-  }
-
   if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    const demos = JSON.parse(localStorage.getItem('billqyro_demo_invoices') || '[]');
+    const idx = demos.findIndex(inv => inv.id === invoice.id || inv.publicToken === invoice.publicToken);
+    if (idx !== -1) {
+      demos[idx] = invoice;
+      localStorage.setItem('billqyro_demo_invoices', JSON.stringify(demos));
+    }
+    
     if (invoice.paymentProofs && invoice.paymentProofs.length > 0) {
       const demoPayments = JSON.parse(localStorage.getItem('billqyro_demo_payments') || '[]');
       invoice.paymentProofs.forEach(proof => {
@@ -1907,7 +1928,16 @@ export const saveInvoicePublicly = async (invoice) => {
       });
       localStorage.setItem('billqyro_demo_payments', JSON.stringify(demoPayments));
     }
+    window.dispatchEvent(new Event('storage'));
     return { status: 'success' };
+  }
+
+  const invoices = await getInvoices();
+  const index = invoices.findIndex(inv => inv.id === invoice.id || inv.publicToken === invoice.publicToken);
+  if (index !== -1) {
+    invoices[index] = invoice;
+    updateLocalCache(KEYS.INVOICES, invoices);
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
   }
 
   if (firebaseReady) {
@@ -2193,6 +2223,10 @@ export const enableRealTimeSync = () => {
 
 // One-time Syncing on Authentication or Startup
 export const syncFromFirestore = async () => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    console.warn('Blocked real data operation during Demo Mode: syncFromFirestore');
+    return null;
+  }
   if (!firebaseReady) {
     console.log("Firebase not enabled, skipping Firestore sync.");
     return null;

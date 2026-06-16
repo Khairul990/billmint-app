@@ -165,11 +165,34 @@ function App() {
   const [syncStatus, setSyncStatus] = useState('Synced');
   const [isDemoSessionActive, setIsDemoSessionActive] = useState(false);
   const [isVideoCreatorMode, setIsVideoCreatorMode] = useState(false);
+  
+  const [demoInvoices, setDemoInvoices] = useState([]);
+  const [demoCustomers, setDemoCustomers] = useState([]);
+  const [demoProducts, setDemoProducts] = useState([]);
+  const [demoExpenses, setDemoExpenses] = useState([]);
+  const [demoSettings, setDemoSettings] = useState(null);
 
   useEffect(() => {
     const checkDemo = () => {
-      setIsDemoSessionActive(localStorage.getItem('billqyro_demo_session_active') === 'true');
-      setIsVideoCreatorMode(localStorage.getItem('billqyro_demo_video_creator') === 'true');
+      const active = localStorage.getItem('billqyro_demo_session_active') === 'true';
+      setIsDemoSessionActive(active);
+      const isVideo = localStorage.getItem('billqyro_demo_video_creator') === 'true';
+      setIsVideoCreatorMode(isVideo);
+      
+      if (active) {
+        setDemoInvoices(JSON.parse(localStorage.getItem('billqyro_demo_invoices') || '[]'));
+        setDemoCustomers(JSON.parse(localStorage.getItem('billqyro_demo_customers') || '[]'));
+        setDemoProducts(JSON.parse(localStorage.getItem('billqyro_demo_products') || '[]'));
+        setDemoExpenses(JSON.parse(localStorage.getItem('billqyro_demo_expenses') || '[]'));
+        const s = JSON.parse(localStorage.getItem('billqyro_demo_settings') || 'null');
+        setDemoSettings(s || {
+           businessName: isVideo ? 'Demo Corp' : 'My Business (Demo)',
+           ownerName: isVideo ? 'Demo Owner' : 'Me',
+           email: isVideo ? 'hello@democorp.com' : 'demo@example.com',
+           phone: isVideo ? '+1 555-0199' : '9999999999',
+           themeColor: 'obsidian-gold'
+        });
+      }
     };
     checkDemo();
     window.addEventListener('storage', checkDemo);
@@ -622,6 +645,24 @@ function App() {
 
   // Invoices
   const handleSaveInvoice = async (payload, saveCustomerAsNew = false) => {
+    if (isDemoSessionActive) {
+      const demos = JSON.parse(localStorage.getItem('billqyro_demo_invoices') || '[]');
+      if (payload.id) {
+        const idx = demos.findIndex(i => i.id === payload.id);
+        if (idx !== -1) demos[idx] = payload;
+        else demos.push(payload);
+      } else {
+        payload.id = 'demo-inv-' + Date.now();
+        if (!payload.invoiceNumber) payload.invoiceNumber = 'DEMO-INV-' + (1000 + demos.length);
+        demos.push(payload);
+      }
+      localStorage.setItem('billqyro_demo_invoices', JSON.stringify(demos));
+      toast.success('Saved to Demo Session');
+      window.dispatchEvent(new Event('storage'));
+      setEditingInvoice(null);
+      setCurrentTab('invoices');
+      return;
+    }
     const isNew = !payload.id || !invoices.some(inv => inv.id === payload.id);
     const freeLimit = settings?.freeInvoiceLimit !== undefined ? settings.freeInvoiceLimit : 15;
     if (isNew && subscription.status !== 'premium' && invoices.length >= freeLimit) {
@@ -754,6 +795,14 @@ function App() {
   };
 
   const handleDeleteInvoice = async (id, permanent = false) => {
+    if (isDemoSessionActive) {
+      const demos = JSON.parse(localStorage.getItem('billqyro_demo_invoices') || '[]');
+      const filtered = demos.filter(i => i.id !== id);
+      localStorage.setItem('billqyro_demo_invoices', JSON.stringify(filtered));
+      toast.success('Deleted from Demo Session');
+      window.dispatchEvent(new Event('storage'));
+      return;
+    }
     let shouldDelete = true;
     if (!permanent) {
       shouldDelete = window.confirm('Are you sure you want to move this invoice to trash?');
@@ -772,6 +821,21 @@ function App() {
 
   // Customers
   const handleSaveCustomer = async (payload) => {
+    if (isDemoSessionActive) {
+      const demos = JSON.parse(localStorage.getItem('billqyro_demo_customers') || '[]');
+      if (payload.id) {
+        const idx = demos.findIndex(i => i.id === payload.id);
+        if (idx !== -1) demos[idx] = payload;
+        else demos.push(payload);
+      } else {
+        payload.id = 'demo-cust-' + Date.now();
+        demos.push(payload);
+      }
+      localStorage.setItem('billqyro_demo_customers', JSON.stringify(demos));
+      toast.success('Saved to Demo Session');
+      window.dispatchEvent(new Event('storage'));
+      return;
+    }
     try {
       const { updatedCustomers, firebaseStatus } = await saveCustomer(payload);
       setCustomers(updatedCustomers);
@@ -793,6 +857,14 @@ function App() {
   };
 
   const handleDeleteCustomer = async (id) => {
+    if (isDemoSessionActive) {
+      const demos = JSON.parse(localStorage.getItem('billqyro_demo_customers') || '[]');
+      const filtered = demos.filter(i => i.id !== id);
+      localStorage.setItem('billqyro_demo_customers', JSON.stringify(filtered));
+      toast.success('Deleted from Demo Session');
+      window.dispatchEvent(new Event('storage'));
+      return;
+    }
     if (window.confirm('Are you sure you want to delete this customer?')) {
       const { updatedCustomers, firebaseStatus } = await deleteCustomer(id);
       setCustomers(updatedCustomers);
@@ -806,6 +878,21 @@ function App() {
 
   // Products
   const handleSaveProduct = async (payload) => {
+    if (isDemoSessionActive) {
+      const demos = JSON.parse(localStorage.getItem('billqyro_demo_products') || '[]');
+      if (payload.id) {
+        const idx = demos.findIndex(i => i.id === payload.id);
+        if (idx !== -1) demos[idx] = payload;
+        else demos.push(payload);
+      } else {
+        payload.id = 'demo-prod-' + Date.now();
+        demos.push(payload);
+      }
+      localStorage.setItem('billqyro_demo_products', JSON.stringify(demos));
+      toast.success('Saved to Demo Session');
+      window.dispatchEvent(new Event('storage'));
+      return;
+    }
     try {
       const { updatedProducts, firebaseStatus } = await saveProduct(payload);
       setProducts(updatedProducts);
@@ -827,6 +914,14 @@ function App() {
   };
 
   const handleDeleteProduct = async (id) => {
+    if (isDemoSessionActive) {
+      const demos = JSON.parse(localStorage.getItem('billqyro_demo_products') || '[]');
+      const filtered = demos.filter(i => i.id !== id);
+      localStorage.setItem('billqyro_demo_products', JSON.stringify(filtered));
+      toast.success('Deleted from Demo Session');
+      window.dispatchEvent(new Event('storage'));
+      return;
+    }
     const { updatedProducts, firebaseStatus } = await deleteProduct(id);
     setProducts(updatedProducts);
     if (firebaseStatus === 'failed') {
@@ -937,15 +1032,22 @@ function App() {
       });
   };
 
+  // HARD DEMO MODE ISOLATION SWITCH
+  const activeInvoices = isDemoSessionActive ? demoInvoices : invoices;
+  const activeCustomers = isDemoSessionActive ? demoCustomers : customers;
+  const activeProducts = isDemoSessionActive ? demoProducts : products;
+  const activeExpenses = isDemoSessionActive ? demoExpenses : expenses;
+  const activeSettings = (isDemoSessionActive && demoSettings) ? demoSettings : settings;
+
   // --- TAB ROUTER SWITCHBOARD ---
   const renderTabContent = () => {
-    const isProfileIncomplete = settings && !settings.profileSetupCompleted && !settings.businessName;
+    const isProfileIncomplete = activeSettings && !activeSettings.profileSetupCompleted && !activeSettings.businessName;
     const activeTab = isProfileIncomplete ? 'onboarding' : currentTab;
 
     if (activeTab === 'onboarding') {
       return (
         <OnboardingWizard
-          businessSettings={settings}
+          businessSettings={activeSettings}
           onSaveSettings={(newSettings) => {
             saveSettings(newSettings);
             setSettings(newSettings);
@@ -959,10 +1061,10 @@ function App() {
       case 'dashboard':
         return (
           <Dashboard
-            invoices={invoices}
-            customers={customers}
-            products={products}
-            expenses={expenses}
+            invoices={activeInvoices}
+            customers={activeCustomers}
+            products={activeProducts}
+            expenses={activeExpenses}
             onViewInvoice={(inv) => {
               setEditingInvoice(inv);
               setCurrentTab('invoices');
@@ -974,7 +1076,7 @@ function App() {
             onDeleteInvoice={handleDeleteInvoice}
             onDownloadPDF={handleDownloadPDF}
             setCurrentTab={setCurrentTab}
-            businessSettings={settings}
+            businessSettings={activeSettings}
             installPromptEvent={installPromptEvent}
             isAppInstalled={isAppInstalled}
             onInstallApp={handleInstallApp}
@@ -1006,51 +1108,51 @@ function App() {
       case 'due-ledger':
         return (
           <DueLedger 
-            customers={customers} 
-            invoices={invoices} 
-            businessSettings={settings}
+            customers={activeCustomers} 
+            invoices={activeInvoices} 
+            businessSettings={activeSettings}
           />
         );
       case 'reports':
         return (
           <Reports 
-            invoices={invoices} 
-            customers={customers} 
-            businessSettings={settings}
+            invoices={activeInvoices} 
+            customers={activeCustomers} 
+            businessSettings={activeSettings}
           />
         );
       case 'invoices':
         return (
           <Invoices
-            invoices={invoices}
+            invoices={activeInvoices}
             editingInvoice={editingInvoice}
             onEditInvoice={setEditingInvoice}
             onDeleteInvoice={handleDeleteInvoice}
             onDownloadPDF={handleDownloadPDF}
             setCurrentTab={setCurrentTab}
-            businessSettings={settings}
+            businessSettings={activeSettings}
           />
         );
       case 'estimates':
         return (
           <Estimates
-            invoices={invoices}
+            invoices={activeInvoices}
             editingInvoice={editingInvoice}
             onEditInvoice={setEditingInvoice}
             onDeleteInvoice={handleDeleteInvoice}
             onDownloadPDF={handleDownloadPDF}
             setCurrentTab={setCurrentTab}
-            businessSettings={settings}
+            businessSettings={activeSettings}
             onSaveInvoice={handleSaveInvoice}
           />
         );
       case 'create-invoice':
         return (
           <CreateInvoice
-            invoices={invoices}
-            customers={customers}
-            products={products}
-            businessSettings={settings}
+            invoices={activeInvoices}
+            customers={activeCustomers}
+            products={activeProducts}
+            businessSettings={activeSettings}
             onSaveInvoice={handleSaveInvoice}
             setCurrentTab={setCurrentTab}
             editingInvoice={editingInvoice}
@@ -1066,8 +1168,8 @@ function App() {
       case 'customers':
         return (
           <Customers
-            customers={customers}
-            invoices={invoices}
+            customers={activeCustomers}
+            invoices={activeInvoices}
             onSaveCustomer={handleSaveCustomer}
             onDeleteCustomer={handleDeleteCustomer}
           />
@@ -1075,19 +1177,19 @@ function App() {
       case 'products':
         return (
           <Products
-            products={products}
+            products={activeProducts}
             onSaveProduct={handleSaveProduct}
             onDeleteProduct={handleDeleteProduct}
-            businessSettings={settings}
+            businessSettings={activeSettings}
           />
         );
       case 'expenses':
         return (
           <Expenses
-            expenses={expenses}
+            expenses={activeExpenses}
             onSaveExpense={handleSaveExpense}
             onDeleteExpense={handleDeleteExpense}
-            businessSettings={settings}
+            businessSettings={activeSettings}
           />
         );
       case 'appointments':
@@ -1458,10 +1560,10 @@ function App() {
                   setCurrentTab(tab);
                 }}
                 onLogout={handleLogout}
-                businessSettings={settings}
+                businessSettings={activeSettings}
                 isAuthenticated={isAuthenticated}
                 userRole={userRole}
-                invoices={invoices}
+                invoices={activeInvoices}
                 subscription={subscription}
                 userEmail={getAuthSession()?.userEmail}
                 onQuickBillOpen={() => setIsQuickBillOpen(true)}
@@ -1469,8 +1571,8 @@ function App() {
                 businessWorkspaces={businessWorkspaces}
                 activeWorkspaceId={activeWorkspaceId}
                 setActiveWorkspace={setActiveWorkspace}
-                syncSource="cloud"
-                syncStatus={syncStatus}
+                syncSource={isDemoSessionActive ? "local" : "cloud"}
+                syncStatus={isDemoSessionActive ? "Local Sandbox" : syncStatus}
               >
                 <AnimatePresence mode="wait">
                   <motion.div
