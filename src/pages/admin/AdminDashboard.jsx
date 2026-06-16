@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, FileText, IndianRupee, Activity, Crown, Store, Clock, Database, ShieldAlert, CheckCircle2, AlertTriangle, ServerCrash, RefreshCw, CreditCard } from 'lucide-react';
+import { Users, FileText, IndianRupee, Activity, Crown, Store, Clock, Database, ShieldAlert, CheckCircle2, AlertTriangle, ServerCrash, RefreshCw, CreditCard, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const AdminDashboard = () => {
