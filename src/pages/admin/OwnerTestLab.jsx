@@ -77,11 +77,6 @@ const OwnerTestLab = () => {
     toast.success(`Complete realistic ${stats.persona} sandbox generated!`, { icon: '🧪' });
     setIsGenerating('');
   };
-    
-    loadStats();
-    toast.success('Complete realistic demo sandbox generated!', { icon: '🧪' });
-    setIsGenerating('');
-  };
 
   const setPersona = (personaName) => {
     localStorage.setItem('billqyro_demo_session_persona', personaName);
