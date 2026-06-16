@@ -180,23 +180,30 @@ export const generateSmartDemoData = (personaName) => {
       totalAmount += prod.price * quantity;
     }
 
-    let paidAmount = totalAmount;
-    if (status === 'unpaid') paidAmount = 0;
-    else if (status === 'partial') paidAmount = Math.floor(totalAmount * (Math.random() * 0.5 + 0.2));
+    let amountPaid = totalAmount;
+    let paymentStatus = 'Paid';
+    if (status === 'unpaid') {
+      amountPaid = 0;
+      paymentStatus = 'Unpaid';
+    } else if (status === 'partial') {
+      amountPaid = Math.floor(totalAmount * (Math.random() * 0.5 + 0.2));
+      paymentStatus = 'Partial';
+    }
 
     const customer = customers[Math.floor(Math.random() * customers.length)];
-    const invoiceDate = getRandomDate(180);
+    const invoiceDate = getRandomDate(180).substring(0, 10); // Dashboard usually expects YYYY-MM-DD
 
     invoices.push({
       id: `demo-inv-${Date.now()}-${i}`,
       invoiceNumber: `DEMO-INV-2026-${(i + 1).toString().padStart(3, '0')}`,
       customerId: customer.id,
       customerName: customer.name,
-      totalAmount,
-      paidAmount,
-      status,
+      grandTotal: totalAmount,
+      amountPaid: amountPaid,
+      balanceDue: totalAmount - amountPaid,
+      paymentStatus: paymentStatus,
       date: invoiceDate,
-      dueDate: new Date(new Date(invoiceDate).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(new Date(invoiceDate).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10),
       items,
       isTestData: true
     });
@@ -207,13 +214,13 @@ export const generateSmartDemoData = (personaName) => {
 
   // 4. Generate 25 Payment Proofs (tied to pending/partial invoices)
   const payments = [];
-  const pendingInvoices = invoices.filter(inv => inv.status !== 'paid').slice(0, 25);
+  const pendingInvoices = invoices.filter(inv => inv.paymentStatus !== 'Paid').slice(0, 25);
   pendingInvoices.forEach((inv, i) => {
     payments.push({
       id: `demo-proof-${Date.now()}-${i}`,
       invoiceId: inv.id,
       invoiceNumber: inv.invoiceNumber,
-      amount: inv.totalAmount - inv.paidAmount,
+      amount: inv.grandTotal - inv.amountPaid,
       method: ['UPI', 'Bank Transfer', 'Cash'][Math.floor(Math.random() * 3)],
       status: ['pending', 'approved', 'rejected'][Math.floor(Math.random() * 3)],
       utr: `UTR${Math.floor(100000000000 + Math.random() * 899999999999)}`,

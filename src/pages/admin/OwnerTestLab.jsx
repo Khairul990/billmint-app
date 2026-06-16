@@ -3,6 +3,7 @@ import { Beaker, Users, FileText, RefreshCw, Loader, AlertTriangle, Trash2, Vide
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { generateSmartDemoData } from '../../utils/demoDataGenerator';
+import { clearDemoData } from '../../utils/demoDataManager';
 
 const OwnerTestLab = () => {
   const [isGenerating, setIsGenerating] = useState('');
@@ -61,9 +62,9 @@ const OwnerTestLab = () => {
     // Auto-generate reports metadata
     let totalSales = 0, pendingDue = 0, paidAmount = 0;
     invoices.forEach(inv => {
-      totalSales += inv.totalAmount;
-      paidAmount += inv.paidAmount;
-      pendingDue += (inv.totalAmount - inv.paidAmount);
+      totalSales += inv.grandTotal;
+      paidAmount += inv.amountPaid;
+      pendingDue += inv.balanceDue;
     });
     
     const reportsPayload = {
@@ -97,17 +98,12 @@ const OwnerTestLab = () => {
 
   const clearTestData = () => {
     if (window.confirm("Are you sure you want to delete all demo sandbox data? Production data is strictly isolated and will NOT be affected.")) {
-      localStorage.removeItem('billqyro_demo_customers');
-      localStorage.removeItem('billqyro_demo_invoices');
-      localStorage.removeItem('billqyro_demo_products');
-      localStorage.removeItem('billqyro_demo_reports');
-      localStorage.removeItem('billqyro_demo_payments');
+      clearDemoData();
       localStorage.removeItem('billqyro_demo_session_persona');
       localStorage.removeItem('billqyro_demo_session_active');
       localStorage.removeItem('billqyro_demo_video_creator');
       loadStats();
       toast.success('Demo sandbox cleared.', { icon: '🧹' });
-      window.dispatchEvent(new Event('storage'));
     }
   };
 
@@ -126,11 +122,7 @@ const OwnerTestLab = () => {
 
   const startDemoJourney = () => {
     if (window.confirm("Start Full Demo Journey? This will clear old demo data and simulate a completely new user experience.")) {
-      localStorage.removeItem('billqyro_demo_customers');
-      localStorage.removeItem('billqyro_demo_invoices');
-      localStorage.removeItem('billqyro_demo_products');
-      localStorage.removeItem('billqyro_demo_reports');
-      localStorage.removeItem('billqyro_demo_payments');
+      clearDemoData();
       localStorage.removeItem('billqyro_demo_settings');
       localStorage.removeItem('billqyro_demo_logged_in');
       
