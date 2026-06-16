@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { generateSmartDemoData } from '../../utils/demoDataGenerator';
 import { clearDemoData } from '../../utils/demoDataManager';
+import { ShimmerButton } from '../../components/magicui/shimmer-button';
 
 const OwnerTestLab = () => {
   const [isGenerating, setIsGenerating] = useState('');
@@ -218,13 +219,15 @@ const OwnerTestLab = () => {
               {stats.customers} Cust / {stats.products} Prod / {stats.invoices} Inv
             </span>
           </div>
-          <button 
+          <ShimmerButton 
             onClick={generateDemoData}
             disabled={isGenerating !== ''}
-            className="ml-11 w-[calc(100%-2.75rem)] py-3 bg-[#0f172a] hover:bg-emerald-600 border border-emerald-500/30 text-emerald-400 hover:text-white text-sm font-bold rounded-xl flex justify-center items-center transition-all disabled:opacity-50"
+            className="ml-11 w-[calc(100%-2.75rem)]"
+            shimmerColor="#10b981"
+            background="rgba(15, 23, 42, 1)"
           >
-            {isGenerating === 'all' ? <Loader className="w-4 h-4 animate-spin" /> : 'Generate Complete Persona Dataset'}
-          </button>
+            {isGenerating === 'all' ? <Loader className="w-4 h-4 animate-spin text-emerald-400" /> : <span className="text-emerald-400 font-bold text-sm">Generate Complete Persona Dataset</span>}
+          </ShimmerButton>
         </div>
 
         {/* Demo Preview Reports */}
@@ -325,12 +328,16 @@ const OwnerTestLab = () => {
           </div>
           
           <div className="ml-11 mt-4 w-[calc(100%-2.75rem)] relative group">
-            <button 
+            <ShimmerButton 
               onClick={startDemoJourney}
-              className="w-full py-4 bg-[image:var(--accent-gradient)] hover:brightness-110 text-white font-black rounded-xl flex justify-center items-center transition-all shadow-glow"
+              className="w-full shadow-glow"
+              shimmerColor="#f59e0b"
+              background="var(--accent-gradient)"
             >
-              <Play className="w-5 h-5 mr-2" fill="currentColor" /> START FULL GUIDED JOURNEY
-            </button>
+              <div className="flex items-center text-white font-black">
+                <Play className="w-5 h-5 mr-2" fill="currentColor" /> START FULL GUIDED JOURNEY
+              </div>
+            </ShimmerButton>
           </div>
         </div>
 

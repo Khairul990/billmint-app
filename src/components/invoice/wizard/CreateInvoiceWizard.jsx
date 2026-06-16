@@ -5,6 +5,7 @@ import { useInvoice } from '../../../contexts/InvoiceContext';
 import { toast } from 'react-hot-toast';
 import { auth } from '../../../services/firebaseConfig';
 import { generateInvoiceNumber } from '../../../services/invoiceNumberService';
+import { ShimmerButton } from '../../magicui/shimmer-button';
 
 import CustomerSelectionStep from './steps/CustomerSelectionStep';
 import ItemsSelectionStep from './steps/ItemsSelectionStep';
@@ -265,19 +266,27 @@ const CreateInvoiceWizard = ({ onSaveInvoice, onDownloadPDF, setCurrentTab, cust
           </button>
           
           {currentStep < 4 ? (
-            <button
+            <ShimmerButton
               onClick={handleNext}
-              className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-[image:var(--accent-gradient)] text-theme-button-text hover:opacity-90 rounded-xl font-black shadow-lg shadow-theme-glow transition-all min-h-[48px]"
+              className="w-full md:w-auto min-h-[48px] shadow-lg shadow-theme-glow"
+              shimmerColor="#ffffff"
+              background="var(--accent-gradient)"
             >
-              Next <ArrowRight className="w-5 h-5" />
-            </button>
+              <div className="flex items-center gap-2 text-theme-button-text font-black">
+                Next <ArrowRight className="w-5 h-5" />
+              </div>
+            </ShimmerButton>
           ) : (
-            <button
+            <ShimmerButton
               onClick={() => handleSave('Pending')}
-              className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-theme-success text-white hover:opacity-90 rounded-xl font-black shadow-lg transition-all min-h-[48px]"
+              className="w-full md:w-auto min-h-[48px] shadow-lg"
+              shimmerColor="#ffffff"
+              background="var(--status-success)"
             >
-              <Save className="w-5 h-5" /> Finalize Invoice
-            </button>
+              <div className="flex items-center gap-2 text-white font-black">
+                <Save className="w-5 h-5" /> Finalize Invoice
+              </div>
+            </ShimmerButton>
           )}
         </div>
       </div>

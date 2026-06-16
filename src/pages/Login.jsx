@@ -23,6 +23,7 @@ import {
   UserRound,
   Zap,
 } from "lucide-react";
+import { ShimmerButton } from '../components/magicui/shimmer-button';
 
 import { auth, firebaseReady, db } from '../services/firebaseConfig';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
@@ -1070,18 +1071,14 @@ function LoginPanel({ onLoginSuccess }) {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.5 }}>
-            <motion.button
-              whileHover={{ y: -2, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <ShimmerButton
               type="submit"
               disabled={isSigningIn}
-              className="group relative flex h-[52px] w-full items-center justify-center overflow-hidden rounded-[22px] border-0 bg-[image:var(--accent-gradient)] px-6 font-black text-theme-primary shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-2xl transition-all disabled:cursor-not-allowed disabled:opacity-80 hover:shadow-[0_0_35px_var(--accent-glow)]"
+              className="w-full h-[52px]"
+              shimmerColor="#ffffff"
+              background="var(--accent-gradient)"
             >
-              <span className="absolute inset-[1px] rounded-[21px] bg-gradient-to-b from-white/20 via-white/5 to-black/20 pointer-events-none" />
-              <span className="absolute left-4 right-4 top-1 h-5 rounded-full bg-white/20 blur-lg opacity-70 transition group-hover:opacity-100 pointer-events-none" />
-              <span className="absolute -left-24 top-0 h-full w-20 rotate-12 bg-white/30 blur-md transition-all duration-700 group-hover:left-[120%] pointer-events-none" />
-              
-              <span className="relative flex items-center gap-2 text-[15px] drop-shadow-[0_1px_8px_rgba(0,0,0,0.3)]">
+              <div className="flex items-center gap-2 text-[15px] font-black drop-shadow-[0_1px_8px_rgba(0,0,0,0.3)] text-theme-primary">
                 {isSigningIn ? (isLoginMode ? "Signing in..." : "Creating account...") : (isLoginMode ? "Sign In to Dashboard" : "Sign Up to Dashboard")}
                 {isSigningIn ? (
                   <motion.span
@@ -1092,8 +1089,8 @@ function LoginPanel({ onLoginSuccess }) {
                 ) : (
                   <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={18} />
                 )}
-              </span>
-            </motion.button>
+              </div>
+            </ShimmerButton>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.5 }} className="flex items-center gap-3">
