@@ -3,7 +3,7 @@ import { Beaker, Users, FileText, RefreshCw, Loader, AlertTriangle, Trash2, Vide
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { generateSmartDemoData } from '../../utils/demoDataGenerator';
-import { clearDemoData } from '../../utils/demoDataManager';
+import { clearDemoData, generateFakeAdminData } from '../../utils/demoDataManager';
 import { ShimmerButton } from '../../components/magicui/shimmer-button';
 
 const OwnerTestLab = () => {
@@ -19,6 +19,7 @@ const OwnerTestLab = () => {
   const [previewMode, setPreviewMode] = useState(false);
   const [demoActive, setDemoActive] = useState(false);
   const [demoPayments, setDemoPayments] = useState([]);
+  const [adminSimActive, setAdminSimActive] = useState(false);
 
   const loadStats = () => {
     const customers = JSON.parse(localStorage.getItem('billqyro_demo_customers') || '[]');
@@ -29,6 +30,7 @@ const OwnerTestLab = () => {
     const isActive = localStorage.getItem('billqyro_demo_session_active') === 'true';
     const videoCreator = localStorage.getItem('billqyro_demo_video_creator') === 'true';
     const payments = JSON.parse(localStorage.getItem('billqyro_demo_payments') || '[]');
+    const adminData = localStorage.getItem('billqyro_demo_admin_data');
 
     setStats({
       customers: customers.length,
@@ -40,6 +42,7 @@ const OwnerTestLab = () => {
     });
     setDemoActive(isActive);
     setDemoPayments(payments);
+    setAdminSimActive(!!adminData);
   };
 
   useEffect(() => {
@@ -143,6 +146,26 @@ const OwnerTestLab = () => {
     localStorage.setItem('billqyro_demo_payments', JSON.stringify(updated));
     setDemoPayments(updated);
     toast.success(`Demo proof ${action === 'approved' ? 'approved' : 'rejected'}.`);
+  };
+
+  const startFakeUserSimulation = (type) => {
+    toast.success(`Starting Fake ${type} User Simulation...`);
+    // Store type in local storage so that when app redirects it pretends to be this user
+    localStorage.setItem('billqyro_demo_session_active', 'true');
+    localStorage.setItem('billqyro_demo_simulation_type', type);
+    window.location.href = '/';
+  };
+
+  const handleAdminPanelSimulator = () => {
+    if (adminSimActive) {
+      localStorage.removeItem('billqyro_demo_admin_data');
+      toast.success('Admin Panel Simulator Cleared');
+      setAdminSimActive(false);
+    } else {
+      generateFakeAdminData();
+      toast.success('Fake Admin Data Generated! Go to Dashboard to see it.');
+      setAdminSimActive(true);
+    }
   };
 
   const personas = [
@@ -383,6 +406,49 @@ const OwnerTestLab = () => {
             </div>
           </div>
         )}
+
+        {/* Fake Real User Simulation Lab */}
+        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-blue-500/30 mt-6">
+          <h3 className="text-white font-bold text-lg mb-4 flex items-center">
+            <Users className="w-5 h-5 mr-2 text-blue-400" /> Fake Real User Simulation Lab
+          </h3>
+          <p className="text-slate-400 text-sm mb-4">Login as different user types to safely test the UI flow and feature restrictions.</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {['Free User', 'Pay Per Bill', 'Premium Monthly', 'Pro Plus Lifetime', 'Trial User', 'Locked User'].map(type => (
+              <button 
+                key={type}
+                onClick={() => startFakeUserSimulation(type)}
+                className="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-sm border border-slate-700 transition-colors"
+              >
+                Login as {type}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Admin Panel Demo Simulator */}
+        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-purple-500/30 mt-6">
+          <h3 className="text-white font-bold text-lg mb-4 flex items-center">
+            <BarChart2 className="w-5 h-5 mr-2 text-purple-400" /> Admin Panel Demo Simulator
+          </h3>
+          <p className="text-slate-400 text-sm mb-4">Generate 500+ fake users, revenue data, and metrics to see how the Admin Dashboard looks with real usage data.</p>
+          
+          <button 
+            onClick={handleAdminPanelSimulator}
+            className={`px-6 py-3 font-bold rounded-xl flex items-center transition-colors ${adminSimActive ? 'bg-rose-500 hover:bg-rose-600 text-white' : 'bg-purple-600 hover:bg-purple-500 text-white'}`}
+          >
+            <BarChart2 className="w-5 h-5 mr-2" /> 
+            {adminSimActive ? 'Clear Fake Admin Data' : 'Generate Fake Admin Data'}
+          </button>
+          
+          {adminSimActive && (
+            <div className="mt-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700">
+              <p className="text-slate-300 text-sm font-bold">✓ 500 fake users created</p>
+              <p className="text-slate-300 text-sm font-bold">✓ ₹1,245,000 fake revenue injected</p>
+              <p className="text-emerald-400 text-sm font-bold mt-2">Go to Admin Dashboard to preview the data!</p>
+            </div>
+          )}
+        </div>
 
       </div>
     </motion.div>

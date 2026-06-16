@@ -92,6 +92,7 @@ const AdminPanel = React.lazy(() => import('./pages/admin/AdminPanel'));
 const PremiumPricing = React.lazy(() => import('./pages/PremiumPricing'));
 const PaymentDueScreen = React.lazy(() => import('./pages/PaymentDueScreen'));
 import QuickBillModal from './components/QuickBillModal';
+import AdminPINLogin from './pages/admin/AdminPINLogin';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -148,6 +149,9 @@ class ErrorBoundary extends React.Component {
 
 const AdminRouteGuard = ({ setCurrentTab, children }) => {
   const session = getAuthSession();
+  const [isUnlocked, setIsUnlocked] = useState(
+    localStorage.getItem('billqyro_admin_unlocked') === 'true'
+  );
   
   useEffect(() => {
     if (!isAdminUser(session)) {
@@ -158,6 +162,15 @@ const AdminRouteGuard = ({ setCurrentTab, children }) => {
 
   if (!isAdminUser(session)) {
     return <div className="flex h-screen bg-theme-main items-center justify-center"><ClassicLoader /></div>;
+  }
+
+  if (!isUnlocked) {
+    return (
+      <AdminPINLogin 
+        onPinSuccess={() => setIsUnlocked(true)} 
+        onCancel={() => setCurrentTab('dashboard')} 
+      />
+    );
   }
 
   return children;

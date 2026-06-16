@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Store, CheckCircle2, ChevronRight, ChevronLeft, Building2, User, Paintbrush, Play,
   ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText,
-  CreditCard, ShieldCheck, Globe, Coffee, Settings
+  CreditCard, ShieldCheck, Globe, Coffee, Settings, Info
 } from 'lucide-react';
 import { BUSINESS_PRESETS, ALL_MODULES } from '../../config/businessPresets';
+import { getAuthSession } from '../../services/dbEngine';
 
 const iconMap = {
   ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText, Store, Palette: Paintbrush, Coffee, Settings
@@ -18,6 +19,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
     enabledModules: [],
     businessName: businessSettings.businessName || '',
     ownerName: businessSettings.ownerName || '',
+    ownerEmail: getAuthSession()?.userEmail || '',
     phone: businessSettings.phone || '',
     address: businessSettings.address || '',
     theme: 'titanium-blue',
@@ -130,23 +132,20 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
         <div className="w-16 h-16 bg-theme-accent/10 text-theme-accent rounded-3xl mx-auto flex items-center justify-center mb-6">
           <User className="w-8 h-8" />
         </div>
-        <h1 className="text-3xl font-black text-theme-primary tracking-tight">Business Details</h1>
-        <p className="text-sm font-bold text-theme-muted">Tell us about {selectedPreset.label} (Optional)</p>
+        <h1 className="text-3xl font-black text-theme-primary tracking-tight">Profile & Business Details</h1>
+        <p className="text-sm font-bold text-theme-muted">Please provide your details below.</p>
       </div>
 
       <div className="space-y-5 bg-theme-card p-6 rounded-3xl border border-theme-border-soft shadow-premium">
-        <div>
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Business Name</label>
-          <input
-            type="text"
-            value={formData.businessName}
-            onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-            placeholder={`e.g. My ${selectedPreset.label}`}
-            className="w-full bg-theme-app border border-theme-border-soft rounded-xl p-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
-          />
+        <div className="p-4 bg-theme-surface rounded-xl border border-theme-border-soft mb-2 flex gap-3 items-start">
+          <ShieldCheck className="w-5 h-5 text-theme-accent shrink-0 mt-0.5" />
+          <p className="text-xs text-theme-muted font-bold leading-relaxed">
+            Your name, phone number and email are collected for account verification, support, payment review and platform safety.
+          </p>
         </div>
+
         <div>
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Owner Name</label>
+          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Full Name <span className="text-theme-accent">*</span></label>
           <input
             type="text"
             value={formData.ownerName}
@@ -156,12 +155,31 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
           />
         </div>
         <div>
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Phone Number</label>
+          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Phone Number <span className="text-theme-accent">*</span></label>
           <input
             type="tel"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             placeholder="e.g. +91 98765 43210"
+            className="w-full bg-theme-app border border-theme-border-soft rounded-xl p-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Email Address (Auto-filled)</label>
+          <input
+            type="email"
+            value={formData.ownerEmail}
+            readOnly
+            className="w-full bg-theme-app border border-theme-border-soft rounded-xl p-4 text-sm font-bold text-theme-muted opacity-70 cursor-not-allowed focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Business Name (Optional)</label>
+          <input
+            type="text"
+            value={formData.businessName}
+            onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+            placeholder={`e.g. My ${selectedPreset.label}`}
             className="w-full bg-theme-app border border-theme-border-soft rounded-xl p-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
           />
         </div>
@@ -444,7 +462,11 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
           {step < 6 ? (
             <button 
               onClick={nextStep}
-              disabled={(step === 1 && !formData.businessType) || (step === 5 && !isAddWorkspaceMode && !formData.legalAgreed)}
+              disabled={
+                (step === 1 && !formData.businessType) || 
+                (step === 2 && !isAddWorkspaceMode && (!formData.ownerName.trim() || !formData.phone.trim())) ||
+                (step === 5 && !isAddWorkspaceMode && !formData.legalAgreed)
+              }
               className="flex-1 py-4 bg-[image:var(--accent-gradient)] text-white font-black rounded-2xl shadow-premium flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               Continue <ChevronRight className="w-5 h-5" />

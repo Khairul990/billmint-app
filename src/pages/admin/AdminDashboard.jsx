@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, FileText, IndianRupee, Activity, Crown, Store, Clock, Database, ShieldAlert, CheckCircle2, AlertTriangle, ServerCrash, RefreshCw, CreditCard, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getFakeAdminData } from '../../utils/demoDataManager';
 
 const AdminDashboard = () => {
+  const [fakeData, setFakeData] = useState(null);
+
+  useEffect(() => {
+    const checkData = () => {
+      setFakeData(getFakeAdminData());
+    };
+    checkData();
+    window.addEventListener('storage', checkData);
+    return () => window.removeEventListener('storage', checkData);
+  }, []);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -37,6 +49,16 @@ const AdminDashboard = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
+        {fakeData && (
+          <div className="md:col-span-2 lg:col-span-3 bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl flex items-center mb-2">
+            <AlertTriangle className="w-5 h-5 text-amber-500 mr-3" />
+            <div>
+              <p className="text-amber-500 font-bold">Admin Panel Demo Simulator Active</p>
+              <p className="text-amber-500/70 text-sm">Showing simulated large-scale data for Owner Test Lab preview.</p>
+            </div>
+          </div>
+        )}
+
         <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-400"></div>
           <div className="flex justify-between items-start mb-4">
@@ -45,7 +67,7 @@ const AdminDashboard = () => {
             </div>
             <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">+12%</span>
           </div>
-          <div className="text-4xl font-black text-white">1,248</div>
+          <div className="text-4xl font-black text-white">{fakeData ? fakeData.totalUsers : '1,248'}</div>
           <div className="text-slate-500 text-xs mt-2 font-medium">vs last month</div>
         </motion.div>
         
@@ -81,7 +103,7 @@ const AdminDashboard = () => {
             </div>
             <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">+5%</span>
           </div>
-          <div className="text-4xl font-black text-white">312</div>
+          <div className="text-4xl font-black text-white">{fakeData ? fakeData.premiumUsers : '312'}</div>
           <div className="text-slate-500 text-xs mt-2 font-medium">Conversion rate 25%</div>
         </motion.div>
 
@@ -93,7 +115,7 @@ const AdminDashboard = () => {
             </div>
             <span className="px-2 py-1 bg-rose-500/10 text-rose-400 text-xs font-bold rounded-lg border border-rose-500/20">Action Req</span>
           </div>
-          <div className="text-4xl font-black text-white">14</div>
+          <div className="text-4xl font-black text-white">{fakeData ? fakeData.pendingPayments : '14'}</div>
           <div className="text-slate-500 text-xs mt-2 font-medium">Proofs await review</div>
         </motion.div>
 
@@ -105,7 +127,7 @@ const AdminDashboard = () => {
             </div>
             <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">+18%</span>
           </div>
-          <div className="text-4xl font-black text-white">₹1.56L</div>
+          <div className="text-4xl font-black text-white">{fakeData ? `₹${(fakeData.fakeRevenue / 100000).toFixed(2)}L` : '₹1.56L'}</div>
           <div className="text-slate-500 text-xs mt-2 font-medium">Current MRR</div>
         </motion.div>
 

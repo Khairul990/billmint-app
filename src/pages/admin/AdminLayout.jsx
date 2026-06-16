@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAuthSession } from '../../services/dbEngine';
 import { auth } from '../../services/firebaseConfig';
-import { Lock, ShieldAlert, ArrowLeft, Activity, Users, Settings as SettingsIcon, CreditCard, ShieldCheck, Menu, X, User } from 'lucide-react';
+import { Lock, ShieldAlert, ArrowLeft, Activity, Users, Settings as SettingsIcon, CreditCard, ShieldCheck, Menu, X, User, Crown, ToggleRight, Database, ListPlus, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTab }) => {
@@ -13,82 +13,26 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
   const adminMenu = [
     { id: 'dashboard', label: 'Dashboard', icon: <Activity className="w-5 h-5" /> },
     { id: 'users', label: 'User Manager', icon: <Users className="w-5 h-5" /> },
+    { id: 'premium', label: 'Premium Control', icon: <Crown className="w-5 h-5" /> },
     { id: 'payments', label: 'Payment Proofs', icon: <CreditCard className="w-5 h-5" /> },
     { id: 'settings', label: 'Global Settings', icon: <SettingsIcon className="w-5 h-5" /> },
+    { id: 'features', label: 'Feature Switch', icon: <ToggleRight className="w-5 h-5" /> },
     { id: 'lab', label: 'Owner Test Lab', icon: <ShieldAlert className="w-5 h-5" /> },
     { id: 'health', label: 'App Health', icon: <Activity className="w-5 h-5" /> },
-    { id: 'security', label: 'Security Logs', icon: <ShieldCheck className="w-5 h-5" /> },
+    { id: 'security', label: 'Security Center', icon: <ShieldCheck className="w-5 h-5" /> },
+    { id: 'backup', label: 'Backup Center', icon: <Database className="w-5 h-5" /> },
+    { id: 'changelog', label: 'Changelog Manager', icon: <ListPlus className="w-5 h-5" /> },
+    { id: 'support', label: 'Support & Features', icon: <MessageSquare className="w-5 h-5" /> },
   ];
 
-  useEffect(() => {
-    // Basic session validation
-    const session = getAuthSession();
-    if (session && session.userEmail === 'khairmurafiq@gmail.com') { // Replace with actual logic
-      if (sessionStorage.getItem('billqyro_admin_unlocked') === 'true') {
-        setIsAuthorized(true);
-      }
-    } else {
-      setIsAuthorized(false);
-    }
-  }, []);
-
-  const handlePinSubmit = (e) => {
-    e.preventDefault();
-    if (pin === '1234') {
-      sessionStorage.setItem('billqyro_admin_unlocked', 'true');
-      setIsAuthorized(true);
-    } else {
-      setPinError('Invalid Security PIN');
-    }
-  };
+  // The PIN check is now handled upstream by App.jsx -> AdminPINLogin.jsx
+  // So we don't need the internal lock screen here. IsAuthorized logic is removed to avoid conflicts.
+  // We can just rely on the parent wrapper guarding access.
 
   const handleNavClick = (id) => {
     setActiveAdminTab(id);
     setIsMobileMenuOpen(false);
   };
-
-  if (!isAuthorized && sessionStorage.getItem('billqyro_admin_unlocked') !== 'true') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-[#0f172a] to-slate-900 flex items-center justify-center p-6 font-sans">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="max-w-sm w-full bg-[#1e293b]/80 backdrop-blur-xl p-8 rounded-3xl border border-slate-700 shadow-2xl text-center"
-        >
-          <div className="w-16 h-16 bg-rose-500/10 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
-            <Lock className="w-8 h-8" />
-          </div>
-          <h2 className="text-xl font-bold text-white mb-2">Owner Control Room</h2>
-          <p className="text-xs text-slate-400 mb-6">Secure session requires PIN verification.</p>
-          
-          <form onSubmit={handlePinSubmit}>
-            <input
-              type="password"
-              placeholder="••••"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              className="w-full bg-[#0f172a]/50 border border-slate-700 text-white p-4 rounded-xl text-center text-2xl tracking-[0.5em] mb-4 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all"
-              autoFocus
-            />
-            {pinError && <p className="text-rose-500 text-xs mb-4">{pinError}</p>}
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-rose-500/20"
-            >
-              Verify Access
-            </button>
-          </form>
-          
-          <button
-            onClick={() => setCurrentTab('dashboard')}
-            className="mt-6 text-slate-500 text-xs hover:text-slate-300 font-medium flex items-center justify-center mx-auto transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-1" /> Return to BillQyro
-          </button>
-        </motion.div>
-      </div>
-    );
-  }
 
   const SidebarContent = () => (
     <>
