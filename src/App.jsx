@@ -4,8 +4,6 @@ import { toast, Toaster } from 'react-hot-toast';
 import { useThemeEngine } from './hooks/useThemeEngine';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Lock, AlertTriangle } from 'lucide-react';
-import { EmpireLogo, AnimatedBorderTrail } from './components/BrandSystem';
-import VideoCreatorMask from './components/VideoCreatorMask';
 import { 
   getDemoInvoices, getDemoCustomers, getDemoProducts, getDemoPayments, getDemoReports, 
   saveDemoInvoice, deleteDemoInvoice, saveDemoCustomer, saveDemoProduct, isDemoModeActive,
