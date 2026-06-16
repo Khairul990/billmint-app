@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Beaker, Users, FileText, RefreshCw, Loader, AlertTriangle, Trash2, Video, BarChart2, CheckCircle2, Play, ArrowLeft, Power } from 'lucide-react';
+import { Beaker, Users, FileText, RefreshCw, Loader, AlertTriangle, Trash2, Video, BarChart2, CheckCircle2, Play, ArrowLeft, Power, Box, ArrowRight, Eye, ShieldCheck, XCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 
@@ -8,41 +8,101 @@ const OwnerTestLab = () => {
   const [stats, setStats] = useState({
     customers: 0,
     invoices: 0,
+    products: 0,
     reports: false,
-    persona: 'None'
+    persona: 'None',
+    videoCreator: false
   });
   const [previewMode, setPreviewMode] = useState(false);
   const [demoActive, setDemoActive] = useState(false);
+  const [demoPayments, setDemoPayments] = useState([]);
 
-  // Load initial stats from local storage
   const loadStats = () => {
-    const customers = JSON.parse(localStorage.getItem('billqyro_testlab_customers') || '[]');
-    const invoices = JSON.parse(localStorage.getItem('billqyro_testlab_invoices') || '[]');
-    const reports = localStorage.getItem('billqyro_testlab_reports') !== null;
-    const persona = localStorage.getItem('billqyro_testlab_persona') || 'None';
+    const customers = JSON.parse(localStorage.getItem('billqyro_demo_customers') || '[]');
+    const invoices = JSON.parse(localStorage.getItem('billqyro_demo_invoices') || '[]');
+    const products = JSON.parse(localStorage.getItem('billqyro_demo_products') || '[]');
+    const reports = localStorage.getItem('billqyro_demo_reports') !== null;
+    const persona = localStorage.getItem('billqyro_demo_session_persona') || 'None';
     const isActive = localStorage.getItem('billqyro_demo_session_active') === 'true';
+    const videoCreator = localStorage.getItem('billqyro_demo_video_creator') === 'true';
+    const payments = JSON.parse(localStorage.getItem('billqyro_demo_payments') || '[]');
 
     setStats({
       customers: customers.length,
       invoices: invoices.length,
+      products: products.length,
       reports,
-      persona
+      persona,
+      videoCreator
     });
     setDemoActive(isActive);
+    setDemoPayments(payments);
   };
 
   useEffect(() => {
     loadStats();
-    
     const handleStorageChange = () => loadStats();
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  const generateDemoCustomers = () => {
+  const getPersonaItems = (persona) => {
+    switch (persona) {
+      case 'Doctor': return {
+        productNames: ['Consultation Fee', 'Medicine Follow-up', 'Blood Test', 'Full Body Checkup'],
+        customerPrefix: 'Patient'
+      };
+      case 'Teacher': return {
+        productNames: ['Monthly Tuition Fee', 'Registration Fee', 'Study Material', 'Exam Fee'],
+        customerPrefix: 'Student'
+      };
+      case 'Embroidery': return {
+        productNames: ['Custom Stitching', 'Bridal Design', 'Thread Work', 'Pattern Digitizing'],
+        customerPrefix: 'Client'
+      };
+      case 'Tailor': return {
+        productNames: ['Suit Alteration', 'Custom Shirt', 'Wedding Dress', 'Pant Stitching'],
+        customerPrefix: 'Client'
+      };
+      case 'Retail': return {
+        productNames: ['Cotton T-Shirt', 'Denim Jeans', 'Leather Belt', 'Sneakers'],
+        customerPrefix: 'Customer'
+      };
+      case 'Service': return {
+        productNames: ['AC Repair', 'Laptop Servicing', 'Plumbing Job', 'Electrical Repair'],
+        customerPrefix: 'Client'
+      };
+      case 'Freelancer': return {
+        productNames: ['Website Design', 'SEO Optimization', 'Logo Creation', 'Consulting Hour'],
+        customerPrefix: 'Client'
+      };
+      default: return {
+        productNames: ['Premium Service', 'Basic Package', 'Consultation', 'Add-on Support'],
+        customerPrefix: 'Customer'
+      };
+    }
+  };
+
+  const generateDemoData = async () => {
+    setIsGenerating('all');
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    const personaData = getPersonaItems(stats.persona);
+
+    // 1. Generate Products
+    const fakeProducts = personaData.productNames.map((name, i) => ({
+      id: `test-prod-${Date.now()}-${i}`,
+      name: name,
+      price: Math.floor(500 + Math.random() * 5000),
+      isTestData: true,
+      createdAt: new Date().toISOString()
+    }));
+    localStorage.setItem('billqyro_demo_products', JSON.stringify(fakeProducts));
+
+    // 2. Generate Customers
     const fakeCustomers = Array.from({ length: 50 }).map((_, i) => ({
       id: `test-cust-${Date.now()}-${i}`,
-      name: `Demo Customer ${i + 1}`,
+      name: `${personaData.customerPrefix} ${Math.floor(Math.random() * 900) + 100}`,
       phone: `+91 90000${Math.floor(10000 + Math.random() * 90000)}`,
       email: `demo${i+1}@example.com`,
       address: `123 Demo St, City ${i % 5}`,
@@ -50,90 +110,77 @@ const OwnerTestLab = () => {
       isTestData: true,
       createdAt: new Date().toISOString()
     }));
+    localStorage.setItem('billqyro_demo_customers', JSON.stringify(fakeCustomers));
 
-    localStorage.setItem('billqyro_testlab_customers', JSON.stringify(fakeCustomers));
-    loadStats();
-  };
-
-  const generateDemoInvoices = () => {
-    const existingCustomers = JSON.parse(localStorage.getItem('billqyro_testlab_customers') || '[]');
-    
+    // 3. Generate Invoices
     const fakeInvoices = Array.from({ length: 100 }).map((_, i) => {
       const isPaid = Math.random() > 0.4;
-      const total = Math.floor(500 + Math.random() * 5000);
+      const product = fakeProducts[i % fakeProducts.length];
+      const total = product.price * (Math.floor(Math.random() * 3) + 1);
       return {
         id: `test-inv-${Date.now()}-${i}`,
         invoiceNumber: `DEMO-${1000 + i}`,
-        customerId: existingCustomers.length > 0 ? existingCustomers[i % existingCustomers.length].id : 'unlinked',
-        customerName: existingCustomers.length > 0 ? existingCustomers[i % existingCustomers.length].name : 'Walk-in Customer',
+        customerId: fakeCustomers[i % fakeCustomers.length].id,
+        customerName: fakeCustomers[i % fakeCustomers.length].name,
         totalAmount: total,
         paidAmount: isPaid ? total : (Math.random() > 0.5 ? Math.floor(total / 2) : 0),
         status: isPaid ? 'paid' : (Math.random() > 0.5 ? 'partial' : 'unpaid'),
         date: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toISOString(),
+        items: [{ name: product.name, price: product.price, quantity: total/product.price }],
         isTestData: true
       };
     });
-
-    localStorage.setItem('billqyro_testlab_invoices', JSON.stringify(fakeInvoices));
+    localStorage.setItem('billqyro_demo_invoices', JSON.stringify(fakeInvoices));
     
     // Auto-generate reports
-    let totalSales = 0;
-    let pendingDue = 0;
-    let paidAmount = 0;
+    let totalSales = 0, pendingDue = 0, paidAmount = 0;
     fakeInvoices.forEach(inv => {
       totalSales += inv.totalAmount;
       paidAmount += inv.paidAmount;
       pendingDue += (inv.totalAmount - inv.paidAmount);
     });
-    const reportData = {
-      totalSales: totalSales,
-      pendingDue: pendingDue,
-      paidAmount: paidAmount,
-      customerCount: existingCustomers.length || 50,
-      invoiceCount: fakeInvoices.length || 100,
-      generatedAt: new Date().toISOString(),
-      isTestData: true
-    };
-    localStorage.setItem('billqyro_testlab_reports', JSON.stringify(reportData));
+    localStorage.setItem('billqyro_demo_reports', JSON.stringify({
+      totalSales, pendingDue, paidAmount,
+      customerCount: 50, invoiceCount: 100,
+      generatedAt: new Date().toISOString()
+    }));
     
     loadStats();
+    toast.success('Complete realistic demo sandbox generated!', { icon: '🧪' });
+    setIsGenerating('');
   };
 
   const setPersona = (personaName) => {
-    localStorage.setItem('billqyro_testlab_persona', personaName);
+    localStorage.setItem('billqyro_demo_session_persona', personaName);
     loadStats();
     toast.success(`${personaName} demo mode activated!`, { icon: '✨' });
   };
 
-  const clearTestData = () => {
-    if (window.confirm("Are you sure you want to delete all test lab data? Production data will NOT be affected.")) {
-      localStorage.removeItem('billqyro_testlab_customers');
-      localStorage.removeItem('billqyro_testlab_invoices');
-      localStorage.removeItem('billqyro_testlab_reports');
-      localStorage.removeItem('billqyro_testlab_persona');
-      localStorage.removeItem('billqyro_demo_session_active');
-      loadStats();
-      toast.success('Test lab data cleared.', { icon: '🧹' });
-      // Notify other tabs/components
-      window.dispatchEvent(new Event('storage'));
+  const toggleVideoCreatorMode = () => {
+    if (stats.videoCreator) {
+      localStorage.removeItem('billqyro_demo_video_creator');
+      toast.success('Video Creator Mode disabled.');
+    } else {
+      localStorage.setItem('billqyro_demo_video_creator', 'true');
+      toast.success('Video Creator Mode enabled. Sensitive info will be masked.', { icon: '🎥' });
     }
+    loadStats();
   };
 
-  const handleAction = async (type) => {
-    setIsGenerating(type);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    if (type === 'customers') {
-      generateDemoCustomers();
-      toast.success('50 fake customers generated!', { icon: '🧪' });
-    } else if (type === 'invoices') {
-      generateDemoInvoices();
-      toast.success('100 fake invoices generated!', { icon: '🧪' });
-    } else if (type === 'clear') {
-      clearTestData();
+  const clearTestData = () => {
+    if (window.confirm("Are you sure you want to delete all demo sandbox data? Production data is strictly isolated and will NOT be affected.")) {
+      localStorage.removeItem('billqyro_demo_customers');
+      localStorage.removeItem('billqyro_demo_invoices');
+      localStorage.removeItem('billqyro_demo_products');
+      localStorage.removeItem('billqyro_demo_reports');
+      localStorage.removeItem('billqyro_demo_payments');
+      localStorage.removeItem('billqyro_demo_session_persona');
+      localStorage.removeItem('billqyro_demo_session_active');
+      localStorage.removeItem('billqyro_demo_video_creator');
+      loadStats();
+      toast.success('Demo sandbox cleared.', { icon: '🧹' });
+      window.dispatchEvent(new Event('storage'));
     }
-    
-    setIsGenerating('');
   };
 
   const toggleDemoSession = () => {
@@ -144,10 +191,19 @@ const OwnerTestLab = () => {
     } else {
       localStorage.setItem('billqyro_demo_session_active', 'true');
       setDemoActive(true);
-      toast.success('Demo session started. Real data is safe.', { icon: '🎬' });
+      toast.success('Demo session started. Real data is completely hidden.', { icon: '🎬' });
     }
-    // Dispatch event so main app catches it
     window.dispatchEvent(new Event('storage'));
+  };
+
+  const handleDemoProof = (id, action) => {
+    const updated = demoPayments.map(p => {
+      if (p.id === id) p.status = action;
+      return p;
+    });
+    localStorage.setItem('billqyro_demo_payments', JSON.stringify(updated));
+    setDemoPayments(updated);
+    toast.success(`Demo proof ${action === 'approved' ? 'approved' : 'rejected'}.`);
   };
 
   const personas = [
@@ -160,80 +216,14 @@ const OwnerTestLab = () => {
     { name: 'Freelancer', icon: '💻', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
   ];
 
-  // Helper for persona labels
-  const getLabels = (persona) => {
-    switch (persona) {
-      case 'Tailor': return { rev: 'Orders', cust: 'Measurements', inv: 'Delivery' };
-      case 'Embroidery': return { rev: 'Designs', cust: 'Orders', inv: 'Delivery' };
-      case 'Doctor': return { rev: 'Bills', cust: 'Patients', inv: 'Appointments' };
-      case 'Teacher': return { rev: 'Fees', cust: 'Students', inv: 'Classes' };
-      case 'Retail': return { rev: 'Sales', cust: 'Customers', inv: 'Products' };
-      case 'Service': return { rev: 'Jobs', cust: 'Clients', inv: 'Devices' };
-      default: return { rev: 'Revenue', cust: 'Customers', inv: 'Invoices' };
-    }
-  };
-  const labels = getLabels(stats.persona);
-
-  if (previewMode) {
-    const reportData = JSON.parse(localStorage.getItem('billqyro_testlab_reports') || '{"totalSales":0,"pendingDue":0,"paidAmount":0,"customerCount":0,"invoiceCount":0}');
-    return (
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
-        <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl">
-          <div>
-            <h3 className="text-emerald-400 font-bold flex items-center">
-              <Play className="w-4 h-4 mr-2" /> Live Demo Preview
-            </h3>
-            <p className="text-emerald-400/70 text-sm">Rendering static UI from local test lab data.</p>
-          </div>
-          <button 
-            onClick={() => setPreviewMode(false)}
-            className="flex items-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" /> Exit Preview
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-[#1e293b]/60 p-6 rounded-2xl border border-slate-700/50">
-            <p className="text-slate-400 font-medium mb-1">Total {labels.rev}</p>
-            <h2 className="text-3xl font-black text-white">₹{reportData.totalSales.toLocaleString()}</h2>
-          </div>
-          <div className="bg-[#1e293b]/60 p-6 rounded-2xl border border-slate-700/50">
-            <p className="text-slate-400 font-medium mb-1">Total Collected</p>
-            <h2 className="text-3xl font-black text-emerald-400">₹{reportData.paidAmount.toLocaleString()}</h2>
-          </div>
-          <div className="bg-[#1e293b]/60 p-6 rounded-2xl border border-slate-700/50">
-            <p className="text-slate-400 font-medium mb-1">Pending Due</p>
-            <h2 className="text-3xl font-black text-rose-400">₹{reportData.pendingDue.toLocaleString()}</h2>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-[#1e293b]/60 p-6 rounded-2xl border border-slate-700/50 text-center">
-             <h3 className="text-4xl font-black text-blue-400">{reportData.customerCount}</h3>
-             <p className="text-slate-400 font-medium mt-2">Fake {labels.cust}</p>
-          </div>
-          <div className="bg-[#1e293b]/60 p-6 rounded-2xl border border-slate-700/50 text-center">
-             <h3 className="text-4xl font-black text-purple-400">{reportData.invoiceCount}</h3>
-             <p className="text-slate-400 font-medium mt-2">Fake {labels.inv}</p>
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="space-y-8 pb-10"
-    >
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white tracking-tight flex items-center">
             <Beaker className="w-6 h-6 mr-3 text-rose-500" /> Owner Test Lab
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Generate sandbox data and manage demo sessions safely.</p>
+          <p className="text-slate-400 text-sm mt-1">Generate sandbox data, mock live links, and manage Demo Sessions safely.</p>
         </div>
       </div>
       
@@ -243,14 +233,13 @@ const OwnerTestLab = () => {
           <AlertTriangle className="w-5 h-5 text-rose-400" />
         </div>
         <div>
-          <h3 className="text-rose-400 font-bold mb-1">Generated demo data is for preview and video recording only.</h3>
+          <h3 className="text-rose-400 font-bold mb-1">Strict Isolation Enabled. Real User Data Is Never Touched.</h3>
           <p className="text-rose-400/70 text-sm">
-            It will not appear in real customer accounts. All generated data is kept in a separate local namespace and will not affect production systems.
+            Everything generated or modified during a Demo Session is stored entirely inside temporary local sandbox keys (`billqyro_demo_*`). Production Firestore writes are fully disabled during demo mode.
           </p>
         </div>
       </div>
 
-      {/* Step Guide UI */}
       <div className="space-y-6">
         
         {/* Step 1: Persona */}
@@ -258,7 +247,7 @@ const OwnerTestLab = () => {
           <div className="flex items-center mb-4">
             <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold mr-3">1</div>
             <h3 className="text-white font-bold text-lg flex items-center">
-              <Video className="w-5 h-5 mr-2 text-amber-500" /> Choose Persona
+               Choose Demo Persona
             </h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pl-11">
@@ -280,72 +269,59 @@ const OwnerTestLab = () => {
           </div>
         </div>
 
-        {/* Step 2 & 3: Generation */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold mr-3">2</div>
-                <h3 className="text-white font-bold text-lg">Generate Customers</h3>
-              </div>
-              <span className="text-slate-400 text-sm font-bold bg-slate-800 px-3 py-1 rounded-full">{stats.customers} ready</span>
-            </div>
-            <button 
-              onClick={() => handleAction('customers')}
-              disabled={isGenerating !== ''}
-              className="ml-11 w-[calc(100%-2.75rem)] py-3 bg-[#0f172a] hover:bg-blue-600 border border-blue-500/30 text-blue-400 hover:text-white text-sm font-bold rounded-xl flex justify-center items-center transition-all disabled:opacity-50"
-            >
-              {isGenerating === 'customers' ? <Loader className="w-4 h-4 animate-spin" /> : 'Generate 50 Fake Customers'}
-            </button>
-          </div>
-
-          <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold mr-3">3</div>
-                <h3 className="text-white font-bold text-lg">Generate Invoices</h3>
-              </div>
-              <span className="text-slate-400 text-sm font-bold bg-slate-800 px-3 py-1 rounded-full">{stats.invoices} ready</span>
-            </div>
-            <button 
-              onClick={() => handleAction('invoices')}
-              disabled={isGenerating !== '' || stats.customers === 0}
-              className="ml-11 w-[calc(100%-2.75rem)] py-3 bg-[#0f172a] hover:bg-emerald-600 border border-emerald-500/30 text-emerald-400 hover:text-white text-sm font-bold rounded-xl flex justify-center items-center transition-all disabled:opacity-50"
-            >
-              {isGenerating === 'invoices' ? <Loader className="w-4 h-4 animate-spin" /> : (stats.customers === 0 ? 'Need Customers First' : 'Generate 100 Fake Invoices')}
-            </button>
-          </div>
-        </div>
-
-        {/* Step 4: Preview Dashboard */}
+        {/* Step 2: Generation */}
         <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold mr-3">4</div>
-              <h3 className="text-white font-bold text-lg">Preview & Verify</h3>
+              <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold mr-3">2</div>
+              <h3 className="text-white font-bold text-lg">Generate Sandbox Data</h3>
             </div>
+            <span className="text-slate-400 text-sm font-bold bg-slate-800 px-3 py-1 rounded-full">
+              {stats.customers} Cust / {stats.products} Prod / {stats.invoices} Inv
+            </span>
           </div>
-          <p className="ml-11 text-slate-400 text-sm mb-4">Check how your demo data looks with the active persona labels.</p>
           <button 
-            onClick={() => setPreviewMode(true)}
-            disabled={!stats.reports}
-            className="ml-11 w-[calc(100%-2.75rem)] py-3 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-400 font-bold rounded-xl flex justify-center items-center transition-all disabled:opacity-50"
+            onClick={generateDemoData}
+            disabled={isGenerating !== ''}
+            className="ml-11 w-[calc(100%-2.75rem)] py-3 bg-[#0f172a] hover:bg-emerald-600 border border-emerald-500/30 text-emerald-400 hover:text-white text-sm font-bold rounded-xl flex justify-center items-center transition-all disabled:opacity-50"
           >
-            <BarChart2 className="w-4 h-4 mr-2" /> {stats.reports ? 'Preview Demo Dashboard' : 'Generate Data First'}
+            {isGenerating === 'all' ? <Loader className="w-4 h-4 animate-spin" /> : 'Generate Complete Persona Dataset'}
           </button>
         </div>
 
-        {/* Step 5: Demo Session Control */}
+        {/* Step 3: Video Creator Mode */}
+        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold mr-3">3</div>
+              <h3 className="text-white font-bold text-lg">Video Creator Mode</h3>
+            </div>
+            {stats.videoCreator && <span className="text-amber-500 text-xs font-bold border border-amber-500/30 bg-amber-500/10 px-2 py-1 rounded-full">Active</span>}
+          </div>
+          <p className="ml-11 text-slate-400 text-sm mb-4">
+            Masks your real email, phone, and business logos with generic placeholders for clean YouTube or Instagram recording.
+          </p>
+          <button 
+            onClick={toggleVideoCreatorMode}
+            className={`ml-11 w-[calc(100%-2.75rem)] py-3 font-bold rounded-xl flex justify-center items-center transition-all ${
+              stats.videoCreator ? 'bg-amber-500 hover:bg-amber-400 text-amber-950' : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-600'
+            }`}
+          >
+            <Video className="w-4 h-4 mr-2" /> {stats.videoCreator ? 'Disable Video Creator Mode' : 'Enable Video Creator Mode'}
+          </button>
+        </div>
+
+        {/* Step 4 & 5: Demo Session Control & Open */}
         <div className={`backdrop-blur-md p-6 rounded-3xl border transition-all ${demoActive ? 'bg-amber-500/10 border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.1)]' : 'bg-[#1e293b]/60 border-slate-700/50'}`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${demoActive ? 'bg-amber-500 text-amber-950' : 'bg-slate-700 text-white'}`}>5</div>
-              <h3 className={`${demoActive ? 'text-amber-400' : 'text-white'} font-bold text-lg`}>Demo Session</h3>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${demoActive ? 'bg-amber-500 text-amber-950' : 'bg-slate-700 text-white'}`}>4</div>
+              <h3 className={`${demoActive ? 'text-amber-400' : 'text-white'} font-bold text-lg`}>Global Demo Session</h3>
             </div>
-            {demoActive && <span className="bg-amber-500 text-amber-950 px-3 py-1 rounded-full text-xs font-bold animate-pulse">ACTIVE</span>}
+            {demoActive && <span className="bg-amber-500 text-amber-950 px-3 py-1 rounded-full text-xs font-bold animate-pulse">LIVE</span>}
           </div>
           <p className="ml-11 text-slate-400 text-sm mb-4">
-            Starting a demo session will temporarily override the entire app to show your generated fake data.
+            Start the session to globally isolate reads/writes, then open the workspace to test it like a real user.
           </p>
           <div className="ml-11 flex flex-col md:flex-row gap-4 w-[calc(100%-2.75rem)]">
             <button 
@@ -354,19 +330,66 @@ const OwnerTestLab = () => {
               className={`flex-1 py-3 font-bold rounded-xl flex justify-center items-center transition-all disabled:opacity-50 ${
                 demoActive 
                   ? 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30' 
-                  : 'bg-amber-500 hover:bg-amber-400 text-amber-950'
+                  : 'bg-emerald-500 hover:bg-emerald-400 text-emerald-950'
               }`}
             >
-              <Power className="w-4 h-4 mr-2" /> {demoActive ? 'End Demo Session' : 'Start Demo Session'}
+              <Power className="w-4 h-4 mr-2" /> {demoActive ? 'End Session' : 'Start Demo Session'}
             </button>
             <button 
-              onClick={() => handleAction('clear')}
-              className="px-6 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-bold rounded-xl flex justify-center items-center transition-all"
+              onClick={() => {
+                if (!demoActive) toast.error('Start Demo Session first!');
+                else window.location.href = '/';
+              }}
+              disabled={!demoActive}
+              className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl flex justify-center items-center transition-all disabled:opacity-50"
             >
-              <Trash2 className="w-4 h-4 mr-2" /> Clear Test Data
+              <Eye className="w-4 h-4 mr-2" /> Open Demo Workspace <ArrowRight className="w-4 h-4 ml-2" />
             </button>
           </div>
         </div>
+
+        {/* Step 6: Clear Safety */}
+        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
+          <div className="flex items-center mb-4">
+            <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold mr-3">5</div>
+            <h3 className="text-white font-bold text-lg">Clear Sandbox Data</h3>
+          </div>
+          <button 
+            onClick={clearTestData}
+            className="ml-11 px-6 py-3 w-[calc(100%-2.75rem)] bg-slate-800 hover:bg-rose-900/40 border border-slate-700 hover:border-rose-500/30 hover:text-rose-400 text-slate-300 font-bold rounded-xl flex justify-center items-center transition-all"
+          >
+            <Trash2 className="w-4 h-4 mr-2" /> Clear All Sandbox Data
+          </button>
+        </div>
+
+        {/* Demo Payment Proofs Review */}
+        {demoPayments.length > 0 && (
+          <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-blue-500/30">
+            <h3 className="text-blue-400 font-bold text-lg mb-4 flex items-center">
+              <ShieldCheck className="w-5 h-5 mr-2" /> Demo Payment Proofs (Isolated)
+            </h3>
+            <div className="space-y-3">
+              {demoPayments.map((payment) => (
+                <div key={payment.id} className="flex items-center justify-between p-4 bg-[#0f172a] rounded-xl border border-slate-700">
+                  <div>
+                    <p className="text-white font-bold">₹{payment.amount} <span className="text-slate-400 text-sm font-normal">via</span> {payment.method}</p>
+                    <p className="text-slate-400 text-xs mt-1">Inv: {payment.invoiceId} • UTR: {payment.utr}</p>
+                  </div>
+                  {payment.status === 'pending' ? (
+                    <div className="flex gap-2">
+                      <button onClick={() => handleDemoProof(payment.id, 'approved')} className="text-emerald-400 bg-emerald-400/10 hover:bg-emerald-400/20 px-3 py-1 rounded-md text-xs font-bold">Approve</button>
+                      <button onClick={() => handleDemoProof(payment.id, 'rejected')} className="text-rose-400 bg-rose-400/10 hover:bg-rose-400/20 px-3 py-1 rounded-md text-xs font-bold">Reject</button>
+                    </div>
+                  ) : (
+                    <span className={`text-xs font-bold px-2 py-1 rounded ${payment.status === 'approved' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-rose-400/10 text-rose-400'}`}>
+                      {payment.status.toUpperCase()}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
       </div>
     </motion.div>

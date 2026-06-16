@@ -164,9 +164,13 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!getAuthSession());
   const [syncStatus, setSyncStatus] = useState('Synced');
   const [isDemoSessionActive, setIsDemoSessionActive] = useState(false);
+  const [isVideoCreatorMode, setIsVideoCreatorMode] = useState(false);
 
   useEffect(() => {
-    const checkDemo = () => setIsDemoSessionActive(localStorage.getItem('billqyro_demo_session_active') === 'true');
+    const checkDemo = () => {
+      setIsDemoSessionActive(localStorage.getItem('billqyro_demo_session_active') === 'true');
+      setIsVideoCreatorMode(localStorage.getItem('billqyro_demo_video_creator') === 'true');
+    };
     checkDemo();
     window.addEventListener('storage', checkDemo);
     return () => window.removeEventListener('storage', checkDemo);
@@ -1416,9 +1420,12 @@ function App() {
           <motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="w-full h-full flex flex-col">
             {isDemoSessionActive && (
               <div className="bg-amber-500 text-amber-950 px-4 py-2 flex items-center justify-between font-bold text-sm z-[999999] relative shadow-md">
-                <span className="flex items-center"><AlertTriangle className="w-4 h-4 mr-2"/> DEMO SESSION ACTIVE — Real user data is hidden and safe.</span>
+                <span className="flex items-center">
+                  <AlertTriangle className="w-4 h-4 mr-2"/> DEMO MODE ACTIVE — Real data is safe. {isVideoCreatorMode && " | Video Creator Masking ON"}
+                </span>
                 <button onClick={() => {
                   localStorage.removeItem('billqyro_demo_session_active');
+                  localStorage.removeItem('billqyro_demo_video_creator');
                   window.location.reload();
                 }} className="bg-amber-950 hover:bg-amber-900 text-amber-500 px-3 py-1 rounded-md text-xs transition-colors">Exit Demo</button>
               </div>

@@ -71,6 +71,7 @@ export class BillQyroDB {
   }
 
   static async put(storeName, item) {
+    if (localStorage.getItem('billqyro_demo_session_active') === 'true') return item;
     const db = await this.open();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(storeName, 'readwrite');
@@ -83,6 +84,7 @@ export class BillQyroDB {
   }
 
   static async delete(storeName, id) {
+    if (localStorage.getItem('billqyro_demo_session_active') === 'true') return true;
     const db = await this.open();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(storeName, 'readwrite');
@@ -95,6 +97,7 @@ export class BillQyroDB {
   }
 
   static async clear(storeName) {
+    if (localStorage.getItem('billqyro_demo_session_active') === 'true') return true;
     const db = await this.open();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(storeName, 'readwrite');
