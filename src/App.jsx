@@ -3,7 +3,7 @@ import { isAdminUser } from './utils/adminAccess';
 import { toast, Toaster } from 'react-hot-toast';
 import { useThemeEngine } from './hooks/useThemeEngine';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Lock } from 'lucide-react';
+import { Lock, AlertTriangle } from 'lucide-react';
 import Layout from './components/Layout';
 import PostLoginWelcome from './components/PostLoginWelcome';
 import ClassicLoader from './components/ClassicLoader';
@@ -163,6 +163,15 @@ function App() {
   const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!getAuthSession());
   const [syncStatus, setSyncStatus] = useState('Synced');
+  const [isDemoSessionActive, setIsDemoSessionActive] = useState(false);
+
+  useEffect(() => {
+    const checkDemo = () => setIsDemoSessionActive(localStorage.getItem('billqyro_demo_session_active') === 'true');
+    checkDemo();
+    window.addEventListener('storage', checkDemo);
+    return () => window.removeEventListener('storage', checkDemo);
+  }, []);
+
   const [currentTab, setCurrentTab] = useState(() => {
     if (window.location.pathname === '/km-admin') {
       return 'admin-panel';
@@ -1404,7 +1413,16 @@ function App() {
             </React.Suspense>
           </motion.div>
         ) : (
-          <motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="w-full h-full">
+          <motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="w-full h-full flex flex-col">
+            {isDemoSessionActive && (
+              <div className="bg-amber-500 text-amber-950 px-4 py-2 flex items-center justify-between font-bold text-sm z-[999999] relative shadow-md">
+                <span className="flex items-center"><AlertTriangle className="w-4 h-4 mr-2"/> DEMO SESSION ACTIVE — Real user data is hidden and safe.</span>
+                <button onClick={() => {
+                  localStorage.removeItem('billqyro_demo_session_active');
+                  window.location.reload();
+                }} className="bg-amber-950 hover:bg-amber-900 text-amber-500 px-3 py-1 rounded-md text-xs transition-colors">Exit Demo</button>
+              </div>
+            )}
             <PostLoginWelcome 
               show={showWelcomeAnimation} 
               userName={settings?.businessName || ''} 

@@ -1161,6 +1161,7 @@ export const saveSettings = (settings) => {
 
 // --- EXPENSES ---
 export const getExpenses = async (includeDeleted = false) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') return [];
   initializeStorage();
   try {
     const data = await BillQyroDB.getAll('expenses');
@@ -1175,6 +1176,10 @@ export const getExpenses = async (includeDeleted = false) => {
 };
 
 export const saveExpense = async (expense) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    toast.error('Actions are disabled in Demo Mode to protect real data.');
+    return { updatedExpenses: [], firebaseStatus: 'demo-mode' };
+  }
   const expenses = await getExpenses();
   if (expense.id) {
     const index = expenses.findIndex(e => e.id === expense.id);
@@ -1214,6 +1219,10 @@ export const saveExpense = async (expense) => {
 };
 
 export const deleteExpense = async (id, permanent = false) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    toast.error('Actions are disabled in Demo Mode to protect real data.');
+    return { updatedExpenses: [], firebaseStatus: 'demo-mode' };
+  }
   const expenses = await getExpenses(true);
   const idx = expenses.findIndex(e => e.id === id);
   if (idx === -1) return { updatedExpenses: expenses.filter(e => !e.isDeleted), firebaseStatus: 'failed' };
@@ -1266,6 +1275,9 @@ export const deleteExpense = async (id, permanent = false) => {
 
 // --- CUSTOMERS ---
 export const getCustomers = async (includeDeleted = false) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    return JSON.parse(localStorage.getItem('billqyro_testlab_customers') || '[]');
+  }
   initializeStorage();
   try {
     const data = await BillQyroDB.getAll('customers');
@@ -1276,6 +1288,10 @@ export const getCustomers = async (includeDeleted = false) => {
 };
 
 export const saveCustomer = async (customer) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    toast.error('Actions are disabled in Demo Mode to protect real data.');
+    return { updatedCustomers: [], firebaseStatus: 'demo-mode' };
+  }
   const customers = await getCustomers();
   if (customer.id) {
     const index = customers.findIndex(c => c.id === customer.id);
@@ -1318,6 +1334,10 @@ export const saveCustomer = async (customer) => {
 };
 
 export const deleteCustomer = async (id, permanent = false) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    toast.error('Actions are disabled in Demo Mode to protect real data.');
+    return { updatedCustomers: [], firebaseStatus: 'demo-mode' };
+  }
   const customers = await getCustomers(true);
   const idx = customers.findIndex(c => c.id === id);
   if (idx === -1) return { updatedCustomers: customers.filter(c => !c.isDeleted), firebaseStatus: 'failed' };
@@ -1372,6 +1392,7 @@ export const deleteCustomer = async (id, permanent = false) => {
 
 // --- PRODUCTS ---
 export const getProducts = async (includeDeleted = false) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') return [];
   initializeStorage();
   try {
     const data = await BillQyroDB.getAll('products');
@@ -1382,6 +1403,10 @@ export const getProducts = async (includeDeleted = false) => {
 };
 
 export const saveProduct = async (product) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    toast.error('Actions are disabled in Demo Mode to protect real data.');
+    return { updatedProducts: [], firebaseStatus: 'demo-mode' };
+  }
   const products = await getProducts();
   if (product.id) {
     const index = products.findIndex(p => p.id === product.id);
@@ -1424,6 +1449,10 @@ export const saveProduct = async (product) => {
 };
 
 export const deleteProduct = async (id, permanent = false) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    toast.error('Actions are disabled in Demo Mode to protect real data.');
+    return { updatedProducts: [], firebaseStatus: 'demo-mode' };
+  }
   const products = await getProducts(true);
   const idx = products.findIndex(p => p.id === id);
   if (idx === -1) return { updatedProducts: products.filter(p => !p.isDeleted), firebaseStatus: 'failed' };
@@ -1478,6 +1507,9 @@ export const deleteProduct = async (id, permanent = false) => {
 
 // --- INVOICES ---
 export const getInvoices = async (includeDeleted = false) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    return JSON.parse(localStorage.getItem('billqyro_testlab_invoices') || '[]');
+  }
   initializeStorage();
   try {
     const data = await BillQyroDB.getAll('invoices');
@@ -1503,6 +1535,10 @@ const generateSecureToken = () => {
 };
 
 export const saveInvoice = async (invoice) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    toast.error('Actions are disabled in Demo Mode to protect real data.');
+    return { updatedInvoices: [], firebaseStatus: 'demo-mode' };
+  }
   const invoices = await getInvoices();
 
   // 1. Ensure secure publicToken is generated
@@ -1903,6 +1939,10 @@ export const restoreInvoice = async (id) => {
 };
 
 export const deleteInvoice = async (id, permanent = false) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    toast.error('Actions are disabled in Demo Mode to protect real data.');
+    return { updatedInvoices: [], firebaseStatus: 'demo-mode' };
+  }
   const invoices = await getInvoices();
   
   if (!permanent) {
