@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInvoice } from '../../../contexts/InvoiceContext';
 import { toast } from 'react-hot-toast';
-import { Check, User, ShoppingBag, CreditCard, Cloud } from 'lucide-react';
+import { Check, User, ShoppingBag, CreditCard, Cloud, AlertTriangle, Loader2 } from 'lucide-react';
 
 import StudioHeader from './StudioHeader';
 import SmartCustomerSelect from './SmartCustomerSelect';
@@ -10,7 +10,6 @@ import ExcelBillTable from './ExcelBillTable';
 import CompactSummaryStrip from './CompactSummaryStrip';
 import CompactPaymentSection from './CompactPaymentSection';
 import LiveInvoicePreview from '../LiveInvoicePreview';
-import { AlertTriangle } from 'lucide-react';
 
 const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, onBack }) => {
   const { state, dispatch } = useInvoice();
