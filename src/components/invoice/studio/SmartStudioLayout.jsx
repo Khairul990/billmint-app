@@ -86,9 +86,14 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
       toast.error('Customer name is required to finalize.');
       return false;
     }
-    const hasValidItems = state.items.some(i => i.description || i.rate > 0);
+    const hasValidItems = state.items.length > 0 && state.items.some(i => i.description || i.itemService || i.rate > 0);
     if (!hasValidItems) {
-      toast.error('Please add at least one item.');
+      toast.error('Please add at least one bill item.');
+      return false;
+    }
+    const hasZeroRate = state.items.some(i => i.itemService && (!i.rate || parseFloat(i.rate) === 0));
+    if (hasZeroRate) {
+      toast.error('Rate required for bill items. Please fix before saving.');
       return false;
     }
     if (state.totals.grandTotal === 0 && state.items.length > 0) {
@@ -180,14 +185,34 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
             <SmartCustomerSelect customers={customers} />
           </div>
 
-          <div className="bg-theme-surface border border-theme-border-soft rounded-2xl shadow-sm flex-1 overflow-hidden flex flex-col">
+          <div className="bg-theme-surface border border-[rgba(236,72,153,0.1)] rounded-2xl shadow-sm flex-1 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
             <ExcelBillTable products={products} />
           </div>
           
-          {/* Moved StickyTotalPanel inside Left Workspace so it sits below table */}
-          <StickyTotalPanel onFinalize={handleFinalize} isSaving={isSaving} />
+          {/* Mobile or Side-Preview mode Summary Position */}
+          <div className={`block ${previewMode === 'SIDE' ? 'lg:block' : 'lg:hidden'}`}>
+            <StickyTotalPanel onFinalize={handleFinalize} isSaving={isSaving} />
+          </div>
 
         </div>
+
+        {/* Right Summary Panel (Desktop Only, Side Preview OFF) */}
+        <AnimatePresence>
+          {previewMode === 'OFF' && (
+            <motion.div 
+              initial={{ opacity: 0, x: 20, width: 0 }}
+              animate={{ opacity: 1, x: 0, width: '30%' }}
+              exit={{ opacity: 0, x: 20, width: 0 }}
+              className="hidden lg:block relative"
+            >
+              <div className="sticky top-32">
+                <div className="bg-theme-surface border border-[rgba(236,72,153,0.1)] rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                  <StickyTotalPanel onFinalize={handleFinalize} isSaving={isSaving} />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Right Preview Panel (Side Mode) */}
         <AnimatePresence>

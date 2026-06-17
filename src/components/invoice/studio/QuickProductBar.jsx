@@ -5,19 +5,18 @@ import { useInvoice } from '../../../contexts/InvoiceContext';
 const QuickProductBar = ({ products = [] }) => {
   const { state, dispatch } = useInvoice();
 
-  // If no products available, mock some common ones or return null
-  const defaultQuickPills = [
+  const mostUsed = [
     { name: 'Shirt Stitching', rate: 450, unit: 'Piece' },
     { name: 'Pant Stitching', rate: 500, unit: 'Piece' },
-    { name: 'Embroidery Design', rate: 800, unit: 'Design' },
+    { name: 'Embroidery Design', rate: 800, unit: 'Design' }
+  ];
+
+  const recentUsed = [
     { name: 'Logo Stitch', rate: 250, unit: 'Piece' },
     { name: 'Alteration', rate: 100, unit: 'Piece' },
     { name: 'Doctor Visit', rate: 500, unit: 'Service' },
     { name: 'Tuition Fee', rate: 1000, unit: 'Service' }
   ];
-
-  // Use predefined default products unless the user specifically configured custom products
-  const topProducts = products.length > 0 ? products.slice(0, 7) : defaultQuickPills;
 
   const [duplicatePrompt, setDuplicatePrompt] = useState(null);
 
@@ -62,12 +61,25 @@ const QuickProductBar = ({ products = [] }) => {
   };
 
   return (
-    <div className="flex flex-col gap-2 mb-4 relative">
+    <div className="flex flex-col gap-3 mb-4 relative bg-theme-surface/50 p-3 rounded-xl border border-theme-border-soft">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted mr-2">Quick Add / Recent:</span>
-        {topProducts.map((p, idx) => (
+        <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted min-w-[70px]">Most Used:</span>
+        {mostUsed.map((p, idx) => (
           <button
-            key={idx}
+            key={`most-${idx}`}
+            onClick={() => handleQuickAdd(p)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-theme-app border border-theme-border-soft hover:border-theme-accent hover:bg-theme-accent/5 hover:text-theme-accent rounded-full text-xs font-bold text-theme-primary transition-all shadow-sm"
+          >
+            <Plus className="w-3 h-3" /> {p.name || p.productName}
+          </button>
+        ))}
+      </div>
+      
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted min-w-[70px]">Recent:</span>
+        {recentUsed.map((p, idx) => (
+          <button
+            key={`recent-${idx}`}
             onClick={() => handleQuickAdd(p)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-theme-app border border-theme-border-soft hover:border-theme-accent hover:bg-theme-accent/5 hover:text-theme-accent rounded-full text-xs font-bold text-theme-primary transition-all shadow-sm"
           >

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { Plus, Copy, Trash2, GripVertical, CheckSquare } from 'lucide-react';
+import { Plus, Copy, Trash2, GripVertical, CheckSquare, FilePlus, ChevronDown } from 'lucide-react';
 import QuickProductBar from './QuickProductBar';
 
 const ExcelBillTable = ({ products }) => {
@@ -145,8 +145,35 @@ const ExcelBillTable = ({ products }) => {
         <QuickProductBar products={products} />
       </div>
 
-      <div className="flex-1 overflow-auto">
-        <table className="w-full text-left border-collapse" ref={tableRef}>
+      <div className="flex-1 overflow-auto bg-theme-app/30">
+        {state.items.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center p-6 animate-in fade-in zoom-in-95 duration-300">
+            <div className="w-20 h-20 bg-theme-accent/10 text-theme-accent rounded-full flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(236,72,153,0.15)] ring-8 ring-theme-accent/5">
+              <FilePlus className="w-10 h-10" />
+            </div>
+            <h3 className="text-xl font-black text-theme-primary tracking-tight mb-2">No items added yet</h3>
+            <p className="text-sm font-bold text-theme-muted max-w-sm mx-auto mb-8">
+              Use the Quick Add bar above or create your first blank bill item below.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <button
+                onClick={() => {
+                  handleAddRow();
+                  setTimeout(() => {
+                    const firstInput = document.querySelector('input[placeholder="Item name..."]');
+                    if (firstInput) firstInput.focus();
+                  }, 100);
+                }}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-4 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-xl font-black shadow-lg shadow-theme-accent/30 transition-all active:scale-95"
+              >
+                <Plus className="w-5 h-5" /> Add First Item
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Desktop Table View */}
+            <table className="hidden sm:table w-full text-left border-collapse" ref={tableRef}>
           <thead className="sticky top-[108px] bg-theme-app/95 backdrop-blur-md z-30 text-[10px] uppercase font-black text-theme-muted tracking-wider shadow-sm">
             <tr>
               <th className="p-3 w-10 text-center">
@@ -173,7 +200,7 @@ const ExcelBillTable = ({ products }) => {
           <tbody className="divide-y divide-theme-border-soft">
             {state.items.map((item, rowIndex) => (
               <tr key={item.id} className={`grid-row group transition-colors ${selectedRows.has(rowIndex) ? 'bg-theme-accent/10' : 'hover:bg-theme-accent/5'}`}>
-                <td className="p-2 text-center border-r border-transparent">
+                <td className="p-1.5 text-center border-r border-transparent">
                   <input 
                     type="checkbox" 
                     checked={selectedRows.has(rowIndex)}
@@ -181,34 +208,35 @@ const ExcelBillTable = ({ products }) => {
                     className="w-3.5 h-3.5 rounded border-theme-border-soft text-theme-accent focus:ring-theme-accent cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity peer-checked:opacity-100"
                   />
                 </td>
-                <td className="p-2 text-center text-theme-muted cursor-grab active:cursor-grabbing">
+                <td className="p-1.5 text-center text-theme-muted cursor-grab active:cursor-grabbing">
                   <GripVertical className="w-4 h-4 mx-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                 </td>
-                <td className="p-2 text-center text-xs font-bold text-theme-muted">
+                <td className="p-1.5 text-center text-xs font-bold text-theme-muted">
                   {item.sn}
                 </td>
-                <td className="p-2">
+                <td className="p-1.5">
                   <input
+                    id={rowIndex === 0 ? "first-item-name" : undefined}
                     type="text"
                     value={item.itemService || ''}
                     onChange={(e) => handleUpdateItem(rowIndex, 'itemService', e.target.value)}
                     onKeyDown={(e) => handleKeyDown(e, rowIndex, 0)}
                     placeholder="Item name..."
-                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-bold text-theme-primary py-1 px-1 transition-colors"
+                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-bold text-theme-primary py-0.5 px-1 transition-colors"
                   />
                 </td>
-                <td className="p-2">
+                <td className="p-1.5">
                   <input
                     type="text"
                     value={item.description}
                     onChange={(e) => handleUpdateItem(rowIndex, 'description', e.target.value)}
                     onKeyDown={(e) => handleKeyDown(e, rowIndex, 1)}
                     placeholder="Details..."
-                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm text-theme-muted py-1 px-1 transition-colors"
+                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-xs text-theme-muted py-0.5 px-1 transition-colors"
                   />
                 </td>
-                <td className="p-2">
-                  <div className="flex items-center justify-center gap-1 bg-theme-app/50 rounded-lg p-0.5 border border-theme-border-soft">
+                <td className="p-1.5">
+                  <div className="flex items-center justify-center gap-1 bg-theme-surface rounded-md p-0.5 border border-theme-border-soft">
                     <button 
                       onClick={() => handleUpdateItem(rowIndex, 'qty', Math.max(1, (parseFloat(item.qty) || 1) - 1))}
                       className="w-5 h-5 flex items-center justify-center text-theme-muted hover:text-theme-primary hover:bg-theme-surface rounded transition-colors"
@@ -228,12 +256,13 @@ const ExcelBillTable = ({ products }) => {
                     >+</button>
                   </div>
                 </td>
-                <td className="p-2">
-                  <select
+                <td className="p-1.5">
+                  <div className="relative">
+                    <select
                     value={item.unit || 'Piece'}
                     onChange={(e) => handleUpdateItem(rowIndex, 'unit', e.target.value)}
                     onKeyDown={(e) => handleKeyDown(e, rowIndex, 3)}
-                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-xs font-bold text-theme-muted py-1.5 transition-colors cursor-pointer"
+                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-xs font-bold text-theme-muted py-1 pl-1 pr-4 transition-colors cursor-pointer appearance-none"
                   >
                     <option value="Piece">Piece</option>
                     <option value="Kg">Kg</option>
@@ -242,26 +271,32 @@ const ExcelBillTable = ({ products }) => {
                     <option value="Box">Box</option>
                     <option value="Service">Service</option>
                   </select>
+                  <ChevronDown className="w-3 h-3 text-theme-muted absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
                 </td>
-                <td className="p-2">
+                <td className="p-1.5 relative">
                   <input
                     type="number"
                     value={item.rate || ''}
                     onChange={(e) => handleUpdateItem(rowIndex, 'rate', e.target.value)}
                     onKeyDown={(e) => handleKeyDown(e, rowIndex, 4)}
-                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-black text-theme-primary py-1 px-1 text-right transition-colors"
+                    placeholder="Enter rate ₹"
+                    className={`w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-black text-theme-primary py-0.5 px-1 text-right transition-colors ${item.itemService && (!item.rate || parseFloat(item.rate) === 0) ? 'border-rose-400 bg-rose-500/5' : ''}`}
                   />
+                  {item.itemService && (!item.rate || parseFloat(item.rate) === 0) && (
+                    <span className="absolute -bottom-3 right-0 text-[9px] text-rose-500 font-bold">Rate required</span>
+                  )}
                 </td>
-                <td className="p-2">
+                <td className="p-1.5">
                   <input
                     type="number"
                     value={item.discount || ''}
                     onChange={(e) => handleUpdateItem(rowIndex, 'discount', e.target.value)}
                     onKeyDown={(e) => handleKeyDown(e, rowIndex, 5)}
-                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-bold text-theme-primary py-1 px-1 text-right transition-colors"
+                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-bold text-theme-primary py-0.5 px-1 text-right transition-colors"
                   />
                 </td>
-                <td className="p-2">
+                <td className="p-1.5">
                   <input
                     type="number"
                     value={item.tax || ''}
@@ -275,8 +310,8 @@ const ExcelBillTable = ({ products }) => {
                     ₹{calculateRowAmount(item).toLocaleString()}
                   </div>
                 </td>
-                <td className="p-2 text-center">
-                  <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <td className="p-1.5 text-center">
+                  <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => handleCopyRow(rowIndex)} className="p-1.5 text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 rounded-md transition-colors" title="Duplicate Row">
                       <Copy className="w-3.5 h-3.5" />
                     </button>
@@ -289,6 +324,102 @@ const ExcelBillTable = ({ products }) => {
             ))}
           </tbody>
         </table>
+
+        {/* Mobile Stacked Cards View */}
+        <div className="block sm:hidden divide-y divide-theme-border-soft p-2">
+          {state.items.map((item, rowIndex) => (
+            <div key={item.id} className="bg-theme-surface rounded-xl p-3 mb-3 border border-theme-border-soft shadow-sm relative">
+              
+              <div className="flex justify-between items-start mb-2 gap-2">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={item.itemService || ''}
+                    onChange={(e) => handleUpdateItem(rowIndex, 'itemService', e.target.value)}
+                    placeholder="Item name..."
+                    className="w-full bg-transparent outline-none text-sm font-black text-theme-primary placeholder-theme-muted/50"
+                  />
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-sm font-black text-theme-primary">
+                    ₹{calculateRowAmount(item).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-3">
+                <input
+                  type="text"
+                  value={item.description}
+                  onChange={(e) => handleUpdateItem(rowIndex, 'description', e.target.value)}
+                  placeholder="Details (optional)..."
+                  className="w-full bg-transparent outline-none text-xs font-bold text-theme-muted placeholder-theme-muted/30"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="bg-theme-app/50 p-2 rounded-lg border border-theme-border-soft flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase text-theme-muted">Qty</span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleUpdateItem(rowIndex, 'qty', Math.max(1, (parseFloat(item.qty) || 1) - 1))} className="w-5 h-5 flex items-center justify-center bg-theme-surface rounded shadow-sm text-theme-primary">-</button>
+                    <span className="text-xs font-bold text-theme-primary">{item.qty || 0}</span>
+                    <button onClick={() => handleUpdateItem(rowIndex, 'qty', (parseFloat(item.qty) || 0) + 1)} className="w-5 h-5 flex items-center justify-center bg-theme-surface rounded shadow-sm text-theme-primary">+</button>
+                  </div>
+                </div>
+
+                <div className={`bg-theme-app/50 p-2 rounded-lg border border-theme-border-soft flex items-center justify-between ${item.itemService && (!item.rate || parseFloat(item.rate) === 0) ? 'border-rose-400/50 bg-rose-500/5' : ''}`}>
+                  <span className="text-[10px] font-black uppercase text-theme-muted">Rate</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-black text-theme-muted">₹</span>
+                    <input
+                      type="number"
+                      value={item.rate || ''}
+                      onChange={(e) => handleUpdateItem(rowIndex, 'rate', e.target.value)}
+                      placeholder="0"
+                      className="w-16 bg-transparent outline-none text-sm font-black text-theme-primary text-right"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Advanced toggles could go here if needed, but for now we show all or basic. Let's just show disc/tax compactly. */}
+              <div className="flex gap-3">
+                <div className="flex-1 flex items-center gap-2">
+                  <span className="text-[10px] font-bold uppercase text-theme-muted">Disc ₹</span>
+                  <input
+                    type="number"
+                    value={item.discount || ''}
+                    onChange={(e) => handleUpdateItem(rowIndex, 'discount', e.target.value)}
+                    placeholder="0"
+                    className="w-full bg-theme-app border border-theme-border-soft rounded-md px-2 py-1 text-xs font-bold text-theme-primary outline-none focus:border-theme-accent"
+                  />
+                </div>
+                <div className="flex-1 flex items-center gap-2">
+                  <span className="text-[10px] font-bold uppercase text-theme-muted">Tax %</span>
+                  <input
+                    type="number"
+                    value={item.tax || ''}
+                    onChange={(e) => handleUpdateItem(rowIndex, 'tax', e.target.value)}
+                    placeholder="0"
+                    className="w-full bg-theme-app border border-theme-border-soft rounded-md px-2 py-1 text-xs font-bold text-theme-primary outline-none focus:border-theme-accent"
+                  />
+                </div>
+              </div>
+
+              <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Always show delete on mobile for easy access */}
+              </div>
+              <button 
+                onClick={() => handleDeleteRow(rowIndex)} 
+                className="absolute -top-2 -right-2 w-7 h-7 bg-theme-surface border border-theme-border-soft shadow-sm rounded-full flex items-center justify-center text-theme-muted hover:text-theme-danger hover:border-theme-danger/30 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+        </>
+        )}
       </div>
 
       <div className="p-3 border-t border-theme-border-soft bg-theme-app/50 flex justify-between items-center">
@@ -311,12 +442,14 @@ const ExcelBillTable = ({ products }) => {
       </div>
 
       {/* Mobile Floating Action Button */}
-      <button
-        onClick={handleAddRow}
-        className="fixed bottom-24 right-4 w-14 h-14 bg-theme-accent text-white rounded-full shadow-[0_8px_30px_rgba(236,72,153,0.3)] flex items-center justify-center z-50 sm:hidden hover:bg-theme-accent/90 transition-transform active:scale-95"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
+      {state.items.length > 0 && (
+        <button
+          onClick={handleAddRow}
+          className="fixed bottom-24 right-4 w-14 h-14 bg-theme-accent text-white rounded-full shadow-[0_8px_30px_rgba(236,72,153,0.3)] flex items-center justify-center z-50 sm:hidden hover:bg-theme-accent/90 transition-transform active:scale-95"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
+      )}
     </div>
   );
 };
