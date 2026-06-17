@@ -9,13 +9,15 @@ const QuickProductBar = ({ products = [] }) => {
   const defaultQuickPills = [
     { name: 'Shirt Stitching', rate: 450, unit: 'Piece' },
     { name: 'Pant Stitching', rate: 500, unit: 'Piece' },
-    { name: 'Saree Fall & Pico', rate: 150, unit: 'Piece' },
     { name: 'Embroidery Design', rate: 800, unit: 'Design' },
-    { name: 'Alteration', rate: 100, unit: 'Piece' }
+    { name: 'Logo Stitch', rate: 250, unit: 'Piece' },
+    { name: 'Alteration', rate: 100, unit: 'Piece' },
+    { name: 'Doctor Visit', rate: 500, unit: 'Service' },
+    { name: 'Tuition Fee', rate: 1000, unit: 'Service' }
   ];
 
-  // Try to pick top 6 used products from the database, or fallback
-  const topProducts = products.length > 0 ? products.slice(0, 6) : defaultQuickPills;
+  // Use predefined default products unless the user specifically configured custom products
+  const topProducts = products.length > 0 ? products.slice(0, 7) : defaultQuickPills;
 
   const handleQuickAdd = (prod) => {
     // Determine if last item is completely empty to overwrite it

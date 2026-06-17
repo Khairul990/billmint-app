@@ -12,12 +12,12 @@ import LiveInvoicePreview from '../LiveInvoicePreview';
 const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }) => {
   const { state, dispatch } = useInvoice();
   
-  // Preview Modes: 'OFF', 'SIDE', 'FULLSCREEN'
   const [previewMode, setPreviewMode] = useState('OFF');
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+  const [saveStatus, setSaveStatus] = useState(''); // '', 'unsaved', 'saving', 'saved'
 
-  // Auto-Save Engine
+  // Auto-Save Engine (Debounced)
   const autoSaveDraft = useCallback(async () => {
     // Basic validation to prevent saving completely empty drafts repeatedly
     const hasContent = state.customer.name || state.items.some(i => i.description || i.qty > 0);
@@ -34,12 +34,20 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
     }
   }, [state, onSaveInvoice]);
 
+  // Debounce effect
   useEffect(() => {
-    const timer = setInterval(() => {
-      autoSaveDraft();
-    }, 5000); // 5 seconds auto-save engine
-    return () => clearInterval(timer);
-  }, [autoSaveDraft]);
+    const hasContent = state.customer.name || state.items.some(i => i.description || i.qty > 0);
+    if (!hasContent) return;
+
+    setSaveStatus('unsaved');
+    const timer = setTimeout(async () => {
+      setSaveStatus('saving');
+      await autoSaveDraft();
+      setSaveStatus('saved');
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [state, autoSaveDraft]);
 
   // Keyboard Shortcuts Engine
   useEffect(() => {
@@ -47,8 +55,8 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
       // Ctrl/Cmd + S = Save Draft
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        toast.success("Draft Saved!");
-        autoSaveDraft();
+        setSaveStatus('saving');
+        autoSaveDraft().then(() => setSaveStatus('saved'));
       }
       // Ctrl/Cmd + Enter = Finalize
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -94,9 +102,14 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
         previewMode={previewMode} 
         setPreviewMode={setPreviewMode} 
         lastSaved={lastSaved}
-        onSaveDraft={autoSaveDraft}
+        saveStatus={saveStatus}
+        onSaveDraft={() => {
+          setSaveStatus('saving');
+          autoSaveDraft().then(() => setSaveStatus('saved'));
+        }}
         onFinalize={handleFinalize}
         isSaving={isSaving}
+        onDownloadPDF={onDownloadPDF}
       />
 
       {/* Main Studio Body */}
@@ -151,19 +164,47 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
       {/* Sticky Total Panel (Desktop Right) */}
       <StickyTotalPanel onFinalize={handleFinalize} isSaving={isSaving} />
 
-      {/* Mobile Sticky Bottom Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-theme-app/95 backdrop-blur-xl border-t border-theme-border-soft p-4 flex items-center justify-between z-50 pb-safe">
-        <div>
-          <p className="text-[10px] font-bold text-theme-muted uppercase">Grand Total</p>
-          <p className="text-xl font-black text-theme-primary">₹{state.totals.grandTotal.toLocaleString()}</p>
+      {/* Universal Sticky Bottom Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-theme-app/95 backdrop-blur-xl border-t border-theme-border-soft px-4 py-3 flex items-center justify-between z-50 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+        
+        <div className="hidden sm:flex items-center gap-4 border-r border-theme-border-soft pr-4">
+          <div>
+            <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Grand Total</p>
+            <p className="text-xl font-black text-theme-primary leading-none mt-1">₹{state.totals.grandTotal.toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Balance Due</p>
+            <p className="text-lg font-black text-theme-danger leading-none mt-1">₹{state.totals.balanceDue.toLocaleString()}</p>
+          </div>
         </div>
-        <button 
-          onClick={handleFinalize}
-          disabled={isSaving}
-          className="bg-[image:var(--accent-gradient)] text-white font-black text-sm px-6 py-3 rounded-xl shadow-glow active:scale-95 transition-transform flex items-center"
-        >
-          {isSaving ? "Saving..." : "Generate Bill"}
-        </button>
+
+        <div className="flex items-center gap-2 md:gap-3 overflow-x-auto w-full sm:w-auto scrollbar-hide">
+          <button 
+            onClick={() => {
+              setSaveStatus('saving');
+              autoSaveDraft().then(() => setSaveStatus('saved'));
+            }}
+            disabled={isSaving}
+            className="flex-shrink-0 bg-theme-surface border border-theme-border-soft hover:bg-theme-border-soft text-theme-primary font-bold text-xs px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+          >
+            Save Draft
+          </button>
+          
+          <button 
+            onClick={() => { if(onDownloadPDF) onDownloadPDF(state); }}
+            className="flex-shrink-0 bg-theme-surface border border-theme-border-soft hover:bg-theme-border-soft text-theme-primary font-bold text-xs px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+          >
+            Generate PDF
+          </button>
+          
+          <button 
+            onClick={handleFinalize}
+            disabled={isSaving}
+            className="flex-shrink-0 bg-[image:var(--accent-gradient)] text-white font-black text-xs px-6 py-2.5 rounded-xl shadow-glow active:scale-95 transition-transform flex items-center whitespace-nowrap"
+          >
+            {isSaving ? "Processing..." : "Generate Live Link"}
+          </button>
+        </div>
       </div>
 
     </div>

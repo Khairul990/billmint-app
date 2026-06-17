@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { UserPlus, Search, ChevronDown, Check, Phone, Mail, MapPin } from 'lucide-react';
+import { UserPlus, Search, ChevronDown, Check, Phone, Mail, MapPin, MessageCircle, Clock, IndianRupee, Star, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CustomerInsightsPane from './CustomerInsightsPane';
 
@@ -33,8 +33,12 @@ const SmartCustomerSelect = ({ customers = [] }) => {
         id: customer.id,
         name: customer.name,
         phone: customer.phone || '',
+        whatsapp: customer.whatsapp || '',
         email: customer.email || '',
-        address: customer.address || ''
+        address: customer.address || '',
+        customerType: customer.customerType || 'Retail',
+        previousDue: customer.previousDue || 0,
+        lastOrderDate: customer.lastOrderDate || ''
       }
     });
     setIsOpen(false);
@@ -136,35 +140,80 @@ const SmartCustomerSelect = ({ customers = [] }) => {
         </div>
       </div>
 
-      {/* Advanced Details (Collapsible or always visible if populated) */}
-      {(state.customer.email || state.customer.address || state.customer.id) && (
-        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          <div>
-            <div className="relative group">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted transition-colors group-focus-within:text-theme-accent" />
-              <input
-                type="email"
-                value={state.customer.email}
-                onChange={(e) => handleQuickChange('email', e.target.value)}
-                placeholder="Email Address (Optional)"
-                className="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-app border border-theme-border-soft focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 outline-none text-theme-primary text-sm transition-all"
-              />
-            </div>
-          </div>
-          <div>
-            <div className="relative group">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted transition-colors group-focus-within:text-theme-accent" />
-              <input
-                type="text"
-                value={state.customer.address}
-                onChange={(e) => handleQuickChange('address', e.target.value)}
-                placeholder="Billing Address (Optional)"
-                className="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-app border border-theme-border-soft focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 outline-none text-theme-primary text-sm transition-all"
-              />
-            </div>
-          </div>
-        </motion.div>
+      {/* Quick Select Panel */}
+      {!state.customer.id && (
+        <div className="flex items-center gap-2 mt-2 overflow-x-auto pb-2 scrollbar-hide">
+          <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider mr-2 whitespace-nowrap">Quick Pick:</span>
+          {customers.slice(0, 3).map((c, i) => (
+            <button 
+              key={c.id || i}
+              onClick={() => handleSelect(c)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-theme-app border border-theme-border-soft hover:border-theme-accent rounded-lg text-xs font-bold text-theme-primary transition-colors whitespace-nowrap"
+            >
+              {i === 0 ? <Star className="w-3 h-3 text-amber-500" /> : <History className="w-3 h-3 text-blue-500" />}
+              {c.name}
+            </button>
+          ))}
+        </div>
       )}
+
+      {/* Advanced Details (Always visible fields as requested) */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+        <div>
+          <label className="block text-[10px] font-bold text-theme-muted mb-1 uppercase tracking-wider ml-1">WhatsApp</label>
+          <div className="relative group">
+            <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500 transition-colors group-focus-within:text-emerald-400" />
+            <input
+              type="tel"
+              value={state.customer.whatsapp || ''}
+              onChange={(e) => handleQuickChange('whatsapp', e.target.value)}
+              placeholder="WhatsApp No."
+              className="w-full pl-9 pr-2 py-2 rounded-xl bg-theme-app border border-theme-border-soft focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-theme-primary text-sm font-bold transition-all"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold text-theme-muted mb-1 uppercase tracking-wider ml-1">Customer Type</label>
+          <div className="relative group">
+            <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted transition-colors group-focus-within:text-theme-accent" />
+            <select
+              value={state.customer.customerType || 'Retail'}
+              onChange={(e) => handleQuickChange('customerType', e.target.value)}
+              className="w-full pl-9 pr-2 py-2 rounded-xl bg-theme-app border border-theme-border-soft focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 outline-none text-theme-primary text-sm font-bold transition-all cursor-pointer appearance-none"
+            >
+              <option value="Retail">Retail</option>
+              <option value="Wholesale">Wholesale</option>
+              <option value="VIP">VIP</option>
+              <option value="B2B">B2B</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold text-theme-muted mb-1 uppercase tracking-wider ml-1">Previous Due</label>
+          <div className="relative group">
+            <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-500 transition-colors group-focus-within:text-rose-400" />
+            <input
+              type="number"
+              value={state.customer.previousDue || ''}
+              onChange={(e) => handleQuickChange('previousDue', e.target.value)}
+              placeholder="0.00"
+              className="w-full pl-9 pr-2 py-2 rounded-xl bg-theme-app border border-theme-border-soft focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 outline-none text-theme-primary text-sm font-bold transition-all"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold text-theme-muted mb-1 uppercase tracking-wider ml-1">Last Order</label>
+          <div className="relative group">
+            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted transition-colors group-focus-within:text-theme-accent" />
+            <input
+              type="date"
+              value={state.customer.lastOrderDate || ''}
+              onChange={(e) => handleQuickChange('lastOrderDate', e.target.value)}
+              className="w-full pl-9 pr-2 py-2 rounded-xl bg-theme-app border border-theme-border-soft focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 outline-none text-theme-primary text-sm font-bold transition-all"
+            />
+          </div>
+        </div>
+      </motion.div>
 
       {/* AI Customer Insights */}
       <CustomerInsightsPane customerId={state.customer.id} />

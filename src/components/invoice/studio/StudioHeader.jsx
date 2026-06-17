@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { Loader2, LayoutPanelLeft, Maximize, PanelRightInactive, Cloud, CloudOff, Save, Check } from 'lucide-react';
+import { Loader2, LayoutPanelLeft, Maximize, PanelRightInactive, Cloud, CloudOff, Save, Check, FileText, Link } from 'lucide-react';
 import { ShimmerButton } from '../../magicui/shimmer-button';
 
-const StudioHeader = ({ previewMode, setPreviewMode, lastSaved, onSaveDraft, onFinalize, isSaving }) => {
+const StudioHeader = ({ previewMode, setPreviewMode, lastSaved, saveStatus, onSaveDraft, onFinalize, isSaving, onDownloadPDF }) => {
   const { state, dispatch } = useInvoice();
 
   return (
@@ -15,16 +15,11 @@ const StudioHeader = ({ previewMode, setPreviewMode, lastSaved, onSaveDraft, onF
         <div>
           <h1 className="text-xl font-black text-theme-primary tracking-tight">Smart Studio</h1>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="flex items-center text-[10px] font-bold text-theme-muted uppercase tracking-wider">
-              {lastSaved ? (
-                <span className="flex items-center text-theme-success">
-                  <Cloud className="w-3 h-3 mr-1" /> Saved {lastSaved.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                </span>
-              ) : (
-                <span className="flex items-center text-theme-warning">
-                  <CloudOff className="w-3 h-3 mr-1" /> Unsaved
-                </span>
-              )}
+            <span className="flex items-center text-[10px] font-bold uppercase tracking-wider transition-colors duration-300">
+              {saveStatus === 'saving' && <span className="text-amber-400 flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Saving...</span>}
+              {saveStatus === 'unsaved' && <span className="text-rose-400 flex items-center"><CloudOff className="w-3 h-3 mr-1" /> Unsaved Changes</span>}
+              {saveStatus === 'saved' && <span className="text-emerald-400 flex items-center"><Cloud className="w-3 h-3 mr-1" /> Saved just now</span>}
+              {saveStatus === '' && <span className="text-theme-muted flex items-center"><Cloud className="w-3 h-3 mr-1" /> All saved</span>}
             </span>
             <span className="w-1 h-1 rounded-full bg-theme-border-soft"></span>
             <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">
@@ -83,21 +78,28 @@ const StudioHeader = ({ previewMode, setPreviewMode, lastSaved, onSaveDraft, onF
         {/* Actions */}
         <button 
           onClick={onSaveDraft}
-          className="hidden sm:flex items-center justify-center gap-2 px-4 py-2 bg-theme-surface hover:bg-theme-border-soft text-theme-primary text-xs font-bold rounded-xl transition-all shadow-sm border border-theme-border-soft"
+          className="hidden sm:flex items-center justify-center gap-1.5 px-3 py-1.5 bg-theme-surface hover:bg-theme-border-soft text-theme-primary text-xs font-bold rounded-xl transition-all shadow-sm border border-theme-border-soft"
         >
-          <Save className="w-3.5 h-3.5 text-theme-muted" /> Draft
+          <Save className="w-3.5 h-3.5 text-theme-muted" /> Save Draft
+        </button>
+
+        <button 
+          onClick={() => { if(onDownloadPDF) onDownloadPDF(state); }}
+          className="hidden md:flex items-center justify-center gap-1.5 px-3 py-1.5 bg-theme-surface hover:bg-theme-border-soft text-theme-primary text-xs font-bold rounded-xl transition-all shadow-sm border border-theme-border-soft"
+        >
+          <FileText className="w-3.5 h-3.5 text-rose-500" /> Generate PDF
         </button>
 
         <ShimmerButton
           onClick={onFinalize}
           disabled={isSaving}
-          className="h-9 px-6 shadow-glow"
+          className="h-9 px-4 shadow-glow"
           shimmerColor="#ffffff"
           background="var(--accent-gradient)"
         >
           <div className="flex items-center gap-2 text-white font-black text-xs">
-            {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-            Generate
+            {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Link className="w-3.5 h-3.5" />}
+            Generate Live Link
           </div>
         </ShimmerButton>
 

@@ -12,10 +12,16 @@ const ExcelBillTable = ({ products }) => {
     newItems[index] = { ...newItems[index], [field]: value };
     
     // Auto calculate amount
-    if (field === 'qty' || field === 'rate') {
+    if (['qty', 'rate', 'discount', 'tax'].includes(field)) {
       const q = parseFloat(newItems[index].qty) || 0;
       const r = parseFloat(newItems[index].rate) || 0;
-      newItems[index].amount = q * r;
+      const d = parseFloat(newItems[index].discount) || 0;
+      const t = parseFloat(newItems[index].tax) || 0;
+      
+      const baseAmount = q * r;
+      const afterDiscount = baseAmount - d;
+      const taxAmount = (afterDiscount * t) / 100;
+      newItems[index].amount = afterDiscount + taxAmount;
     }
     
     dispatch({ type: 'SET_ITEMS', payload: newItems });
@@ -26,8 +32,11 @@ const ExcelBillTable = ({ products }) => {
       id: `item-${Date.now()}`,
       sn: state.items.length + 1,
       description: '',
+      itemService: '',
       qty: 1,
       rate: 0,
+      discount: 0,
+      tax: 0,
       unit: 'Piece',
       amount: 0
     }];
@@ -102,13 +111,16 @@ const ExcelBillTable = ({ products }) => {
           <thead className="sticky top-0 bg-theme-app/95 backdrop-blur-md z-10 text-[10px] uppercase font-black text-theme-muted tracking-wider shadow-sm">
             <tr>
               <th className="p-3 w-10 text-center"></th>
-              <th className="p-3 w-12 text-center">SN</th>
-              <th className="p-3 min-w-[250px]">Item Description</th>
-              <th className="p-3 w-24 text-center">Qty</th>
-              <th className="p-3 w-28">Unit</th>
-              <th className="p-3 w-32 text-right">Rate (₹)</th>
-              <th className="p-3 w-32 text-right">Amount (₹)</th>
-              <th className="p-3 w-20 text-center">Actions</th>
+              <th className="p-3 w-10 text-center">SN</th>
+              <th className="p-3 min-w-[150px]">Item</th>
+              <th className="p-3 min-w-[150px]">Description</th>
+              <th className="p-3 w-20 text-center">Qty</th>
+              <th className="p-3 w-24">Unit</th>
+              <th className="p-3 w-28 text-right">Rate</th>
+              <th className="p-3 w-24 text-right">Disc (₹)</th>
+              <th className="p-3 w-20 text-right">Tax %</th>
+              <th className="p-3 w-28 text-right">Amount (₹)</th>
+              <th className="p-3 w-16 text-center">Acts</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-theme-border-soft">
@@ -123,11 +135,21 @@ const ExcelBillTable = ({ products }) => {
                 <td className="p-2">
                   <input
                     type="text"
+                    value={item.itemService || ''}
+                    onChange={(e) => handleUpdateItem(rowIndex, 'itemService', e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, rowIndex, 0)}
+                    placeholder="Item name..."
+                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-bold text-theme-primary py-1 px-1 transition-colors"
+                  />
+                </td>
+                <td className="p-2">
+                  <input
+                    type="text"
                     value={item.description}
                     onChange={(e) => handleUpdateItem(rowIndex, 'description', e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, rowIndex, 0)}
-                    placeholder="Enter item name..."
-                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-bold text-theme-primary py-1 px-2 transition-colors"
+                    onKeyDown={(e) => handleKeyDown(e, rowIndex, 1)}
+                    placeholder="Details..."
+                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm text-theme-muted py-1 px-1 transition-colors"
                   />
                 </td>
                 <td className="p-2">
@@ -135,15 +157,15 @@ const ExcelBillTable = ({ products }) => {
                     type="number"
                     value={item.qty || ''}
                     onChange={(e) => handleUpdateItem(rowIndex, 'qty', e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, rowIndex, 1)}
-                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-bold text-theme-primary py-1 px-2 text-center transition-colors appearance-none"
+                    onKeyDown={(e) => handleKeyDown(e, rowIndex, 2)}
+                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-bold text-theme-primary py-1 px-1 text-center transition-colors appearance-none"
                   />
                 </td>
                 <td className="p-2">
                   <select
                     value={item.unit || 'Piece'}
                     onChange={(e) => handleUpdateItem(rowIndex, 'unit', e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, rowIndex, 2)}
+                    onKeyDown={(e) => handleKeyDown(e, rowIndex, 3)}
                     className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-xs font-bold text-theme-muted py-1.5 transition-colors cursor-pointer"
                   >
                     <option value="Piece">Piece</option>
@@ -159,8 +181,26 @@ const ExcelBillTable = ({ products }) => {
                     type="number"
                     value={item.rate || ''}
                     onChange={(e) => handleUpdateItem(rowIndex, 'rate', e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, rowIndex, 3)}
-                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-black text-theme-primary py-1 px-2 text-right transition-colors"
+                    onKeyDown={(e) => handleKeyDown(e, rowIndex, 4)}
+                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-black text-theme-primary py-1 px-1 text-right transition-colors"
+                  />
+                </td>
+                <td className="p-2">
+                  <input
+                    type="number"
+                    value={item.discount || ''}
+                    onChange={(e) => handleUpdateItem(rowIndex, 'discount', e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, rowIndex, 5)}
+                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-bold text-theme-primary py-1 px-1 text-right transition-colors"
+                  />
+                </td>
+                <td className="p-2">
+                  <input
+                    type="number"
+                    value={item.tax || ''}
+                    onChange={(e) => handleUpdateItem(rowIndex, 'tax', e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, rowIndex, 6)}
+                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-bold text-theme-primary py-1 px-1 text-right transition-colors"
                   />
                 </td>
                 <td className="p-2">

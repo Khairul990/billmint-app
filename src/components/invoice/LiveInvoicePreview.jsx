@@ -3,7 +3,7 @@ import { useInvoice } from '../../contexts/InvoiceContext';
 import InvoicePreview from '../InvoicePreview';
 
 const LiveInvoicePreview = () => {
-  const { state, businessSettings } = useInvoice();
+  const { state, businessSettings, dispatch } = useInvoice();
 
   const previewProps = {
     invoiceNumber: state.invoiceNumber,
@@ -24,6 +24,7 @@ const LiveInvoicePreview = () => {
     notes: state.settings.notes,
     terms: state.settings.terms,
     paymentStatus: state.settings.paymentStatus,
+    selectedTemplate: state.selectedTemplate || 'retail',
     billType: state.billType,
     pdfVisibleFields: state.pdfVisibleFields,
     businessSettings: businessSettings
@@ -36,7 +37,23 @@ const LiveInvoicePreview = () => {
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
           Live Preview
         </span>
-        <span className="text-xs font-medium text-theme-muted px-2 py-1 bg-theme-surface rounded-lg border border-theme-border-soft">A4 Size</span>
+        <div className="flex items-center gap-2">
+          <select
+            value={state.selectedTemplate || 'retail'}
+            onChange={(e) => dispatch({ type: 'UPDATE_META', payload: { selectedTemplate: e.target.value } })}
+            className="text-xs font-bold text-theme-accent bg-theme-accent/10 hover:bg-theme-accent/20 outline-none px-2 py-1.5 rounded-lg border border-theme-accent/20 cursor-pointer appearance-none transition-colors"
+          >
+            <option value="classic">Classic</option>
+            <option value="modern">Modern</option>
+            <option value="professional">Professional</option>
+            <option value="gold">Gold</option>
+            <option value="doctor">Doctor</option>
+            <option value="teacher">Teacher</option>
+            <option value="embroidery">Embroidery</option>
+            <option value="retail">Retail</option>
+          </select>
+          <span className="text-xs font-bold text-theme-muted px-2 py-1.5 bg-theme-app rounded-lg border border-theme-border-soft hidden sm:inline-block">A4 Size</span>
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-theme-app dark:bg-theme-card flex justify-center custom-scrollbar">
         <div className="w-full max-w-[800px] origin-top scale-[0.6] sm:scale-[0.7] md:scale-[0.85] lg:scale-90 xl:scale-100 transition-transform">
