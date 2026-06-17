@@ -126,6 +126,9 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
             <ExcelBillTable products={products} />
           </div>
           
+          {/* Moved StickyTotalPanel inside Left Workspace so it sits below table */}
+          <StickyTotalPanel onFinalize={handleFinalize} isSaving={isSaving} />
+
         </div>
 
         {/* Right Preview Panel (Side Mode) */}
@@ -160,9 +163,6 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Sticky Total Panel (Desktop Right) */}
-      <StickyTotalPanel onFinalize={handleFinalize} isSaving={isSaving} />
 
       {/* Universal Sticky Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-theme-app/95 backdrop-blur-xl border-t border-theme-border-soft px-4 py-3 flex items-center justify-between z-50 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">

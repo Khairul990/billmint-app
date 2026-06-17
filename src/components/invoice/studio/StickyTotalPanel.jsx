@@ -9,21 +9,21 @@ const StickyTotalPanel = ({ onFinalize, isSaving }) => {
   const { state, dispatch } = useInvoice();
 
   return (
-    <div className="lg:w-80 shrink-0 border-l border-theme-border-soft bg-theme-surface flex flex-col h-[calc(100vh-4rem)] sticky top-16 z-40 shadow-[-10px_0_30px_rgba(0,0,0,0.03)] hidden lg:flex">
+    <div className="w-full bg-theme-surface border border-theme-border-soft rounded-2xl shadow-sm flex flex-col lg:flex-row gap-6 p-4 md:p-6 mb-24">
       
-      <div className="p-4 border-b border-theme-border-soft flex items-center justify-between bg-theme-app/50 backdrop-blur-md">
+      {/* Math Column */}
+      <div className="flex-1 flex flex-col justify-center space-y-3">
         <h2 className="text-sm font-black uppercase tracking-wider text-theme-primary flex items-center gap-2">
           <Calculator className="w-4 h-4 text-theme-accent" /> Summary
         </h2>
         <button className="p-1.5 text-theme-muted hover:text-theme-accent transition-colors rounded-lg hover:bg-theme-accent/10" title="Advanced Options">
           <Settings2 className="w-4 h-4" />
         </button>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-        
-        {/* Subtotal & Advanced Math */}
-        <div className="space-y-3 mb-6">
+      {/* Totals Column */}
+      <div className="flex-1 flex flex-col gap-3 justify-center lg:border-x border-theme-border-soft lg:px-6 py-4 lg:py-0 border-y lg:border-y-0">
           <div className="flex items-center justify-between text-sm">
             <span className="font-bold text-theme-muted">Subtotal</span>
             <span className="font-black text-theme-primary">₹{state.totals.subtotal.toLocaleString()}</span>
@@ -68,30 +68,11 @@ const StickyTotalPanel = ({ onFinalize, isSaving }) => {
           <p className="text-xs font-black uppercase tracking-widest text-white/80 mb-1 relative z-10">Grand Total</p>
           <p className="text-3xl font-black text-white tracking-tight relative z-10">₹{state.totals.grandTotal.toLocaleString()}</p>
         </div>
-
-        <SmartPaymentSection />
-
-        {/* Balance Due Display */}
-        <div className="mt-2 p-3 bg-theme-danger/5 border border-theme-danger/20 rounded-xl flex items-center justify-between">
-          <span className="text-xs font-bold text-theme-danger uppercase tracking-wider">Balance Due</span>
-          <span className="text-lg font-black text-theme-danger">₹{state.totals.balanceDue.toLocaleString()}</span>
-        </div>
-
       </div>
 
-      <div className="p-4 border-t border-theme-border-soft bg-theme-app/90 backdrop-blur-md">
-        <ShimmerButton
-          onClick={onFinalize}
-          disabled={isSaving}
-          className="w-full h-12 shadow-glow"
-          shimmerColor="#ffffff"
-          background="var(--accent-gradient)"
-        >
-          <div className="flex items-center justify-center gap-2 text-white font-black">
-            {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
-            Generate Invoice
-          </div>
-        </ShimmerButton>
+      {/* Payment Column */}
+      <div className="flex-1 flex flex-col justify-center">
+        <SmartPaymentSection />
       </div>
 
     </div>
