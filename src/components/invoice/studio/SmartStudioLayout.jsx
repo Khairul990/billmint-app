@@ -187,7 +187,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
             <SmartCustomerSelect customers={customers} />
           </div>
 
-          <div className="bg-theme-surface border border-[rgba(236,72,153,0.1)] rounded-2xl shadow-sm flex-1 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+          <div className="bg-theme-surface border border-[rgba(236,72,153,0.1)] rounded-2xl shadow-sm flex flex-col hover:shadow-md transition-shadow overflow-hidden">
             <ExcelBillTable products={products} />
           </div>
           
