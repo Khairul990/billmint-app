@@ -372,18 +372,17 @@ const ExcelBillTable = ({ products }) => {
 
       <div className="w-full bg-theme-surface">
         {state.items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center p-6 animate-in fade-in zoom-in-95 duration-300">
-            <div className="bg-theme-surface border border-theme-border-soft p-8 md:p-12 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] max-w-lg w-full flex flex-col items-center relative overflow-hidden group">
+          <div className="flex flex-col items-center justify-center min-h-[300px] text-center p-4">
+            <div className="bg-theme-app/50 border border-theme-border-soft p-6 rounded-2xl w-full max-w-md flex flex-col items-center">
               <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
               
-              <div className="w-24 h-24 bg-theme-app border border-theme-border-soft text-theme-accent rounded-full flex items-center justify-center mb-6 shadow-inner relative">
-                <div className="absolute inset-0 rounded-full border-2 border-theme-accent/20 animate-pulse"></div>
-                <FilePlus className="w-10 h-10" />
+              <div className="w-16 h-16 bg-theme-surface border border-theme-border-soft text-theme-muted rounded-full flex items-center justify-center mb-4 shadow-sm">
+                <FilePlus className="w-6 h-6" />
               </div>
               
-              <h3 className="text-2xl font-black text-theme-primary tracking-tight mb-3">No Bill Items Added</h3>
-              <p className="text-sm font-bold text-theme-muted max-w-sm mx-auto mb-8">
-                Create your first item or use Quick Add.
+              <h3 className="text-lg font-black text-theme-primary mb-1">No Items Added</h3>
+              <p className="text-xs font-bold text-theme-muted mb-6">
+                Click Quick Add or manually add the first row.
               </p>
               
               <div className="flex flex-col gap-3 w-full">
@@ -395,9 +394,9 @@ const ExcelBillTable = ({ products }) => {
                       if (firstInput) firstInput.focus();
                     }, 100);
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-theme-accent to-pink-500 hover:from-pink-500 hover:to-theme-accent text-white rounded-xl font-black shadow-lg shadow-theme-accent/30 transition-all active:scale-95"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-xl font-black shadow-sm transition-all"
                 >
-                  <Plus className="w-5 h-5" /> Add First Item
+                  <Plus className="w-4 h-4" /> Add First Item
                 </button>
               </div>
             </div>

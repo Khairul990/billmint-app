@@ -2,12 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInvoice } from '../../../contexts/InvoiceContext';
 import { toast } from 'react-hot-toast';
-import { Check, User, ShoppingBag, CreditCard } from 'lucide-react';
+import { Check, User, ShoppingBag, CreditCard, Cloud } from 'lucide-react';
 
 import StudioHeader from './StudioHeader';
 import SmartCustomerSelect from './SmartCustomerSelect';
 import ExcelBillTable from './ExcelBillTable';
-import StickyTotalPanel from './StickyTotalPanel';
+import CompactSummaryStrip from './CompactSummaryStrip';
+import CompactPaymentSection from './CompactPaymentSection';
 import LiveInvoicePreview from '../LiveInvoicePreview';
 import { AlertTriangle } from 'lucide-react';
 
@@ -177,60 +178,47 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         </div>
       </div>
 
-      {/* Main Studio Body */}
-      <div className={`flex flex-1 gap-6 p-4 md:p-6 pb-32 transition-all duration-300 ${previewMode === 'FULLSCREEN' ? 'hidden' : ''}`}>
+      {/* Main Studio Body - Single Column Layout */}
+      <div className={`flex flex-col flex-1 gap-4 p-4 md:p-6 pb-32 transition-all duration-300 w-full max-w-7xl mx-auto ${previewMode === 'FULLSCREEN' ? 'hidden' : ''}`}>
         
-        {/* Left Workspace */}
-        <div className={`flex flex-col gap-6 transition-all duration-500 ${previewMode === 'SIDE' ? 'w-full lg:w-[60%]' : 'w-full'}`}>
-          
-          <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-4 shadow-sm">
-            <SmartCustomerSelect customers={customers} />
-          </div>
-
-          <div className="bg-theme-surface border border-[rgba(236,72,153,0.1)] rounded-2xl shadow-sm flex flex-col hover:shadow-md transition-shadow overflow-hidden">
-            <ExcelBillTable products={products} />
-          </div>
-          
-          {/* Mobile or Side-Preview mode Summary Position */}
-          <div className={`block ${previewMode === 'SIDE' ? 'lg:block' : 'lg:hidden'}`}>
-            <StickyTotalPanel onFinalize={handleFinalize} isSaving={isSaving} />
-          </div>
-
+        {/* Customer Details */}
+        <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-4 shadow-sm">
+          <SmartCustomerSelect customers={customers} />
         </div>
 
-        {/* Right Summary Panel (Desktop Only, Side Preview OFF) */}
-        <AnimatePresence>
-          {previewMode === 'OFF' && (
-            <motion.div 
-              initial={{ opacity: 0, x: 20, width: 0 }}
-              animate={{ opacity: 1, x: 0, width: '30%' }}
-              exit={{ opacity: 0, x: 20, width: 0 }}
-              className="hidden lg:block relative"
-            >
-              <div className="sticky top-32">
-                <div className="bg-theme-surface border border-[rgba(236,72,153,0.1)] rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                  <StickyTotalPanel onFinalize={handleFinalize} isSaving={isSaving} />
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Large Spreadsheet Grid */}
+        <div className="bg-theme-surface border border-[rgba(236,72,153,0.1)] rounded-2xl shadow-sm flex flex-col hover:shadow-md transition-shadow overflow-hidden min-h-[500px]">
+          <ExcelBillTable products={products} />
+        </div>
+        
+        {/* Compact Summary Strip */}
+        <CompactSummaryStrip />
 
-        {/* Right Preview Panel (Side Mode) */}
-        <AnimatePresence>
-          {previewMode === 'SIDE' && (
-            <motion.div 
-              initial={{ opacity: 0, x: 20, width: 0 }}
-              animate={{ opacity: 1, x: 0, width: '40%' }}
-              exit={{ opacity: 0, x: 20, width: 0 }}
-              className="hidden lg:block border-l border-theme-border-soft pl-6 relative"
-            >
-              <div className="sticky top-24 h-[calc(100vh-8rem)]">
-                <LiveInvoicePreview />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Compact Payment Section */}
+        <CompactPaymentSection />
+
+        {/* Action Bar (Sticky Bottom) - Mobile/Desktop Unified */}
+        <div className="fixed bottom-0 left-0 lg:left-64 right-0 p-4 bg-theme-surface/95 backdrop-blur-md border-t border-theme-border-soft z-50 flex items-center justify-between lg:justify-end gap-3 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
+          <button 
+            onClick={() => {
+              setSaveStatus('saving');
+              autoSaveDraft().then(() => setSaveStatus('saved'));
+            }}
+            className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-theme-app border border-theme-border-soft hover:bg-theme-border-soft text-theme-primary rounded-xl font-bold transition-all"
+          >
+            <Cloud className="w-4 h-4" /> Save Draft
+          </button>
+          
+          <button 
+            onClick={handleFinalize}
+            disabled={isSaving}
+            className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-theme-accent to-pink-500 hover:from-pink-500 hover:to-theme-accent text-white rounded-xl font-black shadow-lg shadow-theme-accent/30 transition-all active:scale-95 disabled:opacity-50"
+          >
+            {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
+            {isSaving ? 'Saving...' : 'Finalize Invoice'}
+          </button>
+        </div>
+
       </div>
 
       {/* Fullscreen Preview Mode */}
