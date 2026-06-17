@@ -13,12 +13,13 @@ const StickyTotalPanel = ({ onFinalize, isSaving }) => {
       
       {/* Math Column */}
       <div className="flex-1 flex flex-col justify-center space-y-3">
-        <h2 className="text-sm font-black uppercase tracking-wider text-theme-primary flex items-center gap-2">
-          <Calculator className="w-4 h-4 text-theme-accent" /> Summary
-        </h2>
-        <button className="p-1.5 text-theme-muted hover:text-theme-accent transition-colors rounded-lg hover:bg-theme-accent/10" title="Advanced Options">
-          <Settings2 className="w-4 h-4" />
-        </button>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-black uppercase tracking-wider text-theme-primary flex items-center gap-2">
+            <Calculator className="w-4 h-4 text-theme-accent" /> Summary
+          </h2>
+          <button className="p-1.5 text-theme-muted hover:text-theme-accent transition-colors rounded-lg hover:bg-theme-accent/10" title="Advanced Options">
+            <Settings2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
