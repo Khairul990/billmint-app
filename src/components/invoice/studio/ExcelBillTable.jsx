@@ -25,58 +25,58 @@ const MemoizedBillRow = memo(({
   onToggleSelection 
 }) => {
   return (
-    <tr className={`grid-row group transition-colors ${isSelected ? 'bg-theme-accent/5' : 'hover:bg-theme-surface-hover'}`}>
+    <tr className={`grid-row group transition-all duration-200 border-b border-theme-border-soft ${isSelected ? 'bg-theme-accent/10 shadow-[inset_4px_0_0_var(--tw-colors-theme-accent)]' : 'hover:bg-theme-surface-hover'}`}>
       <td className="p-0 text-center border-r border-theme-border-soft">
         <input 
           type="checkbox" 
           checked={isSelected}
           onChange={() => onToggleSelection(rowIndex)}
-          className="w-3 h-3 rounded border-theme-border-soft text-theme-accent focus:ring-theme-accent cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity peer-checked:opacity-100"
+          className="w-3.5 h-3.5 rounded border-theme-border-soft text-theme-accent focus:ring-theme-accent cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity peer-checked:opacity-100"
         />
       </td>
       <td className="p-0 text-center border-r border-theme-border-soft text-theme-muted cursor-grab active:cursor-grabbing">
         <GripVertical className="w-3.5 h-3.5 mx-auto opacity-0 group-hover:opacity-50 transition-opacity" />
       </td>
-      <td className="p-0 text-center border-r border-theme-border-soft text-[10px] font-bold text-theme-muted">
+      <td className="p-0 text-center border-r border-theme-border-soft text-[10px] font-black text-theme-muted">
         {item.sn}
       </td>
-      <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-white dark:focus-within:bg-theme-app transition-colors">
+      <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-theme-surface focus-within:shadow-[inset_0_0_0_2px_var(--tw-colors-theme-accent)] transition-all">
         <input
           id={rowIndex === 0 ? "first-item-name" : undefined}
           type="text"
           value={item.itemService || ''}
           onChange={(e) => onUpdateItem(rowIndex, 'itemService', e.target.value)}
           onKeyDown={(e) => onKeyDown(e, rowIndex, 0)}
-          placeholder="Enter item..."
-          className="w-full h-full bg-transparent outline-none text-xs font-bold text-theme-primary py-2 px-2"
+          placeholder={rowIndex === 0 ? "Type item or select Quick Add..." : "Enter item..."}
+          className={`w-full h-full bg-transparent outline-none font-black text-theme-primary py-2.5 px-3 ${rowIndex === 0 ? 'text-sm' : 'text-xs'}`}
         />
       </td>
-      <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-white dark:focus-within:bg-theme-app transition-colors">
+      <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-theme-surface focus-within:shadow-[inset_0_0_0_1px_var(--tw-colors-theme-accent)] transition-all">
         <input
           type="text"
           value={item.description || ''}
           onChange={(e) => onUpdateItem(rowIndex, 'description', e.target.value)}
           onKeyDown={(e) => onKeyDown(e, rowIndex, 1)}
           placeholder="Details..."
-          className="w-full h-full bg-transparent outline-none text-[11px] font-medium text-theme-muted py-2 px-2"
+          className="w-full h-full bg-transparent outline-none text-[11px] font-medium text-theme-muted py-2.5 px-3"
         />
       </td>
-      <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-white dark:focus-within:bg-theme-app transition-colors">
+      <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-theme-surface focus-within:shadow-[inset_0_0_0_1px_var(--tw-colors-theme-accent)] transition-all">
         <input
           type="number"
           value={item.qty || ''}
           onChange={(e) => onUpdateItem(rowIndex, 'qty', e.target.value)}
           onKeyDown={(e) => onKeyDown(e, rowIndex, 2)}
-          className="w-full h-full bg-transparent outline-none text-xs font-bold text-theme-primary text-center appearance-none py-2 px-1"
+          className="w-full h-full bg-transparent outline-none text-xs font-black text-theme-primary text-center appearance-none py-2.5 px-2"
         />
       </td>
-      <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-white dark:focus-within:bg-theme-app transition-colors">
+      <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-theme-surface transition-all">
         <div className="relative h-full flex items-center">
           <select
             value={item.unit || 'Piece'}
             onChange={(e) => onUpdateItem(rowIndex, 'unit', e.target.value)}
             onKeyDown={(e) => onKeyDown(e, rowIndex, 3)}
-            className="w-full h-full bg-transparent outline-none text-[11px] font-bold text-theme-muted py-2 pl-2 pr-4 cursor-pointer appearance-none"
+            className="w-full h-full bg-transparent outline-none text-[11px] font-bold text-theme-muted py-2.5 pl-3 pr-5 cursor-pointer appearance-none"
           >
             <option value="Piece">Piece</option>
             <option value="Kg">Kg</option>
@@ -85,50 +85,53 @@ const MemoizedBillRow = memo(({
             <option value="Box">Box</option>
             <option value="Service">Service</option>
           </select>
-          <ChevronDown className="w-3 h-3 text-theme-muted absolute right-1 pointer-events-none" />
+          <ChevronDown className="w-3 h-3 text-theme-muted absolute right-2 pointer-events-none" />
         </div>
       </td>
-      <td className="p-0 relative border-r border-theme-border-soft bg-transparent focus-within:bg-white dark:focus-within:bg-theme-app transition-colors">
+      <td className="p-0 relative border-r border-theme-border-soft bg-transparent focus-within:bg-theme-surface focus-within:shadow-[inset_0_0_0_1px_var(--tw-colors-theme-accent)] transition-all">
         <input
           type="number"
           value={item.rate || ''}
           onChange={(e) => onUpdateItem(rowIndex, 'rate', e.target.value)}
           onKeyDown={(e) => onKeyDown(e, rowIndex, 4)}
-          placeholder="0.00"
-          className={`w-full h-full bg-transparent outline-none text-xs font-black text-theme-primary py-2 px-2 text-right ${item.itemService && (!item.rate || parseFloat(item.rate) === 0) ? 'bg-rose-500/10' : ''}`}
+          placeholder={rowIndex === 0 ? "Rate ₹" : "0.00"}
+          className={`w-full h-full bg-transparent outline-none font-black text-theme-primary py-2.5 px-3 text-right ${rowIndex === 0 ? 'text-sm' : 'text-xs'} ${item.itemService && (!item.rate || parseFloat(item.rate) === 0) ? 'bg-rose-500/10 text-rose-600' : ''}`}
         />
         {item.itemService && (!item.rate || parseFloat(item.rate) === 0) && (
           <div className="absolute inset-y-0 right-0 w-1 bg-rose-500"></div>
         )}
       </td>
-      <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-white dark:focus-within:bg-theme-app transition-colors">
+      <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-theme-surface focus-within:shadow-[inset_0_0_0_1px_var(--tw-colors-theme-accent)] transition-all">
         <input
           type="number"
           value={item.discount || ''}
           onChange={(e) => onUpdateItem(rowIndex, 'discount', e.target.value)}
           onKeyDown={(e) => onKeyDown(e, rowIndex, 5)}
           placeholder="0"
-          className="w-full h-full bg-transparent outline-none text-xs font-bold text-theme-primary py-2 px-2 text-right"
+          className="w-full h-full bg-transparent outline-none text-xs font-bold text-theme-primary py-2.5 px-3 text-right"
         />
       </td>
-      <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-white dark:focus-within:bg-theme-app transition-colors">
+      <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-theme-surface focus-within:shadow-[inset_0_0_0_1px_var(--tw-colors-theme-accent)] transition-all">
         <input
           type="number"
           value={item.tax || ''}
           onChange={(e) => onUpdateItem(rowIndex, 'tax', e.target.value)}
           onKeyDown={(e) => onKeyDown(e, rowIndex, 6)}
           placeholder="0"
-          className="w-full h-full bg-transparent outline-none text-xs font-bold text-theme-primary py-2 px-2 text-right"
+          className="w-full h-full bg-transparent outline-none text-xs font-bold text-theme-primary py-2.5 px-3 text-right"
         />
       </td>
       <td className="p-0 border-r border-theme-border-soft bg-theme-surface">
-        <div className="w-full h-full flex items-center justify-end px-2 text-xs font-black text-theme-primary">
-          {calculateRowAmount(item).toLocaleString()}
+        <div className="w-full h-full flex items-center justify-end px-3 text-sm font-black text-theme-primary">
+          {calculateRowAmount(item).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
       </td>
       <td className="p-0 text-center">
         <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={() => onDeleteRow(rowIndex)} className="p-1 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded transition-colors" title="Delete Row">
+          <button onClick={() => onCopyRow(rowIndex)} className="p-1.5 text-theme-muted hover:text-theme-primary hover:bg-theme-border-soft rounded-lg transition-colors" title="Duplicate Row">
+            <Copy className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => onDeleteRow(rowIndex)} className="p-1.5 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded-lg transition-colors" title="Delete Row">
             <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -153,88 +156,108 @@ const MemoizedMobileBillRow = memo(({
   onDeleteRow 
 }) => {
   return (
-    <div className="bg-theme-surface rounded-xl p-3 mb-3 border border-theme-border-soft shadow-sm relative group">
-      <div className="flex justify-between items-start mb-2 gap-2">
-        <div className="flex-1">
-          <input
-            type="text"
-            value={item.itemService || ''}
-            onChange={(e) => onUpdateItem(rowIndex, 'itemService', e.target.value)}
-            placeholder="Item name..."
-            className="w-full bg-transparent outline-none text-sm font-black text-theme-primary placeholder-theme-muted/50"
-          />
-        </div>
-        <div className="text-right shrink-0">
-          <div className="text-sm font-black text-theme-primary">
-            ₹{calculateRowAmount(item).toLocaleString()}
+    <div className="bg-theme-surface rounded-2xl p-4 mb-4 border border-theme-border-soft shadow-sm relative group overflow-hidden">
+      <div className="absolute top-0 left-0 w-1 h-full bg-theme-accent"></div>
+      
+      <div className="flex flex-col gap-3">
+        {/* Item Name & Rate */}
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Item Service</label>
+            <input
+              type="text"
+              value={item.itemService || ''}
+              onChange={(e) => onUpdateItem(rowIndex, 'itemService', e.target.value)}
+              placeholder="Enter item name..."
+              className="w-full bg-theme-app/50 border border-theme-border-soft rounded-lg px-3 py-2 outline-none text-sm font-black text-theme-primary focus:border-theme-accent transition-colors"
+            />
           </div>
-        </div>
-      </div>
-
-      <div className="mb-3">
-        <input
-          type="text"
-          value={item.description || ''}
-          onChange={(e) => onUpdateItem(rowIndex, 'description', e.target.value)}
-          placeholder="Details (optional)..."
-          className="w-full bg-transparent outline-none text-xs font-bold text-theme-muted placeholder-theme-muted/30"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 mb-3">
-        <div className="bg-theme-app/50 p-2 rounded-lg border border-theme-border-soft flex items-center justify-between">
-          <span className="text-[10px] font-black uppercase text-theme-muted">Qty</span>
-          <div className="flex items-center gap-2">
-            <button onClick={() => onUpdateItem(rowIndex, 'qty', Math.max(1, (parseFloat(item.qty) || 1) - 1))} className="w-5 h-5 flex items-center justify-center bg-theme-surface rounded shadow-sm text-theme-primary">-</button>
-            <span className="text-xs font-bold text-theme-primary">{item.qty || 0}</span>
-            <button onClick={() => onUpdateItem(rowIndex, 'qty', (parseFloat(item.qty) || 0) + 1)} className="w-5 h-5 flex items-center justify-center bg-theme-surface rounded shadow-sm text-theme-primary">+</button>
-          </div>
-        </div>
-
-        <div className={`bg-theme-app/50 p-2 rounded-lg border border-theme-border-soft flex items-center justify-between ${item.itemService && (!item.rate || parseFloat(item.rate) === 0) ? 'border-rose-400/50 bg-rose-500/5' : ''}`}>
-          <span className="text-[10px] font-black uppercase text-theme-muted">Rate</span>
-          <div className="flex items-center gap-1">
-            <span className="text-xs font-black text-theme-muted">₹</span>
+          <div className="w-28">
+            <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Rate (₹)</label>
             <input
               type="number"
               value={item.rate || ''}
               onChange={(e) => onUpdateItem(rowIndex, 'rate', e.target.value)}
-              placeholder="0"
-              className="w-16 bg-transparent outline-none text-sm font-black text-theme-primary text-right"
+              placeholder="0.00"
+              className="w-full bg-theme-app/50 border border-theme-border-soft rounded-lg px-3 py-2 outline-none text-sm font-black text-theme-primary focus:border-theme-accent transition-colors text-right"
             />
           </div>
         </div>
-      </div>
 
-      <div className="flex gap-3">
-        <div className="flex-1 flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase text-theme-muted">Disc ₹</span>
+        {/* Description */}
+        <div>
           <input
-            type="number"
-            value={item.discount || ''}
-            onChange={(e) => onUpdateItem(rowIndex, 'discount', e.target.value)}
-            placeholder="0"
-            className="w-full bg-theme-app border border-theme-border-soft rounded-md px-2 py-1 text-xs font-bold text-theme-primary outline-none focus:border-theme-accent"
+            type="text"
+            value={item.description || ''}
+            onChange={(e) => onUpdateItem(rowIndex, 'description', e.target.value)}
+            placeholder="Details (optional)..."
+            className="w-full bg-transparent outline-none text-xs font-bold text-theme-muted placeholder-theme-muted/50 px-1"
           />
         </div>
-        <div className="flex-1 flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase text-theme-muted">Tax %</span>
-          <input
-            type="number"
-            value={item.tax || ''}
-            onChange={(e) => onUpdateItem(rowIndex, 'tax', e.target.value)}
-            placeholder="0"
-            className="w-full bg-theme-app border border-theme-border-soft rounded-md px-2 py-1 text-xs font-bold text-theme-primary outline-none focus:border-theme-accent"
-          />
-        </div>
-      </div>
 
-      <button 
-        onClick={() => onDeleteRow(rowIndex)} 
-        className="absolute -top-2 -right-2 w-7 h-7 bg-theme-surface border border-theme-border-soft shadow-sm rounded-full flex items-center justify-center text-theme-muted hover:text-theme-danger hover:border-theme-danger/30 transition-colors opacity-0 group-hover:opacity-100 md:opacity-100"
-      >
-        <Trash2 className="w-3.5 h-3.5" />
-      </button>
+        <div className="h-px w-full bg-theme-border-soft/50 my-1"></div>
+
+        {/* Qty, Unit, Disc, Tax */}
+        <div className="grid grid-cols-4 gap-2">
+          <div className="col-span-1">
+            <label className="text-[9px] font-black uppercase text-theme-muted mb-1 block">Qty</label>
+            <input
+              type="number"
+              value={item.qty || ''}
+              onChange={(e) => onUpdateItem(rowIndex, 'qty', e.target.value)}
+              className="w-full bg-theme-app/50 border border-theme-border-soft rounded-lg px-2 py-1.5 outline-none text-xs font-bold text-theme-primary text-center"
+            />
+          </div>
+          <div className="col-span-1">
+            <label className="text-[9px] font-black uppercase text-theme-muted mb-1 block">Unit</label>
+            <div className="relative">
+              <select
+                value={item.unit || 'Piece'}
+                onChange={(e) => onUpdateItem(rowIndex, 'unit', e.target.value)}
+                className="w-full bg-theme-app/50 border border-theme-border-soft rounded-lg px-2 py-1.5 outline-none text-[10px] font-bold text-theme-muted appearance-none"
+              >
+                <option value="Piece">Piece</option>
+                <option value="Kg">Kg</option>
+                <option value="Meter">Meter</option>
+                <option value="Liter">Liter</option>
+                <option value="Box">Box</option>
+                <option value="Service">Service</option>
+              </select>
+            </div>
+          </div>
+          <div className="col-span-1">
+            <label className="text-[9px] font-black uppercase text-theme-muted mb-1 block">Disc ₹</label>
+            <input
+              type="number"
+              value={item.discount || ''}
+              onChange={(e) => onUpdateItem(rowIndex, 'discount', e.target.value)}
+              className="w-full bg-theme-app/50 border border-theme-border-soft rounded-lg px-2 py-1.5 outline-none text-xs font-bold text-theme-primary text-center"
+            />
+          </div>
+          <div className="col-span-1">
+            <label className="text-[9px] font-black uppercase text-theme-muted mb-1 block">Tax %</label>
+            <input
+              type="number"
+              value={item.tax || ''}
+              onChange={(e) => onUpdateItem(rowIndex, 'tax', e.target.value)}
+              className="w-full bg-theme-app/50 border border-theme-border-soft rounded-lg px-2 py-1.5 outline-none text-xs font-bold text-theme-primary text-center"
+            />
+          </div>
+        </div>
+
+        {/* Total & Action */}
+        <div className="flex items-center justify-between mt-2 pt-3 border-t border-theme-border-soft border-dashed">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black uppercase text-theme-muted">Amount:</span>
+            <span className="text-sm font-black text-theme-primary">₹{calculateRowAmount(item).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          </div>
+          <button 
+            onClick={() => onDeleteRow(rowIndex)} 
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors"
+          >
+            <Trash2 className="w-3 h-3" /> Remove
+          </button>
+        </div>
     </div>
   );
 }, (prevProps, nextProps) => {
@@ -373,62 +396,56 @@ const ExcelBillTable = ({ products }) => {
       <div className="w-full bg-theme-surface">
         {state.items.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[300px] text-center p-4">
-            <div className="bg-theme-app/50 border border-theme-border-soft p-6 rounded-2xl w-full max-w-md flex flex-col items-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-              
-              <div className="w-16 h-16 bg-theme-surface border border-theme-border-soft text-theme-muted rounded-full flex items-center justify-center mb-4 shadow-sm">
-                <FilePlus className="w-6 h-6" />
-              </div>
-              
-              <h3 className="text-lg font-black text-theme-primary mb-1">No Items Added</h3>
-              <p className="text-xs font-bold text-theme-muted mb-6">
-                Click Quick Add or manually add the first row.
-              </p>
-              
-              <div className="flex flex-col gap-3 w-full">
-                <button
-                  onClick={() => {
-                    handleAddRow();
-                    setTimeout(() => {
-                      const firstInput = document.querySelector('input[placeholder="Enter item..."]');
-                      if (firstInput) firstInput.focus();
-                    }, 100);
-                  }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-xl font-black shadow-sm transition-all"
-                >
-                  <Plus className="w-4 h-4" /> Add First Item
-                </button>
-              </div>
+          <div className="flex flex-col items-center justify-center min-h-[250px] text-center p-8 bg-theme-app/30 border border-theme-border-soft border-dashed rounded-2xl mx-4 mb-4">
+            <div className="w-16 h-16 bg-theme-surface border border-theme-border-soft text-theme-muted rounded-2xl flex items-center justify-center mb-4 shadow-sm rotate-3">
+              <FilePlus className="w-6 h-6 text-theme-accent" />
             </div>
+            <h3 className="text-lg font-black text-theme-primary mb-1">No Bill Items Yet</h3>
+            <p className="text-xs font-bold text-theme-muted mb-6 max-w-xs">
+              Start adding items by clicking on Quick Add above or add an empty row.
+            </p>
+            <button
+              onClick={() => {
+                handleAddRow();
+                setTimeout(() => {
+                  const firstInput = document.querySelector('input[placeholder="Type item or select Quick Add..."]');
+                  if (firstInput) firstInput.focus();
+                }, 100);
+              }}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-xl font-black shadow-premium transition-all hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <Plus className="w-4 h-4" /> Add First Item
+            </button>
+          </div>
           </div>
         ) : (
           <>
             {/* Desktop Table View */}
             <table className="hidden sm:table w-full text-left border-collapse" ref={tableRef}>
-              <thead className="sticky top-[64px] bg-theme-surface z-30 text-[9px] uppercase font-black text-theme-muted tracking-wider shadow-sm border-b border-theme-border-soft">
+              <thead className="sticky top-[64px] bg-theme-surface z-30 text-[9px] uppercase font-black text-theme-muted tracking-wider shadow-sm border-y border-theme-border-soft">
                 <tr>
-                  <th className="py-2 px-1 w-8 text-center border-r border-theme-border-soft">
+                  <th className="py-3 px-1 w-8 text-center border-r border-theme-border-soft bg-theme-app/50">
                     <input 
                       type="checkbox" 
                       checked={state.items.length > 0 && selectedRows.size === state.items.length}
                       onChange={toggleAllSelection}
-                      className="w-3 h-3 rounded border-theme-border-soft text-theme-accent focus:ring-theme-accent cursor-pointer"
+                      className="w-3.5 h-3.5 rounded border-theme-border-soft text-theme-accent focus:ring-theme-accent cursor-pointer"
                     />
                   </th>
-                  <th className="py-2 px-1 w-6 text-center border-r border-theme-border-soft"></th>
-                  <th className="py-2 px-1 w-8 text-center border-r border-theme-border-soft">#</th>
-                  <th className="py-2 px-2 w-[35%] min-w-[200px] border-r border-theme-border-soft">Item Name</th>
-                  <th className="py-2 px-2 w-[25%] min-w-[150px] border-r border-theme-border-soft">Description</th>
-                  <th className="py-2 px-1 w-20 text-center border-r border-theme-border-soft">Qty</th>
-                  <th className="py-2 px-2 w-20 border-r border-theme-border-soft">Unit</th>
-                  <th className="py-2 px-2 w-24 text-right border-r border-theme-border-soft">Rate (₹)</th>
-                  <th className="py-2 px-2 w-20 text-right border-r border-theme-border-soft">Disc</th>
-                  <th className="py-2 px-2 w-16 text-right border-r border-theme-border-soft">Tax%</th>
-                  <th className="py-2 px-2 w-28 text-right border-r border-theme-border-soft">Amount</th>
-                  <th className="py-2 px-1 w-12 text-center"></th>
+                  <th className="py-3 px-1 w-6 text-center border-r border-theme-border-soft bg-theme-app/50"></th>
+                  <th className="py-3 px-1 w-8 text-center border-r border-theme-border-soft bg-theme-app/50">#</th>
+                  <th className="py-3 px-3 w-[35%] min-w-[200px] border-r border-theme-border-soft bg-theme-app/50">Item Name</th>
+                  <th className="py-3 px-3 w-[25%] min-w-[150px] border-r border-theme-border-soft bg-theme-app/50">Description</th>
+                  <th className="py-3 px-2 w-20 text-center border-r border-theme-border-soft bg-theme-app/50">Qty</th>
+                  <th className="py-3 px-3 w-20 border-r border-theme-border-soft bg-theme-app/50">Unit</th>
+                  <th className="py-3 px-3 w-24 text-right border-r border-theme-border-soft bg-theme-app/50">Rate (₹)</th>
+                  <th className="py-3 px-3 w-20 text-right border-r border-theme-border-soft bg-theme-app/50">Disc</th>
+                  <th className="py-3 px-3 w-16 text-right border-r border-theme-border-soft bg-theme-app/50">Tax%</th>
+                  <th className="py-3 px-3 w-28 text-right border-r border-theme-border-soft bg-theme-app/50">Amount</th>
+                  <th className="py-3 px-1 w-16 text-center bg-theme-app/50"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-theme-border-soft bg-theme-surface">
+              <tbody className="bg-theme-surface">
                 {state.items.map((item, rowIndex) => (
                   <MemoizedBillRow
                     key={item.id}
@@ -444,6 +461,16 @@ const ExcelBillTable = ({ products }) => {
                 ))}
               </tbody>
             </table>
+            
+            {/* Helper Row when rows are few */}
+            {state.items.length > 0 && state.items.length < 5 && (
+              <div className="hidden sm:flex items-center justify-center p-3 border-b border-theme-border-soft bg-theme-app/30 animate-in fade-in">
+                <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider flex items-center gap-4">
+                  <span><kbd className="px-1.5 py-0.5 bg-theme-surface border border-theme-border-soft rounded mr-1">Enter</kbd> Add Row</span>
+                  <span><kbd className="px-1.5 py-0.5 bg-theme-surface border border-theme-border-soft rounded mr-1">Tab</kbd> Next Field</span>
+                </p>
+              </div>
+            )}
 
             {/* Mobile Stacked Cards View */}
             <div className="block sm:hidden divide-y divide-theme-border-soft p-2">

@@ -62,38 +62,48 @@ const QuickProductBar = ({ products = [] }) => {
 
   return (
     <div className="flex flex-col gap-3 mb-4 relative bg-theme-surface/50 p-3 rounded-xl border border-theme-border-soft">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted min-w-[70px]">Most Used:</span>
-        {mostUsed.map((p, idx) => (
-          <button
-            key={`most-${idx}`}
-            onClick={() => handleQuickAdd(p)}
-            className="flex flex-col items-start gap-0.5 px-3 py-1.5 bg-theme-app border border-theme-border-soft hover:border-theme-accent hover:shadow-sm rounded-xl text-left transition-all group min-w-[110px]"
-          >
-            <div className="flex items-center justify-between w-full">
-              <span className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors line-clamp-1">{p.name || p.productName}</span>
-              <Plus className="w-3 h-3 text-theme-muted group-hover:text-theme-accent transition-colors opacity-0 group-hover:opacity-100 ml-1 shrink-0" />
-            </div>
-            <span className="text-[10px] font-black text-theme-muted group-hover:text-theme-accent/80 transition-colors">₹{(p.rate || p.price || 0).toLocaleString()}</span>
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted min-w-[70px] flex items-center gap-1.5"><AlertTriangle className="w-3 h-3 text-amber-500" /> Most Used:</span>
+        <div className="flex flex-wrap gap-2">
+          {mostUsed.map((p, idx) => (
+            <button
+              key={`most-${idx}`}
+              onClick={() => handleQuickAdd(p)}
+              className="group flex flex-col items-start px-3 py-2 bg-theme-app/50 border border-theme-border-soft hover:bg-theme-surface hover:border-theme-accent/50 hover:shadow-sm rounded-xl text-left transition-all w-32 relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <span className="text-xs font-black text-theme-primary group-hover:text-theme-accent transition-colors line-clamp-1 w-full relative z-10">{p.name || p.productName}</span>
+              <div className="flex items-center justify-between w-full mt-1 relative z-10">
+                <span className="text-[10px] font-bold text-theme-muted group-hover:text-theme-primary transition-colors">₹{(p.rate || p.price || 0).toLocaleString()}</span>
+                <span className="w-4 h-4 rounded-full bg-theme-accent/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform scale-75 group-hover:scale-100">
+                  <Plus className="w-2.5 h-2.5 text-theme-accent" />
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
       
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted min-w-[70px]">Recent:</span>
-        {recentUsed.map((p, idx) => (
-          <button
-            key={`recent-${idx}`}
-            onClick={() => handleQuickAdd(p)}
-            className="flex flex-col items-start gap-0.5 px-3 py-1.5 bg-theme-app border border-theme-border-soft hover:border-theme-accent hover:shadow-sm rounded-xl text-left transition-all group min-w-[110px]"
-          >
-            <div className="flex items-center justify-between w-full">
-              <span className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors line-clamp-1">{p.name || p.productName}</span>
-              <Plus className="w-3 h-3 text-theme-muted group-hover:text-theme-accent transition-colors opacity-0 group-hover:opacity-100 ml-1 shrink-0" />
-            </div>
-            <span className="text-[10px] font-black text-theme-muted group-hover:text-theme-accent/80 transition-colors">₹{(p.rate || p.price || 0).toLocaleString()}</span>
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted min-w-[70px] flex items-center gap-1.5"><ArrowUp className="w-3 h-3 text-emerald-500" /> Recent:</span>
+        <div className="flex flex-wrap gap-2">
+          {recentUsed.map((p, idx) => (
+            <button
+              key={`recent-${idx}`}
+              onClick={() => handleQuickAdd(p)}
+              className="group flex flex-col items-start px-3 py-2 bg-theme-app/50 border border-theme-border-soft hover:bg-theme-surface hover:border-theme-accent/50 hover:shadow-sm rounded-xl text-left transition-all w-32 relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <span className="text-xs font-black text-theme-primary group-hover:text-theme-accent transition-colors line-clamp-1 w-full relative z-10">{p.name || p.productName}</span>
+              <div className="flex items-center justify-between w-full mt-1 relative z-10">
+                <span className="text-[10px] font-bold text-theme-muted group-hover:text-theme-primary transition-colors">₹{(p.rate || p.price || 0).toLocaleString()}</span>
+                <span className="w-4 h-4 rounded-full bg-theme-accent/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform scale-75 group-hover:scale-100">
+                  <Plus className="w-2.5 h-2.5 text-theme-accent" />
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
 
       {duplicatePrompt && (
