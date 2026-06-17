@@ -189,7 +189,7 @@ const ExcelBillTable = ({ products }) => {
           <>
             {/* Desktop Table View */}
             <table className="hidden sm:table w-full text-left border-collapse" ref={tableRef}>
-          <thead className="sticky top-[108px] bg-theme-app/95 backdrop-blur-md z-30 text-[10px] uppercase font-black text-theme-muted tracking-wider shadow-sm">
+          <thead className="sticky top-0 bg-theme-app/95 backdrop-blur-md z-30 text-[10px] uppercase font-black text-theme-muted tracking-wider shadow-sm">
             <tr>
               <th className="p-3 w-10 text-center">
                 <input 
