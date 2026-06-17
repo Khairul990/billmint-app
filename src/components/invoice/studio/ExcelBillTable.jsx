@@ -1,28 +1,19 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { Plus, Copy, Trash2, GripVertical } from 'lucide-react';
+import { Plus, Copy, Trash2, GripVertical, CheckSquare } from 'lucide-react';
 import QuickProductBar from './QuickProductBar';
 
 const ExcelBillTable = ({ products }) => {
   const { state, dispatch } = useInvoice();
   const tableRef = useRef(null);
+  const [selectedRows, setSelectedRows] = useState(new Set());
 
   const handleUpdateItem = (index, field, value) => {
     const newItems = [...state.items];
     newItems[index] = { ...newItems[index], [field]: value };
     
-    // Auto calculate amount
-    if (['qty', 'rate', 'discount', 'tax'].includes(field)) {
-      const q = parseFloat(newItems[index].qty) || 0;
-      const r = parseFloat(newItems[index].rate) || 0;
-      const d = parseFloat(newItems[index].discount) || 0;
-      const t = parseFloat(newItems[index].tax) || 0;
-      
-      const baseAmount = q * r;
-      const afterDiscount = baseAmount - d;
-      const taxAmount = (afterDiscount * t) / 100;
-      newItems[index].amount = afterDiscount + taxAmount;
-    }
+    // Removed side-effect amount calculation. Totals are now computed globally or dynamically rendered.
+    // This fixes the bug where Quick Added items had invalid amounts or double taxation.
     
     dispatch({ type: 'SET_ITEMS', payload: newItems });
   };
@@ -37,8 +28,7 @@ const ExcelBillTable = ({ products }) => {
       rate: 0,
       discount: 0,
       tax: 0,
-      unit: 'Piece',
-      amount: 0
+      unit: 'Piece'
     }];
     dispatch({ type: 'SET_ITEMS', payload: newItems });
   };
@@ -51,6 +41,7 @@ const ExcelBillTable = ({ products }) => {
   const handleDeleteRow = (index) => {
     if (state.items.length === 1) {
       // Don't delete last row, just clear it
+      handleUpdateItem(0, 'itemService', '');
       handleUpdateItem(0, 'description', '');
       handleUpdateItem(0, 'qty', 1);
       handleUpdateItem(0, 'rate', 0);
@@ -58,6 +49,47 @@ const ExcelBillTable = ({ products }) => {
     }
     const newItems = state.items.filter((_, i) => i !== index).map((item, idx) => ({ ...item, sn: idx + 1 }));
     dispatch({ type: 'SET_ITEMS', payload: newItems });
+    const newSelected = new Set(selectedRows);
+    newSelected.delete(index);
+    setSelectedRows(newSelected);
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedRows.size === 0) return;
+    const newItems = state.items.filter((_, i) => !selectedRows.has(i)).map((item, idx) => ({ ...item, sn: idx + 1 }));
+    
+    // If we deleted everything, leave one empty row
+    if (newItems.length === 0) {
+      newItems.push({
+        id: `item-${Date.now()}`,
+        sn: 1,
+        description: '',
+        itemService: '',
+        qty: 1,
+        rate: 0,
+        discount: 0,
+        tax: 0,
+        unit: 'Piece'
+      });
+    }
+    
+    dispatch({ type: 'SET_ITEMS', payload: newItems });
+    setSelectedRows(new Set());
+  };
+
+  const toggleRowSelection = (index) => {
+    const newSelected = new Set(selectedRows);
+    if (newSelected.has(index)) newSelected.delete(index);
+    else newSelected.add(index);
+    setSelectedRows(newSelected);
+  };
+
+  const toggleAllSelection = () => {
+    if (selectedRows.size === state.items.length) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(state.items.map((_, i) => i)));
+    }
   };
 
   // Keyboard Navigation (Excel-like)
@@ -99,6 +131,13 @@ const ExcelBillTable = ({ products }) => {
     }
   };
 
+  const calculateRowAmount = (item) => {
+    const q = parseFloat(item.qty) || 0;
+    const r = parseFloat(item.rate) || 0;
+    const d = parseFloat(item.discount) || 0;
+    return Math.max(0, (q * r) - d);
+  };
+
   return (
     <div className="flex flex-col h-full bg-theme-surface">
       <div className="p-4 border-b border-theme-border-soft">
@@ -110,6 +149,14 @@ const ExcelBillTable = ({ products }) => {
         <table className="w-full text-left border-collapse" ref={tableRef}>
           <thead className="sticky top-0 bg-theme-app/95 backdrop-blur-md z-10 text-[10px] uppercase font-black text-theme-muted tracking-wider shadow-sm">
             <tr>
+              <th className="p-3 w-10 text-center">
+                <input 
+                  type="checkbox" 
+                  checked={state.items.length > 0 && selectedRows.size === state.items.length}
+                  onChange={toggleAllSelection}
+                  className="w-3.5 h-3.5 rounded border-theme-border-soft text-theme-accent focus:ring-theme-accent cursor-pointer"
+                />
+              </th>
               <th className="p-3 w-10 text-center"></th>
               <th className="p-3 w-10 text-center">SN</th>
               <th className="p-3 min-w-[150px]">Item</th>
@@ -125,7 +172,15 @@ const ExcelBillTable = ({ products }) => {
           </thead>
           <tbody className="divide-y divide-theme-border-soft">
             {state.items.map((item, rowIndex) => (
-              <tr key={item.id} className="grid-row group hover:bg-theme-accent/5 transition-colors">
+              <tr key={item.id} className={`grid-row group transition-colors ${selectedRows.has(rowIndex) ? 'bg-theme-accent/10' : 'hover:bg-theme-accent/5'}`}>
+                <td className="p-2 text-center border-r border-transparent">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedRows.has(rowIndex)}
+                    onChange={() => toggleRowSelection(rowIndex)}
+                    className="w-3.5 h-3.5 rounded border-theme-border-soft text-theme-accent focus:ring-theme-accent cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity peer-checked:opacity-100"
+                  />
+                </td>
                 <td className="p-2 text-center text-theme-muted cursor-grab active:cursor-grabbing">
                   <GripVertical className="w-4 h-4 mx-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                 </td>
@@ -153,13 +208,25 @@ const ExcelBillTable = ({ products }) => {
                   />
                 </td>
                 <td className="p-2">
-                  <input
-                    type="number"
-                    value={item.qty || ''}
-                    onChange={(e) => handleUpdateItem(rowIndex, 'qty', e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, rowIndex, 2)}
-                    className="w-full bg-transparent border-b border-transparent focus:border-theme-accent outline-none text-sm font-bold text-theme-primary py-1 px-1 text-center transition-colors appearance-none"
-                  />
+                  <div className="flex items-center justify-center gap-1 bg-theme-app/50 rounded-lg p-0.5 border border-theme-border-soft">
+                    <button 
+                      onClick={() => handleUpdateItem(rowIndex, 'qty', Math.max(1, (parseFloat(item.qty) || 1) - 1))}
+                      className="w-5 h-5 flex items-center justify-center text-theme-muted hover:text-theme-primary hover:bg-theme-surface rounded transition-colors"
+                      tabIndex="-1"
+                    >-</button>
+                    <input
+                      type="number"
+                      value={item.qty || ''}
+                      onChange={(e) => handleUpdateItem(rowIndex, 'qty', e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(e, rowIndex, 2)}
+                      className="w-8 bg-transparent focus:border-theme-accent outline-none text-sm font-bold text-theme-primary text-center appearance-none"
+                    />
+                    <button 
+                      onClick={() => handleUpdateItem(rowIndex, 'qty', (parseFloat(item.qty) || 0) + 1)}
+                      className="w-5 h-5 flex items-center justify-center text-theme-muted hover:text-theme-primary hover:bg-theme-surface rounded transition-colors"
+                      tabIndex="-1"
+                    >+</button>
+                  </div>
                 </td>
                 <td className="p-2">
                   <select
@@ -205,7 +272,7 @@ const ExcelBillTable = ({ products }) => {
                 </td>
                 <td className="p-2">
                   <div className="text-right text-sm font-black text-theme-primary pr-2">
-                    ₹{item.amount?.toLocaleString()}
+                    ₹{calculateRowAmount(item).toLocaleString()}
                   </div>
                 </td>
                 <td className="p-2 text-center">
@@ -224,7 +291,17 @@ const ExcelBillTable = ({ products }) => {
         </table>
       </div>
 
-      <div className="p-3 border-t border-theme-border-soft bg-theme-app/50 flex justify-center">
+      <div className="p-3 border-t border-theme-border-soft bg-theme-app/50 flex justify-between items-center">
+        <div>
+          {selectedRows.size > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="flex items-center gap-2 px-4 py-2 bg-theme-danger/10 hover:bg-theme-danger/20 text-theme-danger text-xs font-bold rounded-xl transition-all shadow-sm border border-theme-danger/20"
+            >
+              <Trash2 className="w-4 h-4" /> Delete Selected ({selectedRows.size})
+            </button>
+          )}
+        </div>
         <button
           onClick={handleAddRow}
           className="flex items-center gap-2 px-4 py-2 bg-theme-surface hover:bg-theme-border-soft text-theme-primary text-xs font-bold rounded-xl transition-all shadow-sm border border-theme-border-soft"

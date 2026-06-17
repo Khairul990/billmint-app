@@ -7,11 +7,15 @@
  */
 export const calculateTotals = (items = [], taxPercentage = 0, discountAmount = 0) => {
   const subtotal = items.reduce((acc, item) => {
-    return acc + (parseFloat(item.amount) || 0);
+    const q = parseFloat(item.qty) || 0;
+    const r = parseFloat(item.rate) || 0;
+    const d = parseFloat(item.discount) || 0;
+    const itemAmount = Math.max(0, (q * r) - d); // Row level calculation
+    return acc + itemAmount;
   }, 0);
 
-  const discount = parseFloat(discountAmount) || 0;
-  const taxableAmount = Math.max(0, subtotal - discount);
+  const globalDiscount = parseFloat(discountAmount) || 0;
+  const taxableAmount = Math.max(0, subtotal - globalDiscount);
   
   const taxRate = parseFloat(taxPercentage) || 0;
   const taxAmount = (taxableAmount * taxRate) / 100;

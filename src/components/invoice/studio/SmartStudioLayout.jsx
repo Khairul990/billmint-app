@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInvoice } from '../../../contexts/InvoiceContext';
 import { toast } from 'react-hot-toast';
+import { Check, User, ShoppingBag, CreditCard } from 'lucide-react';
 
 import StudioHeader from './StudioHeader';
 import SmartCustomerSelect from './SmartCustomerSelect';
@@ -78,16 +79,25 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [autoSaveDraft]);
 
-  const handleFinalize = async () => {
+  const validateBeforeSave = () => {
     if (!state.customer.name) {
       toast.error('Customer name is required to finalize.');
-      return;
+      return false;
     }
     const hasValidItems = state.items.some(i => i.description || i.rate > 0);
     if (!hasValidItems) {
       toast.error('Please add at least one item.');
-      return;
+      return false;
     }
+    if (state.totals.grandTotal === 0 && state.items.length > 0) {
+      toast.error('Grand Total is ₹0. Please check item rates and quantities.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleFinalize = async () => {
+    if (!validateBeforeSave()) return;
 
     setIsSaving(true);
     try {
@@ -114,8 +124,40 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
         }}
         onFinalize={handleFinalize}
         isSaving={isSaving}
-        onDownloadPDF={onDownloadPDF}
+        onDownloadPDF={() => {
+          if (validateBeforeSave()) {
+            if (onDownloadPDF) onDownloadPDF(state);
+          }
+        }}
       />
+
+      {/* Progress Indicator */}
+      <div className="bg-theme-surface border-b border-theme-border-soft px-4 py-2.5 flex items-center justify-center gap-2 sm:gap-6 overflow-x-auto scrollbar-hide">
+        <div className={`flex items-center gap-2 ${!!state.customer.name ? 'text-theme-success' : 'text-theme-muted'}`}>
+          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${!!state.customer.name ? 'bg-theme-success/20 text-theme-success' : 'bg-theme-app border border-theme-border-soft'}`}>
+            {!!state.customer.name ? <Check className="w-3 h-3" /> : 1}
+          </div>
+          <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Customer</span>
+        </div>
+        
+        <div className="w-8 h-[1px] bg-theme-border-soft"></div>
+        
+        <div className={`flex items-center gap-2 ${state.items.some(i => (i.description || i.itemService) && i.rate > 0) ? 'text-theme-success' : 'text-theme-muted'}`}>
+          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${state.items.some(i => (i.description || i.itemService) && i.rate > 0) ? 'bg-theme-success/20 text-theme-success' : 'bg-theme-app border border-theme-border-soft'}`}>
+            {state.items.some(i => (i.description || i.itemService) && i.rate > 0) ? <Check className="w-3 h-3" /> : 2}
+          </div>
+          <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Items</span>
+        </div>
+
+        <div className="w-8 h-[1px] bg-theme-border-soft"></div>
+
+        <div className={`flex items-center gap-2 ${state.totals.grandTotal > 0 ? 'text-theme-success' : 'text-theme-muted'}`}>
+          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${state.totals.grandTotal > 0 ? 'bg-theme-success/20 text-theme-success' : 'bg-theme-app border border-theme-border-soft'}`}>
+            {state.totals.grandTotal > 0 ? <Check className="w-3 h-3" /> : 3}
+          </div>
+          <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Summary</span>
+        </div>
+      </div>
 
       {/* Main Studio Body */}
       <div className={`flex flex-1 gap-6 p-4 md:p-6 transition-all duration-300 ${previewMode === 'FULLSCREEN' ? 'hidden' : ''}`}>
@@ -196,7 +238,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
           </button>
           
           <button 
-            onClick={() => { if(onDownloadPDF) onDownloadPDF(state); }}
+            onClick={() => { if(validateBeforeSave() && onDownloadPDF) onDownloadPDF(state); }}
             className="flex-shrink-0 bg-theme-surface border border-theme-border-soft hover:bg-theme-border-soft text-theme-primary font-bold text-xs px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
           >
             Generate PDF
