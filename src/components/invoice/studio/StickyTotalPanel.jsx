@@ -61,7 +61,6 @@ const StickyTotalPanel = ({ onFinalize, isSaving }) => {
               />
             </div>
           </div>
-        </div>
 
         {/* Grand Total Big Display */}
         <div className="bg-[image:var(--accent-gradient)] rounded-2xl p-4 shadow-glow mb-6 relative overflow-hidden">
