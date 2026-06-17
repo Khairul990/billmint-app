@@ -198,7 +198,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         <CompactPaymentSection />
 
         {/* Action Bar (Sticky Bottom) - Mobile/Desktop Unified */}
-        <div className="fixed bottom-0 left-0 lg:left-64 right-0 p-4 bg-theme-surface/95 backdrop-blur-md border-t border-theme-border-soft z-50 flex items-center justify-between lg:justify-end gap-3 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
+        <div className="sticky bottom-0 mt-4 p-4 bg-theme-surface/95 backdrop-blur-md border border-theme-border-soft rounded-2xl z-50 flex items-center justify-between lg:justify-end gap-3 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
           <button 
             onClick={() => {
               setSaveStatus('saving');
@@ -236,49 +236,6 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Universal Sticky Bottom Action Bar (Mobile Only) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-theme-app/95 backdrop-blur-xl border-t border-theme-border-soft px-4 py-3 flex lg:hidden items-center justify-between z-50 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-        
-        <div className="hidden sm:flex items-center gap-4 border-r border-theme-border-soft pr-4">
-          <div>
-            <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Grand Total</p>
-            <p className="text-xl font-black text-theme-primary leading-none mt-1">₹{state.totals.grandTotal.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Balance Due</p>
-            <p className="text-lg font-black text-theme-danger leading-none mt-1">₹{state.totals.balanceDue.toLocaleString()}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 md:gap-3 overflow-x-auto w-full sm:w-auto scrollbar-hide">
-          <button 
-            onClick={() => {
-              setSaveStatus('saving');
-              autoSaveDraft().then(() => setSaveStatus('saved'));
-            }}
-            disabled={isSaving}
-            className="flex-shrink-0 bg-theme-surface border border-theme-border-soft hover:bg-theme-border-soft text-theme-primary font-bold text-xs px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
-          >
-            Save Draft
-          </button>
-          
-          <button 
-            onClick={() => { if(validateBeforeSave() && onDownloadPDF) onDownloadPDF(state); }}
-            className="flex-shrink-0 bg-theme-surface border border-theme-border-soft hover:bg-theme-border-soft text-theme-primary font-bold text-xs px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
-          >
-            Generate PDF
-          </button>
-          
-          <button 
-            onClick={handleFinalize}
-            disabled={isSaving}
-            className="flex-shrink-0 bg-[image:var(--accent-gradient)] text-white font-black text-xs px-6 py-2.5 rounded-xl shadow-glow active:scale-95 transition-transform flex items-center whitespace-nowrap"
-          >
-            {isSaving ? "Processing..." : "Generate Live Link"}
-          </button>
-        </div>
-      </div>
 
       {/* Unsaved Changes Prompt */}
       {showExitPrompt && (
