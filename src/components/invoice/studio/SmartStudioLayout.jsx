@@ -17,6 +17,11 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
   const [lastSaved, setLastSaved] = useState(null);
   const [saveStatus, setSaveStatus] = useState(''); // '', 'unsaved', 'saving', 'saved'
 
+  const onSaveInvoiceRef = React.useRef(onSaveInvoice);
+  useEffect(() => {
+    onSaveInvoiceRef.current = onSaveInvoice;
+  }, [onSaveInvoice]);
+
   // Auto-Save Engine (Debounced)
   const autoSaveDraft = useCallback(async () => {
     // Basic validation to prevent saving completely empty drafts repeatedly
@@ -25,14 +30,14 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
 
     try {
       // Push to onSaveInvoice as a Draft and mark silent=true
-      if (onSaveInvoice) {
-        await onSaveInvoice({ ...state, paymentStatus: 'Draft' }, false, true);
+      if (onSaveInvoiceRef.current) {
+        await onSaveInvoiceRef.current({ ...state, paymentStatus: 'Draft' }, false, true);
         setLastSaved(new Date());
       }
     } catch (err) {
       console.error("Auto-save failed", err);
     }
-  }, [state, onSaveInvoice]);
+  }, [state]);
 
   // Debounce effect
   useEffect(() => {
