@@ -9,7 +9,8 @@ const CreateInvoice = ({
   businessSettings,
   onSaveInvoice,
   editingInvoice = null,
-  onDownloadPDF
+  onDownloadPDF,
+  onBack
 }) => {
   return (
     <InvoiceProvider 
@@ -22,6 +23,7 @@ const CreateInvoice = ({
         products={products}
         onSaveInvoice={onSaveInvoice}
         onDownloadPDF={onDownloadPDF}
+        onBack={onBack}
       />
     </InvoiceProvider>
   );

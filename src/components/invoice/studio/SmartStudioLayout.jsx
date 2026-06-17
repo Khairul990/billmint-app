@@ -9,14 +9,16 @@ import SmartCustomerSelect from './SmartCustomerSelect';
 import ExcelBillTable from './ExcelBillTable';
 import StickyTotalPanel from './StickyTotalPanel';
 import LiveInvoicePreview from '../LiveInvoicePreview';
+import { AlertTriangle } from 'lucide-react';
 
-const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }) => {
+const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, onBack }) => {
   const { state, dispatch } = useInvoice();
   
   const [previewMode, setPreviewMode] = useState('OFF');
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [saveStatus, setSaveStatus] = useState(''); // '', 'unsaved', 'saving', 'saved'
+  const [showExitPrompt, setShowExitPrompt] = useState(false);
 
   const onSaveInvoiceRef = React.useRef(onSaveInvoice);
   useEffect(() => {
@@ -110,8 +112,16 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
     }
   };
 
+  const handleBackClick = () => {
+    if (saveStatus === 'unsaved') {
+      setShowExitPrompt(true);
+    } else {
+      if (onBack) onBack();
+    }
+  };
+
   return (
-    <div className="flex flex-col min-h-[calc(100vh-6rem)] bg-theme-app">
+    <div className="flex flex-col min-h-[calc(100vh-6rem)] bg-theme-app relative">
       {/* Smart Sticky Header */}
       <StudioHeader 
         previewMode={previewMode} 
@@ -129,10 +139,11 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
             if (onDownloadPDF) onDownloadPDF(state);
           }
         }}
+        onBack={handleBackClick}
       />
 
       {/* Progress Indicator */}
-      <div className="bg-theme-surface border-b border-theme-border-soft px-4 py-2.5 flex items-center justify-center gap-2 sm:gap-6 overflow-x-auto scrollbar-hide">
+      <div className="sticky top-[72px] z-40 bg-theme-surface/95 backdrop-blur-md border-b border-theme-border-soft px-4 py-2.5 flex items-center justify-center gap-2 sm:gap-6 overflow-x-auto scrollbar-hide">
         <div className={`flex items-center gap-2 ${!!state.customer.name ? 'text-theme-success' : 'text-theme-muted'}`}>
           <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${!!state.customer.name ? 'bg-theme-success/20 text-theme-success' : 'bg-theme-app border border-theme-border-soft'}`}>
             {!!state.customer.name ? <Check className="w-3 h-3" /> : 1}
@@ -160,7 +171,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
       </div>
 
       {/* Main Studio Body */}
-      <div className={`flex flex-1 gap-6 p-4 md:p-6 transition-all duration-300 ${previewMode === 'FULLSCREEN' ? 'hidden' : ''}`}>
+      <div className={`flex flex-1 gap-6 p-4 md:p-6 pb-32 transition-all duration-300 ${previewMode === 'FULLSCREEN' ? 'hidden' : ''}`}>
         
         {/* Left Workspace */}
         <div className={`flex flex-col gap-6 transition-all duration-500 ${previewMode === 'SIDE' ? 'w-full lg:w-[60%]' : 'w-full'}`}>
@@ -253,6 +264,54 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF }
           </button>
         </div>
       </div>
+
+      {/* Unsaved Changes Prompt */}
+      {showExitPrompt && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-theme-surface border border-theme-border-soft rounded-2xl shadow-2xl w-full max-w-sm p-6"
+          >
+            <div className="flex items-center gap-3 text-rose-500 mb-4">
+              <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-black text-theme-primary leading-tight">Unsaved Changes</h3>
+            </div>
+            
+            <p className="text-sm font-bold text-theme-muted mb-6">
+              You have unsaved changes. Save as draft before leaving?
+            </p>
+
+            <div className="flex flex-col gap-2">
+              <button 
+                onClick={async () => {
+                  setSaveStatus('saving');
+                  await autoSaveDraft();
+                  setSaveStatus('saved');
+                  if (onBack) onBack();
+                }}
+                className="w-full py-3 bg-theme-accent hover:bg-theme-accent/90 text-white text-sm font-bold rounded-xl transition-colors"
+              >
+                Save & Exit
+              </button>
+              <button 
+                onClick={() => { if(onBack) onBack(); }}
+                className="w-full py-3 bg-theme-danger/10 hover:bg-theme-danger/20 text-theme-danger text-sm font-bold rounded-xl transition-colors"
+              >
+                Exit without saving
+              </button>
+              <button 
+                onClick={() => setShowExitPrompt(false)}
+                className="w-full py-3 bg-transparent hover:bg-theme-border-soft text-theme-muted hover:text-theme-primary text-sm font-bold rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
     </div>
   );

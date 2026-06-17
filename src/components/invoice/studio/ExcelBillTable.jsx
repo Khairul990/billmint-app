@@ -140,14 +140,14 @@ const ExcelBillTable = ({ products }) => {
 
   return (
     <div className="flex flex-col h-full bg-theme-surface">
-      <div className="p-4 border-b border-theme-border-soft">
+      <div className="sticky top-0 z-40 bg-theme-surface/95 backdrop-blur-md p-4 border-b border-theme-border-soft">
         <h2 className="text-sm font-black uppercase tracking-wider text-theme-primary mb-3">Bill Items</h2>
         <QuickProductBar products={products} />
       </div>
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-left border-collapse" ref={tableRef}>
-          <thead className="sticky top-0 bg-theme-app/95 backdrop-blur-md z-10 text-[10px] uppercase font-black text-theme-muted tracking-wider shadow-sm">
+          <thead className="sticky top-[108px] bg-theme-app/95 backdrop-blur-md z-30 text-[10px] uppercase font-black text-theme-muted tracking-wider shadow-sm">
             <tr>
               <th className="p-3 w-10 text-center">
                 <input 
@@ -304,11 +304,19 @@ const ExcelBillTable = ({ products }) => {
         </div>
         <button
           onClick={handleAddRow}
-          className="flex items-center gap-2 px-4 py-2 bg-theme-surface hover:bg-theme-border-soft text-theme-primary text-xs font-bold rounded-xl transition-all shadow-sm border border-theme-border-soft"
+          className="hidden sm:flex items-center gap-2 px-4 py-2 bg-theme-surface hover:bg-theme-border-soft text-theme-primary text-xs font-bold rounded-xl transition-all shadow-sm border border-theme-border-soft"
         >
           <Plus className="w-4 h-4" /> Add New Row
         </button>
       </div>
+
+      {/* Mobile Floating Action Button */}
+      <button
+        onClick={handleAddRow}
+        className="fixed bottom-24 right-4 w-14 h-14 bg-theme-accent text-white rounded-full shadow-[0_8px_30px_rgba(236,72,153,0.3)] flex items-center justify-center z-50 sm:hidden hover:bg-theme-accent/90 transition-transform active:scale-95"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
     </div>
   );
 };

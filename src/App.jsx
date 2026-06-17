@@ -1199,6 +1199,10 @@ function App() {
             setCurrentTab={setCurrentTab}
             editingInvoice={editingInvoice}
             onDownloadPDF={handleDownloadPDF}
+            onBack={() => {
+              setEditingInvoice(null);
+              setCurrentTab('dashboard');
+            }}
             onQuickBillOpen={() => setIsQuickBillOpen(true)}
           />
         );
