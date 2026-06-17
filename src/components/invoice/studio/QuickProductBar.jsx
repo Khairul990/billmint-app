@@ -61,6 +61,7 @@ const QuickProductBar = ({ products = [] }) => {
     dispatch({ type: 'SET_ITEMS', payload: newItems });
   };
 
+  return (
     <div className="flex flex-col gap-2 mb-4 relative">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted mr-2">Quick Add / Recent:</span>
