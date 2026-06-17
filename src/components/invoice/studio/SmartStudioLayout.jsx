@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInvoice } from '../../../contexts/InvoiceContext';
 import { toast } from 'react-hot-toast';
-import { Check, User, ShoppingBag, CreditCard, Cloud, AlertTriangle, Loader2 } from 'lucide-react';
+import { Check, User, ShoppingBag, CreditCard, Cloud, AlertTriangle, Loader2, ArrowRight, ArrowLeft, FileText, Share2, Eye } from 'lucide-react';
 
 import StudioHeader from './StudioHeader';
 import SmartCustomerSelect from './SmartCustomerSelect';
-import ExcelBillTable from './ExcelBillTable';
+import SmartBillItemsList from './SmartBillItemsList';
 import CompactSummaryStrip from './CompactSummaryStrip';
 import CompactPaymentSection from './CompactPaymentSection';
 import LiveInvoicePreview from '../LiveInvoicePreview';
@@ -14,25 +14,15 @@ import LiveInvoicePreview from '../LiveInvoicePreview';
 const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, onBack }) => {
   const { state, dispatch } = useInvoice();
   
-  const [previewMode, setPreviewMode] = useState('OFF');
-  const [isSaving, setIsSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState(null);
-  const [saveStatus, setSaveStatus] = useState(''); // '', 'unsaved', 'saving', 'saved'
-  const [showExitPrompt, setShowExitPrompt] = useState(false);
-
-  const onSaveInvoiceRef = React.useRef(onSaveInvoice);
-  useEffect(() => {
-    onSaveInvoiceRef.current = onSaveInvoice;
-  }, [onSaveInvoice]);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [showMobilePreview, setShowMobilePreview] = useState(false);
 
   // Auto-Save Engine (Debounced)
   const autoSaveDraft = useCallback(async () => {
-    // Basic validation to prevent saving completely empty drafts repeatedly
     const hasContent = state.customer.name || state.items.some(i => i.description || i.qty > 0);
     if (!hasContent) return;
 
     try {
-      // Push to onSaveInvoice as a Draft and mark silent=true
       if (onSaveInvoiceRef.current) {
         await onSaveInvoiceRef.current({ ...state, paymentStatus: 'Draft' }, false, true);
         setLastSaved(new Date());
@@ -56,30 +46,6 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
 
     return () => clearTimeout(timer);
   }, [state, autoSaveDraft]);
-
-  // Keyboard Shortcuts Engine
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      // Ctrl/Cmd + S = Save Draft
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        setSaveStatus('saving');
-        autoSaveDraft().then(() => setSaveStatus('saved'));
-      }
-      // Ctrl/Cmd + Enter = Finalize
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault();
-        handleFinalize();
-      }
-      // Ctrl/Cmd + P = Toggle Preview
-      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-        e.preventDefault();
-        setPreviewMode(prev => prev === 'OFF' ? 'SIDE' : 'OFF');
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [autoSaveDraft]);
 
   const validateBeforeSave = () => {
     if (!state.customer.name) {
@@ -105,7 +71,6 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
 
   const handleFinalize = async () => {
     if (!validateBeforeSave()) return;
-
     setIsSaving(true);
     try {
       await onSaveInvoice({ ...state, paymentStatus: state.settings.paymentStatus }, state.saveCustomer && !state.customer.id, false);
@@ -125,8 +90,14 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
     }
   };
 
+  const steps = [
+    { id: 1, title: 'Customer', icon: <User className="w-5 h-5" /> },
+    { id: 2, title: 'Items', icon: <ShoppingBag className="w-5 h-5" /> },
+    { id: 3, title: 'Payment', icon: <CreditCard className="w-5 h-5" /> }
+  ];
+
   return (
-    <div className="flex flex-col min-h-[calc(100vh-6rem)] bg-theme-app relative">
+    <div className="flex flex-col min-h-screen bg-theme-app relative overflow-x-hidden">
       {/* Smart Sticky Header */}
       <StudioHeader 
         previewMode={previewMode} 
@@ -147,94 +118,217 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         onBack={handleBackClick}
       />
 
-      {/* Live KPI Strip */}
-      <div className="bg-theme-surface/95 backdrop-blur-md border-b border-theme-border-soft px-4 md:px-6 py-2.5 flex items-center justify-between overflow-x-auto scrollbar-hide shadow-sm z-40 relative">
-        <div className="flex items-center gap-6 text-sm whitespace-nowrap min-w-max">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted">Customer</span>
-            <span className="font-black text-theme-primary">{state.customer.name || <span className="text-theme-muted/50">Unselected</span>}</span>
-          </div>
-          <div className="w-[1px] h-6 bg-theme-border-soft"></div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted">Items</span>
-            <span className="font-black text-theme-primary">{state.items.filter(i => i.itemService || i.description).length}</span>
-          </div>
-          <div className="w-[1px] h-6 bg-theme-border-soft"></div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted">Qty</span>
-            <span className="font-black text-theme-primary">{state.items.reduce((sum, item) => sum + (parseFloat(item.qty) || 0), 0)}</span>
-          </div>
-          <div className="w-[1px] h-6 bg-theme-border-soft"></div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted">Subtotal</span>
-            <span className="font-black text-theme-primary">₹{state.totals.subtotal.toLocaleString()}</span>
-          </div>
-          <div className="w-[1px] h-6 bg-theme-border-soft"></div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted">Due</span>
-            <span className="font-black text-theme-danger">₹{state.totals.balanceDue.toLocaleString()}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Studio Body - Single Column Layout */}
-      <div className={`flex flex-col flex-1 gap-4 p-4 lg:p-6 xl:p-8 pb-32 transition-all duration-300 w-full max-w-none mx-auto ${previewMode === 'FULLSCREEN' ? 'hidden' : ''}`}>
+      {/* Main Studio Body - Two Column on Desktop, Stacked on Mobile */}
+      <div className="flex flex-col xl:flex-row flex-1 p-4 lg:p-6 xl:p-8 gap-6 lg:gap-8 max-w-[1600px] mx-auto w-full">
         
-        {/* Customer Details */}
-        <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-4 shadow-sm">
-          <SmartCustomerSelect customers={customers} />
-        </div>
-
-        {/* Large Spreadsheet Grid */}
-        <div className="bg-theme-surface border border-[rgba(236,72,153,0.1)] rounded-2xl shadow-sm flex flex-col hover:shadow-md transition-shadow overflow-hidden min-h-[500px]">
-          <ExcelBillTable products={products} />
-        </div>
-        
-        {/* Compact Summary Strip */}
-        <CompactSummaryStrip />
-
-        {/* Compact Payment Section */}
-        <CompactPaymentSection />
-
-        {/* Action Bar (Sticky Bottom) - Mobile/Desktop Unified */}
-        <div className="sticky bottom-0 mt-4 p-4 bg-theme-surface/95 backdrop-blur-md border border-theme-border-soft rounded-2xl z-50 flex items-center justify-between lg:justify-end gap-3 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
-          <button 
-            onClick={() => {
-              setSaveStatus('saving');
-              autoSaveDraft().then(() => setSaveStatus('saved'));
-            }}
-            className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-theme-app border border-theme-border-soft hover:bg-theme-border-soft text-theme-primary rounded-xl font-bold transition-all"
-          >
-            <Cloud className="w-4 h-4" /> Save Draft
-          </button>
+        {/* Left Column - Builder Wizard */}
+        <div className={`flex-1 flex flex-col gap-6 xl:max-w-2xl 2xl:max-w-3xl transition-all duration-300 ${showMobilePreview ? 'hidden xl:flex' : 'flex'}`}>
           
-          <button 
-            onClick={handleFinalize}
-            disabled={isSaving}
-            className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-theme-accent to-pink-500 hover:from-pink-500 hover:to-theme-accent text-white rounded-xl font-black shadow-lg shadow-theme-accent/30 transition-all active:scale-95 disabled:opacity-50"
-          >
-            {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
-            {isSaving ? 'Saving...' : 'Finalize Invoice'}
-          </button>
+          {/* Progress Stepper */}
+          <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center justify-between relative">
+              {/* Connecting Line */}
+              <div className="absolute top-6 left-0 right-0 h-1 bg-theme-border-soft -z-10 rounded-full">
+                <div 
+                  className="h-full bg-theme-accent transition-all duration-500 rounded-full"
+                  style={{ width: `${((currentStep - 1) / 2) * 100}%` }}
+                ></div>
+              </div>
+
+              {steps.map((step) => {
+                const isActive = currentStep === step.id;
+                const isCompleted = currentStep > step.id;
+
+                return (
+                  <button 
+                    key={step.id}
+                    onClick={() => setCurrentStep(step.id)}
+                    className="flex flex-col items-center gap-2 group"
+                  >
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm
+                      ${isActive ? 'bg-theme-accent text-white scale-110 shadow-theme-accent/30 shadow-lg' : 
+                        isCompleted ? 'bg-theme-accent/20 text-theme-accent' : 
+                        'bg-theme-app border-2 border-theme-border-soft text-theme-muted group-hover:border-theme-accent/50 group-hover:text-theme-accent'}
+                    `}>
+                      {isCompleted ? <Check className="w-6 h-6" /> : step.icon}
+                    </div>
+                    <span className={`text-[10px] sm:text-xs font-black uppercase tracking-wider transition-colors
+                      ${isActive ? 'text-theme-accent' : isCompleted ? 'text-theme-primary' : 'text-theme-muted'}
+                    `}>
+                      {step.title}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Active Step Content */}
+          <div className="flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300">
+            {currentStep === 1 && (
+              <div className="flex flex-col gap-6">
+                <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-6 shadow-sm">
+                  <h2 className="text-sm font-black uppercase text-theme-primary mb-4 flex items-center gap-2"><User className="w-4 h-4 text-theme-accent" /> Customer Details</h2>
+                  <SmartCustomerSelect customers={customers} />
+                </div>
+                
+                <button 
+                  onClick={() => setCurrentStep(2)}
+                  className="mt-4 flex items-center justify-center gap-2 w-full py-4 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-2xl font-black shadow-premium transition-all active:scale-[0.98]"
+                >
+                  Continue to Items <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <div className="flex flex-col gap-6">
+                <SmartBillItemsList products={products} />
+                
+                <div className="flex gap-4 mt-4">
+                  <button 
+                    onClick={() => setCurrentStep(1)}
+                    className="py-4 px-6 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98]"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                  <button 
+                    onClick={() => setCurrentStep(3)}
+                    className="flex-1 flex items-center justify-center gap-2 py-4 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-2xl font-black shadow-premium transition-all active:scale-[0.98]"
+                  >
+                    Continue to Payment <ArrowRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 3 && (
+              <div className="flex flex-col gap-6 pb-20 xl:pb-0">
+                <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-6 shadow-sm">
+                  <h2 className="text-sm font-black uppercase text-theme-primary mb-4 flex items-center gap-2"><CreditCard className="w-4 h-4 text-theme-accent" /> Payment Details</h2>
+                  <CompactPaymentSection />
+                </div>
+                
+                <CompactSummaryStrip />
+
+                {/* 3 Large Action Cards */}
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Save Draft Card */}
+                  <div className="bg-theme-surface border border-theme-border-soft hover:border-theme-accent/30 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between">
+                    <div className="mb-4">
+                      <div className="w-10 h-10 bg-theme-app text-theme-primary rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <Cloud className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-black text-theme-primary">Save Draft</h3>
+                      <p className="text-[10px] font-bold text-theme-muted mt-1 leading-snug">Keep editing later, nothing is sent yet.</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setSaveStatus('saving');
+                        autoSaveDraft().then(() => setSaveStatus('saved'));
+                        toast.success("Saved as draft");
+                      }}
+                      className="w-full py-2.5 bg-theme-app text-theme-primary rounded-xl text-xs font-black uppercase hover:bg-theme-border-soft transition-colors"
+                    >
+                      Save Now
+                    </button>
+                  </div>
+
+                  {/* Generate PDF Card */}
+                  <div className="bg-theme-surface border border-theme-border-soft hover:border-theme-accent/30 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between">
+                    <div className="mb-4">
+                      <div className="w-10 h-10 bg-theme-app text-theme-primary rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-black text-theme-primary">Generate PDF</h3>
+                      <p className="text-[10px] font-bold text-theme-muted mt-1 leading-snug">Download a professional PDF copy.</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        if (validateBeforeSave()) {
+                          if (onDownloadPDF) onDownloadPDF(state);
+                        }
+                      }}
+                      className="w-full py-2.5 bg-theme-app text-theme-primary rounded-xl text-xs font-black uppercase hover:bg-theme-border-soft transition-colors"
+                    >
+                      Download
+                    </button>
+                  </div>
+
+                  {/* Generate Live Link Card (Primary) */}
+                  <div className="bg-theme-surface border-2 border-theme-accent/50 rounded-2xl p-5 shadow-premium hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col justify-between relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-theme-accent to-pink-500"></div>
+                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-theme-accent/5 rounded-full blur-2xl group-hover:bg-theme-accent/10 transition-colors"></div>
+                    <div className="mb-4 relative z-10">
+                      <div className="w-10 h-10 bg-theme-accent/10 text-theme-accent rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <Share2 className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-black text-theme-accent">Generate Live Link</h3>
+                      <p className="text-[10px] font-bold text-theme-muted mt-1 leading-snug">Customer gets a live link to view bill and upload payment screenshot.</p>
+                    </div>
+                    <button 
+                      onClick={handleFinalize}
+                      disabled={isSaving}
+                      className="relative z-10 w-full py-3 bg-gradient-to-r from-theme-accent to-pink-500 text-white rounded-xl text-xs font-black uppercase hover:shadow-lg hover:shadow-theme-accent/30 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+                      Create Link
+                    </button>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setCurrentStep(2)}
+                  className="mt-2 py-4 w-full bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  <ArrowLeft className="w-5 h-5" /> Back to Items
+                </button>
+              </div>
+            )}
+          </div>
+
+        </div>
+
+        {/* Right Column - Live Invoice Preview (Sticky on Desktop, Fullscreen on Mobile when toggled) */}
+        <div className={`xl:w-[500px] 2xl:w-[600px] shrink-0 transition-all duration-300 ${!showMobilePreview ? 'hidden xl:block' : 'fixed inset-0 z-50 bg-theme-app p-4 overflow-y-auto'}`}>
+          <div className="xl:sticky xl:top-[88px] h-full xl:h-[calc(100vh-120px)] flex flex-col">
+            
+            {/* Mobile Header for Preview */}
+            <div className="xl:hidden flex items-center justify-between mb-4 bg-theme-surface p-4 rounded-2xl shadow-sm">
+              <h2 className="font-black text-theme-primary flex items-center gap-2"><Eye className="w-5 h-5 text-theme-accent" /> Live Preview</h2>
+              <button 
+                onClick={() => setShowMobilePreview(false)}
+                className="px-4 py-2 bg-theme-app border border-theme-border-soft rounded-lg text-sm font-bold text-theme-primary"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-2xl border border-theme-border-soft overflow-hidden h-full flex flex-col">
+              <div className="bg-theme-surface p-3 border-b border-theme-border-soft flex items-center justify-between shrink-0 hidden xl:flex">
+                <span className="text-xs font-black uppercase tracking-wider text-theme-muted flex items-center gap-2">
+                  <Eye className="w-4 h-4" /> Live Customer View
+                </span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 bg-theme-app/30">
+                <div className="transform origin-top mx-auto w-full max-w-[800px] bg-white rounded-xl shadow-sm border border-theme-border-soft overflow-hidden">
+                  <LiveInvoicePreview />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
 
-      {/* Fullscreen Preview Mode */}
-      <AnimatePresence>
-        {previewMode === 'FULLSCREEN' && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="flex-1 p-6"
-          >
-            <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
-              <LiveInvoicePreview />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Mobile Floating Action Button to toggle Preview */}
+      <button
+        onClick={() => setShowMobilePreview(true)}
+        className={`xl:hidden fixed bottom-6 right-6 w-14 h-14 bg-theme-accent text-white rounded-full shadow-premium flex items-center justify-center transition-all z-40 active:scale-95 ${showMobilePreview ? 'hidden' : 'flex'}`}
+      >
+        <Eye className="w-6 h-6" />
+      </button>
 
       {/* Unsaved Changes Prompt */}
       {showExitPrompt && (
