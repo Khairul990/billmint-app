@@ -99,6 +99,55 @@ const invoiceReducer = (state, action) => {
       };
     }
 
+    case 'UPDATE_ITEM_FIELD': {
+      const { index, field, value } = action.payload;
+      const newItems = [...state.items];
+      newItems[index] = { ...newItems[index], [field]: value };
+      
+      const { subtotal, taxAmount, grandTotal } = calculateTotals(
+        newItems, state.totals.taxPercentage, state.totals.discountAmount
+      );
+      return {
+        ...state, items: newItems, totals: { ...state.totals, subtotal, taxAmount, grandTotal, balanceDue: Math.max(0, grandTotal - state.totals.amountPaid) }
+      };
+    }
+
+    case 'ADD_EMPTY_ROW': {
+      const newItems = [...state.items, {
+        id: `item-${Date.now()}`, sn: state.items.length + 1, description: '', itemService: '', qty: 1, rate: 0, discount: 0, tax: 0, unit: 'Piece'
+      }];
+      return { ...state, items: newItems };
+    }
+
+    case 'COPY_ROW': {
+      const itemToCopy = { ...state.items[action.payload], id: `item-${Date.now()}`, sn: state.items.length + 1 };
+      const newItems = [...state.items, itemToCopy];
+      const { subtotal, taxAmount, grandTotal } = calculateTotals(newItems, state.totals.taxPercentage, state.totals.discountAmount);
+      return { ...state, items: newItems, totals: { ...state.totals, subtotal, taxAmount, grandTotal, balanceDue: Math.max(0, grandTotal - state.totals.amountPaid) } };
+    }
+
+    case 'DELETE_ROW': {
+      const index = action.payload;
+      let newItems;
+      if (state.items.length === 1) {
+        newItems = [{ ...state.items[0], itemService: '', description: '', qty: 1, rate: 0 }];
+      } else {
+        newItems = state.items.filter((_, i) => i !== index).map((item, idx) => ({ ...item, sn: idx + 1 }));
+      }
+      const { subtotal, taxAmount, grandTotal } = calculateTotals(newItems, state.totals.taxPercentage, state.totals.discountAmount);
+      return { ...state, items: newItems, totals: { ...state.totals, subtotal, taxAmount, grandTotal, balanceDue: Math.max(0, grandTotal - state.totals.amountPaid) } };
+    }
+
+    case 'BULK_DELETE_ROWS': {
+      const indicesSet = new Set(action.payload);
+      let newItems = state.items.filter((_, i) => !indicesSet.has(i)).map((item, idx) => ({ ...item, sn: idx + 1 }));
+      if (newItems.length === 0) {
+        newItems.push({ id: `item-${Date.now()}`, sn: 1, description: '', itemService: '', qty: 1, rate: 0, discount: 0, tax: 0, unit: 'Piece' });
+      }
+      const { subtotal, taxAmount, grandTotal } = calculateTotals(newItems, state.totals.taxPercentage, state.totals.discountAmount);
+      return { ...state, items: newItems, totals: { ...state.totals, subtotal, taxAmount, grandTotal, balanceDue: Math.max(0, grandTotal - state.totals.amountPaid) } };
+    }
+
     case 'UPDATE_TOTALS': {
       const updatedTotals = { ...state.totals, ...action.payload };
       const { subtotal, taxAmount, grandTotal } = calculateTotals(
