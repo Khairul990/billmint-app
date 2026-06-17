@@ -454,10 +454,6 @@ const ExcelBillTable = ({ products }) => {
         )}
       </div>
 
-        </>
-        )}
-      </div>
-
       {/* Mobile Floating Action Button */}
       {state.items.length > 0 && (
         <button
