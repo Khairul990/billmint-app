@@ -417,14 +417,14 @@ const ExcelBillTable = ({ products }) => {
                   </th>
                   <th className="py-2 px-1 w-6 text-center border-r border-theme-border-soft"></th>
                   <th className="py-2 px-1 w-8 text-center border-r border-theme-border-soft">#</th>
-                  <th className="py-2 px-2 min-w-[140px] border-r border-theme-border-soft">Item Name</th>
-                  <th className="py-2 px-2 min-w-[140px] border-r border-theme-border-soft">Description</th>
+                  <th className="py-2 px-2 w-[35%] min-w-[200px] border-r border-theme-border-soft">Item Name</th>
+                  <th className="py-2 px-2 w-[25%] min-w-[150px] border-r border-theme-border-soft">Description</th>
                   <th className="py-2 px-1 w-20 text-center border-r border-theme-border-soft">Qty</th>
                   <th className="py-2 px-2 w-20 border-r border-theme-border-soft">Unit</th>
                   <th className="py-2 px-2 w-24 text-right border-r border-theme-border-soft">Rate (₹)</th>
                   <th className="py-2 px-2 w-20 text-right border-r border-theme-border-soft">Disc</th>
                   <th className="py-2 px-2 w-16 text-right border-r border-theme-border-soft">Tax%</th>
-                  <th className="py-2 px-2 w-24 text-right border-r border-theme-border-soft">Amount</th>
+                  <th className="py-2 px-2 w-28 text-right border-r border-theme-border-soft">Amount</th>
                   <th className="py-2 px-1 w-12 text-center"></th>
                 </tr>
               </thead>

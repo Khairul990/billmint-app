@@ -179,7 +179,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
       </div>
 
       {/* Main Studio Body - Single Column Layout */}
-      <div className={`flex flex-col flex-1 gap-4 p-4 md:p-6 pb-32 transition-all duration-300 w-full max-w-7xl mx-auto ${previewMode === 'FULLSCREEN' ? 'hidden' : ''}`}>
+      <div className={`flex flex-col flex-1 gap-4 p-4 lg:p-6 xl:p-8 pb-32 transition-all duration-300 w-full max-w-none mx-auto ${previewMode === 'FULLSCREEN' ? 'hidden' : ''}`}>
         
         {/* Customer Details */}
         <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-4 shadow-sm">
