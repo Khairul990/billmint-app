@@ -147,31 +147,33 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         onBack={handleBackClick}
       />
 
-      {/* Progress Indicator */}
-      <div className="sticky top-[72px] z-40 bg-theme-surface/95 backdrop-blur-md border-b border-theme-border-soft px-4 py-2.5 flex items-center justify-center gap-2 sm:gap-6 overflow-x-auto scrollbar-hide">
-        <div className={`flex items-center gap-2 ${!!state.customer.name ? 'text-theme-success' : 'text-theme-muted'}`}>
-          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${!!state.customer.name ? 'bg-theme-success/20 text-theme-success' : 'bg-theme-app border border-theme-border-soft'}`}>
-            {!!state.customer.name ? <Check className="w-3 h-3" /> : 1}
+      {/* Live KPI Strip */}
+      <div className="bg-theme-surface/95 backdrop-blur-md border-b border-theme-border-soft px-4 md:px-6 py-2.5 flex items-center justify-between overflow-x-auto scrollbar-hide shadow-sm z-40 relative">
+        <div className="flex items-center gap-6 text-sm whitespace-nowrap min-w-max">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted">Customer</span>
+            <span className="font-black text-theme-primary">{state.customer.name || <span className="text-theme-muted/50">Unselected</span>}</span>
           </div>
-          <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Customer</span>
-        </div>
-        
-        <div className="w-8 h-[1px] bg-theme-border-soft"></div>
-        
-        <div className={`flex items-center gap-2 ${state.items.some(i => (i.description || i.itemService) && i.rate > 0) ? 'text-theme-success' : 'text-theme-muted'}`}>
-          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${state.items.some(i => (i.description || i.itemService) && i.rate > 0) ? 'bg-theme-success/20 text-theme-success' : 'bg-theme-app border border-theme-border-soft'}`}>
-            {state.items.some(i => (i.description || i.itemService) && i.rate > 0) ? <Check className="w-3 h-3" /> : 2}
+          <div className="w-[1px] h-6 bg-theme-border-soft"></div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted">Items</span>
+            <span className="font-black text-theme-primary">{state.items.filter(i => i.itemService || i.description).length}</span>
           </div>
-          <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Items</span>
-        </div>
-
-        <div className="w-8 h-[1px] bg-theme-border-soft"></div>
-
-        <div className={`flex items-center gap-2 ${state.totals.grandTotal > 0 ? 'text-theme-success' : 'text-theme-muted'}`}>
-          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${state.totals.grandTotal > 0 ? 'bg-theme-success/20 text-theme-success' : 'bg-theme-app border border-theme-border-soft'}`}>
-            {state.totals.grandTotal > 0 ? <Check className="w-3 h-3" /> : 3}
+          <div className="w-[1px] h-6 bg-theme-border-soft"></div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted">Qty</span>
+            <span className="font-black text-theme-primary">{state.items.reduce((sum, item) => sum + (parseFloat(item.qty) || 0), 0)}</span>
           </div>
-          <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Summary</span>
+          <div className="w-[1px] h-6 bg-theme-border-soft"></div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted">Subtotal</span>
+            <span className="font-black text-theme-primary">₹{state.totals.subtotal.toLocaleString()}</span>
+          </div>
+          <div className="w-[1px] h-6 bg-theme-border-soft"></div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted">Due</span>
+            <span className="font-black text-theme-danger">₹{state.totals.balanceDue.toLocaleString()}</span>
+          </div>
         </div>
       </div>
 
@@ -247,8 +249,8 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         )}
       </AnimatePresence>
 
-      {/* Universal Sticky Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-theme-app/95 backdrop-blur-xl border-t border-theme-border-soft px-4 py-3 flex items-center justify-between z-50 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+      {/* Universal Sticky Bottom Action Bar (Mobile Only) */}
+      <div className="fixed bottom-0 left-0 right-0 bg-theme-app/95 backdrop-blur-xl border-t border-theme-border-soft px-4 py-3 flex lg:hidden items-center justify-between z-50 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
         
         <div className="hidden sm:flex items-center gap-4 border-r border-theme-border-soft pr-4">
           <div>

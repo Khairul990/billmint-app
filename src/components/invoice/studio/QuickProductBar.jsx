@@ -68,9 +68,13 @@ const QuickProductBar = ({ products = [] }) => {
           <button
             key={`most-${idx}`}
             onClick={() => handleQuickAdd(p)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-theme-app border border-theme-border-soft hover:border-theme-accent hover:bg-theme-accent/5 hover:text-theme-accent rounded-full text-xs font-bold text-theme-primary transition-all shadow-sm"
+            className="flex flex-col items-start gap-0.5 px-3 py-1.5 bg-theme-app border border-theme-border-soft hover:border-theme-accent hover:shadow-sm rounded-xl text-left transition-all group min-w-[110px]"
           >
-            <Plus className="w-3 h-3" /> {p.name || p.productName}
+            <div className="flex items-center justify-between w-full">
+              <span className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors line-clamp-1">{p.name || p.productName}</span>
+              <Plus className="w-3 h-3 text-theme-muted group-hover:text-theme-accent transition-colors opacity-0 group-hover:opacity-100 ml-1 shrink-0" />
+            </div>
+            <span className="text-[10px] font-black text-theme-muted group-hover:text-theme-accent/80 transition-colors">₹{(p.rate || p.price || 0).toLocaleString()}</span>
           </button>
         ))}
       </div>
@@ -81,9 +85,13 @@ const QuickProductBar = ({ products = [] }) => {
           <button
             key={`recent-${idx}`}
             onClick={() => handleQuickAdd(p)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-theme-app border border-theme-border-soft hover:border-theme-accent hover:bg-theme-accent/5 hover:text-theme-accent rounded-full text-xs font-bold text-theme-primary transition-all shadow-sm"
+            className="flex flex-col items-start gap-0.5 px-3 py-1.5 bg-theme-app border border-theme-border-soft hover:border-theme-accent hover:shadow-sm rounded-xl text-left transition-all group min-w-[110px]"
           >
-            <Plus className="w-3 h-3" /> {p.name || p.productName}
+            <div className="flex items-center justify-between w-full">
+              <span className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors line-clamp-1">{p.name || p.productName}</span>
+              <Plus className="w-3 h-3 text-theme-muted group-hover:text-theme-accent transition-colors opacity-0 group-hover:opacity-100 ml-1 shrink-0" />
+            </div>
+            <span className="text-[10px] font-black text-theme-muted group-hover:text-theme-accent/80 transition-colors">₹{(p.rate || p.price || 0).toLocaleString()}</span>
           </button>
         ))}
       </div>

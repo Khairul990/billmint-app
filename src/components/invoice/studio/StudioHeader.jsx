@@ -20,8 +20,24 @@ const StudioHeader = ({ previewMode, setPreviewMode, lastSaved, saveStatus, onSa
           <ArrowLeft className="w-5 h-5 text-theme-muted group-hover:text-theme-primary transition-colors" />
         </button>
         <div>
-          <h1 className="text-xl font-black text-theme-primary tracking-tight">Smart Studio</h1>
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-black text-theme-primary tracking-tight">Smart Studio</h1>
+            <div className="flex items-center bg-theme-surface border border-theme-border-soft rounded px-2 py-0.5 ml-2 shadow-sm focus-within:border-theme-accent">
+              <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider mr-1">Inv #</span>
+              {state.generatingNumber ? (
+                <Loader2 className="w-3 h-3 animate-spin text-theme-accent" />
+              ) : (
+                <input 
+                  type="text" 
+                  value={state.invoiceNumber}
+                  onChange={(e) => dispatch({ type: 'SET_INVOICE_NUMBER', payload: e.target.value.toUpperCase() })}
+                  className="bg-transparent border-none outline-none text-theme-primary font-bold text-xs w-20 focus:ring-0 p-0 uppercase"
+                  placeholder="INV-001"
+                />
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 mt-1">
             <span className="flex items-center text-[10px] font-bold uppercase tracking-wider transition-colors duration-300">
               {saveStatus === 'saving' && <span className="text-amber-400 flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Saving...</span>}
               {saveStatus === 'unsaved' && <span className="text-rose-400 flex items-center"><CloudOff className="w-3 h-3 mr-1" /> Unsaved Changes</span>}
@@ -36,21 +52,31 @@ const StudioHeader = ({ previewMode, setPreviewMode, lastSaved, saveStatus, onSa
         </div>
       </div>
 
-      {/* Center: Invoice Number Override */}
-      <div className="flex-1 max-w-xs hidden md:flex items-center justify-center">
-        <div className="flex items-center bg-theme-surface border border-theme-border-soft rounded-xl px-3 py-1.5 shadow-sm w-full transition-colors focus-within:border-theme-accent">
-          <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider mr-2">Inv #</span>
-          {state.generatingNumber ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-theme-accent" />
-          ) : (
-            <input 
-              type="text" 
-              value={state.invoiceNumber}
-              onChange={(e) => dispatch({ type: 'SET_INVOICE_NUMBER', payload: e.target.value.toUpperCase() })}
-              className="bg-transparent border-none outline-none text-theme-primary font-bold text-sm w-full focus:ring-0 p-0 text-center uppercase"
-              placeholder="INV-001"
-            />
-          )}
+      {/* Center: Progress Bar */}
+      <div className="hidden lg:flex items-center justify-center gap-4 flex-1 opacity-80 hover:opacity-100 transition-opacity">
+        <div className={`flex items-center gap-1.5 ${!!state.customer.name ? 'text-theme-success' : 'text-theme-muted'}`}>
+          <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black ${!!state.customer.name ? 'bg-theme-success/20 text-theme-success' : 'bg-theme-surface border border-theme-border-soft'}`}>
+            {!!state.customer.name ? <Check className="w-2.5 h-2.5" /> : 1}
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider">Customer</span>
+        </div>
+        
+        <div className="w-8 h-[1px] bg-theme-border-soft"></div>
+        
+        <div className={`flex items-center gap-1.5 ${state.items.some(i => (i.description || i.itemService) && i.rate > 0) ? 'text-theme-success' : 'text-theme-muted'}`}>
+          <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black ${state.items.some(i => (i.description || i.itemService) && i.rate > 0) ? 'bg-theme-success/20 text-theme-success' : 'bg-theme-surface border border-theme-border-soft'}`}>
+            {state.items.some(i => (i.description || i.itemService) && i.rate > 0) ? <Check className="w-2.5 h-2.5" /> : 2}
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider">Items</span>
+        </div>
+
+        <div className="w-8 h-[1px] bg-theme-border-soft"></div>
+
+        <div className={`flex items-center gap-1.5 ${state.totals.grandTotal > 0 ? 'text-theme-success' : 'text-theme-muted'}`}>
+          <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black ${state.totals.grandTotal > 0 ? 'bg-theme-success/20 text-theme-success' : 'bg-theme-surface border border-theme-border-soft'}`}>
+            {state.totals.grandTotal > 0 ? <Check className="w-2.5 h-2.5" /> : 3}
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider">Payment</span>
         </div>
       </div>
 
@@ -58,27 +84,26 @@ const StudioHeader = ({ previewMode, setPreviewMode, lastSaved, saveStatus, onSa
       <div className="flex items-center gap-2 w-full md:w-auto justify-end">
         
         {/* Preview Toggles */}
-        <div className="hidden lg:flex p-1 bg-theme-surface border border-theme-border-soft rounded-xl shadow-sm mr-2">
+        <div className="hidden lg:flex items-center bg-theme-surface border border-theme-border-soft rounded-xl shadow-sm mr-2 overflow-hidden">
           <button
             onClick={() => setPreviewMode('OFF')}
-            title="Focus Mode"
-            className={`p-1.5 rounded-lg transition-all ${previewMode === 'OFF' ? 'bg-theme-card text-theme-accent shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
+            className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all ${previewMode === 'OFF' ? 'bg-theme-card text-theme-accent' : 'text-theme-muted hover:bg-theme-border-soft'}`}
           >
-            <LayoutPanelLeft className="w-4 h-4" />
+            Editor
           </button>
+          <div className="w-[1px] h-4 bg-theme-border-soft"></div>
           <button
             onClick={() => setPreviewMode('SIDE')}
-            title="Side Preview"
-            className={`p-1.5 rounded-lg transition-all ${previewMode === 'SIDE' ? 'bg-theme-card text-theme-accent shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
+            className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all ${previewMode === 'SIDE' ? 'bg-theme-card text-theme-accent' : 'text-theme-muted hover:bg-theme-border-soft'}`}
           >
-            <PanelRightInactive className="w-4 h-4" />
+            Desktop Preview
           </button>
+          <div className="w-[1px] h-4 bg-theme-border-soft"></div>
           <button
             onClick={() => setPreviewMode('FULLSCREEN')}
-            title="Fullscreen Preview"
-            className={`p-1.5 rounded-lg transition-all ${previewMode === 'FULLSCREEN' ? 'bg-theme-card text-theme-accent shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
+            className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all ${previewMode === 'FULLSCREEN' ? 'bg-theme-card text-theme-accent' : 'text-theme-muted hover:bg-theme-border-soft'}`}
           >
-            <Maximize className="w-4 h-4" />
+            PDF Mode
           </button>
         </div>
 

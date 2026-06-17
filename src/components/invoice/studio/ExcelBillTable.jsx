@@ -148,26 +148,41 @@ const ExcelBillTable = ({ products }) => {
       <div className="flex-1 overflow-auto bg-theme-app/30">
         {state.items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center p-6 animate-in fade-in zoom-in-95 duration-300">
-            <div className="w-20 h-20 bg-theme-accent/10 text-theme-accent rounded-full flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(236,72,153,0.15)] ring-8 ring-theme-accent/5">
-              <FilePlus className="w-10 h-10" />
-            </div>
-            <h3 className="text-xl font-black text-theme-primary tracking-tight mb-2">No items added yet</h3>
-            <p className="text-sm font-bold text-theme-muted max-w-sm mx-auto mb-8">
-              Use the Quick Add bar above or create your first blank bill item below.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <button
-                onClick={() => {
-                  handleAddRow();
-                  setTimeout(() => {
-                    const firstInput = document.querySelector('input[placeholder="Item name..."]');
-                    if (firstInput) firstInput.focus();
-                  }, 100);
-                }}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-4 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-xl font-black shadow-lg shadow-theme-accent/30 transition-all active:scale-95"
-              >
-                <Plus className="w-5 h-5" /> Add First Item
-              </button>
+            <div className="bg-theme-surface border border-theme-border-soft p-8 md:p-12 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] max-w-lg w-full flex flex-col items-center relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+              
+              <div className="w-24 h-24 bg-theme-app border border-theme-border-soft text-theme-accent rounded-full flex items-center justify-center mb-6 shadow-inner relative">
+                <div className="absolute inset-0 rounded-full border-2 border-theme-accent/20 animate-pulse"></div>
+                <FilePlus className="w-10 h-10" />
+              </div>
+              
+              <h3 className="text-2xl font-black text-theme-primary tracking-tight mb-3">No Bill Items Added</h3>
+              <p className="text-sm font-bold text-theme-muted max-w-sm mx-auto mb-8">
+                Create your first item or use Quick Add.
+              </p>
+              
+              <div className="flex flex-col gap-3 w-full">
+                <button
+                  onClick={() => {
+                    handleAddRow();
+                    setTimeout(() => {
+                      const firstInput = document.querySelector('input[placeholder="Item name..."]');
+                      if (firstInput) firstInput.focus();
+                    }, 100);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-theme-accent to-pink-500 hover:from-pink-500 hover:to-theme-accent text-white rounded-xl font-black shadow-lg shadow-theme-accent/30 transition-all active:scale-95"
+                >
+                  <Plus className="w-5 h-5" /> Add First Item
+                </button>
+                
+                <button className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-theme-app border border-theme-border-soft hover:bg-theme-border-soft text-theme-primary rounded-xl font-bold transition-all">
+                  Use Recent Item
+                </button>
+                
+                <button className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-theme-app border border-theme-border-soft hover:bg-theme-border-soft text-theme-primary rounded-xl font-bold transition-all">
+                  Import From Previous Invoice
+                </button>
+              </div>
             </div>
           </div>
         ) : (

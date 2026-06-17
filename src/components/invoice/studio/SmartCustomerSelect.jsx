@@ -55,15 +55,34 @@ const SmartCustomerSelect = ({ customers = [] }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-sm font-black uppercase tracking-wider text-theme-primary flex items-center gap-2">
-          <UserPlus className="w-4 h-4 text-theme-accent" /> Customer Details
-        </h2>
-        {state.customer.name && !state.customer.id && (
-          <span className="text-[10px] font-bold bg-theme-accent/10 text-theme-accent px-2 py-0.5 rounded-full">
-            New Customer (Auto-Save)
-          </span>
-        )}
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-3">
+          <h2 className="text-sm font-black uppercase tracking-wider text-theme-primary flex items-center gap-2">
+            <UserPlus className="w-4 h-4 text-theme-accent" /> Customer Details
+          </h2>
+          {state.customer.customerType === 'VIP' && (
+            <span className="text-[10px] font-black bg-gradient-to-r from-amber-400 to-amber-600 text-white px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+              <Star className="w-2.5 h-2.5 fill-current" /> VIP
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {state.customer.id && (
+            <>
+              <span className="text-[10px] font-bold text-theme-muted bg-theme-app px-2 py-0.5 rounded border border-theme-border-soft">
+                Total Orders: <span className="text-theme-primary font-black">24</span>
+              </span>
+              <span className="text-[10px] font-bold text-theme-muted bg-theme-app px-2 py-0.5 rounded border border-theme-border-soft">
+                LTV: <span className="text-theme-success font-black">₹45,000</span>
+              </span>
+            </>
+          )}
+          {state.customer.name && !state.customer.id && (
+            <span className="text-[10px] font-bold bg-theme-accent/10 text-theme-accent px-2 py-0.5 rounded-full border border-theme-accent/20">
+              New Customer
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
