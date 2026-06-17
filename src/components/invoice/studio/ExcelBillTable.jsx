@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback, memo } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { Plus, Copy, Trash2, GripVertical, CheckSquare, FilePlus, ChevronDown } from 'lucide-react';
+import { Plus, Copy, Trash2, GripVertical, FilePlus, ChevronDown } from 'lucide-react';
 import QuickProductBar from './QuickProductBar';
 
 // Extracted pure function for row calculation
@@ -258,6 +258,7 @@ const MemoizedMobileBillRow = memo(({
             <Trash2 className="w-3 h-3" /> Remove
           </button>
         </div>
+      </div>
     </div>
   );
 }, (prevProps, nextProps) => {
@@ -396,27 +397,27 @@ const ExcelBillTable = ({ products }) => {
       <div className="w-full bg-theme-surface">
         {state.items.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[300px] text-center p-4">
-          <div className="flex flex-col items-center justify-center min-h-[250px] text-center p-8 bg-theme-app/30 border border-theme-border-soft border-dashed rounded-2xl mx-4 mb-4">
-            <div className="w-16 h-16 bg-theme-surface border border-theme-border-soft text-theme-muted rounded-2xl flex items-center justify-center mb-4 shadow-sm rotate-3">
-              <FilePlus className="w-6 h-6 text-theme-accent" />
+            <div className="flex flex-col items-center justify-center min-h-[250px] text-center p-8 bg-theme-app/30 border border-theme-border-soft border-dashed rounded-2xl mx-4 w-full max-w-md">
+              <div className="w-16 h-16 bg-theme-surface border border-theme-border-soft text-theme-muted rounded-2xl flex items-center justify-center mb-4 shadow-sm rotate-3">
+                <FilePlus className="w-6 h-6 text-theme-accent" />
+              </div>
+              <h3 className="text-lg font-black text-theme-primary mb-1">No Bill Items Yet</h3>
+              <p className="text-xs font-bold text-theme-muted mb-6 max-w-xs">
+                Start adding items by clicking on Quick Add above or add an empty row.
+              </p>
+              <button
+                onClick={() => {
+                  handleAddRow();
+                  setTimeout(() => {
+                    const firstInput = document.querySelector('input[placeholder="Type item or select Quick Add..."]');
+                    if (firstInput) firstInput.focus();
+                  }, 100);
+                }}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-xl font-black shadow-premium transition-all hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <Plus className="w-4 h-4" /> Add First Item
+              </button>
             </div>
-            <h3 className="text-lg font-black text-theme-primary mb-1">No Bill Items Yet</h3>
-            <p className="text-xs font-bold text-theme-muted mb-6 max-w-xs">
-              Start adding items by clicking on Quick Add above or add an empty row.
-            </p>
-            <button
-              onClick={() => {
-                handleAddRow();
-                setTimeout(() => {
-                  const firstInput = document.querySelector('input[placeholder="Type item or select Quick Add..."]');
-                  if (firstInput) firstInput.focus();
-                }, 100);
-              }}
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-xl font-black shadow-premium transition-all hover:-translate-y-0.5 active:translate-y-0"
-            >
-              <Plus className="w-4 h-4" /> Add First Item
-            </button>
-          </div>
           </div>
         ) : (
           <>
