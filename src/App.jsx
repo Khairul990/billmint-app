@@ -12,7 +12,6 @@ import {
 import Layout from './components/Layout';
 import { calculateTotals } from './utils/invoiceUtils';
 
-import { useSettings } from './contexts/SettingsContext';
 import PostLoginWelcome from './components/PostLoginWelcome';
 import ClassicLoader from './components/ClassicLoader';
 import {
