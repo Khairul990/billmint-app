@@ -16,6 +16,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
   
   const [currentStep, setCurrentStep] = useState(1);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
+  const [previewMode, setPreviewMode] = useState('SIDE'); // 'OFF', 'SIDE', 'FULLSCREEN'
   const [saveStatus, setSaveStatus] = useState('saved'); // 'saved', 'unsaved', 'saving'
   const [lastSaved, setLastSaved] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -109,8 +110,8 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
     <div className="flex flex-col min-h-screen bg-theme-app relative overflow-x-hidden">
       {/* Smart Sticky Header */}
       <StudioHeader 
-        previewMode={showMobilePreview} 
-        setPreviewMode={setShowMobilePreview} 
+        previewMode={previewMode} 
+        setPreviewMode={setPreviewMode} 
         lastSaved={lastSaved}
         saveStatus={saveStatus}
         onSaveDraft={() => {
@@ -131,7 +132,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
       <div className="flex flex-col xl:flex-row flex-1 p-4 lg:p-6 xl:p-8 gap-6 lg:gap-8 max-w-[1600px] mx-auto w-full">
         
         {/* Left Column - Builder Wizard */}
-        <div className={`flex-1 flex flex-col gap-6 xl:max-w-2xl 2xl:max-w-3xl transition-all duration-300 ${showMobilePreview ? 'hidden xl:flex' : 'flex'}`}>
+        <div className={`flex-1 flex flex-col gap-6 xl:max-w-2xl 2xl:max-w-3xl transition-all duration-300 ${previewMode === 'FULLSCREEN' ? 'hidden' : (showMobilePreview ? 'hidden xl:flex' : 'flex')}`}>
           
           {/* Progress Stepper */}
           <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-6 shadow-sm">
@@ -299,14 +300,23 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         </div>
 
         {/* Right Column - Live Invoice Preview (Sticky on Desktop, Fullscreen on Mobile when toggled) */}
-        <div className={`xl:w-[500px] 2xl:w-[600px] shrink-0 transition-all duration-300 ${!showMobilePreview ? 'hidden xl:block' : 'fixed inset-0 z-50 bg-theme-app p-4 overflow-y-auto'}`}>
+        <div className={`shrink-0 transition-all duration-300 ${
+          previewMode === 'OFF' 
+            ? 'hidden' 
+            : (previewMode === 'FULLSCREEN' || showMobilePreview) 
+              ? 'fixed inset-0 z-50 bg-theme-app p-4 overflow-y-auto w-full h-full' 
+              : 'hidden xl:block xl:w-[500px] 2xl:w-[600px]'
+        }`}>
           <div className="xl:sticky xl:top-[88px] h-full xl:h-[calc(100vh-120px)] flex flex-col">
             
             {/* Mobile Header for Preview */}
-            <div className="xl:hidden flex items-center justify-between mb-4 bg-theme-surface p-4 rounded-2xl shadow-sm">
+            <div className={`${previewMode === 'FULLSCREEN' ? 'flex' : 'xl:hidden flex'} items-center justify-between mb-4 bg-theme-surface p-4 rounded-2xl shadow-sm`}>
               <h2 className="font-black text-theme-primary flex items-center gap-2"><Eye className="w-5 h-5 text-theme-accent" /> Live Preview</h2>
               <button 
-                onClick={() => setShowMobilePreview(false)}
+                onClick={() => {
+                  setShowMobilePreview(false);
+                  if (previewMode === 'FULLSCREEN') setPreviewMode('SIDE');
+                }}
                 className="px-4 py-2 bg-theme-app border border-theme-border-soft rounded-lg text-sm font-bold text-theme-primary"
               >
                 Close
