@@ -12,6 +12,7 @@ import SecurityCenter from './SecurityCenter';
 import BackupCenter from './BackupCenter';
 import ChangelogManager from './ChangelogManager';
 import SupportCenter from './SupportCenter';
+import AnnouncementManager from './AnnouncementManager';
 
 const AdminPanel = ({ currentTab, setCurrentTab }) => {
   const [activeAdminTab, setActiveAdminTab] = useState('dashboard');
@@ -30,6 +31,7 @@ const AdminPanel = ({ currentTab, setCurrentTab }) => {
       {activeAdminTab === 'backup' && <BackupCenter />}
       {activeAdminTab === 'changelog' && <ChangelogManager />}
       {activeAdminTab === 'support' && <SupportCenter />}
+      {activeAdminTab === 'announcements' && <AnnouncementManager />}
     </AdminLayout>
   );
 };

@@ -1,12 +1,66 @@
 import React, { useState, useEffect } from 'react';
-import { Users, FileText, IndianRupee, Activity, Crown, Store, Clock, Database, ShieldAlert, CheckCircle2, AlertTriangle, ServerCrash, RefreshCw, CreditCard, ShieldCheck } from 'lucide-react';
+import { Users, FileText, IndianRupee, Activity, Crown, Store, Clock, Database, ShieldAlert, CheckCircle2, AlertTriangle, ServerCrash, RefreshCw, CreditCard, ShieldCheck, UserMinus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getFakeAdminData } from '../../utils/demoDataManager';
+import { getAdminUsersList, getAdminAllPaymentProofs, getAdminPlatformRevenueStates } from '../../services/dbEngine';
 
 const AdminDashboard = () => {
   const [fakeData, setFakeData] = useState(null);
+  const [realStats, setRealStats] = useState({
+    totalUsers: 0,
+    premiumUsers: 0,
+    freeUsers: 0,
+    pendingPayments: 0,
+    totalDues: 0,
+    totalCollected: 0,
+    lockedUsers: 0
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchRealStats = async () => {
+      try {
+        const users = await getAdminUsersList();
+        const proofs = await getAdminAllPaymentProofs();
+        const revs = await getAdminPlatformRevenueStates();
+
+        const totalUsers = users.length;
+        const premiumUsers = users.filter(u => u.planStatus === 'premium').length;
+        const freeUsers = totalUsers - premiumUsers;
+        
+        const pendingPayments = proofs.filter(p => p.status === 'Pending').length;
+        
+        let totalDues = 0;
+        let totalCollected = 0;
+        let lockedUsers = 0;
+        
+        revs.forEach(r => {
+          totalDues += parseFloat(r.platformPendingAmount) || 0;
+          totalCollected += parseFloat(r.platformPaidAmount) || 0;
+          if (r.lockStatus === 'locked') {
+            lockedUsers++;
+          }
+        });
+
+        setRealStats({
+          totalUsers,
+          premiumUsers,
+          freeUsers,
+          pendingPayments,
+          totalDues,
+          totalCollected,
+          lockedUsers
+        });
+      } catch (e) {
+        console.error('Failed to load admin stats:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRealStats();
+
+    // Simulator check
     const checkData = () => {
       setFakeData(getFakeAdminData());
     };
@@ -32,6 +86,10 @@ const AdminDashboard = () => {
     }
   };
 
+  const displayUsers = fakeData ? fakeData.totalUsers : realStats.totalUsers;
+  const displayPremium = fakeData ? fakeData.premiumUsers : realStats.premiumUsers;
+  const displayPendingProofs = fakeData ? fakeData.pendingPayments : realStats.pendingPayments;
+  
   return (
     <motion.div 
       variants={containerVariants}
@@ -51,7 +109,7 @@ const AdminDashboard = () => {
         
         {fakeData && (
           <div className="md:col-span-2 lg:col-span-3 bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl flex items-center mb-2">
-            <AlertTriangle className="w-5 h-5 text-amber-500 mr-3" />
+            <AlertTriangle className="w-5 h-5 text-amber-500 mr-3 animate-pulse" />
             <div>
               <p className="text-amber-500 font-bold">Admin Panel Demo Simulator Active</p>
               <p className="text-amber-500/70 text-sm">Showing simulated large-scale data for Owner Test Lab preview.</p>
@@ -59,76 +117,89 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {/* Total Users */}
         <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-400"></div>
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center text-slate-400 font-medium">
               <Users className="w-5 h-5 mr-2 text-blue-400" /> Total Users
             </div>
-            <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">+12%</span>
           </div>
-          <div className="text-4xl font-black text-white">{fakeData ? fakeData.totalUsers : '1,248'}</div>
-          <div className="text-slate-500 text-xs mt-2 font-medium">vs last month</div>
+          <div className="text-4xl font-black text-white">{displayUsers}</div>
+          <div className="text-slate-500 text-xs mt-2 font-medium">
+            {fakeData ? 'Simulated accounts' : `${realStats.freeUsers} Free starter accounts`}
+          </div>
         </motion.div>
         
+        {/* Premium Users */}
         <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center text-slate-400 font-medium">
-              <Store className="w-5 h-5 mr-2 text-purple-400" /> Total Businesses
+              <Crown className="w-5 h-5 mr-2 text-purple-400" /> Premium Users
             </div>
-            <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">+8%</span>
           </div>
-          <div className="text-4xl font-black text-white">892</div>
-          <div className="text-slate-500 text-xs mt-2 font-medium">vs last month</div>
+          <div className="text-4xl font-black text-white">{displayPremium}</div>
+          <div className="text-slate-500 text-xs mt-2 font-medium">
+            {fakeData ? 'Conversion rate 25%' : `Conversion Rate: ${displayUsers > 0 ? Math.round((displayPremium / displayUsers) * 100) : 0}%`}
+          </div>
         </motion.div>
 
+        {/* Pending Proofs */}
         <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-400"></div>
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center text-slate-400 font-medium">
-              <FileText className="w-5 h-5 mr-2 text-amber-400" /> Total Invoices
+              <Clock className="w-5 h-5 mr-2 text-amber-400" /> Pending Proofs
             </div>
-            <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">+24%</span>
+            {displayPendingProofs > 0 && (
+              <span className="px-2 py-0.5 bg-rose-500/20 text-rose-400 text-[10px] font-black rounded border border-rose-500/30 animate-pulse">Action Required</span>
+            )}
           </div>
-          <div className="text-4xl font-black text-white">45,902</div>
-          <div className="text-slate-500 text-xs mt-2 font-medium">850 created today</div>
+          <div className="text-4xl font-black text-white">{displayPendingProofs}</div>
+          <div className="text-slate-500 text-xs mt-2 font-medium">Proofs awaiting review in queue</div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-red-500"></div>
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center text-slate-400 font-medium">
-              <Crown className="w-5 h-5 mr-2 text-rose-400" /> Premium Users
-            </div>
-            <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">+5%</span>
-          </div>
-          <div className="text-4xl font-black text-white">{fakeData ? fakeData.premiumUsers : '312'}</div>
-          <div className="text-slate-500 text-xs mt-2 font-medium">Conversion rate 25%</div>
-        </motion.div>
-
-        <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-blue-500"></div>
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center text-slate-400 font-medium">
-              <Clock className="w-5 h-5 mr-2 text-indigo-400" /> Pending Payments
-            </div>
-            <span className="px-2 py-1 bg-rose-500/10 text-rose-400 text-xs font-bold rounded-lg border border-rose-500/20">Action Req</span>
-          </div>
-          <div className="text-4xl font-black text-white">{fakeData ? fakeData.pendingPayments : '14'}</div>
-          <div className="text-slate-500 text-xs mt-2 font-medium">Proofs await review</div>
-        </motion.div>
-
+        {/* Total Collected Revenue */}
         <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center text-slate-400 font-medium">
-              <IndianRupee className="w-5 h-5 mr-2 text-emerald-400" /> Est. Revenue
+              <IndianRupee className="w-5 h-5 mr-2 text-emerald-400" /> Total Collected
             </div>
-            <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">+18%</span>
           </div>
-          <div className="text-4xl font-black text-white">{fakeData ? `₹${(fakeData.fakeRevenue / 100000).toFixed(2)}L` : '₹1.56L'}</div>
-          <div className="text-slate-500 text-xs mt-2 font-medium">Current MRR</div>
+          <div className="text-4xl font-black text-white">
+            {fakeData ? `₹${(fakeData.fakeRevenue / 100000).toFixed(2)}L` : `₹${realStats.totalCollected}`}
+          </div>
+          <div className="text-slate-500 text-xs mt-2 font-medium">Revenue cleared by users</div>
+        </motion.div>
+
+        {/* Total Platform Dues */}
+        <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-red-500"></div>
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex items-center text-slate-400 font-medium">
+              <FileText className="w-5 h-5 mr-2 text-rose-400" /> Platform Dues
+            </div>
+          </div>
+          <div className="text-4xl font-black text-white">
+            {fakeData ? '₹4,900' : `₹${realStats.totalDues}`}
+          </div>
+          <div className="text-slate-500 text-xs mt-2 font-medium">Outstanding platform dues</div>
+        </motion.div>
+
+        {/* Locked Users Count */}
+        <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-blue-500"></div>
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex items-center text-slate-400 font-medium">
+              <UserMinus className="w-5 h-5 mr-2 text-indigo-400" /> Locked Accounts
+            </div>
+          </div>
+          <div className="text-4xl font-black text-white">
+            {fakeData ? '0' : realStats.lockedUsers}
+          </div>
+          <div className="text-slate-500 text-xs mt-2 font-medium">Users restricted due to limits</div>
         </motion.div>
 
       </div>
@@ -168,36 +239,6 @@ const AdminDashboard = () => {
             <div className="ml-auto">
               <span className="flex items-center px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">
                 <CheckCircle2 className="w-3 h-3 mr-1" /> Healthy
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/40 border border-slate-700/30">
-            <div className="p-2 bg-amber-500/10 rounded-lg text-amber-400">
-              <ServerCrash className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-slate-400 text-sm font-medium">Offline Queue</p>
-              <p className="text-white font-bold mt-1">42 pending tasks</p>
-            </div>
-            <div className="ml-auto">
-              <span className="flex items-center px-2 py-1 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-500/20">
-                <AlertTriangle className="w-3 h-3 mr-1" /> Warning
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/40 border border-slate-700/30">
-            <div className="p-2 bg-rose-500/10 rounded-lg text-rose-400">
-              <CreditCard className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-slate-400 text-sm font-medium">Payment Queue</p>
-              <p className="text-white font-bold mt-1">14 proofs unverified</p>
-            </div>
-            <div className="ml-auto">
-              <span className="flex items-center px-2 py-1 bg-rose-500/10 text-rose-400 text-xs font-bold rounded-lg border border-rose-500/20">
-                <ShieldAlert className="w-3 h-3 mr-1" /> Action Needed
               </span>
             </div>
           </div>

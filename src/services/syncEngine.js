@@ -116,7 +116,7 @@ let unsubscribes = [];
 export const startRealTimeSync = (userId) => {
   if (!firebaseReady || !userId) return;
 
-  console.log('[SYNC ENGINE] Starting Real-Time Sync Pro for user:', userId);
+
 
   // Clear previous listeners
   unsubscribes.forEach(unsub => unsub());
@@ -142,7 +142,7 @@ export const startRealTimeSync = (userId) => {
       let localSettings = localSettingsStr ? JSON.parse(localSettingsStr) : null;
 
       if (cloudWins(localSettings, cloudSettings)) {
-        console.log('[SYNC ENGINE] Cloud Settings applied instantly.');
+
         localStorage.setItem(KEYS.SETTINGS, JSON.stringify(cloudSettings));
         window.dispatchEvent(new CustomEvent('billqyro:settings-updated', { detail: cloudSettings }));
       }

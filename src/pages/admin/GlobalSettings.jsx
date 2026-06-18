@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { Settings as SettingsIcon, Globe, Moon, ShieldAlert, Zap, Edit3, Sliders, Bell } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Settings as SettingsIcon, Globe, ShieldAlert, Zap, Sliders, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getGlobalRevenueSettings, saveGlobalRevenueSettings } from '../../services/dbEngine';
+import { toast } from 'react-hot-toast';
 
 const ToggleSwitch = ({ label, enabled, setEnabled }) => (
   <label className="flex items-center justify-between cursor-pointer group">
@@ -19,10 +21,81 @@ const ToggleSwitch = ({ label, enabled, setEnabled }) => (
 );
 
 const GlobalSettings = () => {
-  const [maintenance, setMaintenance] = useState(false);
-  const [allowReg, setAllowReg] = useState(true);
-  const [liveLinks, setLiveLinks] = useState(true);
-  const [paymentSystem, setPaymentSystem] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [premiumModeEnabled, setPremiumModeEnabled] = useState(true);
+  const [payPerBillEnabled, setPayPerBillEnabled] = useState(true);
+  const [freeBillLimit, setFreeBillLimit] = useState(10);
+  const [chargePerBill, setChargePerBill] = useState(5);
+  const [percentageChargeSetting, setPercentageChargeSetting] = useState(0);
+  const [monthlyGraceLimit, setMonthlyGraceLimit] = useState(5);
+  const [maxPendingDue, setMaxPendingDue] = useState(100);
+  const [maxUnpaidBillCount, setMaxUnpaidBillCount] = useState(20);
+  const [lockBehavior, setLockBehavior] = useState('bill_creation');
+  const [upiId, setUpiId] = useState('khairul2052007@okaxis');
+  const [payeeName, setPayeeName] = useState('BillQyro Platform');
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const s = await getGlobalRevenueSettings();
+        setPremiumModeEnabled(s.premiumModeEnabled ?? true);
+        setPayPerBillEnabled(s.payPerBillEnabled ?? true);
+        setFreeBillLimit(s.freeBillLimit ?? 10);
+        setChargePerBill(s.chargePerBill ?? 5);
+        setPercentageChargeSetting(s.percentageChargeSetting ?? 0);
+        setMonthlyGraceLimit(s.monthlyGraceLimit ?? 5);
+        setMaxPendingDue(s.maxPendingDue ?? 100);
+        setMaxUnpaidBillCount(s.maxUnpaidBillCount ?? 20);
+        setLockBehavior(s.lockBehavior ?? 'bill_creation');
+        setUpiId(s.upiId || 'khairul2052007@okaxis');
+        setPayeeName(s.payeeName || 'BillQyro Platform');
+      } catch (e) {
+        toast.error('Failed to load global revenue settings');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleSave = async () => {
+    setLoading(true);
+    const payload = {
+      premiumModeEnabled,
+      payPerBillEnabled,
+      freeBillLimit: parseInt(freeBillLimit) || 10,
+      chargePerBill: parseFloat(chargePerBill) || 5,
+      percentageChargeSetting: parseFloat(percentageChargeSetting) || 0,
+      monthlyGraceLimit: parseInt(monthlyGraceLimit) || 5,
+      maxPendingDue: parseFloat(maxPendingDue) || 100,
+      maxUnpaidBillCount: parseInt(maxUnpaidBillCount) || 20,
+      lockBehavior,
+      upiId,
+      payeeName
+    };
+
+    try {
+      const success = await saveGlobalRevenueSettings(payload);
+      if (success) {
+        toast.success('Global revenue settings saved successfully!');
+      } else {
+        toast.error('Failed to save settings to Firestore.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Error saving settings.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <span className="w-8 h-8 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin"></span>
+      </div>
+    );
+  }
 
   return (
     <motion.div 
@@ -33,11 +106,14 @@ const GlobalSettings = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h2 className="text-2xl font-bold text-white tracking-tight flex items-center">
-            <Sliders className="w-6 h-6 mr-3 text-emerald-400" /> Global Settings
+            <Sliders className="w-6 h-6 mr-3 text-emerald-400" /> Revenue Settings (Owner)
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Configure platform-wide parameters and feature flags.</p>
+          <p className="text-slate-400 text-sm mt-1">Configure global monetization parameters and limits.</p>
         </div>
-        <button className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-emerald-500/20">
+        <button 
+          onClick={handleSave}
+          className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-emerald-500/20 cursor-pointer"
+        >
           Save Changes
         </button>
       </div>
@@ -45,119 +121,137 @@ const GlobalSettings = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Core Settings */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50">
-          <h3 className="font-bold text-white mb-6 flex items-center border-b border-slate-700/50 pb-4">
-            <Globe className="w-5 h-5 mr-2 text-blue-400" /> Core Preferences
+        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 space-y-6">
+          <h3 className="font-bold text-white flex items-center border-b border-slate-700/50 pb-4">
+            <Globe className="w-5 h-5 mr-2 text-blue-400" /> Monetization Modes
           </h3>
-          <div className="space-y-5">
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Default Theme</label>
-              <select className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all appearance-none cursor-pointer">
-                <option value="system">System Default</option>
-                <option value="dark">Dark Mode (Premium)</option>
-                <option value="light">Light Mode</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Default Language</label>
-              <select className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all appearance-none cursor-pointer">
-                <option value="en">English (US)</option>
-                <option value="hi">Hindi (India)</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Global Announcement</label>
-              <textarea 
-                placeholder="Enter an announcement to display to all users..."
-                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all resize-none h-24"
-              ></textarea>
-            </div>
+          <ToggleSwitch 
+            label="Enable Premium Subscriptions" 
+            enabled={premiumModeEnabled} 
+            setEnabled={setPremiumModeEnabled} 
+          />
+          <ToggleSwitch 
+            label="Enable Pay-Per-Bill Model" 
+            enabled={payPerBillEnabled} 
+            setEnabled={setPayPerBillEnabled} 
+          />
+        </div>
+
+        {/* UPI Payments */}
+        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 space-y-5">
+          <h3 className="font-bold text-white flex items-center border-b border-slate-700/50 pb-4">
+            <CreditCard className="w-5 h-5 mr-2 text-purple-400" /> UPI Payment Details
+          </h3>
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Platform UPI ID</label>
+            <input 
+              type="text"
+              value={upiId}
+              onChange={(e) => setUpiId(e.target.value)}
+              className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Payee Name</label>
+            <input 
+              type="text"
+              value={payeeName}
+              onChange={(e) => setPayeeName(e.target.value)}
+              className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+            />
           </div>
         </div>
 
         {/* Business Limits */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50">
-          <h3 className="font-bold text-white mb-6 flex items-center border-b border-slate-700/50 pb-4">
-            <Zap className="w-5 h-5 mr-2 text-amber-400" /> Subscription & Limits
+        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 lg:col-span-2 space-y-6">
+          <h3 className="font-bold text-white flex items-center border-b border-slate-700/50 pb-4">
+            <Zap className="w-5 h-5 mr-2 text-amber-400" /> Pricing & Lock Parameters
           </h3>
-          <div className="space-y-5">
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Free Bill Limit</label>
-                <input 
-                  type="number" 
-                  defaultValue={20}
-                  className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
-                />
-              </div>
-              <div className="flex-1">
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Charge Per Bill</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500">₹</span>
-                  <input 
-                    type="number" 
-                    defaultValue={2.50}
-                    step="0.10"
-                    className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
-                  />
-                </div>
-              </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Free Bill Limit</label>
+              <input 
+                type="number" 
+                value={freeBillLimit}
+                onChange={(e) => setFreeBillLimit(e.target.value)}
+                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+              />
             </div>
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Max Pending Due</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500">₹</span>
-                  <input 
-                    type="number" 
-                    defaultValue={500}
-                    className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
-                  />
-                </div>
-              </div>
-              <div className="flex-1">
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Grace Period (Days)</label>
-                <input 
-                  type="number" 
-                  defaultValue={3}
-                  className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
-                />
-              </div>
+            
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Flat Charge Per Bill (₹)</label>
+              <input 
+                type="number" 
+                value={chargePerBill}
+                onChange={(e) => setChargePerBill(e.target.value)}
+                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+              />
             </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Percentage Charge (%)</label>
+              <input 
+                type="number" 
+                value={percentageChargeSetting}
+                onChange={(e) => setPercentageChargeSetting(e.target.value)}
+                placeholder="e.g. 1% of bill value (Overrides flat charge)"
+                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Grace Bills Count</label>
+              <input 
+                type="number" 
+                value={monthlyGraceLimit}
+                onChange={(e) => setMonthlyGraceLimit(e.target.value)}
+                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Max Pending Dues (₹)</label>
+              <input 
+                type="number" 
+                value={maxPendingDue}
+                onChange={(e) => setMaxPendingDue(e.target.value)}
+                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Max Unpaid Bills Count</label>
+              <input 
+                type="number" 
+                value={maxUnpaidBillCount}
+                onChange={(e) => setMaxUnpaidBillCount(e.target.value)}
+                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Lock Behavior After Limit Exceeded</label>
+            <select
+              value={lockBehavior}
+              onChange={(e) => setLockBehavior(e.target.value)}
+              className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer"
+            >
+              <option value="bill_creation">Lock New Bill Creation Only</option>
+              <option value="none">No Lock (Warning Only)</option>
+            </select>
           </div>
         </div>
 
-        {/* Access Controls */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50">
-          <h3 className="font-bold text-white mb-6 flex items-center border-b border-slate-700/50 pb-4">
-            <ShieldAlert className="w-5 h-5 mr-2 text-rose-400" /> Platform Controls
-          </h3>
-          <div className="space-y-6">
-            <ToggleSwitch label="Maintenance Mode" enabled={maintenance} setEnabled={setMaintenance} />
-            <ToggleSwitch label="Allow New Registrations" enabled={allowReg} setEnabled={setAllowReg} />
-            {maintenance && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl"
-              >
-                <p className="text-rose-400 text-xs font-bold flex items-center">
-                  <ShieldAlert className="w-4 h-4 mr-2" />
-                  Only Admin IPs can access the platform currently.
-                </p>
-              </motion.div>
-            )}
-          </div>
-        </div>
-
-        {/* Feature Switches */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50">
-          <h3 className="font-bold text-white mb-6 flex items-center border-b border-slate-700/50 pb-4">
-            <SettingsIcon className="w-5 h-5 mr-2 text-purple-400" /> Feature Toggles
-          </h3>
-          <div className="space-y-6">
-            <ToggleSwitch label="Live Link Sharing" enabled={liveLinks} setEnabled={setLiveLinks} />
-            <ToggleSwitch label="Payment Proof System" enabled={paymentSystem} setEnabled={setPaymentSystem} />
+        {/* Info Control */}
+        <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-6 lg:col-span-2 flex items-start space-x-4">
+          <ShieldAlert className="w-6 h-6 text-rose-400 shrink-0 mt-0.5" />
+          <div>
+            <h4 className="text-white font-bold text-sm">Security & Enforcement Note</h4>
+            <p className="text-slate-400 text-xs mt-1 leading-relaxed">
+              When lock enforcement is active, users exceeding their free bill limit, unpaid count, or max dues threshold will be restricted from saving new invoices. However, login, existing invoice viewing, downloads, and backups will remain fully operational.
+            </p>
           </div>
         </div>
 

@@ -16,6 +16,15 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
   
   const [currentStep, setCurrentStep] = useState(1);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('saved'); // 'saved', 'unsaved', 'saving'
+  const [lastSaved, setLastSaved] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showExitPrompt, setShowExitPrompt] = useState(false);
+  
+  const onSaveInvoiceRef = React.useRef(onSaveInvoice);
+  useEffect(() => {
+    onSaveInvoiceRef.current = onSaveInvoice;
+  }, [onSaveInvoice]);
 
   // Auto-Save Engine (Debounced)
   const autoSaveDraft = useCallback(async () => {
@@ -100,8 +109,8 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
     <div className="flex flex-col min-h-screen bg-theme-app relative overflow-x-hidden">
       {/* Smart Sticky Header */}
       <StudioHeader 
-        previewMode={previewMode} 
-        setPreviewMode={setPreviewMode} 
+        previewMode={showMobilePreview} 
+        setPreviewMode={setShowMobilePreview} 
         lastSaved={lastSaved}
         saveStatus={saveStatus}
         onSaveDraft={() => {

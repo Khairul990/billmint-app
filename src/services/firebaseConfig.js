@@ -31,14 +31,14 @@ if (hasConfig) {
     storage = getStorage(app);
     firebaseReady = true;
     window.billqyro_firebaseReady = true;
-    console.log('Firebase initialized successfully!');
+
   } catch (error) {
     window.billqyro_firebaseReady = false;
     console.warn('Firebase initialization failed, falling back to LocalStorage offline mode.', error);
   }
 } else {
   window.billqyro_firebaseReady = false;
-  console.log('Firebase credentials not set in environment. Running in graceful offline mode (LocalStorage).');
+
 }
 
 export { app, auth, db, storage, firebaseReady };

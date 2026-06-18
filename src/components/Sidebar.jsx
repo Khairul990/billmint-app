@@ -49,22 +49,29 @@ const Sidebar = ({
     switch(wsType) {
       case 'doctor': return 'Patients';
       case 'teacher': return 'Students';
-      case 'freelance':
-      case 'service': return 'Clients';
+      case 'repair':
+      case 'service': return 'Device Owners';
+      case 'tailor':
+      case 'embroidery':
+      case 'freelance': return 'Clients';
       default: return t('customers');
     }
   };
 
   const getInvoiceLabel = () => {
     switch(wsType) {
-      case 'teacher': return 'Fee Receipts';
-      case 'doctor': return 'Bills';
-      default: return t('invoices');
+      case 'teacher': return 'Fee Slips';
+      case 'doctor': return 'Consultations';
+      case 'tailor': return 'Order Slips';
+      case 'embroidery': return 'Work Orders';
+      case 'repair':
+      case 'service': return 'Repair Tickets';
+      default: return 'Bills';
     }
   };
 
   let menuItems = [
-    { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
+    { id: 'dashboard', label: "Today's Business", icon: LayoutDashboard },
     { id: 'invoices', label: getInvoiceLabel(), icon: FileSpreadsheet, module: 'billing' },
     { id: 'estimates', label: 'Estimates & Quotes', icon: FileSpreadsheet },
     { id: 'marketplace', label: 'Template Marketplace', icon: Store },

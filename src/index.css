@@ -18,17 +18,21 @@ html {
 
 /* Global Theme Transition */
 body, body *, ::before, ::after {
-  transition: background-color 700ms ease-in-out, 
-              border-color 700ms ease-in-out, 
-              color 700ms ease-in-out, 
-              box-shadow 700ms ease-in-out,
-              fill 700ms ease-in-out,
-              stroke 700ms ease-in-out;
+  transition: background-color 200ms ease-in-out, 
+              border-color 200ms ease-in-out, 
+              color 200ms ease-in-out, 
+              box-shadow 200ms ease-in-out,
+              fill 200ms ease-in-out,
+              stroke 200ms ease-in-out;
 }
 
 /* Override for elements that define their own transitions (e.g. Tailwind transition-all) so hover states aren't sluggish */
 .transition, .transition-all, .transition-colors, .transition-opacity, .transition-shadow, .transition-transform {
-  transition-duration: 300ms;
+  transition-duration: 200ms;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 @layer base {

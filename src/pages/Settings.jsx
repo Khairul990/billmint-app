@@ -183,7 +183,7 @@ const Settings = ({
       try {
         setStorageInfo(getStorageUsage());
       } catch (e) {
-        console.log('Failed to get storage usage', e);
+
       }
     }
   }, [activeTab]);

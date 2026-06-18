@@ -165,6 +165,13 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
           </div>
         )}
 
+        {businessSettings?.maintenanceMode && (
+          <div className="bg-rose-600 text-white font-black text-xs py-1.5 text-center uppercase tracking-widest z-50 relative shadow-md flex items-center justify-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+            SYSTEM MAINTENANCE ACTIVE — Invoice creation, live links, and premium upgrades are temporarily disabled.
+          </div>
+        )}
+
         {/* Header Block with Premium Dual-Theme Layout */}
         <header className="sticky top-0 z-40 bg-theme-card/80 backdrop-blur-xl border-b border-theme-accent/50 px-4 sm:px-6 py-4 md:py-5 text-theme-primary shadow-sm transition-all duration-300">
           {/* Subtle Ambient Background Gradients wrapped to prevent overflow spill */}
@@ -374,7 +381,11 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                         </div>
                         <div className="overflow-hidden">
                           <p className="text-sm font-black text-theme-primary truncate">{businessSettings?.businessName || 'My Business'}</p>
-                          <p className="text-xs font-semibold text-theme-muted truncate">{businessSettings?.email || userEmail || 'No email provided'}</p>
+                          <p className="text-xs font-semibold text-theme-muted truncate">
+                            {localStorage.getItem('billqyro_demo_video_creator') === 'true'
+                              ? '••••••••@••••.•••'
+                              : (businessSettings?.email || userEmail || 'No email provided')}
+                          </p>
                         </div>
                       </div>
                       

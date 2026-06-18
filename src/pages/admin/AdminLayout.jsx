@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAuthSession } from '../../services/dbEngine';
 import { auth } from '../../services/firebaseConfig';
-import { Lock, ShieldAlert, ArrowLeft, Activity, Users, Settings as SettingsIcon, CreditCard, ShieldCheck, Menu, X, User, Crown, ToggleRight, Database, ListPlus, MessageSquare } from 'lucide-react';
+import { Lock, ShieldAlert, ArrowLeft, Activity, Users, Settings as SettingsIcon, CreditCard, ShieldCheck, Menu, X, User, Crown, ToggleRight, Database, ListPlus, MessageSquare, Megaphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTab }) => {
@@ -23,6 +23,7 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
     { id: 'backup', label: 'Backup Center', icon: <Database className="w-5 h-5" /> },
     { id: 'changelog', label: 'Changelog Manager', icon: <ListPlus className="w-5 h-5" /> },
     { id: 'support', label: 'Support & Features', icon: <MessageSquare className="w-5 h-5" /> },
+    { id: 'announcements', label: 'Announcements', icon: <Megaphone className="w-5 h-5" /> },
   ];
 
   // The PIN check is now handled upstream by App.jsx -> AdminPINLogin.jsx

@@ -12,8 +12,7 @@ import {
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import PullToRefresh from '../components/PullToRefresh';
-import { syncFromFirestore } from '../services/dbEngine';
-import { getGlobalAdminSettings } from '../services/dbEngine';
+import { syncFromFirestore, getGlobalAdminSettings, getActiveAnnouncement } from '../services/dbEngine';
 import AnimatedBorderTrail from '../components/AnimatedBorderTrail';
 import { t } from '../utils/i18n';
 
@@ -35,12 +34,46 @@ const Dashboard = ({
   onQuickBillOpen,
   pendingPaymentsCount = 0,
   syncStatus = 'Synced',
-  isLoading = false
+  isLoading = false,
+  revenueStatus = {}
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [lastBackupTime, setLastBackupTime] = useState('');
+  const [activeAnnouncement, setActiveAnnouncement] = useState(null);
+  const [isVideoCreatorMode, setIsVideoCreatorMode] = useState(false);
+
+  useEffect(() => {
+    const timeStr = localStorage.getItem('billqyro_last_backup_time');
+    if (timeStr) {
+      try {
+        setLastBackupTime(new Date(timeStr).toLocaleString());
+      } catch (e) {
+        setLastBackupTime(timeStr);
+      }
+    } else {
+      setLastBackupTime('Never');
+    }
+  }, []);
+
+  useEffect(() => {
+    const loadAnnouncement = async () => {
+      try {
+        const ann = await getActiveAnnouncement();
+        setActiveAnnouncement(ann);
+      } catch (e) {
+        console.error("Failed to load active announcement:", e);
+      }
+    };
+    loadAnnouncement();
+
+    try {
+      setIsVideoCreatorMode(localStorage.getItem('billqyro_demo_video_creator') === 'true');
+    } catch (e) {}
+  }, []);
 
   const currencySymbol = businessSettings?.currency || '₹';
-  const businessName = businessSettings?.businessName || 'My Business';
+  const rawBusinessName = businessSettings?.businessName || 'My Business';
+  const businessName = isVideoCreatorMode ? '•••••••• Ltd' : rawBusinessName;
   
   const activeWorkspace = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId) || businessSettings;
   const businessType = activeWorkspace?.businessType || businessSettings?.businessType;
@@ -101,15 +134,222 @@ const Dashboard = ({
   };
   const monthlyData = getMonthlyData();
 
+  // --- SHOPKEEPER PSYCHOLOGY HELPERS & STATS ---
+  const getDeliveriesThisWeek = () => {
+    const today = new Date();
+    const nextWeek = new Date();
+    nextWeek.setDate(today.getDate() + 7);
+    return invoices.filter(inv => {
+      if (!inv.dueDate) return false;
+      const dDate = new Date(inv.dueDate);
+      return dDate >= today && dDate <= nextWeek;
+    }).length;
+  };
+
+  const getMonthlyCollection = () => {
+    const currentMonthStr = new Date().toISOString().substring(0, 7);
+    return invoices
+      .filter(inv => inv.date && inv.date.startsWith(currentMonthStr))
+      .reduce((sum, inv) => sum + (parseFloat(inv.amountPaid) || 0), 0);
+  };
+
+  const getFeePending = () => {
+    return invoices.reduce((sum, inv) => sum + (parseFloat(inv.balanceDue) || 0), 0);
+  };
+
+  const getPatientsToday = () => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const uniquePatients = new Set(
+      invoices.filter(inv => inv.date === todayStr).map(inv => inv.customerName)
+    );
+    return uniquePatients.size;
+  };
+
+  const getFollowUpDue = () => {
+    const limitDate = new Date();
+    limitDate.setDate(limitDate.getDate() - 7);
+    return invoices.filter(inv => {
+      if (!inv.date) return false;
+      const invDate = new Date(inv.date);
+      return inv.balanceDue > 0 && invDate < limitDate;
+    }).length;
+  };
+
+  const getTodaysSales = () => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    return invoices
+      .filter(inv => inv.date === todayStr)
+      .reduce((sum, inv) => sum + (parseFloat(inv.grandTotal) || 0), 0);
+  };
+
+  const getTopProductsList = () => {
+    const counts = {};
+    invoices.forEach(inv => {
+      (inv.items || []).forEach(item => {
+        const name = item.description || item.productName || item.serviceName || item.itemService || 'Item';
+        counts[name] = (counts[name] || 0) + (parseFloat(item.qty) || 1);
+      });
+    });
+    const sorted = Object.keys(counts)
+      .map(name => ({ name, qty: counts[name] }))
+      .sort((a, b) => b.qty - a.qty);
+    return sorted[0]?.name || 'N/A';
+  };
+
+  const getWaitingForParts = () => {
+    return invoices.filter(inv => 
+      inv.notes?.toLowerCase().includes('part') || 
+      inv.status?.toLowerCase() === 'waiting'
+    ).length || 0;
+  };
+
+  const getReadyForPickup = () => {
+    return invoices.filter(inv => inv.status?.toLowerCase() === 'ready' || inv.paymentStatus === 'Partially Paid').length || 0;
+  };
+
+  const getActiveDesigns = () => {
+    return products.length || 0;
+  };
+
+  const getDeliveryScheduleCount = () => {
+    const today = new Date();
+    const limit = new Date();
+    limit.setDate(today.getDate() + 3);
+    return invoices.filter(inv => {
+      if (!inv.dueDate) return false;
+      const dDate = new Date(inv.dueDate);
+      return dDate >= today && dDate <= limit;
+    }).length;
+  };
+
+  const getNextAction = () => {
+    const duesCount = invoices.filter(inv => inv.balanceDue > 0).length;
+    if (duesCount > 0) {
+      return {
+        text: `Send reminder for pending dues`,
+        action: () => setCurrentTab('due-ledger'),
+        buttonText: 'View Due Ledger'
+      };
+    }
+    return {
+      text: 'Create a new bill to start tracking sales',
+      action: () => setCurrentTab('create'),
+      buttonText: 'Create Bill'
+    };
+  };
+  const nextAction = getNextAction();
+
+  const getCategoryWidgets = () => {
+    const type = (businessType || '').toLowerCase();
+    
+    // Default / Retail
+    let card1 = {
+      label: "Today's Sales",
+      value: formatCurrency(getTodaysSales(), currencySymbol),
+      desc: "Gross sales today"
+    };
+    let card2 = {
+      label: "Top Product",
+      value: getTopProductsList(),
+      desc: "Most quantity sold"
+    };
+
+    if (type === 'doctor' || type === 'clinic' || type === 'doctor / clinic') {
+      card1 = {
+        label: "Today's Patients",
+        value: `${getPatientsToday()} Patients`,
+        desc: "Unique consults today"
+      };
+      card2 = {
+        label: "Follow-up Due",
+        value: `${getFollowUpDue()} Pending`,
+        desc: "Baki payments > 7 days"
+      };
+    } else if (type === 'teacher' || type === 'tuition' || type === 'teacher / tuition' || type === 'teacher / tuition / coaching') {
+      card1 = {
+        label: "Total Fee Pending",
+        value: formatCurrency(getFeePending(), currencySymbol),
+        desc: "Total baki to collect"
+      };
+      card2 = {
+        label: "Active Courses",
+        value: `${products.length} Courses`,
+        desc: "Total classes/subjects"
+      };
+    } else if (type === 'tailor' || type === 'boutique' || type === 'tailor / boutique' || type === 'tailor & boutique' || type === 'tailor / fashion') {
+      card1 = {
+        label: "Deliveries (7 Days)",
+        value: `${getDeliveriesThisWeek()} Orders`,
+        desc: "Orders due this week"
+      };
+      card2 = {
+        label: "Active Clients",
+        value: `${customers.length} Clients`,
+        desc: "In client database"
+      };
+    } else if (type === 'embroidery' || type === 'designer' || type === 'embroidery & designer' || type === 'embroidery / designer') {
+      card1 = {
+        label: "Deliveries (3 Days)",
+        value: `${getDeliveryScheduleCount()} Orders`,
+        desc: "Embroidery delivery due"
+      };
+      card2 = {
+        label: "Active Designs",
+        value: `${getActiveDesigns()} Designs`,
+        desc: "Embroidery design library"
+      };
+    } else if (type === 'service' || type === 'repair' || type === 'service & repair' || type === 'service / repair') {
+      card1 = {
+        label: "Waiting for Parts",
+        value: `${getWaitingForParts()} Devices`,
+        desc: "Jobs on hold for parts"
+      };
+      card2 = {
+        label: "Ready for Pickup",
+        value: `${getReadyForPickup()} Jobs`,
+        desc: "Completed jobs unpaid"
+      };
+    }
+
+    return (
+      <>
+        <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 flex flex-col justify-between h-[110px]">
+          <div>
+            <span className="text-[10px] font-black text-theme-muted uppercase tracking-wider block mb-1">{card1.label}</span>
+            <p className="text-sm font-black text-theme-primary leading-tight line-clamp-1">{card1.value}</p>
+          </div>
+          <p className="text-[10px] text-theme-muted font-semibold mt-1">{card1.desc}</p>
+        </div>
+        <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 flex flex-col justify-between h-[110px]">
+          <div>
+            <span className="text-[10px] font-black text-theme-muted uppercase tracking-wider block mb-1">{card2.label}</span>
+            <p className="text-sm font-black text-theme-primary leading-tight line-clamp-1">{card2.value}</p>
+          </div>
+          <p className="text-[10px] text-theme-muted font-semibold mt-1">{card2.desc}</p>
+        </div>
+      </>
+    );
+  };
+
   // --- DYNAMIC LABELS ---
   const getLabels = () => {
-    const type = businessType;
-    if (type === 'Doctor / Clinic' || type === 'Doctor') return { clients: 'Patients', invoices: 'Bills', items: 'Services', due: 'Pending Balance', orders: 'Appointments', create: 'Create Bill' };
-    if (type === 'Teacher / Tuition' || type === 'Teacher') return { clients: 'Students', invoices: 'Fee Receipts', items: 'Courses', due: 'Due Fees', orders: 'Reports', create: 'Collect Fee' };
-    if (type === 'Tailor / Fashion' || type === 'Embroidery / Designer' || type === 'Embroidery') return { clients: 'Customers', invoices: 'Orders', items: 'Design Book', due: 'Due Payment', orders: 'Delivery', create: 'Add Order' };
-    if (type === 'Retail' || type === 'Retail / Shop') return { clients: 'Customers', invoices: 'Sales', items: 'Inventory', due: 'Pending Due', orders: 'Products', create: 'Create Invoice' };
-    if (type === 'Service' || type === 'Service / Repair') return { clients: 'Clients', invoices: 'Jobs', items: 'Devices', due: 'Pending Due', orders: 'Delivery', create: 'Create Job' };
-    return { clients: 'Customers', invoices: 'Invoices', items: 'Products/Services', due: 'Pending Due', orders: 'Reports', create: 'Create Invoice' };
+    const type = (businessType || '').toLowerCase();
+    if (type === 'doctor' || type === 'clinic' || type === 'doctor / clinic') {
+      return { clients: 'Patients', invoices: 'Consultations', items: 'Services', due: 'Baki', orders: 'Appointments', create: 'Create Consultation' };
+    }
+    if (type === 'teacher' || type === 'tuition' || type === 'teacher / tuition' || type === 'teacher / tuition / coaching') {
+      return { clients: 'Students', invoices: 'Fee Slips', items: 'Courses', due: 'Baki', orders: 'Reports', create: 'Collect Fee' };
+    }
+    if (type === 'tailor' || type === 'fashion' || type === 'tailor / boutique' || type === 'tailor & boutique' || type === 'tailor / fashion') {
+      return { clients: 'Clients', invoices: 'Order Slips', items: 'Measurements', due: 'Baki', orders: 'Delivery', create: 'Add Order' };
+    }
+    if (type === 'embroidery' || type === 'designer' || type === 'embroidery & designer' || type === 'embroidery / designer') {
+      return { clients: 'Clients', invoices: 'Work Orders', items: 'Designs', due: 'Baki', orders: 'Schedule', create: 'Add Work Order' };
+    }
+    if (type === 'service' || type === 'repair' || type === 'service & repair' || type === 'service / repair') {
+      return { clients: 'Device Owners', invoices: 'Repair Tickets', items: 'Devices', due: 'Baki', orders: 'Jobs', create: 'Create Ticket' };
+    }
+    return { clients: 'Customers', invoices: 'Bills', items: 'Inventory', due: 'Baki', orders: 'Products', create: 'Create Bill' };
   };
   const labels = getLabels();
 
@@ -185,8 +425,121 @@ const Dashboard = ({
             </motion.div>
           )}
 
+          {/* TRUST BADGE & SAFETY BAR */}
+          <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+            <div className="flex items-center gap-2.5 text-theme-primary font-semibold">
+              <Shield className="w-4 h-4 text-theme-accent shrink-0" />
+              <span>Your data stays on your device first.</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md font-black uppercase tracking-wider text-[9px] border border-emerald-500/20">
+                <HardDrive className="w-3 h-3" /> Offline Ready
+              </span>
+              {lastBackupTime && (
+                <span className="text-theme-muted font-semibold">
+                  Last Backup: <span className="font-bold text-theme-primary">{lastBackupTime}</span>
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* PLATFORM REVENUE WARNINGS */}
+          {revenueStatus?.lockStatus === 'warn' && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between shrink-0"
+            >
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-500 shrink-0" />
+                <p className="text-amber-500 text-xs font-bold">
+                  You have pending BillQyro due of <span className="font-black text-theme-primary">₹{revenueStatus.platformPendingAmount}</span>. Please clear it to continue smoothly.
+                </p>
+              </div>
+              <button 
+                onClick={() => setCurrentTab('subscription')}
+                className="text-xs font-black text-amber-600 dark:text-amber-400 hover:underline px-3 py-1.5 bg-amber-500/15 rounded-xl border border-amber-500/20"
+              >
+                Clear Due
+              </button>
+            </motion.div>
+          )}
+
+          {revenueStatus?.lockStatus === 'grace' && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-orange-500/10 border border-orange-500/30 rounded-2xl p-4 flex items-center justify-between shrink-0"
+            >
+              <div className="flex items-center gap-3">
+                <Zap className="w-5 h-5 text-orange-500 shrink-0" />
+                <p className="text-orange-500 text-xs font-bold">
+                  Your free/grace limit is almost finished. Pending Platform Due: <span className="font-black text-theme-primary">₹{revenueStatus.platformPendingAmount}</span>.
+                </p>
+              </div>
+              <button 
+                onClick={() => setCurrentTab('subscription')}
+                className="text-xs font-black text-orange-600 dark:text-orange-400 hover:underline px-3 py-1.5 bg-orange-500/15 rounded-xl border border-orange-500/20"
+              >
+                Pay Now
+              </button>
+            </motion.div>
+          )}
+
+          {revenueStatus?.lockStatus === 'locked' && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4 flex items-center justify-between shrink-0"
+            >
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
+                <p className="text-rose-500 text-xs font-bold">
+                  New bill creation is locked. Please clear your platform due of <span className="font-black text-theme-primary">₹{revenueStatus.platformPendingAmount}</span>.
+                </p>
+              </div>
+              <button 
+                onClick={() => setCurrentTab('subscription')}
+                className="text-xs font-black text-white bg-rose-600 px-3 py-1.5 rounded-xl hover:opacity-90 shadow-[0_0_15px_rgba(239,68,68,0.3)] border border-rose-500/40"
+              >
+                Pay Platform Due
+              </button>
+            </motion.div>
+          )}
+
+          {/* BROADCAST ANNOUNCEMENT BANNER */}
+          {activeAnnouncement && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`border rounded-2xl p-4 flex items-start gap-3 shadow-premium ${
+                activeAnnouncement.type === 'warning'
+                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-200'
+                  : activeAnnouncement.type === 'maintenance'
+                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-200'
+                  : activeAnnouncement.type === 'update'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-200'
+                  : 'bg-theme-accent/10 border-theme-accent/30 text-theme-accent'
+              }`}
+            >
+              <div className="mt-0.5 shrink-0">
+                {activeAnnouncement.type === 'warning' || activeAnnouncement.type === 'maintenance' ? (
+                  <AlertCircle className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                ) : activeAnnouncement.type === 'update' ? (
+                  <Sparkles className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                ) : (
+                  <Megaphone className="w-5 h-5 text-theme-accent" />
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-sm leading-snug">{activeAnnouncement.title}</h3>
+                <p className="text-xs font-semibold opacity-90 mt-1">{activeAnnouncement.message}</p>
+              </div>
+            </motion.div>
+          )}
+
           {/* 1. HERO SUMMARY CARD */}
-          <div className="bg-[image:var(--accent-gradient)] rounded-3xl p-6 md:p-8 shadow-premium text-white relative overflow-hidden">
+          <div className="bg-[image:var(--accent-gradient)] rounded-3xl p-6 md:p-8 text-white relative overflow-hidden">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
             <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/20 blur-3xl rounded-full"></div>
             
@@ -195,11 +548,11 @@ const Dashboard = ({
                 <div className="flex items-center gap-2 mb-2">
                   <h1 className="text-2xl md:text-4xl font-black tracking-tight">{businessName}</h1>
                   <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-sm border border-white/10">
-                    {businessSettings?.activeWorkspaceName || 'Main Workspace'}
+                    {isVideoCreatorMode ? 'Demo Workspace' : (businessSettings?.activeWorkspaceName || 'Main Workspace')}
                   </span>
                 </div>
                 <p className="text-sm md:text-base font-semibold text-white/90 max-w-xl">
-                  {t('welcome')}, {businessSettings?.ownerName || 'Admin'}. Here is your dashboard overview.
+                  {t('welcome')}, {isVideoCreatorMode ? 'Demo Owner' : (businessSettings?.ownerName || 'Admin')}. Here is your Today's Business overview.
                 </p>
                 <div className="flex flex-wrap gap-3 mt-6">
                   {hasBilling && (
@@ -217,29 +570,29 @@ const Dashboard = ({
               
               <div className="flex items-center gap-4 md:gap-6 bg-black/20 backdrop-blur-md p-4 rounded-2xl border border-white/10 overflow-x-auto no-scrollbar w-full lg:w-auto shrink-0">
                 <div className="shrink-0">
-                  <p className="text-[10px] md:text-xs font-bold text-white/70 uppercase tracking-wider mb-1">{isEmbroidery ? 'Orders' : "Today's Revenue"}</p>
+                  <p className="text-[10px] md:text-xs font-bold text-white/70 uppercase tracking-wider mb-1">Today's Earnings</p>
                   {isLoading ? (
                     <div className="w-20 h-8 bg-white/20 animate-pulse rounded-lg mt-1"></div>
                   ) : (
-                    <p className="text-xl md:text-2xl font-black">{isEmbroidery ? todayBills : formatCurrency(todayRevenue, currencySymbol)}</p>
+                    <p className="text-xl md:text-2xl font-black tabular-nums">{formatCurrency(todayRevenue, currencySymbol)}</p>
                   )}
                 </div>
                 <div className="w-px h-10 bg-white/20 shrink-0"></div>
                 <div className="shrink-0">
-                  <p className="text-[10px] md:text-xs font-bold text-white/70 uppercase tracking-wider mb-1">{isEmbroidery ? 'Delivery' : 'Collection'}</p>
+                  <p className="text-[10px] md:text-xs font-bold text-white/70 uppercase tracking-wider mb-1">Today's Collection</p>
                   {isLoading ? (
                     <div className="w-20 h-8 bg-white/20 animate-pulse rounded-lg mt-1"></div>
                   ) : (
-                    <p className="text-xl md:text-2xl font-black">{formatCurrency(todayCollection, currencySymbol)}</p>
+                    <p className="text-xl md:text-2xl font-black tabular-nums">{formatCurrency(todayCollection, currencySymbol)}</p>
                   )}
                 </div>
                 <div className="w-px h-10 bg-white/20 shrink-0"></div>
                 <div className="shrink-0">
-                  <p className="text-[10px] md:text-xs font-bold text-white/70 uppercase tracking-wider mb-1">{isEmbroidery ? 'Due' : 'Pending Due'}</p>
+                  <p className="text-[10px] md:text-xs font-bold text-white/70 uppercase tracking-wider mb-1">Today's Due (Baki)</p>
                   {isLoading ? (
                     <div className="w-20 h-8 bg-white/20 animate-pulse rounded-lg mt-1"></div>
                   ) : (
-                    <p className="text-xl md:text-2xl font-black text-amber-300">{formatCurrency(todayDue, currencySymbol)}</p>
+                    <p className="text-xl md:text-2xl font-black text-amber-300 tabular-nums">{formatCurrency(todayDue, currencySymbol)}</p>
                   )}
                 </div>
               </div>
@@ -255,29 +608,48 @@ const Dashboard = ({
               {/* Quick Actions (Mobile 2x2, Desktop 4x1) */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 {hasBilling && (
-                  <button onClick={() => setCurrentTab('create')} className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-theme-accent to-theme-accent-dark text-white rounded-2xl shadow-premium hover:shadow-premium-hover hover:-translate-y-1 transition-all">
+                  <button onClick={() => setCurrentTab('create')} className="flex flex-col items-center justify-center p-4 bg-theme-accent text-white rounded-2xl border border-theme-border-soft transition-colors duration-200">
                     <Plus className="w-6 h-6 mb-2" />
                     <span className="text-xs font-bold text-center">{labels.create}</span>
                   </button>
                 )}
                 {hasCustomers && (
-                  <button onClick={() => setCurrentTab('customers')} className="flex flex-col items-center justify-center p-4 bg-theme-card border border-theme-border-soft rounded-2xl shadow-premium hover:shadow-premium-hover hover:-translate-y-1 transition-all group">
+                  <button onClick={() => setCurrentTab('customers')} className="flex flex-col items-center justify-center p-4 bg-theme-card border border-theme-border-soft rounded-2xl transition-colors duration-200 group">
                     <Users className="w-6 h-6 mb-2 text-theme-primary group-hover:text-theme-accent transition-colors" />
                     <span className="text-xs font-bold text-theme-primary text-center">Add {labels.clients}</span>
                   </button>
                 )}
                 {hasProducts && (
-                  <button onClick={() => setCurrentTab('products')} className="flex flex-col items-center justify-center p-4 bg-theme-card border border-theme-border-soft rounded-2xl shadow-premium hover:shadow-premium-hover hover:-translate-y-1 transition-all group">
+                  <button onClick={() => setCurrentTab('products')} className="flex flex-col items-center justify-center p-4 bg-theme-card border border-theme-border-soft rounded-2xl transition-colors duration-200 group">
                     <ShoppingBag className="w-6 h-6 mb-2 text-theme-primary group-hover:text-theme-accent transition-colors" />
                     <span className="text-xs font-bold text-theme-primary text-center">Add {labels.items}</span>
                   </button>
                 )}
                 {hasPayments && (
-                  <button onClick={() => setCurrentTab('pending-payments')} className="flex flex-col items-center justify-center p-4 bg-theme-card border border-theme-border-soft rounded-2xl shadow-premium hover:shadow-premium-hover hover:-translate-y-1 transition-all group">
+                  <button onClick={() => setCurrentTab('pending-payments')} className="flex flex-col items-center justify-center p-4 bg-theme-card border border-theme-border-soft rounded-2xl transition-colors duration-200 group">
                     <CheckCircle2 className="w-6 h-6 mb-2 text-theme-primary group-hover:text-theme-accent transition-colors" />
                     <span className="text-xs font-bold text-theme-primary text-center">Collect Payment</span>
                   </button>
                 )}
+              </div>
+
+              {/* Next Action & Category Widgets Row */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Next Action Card */}
+                <div className="bg-theme-accent/5 border border-theme-accent/25 rounded-2xl p-4 flex flex-col justify-between h-[110px]">
+                  <div>
+                    <span className="text-[10px] font-black text-theme-accent uppercase tracking-wider block mb-1">Next Action</span>
+                    <p className="text-xs font-bold text-theme-primary leading-tight">{nextAction.text}</p>
+                  </div>
+                  <button 
+                    onClick={nextAction.action}
+                    className="mt-2 py-1.5 px-3 bg-theme-accent text-white font-bold text-[10px] rounded-xl w-fit transition-colors hover:opacity-90 cursor-pointer min-h-0"
+                  >
+                    {nextAction.buttonText}
+                  </button>
+                </div>
+                {/* Category-specific widgets */}
+                {getCategoryWidgets()}
               </div>
 
               {/* KPI Cards (4 cards) */}
@@ -294,10 +666,10 @@ const Dashboard = ({
                   ))
                 ) : (
                   <>
-                    <StatCard title="Revenue" value={formatCurrency(totalRevenue, currencySymbol)} icon={TrendingUp} trend="+12%" accentColor="bg-theme-success/10 text-theme-success" />
-                    <StatCard title="Collection" value={formatCurrency(totalPaid, currencySymbol)} icon={CheckCircle2} trend="Good" accentColor="bg-theme-accent/10 text-theme-accent" />
-                    <StatCard title={labels.due} value={formatCurrency(totalDue, currencySymbol)} icon={AlertCircle} trend="Action Needed" trendUp={false} accentColor="bg-theme-danger/10 text-theme-danger" />
-                    <StatCard title={`Total ${labels.clients}`} value={totalCustomersCount} icon={Users} trend="Active" accentColor="bg-blue-500/10 text-blue-500" />
+                    <StatCard title="Today's Earnings" value={formatCurrency(todayRevenue, currencySymbol)} icon={TrendingUp} trend="+12%" accentColor="bg-theme-success/10 text-theme-success" />
+                    <StatCard title="Total Collected" value={formatCurrency(totalPaid, currencySymbol)} icon={CheckCircle2} trend="Good" accentColor="bg-theme-accent/10 text-theme-accent" />
+                    <StatCard title="Total Due (Baki)" value={formatCurrency(totalDue, currencySymbol)} icon={AlertCircle} trend="Action Needed" trendUp={false} accentColor="bg-theme-danger/10 text-theme-danger" />
+                    <StatCard title={`Active ${labels.clients}`} value={totalCustomersCount} icon={Users} trend="Active" accentColor="bg-blue-500/10 text-blue-500" />
                   </>
                 )}
               </div>
@@ -405,7 +777,9 @@ const Dashboard = ({
                               <FileText className="w-4 h-4 text-theme-accent" />
                             </div>
                             <div>
-                              <p className="text-xs font-black text-theme-primary mb-0.5 line-clamp-1">{inv.customerName}</p>
+                              <p className="text-xs font-black text-theme-primary mb-0.5 line-clamp-1">
+                                {isVideoCreatorMode ? '••••••••' : inv.customerName}
+                              </p>
                               <p className="text-[10px] font-bold text-theme-muted">{inv.invoiceNumber} • {inv.date}</p>
                             </div>
                           </div>

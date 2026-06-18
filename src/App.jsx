@@ -38,7 +38,9 @@ import {
   importRestore,
   syncFromFirestore,
   enableRealTimeSync,
-  getGlobalAdminSettings
+  getGlobalAdminSettings,
+  getUserRevenueState,
+  getActiveAnnouncement
 } from './services/dbEngine';
 import { downloadInvoicePDF } from './utils/pdfUtils';
 import { auth, firebaseReady } from './services/firebaseConfig';
@@ -192,6 +194,7 @@ function App() {
   const [syncStatus, setSyncStatus] = useState('Synced');
   const [isDemoSessionActive, setIsDemoSessionActive] = useState(false);
   const [isVideoCreatorMode, setIsVideoCreatorMode] = useState(false);
+  const [globalMaintenanceMode, setGlobalMaintenanceMode] = useState(false);
   
   const [demoInvoices, setDemoInvoices] = useState([]);
   const [demoCustomers, setDemoCustomers] = useState([]);
@@ -325,6 +328,32 @@ function App() {
   });
   const [expenses, setExpenses] = useState([]);
   const [subscription, setSubscription] = useState(() => getSubscriptionStatus());
+  const [revenueStatus, setRevenueStatus] = useState({
+    totalBillsCreated: 0,
+    freeBillsUsed: 0,
+    billableBillsCount: 0,
+    platformDueAmount: 0,
+    platformPaidAmount: 0,
+    platformPendingAmount: 0,
+    lastPlatformPaymentDate: null,
+    lockStatus: 'none',
+    graceStatus: 'none',
+    premiumStatus: 'free'
+  });
+
+  useEffect(() => {
+    const fetchRevenue = async () => {
+      const session = getAuthSession();
+      const userId = session?.uid || getRealUserId() || 'local-user';
+      try {
+        const status = await getUserRevenueState(userId, invoices, subscription);
+        setRevenueStatus(status);
+      } catch (e) {
+        console.error('Failed to load user revenue status:', e);
+      }
+    };
+    fetchRevenue();
+  }, [invoices, subscription, isAuthenticated]);
   // Workspace state
   const [businessWorkspaces, setBusinessWorkspaces] = useState(settings.businessWorkspaces || []);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState(settings.activeWorkspaceId || (settings.businessWorkspaces && settings.businessWorkspaces[0]?.id));
@@ -595,6 +624,15 @@ function App() {
             }
           } catch (e) { console.warn('Could not fetch admin settings on boot.'); }
 
+          try {
+            const ann = await getActiveAnnouncement();
+            if (ann && ann.type === 'maintenance') {
+              setGlobalMaintenanceMode(true);
+            } else {
+              setGlobalMaintenanceMode(false);
+            }
+          } catch (e) { console.warn('Could not fetch active announcement on boot.'); }
+
           // Enable real-time multi-device sync via new Sync Engine
           import('./services/syncEngine').then(({ startRealTimeSync }) => {
             const userId = auth.currentUser?.uid;
@@ -703,8 +741,13 @@ function App() {
     }
 
     const isNew = !payload.id || !invoices.some(inv => inv.id === payload.id);
+    if (isNew && revenueStatus.lockStatus === 'locked') {
+      toast.error('New invoice creation is locked. Please clear your platform dues.');
+      return;
+    }
     const freeLimit = settings?.freeInvoiceLimit !== undefined ? settings.freeInvoiceLimit : 15;
-    if (isNew && subscription.status !== 'premium' && invoices.length >= freeLimit && !isSilent) {
+    const isPPBActive = revenueStatus.lockStatus !== 'none' || revenueStatus.platformDueAmount > 0;
+    if (isNew && subscription.status !== 'premium' && invoices.length >= freeLimit && !isSilent && !isPPBActive) {
       setShowPaywallModal(true);
       return;
     }
@@ -1083,6 +1126,7 @@ function App() {
   const renderTabContent = () => {
     const isProfileIncomplete = activeSettings && !activeSettings.profileSetupCompleted && !activeSettings.businessName;
     const activeTab = isProfileIncomplete ? 'onboarding' : currentTab;
+    const isMaintenanceMode = (globalMaintenanceMode || activeSettings?.maintenanceMode) && !isAdminUser(getAuthSession());
 
     if (activeTab === 'onboarding') {
       return (
@@ -1124,6 +1168,7 @@ function App() {
             onQuickBillOpen={() => setIsQuickBillOpen(true)}
             pendingPaymentsCount={pendingPayments.length}
             isLoading={isDataHydrating}
+            revenueStatus={revenueStatus}
           />
         );
       case 'pending-payments':
@@ -1187,6 +1232,38 @@ function App() {
           />
         );
       case 'create-invoice':
+        if ((isMaintenanceMode || activeSettings?.disableNewBillCreation) && !editingInvoice) {
+          return (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+              <div className="w-16 h-16 bg-theme-warning/20 text-theme-warning rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <AlertTriangle className="w-8 h-8 text-theme-warning" />
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2">New Bill Creation Disabled</h2>
+              <p className="text-sm text-theme-muted max-w-sm mb-6">
+                The platform is currently undergoing scheduled maintenance or the owner has disabled new bill creation. You can still view existing bills and run backups.
+              </p>
+              <button onClick={() => setCurrentTab('dashboard')} className="px-5 py-2.5 bg-theme-accent text-white font-bold rounded-xl">
+                Go to Dashboard
+              </button>
+            </div>
+          );
+        }
+        if (revenueStatus.lockStatus === 'locked' && !editingInvoice) {
+          return (
+            <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
+              <PaymentDueScreen 
+                pendingAmount={revenueStatus.platformPendingAmount}
+                chargeableBills={revenueStatus.billableBillsCount}
+                onCancel={() => setCurrentTab('dashboard')}
+                onLogout={() => {
+                  logout();
+                  setIsAuthenticated(false);
+                  setCurrentTab('login');
+                }}
+              />
+            </React.Suspense>
+          );
+        }
         return (
           <CreateInvoice
             invoices={activeInvoices}
@@ -1259,11 +1336,43 @@ function App() {
       case 'delivery':
         return <Delivery />;
       case 'subscription':
+        if (isMaintenanceMode || activeSettings?.disablePremiumUpgrade) {
+          return (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+              <div className="w-16 h-16 bg-theme-warning/20 text-theme-warning rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <AlertTriangle className="w-8 h-8 text-theme-warning" />
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2">Premium Upgrades Suspended</h2>
+              <p className="text-sm text-theme-muted max-w-sm mb-6">
+                Upgrading to premium features is temporarily suspended by the administrator.
+              </p>
+              <button onClick={() => setCurrentTab('dashboard')} className="px-5 py-2.5 bg-theme-accent text-white font-bold rounded-xl">
+                Back to Dashboard
+              </button>
+            </div>
+          );
+        }
         return (
           <PremiumPricing setCurrentTab={setCurrentTab} />
         );
 
       case 'pdf-templates':
+        if (isMaintenanceMode || activeSettings?.disableLiveLinkCreation) {
+          return (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+              <div className="w-16 h-16 bg-theme-warning/20 text-theme-warning rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <AlertTriangle className="w-8 h-8 text-theme-warning" />
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2">Customization Suspended</h2>
+              <p className="text-sm text-theme-muted max-w-sm mb-6">
+                Template customization is temporarily suspended by the administrator.
+              </p>
+              <button onClick={() => setCurrentTab('dashboard')} className="px-5 py-2.5 bg-theme-accent text-white font-bold rounded-xl">
+                Back to Dashboard
+              </button>
+            </div>
+          );
+        }
         return (
           <PdfTemplateStudio 
             businessSettings={settings} 
@@ -1273,6 +1382,22 @@ function App() {
           />
         );
       case 'live-link-templates':
+        if (isMaintenanceMode || activeSettings?.disableLiveLinkCreation) {
+          return (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+              <div className="w-16 h-16 bg-theme-warning/20 text-theme-warning rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <AlertTriangle className="w-8 h-8 text-theme-warning" />
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2">Live Invoice Links Suspended</h2>
+              <p className="text-sm text-theme-muted max-w-sm mb-6">
+                Live link customization and settings are temporarily suspended by the administrator.
+              </p>
+              <button onClick={() => setCurrentTab('dashboard')} className="px-5 py-2.5 bg-theme-accent text-white font-bold rounded-xl">
+                Back to Dashboard
+              </button>
+            </div>
+          );
+        }
         return (
           <LiveLinkTemplateStudio 
             settings={settings}
@@ -1483,45 +1608,7 @@ function App() {
     }
   }
 
-  // --- Maintenance Mode Check ---
-  if (settings?.maintenanceMode) {
-    const session = getAuthSession();
-    if (!isAdminUser(session)) {
-      return (
-        <div className="min-h-screen bg-theme-card flex flex-col items-center justify-center p-6 text-center">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="max-w-md bg-theme-card p-8 rounded-3xl border border-theme-border-strong shadow-2xl"
-          >
-            <div className="w-16 h-16 bg-theme-danger/20 text-theme-danger rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Lock className="w-8 h-8" />
-            </div>
-            <h1 className="text-2xl font-black text-white mb-3">App Under Maintenance</h1>
-            <p className="text-theme-muted font-medium leading-relaxed mb-8">
-              We are currently performing scheduled maintenance to bring you a better experience. Please check back later.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-theme-accent hover:opacity-90 text-white font-bold rounded-xl transition-colors"
-            >
-              Refresh Page
-            </button>
-
-            <button
-              onClick={() => {
-                logout();
-                setIsAuthenticated(false);
-              }}
-              className="block w-full mt-4 text-xs font-bold text-theme-muted hover:text-theme-muted"
-            >
-              Sign out
-            </button>
-          </motion.div>
-        </div>
-      );
-    }
-  }
+  // Root level maintenance mode interceptor removed to allow access to dashboard, invoices view, and backups.
 
   const path = window.location.pathname;
   const showAdminRoute = path === '/km-admin' || currentTab === 'admin-panel';

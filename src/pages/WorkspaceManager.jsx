@@ -217,12 +217,16 @@ const WorkspaceManager = ({
                   className="w-full bg-theme-app border border-theme-border-soft rounded-xl p-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors min-h-[44px]"
                 >
                   <option value="retail">Retail & Shop</option>
+                  <option value="grocery">Grocery & Store</option>
                   <option value="service">Service & Repair</option>
-                  <option value="freelance">Freelance & Agency</option>
                   <option value="doctor">Clinic / Doctor</option>
                   <option value="teacher">Tutor / Teacher</option>
-                  <option value="tailor">Tailor / Boutique</option>
-                  <option value="other">Other</option>
+                  <option value="tailor">Tailor & Boutique</option>
+                  <option value="embroidery">Embroidery & Designer</option>
+                  <option value="freelance">Freelancer & Agency</option>
+                  <option value="restaurant">Restaurant & Food</option>
+                  <option value="custom">Custom Business</option>
+                  <option value="billing_only">Billing Only</option>
                 </select>
               </div>
 

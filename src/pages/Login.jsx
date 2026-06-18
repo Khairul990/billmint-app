@@ -870,7 +870,7 @@ function LoginPanel({ onLoginSuccess }) {
             createdAt: new Date().toISOString()
           }, { merge: true });
           
-          console.log('Signup success');
+
           onLoginSuccess();
         }
       } else {
@@ -888,7 +888,7 @@ function LoginPanel({ onLoginSuccess }) {
   };
 
   const handleGoogleLogin = async () => {
-    console.log('Google login clicked');
+
     setIsSigningIn(true);
     setError('');
     try {
@@ -922,7 +922,7 @@ function LoginPanel({ onLoginSuccess }) {
             createdAt: new Date().toISOString()
           }, { merge: true });
         }
-        console.log('Google login success');
+
         onLoginSuccess();
       } else {
         setError('Firebase is not configured for Google login.');

@@ -18,22 +18,29 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
     switch(wsType) {
       case 'doctor': return 'Patients';
       case 'teacher': return 'Students';
-      case 'freelance':
-      case 'service': return 'Clients';
+      case 'repair':
+      case 'service': return 'Device Owners';
+      case 'tailor':
+      case 'embroidery':
+      case 'freelance': return 'Clients';
       default: return t('customers');
     }
   };
 
   const getInvoiceLabel = () => {
     switch(wsType) {
-      case 'teacher': return 'Fee Receipts';
-      case 'doctor': return 'Bills';
-      default: return t('invoices');
+      case 'teacher': return 'Fee Slips';
+      case 'doctor': return 'Consultations';
+      case 'tailor': return 'Order Slips';
+      case 'embroidery': return 'Work Orders';
+      case 'repair':
+      case 'service': return 'Repair Tickets';
+      default: return 'Bills';
     }
   };
 
   const tabs = [
-    { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
+    { id: 'dashboard', label: "Today's Business", icon: LayoutDashboard },
     { id: 'invoices', label: getInvoiceLabel(), icon: FileSpreadsheet },
     { id: 'create', isAction: true },
     { id: 'customers', label: getCustomerLabel(), icon: Users },

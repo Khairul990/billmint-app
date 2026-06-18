@@ -3,6 +3,34 @@ import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDoc
 import { getAdminEmail } from '../utils/adminAccess';
 import { BillQyroDB } from './localDb';
 import { generateVerificationCode } from './verificationCodeService';
+import {
+  getUserRevenueState,
+  saveUserRevenueState,
+  calculateUserRevenueState,
+  getGlobalRevenueSettings,
+  saveGlobalRevenueSettings,
+  submitPlatformPaymentProof,
+  getUserPaymentProofs,
+  getAdminAllPaymentProofs,
+  getAdminPlatformRevenueStates,
+  updatePlatformPaymentProofStatus
+} from './platformRevenueService';
+import {
+  submitSupportTicket,
+  getAdminAllSupportTickets,
+  getUserSupportTickets,
+  updateSupportTicketStatus,
+  submitFeatureRequest,
+  getAdminAllFeatureRequests,
+  getUserFeatureRequests,
+  updateFeatureRequestStatus,
+  createAnnouncement,
+  getAdminAllAnnouncements,
+  getActiveAnnouncement,
+  toggleAnnouncementActive,
+  createChangelog,
+  getAdminAllChangelogs
+} from './platformAdminService';
 
 // --- OFFLINE SYNC QUEUE ENGINE & MIGRATOR ---
 export const migrateLocalStorageToIndexedDB = async () => {
@@ -10,7 +38,7 @@ export const migrateLocalStorageToIndexedDB = async () => {
     const isMigrated = localStorage.getItem('billqyro_indexeddb_migrated') === 'true';
     if (isMigrated) return;
 
-    console.log('[MIGRATION] Starting LocalStorage to IndexedDB migration...');
+
 
     // Invoices
     const localInvoices = JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
@@ -37,7 +65,7 @@ export const migrateLocalStorageToIndexedDB = async () => {
     }
 
     localStorage.setItem('billqyro_indexeddb_migrated', 'true');
-    console.log('[MIGRATION] LocalStorage to IndexedDB migration completed successfully!');
+
   } catch (error) {
     console.error('[MIGRATION] LocalStorage to IndexedDB migration failed:', error);
   }
@@ -74,7 +102,7 @@ export const queueSyncTransaction = async (action, storeName, docId, data) => {
     lastRetryAt: 0
   };
   await BillQyroDB.put('syncQueue', tx);
-  console.log('[SYNC QUEUE] Queued transaction offline:', tx);
+
 };
 
 // --- CORE LOGGING SYSTEM ---
@@ -118,7 +146,7 @@ export const logAudit = async (action, entityType, entityId, before = null, afte
     };
     
     await BillQyroDB.put('auditLogs', auditEntry);
-    console.log(`[AUDIT] ${action} on ${entityType}/${entityId}`);
+
     
     // Also queue audit logs for sync so they go to cloud
     await queueSyncTransaction('save', 'auditLogs', auditEntry.id, auditEntry);
@@ -145,7 +173,7 @@ export const syncOfflineTransactions = async () => {
     
     if (userQueue.length === 0) return;
 
-    console.log(`[SYNC QUEUE] Syncing ${userQueue.length} offline transactions...`);
+
 
     // Sort by createdAt so we sync in order
     const sortedQueue = userQueue.sort((a, b) => a.createdAt - b.createdAt);
@@ -206,7 +234,7 @@ export const syncOfflineTransactions = async () => {
         // Remove from queue after successful sync
         if (syncSuccess) {
           await BillQyroDB.delete('syncQueue', tx.id);
-          console.log('[SYNC QUEUE] Successfully synced transaction:', tx.id);
+
         } else {
           // Update retry logic
           tx.retryCount = (tx.retryCount || 0) + 1;
@@ -232,7 +260,7 @@ export const syncOfflineTransactions = async () => {
 // Listen for network reconnection
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
-    console.log('[NETWORK] Connection restored. Flushing sync queue...');
+
     syncOfflineTransactions();
   });
 }
@@ -270,7 +298,7 @@ export const migrateGlobalToScopedStorage = async () => {
   const uid = getRealUserId();
   if (!uid) return { status: 'failed', message: 'No real UID found' };
 
-  console.log('[MIGRATION] Starting safe global to scoped storage migration for:', uid);
+
 
   const collections = ['invoices', 'customers', 'products', 'expenses', 'settings', 'subscription'];
   let migratedCount = 0;
@@ -317,7 +345,7 @@ export const migrateGlobalToScopedStorage = async () => {
     }
   }
 
-  console.log(`[MIGRATION] Completed. Migrated collections safely.`);
+
   return { status: 'success', migratedCount };
 };
 
@@ -622,7 +650,7 @@ const firestoreDelete = async (collectionName, docId) => {
       docRef = doc(db, collectionName, userId, 'items', docId);
     }
     await deleteDoc(docRef);
-    console.log(`Firestore successfully deleted from ${collectionName} for user: ${userId}`);
+
   } catch (error) {
     console.error(`Firestore delete failed for ${collectionName}:`, error);
   }
@@ -854,7 +882,7 @@ export const clearAllLocalData = async () => {
     for (const name of caches) {
       await window.caches.delete(name);
     }
-    console.log('All local data cleared successfully.');
+
   } catch (err) {
     console.error('Error clearing storage', err);
   }
@@ -889,7 +917,7 @@ export const wipeUserFirestoreData = async (userId) => {
     await deleteDoc(doc(db, 'users', userId));
     await deleteDoc(doc(db, 'usersList', userId));
     
-    console.log('[WIPE] Firestore data completely wiped for user:', userId);
+
   } catch (error) {
     console.error('[WIPE] Error wiping Firestore data:', error);
   }
@@ -994,7 +1022,7 @@ export const registerOrUpdateUserList = async (activeSettings) => {
 
   try {
     await setDoc(doc(db, 'usersList', userId), userRecord);
-    console.log('[DEBUG] Successfully registered/updated userList for:', email);
+
   } catch (e) {
     console.error('[ERROR] Failed to update usersList:', e);
   }
@@ -1572,6 +1600,13 @@ export const saveInvoice = async (invoice) => {
     return { updatedInvoices: [], firebaseStatus: 'blocked' };
   }
   const invoices = await getInvoices();
+  const isNew = !invoice.id || !invoices.some(inv => inv.id === invoice.id);
+  if (isNew) {
+    const globalRevSettings = await getGlobalRevenueSettings();
+    if (globalRevSettings?.disableNewBillCreation) {
+      throw new Error('New bill creation is temporarily disabled by the platform owner.');
+    }
+  }
 
   // 1. Ensure secure publicToken is generated
   if (!invoice.publicToken || invoice.publicToken === 'undefined' || invoice.publicToken === 'null' || invoice.publicToken === '') {
@@ -1744,6 +1779,16 @@ export const saveInvoice = async (invoice) => {
     firebaseStatus = 'offline';
   }
 
+  // Recalculate platform dues/monetization state
+  try {
+    const subStatus = getSubscriptionStatus();
+    const globalRevSettings = await getGlobalRevenueSettings();
+    const calculatedState = calculateUserRevenueState(invoice.userId, invoices, globalRevSettings, subStatus);
+    await saveUserRevenueState(invoice.userId, calculatedState);
+  } catch (e) {
+    console.error('Error updating platform revenue state in saveInvoice:', e);
+  }
+
   return {
     updatedInvoices: invoices,
     firebaseStatus
@@ -1815,8 +1860,8 @@ const syncLocalInvoice = async (cloudData) => {
 };
 
 export const getInvoiceByPublicToken = async (token) => {
-  console.log('[DEBUG] getInvoiceByPublicToken - Requested publicToken:', token);
-  console.log('[DEBUG] getInvoiceByPublicToken - Firestore path checked: publicInvoices/' + token);
+
+
 
   // Reset last error
   window.billqyro_lastError = null;
@@ -1827,7 +1872,7 @@ export const getInvoiceByPublicToken = async (token) => {
       let docRef = doc(db, 'publicInvoices', token);
       let snap = await getDoc(docRef);
 
-      console.log('[DEBUG] getInvoiceByPublicToken - Checked publicInvoices/' + token + ' - Document exists:', snap.exists());
+
 
       if (snap.exists()) {
         const cloudData = snap.data();
@@ -1836,11 +1881,11 @@ export const getInvoiceByPublicToken = async (token) => {
       }
 
       // 2. Try legacy public_invoices for compatibility with older links
-      console.log('[DEBUG] getInvoiceByPublicToken - Firestore path checked: public_invoices/' + token);
+
       docRef = doc(db, 'public_invoices', token);
       snap = await getDoc(docRef);
 
-      console.log('[DEBUG] getInvoiceByPublicToken - Checked legacy public_invoices/' + token + ' - Document exists:', snap.exists());
+
 
       if (snap.exists()) {
         const cloudData = snap.data();
@@ -1863,10 +1908,10 @@ export const getInvoiceByPublicToken = async (token) => {
   }
 
   // Local storage fallback
-  console.log('[DEBUG] getInvoiceByPublicToken - Document not found in Firestore. Trying local localStorage fallback...');
+
   const invoices = await getInvoices();
   const localMatch = invoices.find(inv => inv.publicToken === token);
-  console.log('[DEBUG] getInvoiceByPublicToken - Local localStorage match found:', !!localMatch);
+
   return localMatch || null;
 };
 
@@ -1890,12 +1935,12 @@ export const ensureInvoicePublicToken = async (invoice) => {
   // 3. Force save/create public-safe copy and private copy in Firestore
   if (firebaseReady) {
     try {
-      console.log('[DEBUG] ensureInvoicePublicToken - Force writing public copy to publicInvoices/' + token);
+
       await firestoreSave('publicInvoices', token, invoice);
 
       const userId = getRealUserId();
       if (userId && invoice.id) {
-        console.log('[DEBUG] ensureInvoicePublicToken - Force writing private copy to invoices/' + userId + '/items/' + invoice.id);
+
         await setDoc(doc(db, 'invoices', userId, 'items', invoice.id), invoice);
       }
     } catch (e) {
@@ -2025,6 +2070,18 @@ export const deleteInvoice = async (id, permanent = false) => {
       } else {
         firebaseStatus = 'offline';
       }
+
+      // Recalculate platform dues/monetization state
+      try {
+        const userId = getRealUserId() || 'local-user';
+        const subStatus = getSubscriptionStatus();
+        const globalRevSettings = await getGlobalRevenueSettings();
+        const calculatedState = calculateUserRevenueState(userId, invoices, globalRevSettings, subStatus);
+        await saveUserRevenueState(userId, calculatedState);
+      } catch (e) {
+        console.error('Error updating platform revenue state in deleteInvoice:', e);
+      }
+
       return { updatedInvoices: invoices, firebaseStatus };
     }
   }
@@ -2053,6 +2110,17 @@ export const deleteInvoice = async (id, permanent = false) => {
     firebaseStatus = 'offline';
   }
 
+  // Recalculate platform dues/monetization state
+  try {
+    const userId = getRealUserId() || 'local-user';
+    const subStatus = getSubscriptionStatus();
+    const globalRevSettings = await getGlobalRevenueSettings();
+    const calculatedState = calculateUserRevenueState(userId, filtered, globalRevSettings, subStatus);
+    await saveUserRevenueState(userId, calculatedState);
+  } catch (e) {
+    console.error('Error updating platform revenue state in deleteInvoice permanent:', e);
+  }
+
   return {
     updatedInvoices: filtered,
     firebaseStatus
@@ -2066,6 +2134,8 @@ export const exportBackup = async () => {
   const products = await getProducts();
   const expenses = await getExpenses();
   const settings = getSettings();
+
+  localStorage.setItem('billqyro_last_backup_time', new Date().toISOString());
 
   return {
     appName: "BillQyro",
@@ -2184,7 +2254,7 @@ export const enableRealTimeSync = () => {
   if (!firebaseReady) return;
 
   const userId = getRealUserId();
-  console.log('Enabling Real-Time Sync for workspace:', userId);
+
 
   // Clear any existing listeners
   unsubscribes.forEach(unsub => unsub());
@@ -2234,7 +2304,7 @@ export const syncFromFirestore = async () => {
     return null;
   }
   if (!firebaseReady) {
-    console.log("Firebase not enabled, skipping Firestore sync.");
+
     return null;
   }
   try {
@@ -2257,7 +2327,7 @@ export const syncFromFirestore = async () => {
       return;
     }
     toast.success('Local data backed up on this device');
-    console.log("Syncing data from Firestore for user: " + userId);
+
 
     // 1. Flush offline transactions first to avoid losing offline work
     if (navigator.onLine) {
@@ -2410,4 +2480,31 @@ export const backupLocalData = async () => {
     console.error('Backup local data error:', e);
     return false;
   }
+};
+
+export {
+  getUserRevenueState,
+  saveUserRevenueState,
+  calculateUserRevenueState,
+  getGlobalRevenueSettings,
+  saveGlobalRevenueSettings,
+  submitPlatformPaymentProof,
+  getUserPaymentProofs,
+  getAdminAllPaymentProofs,
+  getAdminPlatformRevenueStates,
+  updatePlatformPaymentProofStatus,
+  submitSupportTicket,
+  getAdminAllSupportTickets,
+  getUserSupportTickets,
+  updateSupportTicketStatus,
+  submitFeatureRequest,
+  getAdminAllFeatureRequests,
+  getUserFeatureRequests,
+  updateFeatureRequestStatus,
+  createAnnouncement,
+  getAdminAllAnnouncements,
+  getActiveAnnouncement,
+  toggleAnnouncementActive,
+  createChangelog,
+  getAdminAllChangelogs
 };

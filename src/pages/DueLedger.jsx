@@ -150,8 +150,10 @@ const DueLedger = ({ customers = [], invoices = [], businessSettings }) => {
       </div>
 
       {/* Ledger Table / List */}
-      <div className="bg-theme-card border border-theme-border-soft rounded-3xl overflow-hidden shadow-premium flex-1">
-        <div className="overflow-x-auto">
+      {/* Ledger Table / List */}
+      <div className="bg-theme-card border border-theme-border-soft rounded-3xl overflow-hidden flex-1">
+        {/* Desktop View Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="bg-theme-surface border-b border-theme-border-soft text-xs text-theme-muted font-bold uppercase tracking-wider">
@@ -177,13 +179,13 @@ const DueLedger = ({ customers = [], invoices = [], businessSettings }) => {
                       </div>
                     </div>
                   </td>
-                  <td className="p-4 text-right text-sm font-semibold text-theme-primary">
+                  <td className="p-4 text-right text-sm font-semibold text-theme-primary tabular-nums">
                     {formatCurrency(cust.totalBilled)}
                   </td>
-                  <td className="p-4 text-right text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                  <td className="p-4 text-right text-sm font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
                     {formatCurrency(cust.totalPaid)}
                   </td>
-                  <td className="p-4 text-right text-sm font-black text-rose-600 dark:text-rose-400">
+                  <td className="p-4 text-right text-sm font-black text-rose-600 dark:text-rose-400 tabular-nums">
                     {formatCurrency(cust.totalDue)}
                   </td>
                   <td className="p-4 text-center">
@@ -198,7 +200,7 @@ const DueLedger = ({ customers = [], invoices = [], businessSettings }) => {
                   <td className="p-4 pr-6 text-right">
                     <button 
                       onClick={() => setSelectedCustomer(cust)}
-                      className="inline-flex items-center justify-center p-2 rounded-xl bg-theme-app border border-theme-border-soft hover:border-theme-accent hover:text-theme-accent text-theme-muted transition-colors active:scale-95"
+                      className="inline-flex items-center justify-center p-2 rounded-xl bg-theme-app border border-theme-border-soft hover:border-theme-accent hover:text-theme-accent text-theme-muted transition-colors active:scale-95 min-h-[44px]"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -214,6 +216,55 @@ const DueLedger = ({ customers = [], invoices = [], businessSettings }) => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View Cards */}
+        <div className="md:hidden space-y-4 p-4">
+          {filteredList.map(cust => (
+            <div key={cust.id} className="bg-theme-surface border border-theme-border-soft rounded-2xl p-4 flex flex-col justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-theme-accent-light text-theme-accent font-black flex items-center justify-center shrink-0">
+                  {cust.name.substring(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-theme-primary leading-tight">{cust.name}</p>
+                  <p className="text-[10px] font-semibold text-theme-muted mt-0.5">{cust.phone || 'No Phone'}</p>
+                </div>
+                <span className={`ml-auto text-[9px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${
+                  cust.status === 'Clear' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50' : 
+                  cust.status === 'Overdue' ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900/50' :
+                  'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50'
+                }`}>
+                  {cust.status}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 border-t border-theme-border-soft pt-3 text-center">
+                <div>
+                  <span className="text-[9px] font-semibold text-theme-muted uppercase tracking-wider block">Billed</span>
+                  <span className="text-xs font-bold text-theme-primary tabular-nums">{formatCurrency(cust.totalBilled)}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] font-semibold text-theme-muted uppercase tracking-wider block">Paid</span>
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{formatCurrency(cust.totalPaid)}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] font-semibold text-theme-muted uppercase tracking-wider block text-rose-500">Due</span>
+                  <span className="text-xs font-black text-rose-600 dark:text-rose-400 tabular-nums">{formatCurrency(cust.totalDue)}</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedCustomer(cust)}
+                className="w-full mt-1 py-2.5 bg-theme-app hover:bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary transition-colors flex items-center justify-center gap-1.5 min-h-[48px]"
+              >
+                View Full Ledger <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+          {filteredList.length === 0 && (
+            <div className="text-center p-8 bg-theme-surface border border-theme-border-soft rounded-2xl text-sm font-semibold text-theme-muted">
+              No customers found matching your search.
+            </div>
+          )}
         </div>
       </div>
 

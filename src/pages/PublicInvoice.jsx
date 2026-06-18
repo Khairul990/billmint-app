@@ -34,7 +34,7 @@ const PublicInvoice = ({ initialInvoice }) => {
   
   // Sync state if initialInvoice resolves later (async)
   useEffect(() => {
-    console.log('[DEBUG] PublicInvoice - initialInvoice updated:', initialInvoice);
+
     setInvoice(initialInvoice);
   }, [initialInvoice]);
   
@@ -118,7 +118,7 @@ const PublicInvoice = ({ initialInvoice }) => {
       // 1. Verify Transaction ID remotely
       if (txnId) {
         const verifyRes = await verifyTransactionId(txnId, invoice.balanceDue !== undefined ? invoice.balanceDue : invoice.grandTotal);
-        console.log('[STUB] Verification Result:', verifyRes);
+
       }
       
       // 2. Mock sending an acknowledgment email to the customer
