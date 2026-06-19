@@ -127,12 +127,12 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         onBack={handleBackClick}
       />
 
-      {/* Main Studio Body - Full Width Centered */}
-      <div className="flex-1 p-4 lg:p-6 xl:p-8 w-full max-w-7xl mx-auto animate-in fade-in duration-300 pb-24">
+      {/* Main Studio Body - Full Width */}
+      <div className="flex-1 p-4 lg:p-6 xl:p-8 w-full animate-in fade-in duration-300 pb-24">
         
         {/* Progress Stepper */}
-        <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-6 shadow-sm mb-6 max-w-3xl mx-auto">
-          <div className="flex items-center justify-between relative">
+        <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-6 shadow-sm mb-6 w-full">
+          <div className="flex items-center justify-between relative max-w-4xl mx-auto">
             {/* Connecting Line */}
             <div className="absolute top-6 left-0 right-0 h-1 bg-theme-border-soft -z-10 rounded-full">
               <div 
@@ -170,10 +170,10 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         </div>
 
         {/* Active Step Content */}
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 w-full">
           {currentStep === 1 && (
-            <div className="flex flex-col gap-6 max-w-3xl mx-auto">
-              <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-6 shadow-sm">
+            <div className="flex flex-col gap-6 w-full">
+              <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-6 shadow-sm w-full">
                 <h2 className="text-sm font-black uppercase text-theme-primary mb-4 flex items-center gap-2"><User className="w-4 h-4 text-theme-accent" /> Customer Details</h2>
                 <SmartCustomerSelect customers={customers} />
               </div>
@@ -188,10 +188,10 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
           )}
 
           {currentStep === 2 && (
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 w-full">
               <SmartBillItemsList products={products} />
               
-              <div className="flex gap-4 mt-4 max-w-3xl mx-auto w-full">
+              <div className="flex gap-4 mt-4 w-full">
                 <button 
                   onClick={() => setCurrentStep(1)}
                   className="py-4 px-6 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98]"
@@ -209,8 +209,8 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
           )}
 
           {currentStep === 3 && (
-            <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-              <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-6 shadow-sm">
+            <div className="flex flex-col gap-6 w-full">
+              <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-6 shadow-sm w-full">
                 <h2 className="text-sm font-black uppercase text-theme-primary mb-4 flex items-center gap-2"><CreditCard className="w-4 h-4 text-theme-accent" /> Payment Details</h2>
                 <CompactPaymentSection />
               </div>
@@ -218,7 +218,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
               <CompactSummaryStrip />
 
               {/* 3 Large Action Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                 {/* Save Draft Card */}
                 <div className="bg-theme-surface border border-theme-border-soft hover:border-theme-accent/30 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between">
                   <div className="mb-4">
