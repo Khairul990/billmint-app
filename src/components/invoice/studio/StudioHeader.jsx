@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { Loader2, LayoutPanelLeft, Maximize, PanelRightInactive, Cloud, CloudOff, Save, Check, FileText, Link, ArrowLeft } from 'lucide-react';
+import { Loader2, LayoutPanelLeft, Maximize, PanelRightInactive, Cloud, CloudOff, Save, Check, FileText, Link, ArrowLeft, Eye } from 'lucide-react';
 import { ShimmerButton } from '../../magicui/shimmer-button';
 
-const StudioHeader = ({ previewMode, setPreviewMode, lastSaved, saveStatus, onSaveDraft, onFinalize, isSaving, onDownloadPDF, onBack }) => {
+const StudioHeader = ({ showPreviewModal, setShowPreviewModal, lastSaved, saveStatus, onSaveDraft, onFinalize, isSaving, onDownloadPDF, onBack }) => {
   const { state, dispatch } = useInvoice();
 
   return (
@@ -83,29 +83,13 @@ const StudioHeader = ({ previewMode, setPreviewMode, lastSaved, saveStatus, onSa
       {/* Right: View Toggles & Actions */}
       <div className="flex items-center gap-2 w-full md:w-auto justify-end">
         
-        {/* Preview Toggles */}
-        <div className="hidden lg:flex items-center bg-theme-surface border border-theme-border-soft rounded-xl shadow-sm mr-2 overflow-hidden">
-          <button
-            onClick={() => setPreviewMode('OFF')}
-            className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all ${previewMode === 'OFF' ? 'bg-theme-card text-theme-accent' : 'text-theme-muted hover:bg-theme-border-soft'}`}
-          >
-            Editor
-          </button>
-          <div className="w-[1px] h-4 bg-theme-border-soft"></div>
-          <button
-            onClick={() => setPreviewMode('SIDE')}
-            className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all ${previewMode === 'SIDE' ? 'bg-theme-card text-theme-accent' : 'text-theme-muted hover:bg-theme-border-soft'}`}
-          >
-            Desktop Preview
-          </button>
-          <div className="w-[1px] h-4 bg-theme-border-soft"></div>
-          <button
-            onClick={() => setPreviewMode('FULLSCREEN')}
-            className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all ${previewMode === 'FULLSCREEN' ? 'bg-theme-card text-theme-accent' : 'text-theme-muted hover:bg-theme-border-soft'}`}
-          >
-            PDF Mode
-          </button>
-        </div>
+        {/* Preview Button */}
+        <button 
+          onClick={() => setShowPreviewModal(true)}
+          className="hidden sm:flex items-center justify-center gap-1.5 px-4 py-1.5 bg-theme-surface hover:bg-theme-border-soft text-theme-primary text-[10px] font-black uppercase tracking-wider rounded-xl transition-all shadow-sm border border-theme-border-soft mr-2"
+        >
+          <Eye className="w-4 h-4 text-theme-accent" /> Live Preview
+        </button>
 
         {/* Actions */}
         <button 
