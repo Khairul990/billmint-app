@@ -3,7 +3,7 @@ import { isAdminUser } from './utils/adminAccess';
 import { toast, Toaster } from 'react-hot-toast';
 import { useThemeEngine } from './hooks/useThemeEngine';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Lock, AlertTriangle } from 'lucide-react';
+import { Lock, AlertTriangle, Trash2 } from 'lucide-react';
 import { 
   getDemoInvoices, getDemoCustomers, getDemoProducts, getDemoPayments, getDemoReports, 
   saveDemoInvoice, deleteDemoInvoice, saveDemoCustomer, saveDemoProduct, isDemoModeActive,
@@ -884,12 +884,8 @@ function App() {
       toast.success('Deleted from Demo Session');
       return;
     }
-    let shouldDelete = true;
-    if (!permanent) {
-      shouldDelete = window.confirm('Are you sure you want to move this invoice to trash?');
-    }
-    
-    if (shouldDelete) {
+
+    const executeDelete = async () => {
       const { updatedInvoices, firebaseStatus } = await deleteInvoice(id, permanent);
       setInvoices(updatedInvoices);
       if (firebaseStatus === 'failed') {
@@ -897,6 +893,44 @@ function App() {
       } else {
         toast.success(permanent ? 'Invoice permanently deleted!' : 'Invoice moved to trash.');
       }
+    };
+
+    if (permanent) {
+      await executeDelete();
+    } else {
+      toast.custom(
+        (t) => (
+          <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-sm w-full bg-theme-app dark:bg-theme-surface shadow-2xl rounded-2xl pointer-events-auto border border-theme-border-soft overflow-hidden`}>
+            <div className="p-5 flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full bg-theme-danger/10 text-theme-danger flex items-center justify-center mb-3">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-theme-primary dark:text-theme-primary mb-1">Move to Trash?</h3>
+              <p className="text-xs text-theme-muted font-semibold mb-6">
+                Are you sure you want to move this invoice to the trash? You can restore it later if needed.
+              </p>
+              <div className="flex w-full gap-2">
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="flex-1 bg-theme-card border border-theme-border-soft text-theme-muted font-bold py-2.5 rounded-xl transition-all hover:bg-theme-border-soft"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    toast.dismiss(t.id);
+                    await executeDelete();
+                  }}
+                  className="flex-1 bg-theme-danger text-white font-bold py-2.5 rounded-xl transition-all hover:bg-rose-600 shadow-md"
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        ),
+        { duration: 5000 }
+      );
     }
   };
 

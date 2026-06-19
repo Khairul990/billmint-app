@@ -117,44 +117,57 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
       <div className={`flex flex-col ${compact ? '' : 'md:flex-row md:items-center'} justify-between gap-4`}>
         {/* Top/Left Section: Metadata */}
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-app text-theme-accent dark:text-theme-accent rounded-xl">
+          <div className="p-3 bg-gradient-to-br from-theme-app to-theme-surface dark:from-theme-surface dark:to-theme-card text-theme-accent dark:text-theme-accent rounded-xl border border-theme-border-soft shadow-sm hidden sm:block">
             <FileText className="w-6 h-6" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-theme-primary dark:text-theme-primary text-base md:text-lg">{invoice.invoiceNumber}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-black text-theme-primary dark:text-theme-primary text-base md:text-lg">{invoice.invoiceNumber}</span>
+              {invoice.customerName && (
+                <>
+                   <span className="text-theme-muted hidden sm:inline">•</span>
+                   <span className="font-extrabold text-theme-accent dark:text-theme-accent text-sm md:text-base bg-theme-accent/5 px-2 py-0.5 rounded-lg border border-theme-accent/10">{invoice.customerName}</span>
+                </>
+              )}
             </div>
-            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <span className={`text-[9px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getStatusStyle(invoice.paymentStatus)}`}>
+            <div className="flex flex-wrap items-center gap-1.5 mt-2">
+              <span className={`text-[10px] px-2.5 py-0.5 rounded-full border font-extrabold uppercase tracking-wider shadow-sm ${getStatusStyle(invoice.paymentStatus)}`}>
                 {invoice.paymentStatus}
               </span>
               {invoice.orderStatus && (
-                <span className={`text-[9px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getOrderStatusStyle(invoice.orderStatus)}`}>
+                <span className={`text-[10px] px-2.5 py-0.5 rounded-full border font-extrabold uppercase tracking-wider shadow-sm ${getOrderStatusStyle(invoice.orderStatus)}`}>
                   {invoice.orderStatus}
                 </span>
               )}
               {invoice.syncStatus && getSyncStatusLabel(invoice.syncStatus) && (
-                <span className={`text-[9px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${getSyncStatusStyle(invoice.syncStatus)}`}>
+                <span className={`text-[10px] px-2.5 py-0.5 rounded-full border font-extrabold uppercase tracking-wider shadow-sm ${getSyncStatusStyle(invoice.syncStatus)}`}>
                   {getSyncStatusLabel(invoice.syncStatus)}
                 </span>
               )}
             </div>
-            <p className="text-sm font-semibold text-theme-primary dark:text-theme-muted mt-1.5 line-clamp-1 break-all pr-2">{invoice.customerName}</p>
-            <p className="text-[10px] text-theme-muted dark:text-theme-muted mt-0.5">Due: {invoice.dueDate || 'N/A'}</p>
+            <p className="text-[11px] font-bold text-theme-muted dark:text-theme-muted mt-2">Due Date: {invoice.dueDate || 'N/A'}</p>
           </div>
         </div>
 
         {/* Right Section: Price & Quick CTA Buttons */}
-        <div className={`flex ${compact ? 'flex-row items-center justify-between border-t pt-3' : 'md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 pt-3 md:pt-0'} border-theme-border-soft dark:border-theme-border-soft/80`}>
-          <div className={`flex flex-col ${compact ? '' : 'md:items-end'}`}>
-            <span className={`text-xl md:text-2xl font-extrabold text-theme-primary dark:text-theme-primary`}>
-              {formatCurrency(invoice.grandTotal, currencySymbol)}
-            </span>
-            {(invoice.balanceDue > 0) && (
-              <span className="text-[10px] text-rose-500 font-bold uppercase tracking-wider">
-                Due: {formatCurrency(invoice.balanceDue, currencySymbol)}
-              </span>
-            )}
+        <div className={`flex ${compact ? 'flex-col items-start border-t pt-3' : 'md:flex-col items-start md:items-end justify-between border-t md:border-t-0 pt-3 md:pt-0 gap-3'} border-theme-border-soft dark:border-theme-border-soft/80`}>
+          
+          {/* Pro+ Payment Stats Bar */}
+          <div className="flex items-center gap-3 bg-theme-app dark:bg-theme-surface rounded-xl px-3 py-2 border border-theme-border-soft dark:border-theme-border-soft/50 shadow-inner w-full md:w-auto overflow-x-auto no-scrollbar">
+            <div className="flex flex-col items-start md:items-end min-w-[70px]">
+              <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">Bill Total</span>
+              <span className="text-sm font-black text-theme-primary dark:text-theme-primary">{formatCurrency(invoice.grandTotal, currencySymbol)}</span>
+            </div>
+            <div className="w-px h-6 bg-theme-border-soft dark:bg-theme-border-soft/50"></div>
+            <div className="flex flex-col items-start md:items-end min-w-[70px]">
+              <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">Paid</span>
+              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(invoice.amountPaid || 0, currencySymbol)}</span>
+            </div>
+            <div className="w-px h-6 bg-theme-border-soft dark:bg-theme-border-soft/50"></div>
+            <div className="flex flex-col items-start md:items-end min-w-[70px]">
+              <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">Due</span>
+              <span className={`text-sm font-black ${invoice.balanceDue > 0 ? 'text-rose-500' : 'text-theme-muted'}`}>{formatCurrency(invoice.balanceDue || 0, currencySymbol)}</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 mt-2">

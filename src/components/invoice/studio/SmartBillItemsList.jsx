@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { Plus, Trash2, AlertTriangle, ArrowUp, X, Settings2 } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, ArrowUp, X, Settings2, Copy } from 'lucide-react';
 
 const calculateRowAmount = (item) => {
   const q = parseFloat(item.qty) || 0;
@@ -50,6 +50,10 @@ const SmartBillItemsList = ({ products = [] }) => {
 
   const handleUpdateItem = useCallback((index, field, value) => {
     dispatch({ type: 'UPDATE_ITEM_FIELD', payload: { index, field, value } });
+  }, [dispatch]);
+
+  const handleCopyRow = useCallback((index) => {
+    dispatch({ type: 'COPY_ROW', payload: index });
   }, [dispatch]);
 
   const handleDeleteRow = useCallback((index) => {
@@ -211,14 +215,23 @@ const SmartBillItemsList = ({ products = [] }) => {
                       ₹{calculateRowAmount(item).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-center">
-                    <button 
-                      onClick={() => handleDeleteRow(index)}
-                      className="text-theme-muted hover:text-theme-danger transition-colors p-1.5 rounded-lg hover:bg-theme-danger/10 mx-auto"
-                      title="Delete Row"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center justify-center gap-2">
+                      <button 
+                        onClick={() => handleCopyRow(index)}
+                        className="text-theme-muted hover:text-theme-accent transition-colors p-1.5 rounded-lg hover:bg-theme-accent/10"
+                        title="Duplicate Row"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteRow(index)}
+                        className="text-theme-muted hover:text-theme-danger transition-colors p-1.5 rounded-lg hover:bg-theme-danger/10"
+                        title="Delete Row"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
