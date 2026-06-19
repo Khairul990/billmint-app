@@ -250,12 +250,9 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
                     <p className="text-[10px] font-bold text-theme-muted mt-1 leading-snug">Keep editing later, nothing is sent yet.</p>
                   </div>
                   <button 
-                    onClick={() => {
-                      setSaveStatus('saving');
-                      autoSaveDraft().then(() => setSaveStatus('saved'));
-                      toast.success("Saved as draft");
-                    }}
-                    className="w-full py-2.5 bg-theme-app text-theme-primary rounded-xl text-xs font-black uppercase hover:bg-theme-border-soft transition-colors"
+                    onClick={handleSaveDraft}
+                    disabled={isSaving}
+                    className="w-full py-2.5 bg-theme-app text-theme-primary rounded-xl text-xs font-black uppercase hover:bg-theme-border-soft transition-colors disabled:opacity-50"
                   >
                     Save Now
                   </button>
@@ -271,12 +268,9 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
                     <p className="text-[10px] font-bold text-theme-muted mt-1 leading-snug">Download a professional PDF copy.</p>
                   </div>
                   <button 
-                    onClick={() => {
-                      if (validateBeforeSave()) {
-                        if (onDownloadPDF) onDownloadPDF(state);
-                      }
-                    }}
-                    className="w-full py-2.5 bg-theme-app text-theme-primary rounded-xl text-xs font-black uppercase hover:bg-theme-border-soft transition-colors"
+                    onClick={handleDownloadPDF}
+                    disabled={isSaving}
+                    className="w-full py-2.5 bg-theme-app text-theme-primary rounded-xl text-xs font-black uppercase hover:bg-theme-border-soft transition-colors disabled:opacity-50"
                   >
                     Download
                   </button>
@@ -294,7 +288,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
                     <p className="text-[10px] font-bold text-theme-muted mt-1 leading-snug">Customer gets a live link to view bill and upload payment screenshot.</p>
                   </div>
                   <button 
-                    onClick={handleFinalize}
+                    onClick={handleGenerateLiveLink}
                     disabled={isSaving}
                     className="relative z-10 w-full py-3 bg-gradient-to-r from-theme-accent to-pink-500 text-white rounded-xl text-xs font-black uppercase hover:shadow-lg hover:shadow-theme-accent/30 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                   >
