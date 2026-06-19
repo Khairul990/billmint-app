@@ -272,29 +272,29 @@ export const InvoiceProvider = ({ children, editingInvoice, invoices, businessSe
           templateFields: invoiceTemplates.find(t => t.id === (editingInvoice.selectedTemplate || 'retail'))?.fields || invoiceTemplates[0].fields,
           pdfVisibleFields: editingInvoice.pdfVisibleFields || [],
           customer: {
-            id: editingInvoice.customerId || '',
-            name: editingInvoice.customerName || '',
-            phone: editingInvoice.customerPhone || '',
-            email: editingInvoice.customerEmail || '',
-            address: editingInvoice.customerAddress || ''
+            id: editingInvoice.customer?.id || editingInvoice.customerId || '',
+            name: editingInvoice.customer?.name || editingInvoice.customerName || '',
+            phone: editingInvoice.customer?.phone || editingInvoice.customerPhone || '',
+            email: editingInvoice.customer?.email || editingInvoice.customerEmail || '',
+            address: editingInvoice.customer?.address || editingInvoice.customerAddress || ''
           },
           items: parsedItems,
           totals: {
-            subtotal: editingInvoice.subtotal || 0,
-            taxPercentage: editingInvoice.taxPercentage ?? 18,
-            taxAmount: editingInvoice.taxAmount || 0,
-            discountAmount: editingInvoice.discountAmount || 0,
-            grandTotal: editingInvoice.grandTotal || 0,
-            amountPaid: editingInvoice.amountPaid || 0,
-            balanceDue: editingInvoice.balanceDue || 0
+            subtotal: editingInvoice.totals?.subtotal || editingInvoice.subtotal || 0,
+            taxPercentage: editingInvoice.totals?.taxPercentage ?? editingInvoice.taxPercentage ?? 18,
+            taxAmount: editingInvoice.totals?.taxAmount || editingInvoice.taxAmount || 0,
+            discountAmount: editingInvoice.totals?.discountAmount || editingInvoice.discountAmount || 0,
+            grandTotal: editingInvoice.totals?.grandTotal || editingInvoice.grandTotal || 0,
+            amountPaid: editingInvoice.totals?.amountPaid || editingInvoice.amountPaid || 0,
+            balanceDue: editingInvoice.totals?.balanceDue || editingInvoice.balanceDue || 0
           },
           settings: {
-            notes: editingInvoice.notes || '',
-            terms: editingInvoice.terms || '',
-            paymentStatus: editingInvoice.paymentStatus || 'Unpaid',
-            orderStatus: editingInvoice.orderStatus || 'Pending',
-            paymentMethod: editingInvoice.paymentMethod || 'Cash',
-            paymentNote: editingInvoice.paymentNote || ''
+            notes: editingInvoice.settings?.notes || editingInvoice.notes || '',
+            terms: editingInvoice.settings?.terms || editingInvoice.terms || '',
+            paymentStatus: editingInvoice.settings?.paymentStatus || editingInvoice.paymentStatus || 'Unpaid',
+            orderStatus: editingInvoice.settings?.orderStatus || editingInvoice.orderStatus || 'Pending',
+            paymentMethod: editingInvoice.settings?.paymentMethod || editingInvoice.paymentMethod || 'Cash',
+            paymentNote: editingInvoice.settings?.paymentNote || editingInvoice.paymentNote || ''
           },
           paymentProofs: editingInvoice.paymentProofs || []
         }

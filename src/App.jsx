@@ -726,17 +726,45 @@ function App() {
       return;
     }
 
+    // Flatten nested InvoiceContext state if present
+    if (payload.customer && typeof payload.customer === 'object') {
+      payload.customerId = payload.customer.id || payload.customerId;
+      payload.customerName = payload.customer.name || payload.customerName;
+      payload.customerPhone = payload.customer.phone || payload.customerPhone;
+      payload.customerEmail = payload.customer.email || payload.customerEmail;
+      payload.customerAddress = payload.customer.address || payload.customerAddress;
+      delete payload.customer;
+    }
+    if (payload.totals && typeof payload.totals === 'object') {
+      payload.subtotal = payload.totals.subtotal || payload.subtotal || 0;
+      payload.taxPercentage = payload.totals.taxPercentage ?? payload.taxPercentage ?? 18;
+      payload.taxAmount = payload.totals.taxAmount || payload.taxAmount || 0;
+      payload.discountAmount = payload.totals.discountAmount || payload.discountAmount || 0;
+      payload.grandTotal = payload.totals.grandTotal || payload.grandTotal || 0;
+      payload.amountPaid = payload.totals.amountPaid || payload.amountPaid || 0;
+      payload.balanceDue = payload.totals.balanceDue || payload.balanceDue || 0;
+      delete payload.totals;
+    }
+    if (payload.settings && typeof payload.settings === 'object') {
+      payload.notes = payload.settings.notes || payload.notes || '';
+      payload.terms = payload.settings.terms || payload.terms || '';
+      payload.paymentStatus = payload.settings.paymentStatus || payload.paymentStatus || 'Unpaid';
+      payload.orderStatus = payload.settings.orderStatus || payload.orderStatus || 'Pending';
+      payload.paymentMethod = payload.settings.paymentMethod || payload.paymentMethod || 'Cash';
+      payload.paymentNote = payload.settings.paymentNote || payload.paymentNote || '';
+      delete payload.settings;
+    }
+
     // Final Integrity Check
     if (payload.items && payload.items.length > 0) {
       const hasValidItems = payload.items.some(i => (parseFloat(i.qty) || 0) > 0 && (parseFloat(i.rate) || 0) > 0);
-      if (hasValidItems && (!payload.totals || payload.totals.grandTotal === 0)) {
+      if (hasValidItems && (!payload.grandTotal || payload.grandTotal === 0)) {
         console.warn('⚠️ CRITICAL: Attempted to save invoice with ₹0 grand total but valid items exist. Forcing recalculation to prevent data corruption.');
-        const recalculated = calculateTotals(payload.items, payload.totals?.taxPercentage || 0, payload.totals?.discountAmount || 0);
-        payload.totals = {
-          ...payload.totals,
-          ...recalculated,
-          balanceDue: Math.max(0, recalculated.grandTotal - (payload.totals?.amountPaid || 0))
-        };
+        const recalculated = calculateTotals(payload.items, payload.taxPercentage || 0, payload.discountAmount || 0);
+        payload.subtotal = recalculated.subtotal;
+        payload.taxAmount = recalculated.taxAmount;
+        payload.grandTotal = recalculated.grandTotal;
+        payload.balanceDue = Math.max(0, recalculated.grandTotal - (payload.amountPaid || 0));
       }
     }
 
