@@ -10,6 +10,7 @@ import SmartBillItemsList from './SmartBillItemsList';
 import CompactSummaryStrip from './CompactSummaryStrip';
 import CompactPaymentSection from './CompactPaymentSection';
 import LiveInvoicePreview from '../LiveInvoicePreview';
+import { ensureInvoicePublicToken } from '../../../services/dbEngine';
 
 const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, onBack }) => {
   const { state, dispatch } = useInvoice();
@@ -26,35 +27,13 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
     onSaveInvoiceRef.current = onSaveInvoice;
   }, [onSaveInvoice]);
 
-  // Auto-Save Engine (Debounced)
-  const autoSaveDraft = useCallback(async () => {
-    const hasContent = state.customer.name || state.items.some(i => i.description || i.qty > 0);
-    if (!hasContent) return;
-
-    try {
-      if (onSaveInvoiceRef.current) {
-        await onSaveInvoiceRef.current({ ...state, paymentStatus: 'Draft' }, false, true);
-        setLastSaved(new Date());
-      }
-    } catch (err) {
-      console.error("Auto-save failed", err);
-    }
-  }, [state]);
-
-  // Debounce effect
+  // Change Detector (No Auto-Save)
   useEffect(() => {
     const hasContent = state.customer.name || state.items.some(i => i.description || i.qty > 0);
-    if (!hasContent) return;
-
-    setSaveStatus('unsaved');
-    const timer = setTimeout(async () => {
-      setSaveStatus('saving');
-      await autoSaveDraft();
-      setSaveStatus('saved');
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [state, autoSaveDraft]);
+    if (hasContent) {
+      setSaveStatus('unsaved');
+    }
+  }, [state]);
 
   const validateBeforeSave = () => {
     if (!state.customer.name) {
@@ -78,14 +57,63 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
     return true;
   };
 
-  const handleFinalize = async () => {
-    if (!validateBeforeSave()) return;
+  const executeSave = async (silent = true, overridePaymentStatus = null) => {
     setIsSaving(true);
     try {
-      await onSaveInvoice({ ...state, paymentStatus: state.settings.paymentStatus }, state.saveCustomer && !state.customer.id, false);
-      toast.success('Invoice finalized successfully!');
-    } catch (error) {
-      toast.error('Failed to finalize invoice.');
+      const payload = { ...state };
+      if (overridePaymentStatus) {
+        payload.paymentStatus = overridePaymentStatus;
+      } else {
+        payload.paymentStatus = state.settings.paymentStatus;
+      }
+      const savedInvoice = await onSaveInvoice(payload, state.saveCustomer && !state.customer.id, silent);
+      setSaveStatus('saved');
+      setLastSaved(new Date());
+      return savedInvoice;
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save invoice.');
+      return null;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    // Saves as draft and navigates away (non-silent)
+    await executeSave(false, 'Draft');
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!validateBeforeSave()) return;
+    // Save silently first
+    const saved = await executeSave(true);
+    if (saved && onDownloadPDF) {
+      onDownloadPDF(saved);
+    }
+  };
+
+  const handleGenerateLiveLink = async () => {
+    if (!validateBeforeSave()) return;
+    
+    // Save silently first
+    const saved = await executeSave(true);
+    if (!saved) return;
+    
+    setIsSaving(true);
+    try {
+      const token = await ensureInvoicePublicToken(saved);
+      if (!token) {
+        toast.error('Could not create live link. Please try again.');
+        return;
+      }
+      const liveLink = `${window.location.origin}/invoice/${token}`;
+      await navigator.clipboard.writeText(liveLink);
+      toast.success('Live Invoice Link copied to clipboard!');
+      // Navigate away by triggering non-silent save or calling onBack
+      if (onBack) onBack();
+    } catch (err) {
+      toast.error('Could not create live link. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -113,17 +141,10 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         setShowPreviewModal={setShowPreviewModal} 
         lastSaved={lastSaved}
         saveStatus={saveStatus}
-        onSaveDraft={() => {
-          setSaveStatus('saving');
-          autoSaveDraft().then(() => setSaveStatus('saved'));
-        }}
-        onFinalize={handleFinalize}
+        onSaveDraft={handleSaveDraft}
+        onGenerateLiveLink={handleGenerateLiveLink}
         isSaving={isSaving}
-        onDownloadPDF={() => {
-          if (validateBeforeSave()) {
-            if (onDownloadPDF) onDownloadPDF(state);
-          }
-        }}
+        onDownloadPDF={handleDownloadPDF}
         onBack={handleBackClick}
       />
 

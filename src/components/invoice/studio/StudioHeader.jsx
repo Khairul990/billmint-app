@@ -4,7 +4,7 @@ import { useInvoice } from '../../../contexts/InvoiceContext';
 import { Loader2, LayoutPanelLeft, Maximize, PanelRightInactive, Cloud, CloudOff, Save, Check, FileText, Link, ArrowLeft, Eye } from 'lucide-react';
 import { ShimmerButton } from '../../magicui/shimmer-button';
 
-const StudioHeader = ({ showPreviewModal, setShowPreviewModal, lastSaved, saveStatus, onSaveDraft, onFinalize, isSaving, onDownloadPDF, onBack }) => {
+const StudioHeader = ({ showPreviewModal, setShowPreviewModal, lastSaved, saveStatus, onSaveDraft, onGenerateLiveLink, isSaving, onDownloadPDF, onBack }) => {
   const { state, dispatch } = useInvoice();
 
   return (
@@ -100,14 +100,14 @@ const StudioHeader = ({ showPreviewModal, setShowPreviewModal, lastSaved, saveSt
         </button>
 
         <button 
-          onClick={() => { if(onDownloadPDF) onDownloadPDF(state); }}
+          onClick={onDownloadPDF}
           className="hidden md:flex items-center justify-center gap-1.5 px-3 py-1.5 bg-theme-surface hover:bg-theme-border-soft text-theme-primary text-xs font-bold rounded-xl transition-all shadow-sm border border-theme-border-soft"
         >
           <FileText className="w-3.5 h-3.5 text-rose-500" /> Generate PDF
         </button>
 
         <ShimmerButton
-          onClick={onFinalize}
+          onClick={onGenerateLiveLink}
           disabled={isSaving}
           className="h-9 px-4 shadow-glow"
           shimmerColor="#ffffff"

@@ -904,6 +904,7 @@ function App() {
       setEditingInvoice(null);
       setCurrentTab('invoices');
     }
+    return payload;
   };
 
   const handleDeleteInvoice = async (id, permanent = false) => {
