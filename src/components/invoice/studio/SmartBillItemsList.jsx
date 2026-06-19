@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { Plus, Trash2, AlertTriangle, ArrowUp, X } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, ArrowUp, X, Settings2 } from 'lucide-react';
 
 const calculateRowAmount = (item) => {
   const q = parseFloat(item.qty) || 0;
@@ -11,8 +11,28 @@ const calculateRowAmount = (item) => {
 
 const SmartBillItemsList = ({ products = [] }) => {
   const { state, dispatch } = useInvoice();
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newItem, setNewItem] = useState({ itemService: '', description: '', qty: 1, rate: '', unit: 'Piece' });
+  
+  // Custom columns state
+  const [columns, setColumns] = useState({ col1: 'Description', col2: 'Qty', col3: 'Rate' });
+  const [showColModal, setShowColModal] = useState(false);
+  const [tempCols, setTempCols] = useState({ col1: '', col2: '', col3: '' });
+
+  // Update columns based on template selection
+  useEffect(() => {
+    let col1 = 'Description';
+    let col2 = 'Qty';
+    let col3 = 'Rate';
+
+    const t = state.selectedTemplate?.toLowerCase();
+    if (t === 'embroidery') { col1 = 'Design / Work Name'; col2 = 'Qty'; col3 = 'Rate'; }
+    else if (t === 'tailor') { col1 = 'Work / Measurement'; col2 = 'Qty'; col3 = 'Rate'; }
+    else if (t === 'teacher') { col1 = 'Fee Description'; col2 = 'Month'; col3 = 'Amount'; }
+    else if (t === 'doctor' || t === 'clinic') { col1 = 'Service / Visit'; col2 = 'Qty'; col3 = 'Fee'; }
+    else if (t === 'retail' || t === 'mall') { col1 = 'Product Name'; col2 = 'Qty'; col3 = 'Price'; }
+    else if (t === 'repair') { col1 = 'Problem / Service'; col2 = 'Qty'; col3 = 'Charge'; }
+
+    setColumns({ col1, col2, col3 });
+  }, [state.selectedTemplate]);
 
   // Common quick add items
   const mostUsed = [
@@ -35,6 +55,10 @@ const SmartBillItemsList = ({ products = [] }) => {
   const handleDeleteRow = useCallback((index) => {
     dispatch({ type: 'DELETE_ROW', payload: index });
   }, [dispatch]);
+
+  const handleAddRow = () => {
+    dispatch({ type: 'ADD_EMPTY_ROW' });
+  };
 
   const handleQuickAdd = (prod) => {
     const pName = prod.name || prod.productName;
@@ -67,35 +91,14 @@ const SmartBillItemsList = ({ products = [] }) => {
     dispatch({ type: 'SET_ITEMS', payload: newItems });
   };
 
-  const handleModalAdd = () => {
-    if (!newItem.itemService) return;
-    
-    const lastItem = state.items[state.items.length - 1];
-    let newItems = [...state.items];
-    
-    const productToAdd = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      itemService: newItem.itemService,
-      description: newItem.description,
-      qty: newItem.qty || 1,
-      unit: newItem.unit || 'Piece',
-      rate: parseFloat(newItem.rate) || 0,
-      discount: 0,
-      tax: 0,
-      amount: (newItem.qty || 1) * (parseFloat(newItem.rate) || 0)
-    };
+  const openColModal = () => {
+    setTempCols(columns);
+    setShowColModal(true);
+  };
 
-    if (lastItem && !lastItem.itemService && !lastItem.description && (lastItem.rate === 0 || !lastItem.rate)) {
-      productToAdd.sn = lastItem.sn;
-      newItems[newItems.length - 1] = productToAdd;
-    } else {
-      productToAdd.sn = newItems.length + 1;
-      newItems.push(productToAdd);
-    }
-
-    dispatch({ type: 'SET_ITEMS', payload: newItems });
-    setNewItem({ itemService: '', description: '', qty: 1, rate: '', unit: 'Piece' });
-    setShowAddModal(false);
+  const saveColumns = () => {
+    setColumns(tempCols);
+    setShowColModal(false);
   };
 
   return (
@@ -144,160 +147,149 @@ const SmartBillItemsList = ({ products = [] }) => {
         </div>
       </div>
 
-      {/* Items List */}
-      <div className="flex flex-col gap-4">
-        {state.items.length === 0 || (state.items.length === 1 && !state.items[0].itemService && state.items[0].rate === 0) ? (
-           <div className="flex flex-col items-center justify-center p-8 bg-theme-surface border border-theme-border-soft border-dashed rounded-2xl shadow-sm">
-             <div className="w-16 h-16 bg-theme-app border border-theme-border-soft text-theme-muted rounded-full flex items-center justify-center mb-4">
-               <Plus className="w-6 h-6 text-theme-accent" />
-             </div>
-             <h3 className="text-lg font-black text-theme-primary mb-1">No Items Yet</h3>
-             <p className="text-xs font-bold text-theme-muted mb-6">
-               Tap "+ Add Item" below or choose from Quick Add.
-             </p>
-           </div>
-        ) : (
-          state.items.map((item, index) => {
-            // Hide perfectly empty rows from UI in this card view
-            if (!item.itemService && !item.description && (!item.rate || item.rate === 0)) return null;
+      {/* Items Table Section */}
+      <div className="bg-theme-surface border border-theme-border-soft rounded-2xl shadow-sm overflow-hidden flex flex-col">
+        {/* Table Header Action */}
+        <div className="p-3 bg-theme-app/30 border-b border-theme-border-soft flex items-center justify-between">
+          <h3 className="text-xs font-black uppercase tracking-wider text-theme-primary">Bill Items</h3>
+          <button onClick={openColModal} className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-theme-muted hover:text-theme-accent transition-colors">
+            <Settings2 className="w-3 h-3" /> Edit Columns
+          </button>
+        </div>
 
-            return (
-              <div key={item.id || index} className="bg-theme-surface border border-theme-border-soft rounded-2xl p-4 shadow-sm hover:shadow-md transition-all relative group">
-                <button 
-                  onClick={() => handleDeleteRow(index)}
-                  className="absolute top-4 right-4 text-theme-muted hover:text-theme-danger transition-colors p-1 bg-theme-app/50 rounded-lg hover:bg-theme-danger/10"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-                
-                <div className="pr-10 mb-3">
-                  <input
-                    type="text"
-                    value={item.itemService || ''}
-                    onChange={(e) => handleUpdateItem(index, 'itemService', e.target.value)}
-                    placeholder="Item name..."
-                    className="w-full bg-transparent outline-none text-lg font-black text-theme-primary placeholder-theme-muted/50 mb-1"
-                  />
-                  <input
-                    type="text"
-                    value={item.description || ''}
-                    onChange={(e) => handleUpdateItem(index, 'description', e.target.value)}
-                    placeholder="Optional description..."
-                    className="w-full bg-transparent outline-none text-xs font-bold text-theme-muted placeholder-theme-muted/30"
-                  />
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3 bg-theme-app/50 p-3 rounded-xl border border-theme-border-soft">
-                  <div className="flex items-center gap-2 bg-theme-surface px-2 py-1.5 rounded-lg border border-theme-border-soft shadow-sm">
-                    <button onClick={() => handleUpdateItem(index, 'qty', Math.max(1, (parseFloat(item.qty) || 1) - 1))} className="w-6 h-6 flex items-center justify-center text-theme-primary font-bold hover:bg-theme-app rounded">-</button>
-                    <span className="text-sm font-black text-theme-primary w-6 text-center">{item.qty || 1}</span>
-                    <button onClick={() => handleUpdateItem(index, 'qty', (parseFloat(item.qty) || 0) + 1)} className="w-6 h-6 flex items-center justify-center text-theme-primary font-bold hover:bg-theme-app rounded">+</button>
-                  </div>
-                  
-                  <span className="text-xs font-black text-theme-muted">x</span>
-                  
-                  <div className="flex items-center gap-1 bg-theme-surface px-3 py-1.5 rounded-lg border border-theme-border-soft shadow-sm flex-1 min-w-[100px]">
-                    <span className="text-xs font-black text-theme-muted">₹</span>
+        {/* Responsive Table Wrapper */}
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[600px]">
+            <thead>
+              <tr className="bg-theme-app/50 border-b border-theme-border-soft">
+                <th className="py-3 px-4 text-xs font-black text-theme-muted w-12 text-center">No</th>
+                <th className="py-3 px-4 text-xs font-black text-theme-muted">{columns.col1}</th>
+                <th className="py-3 px-4 text-xs font-black text-theme-muted w-24 text-center">{columns.col2}</th>
+                <th className="py-3 px-4 text-xs font-black text-theme-muted w-32 text-right">{columns.col3}</th>
+                <th className="py-3 px-4 text-xs font-black text-theme-muted w-32 text-right">Total</th>
+                <th className="py-3 px-4 text-xs font-black text-theme-muted w-16 text-center">Edit</th>
+              </tr>
+            </thead>
+            <tbody>
+              {state.items.map((item, index) => (
+                <tr key={item.id || index} className="border-b border-theme-border-soft hover:bg-theme-app/30 transition-colors">
+                  <td className="py-3 px-4 text-sm font-bold text-theme-muted text-center">
+                    {index + 1}
+                  </td>
+                  <td className="py-3 px-4">
+                    <input
+                      type="text"
+                      value={item.itemService || ''}
+                      onChange={(e) => handleUpdateItem(index, 'itemService', e.target.value)}
+                      placeholder="Enter details..."
+                      className="w-full bg-transparent outline-none text-sm font-bold text-theme-primary placeholder-theme-muted/50"
+                    />
+                  </td>
+                  <td className="py-3 px-4">
                     <input
                       type="number"
-                      value={item.rate || ''}
-                      onChange={(e) => handleUpdateItem(index, 'rate', e.target.value)}
-                      placeholder="0.00"
-                      className="w-full bg-transparent outline-none text-sm font-black text-theme-primary"
+                      value={item.qty || ''}
+                      onChange={(e) => handleUpdateItem(index, 'qty', e.target.value)}
+                      placeholder="1"
+                      className="w-full bg-transparent outline-none text-sm font-bold text-theme-primary text-center"
                     />
-                  </div>
-
-                  <div className="text-right min-w-[80px]">
-                    <span className="text-[10px] font-bold uppercase text-theme-muted block mb-0.5">Amount</span>
-                    <span className="text-base font-black text-theme-primary">
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center justify-end gap-1">
+                      <span className="text-xs font-black text-theme-muted">₹</span>
+                      <input
+                        type="number"
+                        value={item.rate || ''}
+                        onChange={(e) => handleUpdateItem(index, 'rate', e.target.value)}
+                        placeholder="0.00"
+                        className="w-full max-w-[80px] bg-transparent outline-none text-sm font-bold text-theme-primary text-right"
+                      />
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-right">
+                    <span className="text-sm font-black text-theme-primary">
                       ₹{calculateRowAmount(item).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        )}
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <button 
+                      onClick={() => handleDeleteRow(index)}
+                      className="text-theme-muted hover:text-theme-danger transition-colors p-1.5 rounded-lg hover:bg-theme-danger/10 mx-auto"
+                      title="Delete Row"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Add Row Button at bottom of table */}
+        <div className="p-3 bg-theme-surface">
+          <button 
+            onClick={handleAddRow}
+            className="w-full py-3 bg-theme-app border border-theme-border-soft border-dashed rounded-xl flex items-center justify-center gap-2 text-theme-primary font-bold text-sm hover:border-theme-accent/50 hover:text-theme-accent transition-all active:scale-[0.99]"
+          >
+            <Plus className="w-4 h-4" /> Add Row
+          </button>
+        </div>
       </div>
 
-      <button 
-        onClick={() => setShowAddModal(true)}
-        className="w-full py-4 bg-theme-surface border-2 border-theme-border-soft border-dashed rounded-2xl flex items-center justify-center gap-2 text-theme-primary font-black hover:bg-theme-app hover:border-theme-accent/50 hover:text-theme-accent transition-all active:scale-[0.98]"
-      >
-        <Plus className="w-5 h-5" /> Add New Item
-      </button>
-
-      {/* Add Item Overlay Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-theme-surface w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-200">
+      {/* Edit Columns Modal */}
+      {showColModal && (
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-theme-surface w-full max-w-sm rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-200">
             <div className="flex items-center justify-between p-5 border-b border-theme-border-soft">
-              <h2 className="text-lg font-black text-theme-primary">Add Item</h2>
-              <button onClick={() => setShowAddModal(false)} className="p-2 text-theme-muted hover:text-theme-primary bg-theme-app/50 rounded-full transition-colors">
+              <h2 className="text-lg font-black text-theme-primary">Edit Columns</h2>
+              <button onClick={() => setShowColModal(false)} className="p-2 text-theme-muted hover:text-theme-primary bg-theme-app/50 rounded-full transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
             
             <div className="p-5 flex flex-col gap-4">
               <div>
-                <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Item Name</label>
+                <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Column 2 (Description)</label>
                 <input
                   type="text"
-                  autoFocus
-                  value={newItem.itemService}
-                  onChange={(e) => setNewItem({ ...newItem, itemService: e.target.value })}
-                  placeholder="e.g. Logo Stitching"
-                  className="w-full bg-theme-app border border-theme-border-soft rounded-xl px-4 py-3 outline-none text-base font-black text-theme-primary focus:border-theme-accent transition-colors"
+                  value={tempCols.col1}
+                  onChange={(e) => setTempCols({ ...tempCols, col1: e.target.value })}
+                  className="w-full bg-theme-app border border-theme-border-soft rounded-xl px-4 py-2.5 outline-none text-sm font-bold text-theme-primary focus:border-theme-accent transition-colors"
                 />
               </div>
-              
               <div>
-                <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Description (Optional)</label>
+                <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Column 3 (Quantity)</label>
                 <input
                   type="text"
-                  value={newItem.description}
-                  onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                  placeholder="Size, color, details..."
-                  className="w-full bg-theme-app border border-theme-border-soft rounded-xl px-4 py-2 outline-none text-sm font-bold text-theme-primary focus:border-theme-accent transition-colors"
+                  value={tempCols.col2}
+                  onChange={(e) => setTempCols({ ...tempCols, col2: e.target.value })}
+                  className="w-full bg-theme-app border border-theme-border-soft rounded-xl px-4 py-2.5 outline-none text-sm font-bold text-theme-primary focus:border-theme-accent transition-colors"
                 />
               </div>
-
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Qty</label>
-                  <input
-                    type="number"
-                    value={newItem.qty}
-                    onChange={(e) => setNewItem({ ...newItem, qty: parseFloat(e.target.value) || '' })}
-                    className="w-full bg-theme-app border border-theme-border-soft rounded-xl px-4 py-3 outline-none text-base font-black text-theme-primary focus:border-theme-accent transition-colors text-center"
-                  />
-                </div>
-                <div className="flex-[2]">
-                  <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Rate (₹)</label>
-                  <input
-                    type="number"
-                    value={newItem.rate}
-                    onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })}
-                    placeholder="0.00"
-                    className="w-full bg-theme-app border border-theme-border-soft rounded-xl px-4 py-3 outline-none text-base font-black text-theme-primary focus:border-theme-accent transition-colors text-right"
-                  />
-                </div>
+              <div>
+                <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Column 4 (Rate)</label>
+                <input
+                  type="text"
+                  value={tempCols.col3}
+                  onChange={(e) => setTempCols({ ...tempCols, col3: e.target.value })}
+                  className="w-full bg-theme-app border border-theme-border-soft rounded-xl px-4 py-2.5 outline-none text-sm font-bold text-theme-primary focus:border-theme-accent transition-colors"
+                />
               </div>
             </div>
 
-            <div className="p-5 bg-theme-app border-t border-theme-border-soft flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold uppercase text-theme-muted">Amount</span>
-                <span className="text-xl font-black text-theme-primary">
-                  ₹{((newItem.qty || 1) * (parseFloat(newItem.rate) || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-              </div>
+            <div className="p-5 bg-theme-app border-t border-theme-border-soft flex gap-3">
               <button
-                onClick={handleModalAdd}
-                disabled={!newItem.itemService || !newItem.rate}
-                className="px-6 py-3 bg-theme-accent hover:bg-theme-accent/90 disabled:opacity-50 disabled:hover:bg-theme-accent text-white font-black rounded-xl shadow-premium transition-all active:scale-95"
+                onClick={() => setShowColModal(false)}
+                className="flex-1 py-3 bg-transparent border border-theme-border-soft text-theme-primary font-bold rounded-xl transition-all hover:bg-theme-surface"
               >
-                Add to Bill
+                Cancel
+              </button>
+              <button
+                onClick={saveColumns}
+                className="flex-1 py-3 bg-theme-accent hover:bg-theme-accent/90 text-white font-black rounded-xl shadow-premium transition-all active:scale-95"
+              >
+                Save Changes
               </button>
             </div>
           </div>
@@ -308,3 +300,4 @@ const SmartBillItemsList = ({ products = [] }) => {
 };
 
 export default SmartBillItemsList;
+
