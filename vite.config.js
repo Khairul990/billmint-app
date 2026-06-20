@@ -14,7 +14,9 @@ export default defineConfig(({ mode }) => ({
         maximumFileSizeToCacheInBytes: 5000000, // 5MB limit
         navigateFallbackDenylist: [/^\/__/, /^\/api\//, /^\/publicInvoices\//],
         ignoreURLParametersMatching: [/^token/, /^secret/, /^auth/],
-        cleanupOutdatedCaches: true
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true
       },
       manifest: {
         name: 'BillQyro',

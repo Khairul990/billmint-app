@@ -279,8 +279,22 @@ export const GLOBAL_KEYS = {
 export const getScopedKey = (baseKey) => {
   if (baseKey === GLOBAL_KEYS.AUTH) return baseKey;
   const uid = getRealUserId();
-  // Ensure we don't scope if there's no valid uid
-  return uid ? `${baseKey}_${uid}` : baseKey;
+  if (!uid) return baseKey;
+
+  // Add workspace isolation for data collections
+  if ([GLOBAL_KEYS.INVOICES, GLOBAL_KEYS.CUSTOMERS, GLOBAL_KEYS.PRODUCTS, GLOBAL_KEYS.EXPENSES].includes(baseKey)) {
+    const settingsStr = localStorage.getItem(`${GLOBAL_KEYS.SETTINGS}_${uid}`);
+    if (settingsStr) {
+      try {
+        const settings = JSON.parse(settingsStr);
+        if (settings.activeWorkspaceId) {
+          return `${baseKey}_${uid}_${settings.activeWorkspaceId}`;
+        }
+      } catch (e) {}
+    }
+  }
+
+  return `${baseKey}_${uid}`;
 };
 
 // Dynamic KEYS that automatically scope to the current user
@@ -834,6 +848,7 @@ export const getAuthSession = () => {
 
 
 export const logout = () => {
+  // Clear known scoped keys
   localStorage.removeItem(KEYS.AUTH);
   localStorage.removeItem(KEYS.SETTINGS);
   localStorage.removeItem(KEYS.CUSTOMERS);
@@ -842,9 +857,20 @@ export const logout = () => {
   localStorage.removeItem(KEYS.EXPENSES);
   localStorage.removeItem(KEYS.SUBSCRIPTION);
   localStorage.removeItem('billqyro_last_route');
+  
+  // Aggressively clear ALL possible user/workspace scoped caches
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.startsWith('billqyro_') || key.startsWith('billqyro_settings_') || key.startsWith('billqyro_invoices_') || key.startsWith('billqyro_customers_') || key.startsWith('billqyro_products_') || key.startsWith('billqyro_expenses_'))) {
+      if (key !== 'billqyro_admin_default_theme' && key !== 'billqyro_admin_default_mode') {
+         localStorage.removeItem(key);
+      }
+    }
+  }
+  
   sessionStorage.clear();
   try {
-    BillQyroDB.deleteDB('billqyro-offline-db');
+    indexedDB.deleteDatabase('billqyro-db');
   } catch (e) {
     console.error('Failed to clear IndexedDB on logout', e);
   }
@@ -854,7 +880,7 @@ export const factoryResetAllData = async () => {
   localStorage.clear();
   sessionStorage.clear();
   try {
-    BillQyroDB.deleteDB('billqyro-offline-db');
+    indexedDB.deleteDatabase('billqyro-db');
   } catch(e) {}
   
   if (firebaseReady) {
@@ -1237,11 +1263,18 @@ export const getExpenses = async (includeDeleted = false) => {
     return JSON.parse(localStorage.getItem('billqyro_demo_expenses') || '[]');
   }
   initializeStorage();
+  const userId = getRealUserId();
+  const settings = getSettings();
+  const workspaceId = settings?.activeWorkspaceId;
   try {
     const data = await BillQyroDB.getAll('expenses');
     if (data && data.length > 0) {
       let filtered = data;
-      if (!includeDeleted) filtered = data.filter(e => !e.isDeleted);
+      if (!includeDeleted) {
+        filtered = data.filter(e => !e.isDeleted);
+      }
+      if (userId) filtered = filtered.filter(e => e.userId === userId);
+      if (workspaceId) filtered = filtered.filter(e => !e.workspaceId || e.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
     }
   } catch(e) {}
@@ -1251,6 +1284,10 @@ export const getExpenses = async (includeDeleted = false) => {
 
 export const saveExpense = async (expense) => {
   const expenses = await getExpenses();
+  const settings = getSettings();
+  expense.userId = getRealUserId() || 'local-user';
+  expense.workspaceId = settings?.activeWorkspaceId || 'default';
+  
   if (expense.id) {
     const index = expenses.findIndex(e => e.id === expense.id);
     if (index !== -1) {
@@ -1345,9 +1382,20 @@ export const getCustomers = async (includeDeleted = false) => {
     return JSON.parse(localStorage.getItem('billqyro_demo_customers') || '[]');
   }
   initializeStorage();
+  const userId = getRealUserId();
+  const settings = getSettings();
+  const workspaceId = settings?.activeWorkspaceId;
   try {
     const data = await BillQyroDB.getAll('customers');
-    if (data && data.length > 0) return includeDeleted ? data : data.filter(c => !c.isDeleted);
+    if (data && data.length > 0) {
+      let filtered = data;
+      if (!includeDeleted) {
+        filtered = data.filter(c => !c.isDeleted);
+      }
+      if (userId) filtered = filtered.filter(c => c.userId === userId);
+      if (workspaceId) filtered = filtered.filter(c => !c.workspaceId || c.workspaceId === workspaceId);
+      return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+    }
   } catch(e) {}
   const localData = JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [];
   return includeDeleted ? localData : localData.filter(c => !c.isDeleted);
@@ -1358,6 +1406,11 @@ export const saveCustomer = async (customer) => {
     console.warn('Blocked real data operation during Demo Mode: saveCustomer');
     return { updatedCustomers: [], firebaseStatus: 'blocked' };
   }
+  
+  customer.userId = getRealUserId() || 'local-user';
+  const settings = getSettings();
+  customer.workspaceId = settings?.activeWorkspaceId || 'default';
+  
   const customers = await getCustomers();
   if (customer.id) {
     const index = customers.findIndex(c => c.id === customer.id);
@@ -1458,9 +1511,20 @@ export const getProducts = async (includeDeleted = false) => {
     return JSON.parse(localStorage.getItem('billqyro_demo_products') || '[]');
   }
   initializeStorage();
+  const userId = getRealUserId();
+  const settings = getSettings();
+  const workspaceId = settings?.activeWorkspaceId;
   try {
     const data = await BillQyroDB.getAll('products');
-    if (data && data.length > 0) return includeDeleted ? data : data.filter(p => !p.isDeleted);
+    if (data && data.length > 0) {
+      let filtered = data;
+      if (!includeDeleted) {
+        filtered = data.filter(p => !p.isDeleted);
+      }
+      if (userId) filtered = filtered.filter(p => p.userId === userId);
+      if (workspaceId) filtered = filtered.filter(p => !p.workspaceId || p.workspaceId === workspaceId);
+      return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+    }
   } catch(e) {}
   const localData = JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [];
   return includeDeleted ? localData : localData.filter(p => !p.isDeleted);
@@ -1471,6 +1535,11 @@ export const saveProduct = async (product) => {
     console.warn('Blocked real data operation during Demo Mode: saveProduct');
     return { updatedProducts: [], firebaseStatus: 'blocked' };
   }
+  
+  product.userId = getRealUserId() || 'local-user';
+  const settings = getSettings();
+  product.workspaceId = settings?.activeWorkspaceId || 'default';
+  
   const products = await getProducts();
   if (product.id) {
     const index = products.findIndex(p => p.id === product.id);
@@ -1571,6 +1640,9 @@ export const getInvoices = async (includeDeleted = false) => {
     return JSON.parse(localStorage.getItem('billqyro_demo_invoices') || '[]');
   }
   initializeStorage();
+  const userId = getRealUserId();
+  const settings = getSettings();
+  const workspaceId = settings?.activeWorkspaceId;
   try {
     const data = await BillQyroDB.getAll('invoices');
     if (data && data.length > 0) {
@@ -1578,6 +1650,8 @@ export const getInvoices = async (includeDeleted = false) => {
       if (!includeDeleted) {
         filtered = data.filter(inv => !inv.isDeleted);
       }
+      if (userId) filtered = filtered.filter(inv => inv.userId === userId);
+      if (workspaceId) filtered = filtered.filter(inv => !inv.workspaceId || inv.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch(e) {}
@@ -1712,6 +1786,7 @@ export const saveInvoice = async (invoice) => {
   const userEmail = session?.userEmail || session?.email || 'local-user';
   const settings = getSettings();
   
+  invoice.workspaceId = settings?.activeWorkspaceId || 'default';
   invoice.createdByUid = invoice.userId;
   invoice.createdByEmail = userEmail;
   invoice.businessContactEmail = settings?.email || userEmail;
