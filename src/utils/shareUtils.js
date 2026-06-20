@@ -56,7 +56,7 @@ export function generateInvoiceShareText(invoice, currencySymbol = '₹', busine
   const paymentStatus = invoice.paymentStatus || 'Pending';
   
   // Construct the secure live link automatically
-  const liveLink = invoice.publicToken ? `${window.location.origin}/i/${invoice.publicToken}` : '';
+  const liveLink = invoice.publicToken ? `${window.location.origin}/invoice/${invoice.publicToken}` : '';
 
   let message = `Your invoice is ready.
 Invoice No: ${invoiceNo}
@@ -105,7 +105,7 @@ export function generateWhatsAppReminderLink(invoice, currencySymbol = '₹', bu
   const businessName = invoice.businessSnapshot?.businessName || businessSettings?.businessName || 'Our Business';
   const balanceDue = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), activeSymbol, activeNumberFormat);
   
-  const liveLink = invoice.publicToken ? `${window.location.origin}/i/${invoice.publicToken}` : '';
+  const liveLink = invoice.publicToken ? `${window.location.origin}/invoice/${invoice.publicToken}` : '';
   
   let text = `Hi ${invoice.customerName || 'there'},\n\nJust a gentle reminder from ${businessName} that Invoice #${invoice.invoiceNumber || 'N/A'} has a pending balance of *${balanceDue}*.\n\n`;
   if (liveLink) {

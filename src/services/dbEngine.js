@@ -1291,7 +1291,7 @@ export const getExpenses = async (includeDeleted = false) => {
         filtered = data.filter(e => !e.isDeleted);
       }
       if (userId) filtered = filtered.filter(e => e.userId === userId);
-      if (workspaceId) filtered = filtered.filter(e => !e.workspaceId || e.workspaceId === workspaceId);
+      if (workspaceId) filtered = filtered.filter(e => e.workspaceId === undefined || e.workspaceId === 'default' || e.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
     }
   } catch(e) {}
@@ -1316,11 +1316,6 @@ export const saveExpense = async (expense) => {
     expense.id = 'exp-' + Date.now();
     expenses.push(expense);
   }
-  updateLocalCache(KEYS.EXPENSES, expenses);
-
-  // Save to IndexedDB
-  await BillQyroDB.put('expenses', expense);
-
   // Sync / queue + syncStatus tracking
   let firebaseStatus = 'pending';
   expense.syncStatus = 'pending';
@@ -1411,7 +1406,7 @@ export const getCustomers = async (includeDeleted = false) => {
         filtered = data.filter(c => !c.isDeleted);
       }
       if (userId) filtered = filtered.filter(c => c.userId === userId);
-      if (workspaceId) filtered = filtered.filter(c => !c.workspaceId || c.workspaceId === workspaceId);
+      if (workspaceId) filtered = filtered.filter(c => c.workspaceId === undefined || c.workspaceId === 'default' || c.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch(e) {}
@@ -1444,11 +1439,6 @@ export const saveCustomer = async (customer) => {
     customers.push(customer);
     logAudit('customer_created', 'customer', customer.id, null, customer);
   }
-  updateLocalCache(KEYS.CUSTOMERS, customers);
-
-  // Save to IndexedDB
-  await BillQyroDB.put('customers', customer);
-
   // Sync / queue + syncStatus tracking
   let firebaseStatus = 'pending';
   customer.syncStatus = 'pending';
@@ -1541,7 +1531,7 @@ export const getProducts = async (includeDeleted = false) => {
         filtered = data.filter(p => !p.isDeleted);
       }
       if (userId) filtered = filtered.filter(p => p.userId === userId);
-      if (workspaceId) filtered = filtered.filter(p => !p.workspaceId || p.workspaceId === workspaceId);
+      if (workspaceId) filtered = filtered.filter(p => p.workspaceId === undefined || p.workspaceId === 'default' || p.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch(e) {}
@@ -1574,11 +1564,6 @@ export const saveProduct = async (product) => {
     products.push(product);
     logAudit('product_created', 'product', product.id, null, product);
   }
-  updateLocalCache(KEYS.PRODUCTS, products);
-
-  // Save to IndexedDB
-  await BillQyroDB.put('products', product);
-
   // Sync / queue + syncStatus tracking
   let firebaseStatus = 'pending';
   product.syncStatus = 'pending';
@@ -1671,7 +1656,7 @@ export const getInvoices = async (includeDeleted = false) => {
         filtered = data.filter(inv => !inv.isDeleted);
       }
       if (userId) filtered = filtered.filter(inv => inv.userId === userId);
-      if (workspaceId) filtered = filtered.filter(inv => !inv.workspaceId || inv.workspaceId === workspaceId);
+      if (workspaceId) filtered = filtered.filter(inv => inv.workspaceId === undefined || inv.workspaceId === 'default' || inv.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch(e) {}
@@ -1844,13 +1829,7 @@ export const saveInvoice = async (invoice) => {
     await saveCustomer(customerPayload);
   }
 
-  updateLocalCache(KEYS.INVOICES, invoices);
-
-  // Save to IndexedDB
-  await BillQyroDB.put('invoices', invoice);
-
   // Sync / queue + syncStatus tracking
-  // ALWAYS Queue First to prevent data loss
   invoice.syncStatus = 'pending';
   const idx = invoices.findIndex(inv => inv.id === invoice.id);
   if (idx !== -1) invoices[idx] = invoice;
@@ -2462,11 +2441,14 @@ export const syncFromFirestore = async () => {
       updateLocalCache(KEYS.CUSTOMERS, customers);
     }
 
-    // 6. Apply Invoices
+    // 6. Apply Invoices — coerce numeric fields to prevent string-concatenation bugs
     const invoicesMap = new Map();
     invoicesSnap.forEach(docSnap => {
       const data = docSnap.data();
       data.syncStatus = 'synced';
+      ['grandTotal', 'amountPaid', 'balanceDue', 'subtotal', 'tax', 'discount', 'shipping'].forEach(f => {
+        if (typeof data[f] === 'string') data[f] = parseFloat(data[f]) || 0;
+      });
       invoicesMap.set(docSnap.id, data);
     });
     const invoices = Array.from(invoicesMap.values());
@@ -2517,6 +2499,20 @@ export const syncFromFirestore = async () => {
   } catch (error) {
     console.error("Error syncing from Firestore:", error);
     toast.error('Sync failed: ' + error.message);
+    // Restore from backup
+    try {
+      const backupKeys = ['settings', 'customers', 'products', 'invoices', 'expenses', 'subscription'].map(k => `billqyro_${k}_backup`);
+      backupKeys.forEach(k => {
+        const backup = localStorage.getItem(k);
+        if (backup) {
+          const orig = k.replace('_backup', '');
+          localStorage.setItem(orig, backup);
+        }
+      });
+      toast.error('Restored local data from backup after sync failure');
+    } catch (restoreErr) {
+      console.error('Failed to restore from backup:', restoreErr);
+    }
     throw error;
   }
 };

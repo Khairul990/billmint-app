@@ -385,6 +385,7 @@ const PublicInvoice = ({ initialInvoice }) => {
         return 'bg-theme-accent-light text-theme-accent dark:bg-theme-accent/10 dark:text-theme-accent border border-theme-border-soft dark:border-theme-accent/20';
       case 'Partially Paid':
         return 'bg-theme-accent-light text-theme-accent dark:bg-theme-accent/10 dark:text-theme-accent border border-theme-border-soft dark:border-theme-accent/20';
+      case 'Verified':
       case 'Payment Submitted':
       case 'Submitted':
       case 'Pending Verification':
@@ -402,7 +403,7 @@ const PublicInvoice = ({ initialInvoice }) => {
   };
 
   return (
-    <div className="min-h-screen bg-theme-app dark:bg-theme-surface dark:bg-theme-app py-10 px-4 md:px-6 flex flex-col items-center justify-between font-sans antialiased text-theme-primary dark:text-theme-primary dark:text-theme-primary">
+    <div className="min-h-screen bg-theme-app dark:bg-theme-surface dark:bg-theme-app py-6 md:py-10 px-3 md:px-6 flex flex-col items-center justify-between font-sans antialiased text-theme-primary dark:text-theme-primary dark:text-theme-primary">
       
       {/* Top Floating Control Bar */}
       <div className="max-w-4xl w-full flex items-center justify-between gap-4 mb-6 z-10 bg-theme-card dark:bg-theme-card/70 dark:bg-theme-card/70 p-4 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft backdrop-blur-md shadow-sm">
@@ -663,7 +664,58 @@ const PublicInvoice = ({ initialInvoice }) => {
         </div>
 
         {/* --- RIGHT PANEL: SECURE INTERACTIVE CHECKOUT GATEWAY --- */}
-        {invoice.paymentStatus !== 'Paid' && (
+        {invoice.paymentStatus === 'Paid' ? (
+          <div className="w-full lg:w-[350px] shrink-0 space-y-6">
+            <div className="bg-theme-card rounded-3xl border border-emerald-500/30 shadow-premium p-6 space-y-4 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-theme-primary">Invoice Settled</h3>
+                  <span className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Payment completed</span>
+                </div>
+              </div>
+              <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 text-center">
+                <p className="text-2xl font-black text-emerald-400">{formatVal(invoice.amountPaid)}</p>
+                <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-1">Amount Paid</p>
+              </div>
+              {invoice.paymentHistory?.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-[9px] text-theme-muted font-black uppercase tracking-wider block">Payment History</span>
+                  {invoice.paymentHistory.map((ph, i) => (
+                    <div key={i} className="flex items-center justify-between p-2.5 bg-theme-surface rounded-xl border border-theme-border-soft text-xs">
+                      <span className="text-theme-muted font-semibold">{ph.method || 'Transfer'}</span>
+                      <span className="text-theme-primary font-extrabold">{formatVal(ph.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {liveLinkPrefs.showContactButton && (business.phone || business.email) && (
+                <div className="pt-2 border-t border-theme-border-soft">
+                  <p className="text-[10px] text-theme-muted font-bold mb-2">Need a receipt or help?</p>
+                  <div className="flex gap-2">
+                    {business.phone && (
+                      <a href={`tel:${business.phone}`} className="flex-1 py-2 bg-theme-surface hover:bg-theme-border-soft text-theme-primary font-bold rounded-xl text-xs text-center transition-all cursor-pointer">
+                        <Phone className="w-3.5 h-3.5 inline mr-1" />Call
+                      </a>
+                    )}
+                    {business.email && (
+                      <a href={`mailto:${business.email}?subject=Receipt%20${invoice.invoiceNumber}`} className="flex-1 py-2 bg-theme-surface hover:bg-theme-border-soft text-theme-primary font-bold rounded-xl text-xs text-center transition-all cursor-pointer">
+                        <Mail className="w-3.5 h-3.5 inline mr-1" />Email
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+              <div className="text-center text-[9px] text-theme-muted font-bold flex items-center justify-center gap-1.5">
+                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                <span>Payment Verified & Secured</span>
+              </div>
+            </div>
+          </div>
+        ) : (
           <div className="w-full lg:w-[350px] shrink-0 space-y-6">
 
             {/* PAYMENT BOX GATEWAY (TASK 4) */}
@@ -916,11 +968,6 @@ const PublicInvoice = ({ initialInvoice }) => {
                       )}
                     </div>
 
-                    {/* Fraud Check Badge */}
-                    <div className="mt-3 p-2.5 rounded-xl border bg-theme-surface dark:bg-theme-card text-[10px] font-bold border-theme-border-strong text-theme-muted flex items-center justify-center gap-2 shadow-sm">
-                      <ShieldCheck className="w-4 h-4 text-theme-accent opacity-70" />
-                      <span className="uppercase tracking-wider">Fraud check coming soon</span>
-                    </div>
                   </div>
 
                   <div>

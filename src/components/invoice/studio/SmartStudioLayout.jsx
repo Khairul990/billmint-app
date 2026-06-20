@@ -27,11 +27,16 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
     onSaveInvoiceRef.current = onSaveInvoice;
   }, [onSaveInvoice]);
 
-  // Change Detector (No Auto-Save)
+  const savedSnapshotRef = React.useRef(JSON.stringify(state));
+
+  // Change Detector (No Auto-Save) — compares against last saved snapshot
   useEffect(() => {
-    const hasContent = state.customer.name || state.items.some(i => i.description || i.qty > 0);
-    if (hasContent) {
-      setSaveStatus('unsaved');
+    const currentSnapshot = JSON.stringify(state);
+    if (savedSnapshotRef.current !== currentSnapshot) {
+      const hasContent = state.customer.name || state.items.some(i => i.description || i.qty > 0);
+      if (hasContent) {
+        setSaveStatus('unsaved');
+      }
     }
   }, [state]);
 
@@ -66,9 +71,10 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
       } else {
         payload.paymentStatus = state.settings.paymentStatus;
       }
-      const savedInvoice = await onSaveInvoice(payload, state.saveCustomer && !state.customer.id, silent);
+      const savedInvoice = await onSaveInvoiceRef.current(payload, state.saveCustomer && !state.customer.id, silent);
       setSaveStatus('saved');
       setLastSaved(new Date());
+      savedSnapshotRef.current = JSON.stringify(state);
       return savedInvoice;
     } catch (err) {
       console.error(err);
@@ -365,7 +371,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
               <button 
                 onClick={async () => {
                   setSaveStatus('saving');
-                  await autoSaveDraft();
+                  await handleSaveDraft();
                   setSaveStatus('saved');
                   if (onBack) onBack();
                 }}

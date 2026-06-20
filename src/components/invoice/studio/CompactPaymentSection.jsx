@@ -6,15 +6,16 @@ const CompactPaymentSection = () => {
   const { state, dispatch } = useInvoice();
 
   const handlePaymentStatusChange = (status) => {
-    let amountPaid = state.totals.amountPaid;
+    let amountPaid = parseFloat(state.totals.amountPaid) || 0;
+    const grandTotal = parseFloat(state.totals.grandTotal) || 0;
     if (status === 'Paid') {
-      amountPaid = state.totals.grandTotal;
+      amountPaid = grandTotal;
     } else if (status === 'Unpaid') {
       amountPaid = 0;
     } else if (status === 'Partial') {
       // Keep existing amountPaid if it's between 0 and grandTotal, else set to halfway
-      if (amountPaid <= 0 || amountPaid >= state.totals.grandTotal) {
-        amountPaid = Math.floor(state.totals.grandTotal / 2);
+      if (amountPaid <= 0 || amountPaid >= grandTotal) {
+        amountPaid = Math.floor(grandTotal / 2);
       }
     }
 
@@ -40,9 +41,9 @@ const CompactPaymentSection = () => {
   ];
 
   const statuses = [
-    { id: 'Paid', label: 'Full Paid', color: 'emerald' },
-    { id: 'Partial', label: 'Partial', color: 'amber' },
-    { id: 'Unpaid', label: 'Due', color: 'rose' }
+    { id: 'Paid', label: 'Full Paid', style: 'bg-emerald-500/10 border-emerald-500 text-emerald-600 shadow-sm' },
+    { id: 'Partial', label: 'Partial', style: 'bg-amber-500/10 border-amber-500 text-amber-600 shadow-sm' },
+    { id: 'Unpaid', label: 'Due', style: 'bg-rose-500/10 border-rose-500 text-rose-600 shadow-sm' }
   ];
 
   return (
@@ -59,7 +60,7 @@ const CompactPaymentSection = () => {
                 onClick={() => handlePaymentStatusChange(status.id)}
                 className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
                   state.settings.paymentStatus === status.id
-                    ? `bg-${status.color}-500/10 border-${status.color}-500 text-${status.color}-600 shadow-sm`
+                    ? status.style
                     : 'bg-theme-app border-theme-border-soft text-theme-muted hover:border-theme-muted hover:text-theme-primary'
                 }`}
               >

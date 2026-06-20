@@ -51,7 +51,7 @@ const PaymentProofCenter = () => {
 
   // KPI Calculations
   const pendingCount = proofs.filter(p => p.status === 'Pending').length;
-  const approvedCount = proofs.filter(p => p.status === 'Approved').length;
+  const verifiedCount = proofs.filter(p => p.status === 'Approved' || p.status === 'Verified').length;
   const rejectedCount = proofs.filter(p => p.status === 'Rejected').length;
 
   const filteredProofs = proofs.filter(p => {
@@ -62,6 +62,7 @@ const PaymentProofCenter = () => {
       (p.note?.toLowerCase().includes(term) || '');
     
     if (statusFilter === 'all') return matchesSearch;
+    if (statusFilter === 'Verified') return (p.status === 'Approved' || p.status === 'Verified') && matchesSearch;
     return p.status === statusFilter && matchesSearch;
   });
 
@@ -99,8 +100,8 @@ const PaymentProofCenter = () => {
         <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
           <CheckCircle className="w-6 h-6 text-emerald-500 mb-2" />
-          <div className="text-slate-400 text-sm font-medium mb-1 font-bold">Approved Proofs</div>
-          <div className="text-3xl font-black text-white">{approvedCount}</div>
+          <div className="text-slate-400 text-sm font-medium mb-1 font-bold">Verified Proofs</div>
+          <div className="text-3xl font-black text-white">{verifiedCount}</div>
         </div>
         <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-rose-500"></div>
@@ -113,7 +114,7 @@ const PaymentProofCenter = () => {
       {/* Search and Filter */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8 mb-4">
         <div className="flex gap-2">
-          {['Pending', 'Approved', 'Rejected', 'all'].map((filter) => (
+          {['Pending', 'Verified', 'Rejected', 'all'].map((filter) => (
             <button
               key={filter}
               onClick={() => setStatusFilter(filter)}
@@ -196,13 +197,13 @@ const PaymentProofCenter = () => {
                   <div className="flex flex-col items-end">
                     <span className="text-[10px] font-bold text-slate-500 uppercase">Status</span>
                     <span className={`px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider border mt-1 ${
-                      proof.status === 'Approved'
+                      proof.status === 'Approved' || proof.status === 'Verified'
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                         : proof.status === 'Rejected'
                         ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                         : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                     }`}>
-                      {proof.status}
+                      {proof.status === 'Approved' ? 'Verified' : proof.status}
                     </span>
                   </div>
                 </div>
@@ -224,7 +225,7 @@ const PaymentProofCenter = () => {
                         onClick={() => handleAction(proof, 'Approved')}
                         className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-lg shadow-emerald-500/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
                       >
-                        <CheckCircle className="w-4 h-4" /> Approve & Credit User
+                        <CheckCircle className="w-4 h-4" /> Verify & Credit User
                       </button>
                       <button 
                         disabled={processingId === proof.id}

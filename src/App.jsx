@@ -417,13 +417,7 @@ function App() {
   }, [isAuthenticated]);
   
   // --- 🚀 GLOBAL BOOT & LOADING STATE ---
-  const [isAppBooting, setIsAppBooting] = useState(() => {
-    const hasAuth = !!localStorage.getItem('billqyro_auth');
-    const hasSettings = !!localStorage.getItem('billqyro_settings');
-    // If it's a known returning user, skip the full-screen boot completely
-    if (hasAuth && hasSettings) return false;
-    return true;
-  });
+  const [isAppBooting, setIsAppBooting] = useState(true);
   const [isDataHydrating, setIsDataHydrating] = useState(true);
   const [cloudSyncDone, setCloudSyncDone] = useState(false);
 
@@ -431,15 +425,17 @@ function App() {
   useEffect(() => {
     if (isAppBooting) {
       const timeout = setTimeout(() => {
-        console.warn('[BOOT TIMEOUT] 500ms reached, forcing app load.');
+        console.warn('[BOOT TIMEOUT] 3000ms reached, forcing app load.');
         setIsAppBooting(false);
-      }, 500); // Changed from 7000 to 500ms for premium fast feel
+      }, 3000);
       return () => clearTimeout(timeout);
     }
   }, [isAppBooting]);
 
   // Async Data Loader & Boot Sequence
   useEffect(() => {
+    let isBooted = false;
+
     const loadLocalData = async () => {
       sendEmpireEvent({ eventType: "app_opened", message: "BillQyro Web App Opened", page: "init" });
       sendEmpireHealth({ status: "Healthy", healthScore: 100, note: "App initialized successfully" });
@@ -453,11 +449,14 @@ function App() {
         console.error("Error loading local data:", err);
       } finally {
         setIsDataHydrating(false);
+        isBooted = true;
+        setIsAppBooting(false);
       }
     };
     loadLocalData();
 
     const handleSync = async () => {
+      if (!isBooted) return;
       try {
         setInvoices(await getInvoices() || []);
         setCustomers(await getCustomers() || []);

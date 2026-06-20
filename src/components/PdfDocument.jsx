@@ -15,65 +15,74 @@ Font.register({
 // Styles mapping tailwind-like utility classes to React-PDF styles
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
+    padding: 36,
     fontFamily: 'Roboto',
-    fontSize: 10,
+    fontSize: 9.5,
     color: '#334155',
-    backgroundColor: '#ffffff'
+    backgroundColor: '#ffffff',
+    lineHeight: 1.6,
+  },
+  pageA5: {
+    padding: 24,
+    fontFamily: 'Roboto',
+    fontSize: 8,
+    color: '#334155',
+    backgroundColor: '#ffffff',
+    lineHeight: 1.5,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 30,
+    marginBottom: 24,
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',
-    paddingBottom: 20
+    paddingBottom: 16,
   },
   brandContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: 48,
+    height: 48,
     borderRadius: 8,
-    marginRight: 15,
+    marginRight: 14,
   },
   logoFallback: {
-    width: 50,
-    height: 50,
+    width: 48,
+    height: 48,
     borderRadius: 8,
-    marginRight: 15,
+    marginRight: 14,
     backgroundColor: '#6366f1',
     color: 'white',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
   },
   businessName: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#0f172a',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   metaText: {
-    fontSize: 9,
+    fontSize: 8.5,
     color: '#64748b',
-    marginBottom: 2,
-    lineHeight: 1.4,
+    marginBottom: 1.5,
+    lineHeight: 1.5,
   },
   invoiceInfoBox: {
     alignItems: 'flex-end',
   },
   statusBadge: {
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: 12,
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   statusPaid: {
     backgroundColor: '#ecfdf5',
@@ -90,11 +99,11 @@ const styles = StyleSheet.create({
   invoiceRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   invoiceLabel: {
     color: '#64748b',
-    marginRight: 5,
+    marginRight: 4,
   },
   invoiceValue: {
     fontWeight: 'bold',
@@ -103,49 +112,51 @@ const styles = StyleSheet.create({
   crmGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 30,
+    marginBottom: 24,
   },
   crmSection: {
     width: '45%',
   },
   sectionTitle: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 'bold',
     color: '#94a3b8',
     textTransform: 'uppercase',
-    marginBottom: 8,
+    marginBottom: 6,
+    letterSpacing: 1,
   },
   customerName: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
     color: '#0f172a',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   table: {
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   tableHeaderRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
-    paddingBottom: 8,
-    marginBottom: 8,
+    borderBottomColor: '#cbd5e1',
+    paddingBottom: 6,
+    marginBottom: 6,
   },
   tableHeaderCell: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 'bold',
-    color: '#64748b',
+    color: '#475569',
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#f1f5f9',
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
   tableCell: {
-    fontSize: 10,
+    fontSize: 9.5,
     color: '#334155',
   },
   colDesc: { width: '45%', paddingRight: 10 },
@@ -157,16 +168,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderTopWidth: 1,
     borderTopColor: '#e2e8f0',
-    paddingTop: 20,
-    marginTop: 10,
+    paddingTop: 16,
+    marginTop: 8,
   },
   notesSection: {
     width: '50%',
   },
   notesBox: {
     backgroundColor: '#f8fafc',
-    padding: 12,
-    borderRadius: 8,
+    padding: 10,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#f1f5f9',
   },
@@ -176,72 +187,124 @@ const styles = StyleSheet.create({
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    marginBottom: 5,
   },
   grandTotalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 1,
     borderTopColor: '#e2e8f0',
-    paddingTop: 8,
-    marginTop: 4,
+    paddingTop: 6,
+    marginTop: 3,
   },
   grandTotalLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
     color: '#0f172a',
   },
   grandTotalValue: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#4f46e5',
   },
   paymentSection: {
-    marginTop: 40,
-    padding: 20,
+    marginTop: 32,
+    padding: 16,
     backgroundColor: '#f8fafc',
-    borderRadius: 12,
+    borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
   qrCode: {
-    width: 100,
-    height: 100,
-    marginRight: 20,
+    width: 90,
+    height: 90,
+    marginRight: 16,
   },
   paymentDetails: {
     flex: 1,
   },
   paymentTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#0f172a',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   footer: {
     position: 'absolute',
-    bottom: 30,
-    left: 40,
-    right: 40,
+    bottom: 24,
+    left: 36,
+    right: 36,
     textAlign: 'center',
     borderTopWidth: 1,
     borderTopColor: '#e2e8f0',
-    paddingTop: 15,
+    paddingTop: 12,
   },
   footerText: {
-    fontSize: 8,
+    fontSize: 7,
     color: '#94a3b8',
     fontWeight: 'bold',
     textTransform: 'uppercase',
-  }
+  },
+  businessFooterName: {
+    fontSize: 9,
+    color: '#64748b',
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  thanksSection: {
+    marginTop: 24,
+    padding: 12,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+    textAlign: 'center',
+  },
+  thanksText: {
+    fontSize: 10,
+    color: '#64748b',
+    fontStyle: 'italic',
+    lineHeight: 1.6,
+  },
+  balanceDueRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderTopWidth: 1,
+    borderTopColor: '#fee2e2',
+    paddingTop: 5,
+    marginTop: 3,
+  },
+  balanceDueLabel: {
+    fontSize: 9,
+    color: '#dc2626',
+    fontWeight: 'bold',
+  },
+  balanceDueValue: {
+    fontSize: 9,
+    color: '#dc2626',
+    fontWeight: 'bold',
+  },
 });
 
-const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
+const getCategoryWording = (billType) => {
+  switch (billType) {
+    case 'grocery': return { items: 'Items', qty: 'Qty', price: 'Unit Price', noteLabel: 'Product Notes & Terms' };
+    case 'repair': return { items: 'Services', qty: 'Unit', price: 'Labour + Parts', noteLabel: 'Repair Notes & Terms' };
+    case 'retail': return { items: 'Products', qty: 'Qty', price: 'Unit Price', noteLabel: 'Sales Notes & Terms' };
+    case 'custom': return { items: 'Services', qty: 'Qty', price: 'Rate', noteLabel: 'Notes & Terms' };
+    case 'doctor': return { items: 'Treatments', qty: 'Qty', price: 'Fee', noteLabel: 'Medical Notes' };
+    default: return { items: 'Description', qty: 'Qty', price: 'Rate', noteLabel: 'Notes & Terms' };
+  }
+};
+
+const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' }) => {
   if (!invoice) return null;
 
   const templateId = businessSettings?.selectedPdfTemplate || 'classic';
+  const billType = invoice.billType || 'default';
+  const categoryWords = getCategoryWording(billType);
 
   const regionalPrefs = invoice.regionalSettingsSnapshot || {
     country: businessSettings?.country || 'India',
@@ -293,26 +356,29 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
   else if (templateId === 'doctor') { tPrimary = '#064e3b'; tAccent = '#10b981'; }
   else if (templateId === 'repair') { tPrimary = '#451a03'; tAccent = '#f97316'; }
 
+  const useA5 = pageSize === 'A5';
+  const pageStyle = useA5 ? styles.pageA5 : styles.page;
+
   return (
     <Document>
-      <Page size="A4" style={[styles.page, { color: tText }]}>
+      <Page size={pageSize} style={[pageStyle, { color: tText }]}>
         
         {/* Header: Brand & Invoice Info */}
-        <View style={[styles.headerRow, templateId === 'modern' ? { backgroundColor: tPrimary, padding: 20, color: '#fff', marginHorizontal: -40, marginTop: -40, marginBottom: 40 } : {}]}>
+        <View style={[styles.headerRow, templateId === 'modern' ? { backgroundColor: tPrimary, padding: useA5 ? 12 : 20, color: '#fff', marginHorizontal: useA5 ? -24 : -36, marginTop: useA5 ? -24 : -36, marginBottom: useA5 ? 24 : 40 } : {}]}>
           <View style={styles.brandContainer}>
             {businessPrefs.logoUrl ? (
-              <Image src={businessPrefs.logoUrl} style={styles.logo} />
+              <Image src={businessPrefs.logoUrl} style={useA5 ? { ...styles.logo, width: 36, height: 36 } : styles.logo} />
             ) : (
-              <View style={[styles.logoFallback, { backgroundColor: tAccent }]}>
+              <View style={[styles.logoFallback, { backgroundColor: tAccent }, useA5 ? { width: 36, height: 36, fontSize: 18 } : {}]}>
                 <Text>{businessPrefs.businessName?.charAt(0) || 'B'}</Text>
               </View>
             )}
             <View>
-              <Text style={[styles.businessName, templateId === 'modern' ? { color: '#fff' } : { color: tPrimary }]}>{businessPrefs.businessName}</Text>
+              <Text style={[styles.businessName, useA5 ? { fontSize: 15 } : {}, templateId === 'modern' ? { color: '#fff' } : { color: tPrimary }]}>{businessPrefs.businessName}</Text>
               {businessPrefs.gstNumber ? (
                 <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>{regionalPrefs.taxLabel}: {businessPrefs.gstNumber}</Text>
               ) : null}
-              <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>{businessPrefs.address}</Text>
+              {businessPrefs.address ? <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>{businessPrefs.address}</Text> : null}
               <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>Ph: {businessPrefs.phone}</Text>
               <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>{businessPrefs.email}</Text>
             </View>
@@ -342,7 +408,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
         {/* CRM Info */}
         <View style={styles.crmGrid}>
           <View style={styles.crmSection}>
-            <Text style={[styles.sectionTitle, { color: tAccent }]}>{t('bill_to')}</Text>
+            <Text style={[styles.sectionTitle, { color: tAccent }]}>Bill To</Text>
             <Text style={[styles.customerName, { color: tPrimary }]}>{invoice.customerName}</Text>
             <Text style={styles.metaText}>{invoice.customerAddress || 'No address provided'}</Text>
             <Text style={styles.metaText}>Phone: {invoice.customerPhone || 'N/A'}</Text>
@@ -354,28 +420,29 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
               Please pay on or before the due date.
             </Text>
             <Text style={[styles.metaText, { textAlign: 'right' }]}>
-              Amounts are calculated in {currencySymbol}.
+              Amounts calculated in {currencySymbol}.
             </Text>
           </View>
         </View>
 
         {/* Items Table */}
         <View style={styles.table}>
-          <View style={[styles.tableHeaderRow, templateId === 'minimal' ? { borderTopWidth: 1, borderTopColor: '#000', paddingTop: 8, borderBottomColor: '#000' } : { borderBottomColor: tAccent }]}>
-            <Text style={[styles.tableHeaderCell, styles.colDesc]}>{t('items')} Description</Text>
-            <Text style={[styles.tableHeaderCell, styles.colQty]}>Qty</Text>
-            <Text style={[styles.tableHeaderCell, styles.colRate]}>Unit Price</Text>
-            <Text style={[styles.tableHeaderCell, styles.colAmt]}>{t('total')}</Text>
+          <View style={[styles.tableHeaderRow, templateId === 'minimal' ? { borderTopWidth: 1, borderTopColor: '#000', paddingTop: 6, borderBottomColor: '#000' } : { borderBottomColor: tAccent }]}>
+            <Text style={[styles.tableHeaderCell, styles.colDesc]}>{categoryWords.items}</Text>
+            <Text style={[styles.tableHeaderCell, styles.colQty]}>{categoryWords.qty}</Text>
+            <Text style={[styles.tableHeaderCell, styles.colRate]}>{categoryWords.price}</Text>
+            <Text style={[styles.tableHeaderCell, styles.colAmt]}>Total</Text>
           </View>
           
           {(invoice.items || []).map((item, idx) => (
             <View key={idx} style={[styles.tableRow, templateId === 'minimal' ? { borderBottomColor: '#ccc' } : {}]}>
               <View style={styles.colDesc}>
-                <Text style={{ fontWeight: 'bold', color: tPrimary, marginBottom: 3 }}>
+                <Text style={{ fontWeight: 'bold', color: tPrimary, marginBottom: 2 }}>
                   {item.description || item.name || item.productName || item.serviceName || item.itemService || item.designNo || 'Item'}
                 </Text>
-                {item.workType && <Text style={{ fontSize: 8, color: '#64748b' }}>Work Type: {item.workType}</Text>}
-                {item.size && <Text style={{ fontSize: 8, color: '#64748b' }}>Size: {item.size}</Text>}
+                {item.workType && <Text style={{ fontSize: 7.5, color: '#64748b' }}>Work Type: {item.workType}</Text>}
+                {item.size && <Text style={{ fontSize: 7.5, color: '#64748b' }}>Size: {item.size}</Text>}
+                {item.sizeVariant && <Text style={{ fontSize: 7.5, color: '#64748b' }}>Variant: {item.sizeVariant}</Text>}
               </View>
               <Text style={[styles.tableCell, styles.colQty]}>{item.qty !== undefined ? item.qty : item.quantity}</Text>
               <Text style={[styles.tableCell, styles.colRate]}>{formatCurrency(item.rate !== undefined ? item.rate : item.price, currencySymbol, regionalPrefs.numberFormat)}</Text>
@@ -384,7 +451,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
           ))}
 
           {(!invoice.items || invoice.items.length === 0) && (
-            <View style={{ padding: 20, alignItems: 'center' }}>
+            <View style={{ padding: 16, alignItems: 'center' }}>
               <Text style={{ color: '#94a3b8' }}>No items listed on this invoice.</Text>
             </View>
           )}
@@ -395,10 +462,10 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
           <View style={styles.notesSection}>
             {invoice.notes && (
               <>
-                <Text style={styles.sectionTitle}>Notes & Terms</Text>
+                <Text style={styles.sectionTitle}>{categoryWords.noteLabel}</Text>
                 <View style={styles.notesBox}>
-                  <Text style={{ fontSize: 10, color: '#64748b', fontStyle: 'italic' }}>
-                    "{invoice.notes}"
+                  <Text style={{ fontSize: 9, color: '#64748b', fontStyle: 'italic', lineHeight: 1.6 }}>
+                    {invoice.notes}
                   </Text>
                 </View>
               </>
@@ -413,8 +480,8 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
             
             {invoice.discountAmount > 0 && (
               <View style={styles.totalRow}>
-                <Text style={{ fontSize: 9, color: '#dc2626' }}>Discount</Text>
-                <Text style={{ fontSize: 9, color: '#dc2626', fontWeight: 'bold' }}>-{formatCurrency(invoice.discountAmount, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontSize: 8.5, color: '#dc2626' }}>Discount</Text>
+                <Text style={{ fontSize: 8.5, color: '#dc2626', fontWeight: 'bold' }}>-{formatCurrency(invoice.discountAmount, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
@@ -424,18 +491,35 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
             </View>
 
             <View style={styles.grandTotalRow}>
-              <Text style={[styles.grandTotalLabel, { color: tPrimary }]}>Grand {t('total')}</Text>
+              <Text style={[styles.grandTotalLabel, { color: tPrimary }]}>Grand Total</Text>
               <Text style={[styles.grandTotalValue, { color: tAccent }]}>
                 {formatCurrency(invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}
               </Text>
             </View>
+
+            {/* Balance Due */}
+            {(invoice.balanceDue > 0 || (invoice.grandTotal > (invoice.amountPaid || 0))) && (
+              <View style={styles.balanceDueRow}>
+                <Text style={styles.balanceDueLabel}>Balance Due</Text>
+                <Text style={styles.balanceDueValue}>
+                  {formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}
+                </Text>
+              </View>
+            )}
           </View>
+        </View>
+
+        {/* Thanks Message */}
+        <View style={styles.thanksSection}>
+          <Text style={styles.thanksText}>
+            Thank you for your business, {invoice.customerName || 'valued customer'}!
+          </Text>
         </View>
 
         {/* Doctor Disclaimer */}
         {templateId === 'doctor' && (
-          <View style={{ marginTop: 20, padding: 10, borderLeftWidth: 3, borderLeftColor: tAccent, backgroundColor: tBg }}>
-            <Text style={{ fontSize: 8, color: tPrimary, fontStyle: 'italic' }}>
+          <View style={{ marginTop: 16, padding: 8, borderLeftWidth: 3, borderLeftColor: tAccent, backgroundColor: tBg }}>
+            <Text style={{ fontSize: 7.5, color: tPrimary, fontStyle: 'italic', lineHeight: 1.5 }}>
               Disclaimer: This document is for billing purposes only and does not constitute medical advice or a formal prescription unless explicitly signed by a registered practitioner.
             </Text>
           </View>
@@ -444,14 +528,14 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
         {/* Payment / QR Section */}
         {paymentPrefs?.paymentQrEnabled && paymentPrefs?.showQrInPreview && qrCodeBase64 && (
           <View style={styles.paymentSection}>
-            <Image src={qrCodeBase64} style={styles.qrCode} />
+            <Image src={qrCodeBase64} style={useA5 ? { ...styles.qrCode, width: 70, height: 70 } : styles.qrCode} />
             <View style={styles.paymentDetails}>
               <Text style={[styles.sectionTitle, { color: tAccent }]}>Scan to View Live Invoice</Text>
-              <Text style={[styles.paymentTitle, { color: tPrimary }]}>{paymentPrefs.payeeName}</Text>
-              <Text style={styles.metaText}>Due Amount: {formatCurrency(invoice.balanceDue || invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
-              <Text style={styles.metaText}>Invoice Number: {invoice.invoiceNumber}</Text>
+              <Text style={[styles.paymentTitle, useA5 ? { fontSize: 10 } : {}, { color: tPrimary }]}>{paymentPrefs.payeeName}</Text>
+              <Text style={styles.metaText}>Due: {formatCurrency(invoice.balanceDue || invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
+              <Text style={styles.metaText}>Invoice: {invoice.invoiceNumber}</Text>
               {paymentPrefs.paymentNote && (
-                <Text style={{ fontSize: 8, color: '#64748b', marginTop: 4, fontStyle: 'italic' }}>Note: {paymentPrefs.paymentNote}</Text>
+                <Text style={{ fontSize: 7.5, color: '#64748b', marginTop: 3, fontStyle: 'italic' }}>Note: {paymentPrefs.paymentNote}</Text>
               )}
             </View>
           </View>
@@ -459,6 +543,9 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64 }) => {
 
         {/* Footer */}
         <View style={styles.footer}>
+          {businessPrefs.businessName && (
+            <Text style={styles.businessFooterName}>{businessPrefs.businessName}</Text>
+          )}
           <Text style={styles.footerText}>SECURELY GENERATED VIA BILLQYRO INVOICING SAAS</Text>
         </View>
 

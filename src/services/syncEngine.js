@@ -45,7 +45,7 @@ export const flushSyncQueue = async () => {
     
     // Check if the queue was fully cleared
     const queue = await BillQyroDB.getAll('syncQueue');
-    const pendingItems = queue.filter(tx => tx.userId === userId || !tx.userId);
+    const pendingItems = queue.filter(tx => tx.syncStatus === 'pending' || !tx.syncStatus);
     
     if (pendingItems.length === 0) {
       window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Synced' }));

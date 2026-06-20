@@ -83,20 +83,23 @@ const Dashboard = ({
 
   // --- STATS CALCULATIONS ---
   const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.grandTotal || 0), 0);
-  const totalPaid = invoices.reduce((sum, inv) => sum + (inv.amountPaid || 0), 0);
-  const totalDue = invoices.reduce((sum, inv) => sum + (inv.balanceDue || 0), 0);
+  const totalPaid = invoices.reduce((sum, inv) => sum + (parseFloat(inv.amountPaid) || 0), 0);
+  const totalDue = invoices.reduce((sum, inv) => sum + (parseFloat(inv.balanceDue) || 0), 0);
   const totalCustomersCount = customers.length;
   const totalInvoicesCount = invoices.length;
 
   // --- TODAY'S SUMMARY ---
   const todayStr = new Date().toISOString().split('T')[0];
-  const todaysInvoices = invoices.filter(inv => inv.date === todayStr);
+  const todaysInvoices = invoices.filter(inv => {
+    if (!inv.date) return false;
+    return inv.date.substring(0, 10) === todayStr;
+  });
   const todayBills = todaysInvoices.length;
   const todayRevenue = todaysInvoices.reduce((sum, inv) => sum + (inv.grandTotal || 0), 0);
   const todayCollection = todaysInvoices.reduce((sum, inv) => sum + (inv.amountPaid || 0), 0);
   const todayDue = todaysInvoices.reduce((sum, inv) => sum + (inv.balanceDue || 0), 0);
 
-  const recentInvoices = invoices.slice(-5).reverse();
+  const recentInvoices = invoices.slice(0, 5);
 
   // --- 6-MONTH CHART DATA ---
   const getMonthlyData = () => {
@@ -198,8 +201,8 @@ const Dashboard = ({
 
   const getWaitingForParts = () => {
     return invoices.filter(inv => 
-      inv.notes?.toLowerCase().includes('part') || 
-      inv.status?.toLowerCase() === 'waiting'
+      (typeof inv.notes === 'string' && inv.notes.toLowerCase().includes('part')) || 
+      (typeof inv.status === 'string' && inv.status.toLowerCase() === 'waiting')
     ).length || 0;
   };
 
