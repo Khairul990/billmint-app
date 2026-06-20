@@ -13,8 +13,10 @@ import {
 import { formatCurrency } from '../utils/invoiceUtils';
 import PullToRefresh from '../components/PullToRefresh';
 import { syncFromFirestore, getGlobalAdminSettings, getActiveAnnouncement } from '../services/dbEngine';
+import { getCustomerLabelByType } from '../config/businessPresets';
 import AnimatedBorderTrail from '../components/AnimatedBorderTrail';
 import { t } from '../utils/i18n';
+import AddCustomerSheet from '../components/AddCustomerSheet';
 
 const Dashboard = ({
   invoices = [],
@@ -30,6 +32,7 @@ const Dashboard = ({
   installPromptEvent = null,
   isAppInstalled = false,
   onInstallApp,
+  onSaveCustomer,
   subscription = {},
   onQuickBillOpen,
   pendingPaymentsCount = 0,
@@ -37,6 +40,7 @@ const Dashboard = ({
   isLoading = false,
   revenueStatus = {}
 }) => {
+  const [showAddCustomerSheet, setShowAddCustomerSheet] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [lastBackupTime, setLastBackupTime] = useState('');
   const [activeAnnouncement, setActiveAnnouncement] = useState(null);
@@ -617,7 +621,7 @@ const Dashboard = ({
                   </button>
                 )}
                 {hasCustomers && (
-                  <button onClick={() => setCurrentTab('customers')} className="flex flex-col items-center justify-center p-4 bg-theme-card border border-theme-border-soft rounded-2xl transition-colors duration-200 group">
+                  <button onClick={() => setShowAddCustomerSheet(true)} className="flex flex-col items-center justify-center p-4 bg-theme-card border border-theme-border-soft rounded-2xl transition-colors duration-200 group">
                     <Users className="w-6 h-6 mb-2 text-theme-primary group-hover:text-theme-accent transition-colors" />
                     <span className="text-xs font-bold text-theme-primary text-center">Add {labels.clients}</span>
                   </button>
@@ -895,6 +899,17 @@ const Dashboard = ({
 
         </div>
       </div>
+
+      <AddCustomerSheet
+        isOpen={showAddCustomerSheet}
+        onClose={() => setShowAddCustomerSheet(false)}
+        onSave={(customer) => {
+          if (onSaveCustomer) onSaveCustomer(customer);
+          setShowAddCustomerSheet(false);
+        }}
+        title={'Add New ' + getCustomerLabelByType(businessType)}
+        label={getCustomerLabelByType(businessType)}
+      />
     </PullToRefresh>
   );
 };

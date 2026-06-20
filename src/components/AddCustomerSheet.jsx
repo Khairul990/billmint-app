@@ -3,7 +3,7 @@ import BottomSheet from './BottomSheet';
 import { Save, User, Phone, MapPin, Mail } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-const AddCustomerSheet = ({ isOpen, onClose, onSave }) => {
+const AddCustomerSheet = ({ isOpen, onClose, onSave, title, label = 'Customer' }) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -11,7 +11,7 @@ const AddCustomerSheet = ({ isOpen, onClose, onSave }) => {
 
   const handleSave = () => {
     if (!name.trim()) {
-      toast.error('Customer name is required.');
+      toast.error(label + ' name is required.');
       return;
     }
     
@@ -25,7 +25,7 @@ const AddCustomerSheet = ({ isOpen, onClose, onSave }) => {
     };
     
     onSave(customer);
-    toast.success('Customer added successfully!');
+    toast.success(label + ' added successfully!');
     
     // Reset form
     setName('');
@@ -37,11 +37,11 @@ const AddCustomerSheet = ({ isOpen, onClose, onSave }) => {
   };
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} title="Add New Customer">
+    <BottomSheet isOpen={isOpen} onClose={onClose} title={title || 'Add New Customer'}>
       <div className="space-y-4">
         <div>
           <label className="block text-xs font-bold text-theme-muted mb-1 flex items-center gap-1">
-            <User className="w-3 h-3" /> Customer Name *
+            <User className="w-3 h-3" /> Name *
           </label>
           <input
             type="text"
@@ -96,7 +96,7 @@ const AddCustomerSheet = ({ isOpen, onClose, onSave }) => {
             onClick={handleSave}
             className="w-full py-4 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 font-black rounded-xl flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all text-sm"
           >
-            <Save className="w-4 h-4" /> Save Customer
+            <Save className="w-4 h-4" /> Save
           </button>
         </div>
       </div>

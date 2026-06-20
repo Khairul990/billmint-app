@@ -1231,6 +1231,7 @@ function App() {
             pendingPaymentsCount={pendingPayments.length}
             isLoading={isDataHydrating}
             revenueStatus={revenueStatus}
+            onSaveCustomer={handleSaveCustomer}
           />
         );
       case 'pending-payments':
@@ -1355,6 +1356,7 @@ function App() {
             invoices={activeInvoices}
             onSaveCustomer={handleSaveCustomer}
             onDeleteCustomer={handleDeleteCustomer}
+            businessSettings={activeSettings}
           />
         );
       case 'products':

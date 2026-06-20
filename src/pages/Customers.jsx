@@ -16,6 +16,7 @@ import {
 import BottomSheet from '../components/BottomSheet';
 import PullToRefresh from '../components/PullToRefresh';
 import { syncFromFirestore } from '../services/dbEngine';
+import { getCustomerLabelByType } from '../config/businessPresets';
 import CustomerLedger from '../components/customers/CustomerLedger';
 
 /**
@@ -24,7 +25,9 @@ import CustomerLedger from '../components/customers/CustomerLedger';
  * @param {Function} onSaveCustomer - saves or edits customer in state/storage
  * @param {Function} onDeleteCustomer - deletes customer
  */
-const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCustomer }) => {
+const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCustomer, businessSettings }) => {
+  const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.type || 'retail';
+  const customerLabel = getCustomerLabelByType(wsType);
   const [searchQuery, setSearchQuery] = useState('');
   
   // Modals / Add-Edit states
@@ -105,8 +108,8 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
         {/* Header Panel */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">Customer Directory</h2>
-            <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">CRM CLIENT DATABASE</p>
+            <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">{customerLabel} Directory</h2>
+            <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">CRM {customerLabel.toUpperCase()} DATABASE</p>
           </div>
 
           <button
@@ -114,14 +117,14 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
             className="hidden md:flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
             <UserPlus className="w-4 h-4" />
-            <span>Add New Customer</span>
+            <span>+ Add {customerLabel}</span>
           </button>
           {/* Mobile floating add button */}
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={openAddModal}
             className="fixed bottom-4 right-4 md:hidden flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white rounded-full p-4 shadow-lg hover:scale-105 transition-transform"
-            aria-label="Add Customer"
+            aria-label={'Add ' + customerLabel}
           >
             <UserPlus className="w-6 h-6" />
           </motion.button>
@@ -137,7 +140,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search clients by name, contact, location..."
+            placeholder={'Search ' + customerLabel.toLowerCase() + ' by name, contact, location...'}
             className="w-full pl-12 pr-4 py-5 md:py-4 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl text-xl md:text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent focus:bg-theme-card dark:bg-theme-card transition-all text-theme-primary dark:text-theme-primary"
           />
         </div>
@@ -191,9 +194,9 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
           {filteredCustomers.length === 0 && (
             <div className="md:col-span-2 lg:col-span-3 bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
               <Users className="w-12 h-12 text-theme-primary mx-auto mb-3 animate-pulse" />
-              <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">No customers added</h4>
+              <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">No {customerLabel.toLowerCase()} added</h4>
               <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
-                No customers found. Create invoices to register customers automatically or add them here!
+                No {customerLabel.toLowerCase()} found. Create invoices to register {customerLabel.toLowerCase()} automatically or add them here!
               </p>
             </div>
           )}
@@ -203,11 +206,11 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
         <BottomSheet 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
-          title={editingCustomer ? 'Update CRM Contact' : 'Register New Client'}
+          title={editingCustomer ? 'Update ' + customerLabel : 'Register New ' + customerLabel}
         >
           <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold text-theme-muted pb-4">
             <div>
-              <label className="block mb-1 text-theme-muted">Customer / Business Name</label>
+              <label className="block mb-1 text-theme-muted">{customerLabel} / Business Name</label>
               <input
                 type="text"
                 required
@@ -257,7 +260,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
                 className="w-full py-4 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-2xl font-bold hover:opacity-90 shadow-md shadow-theme-glow hover:shadow-lg transition-all flex items-center justify-center gap-2"
               >
                 <Save className="w-4 h-4" />
-                <span>{editingCustomer ? 'Update Contact' : 'Register Contact'}</span>
+                <span>{editingCustomer ? 'Update ' + customerLabel : 'Register ' + customerLabel}</span>
               </button>
             </div>
           </form>

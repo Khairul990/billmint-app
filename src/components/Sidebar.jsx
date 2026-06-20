@@ -4,6 +4,7 @@ import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, 
 import { logout } from '../services/dbEngine';
 import { triggerLightHaptic } from '../utils/feedback';
 import { t } from '../utils/i18n';
+import { getCustomerLabelByType } from '../config/businessPresets';
 import Logo from './Logo';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 
@@ -45,18 +46,7 @@ const Sidebar = ({
 
   const wsType = activeWorkspace.type || 'retail';
 
-  const getCustomerLabel = () => {
-    switch(wsType) {
-      case 'doctor': return 'Patients';
-      case 'teacher': return 'Students';
-      case 'repair':
-      case 'service': return 'Device Owners';
-      case 'tailor':
-      case 'embroidery':
-      case 'freelance': return 'Clients';
-      default: return t('customers');
-    }
-  };
+  const getCustomerLabel = () => getCustomerLabelByType(wsType);
 
   const getInvoiceLabel = () => {
     switch(wsType) {

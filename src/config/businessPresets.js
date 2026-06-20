@@ -97,7 +97,7 @@ export const BUSINESS_PRESETS = [
     recommendedModules: ['customers', 'orders', 'measurements', 'delivery', 'dueLedger', 'billing', 'reports'],
     optionalModules: ['products', 'expenses', 'paymentProofs'],
     hiddenModules: ['patients', 'students', 'prescription', 'appointments', 'designBook', 'fees', 'attendance', 'devices', 'serviceJobs', 'clients', 'projects'],
-    defaultCustomerLabel: 'Customers',
+    defaultCustomerLabel: 'Clients',
     defaultInvoiceLabel: 'Invoice',
     dashboardKpis: ['pendingOrders', 'completedOrders', 'dueAmount', 'dailySales'],
     quickActions: ['addOrder', 'addMeasurement', 'addCustomer']
@@ -110,7 +110,7 @@ export const BUSINESS_PRESETS = [
     recommendedModules: ['customers', 'orders', 'designBook', 'delivery', 'dueLedger', 'billing', 'reports'],
     optionalModules: ['expenses', 'paymentProofs'],
     hiddenModules: ['products', 'patients', 'students', 'prescription', 'appointments', 'measurements', 'fees', 'attendance', 'devices', 'serviceJobs', 'clients', 'projects'],
-    defaultCustomerLabel: 'Customers',
+    defaultCustomerLabel: 'Clients',
     defaultInvoiceLabel: 'Invoice',
     dashboardKpis: ['activeDesigns', 'pendingOrders', 'dueAmount', 'dailySales'],
     quickActions: ['addDesign', 'addOrder', 'addCustomer']
@@ -168,3 +168,20 @@ export const BUSINESS_PRESETS = [
     quickActions: ['addInvoice']
   }
 ];
+
+/**
+ * Returns the customer/client label for a given business type.
+ * Falls back to a manual mapping when the type doesn't match a preset exactly.
+ */
+export const getCustomerLabelByType = (type) => {
+  if (!type) return 'Customers';
+  const preset = BUSINESS_PRESETS.find(p => p.id === type);
+  if (preset) return preset.defaultCustomerLabel;
+  const t = type.toLowerCase();
+  if (t.includes('doctor') || t.includes('clinic')) return 'Patients';
+  if (t.includes('teacher') || t.includes('tuition')) return 'Students';
+  if (t.includes('tailor') || t.includes('embroidery') || t.includes('designer') || t.includes('fashion')) return 'Clients';
+  if (t.includes('service') || t.includes('repair')) return 'Device Owners';
+  if (t.includes('freelance')) return 'Clients';
+  return 'Customers';
+};
