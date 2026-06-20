@@ -38,29 +38,39 @@ export const migrateLocalStorageToIndexedDB = async () => {
     const isMigrated = localStorage.getItem('billqyro_indexeddb_migrated') === 'true';
     if (isMigrated) return;
 
-
+    const userId = getRealUserId() || 'local-user';
+    const localSettings = JSON.parse(localStorage.getItem(KEYS.SETTINGS) || '{}');
+    const workspaceId = localSettings?.activeWorkspaceId || 'default';
 
     // Invoices
     const localInvoices = JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
     for (const inv of localInvoices) {
+      if (!inv.userId) inv.userId = userId;
+      if (!inv.workspaceId) inv.workspaceId = workspaceId;
       await BillQyroDB.put('invoices', inv);
     }
 
     // Customers
     const localCustomers = JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [];
     for (const c of localCustomers) {
+      if (!c.userId) c.userId = userId;
+      if (!c.workspaceId) c.workspaceId = workspaceId;
       await BillQyroDB.put('customers', c);
     }
 
     // Products
     const localProducts = JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [];
     for (const p of localProducts) {
+      if (!p.userId) p.userId = userId;
+      if (!p.workspaceId) p.workspaceId = workspaceId;
       await BillQyroDB.put('products', p);
     }
 
     // Expenses
     const localExpenses = JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [];
     for (const e of localExpenses) {
+      if (!e.userId) e.userId = userId;
+      if (!e.workspaceId) e.workspaceId = workspaceId;
       await BillQyroDB.put('expenses', e);
     }
 
@@ -847,7 +857,7 @@ export const getAuthSession = () => {
 
 
 
-export const logout = () => {
+export const logout = async () => {
   // Clear known scoped keys
   localStorage.removeItem(KEYS.AUTH);
   localStorage.removeItem(KEYS.SETTINGS);
@@ -870,7 +880,13 @@ export const logout = () => {
   
   sessionStorage.clear();
   try {
-    indexedDB.deleteDatabase('billqyro-db');
+    await BillQyroDB.clear('invoices');
+    await BillQyroDB.clear('customers');
+    await BillQyroDB.clear('products');
+    await BillQyroDB.clear('expenses');
+    await BillQyroDB.clear('syncQueue');
+    await BillQyroDB.clear('auditLogs');
+    await BillQyroDB.clear('errorLogs');
   } catch (e) {
     console.error('Failed to clear IndexedDB on logout', e);
   }
@@ -1264,6 +1280,7 @@ export const getExpenses = async (includeDeleted = false) => {
   }
   initializeStorage();
   const userId = getRealUserId();
+  if (!userId) return [];
   const settings = getSettings();
   const workspaceId = settings?.activeWorkspaceId;
   try {
@@ -1383,6 +1400,7 @@ export const getCustomers = async (includeDeleted = false) => {
   }
   initializeStorage();
   const userId = getRealUserId();
+  if (!userId) return [];
   const settings = getSettings();
   const workspaceId = settings?.activeWorkspaceId;
   try {
@@ -1512,6 +1530,7 @@ export const getProducts = async (includeDeleted = false) => {
   }
   initializeStorage();
   const userId = getRealUserId();
+  if (!userId) return [];
   const settings = getSettings();
   const workspaceId = settings?.activeWorkspaceId;
   try {
@@ -1641,6 +1660,7 @@ export const getInvoices = async (includeDeleted = false) => {
   }
   initializeStorage();
   const userId = getRealUserId();
+  if (!userId) return [];
   const settings = getSettings();
   const workspaceId = settings?.activeWorkspaceId;
   try {

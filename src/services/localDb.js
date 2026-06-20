@@ -3,7 +3,7 @@
  * Provides fast, offline-first asynchronous storage structures for larger data collections.
  */
 const DB_NAME = 'billqyro-db';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 export class BillQyroDB {
   static open() {
@@ -13,20 +13,53 @@ export class BillQyroDB {
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
         
-        if (!db.objectStoreNames.contains('invoices')) {
-          db.createObjectStore('invoices', { keyPath: 'id' });
+        const addStoreIfMissing = (name) => {
+          if (!db.objectStoreNames.contains(name)) {
+            return db.createObjectStore(name, { keyPath: 'id' });
+          }
+          return null;
+        };
+        const addIndexes = (store) => {
+          if (!store.indexNames.contains('userId')) {
+            store.createIndex('userId', 'userId', { unique: false });
+          }
+          if (!store.indexNames.contains('workspaceId')) {
+            store.createIndex('workspaceId', 'workspaceId', { unique: false });
+          }
+        };
+        
+        let store;
+        store = addStoreIfMissing('invoices');
+        if (store) addIndexes(store);
+        if (!store && db.objectStoreNames.contains('invoices')) {
+          const txn = event.target.transaction;
+          addIndexes(txn.objectStore('invoices'));
         }
-        if (!db.objectStoreNames.contains('customers')) {
-          db.createObjectStore('customers', { keyPath: 'id' });
+        
+        store = addStoreIfMissing('customers');
+        if (store) addIndexes(store);
+        if (!store && db.objectStoreNames.contains('customers')) {
+          const txn = event.target.transaction;
+          addIndexes(txn.objectStore('customers'));
         }
-        if (!db.objectStoreNames.contains('expenses')) {
-          db.createObjectStore('expenses', { keyPath: 'id' });
+        
+        store = addStoreIfMissing('expenses');
+        if (store) addIndexes(store);
+        if (!store && db.objectStoreNames.contains('expenses')) {
+          const txn = event.target.transaction;
+          addIndexes(txn.objectStore('expenses'));
         }
-        if (!db.objectStoreNames.contains('products')) {
-          db.createObjectStore('products', { keyPath: 'id' });
+        
+        store = addStoreIfMissing('products');
+        if (store) addIndexes(store);
+        if (!store && db.objectStoreNames.contains('products')) {
+          const txn = event.target.transaction;
+          addIndexes(txn.objectStore('products'));
         }
+        
         if (!db.objectStoreNames.contains('syncQueue')) {
-          db.createObjectStore('syncQueue', { keyPath: 'id' });
+          store = db.createObjectStore('syncQueue', { keyPath: 'id' });
+          addIndexes(store);
         }
         if (!db.objectStoreNames.contains('auditLogs')) {
           db.createObjectStore('auditLogs', { keyPath: 'id' });
