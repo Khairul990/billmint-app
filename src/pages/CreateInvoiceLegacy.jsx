@@ -2557,7 +2557,7 @@ Thank you for your business!`;
                 try {
                   const token = await ensureInvoicePublicToken(editingInvoice);
                   if (!token) return;
-                  const liveLink = `${window.location.origin}/i/${token}`;
+                  const liveLink = `${window.location.origin}/invoice/${token}`;
                   const regionalPrefs = editingInvoice?.regionalSettingsSnapshot || {
                     currency: currencySymbol,
                     numberFormat: businessSettings?.numberFormat || 'Indian'

@@ -2,6 +2,7 @@ import React from 'react';
 import { LayoutDashboard, FileSpreadsheet, Users, MoreHorizontal } from 'lucide-react';
 import { triggerLightHaptic } from '../utils/feedback';
 import { t } from '../utils/i18n';
+import { getInvoiceLabelByType } from '../config/businessPresets';
 
 /**
  * Mobile Bottom Navigation Menu
@@ -27,17 +28,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
     }
   };
 
-  const getInvoiceLabel = () => {
-    switch(wsType) {
-      case 'teacher': return 'Fee Slips';
-      case 'doctor': return 'Consultations';
-      case 'tailor': return 'Order Slips';
-      case 'embroidery': return 'Work Orders';
-      case 'repair':
-      case 'service': return 'Repair Tickets';
-      default: return 'Bills';
-    }
-  };
+  const getInvoiceLabel = () => getInvoiceLabelByType(wsType);
 
   const tabs = [
     { id: 'dashboard', label: "Today's Business", icon: LayoutDashboard },

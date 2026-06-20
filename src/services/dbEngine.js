@@ -1991,38 +1991,41 @@ export const getInvoiceByPublicToken = async (token) => {
 
 export const ensureInvoicePublicToken = async (invoice) => {
   if (!invoice) return null;
+  const invoiceId = invoice.id || invoice._id;
+  if (!invoiceId) return null;
 
-  // 1. Generate secure token if missing
-  if (!invoice.publicToken || invoice.publicToken === 'undefined' || invoice.publicToken === 'null' || invoice.publicToken === '') {
-    invoice.publicToken = generateSecureToken();
+  let token = invoice.publicToken;
+
+  // 1. Generate secure token if missing or invalid
+  if (!token || token === 'undefined' || token === 'null' || token === '') {
+    token = generateSecureToken();
   }
-  const token = invoice.publicToken;
 
-  // 2. Save back to local storage invoices list
+  // 2. Save back to local storage invoices list (mutate a clone, not the original)
   const invoices = await getInvoices();
-  const idx = invoices.findIndex(inv => inv.id === invoice.id);
+  const idx = invoices.findIndex(inv => inv.id === invoiceId);
   if (idx !== -1) {
-    invoices[idx] = invoice;
+    invoices[idx] = { ...invoices[idx], publicToken: token };
     updateLocalCache(KEYS.INVOICES, invoices);
   }
 
   // 3. Force save/create public-safe copy and private copy in Firestore
   if (firebaseReady) {
     try {
+      const publicPayload = { ...invoice, publicToken: token };
 
-      await firestoreSave('publicInvoices', token, invoice);
+      await firestoreSave('publicInvoices', token, publicPayload);
 
       const userId = getRealUserId();
-      if (userId && invoice.id) {
-
-        await setDoc(doc(db, 'invoices', userId, 'items', invoice.id), invoice);
+      if (userId && invoiceId) {
+        await setDoc(doc(db, 'invoices', userId, 'items', invoiceId), publicPayload);
       }
     } catch (e) {
       console.error('[ERROR] Failed to sync publicToken to Firestore in ensureInvoicePublicToken:', e);
     }
   }
 
-  // Dispatch sync event
+  // 4. Dispatch sync event
   window.dispatchEvent(new CustomEvent('billqyro_sync'));
 
   return token;

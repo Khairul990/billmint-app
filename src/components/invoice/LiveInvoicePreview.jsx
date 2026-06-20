@@ -5,29 +5,28 @@ import InvoicePreview from '../InvoicePreview';
 const LiveInvoicePreview = () => {
   const { state, businessSettings, dispatch } = useInvoice();
 
-  const previewProps = {
+  const previewInvoice = {
     invoiceNumber: state.invoiceNumber,
     date: state.date,
     dueDate: state.dueDate,
-    customerName: state.customer.name,
-    customerPhone: state.customer.phone,
-    customerEmail: state.customer.email,
-    customerAddress: state.customer.address,
-    items: state.items,
-    taxPercentage: state.totals.taxPercentage,
-    taxAmount: state.totals.taxAmount,
-    discountAmount: state.totals.discountAmount,
-    grandTotal: state.totals.grandTotal,
-    amountPaid: state.totals.amountPaid,
-    balanceDue: state.totals.balanceDue,
-    subtotal: state.totals.subtotal,
-    notes: state.settings.notes,
-    terms: state.settings.terms,
-    paymentStatus: state.settings.paymentStatus,
-    selectedTemplate: state.selectedTemplate || 'retail',
+    customerName: state.customer?.name,
+    customerPhone: state.customer?.phone,
+    customerEmail: state.customer?.email,
+    customerAddress: state.customer?.address,
+    items: state.items || [],
+    taxPercentage: state.totals?.taxPercentage,
+    taxAmount: state.totals?.taxAmount,
+    discountAmount: state.totals?.discountAmount,
+    grandTotal: state.totals?.grandTotal,
+    amountPaid: state.totals?.amountPaid,
+    balanceDue: state.totals?.balanceDue,
+    subtotal: state.totals?.subtotal,
+    notes: state.settings?.notes,
+    terms: state.settings?.terms,
+    paymentStatus: state.settings?.paymentStatus,
     billType: state.billType,
-    pdfVisibleFields: state.pdfVisibleFields,
-    businessSettings: businessSettings
+    orderStatus: state.orderStatus,
+    businessSnapshot: businessSettings
   };
 
   return (
@@ -57,7 +56,7 @@ const LiveInvoicePreview = () => {
       </div>
       <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-theme-app dark:bg-theme-card flex justify-center custom-scrollbar">
         <div className="w-full max-w-[800px] origin-top scale-[0.6] sm:scale-[0.7] md:scale-[0.85] lg:scale-90 xl:scale-100 transition-transform">
-          <InvoicePreview {...previewProps} isPreviewMode={true} />
+          <InvoicePreview invoice={previewInvoice} isPreviewMode={true} businessSettings={businessSettings} />
         </div>
       </div>
     </div>

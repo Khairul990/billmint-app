@@ -185,3 +185,24 @@ export const getCustomerLabelByType = (type) => {
   if (t.includes('freelance')) return 'Clients';
   return 'Customers';
 };
+
+/**
+ * Returns the invoice/bill label for a given business type.
+ */
+export const getInvoiceLabelByType = (type) => {
+  if (!type) return 'Bills';
+  const preset = BUSINESS_PRESETS.find(p => p.id === type);
+  if (preset && preset.defaultInvoiceLabel) {
+    if (type === 'teacher') return 'Fee Slips';
+    if (type === 'doctor') return 'Consultation Bills';
+    if (type === 'tailor' || type === 'embroidery') return 'Order Slips';
+    if (type === 'service' || type === 'repair') return 'Repair Tickets';
+    return preset.defaultInvoiceLabel;
+  }
+  const t = type.toLowerCase();
+  if (t.includes('teacher') || t.includes('tuition') || t.includes('coaching')) return 'Fee Slips';
+  if (t.includes('doctor') || t.includes('clinic')) return 'Consultation Bills';
+  if (t.includes('tailor') || t.includes('embroidery') || t.includes('designer') || t.includes('fashion')) return 'Order Slips';
+  if (t.includes('service') || t.includes('repair')) return 'Repair Tickets';
+  return 'Bills';
+};

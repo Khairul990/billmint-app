@@ -68,6 +68,8 @@ const Invoices = ({
   
   // Modal Preview State
   const [viewingInvoice, setViewingInvoice] = useState(null);
+  const [generatingLink, setGeneratingLink] = useState(false);
+  const [linkCache, setLinkCache] = useState({});
   const currencySymbol = businessSettings?.currency || '₹';
 
   useEffect(() => {
@@ -487,23 +489,35 @@ const Invoices = ({
                       toast.error('Live Link is disabled. Enable it from Settings.');
                       return;
                     }
+                    const invoiceId = viewingInvoice?.id;
+                    if (!invoiceId) return;
+                    if (linkCache[invoiceId]) {
+                      await navigator.clipboard.writeText(linkCache[invoiceId]);
+                      toast.success('Live Invoice Link copied to clipboard!');
+                      return;
+                    }
+                    setGeneratingLink(true);
                     try {
                       const token = await ensureInvoicePublicToken(viewingInvoice);
                       if (!token) {
                         toast.error('Could not create live link. Please try again.');
                         return;
                       }
-                      const liveLink = `${window.location.origin}/i/${token}`;
+                      const liveLink = `${window.location.origin}/invoice/${token}`;
+                      setLinkCache(prev => ({ ...prev, [invoiceId]: liveLink }));
                       await navigator.clipboard.writeText(liveLink);
                       toast.success('Live Invoice Link copied to clipboard!');
                     } catch (err) {
                       toast.error('Could not create live link. Please try again.');
+                    } finally {
+                      setGeneratingLink(false);
                     }
                   }}
-                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all cursor-pointer"
+                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all cursor-pointer disabled:opacity-40"
                   title="Copy Live Link"
+                  disabled={generatingLink}
                 >
-                  <Link className="w-4 h-4" />
+                  {generatingLink ? <span className="w-4 h-4 border-2 border-theme-accent/30 border-t-theme-accent rounded-full animate-spin block" /> : <Link className="w-4 h-4" />}
                 </button>
                 <button
                   onClick={() => {

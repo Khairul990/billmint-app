@@ -4,7 +4,7 @@ import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, 
 import { logout } from '../services/dbEngine';
 import { triggerLightHaptic } from '../utils/feedback';
 import { t } from '../utils/i18n';
-import { getCustomerLabelByType } from '../config/businessPresets';
+import { getCustomerLabelByType, getInvoiceLabelByType } from '../config/businessPresets';
 import Logo from './Logo';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 
@@ -48,17 +48,7 @@ const Sidebar = ({
 
   const getCustomerLabel = () => getCustomerLabelByType(wsType);
 
-  const getInvoiceLabel = () => {
-    switch(wsType) {
-      case 'teacher': return 'Fee Slips';
-      case 'doctor': return 'Consultations';
-      case 'tailor': return 'Order Slips';
-      case 'embroidery': return 'Work Orders';
-      case 'repair':
-      case 'service': return 'Repair Tickets';
-      default: return 'Bills';
-    }
-  };
+  const getInvoiceLabel = () => getInvoiceLabelByType(wsType);
 
   let menuItems = [
     { id: 'dashboard', label: "Today's Business", icon: LayoutDashboard },
