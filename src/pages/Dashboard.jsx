@@ -46,13 +46,13 @@ const Dashboard = ({
         const invDate = new Date(inv.createdAt);
         return invDate.toDateString() === today.toDateString();
       })
-      .reduce((sum, inv) => sum + (inv.total || 0), 0);
+      .reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
   };
 
   const getTotalDue = () => {
     return invoices
-      .filter(inv => inv.status === 'unpaid' || inv.status === 'partial')
-      .reduce((sum, inv) => sum + (inv.dueAmount || inv.total || 0), 0);
+      .filter(inv => inv.paymentStatus === 'Unpaid' || inv.paymentStatus === 'Partial' || inv.paymentStatus === 'unpaid' || inv.paymentStatus === 'partial')
+      .reduce((sum, inv) => sum + (inv.balanceDue || inv.dueAmount || inv.grandTotal || inv.total || 0), 0);
   };
 
   const getInvoiceLabel = () => {
@@ -87,11 +87,12 @@ const Dashboard = ({
 
   const todayEarnings = getTodaysSales();
   const totalDue = getTotalDue();
+  const pendingBillsCount = invoices.filter(inv => inv.paymentStatus === 'Unpaid' || inv.paymentStatus === 'Partial' || inv.paymentStatus === 'unpaid' || inv.paymentStatus === 'partial' || inv.paymentStatus === 'Pending').length;
   const recentInvoices = getRecentInvoices();
 
   return (
     <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
-      <div className="px-3 sm:px-4 max-w-2xl mx-auto space-y-3 pb-4">
+      <div className="px-3 sm:px-4 md:px-6 max-w-2xl md:max-w-7xl mx-auto space-y-3 md:space-y-6 pb-4 md:pb-6">
 
         {/* Pending Payments Banner */}
         {pendingPaymentsCount > 0 && (
@@ -159,35 +160,40 @@ const Dashboard = ({
         )}
 
         {/* ===== PREMIUM HERO CARD ===== */}
-        <div className="bg-[image:var(--accent-gradient)] text-white rounded-2xl p-4 shadow-premium relative overflow-hidden">
+        <div className="bg-[image:var(--accent-gradient)] text-white rounded-2xl md:rounded-3xl p-4 md:p-6 lg:p-8 shadow-premium relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-8">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[9px] font-black tracking-widest text-white/70 uppercase">
+          
+          <div className="relative z-10 flex-1">
+            <div className="flex items-center justify-between md:justify-start gap-2 mb-2">
+              <p className="text-[9px] md:text-xs font-black tracking-widest text-white/70 uppercase">
                 {businessSettings?.businessName || 'Dashboard'}
               </p>
-              <span className="text-[8px] font-bold text-white/60 bg-white/10 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+              <span className="text-[8px] md:text-[10px] font-bold text-white/60 bg-white/10 px-2 py-0.5 rounded-full backdrop-blur-sm">
                 Today's Collection
               </span>
             </div>
-            <p className="text-2xl font-black tracking-tight">{formatCurrency(todayEarnings)}</p>
-            <div className="grid grid-cols-2 gap-2 mt-3">
-              <div className="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm">
-                <p className="text-[8px] font-bold text-white/70 uppercase tracking-wider">Total Due</p>
-                <p className="text-base font-black mt-0.5">{formatCurrency(totalDue)}</p>
+            <p className="text-3xl md:text-5xl font-black tracking-tight">{formatCurrency(todayEarnings)}</p>
+          </div>
+
+          <div className="relative z-10 flex-1 w-full md:w-auto">
+            <div className="grid grid-cols-2 gap-2 md:gap-4">
+              <div className="bg-white/10 rounded-xl md:rounded-2xl p-3 md:p-4 backdrop-blur-sm hover:bg-white/15 transition-colors">
+                <p className="text-[9px] md:text-xs font-bold text-white/70 uppercase tracking-wider">Total Due</p>
+                <p className="text-lg md:text-2xl font-black mt-1">{formatCurrency(totalDue)}</p>
               </div>
-              <div className="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm">
-                <p className="text-[8px] font-bold text-white/70 uppercase tracking-wider">Pending Bills</p>
-                <p className="text-base font-black mt-0.5">{pendingPaymentsCount || 0}</p>
+              <div className="bg-white/10 rounded-xl md:rounded-2xl p-3 md:p-4 backdrop-blur-sm hover:bg-white/15 transition-colors">
+                <p className="text-[9px] md:text-xs font-bold text-white/70 uppercase tracking-wider">Pending Bills</p>
+                <p className="text-lg md:text-2xl font-black mt-1">{pendingBillsCount}</p>
               </div>
             </div>
-            <div className="flex gap-2 mt-3">
-              <button onClick={onQuickBillOpen} className="flex-1 flex items-center justify-center gap-1.5 bg-white/20 hover:bg-white/30 rounded-xl py-2.5 font-bold text-xs transition-colors active:scale-[0.98]">
-                <Plus className="w-3.5 h-3.5" />
+            
+            <div className="flex gap-2 md:gap-4 mt-3 md:mt-4">
+              <button onClick={onQuickBillOpen} className="flex-1 flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 rounded-xl md:rounded-2xl py-2.5 md:py-3.5 font-bold text-xs md:text-sm transition-all active:scale-[0.98]">
+                <Plus className="w-4 h-4 md:w-5 md:h-5" />
                 New Bill
               </button>
-              <button onClick={() => setCurrentTab('due-ledger')} className="flex-1 flex items-center justify-center gap-1.5 bg-white/20 hover:bg-white/30 rounded-xl py-2.5 font-bold text-xs transition-colors active:scale-[0.98]">
-                <CreditCard className="w-3.5 h-3.5" />
+              <button onClick={() => setCurrentTab('due-ledger')} className="flex-1 flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 rounded-xl md:rounded-2xl py-2.5 md:py-3.5 font-bold text-xs md:text-sm transition-all active:scale-[0.98]">
+                <CreditCard className="w-4 h-4 md:w-5 md:h-5" />
                 Collect Due
               </button>
             </div>
@@ -264,11 +270,11 @@ const Dashboard = ({
                     <div className="text-right ml-2">
                       <p className="text-sm font-black text-theme-primary">{formatCurrency(inv.total || 0)}</p>
                       <span className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full mt-0.5 ${
-                        inv.status === 'paid' ? 'bg-green-500/10 text-green-500' :
-                        inv.status === 'partial' ? 'bg-theme-warning/10 text-theme-warning' :
+                        inv.paymentStatus === 'Paid' || inv.status === 'paid' ? 'bg-green-500/10 text-green-500' :
+                        inv.paymentStatus === 'Partial' || inv.status === 'partial' || inv.paymentStatus === 'Partially Paid' ? 'bg-theme-warning/10 text-theme-warning' :
                         'bg-theme-danger/10 text-theme-danger'
                       }`}>
-                        {inv.status === 'paid' ? 'Paid' : inv.status === 'partial' ? 'Partial' : 'Due'}
+                        {inv.paymentStatus === 'Paid' || inv.status === 'paid' ? 'Paid' : inv.paymentStatus === 'Partial' || inv.status === 'partial' || inv.paymentStatus === 'Partially Paid' ? 'Partial' : 'Due'}
                       </span>
                     </div>
                   </div>
