@@ -498,7 +498,47 @@ const Dashboard = ({
               </motion.div>
             )}
 
-            {/* ===== ROW 1: TOP KPI CARDS (4 compact) ===== */}
+            {/* ===== ROW 1: PREMIUM HERO BANNER ===== */}
+            <motion.div variants={itemVariants} className="bg-[image:var(--accent-gradient)] text-white rounded-2xl p-6 shadow-premium relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-72 h-72 bg-white/[0.06] rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-10 -left-10 w-52 h-52 bg-white/[0.03] rounded-full blur-2xl pointer-events-none" />
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-5">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/60 mb-1">Welcome back,</p>
+                    <h1 className="text-2xl font-black tracking-tight">{businessSettings?.businessName || 'Your Workspace'}</h1>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={onQuickBillOpen} className="px-4 py-2.5 bg-white/20 hover:bg-white/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 backdrop-blur-sm border border-white/10">
+                      <Plus className="w-4 h-4" /> Create Bill
+                    </button>
+                    <button onClick={() => setCurrentTab('due-ledger')} className="px-4 py-2.5 bg-white/20 hover:bg-white/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 backdrop-blur-sm border border-white/10">
+                      <CreditCard className="w-4 h-4" /> Collect Payment
+                    </button>
+                  </div>
+                </div>
+                <div className="mb-5">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-white/60 mb-1">Today's Earnings</p>
+                  <p className="text-4xl font-black tracking-tight tabular-nums">{formatCurrency(todayEarnings)}</p>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/5">
+                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Total Revenue</p>
+                    <p className="text-base font-black mt-0.5 tabular-nums">{formatCurrency(totalRevenue)}</p>
+                  </div>
+                  <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/5">
+                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Today's Due</p>
+                    <p className="text-base font-black mt-0.5 tabular-nums">{formatCurrency(totalDue)}</p>
+                  </div>
+                  <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/5">
+                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Active Customers</p>
+                    <p className="text-base font-black mt-0.5 tabular-nums">{totalCustomers}</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ===== ROW 2: KPI SUMMARY ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-4 gap-3">
               <KpiCard title="Today's Revenue" value={formatCurrency(todayEarnings)} icon={DollarSign} trend={todayEarnings > 0 ? `$${todayEarnings}` : null} />
               <KpiCard title="Total Invoices" value={invoices.length} icon={FileText} trend={invoices.length > 0 ? 'All time' : null} />
@@ -506,8 +546,232 @@ const Dashboard = ({
               <KpiCard title="Active Customers" value={totalCustomers} icon={Users} trend={totalCustomers > 0 ? 'Total clients' : null} />
             </motion.div>
 
+            {/* ===== ROW 3: QUICK ACTIONS ===== */}
+            <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3">
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={onQuickBillOpen} className="flex items-center gap-4 p-4 bg-[image:var(--accent-gradient)] text-white rounded-xl shadow-sm hover:shadow-premium-hover transition-all relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0 relative z-10">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <div className="relative z-10 text-left">
+                  <p className="text-xs font-bold">Create New Bill</p>
+                  <p className="text-[9px] text-white/70 font-semibold mt-0.5">Generate invoice instantly</p>
+                </div>
+              </motion.button>
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setShowAddCustomerSheet(true)} className="flex items-center gap-4 p-4 bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:shadow-premium-hover transition-all hover:border-theme-accent/30">
+                <div className="w-10 h-10 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-theme-primary">Add Customer</p>
+                  <p className="text-[9px] text-theme-muted font-semibold mt-0.5">Register new client</p>
+                </div>
+              </motion.button>
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setCurrentTab('due-ledger')} className="flex items-center gap-4 p-4 bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:shadow-premium-hover transition-all hover:border-amber-500/30">
+                <div className="w-10 h-10 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-theme-primary">Collect Payment</p>
+                  <p className="text-[9px] text-theme-muted font-semibold mt-0.5">Receive pending dues</p>
+                </div>
+              </motion.button>
+            </motion.div>
 
-            {/* ===== ROW 2: CHART ROW (Revenue Bar + Payment Donut) ===== */}
+            {/* ===== ROW 4: RECENT BILLS + DUE OVERVIEW ===== */}
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+              {/* LEFT: Recent Bills + Recent Payments */}
+              <div className="col-span-8 space-y-4">
+                {/* Recent Bills (table) */}
+                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
+                  <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
+                    <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Recent {invoiceLabel}</h3>
+                    <button onClick={() => setCurrentTab('invoices')} className="flex items-center gap-1 text-[9px] font-bold text-theme-accent">
+                      View All <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                  {recentInvoices.length === 0 ? (
+                    <div className="flex items-center gap-3 p-4">
+                      <div className="w-8 h-8 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-theme-primary">No {invoiceLabel.toLowerCase()} yet</p>
+                        <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Create your first invoice to get started</p>
+                      </div>
+                      <button onClick={onQuickBillOpen} className="px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-[10px] font-bold rounded-lg shadow-sm hover:shadow-md transition-all">+ Create</button>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-theme-border-soft">
+                      {recentInvoices.slice(0, 4).map((inv, idx) => (
+                        <motion.div
+                          key={inv.id}
+                          initial={{ opacity: 0, x: -5 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.03 }}
+                          onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }}
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-theme-surface transition-colors cursor-pointer group"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <FileText className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-bold text-theme-primary truncate group-hover:text-theme-accent transition-colors">{inv.customerName || 'Walk-in Customer'}</p>
+                            <p className="text-[9px] text-theme-muted font-semibold">{inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`} &bull; {formatShortDate(inv.createdAt)}</p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <p className="text-[11px] font-black text-theme-primary">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
+                            <span className={`inline-block text-[7px] font-bold px-1.5 py-0.5 rounded-full border ${statusBadge(inv.paymentStatus).classes}`}>{statusBadge(inv.paymentStatus).label}</span>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Recent Payments (compact) */}
+                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Recent Payments</h3>
+                  </div>
+                  {recentPayments.length === 0 ? (
+                    <p className="text-[10px] text-theme-muted font-semibold py-1">No payments collected yet</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {recentPayments.slice(0, 4).map((inv, idx) => (
+                        <div key={inv.id} onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-theme-surface transition-colors cursor-pointer">
+                          <p className="text-[10px] font-bold text-theme-primary truncate flex-1 min-w-0">{inv.customerName || 'Walk-in'}</p>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <p className="text-[10px] font-black text-emerald-500">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
+                            <CheckCircle className="w-3 h-3 text-emerald-500" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* RIGHT: Due Overview + Pending Collection */}
+              <div className="col-span-4 space-y-4">
+                {/* Due Overview */}
+                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
+                  <h3 className="text-sm font-extrabold text-theme-primary tracking-tight mb-3">Due Overview</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Total Outstanding</p>
+                      <p className="text-2xl font-black text-theme-primary tabular-nums mt-0.5">{formatCurrency(totalDue)}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={`flex-1 p-2.5 rounded-xl text-center ${totalOverdue > 0 ? 'bg-red-500/10' : 'bg-theme-surface'}`}>
+                        <p className={`text-base font-black ${totalOverdue > 0 ? 'text-red-500' : 'text-theme-muted'}`}>{totalOverdue}</p>
+                        <p className={`text-[7px] font-bold uppercase tracking-wider ${totalOverdue > 0 ? 'text-red-500' : 'text-theme-muted/60'}`}>Overdue</p>
+                      </div>
+                      <div className="flex-1 p-2.5 rounded-xl bg-theme-surface text-center">
+                        <p className="text-base font-black text-theme-accent">{totalUpcoming}</p>
+                        <p className="text-[7px] font-bold uppercase tracking-wider text-theme-muted/60">Upcoming</p>
+                      </div>
+                      <div className="flex-1 p-2.5 rounded-xl bg-emerald-500/10 text-center">
+                        <p className="text-base font-black text-emerald-500">{paidCount}</p>
+                        <p className="text-[7px] font-bold uppercase tracking-wider text-emerald-500">Paid</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <p className="text-[10px] font-bold text-theme-muted">Collection Rate</p>
+                      <p className="text-sm font-black text-theme-accent tabular-nums">{totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0}%</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pending Collection */}
+                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
+                  <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
+                    <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Pending Collection</h3>
+                    {pendingCollection.length > 0 && (
+                      <button onClick={() => setCurrentTab('due-ledger')} className="text-[9px] font-bold text-theme-accent flex items-center gap-1">Open Ledger <ArrowRight className="w-3 h-3" /></button>
+                    )}
+                  </div>
+                  {pendingCollection.length === 0 ? (
+                    <div className="flex items-center gap-3 p-4">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                        <CheckCircle className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-theme-primary">All clear!</p>
+                        <p className="text-[10px] text-theme-muted font-semibold">No pending collections</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-theme-border-soft">
+                      {pendingCollection.slice(0, 4).map((inv, idx) => {
+                        const isOverdue = inv.dueDate && new Date(inv.dueDate) < new Date();
+                        return (
+                          <div key={inv.id} onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }} className="flex items-center gap-2 px-4 py-2.5 hover:bg-theme-surface transition-colors cursor-pointer group">
+                            <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isOverdue ? 'bg-red-500' : 'bg-amber-500'}`} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-bold text-theme-primary truncate group-hover:text-theme-accent transition-colors">{inv.customerName || 'Walk-in'}</p>
+                              <p className="text-[9px] text-theme-muted font-semibold">{inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`}{inv.dueDate ? ` &bull; Due ${formatShortDate(inv.dueDate)}` : ''}</p>
+                            </div>
+                            <p className="text-[11px] font-black text-theme-primary">{formatCurrency(inv.balanceDue || inv.dueAmount || inv.grandTotal || inv.total || 0)}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {pendingCollection.length > 4 && (
+                    <button onClick={() => setCurrentTab('due-ledger')} className="w-full py-2.5 text-[9px] font-bold text-theme-accent hover:bg-theme-surface transition-colors border-t border-theme-border-soft">
+                      View All {pendingCollection.length} Pending <ArrowRight className="w-3 h-3 inline-block ml-0.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ===== ROW 5: ACTIVITY FEED ===== */}
+            <motion.div variants={itemVariants} className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Activity Feed</h3>
+                  <span className="w-1.5 h-1.5 rounded-full bg-theme-accent animate-pulse" />
+                </div>
+                <span className="text-[9px] font-semibold text-theme-muted">Latest activities</span>
+              </div>
+              {activities.length === 0 ? (
+                <div className="flex items-center gap-3 p-4">
+                  <div className="w-8 h-8 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+                    <Activity className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-theme-primary">No activity yet</p>
+                    <p className="text-[10px] text-theme-muted font-semibold">Activity appears as you use BillQyro</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4">
+                  <div className="relative">
+                    <div className="absolute left-[15px] top-2 bottom-2 w-[2px] bg-gradient-to-b from-theme-accent via-theme-accent/50 to-transparent rounded-full" />
+                    <div className="space-y-0">
+                      {activities.slice(0, 6).map((act, idx) => (
+                        <div key={act.id} className="relative flex items-start gap-3 py-2">
+                          <div className={`w-8 h-8 rounded-full ${act.iconBg} ${act.iconColor} flex items-center justify-center shrink-0 relative z-10 ring-2 ring-theme-card transition-transform hover:scale-110`}>
+                            <act.icon className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0 pt-0.5">
+                            <p className="text-[11px] font-bold text-theme-primary">{act.text}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-[9px] text-theme-muted font-semibold">{act.subtext}</span>
+                              {act.amount > 0 && <><span className="text-theme-border-strong">&bull;</span><span className="text-[9px] font-bold text-theme-primary">{formatCurrency(act.amount)}</span></>}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+
+            {/* ===== ROW 6: BOTTOM ANALYTICS (Revenue Chart + Payment Status) ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
               <div className="col-span-8 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
                 <div className="flex items-center justify-between mb-3">
@@ -524,10 +788,7 @@ const Dashboard = ({
                       <BarChart data={getRevenueTrend()} barCategoryGap="16%">
                         <XAxis dataKey="date" tick={{ fontSize: 9, fill: 'var(--theme-muted)' }} axisLine={false} tickLine={false} />
                         <YAxis tick={{ fontSize: 9, fill: 'var(--theme-muted)' }} axisLine={false} tickLine={false} />
-                        <Tooltip
-                          contentStyle={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border-soft)', borderRadius: 8, fontSize: 10, fontWeight: 700 }}
-                          labelStyle={{ color: 'var(--theme-primary)' }}
-                        />
+                        <Tooltip contentStyle={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border-soft)', borderRadius: 8, fontSize: 10, fontWeight: 700 }} labelStyle={{ color: 'var(--theme-primary)' }} />
                         <Bar dataKey="revenue" name="Revenue" radius={[4, 4, 0, 0]} fill="var(--theme-accent)" />
                         <Bar dataKey="collection" name="Collected" radius={[4, 4, 0, 0]} fill="#10b981" />
                       </BarChart>
@@ -548,10 +809,7 @@ const Dashboard = ({
                             <Cell key={idx} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip
-                          contentStyle={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border-soft)', borderRadius: 8, fontSize: 10, fontWeight: 700 }}
-                          labelStyle={{ color: 'var(--theme-primary)' }}
-                        />
+                        <Tooltip contentStyle={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border-soft)', borderRadius: 8, fontSize: 10, fontWeight: 700 }} labelStyle={{ color: 'var(--theme-primary)' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   )}
@@ -567,156 +825,14 @@ const Dashboard = ({
               </div>
             </motion.div>
 
-            {/* ===== ROW 3: BILLS TABLE + DUE PANEL ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
-              <div className="col-span-8 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between p-3.5 border-b border-theme-border-soft">
-                  <h3 className="text-[11px] font-extrabold text-theme-primary tracking-tight">Recent {invoiceLabel}</h3>
-                  <button onClick={() => setCurrentTab('invoices')} className="text-[8px] font-bold text-theme-accent flex items-center gap-1">
-                    View All <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-                {recentInvoices.length === 0 ? (
-                  <div className="flex items-center gap-3 p-4">
-                    <div className="w-7 h-7 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
-                      <FileText className="w-3.5 h-3.5" />
-                    </div>
-                    <p className="text-xs font-bold text-theme-primary">No {invoiceLabel.toLowerCase()} yet</p>
-                    <button onClick={onQuickBillOpen} className="ml-auto px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-[9px] font-bold rounded-lg">+ Create</button>
-                  </div>
-                ) : (
-                  <div>
-                    {/* Table Header */}
-                    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 px-3.5 py-1.5 border-b border-theme-border-soft">
-                      <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">Customer</span>
-                      <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider text-right">Amount</span>
-                      <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider text-center">Status</span>
-                      <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider text-center">Date</span>
-                    </div>
-                    <div className="divide-y divide-theme-border-soft">
-                      {recentInvoices.slice(0, 5).map((inv, idx) => (
-                        <motion.div
-                          key={inv.id}
-                          initial={{ opacity: 0, x: -5 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: idx * 0.03 }}
-                          onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }}
-                          className="grid grid-cols-[1fr_auto_auto_auto] gap-2 px-3.5 py-2 hover:bg-theme-surface transition-colors cursor-pointer items-center"
-                        >
-                          <div className="min-w-0">
-                            <p className="text-[10px] font-bold text-theme-primary truncate">{inv.customerName || 'Walk-in'}</p>
-                            <p className="text-[8px] text-theme-muted font-semibold">{inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`}</p>
-                          </div>
-                          <p className="text-[10px] font-black text-theme-primary text-right tabular-nums">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
-                          <span className={`inline-block text-[7px] font-bold px-1.5 py-0.5 rounded-full border text-center ${statusBadge(inv.paymentStatus).classes}`}>{statusBadge(inv.paymentStatus).label}</span>
-                          <span className="text-[8px] font-semibold text-theme-muted text-center">{formatShortDate(inv.createdAt)}</span>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="col-span-4 space-y-3">
-                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
-                  <h3 className="text-xs font-extrabold text-theme-primary tracking-tight mb-3">Due Overview</h3>
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="text-[10px] font-bold text-theme-muted">Total Outstanding</p>
-                      <p className="text-xl font-black text-theme-primary tabular-nums mt-0.5">{formatCurrency(totalDue)}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] font-bold text-theme-muted">Collection Rate</p>
-                      <p className="text-xl font-black text-theme-accent tabular-nums mt-0.5">{totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0}%</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className={`flex-1 p-2 rounded-lg text-center ${totalOverdue > 0 ? 'bg-red-500/10' : 'bg-theme-surface'}`}>
-                      <p className={`text-sm font-black ${totalOverdue > 0 ? 'text-red-500' : 'text-theme-muted'}`}>{totalOverdue}</p>
-                      <p className={`text-[7px] font-bold uppercase tracking-wider ${totalOverdue > 0 ? 'text-red-500' : 'text-theme-muted/60'}`}>Overdue</p>
-                    </div>
-                    <div className="flex-1 p-2 rounded-lg bg-theme-surface text-center">
-                      <p className="text-sm font-black text-theme-accent">{totalUpcoming}</p>
-                      <p className="text-[7px] font-bold uppercase tracking-wider text-theme-muted/60">Upcoming</p>
-                    </div>
-                    <div className="flex-1 p-2 rounded-lg bg-emerald-500/10 text-center">
-                      <p className="text-sm font-black text-emerald-500">{paidCount}</p>
-                      <p className="text-[7px] font-bold uppercase tracking-wider text-emerald-500">Paid</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-3">
-                  <h3 className="text-[10px] font-extrabold text-theme-primary tracking-tight mb-2">Quick Actions</h3>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    <button onClick={onQuickBillOpen} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-[image:var(--accent-gradient)] text-white hover:shadow-md transition-all active:scale-95">
-                      <Plus className="w-3.5 h-3.5" />
-                      <span className="text-[7px] font-bold">Bill</span>
-                    </button>
-                    <button onClick={() => setShowAddCustomerSheet(true)} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-theme-accent/10 text-theme-accent hover:bg-theme-accent/20 transition-all active:scale-95">
-                      <Users className="w-3.5 h-3.5" />
-                      <span className="text-[7px] font-bold">Client</span>
-                    </button>
-                    <button onClick={() => setCurrentTab('due-ledger')} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition-all active:scale-95">
-                      <CreditCard className="w-3.5 h-3.5" />
-                      <span className="text-[7px] font-bold">Collect</span>
-                    </button>
-                    <button onClick={() => setCurrentTab('reports')} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-theme-surface text-theme-primary hover:bg-theme-border-soft transition-all active:scale-95">
-                      <BarChart3 className="w-3.5 h-3.5" />
-                      <span className="text-[7px] font-bold">Reports</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Install prompt */}
-                {installPromptEvent && !isAppInstalled && (
-                  <button onClick={onInstallApp} className="w-full py-2 bg-[image:var(--accent-gradient)] text-white text-[9px] font-bold rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95">
-                    Install App for Offline Access
-                  </button>
-                )}
-              </div>
-            </motion.div>
-
-            {/* ===== ROW 4: ACTIVITY FEED (compact) ===== */}
-            <motion.div variants={itemVariants} className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between p-3.5 border-b border-theme-border-soft">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-[11px] font-extrabold text-theme-primary tracking-tight">Activity Feed</h3>
-                  <span className="w-1.5 h-1.5 rounded-full bg-theme-accent animate-pulse" />
-                </div>
-                <span className="text-[8px] font-semibold text-theme-muted">Latest</span>
-              </div>
-              {activities.length === 0 ? (
-                <div className="flex items-center gap-3 p-3.5">
-                  <div className="w-7 h-7 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
-                    <Activity className="w-3.5 h-3.5" />
-                  </div>
-                  <p className="text-xs font-bold text-theme-primary">No activity yet</p>
-                </div>
-              ) : (
-                <div className="p-3.5">
-                  <div className="relative">
-                    <div className="absolute left-[15px] top-2 bottom-2 w-[2px] bg-gradient-to-b from-theme-accent via-theme-accent/50 to-transparent rounded-full" />
-                    <div className="space-y-0">
-                      {activities.slice(0, 5).map((act, idx) => (
-                        <div key={act.id} className="relative flex items-start gap-3 py-1.5">
-                          <div className={`w-7 h-7 rounded-full ${act.iconBg} ${act.iconColor} flex items-center justify-center shrink-0 relative z-10 ring-2 ring-theme-card`}>
-                            <act.icon className="w-3.5 h-3.5" />
-                          </div>
-                          <div className="flex-1 min-w-0 pt-0.5">
-                            <p className="text-[10px] font-bold text-theme-primary">{act.text}</p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-[8px] text-theme-muted font-semibold">{act.subtext}</span>
-                              {act.amount > 0 && <><span className="text-theme-border-strong">•</span><span className="text-[8px] font-bold text-theme-primary">{formatCurrency(act.amount)}</span></>}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </motion.div>
+            {/* Install prompt */}
+            {installPromptEvent && !isAppInstalled && (
+              <motion.div variants={itemVariants}>
+                <button onClick={onInstallApp} className="w-full py-2.5 bg-[image:var(--accent-gradient)] text-white text-[10px] font-bold rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95">
+                  Install App for Offline Access
+                </button>
+              </motion.div>
+            )}
 
             {/* Sync Status Bar */}
             <motion.div variants={itemVariants} className="flex items-center justify-between p-3 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm">
