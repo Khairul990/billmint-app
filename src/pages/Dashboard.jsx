@@ -183,6 +183,10 @@ const Dashboard = ({
   const activities = getActivities();
   const totalCustomers = customers.length;
   const invoiceLabel = getInvoiceLabel();
+  const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
+  const totalCollected = invoices
+    .filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid' || inv.paymentStatus === 'Partial' || inv.paymentStatus === 'partial' || inv.paymentStatus === 'Partially Paid')
+    .reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
 
   const statusBadge = (status) => {
     const s = (status || '').toLowerCase();
@@ -423,211 +427,343 @@ const Dashboard = ({
         </div>
 
         {/* ===== DESKTOP VIEW (>= 1024px) ===== */}
-        <div className="hidden lg:block w-full space-y-6">
-          <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+        <div className="hidden lg:block w-full space-y-5">
+          <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-5">
+
             {/* Banners Row */}
             {pendingPaymentsCount > 0 && (
-              <motion.button
-                variants={itemVariants}
-                onClick={() => setCurrentTab('pending-payments')}
-                className="w-full flex items-center gap-3 p-3 bg-theme-warning/10 border border-theme-warning/30 rounded-2xl text-left hover:bg-theme-warning/15 transition-colors"
-              >
-                <div className="w-9 h-9 rounded-xl bg-theme-warning/20 text-theme-warning flex items-center justify-center shrink-0">
-                  <Bell className="w-5 h-5" />
+              <motion.button variants={itemVariants} onClick={() => setCurrentTab('pending-payments')} className="w-full flex items-center gap-3 p-3 bg-theme-warning/10 border border-theme-warning/30 rounded-xl text-left hover:bg-theme-warning/15 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-theme-warning/20 text-theme-warning flex items-center justify-center shrink-0">
+                  <Bell className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-theme-primary">{pendingPaymentsCount} Payment{pendingPaymentsCount > 1 ? 's' : ''} Pending Review</p>
                   <p className="text-xs text-theme-muted font-semibold">Click to review payment proofs</p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-theme-muted shrink-0" />
+                <ArrowRight className="w-4 h-4 text-theme-muted shrink-0" />
               </motion.button>
             )}
 
             {activeAnnouncement && (
-              <motion.div variants={itemVariants} className={`p-3 rounded-2xl border ${
-                activeAnnouncement.type === 'urgent' ? 'bg-theme-danger/10 border-theme-danger/30' :
-                activeAnnouncement.type === 'info' ? 'bg-theme-accent/10 border-theme-accent/30' :
-                'bg-theme-warning/10 border-theme-warning/30'
-              }`}>
+              <motion.div variants={itemVariants} className={`p-3 rounded-xl border ${activeAnnouncement.type === 'urgent' ? 'bg-theme-danger/10 border-theme-danger/30' : activeAnnouncement.type === 'info' ? 'bg-theme-accent/10 border-theme-accent/30' : 'bg-theme-warning/10 border-theme-warning/30'}`}>
                 <div className="flex items-center gap-2 mb-1">
                   <Megaphone className="w-4 h-4 text-theme-accent" />
-                  <p className="text-xs font-bold text-theme-accent uppercase tracking-wider">
-                    {activeAnnouncement.type === 'urgent' ? 'Important' : 'Announcement'}
-                  </p>
+                  <p className="text-xs font-bold text-theme-accent uppercase tracking-wider">{activeAnnouncement.type === 'urgent' ? 'Important' : 'Announcement'}</p>
                 </div>
                 <p className="text-sm text-theme-primary font-semibold">{activeAnnouncement.message}</p>
               </motion.div>
             )}
 
             {['warn', 'grace', 'locked'].includes(revenueStatus.lockStatus) && (
-              <motion.div variants={itemVariants} className={`p-3 rounded-2xl border ${
-                revenueStatus.lockStatus === 'warn' ? 'bg-theme-warning/10 border-theme-warning/30' :
-                revenueStatus.lockStatus === 'grace' ? 'bg-orange-500/10 border-orange-500/30' :
-                'bg-theme-danger/10 border-theme-danger/30'
-              }`}>
+              <motion.div variants={itemVariants} className={`p-3 rounded-xl border ${revenueStatus.lockStatus === 'warn' ? 'bg-theme-warning/10 border-theme-warning/30' : revenueStatus.lockStatus === 'grace' ? 'bg-orange-500/10 border-orange-500/30' : 'bg-theme-danger/10 border-theme-danger/30'}`}>
                 <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                    revenueStatus.lockStatus === 'locked' ? 'bg-theme-danger/20 text-theme-danger' : 'bg-theme-warning/20 text-theme-warning'
-                  }`}>
-                    <AlertCircle className="w-5 h-5" />
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${revenueStatus.lockStatus === 'locked' ? 'bg-theme-danger/20 text-theme-danger' : 'bg-theme-warning/20 text-theme-warning'}`}>
+                    <AlertCircle className="w-4 h-4" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-theme-primary">
-                      {revenueStatus.lockStatus === 'locked' ? 'Platform Locked' :
-                       revenueStatus.lockStatus === 'grace' ? 'Grace Period Active' : 'Payment Due Soon'}
-                    </p>
+                    <p className="text-sm font-bold text-theme-primary">{revenueStatus.lockStatus === 'locked' ? 'Platform Locked' : revenueStatus.lockStatus === 'grace' ? 'Grace Period Active' : 'Payment Due Soon'}</p>
                     <p className="text-xs text-theme-muted font-semibold mt-0.5">{revenueStatus.message || 'Please update your subscription'}</p>
                   </div>
-                  <button onClick={() => setCurrentTab('subscription')} className="px-3 py-1.5 bg-theme-accent text-white text-xs font-bold rounded-xl shrink-0">
-                    Renew
-                  </button>
+                  <button onClick={() => setCurrentTab('subscription')} className="px-3 py-1.5 bg-theme-accent text-white text-xs font-bold rounded-lg shrink-0">Renew</button>
                 </div>
               </motion.div>
             )}
 
-            {/* ===== ROW 1: KPI GRID ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-4 gap-4">
-              <KpiCard
-                title="Today's Collection"
-                value={formatCurrency(todayEarnings)}
-                icon={DollarSign}
-                gradient
-                trend={todayEarnings > 0 ? `+${formatCurrency(todayEarnings)} today` : null}
-              />
-              <KpiCard
-                title="Total Due"
-                value={formatCurrency(totalDue)}
-                icon={Wallet}
-                trend={totalDue > 0 ? `${pendingBillsCount} pending bills` : null}
-              />
-              <KpiCard
-                title="Pending Bills"
-                value={pendingBillsCount}
-                icon={Clock}
-                trend={pendingBillsCount > 0 ? 'Requires attention' : null}
-              />
-              <KpiCard
-                title="Customers"
-                value={totalCustomers}
-                icon={Users}
-                trend={totalCustomers > 0 ? 'Total registered' : null}
-              />
-            </motion.div>
-
-            {/* ===== WORKSPACE BANNER ===== */}
-            <motion.div variants={itemVariants} className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden max-h-[160px]">
-              <div className="flex items-center justify-between px-5 py-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-md shrink-0">
-                    <Briefcase className="w-5 h-5" />
-                  </div>
+            {/* ===== ROW 1: PREMIUM HERO BANNER ===== */}
+            <motion.div variants={itemVariants} className="bg-[image:var(--accent-gradient)] text-white rounded-2xl p-6 shadow-premium relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-72 h-72 bg-white/[0.06] rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-10 -left-10 w-52 h-52 bg-white/[0.03] rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute top-1/2 left-1/3 w-px h-24 bg-white/10 rotate-45" />
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-5">
                   <div>
-                    <div className="flex items-center gap-2.5 mb-0.5">
-                      <h2 className="text-base font-black text-theme-primary tracking-tight">{businessSettings?.businessName || 'Workspace'}</h2>
-                      <span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1 text-[9px] font-bold text-theme-accent">
-                        <ShieldCheck className="w-3 h-3" /> Secure
-                      </span>
-                      <span className="flex items-center gap-1 text-[9px] font-bold text-theme-muted">
-                        <RefreshCw className={`w-3 h-3 ${syncStatus !== 'Synced' ? 'animate-spin' : ''}`} /> {syncStatus === 'Synced' ? 'Synced' : syncStatus}
-                      </span>
-                    </div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/60 mb-1">Welcome back,</p>
+                    <h1 className="text-2xl font-black tracking-tight">{businessSettings?.businessName || 'Your Workspace'}</h1>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={onQuickBillOpen} className="px-4 py-2.5 bg-white/20 hover:bg-white/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 backdrop-blur-sm border border-white/10">
+                      <Plus className="w-4 h-4" /> Create Bill
+                    </button>
+                    <button onClick={() => setCurrentTab('due-ledger')} className="px-4 py-2.5 bg-white/20 hover:bg-white/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 backdrop-blur-sm border border-white/10">
+                      <CreditCard className="w-4 h-4" /> Collect Payment
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={onQuickBillOpen} className="px-4 py-2 bg-[image:var(--accent-gradient)] text-white text-[11px] font-bold rounded-xl shadow-md hover:shadow-premium-hover transition-all flex items-center gap-1.5 active:scale-95">
-                    <Plus className="w-3.5 h-3.5" /> Quick Bill
-                  </button>
-                  <button onClick={() => setCurrentTab('create-invoice')} className="px-4 py-2 bg-theme-surface border border-theme-border-soft text-theme-primary text-[11px] font-bold rounded-xl hover:bg-theme-accent/5 hover:border-theme-accent/30 transition-all flex items-center gap-1.5 active:scale-95">
-                    <FileText className="w-3.5 h-3.5" /> Full Invoice
-                  </button>
+                <div className="mb-5">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-white/60 mb-1">Today's Earnings</p>
+                  <p className="text-4xl font-black tracking-tight tabular-nums">{formatCurrency(todayEarnings)}</p>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/5">
+                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Today's Collection</p>
+                    <p className="text-base font-black mt-0.5 tabular-nums">{formatCurrency(todayEarnings)}</p>
+                  </div>
+                  <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/5">
+                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Today's Due</p>
+                    <p className="text-base font-black mt-0.5 tabular-nums">{formatCurrency(totalDue)}</p>
+                  </div>
+                  <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/5">
+                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Active Customers</p>
+                    <p className="text-base font-black mt-0.5 tabular-nums">{totalCustomers}</p>
+                  </div>
                 </div>
               </div>
             </motion.div>
 
-            {/* ===== ROW 2: RECENT BILLS (65%) + PENDING COLLECTION (35%) ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-3">
-              {/* Recent Bills */}
-              <div className="col-span-8 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
-                  <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Recent {invoiceLabel}</h3>
-                  <button onClick={() => setCurrentTab('invoices')} className="flex items-center gap-1 text-[10px] font-bold text-theme-accent hover:text-theme-accent-dark transition-colors">
-                    View All Bills
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
+            {/* ===== ROW 2: QUICK ACTION CARDS ===== */}
+            <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3">
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={onQuickBillOpen} className="flex items-center gap-4 p-4 bg-[image:var(--accent-gradient)] text-white rounded-xl shadow-sm hover:shadow-premium-hover transition-all relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0 relative z-10">
+                  <Plus className="w-5 h-5" />
                 </div>
-                {recentInvoices.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 px-4">
-                    <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center mb-2">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                    <p className="text-sm font-bold text-theme-primary">No {invoiceLabel.toLowerCase()} yet</p>
-                    <p className="text-[11px] text-theme-muted font-semibold mt-0.5 mb-3">Create your first invoice to get started</p>
-                    <button onClick={onQuickBillOpen} className="px-4 py-2 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-xl shadow-md hover:shadow-premium-hover transition-all">
-                      + Create First {invoiceLabel.slice(0, -1)}
+                <div className="relative z-10 text-left">
+                  <p className="text-xs font-bold">Create New Bill</p>
+                  <p className="text-[9px] text-white/70 font-semibold mt-0.5">Generate invoice instantly</p>
+                </div>
+              </motion.button>
+
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setShowAddCustomerSheet(true)} className="flex items-center gap-4 p-4 bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:shadow-premium-hover transition-all hover:border-theme-accent/30">
+                <div className="w-10 h-10 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-theme-primary">Add Customer</p>
+                  <p className="text-[9px] text-theme-muted font-semibold mt-0.5">Register new client</p>
+                </div>
+              </motion.button>
+
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setCurrentTab('due-ledger')} className="flex items-center gap-4 p-4 bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:shadow-premium-hover transition-all hover:border-amber-500/30">
+                <div className="w-10 h-10 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-theme-primary">Collect Payment</p>
+                  <p className="text-[9px] text-theme-muted font-semibold mt-0.5">Receive pending dues</p>
+                </div>
+              </motion.button>
+            </motion.div>
+
+            {/* ===== ROW 3: MAIN CONTENT (LEFT KPI + RIGHT INSIGHTS) ===== */}
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+              {/* LEFT COLUMN (8/12): KPI + Revenue + Recent Bills */}
+              <div className="col-span-8 space-y-4">
+
+                {/* KPI Cards in 2x2 grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <KpiCard title="Today's Earnings" value={formatCurrency(todayEarnings)} icon={DollarSign} gradient trend={todayEarnings > 0 ? `+${formatCurrency(todayEarnings)} today` : null} />
+                  <KpiCard title="Total Collected" value={formatCurrency(totalCollected)} icon={Wallet} trend={totalCollected > 0 ? `${invoices.length} invoices` : null} />
+                  <KpiCard title="Total Due" value={formatCurrency(totalDue)} icon={Clock} trend={totalDue > 0 ? `${pendingBillsCount} unpaid` : null} />
+                  <KpiCard title="Active Customers" value={totalCustomers} icon={Users} trend={totalCustomers > 0 ? 'Registered clients' : null} />
+                </div>
+
+                {/* Revenue Overview Summary */}
+                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Revenue Overview</h3>
+                    <button onClick={() => setCurrentTab('reports')} className="flex items-center gap-1 text-[9px] font-bold text-theme-accent hover:text-theme-accent-dark transition-colors">
+                      Full Report <ArrowRight className="w-3 h-3" />
                     </button>
                   </div>
-                ) : (
-                  <div className="divide-y divide-theme-border-soft">
-                    {recentInvoices.map((inv, idx) => (
-                      <motion.div
-                        key={inv.id}
-                        initial={{ opacity: 0, x: -5 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.03 }}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-theme-surface transition-colors cursor-pointer group"
-                      >
-                        <div className="w-7 h-7 rounded-lg bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                          <FileText className="w-3.5 h-3.5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[11px] font-bold text-theme-primary truncate group-hover:text-theme-accent transition-colors">{inv.customerName || 'Walk-in Customer'}</p>
-                          <p className="text-[9px] text-theme-muted font-semibold">
-                            {inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`} • {formatShortDate(inv.createdAt)}
-                          </p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-[11px] font-black text-theme-primary">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
-                          <span className={`inline-block text-[7px] font-bold px-1.5 py-0.5 rounded-full mt-0.5 border ${statusBadge(inv.paymentStatus).classes}`}>
-                            {statusBadge(inv.paymentStatus).label}
-                          </span>
-                        </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); onViewInvoice(inv); setCurrentTab('invoices'); }}
-                          className="w-7 h-7 rounded-lg bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 hover:border-theme-accent/30 transition-all shrink-0 opacity-0 group-hover:opacity-100"
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Total Revenue</p>
+                      <p className="text-base font-black text-theme-primary tabular-nums mt-1"><AnimatedNumber value={formatCurrency(totalRevenue)} /></p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Total Collected</p>
+                      <p className="text-base font-black text-emerald-500 tabular-nums mt-1"><AnimatedNumber value={formatCurrency(totalCollected)} /></p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Collection Rate</p>
+                      <p className="text-base font-black text-theme-accent tabular-nums mt-1">{totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0}%</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Bills (compact) */}
+                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
+                  <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
+                    <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Recent {invoiceLabel}</h3>
+                    <button onClick={() => setCurrentTab('invoices')} className="flex items-center gap-1 text-[9px] font-bold text-theme-accent">
+                      View All <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                  {recentInvoices.length === 0 ? (
+                    <div className="flex items-center gap-3 p-4">
+                      <div className="w-8 h-8 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-theme-primary">No {invoiceLabel.toLowerCase()} yet</p>
+                        <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Create your first invoice to get started</p>
+                      </div>
+                      <button onClick={onQuickBillOpen} className="px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-[10px] font-bold rounded-lg shadow-sm hover:shadow-md transition-all">+ Create</button>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-theme-border-soft">
+                      {recentInvoices.slice(0, 4).map((inv, idx) => (
+                        <motion.div
+                          key={inv.id}
+                          initial={{ opacity: 0, x: -5 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.03 }}
+                          onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }}
+                          className="flex items-center gap-3 px-4 py-2.5 hover:bg-theme-surface transition-colors cursor-pointer group"
                         >
-                          <Eye className="w-3.5 h-3.5" />
-                        </button>
-                      </motion.div>
-                    ))}
+                          <div className="w-7 h-7 rounded-lg bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <FileText className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-bold text-theme-primary truncate group-hover:text-theme-accent transition-colors">{inv.customerName || 'Walk-in Customer'}</p>
+                            <p className="text-[9px] text-theme-muted font-semibold">{inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`} • {formatShortDate(inv.createdAt)}</p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <p className="text-[11px] font-black text-theme-primary">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
+                            <span className={`inline-block text-[7px] font-bold px-1.5 py-0.5 rounded-full border ${statusBadge(inv.paymentStatus).classes}`}>{statusBadge(inv.paymentStatus).label}</span>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN (4/12): Insights + Sync + Mini Bills */}
+              <div className="col-span-4 space-y-4">
+
+                {/* Quick Insights Card */}
+                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
+                  <h3 className="text-sm font-extrabold text-theme-primary tracking-tight mb-3">Quick Insights</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between py-2 border-b border-theme-border-soft">
+                      <p className="text-[10px] font-bold text-theme-muted">Total Bills</p>
+                      <p className="text-xs font-black text-theme-primary tabular-nums">{invoices.length}</p>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-theme-border-soft">
+                      <p className="text-[10px] font-bold text-theme-muted">Total Collected</p>
+                      <p className="text-xs font-black text-emerald-500 tabular-nums">{formatCurrency(totalCollected)}</p>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-theme-border-soft">
+                      <p className="text-[10px] font-bold text-theme-muted">Total Due</p>
+                      <p className="text-xs font-black text-amber-500 tabular-nums">{formatCurrency(totalDue)}</p>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-theme-border-soft">
+                      <p className="text-[10px] font-bold text-theme-muted">Overdue Bills</p>
+                      <p className={`text-xs font-black tabular-nums ${totalOverdue > 0 ? 'text-red-500' : 'text-theme-muted'}`}>{totalOverdue}</p>
+                    </div>
+                    <div className="flex items-center justify-between py-2">
+                      <p className="text-[10px] font-bold text-theme-muted">Upcoming Payments</p>
+                      <p className="text-xs font-black text-theme-accent tabular-nums">{totalUpcoming}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cloud Sync Status */}
+                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-theme-accent" />
+                      <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Cloud Sync</h3>
+                    </div>
+                    <span className={`w-2 h-2 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-pulse' : syncStatus === 'Offline' ? 'bg-red-500' : 'bg-amber-500'}`} />
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-theme-muted mb-3">
+                    <span className={`inline-block w-1.5 h-1.5 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                    {syncStatus === 'Synced' ? 'All data synced to cloud' : syncStatus}
+                    {isAppInstalled && <span className="ml-auto text-[9px] font-bold text-theme-accent bg-theme-accent/10 px-1.5 py-0.5 rounded">Installed</span>}
+                  </div>
+
+                  {/* Recent Payments Mini */}
+                  <div className="pt-1">
+                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-2">Recent Payments</p>
+                    {recentPayments.length === 0 ? (
+                      <p className="text-[10px] text-theme-muted font-semibold py-1">No payments collected yet</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {recentPayments.slice(0, 3).map((inv) => (
+                          <div key={inv.id} className="flex items-center justify-between py-1 px-2 rounded-lg hover:bg-theme-surface transition-colors cursor-pointer" onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }}>
+                            <p className="text-[10px] font-bold text-theme-primary truncate flex-1 min-w-0">{inv.customerName || 'Walk-in'}</p>
+                            <p className="text-[10px] font-black text-emerald-500 shrink-0 ml-2">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {installPromptEvent && !isAppInstalled && (
+                    <button onClick={onInstallApp} className="mt-3 w-full py-2 bg-[image:var(--accent-gradient)] text-white text-[9px] font-bold rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95">
+                      Install App for Offline Access
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ===== ROW 4: ACTIVITY FEED + PENDING COLLECTION ===== */}
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+              {/* Activity Feed (8/12) */}
+              <div className="col-span-8 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Activity Feed</h3>
+                    <span className="w-1.5 h-1.5 rounded-full bg-theme-accent animate-pulse" />
+                  </div>
+                  <span className="text-[9px] font-semibold text-theme-muted">Latest activities</span>
+                </div>
+                {activities.length === 0 ? (
+                  <div className="flex items-center gap-3 p-4">
+                    <div className="w-7 h-7 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+                      <Activity className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-theme-primary">No activity yet</p>
+                      <p className="text-[10px] text-theme-muted font-semibold">Activity appears as you use BillQyro</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4">
+                    <div className="relative">
+                      <div className="absolute left-[15px] top-2 bottom-2 w-[2px] bg-gradient-to-b from-theme-accent via-theme-accent/50 to-transparent rounded-full" />
+                      <div className="space-y-0">
+                        {activities.slice(0, 6).map((act, idx) => (
+                          <div key={act.id} className="relative flex items-start gap-3 py-2">
+                            <div className={`w-7 h-7 rounded-full ${act.iconBg} ${act.iconColor} flex items-center justify-center shrink-0 relative z-10 ring-2 ring-theme-card transition-transform hover:scale-110`}>
+                              <act.icon className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="flex-1 min-w-0 pt-0.5">
+                              <p className="text-[11px] font-bold text-theme-primary">{act.text}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[9px] text-theme-muted font-semibold">{act.subtext}</span>
+                                {act.amount > 0 && <><span className="text-theme-border-strong">•</span><span className="text-[9px] font-bold text-theme-primary">{formatCurrency(act.amount)}</span></>}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Pending Collection */}
+              {/* Pending Collection (4/12) */}
               <div className="col-span-4 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-theme-border-soft">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Pending Collection</h3>
-                    <button onClick={() => setCurrentTab('due-ledger')} className="text-[9px] font-bold text-theme-accent hover:text-theme-accent-dark transition-colors flex items-center gap-1">
-                      Open Ledger <ArrowRight className="w-3 h-3" />
-                    </button>
+                    <button onClick={() => setCurrentTab('due-ledger')} className="text-[9px] font-bold text-theme-accent hover:text-theme-accent-dark transition-colors flex items-center gap-1">Open Ledger <ArrowRight className="w-3 h-3" /></button>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xl font-black text-theme-primary">{formatCurrency(totalDue)}</p>
+                      <p className="text-2xl font-black text-theme-primary">{formatCurrency(totalDue)}</p>
                       <p className="text-[9px] text-theme-muted font-semibold mt-0.5">Total Outstanding</p>
                     </div>
-                    <div className="flex gap-1.5 ml-auto">
-                      <div className={`px-2.5 py-1.5 rounded-xl text-center ${totalOverdue > 0 ? 'bg-red-500/10' : 'bg-theme-surface'}`}>
+                    <div className="flex gap-2">
+                      <div className={`px-3 py-1.5 rounded-xl text-center ${totalOverdue > 0 ? 'bg-red-500/10' : 'bg-theme-surface'}`}>
                         <p className={`text-sm font-black ${totalOverdue > 0 ? 'text-red-500' : 'text-theme-muted'}`}>{totalOverdue}</p>
                         <p className={`text-[7px] font-bold uppercase tracking-wider ${totalOverdue > 0 ? 'text-red-500' : 'text-theme-muted/60'}`}>Overdue</p>
                       </div>
-                      <div className="px-2.5 py-1.5 rounded-xl bg-theme-surface text-center">
+                      <div className="px-3 py-1.5 rounded-xl bg-theme-surface text-center">
                         <p className="text-sm font-black text-theme-accent">{totalUpcoming}</p>
                         <p className="text-[7px] font-bold uppercase tracking-wider text-theme-muted/60">Upcoming</p>
                       </div>
@@ -635,30 +771,25 @@ const Dashboard = ({
                   </div>
                 </div>
                 {pendingCollection.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-5 px-4">
-                    <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-1.5">
+                  <div className="flex items-center gap-3 p-4">
+                    <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
                       <CheckCircle className="w-3.5 h-3.5" />
                     </div>
-                    <p className="text-[11px] font-bold text-theme-primary">All clear!</p>
-                    <p className="text-[9px] text-theme-muted font-semibold">No pending collections</p>
+                    <div>
+                      <p className="text-xs font-bold text-theme-primary">All clear!</p>
+                      <p className="text-[10px] text-theme-muted font-semibold">No pending collections</p>
+                    </div>
                   </div>
                 ) : (
                   <div className="divide-y divide-theme-border-soft">
-                    {pendingCollection.slice(0, 5).map((inv, idx) => {
+                    {pendingCollection.slice(0, 4).map((inv, idx) => {
                       const isOverdue = inv.dueDate && new Date(inv.dueDate) < new Date();
                       return (
-                        <div
-                          key={inv.id}
-                          onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }}
-                          className="flex items-center gap-2 px-4 py-2.5 hover:bg-theme-surface transition-colors cursor-pointer group"
-                        >
+                        <div key={inv.id} onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }} className="flex items-center gap-2 px-4 py-2.5 hover:bg-theme-surface transition-colors cursor-pointer group">
                           <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isOverdue ? 'bg-red-500' : 'bg-amber-500'}`} />
                           <div className="flex-1 min-w-0">
                             <p className="text-[11px] font-bold text-theme-primary truncate group-hover:text-theme-accent transition-colors">{inv.customerName || 'Walk-in'}</p>
-                            <p className="text-[9px] text-theme-muted font-semibold">
-                              {inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`}
-                              {inv.dueDate ? ` • Due ${formatShortDate(inv.dueDate)}` : ''}
-                            </p>
+                            <p className="text-[9px] text-theme-muted font-semibold">{inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`}{inv.dueDate ? ` • Due ${formatShortDate(inv.dueDate)}` : ''}</p>
                           </div>
                           <p className="text-[11px] font-black text-theme-primary">{formatCurrency(inv.balanceDue || inv.dueAmount || inv.grandTotal || inv.total || 0)}</p>
                         </div>
@@ -666,138 +797,12 @@ const Dashboard = ({
                     })}
                   </div>
                 )}
-                {pendingCollection.length > 5 && (
+                {pendingCollection.length > 4 && (
                   <button onClick={() => setCurrentTab('due-ledger')} className="w-full py-2.5 text-[9px] font-bold text-theme-accent hover:bg-theme-surface transition-colors border-t border-theme-border-soft">
                     View All {pendingCollection.length} Pending <ArrowRight className="w-3 h-3 inline-block ml-0.5" />
                   </button>
                 )}
               </div>
-            </motion.div>
-
-            {/* ===== ROW 3: RECENT PAYMENTS (65%) + QUICK ACTIONS (35%) ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-3">
-              {/* Recent Payments */}
-              <div className="col-span-8 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
-                  <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Recent Payments</h3>
-                  <button onClick={() => setCurrentTab('reports')} className="flex items-center gap-1 text-[9px] font-bold text-theme-accent hover:text-theme-accent-dark transition-colors">
-                    View Reports
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-                {recentPayments.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-5 px-4">
-                    <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-1.5">
-                      <CheckCircle className="w-3.5 h-3.5" />
-                    </div>
-                    <p className="text-[11px] font-bold text-theme-primary">No payments yet</p>
-                    <p className="text-[9px] text-theme-muted font-semibold mb-2">Payments appear here once collected</p>
-                    <button onClick={onQuickBillOpen} className="px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-[9px] font-bold rounded-xl shadow-md transition-all">
-                      + Create {invoiceLabel.slice(0, -1)}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-theme-border-soft">
-                    {recentPayments.map((inv, idx) => (
-                      <div
-                        key={inv.id}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-theme-surface transition-colors cursor-pointer group"
-                        onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }}
-                      >
-                        <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all">
-                          <CheckCircle className="w-3.5 h-3.5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-theme-primary truncate group-hover:text-theme-accent transition-colors">{inv.customerName || 'Walk-in Customer'}</p>
-                          <p className="text-[9px] text-theme-muted font-semibold flex items-center gap-1.5">
-                            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-theme-surface border border-theme-border-soft">{inv.paymentMethod || 'N/A'}</span>
-                            <span>•</span>
-                            <span>{formatShortDate(inv.updatedAt || inv.createdAt)}</span>
-                          </p>
-                        </div>
-                        <p className="text-xs font-black text-emerald-500 shrink-0">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Quick Actions */}
-              <div className="col-span-4 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-theme-border-soft">
-                  <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Quick Actions</h3>
-                </div>
-                <div className="p-3 grid grid-cols-2 gap-2">
-                  {[
-                    { onClick: onQuickBillOpen, icon: Plus, bg: 'bg-[image:var(--accent-gradient)]', label: `New ${invoiceLabel.slice(0, -1)}`, shadow: true },
-                    { onClick: () => setShowAddCustomerSheet(true), icon: Users, bg: 'bg-theme-accent/10', label: 'New Customer' },
-                    { onClick: () => setCurrentTab('due-ledger'), icon: ListChecks, bg: 'bg-amber-500/10', label: 'Due Ledger' },
-                    { onClick: () => setCurrentTab('pending-payments'), icon: Camera, bg: 'bg-blue-500/10', label: 'Proofs' },
-                    { onClick: () => setCurrentTab('reports'), icon: BarChart3, bg: 'bg-purple-500/10', label: 'Reports' },
-                    { onClick: () => setCurrentTab('live-link-templates'), icon: Link, bg: 'bg-cyan-500/10', label: 'Live Links' },
-                  ].map((action, i) => (
-                    <motion.button
-                      key={i}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={action.onClick}
-                      className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-theme-surface border border-theme-border-soft hover:border-theme-accent/30 hover:bg-theme-accent/5 transition-all group cursor-pointer"
-                    >
-                      <div className={`w-9 h-9 rounded-full ${action.bg} ${action.bg.includes('accent-gradient') ? 'text-white' : ''} flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm`}>
-                        <action.icon className={`w-4 h-4 ${action.bg.includes('accent-gradient') ? 'text-white' : ''}`} />
-                      </div>
-                      <span className="text-[9px] font-bold text-theme-primary text-center leading-tight">{action.label}</span>
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-
-            {/* ===== ROW 4: ACTIVITY FEED ===== */}
-            <motion.div variants={itemVariants} className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Activity Feed</h3>
-                  <span className="w-1.5 h-1.5 rounded-full bg-theme-accent animate-pulse" />
-                </div>
-                <span className="text-[9px] font-semibold text-theme-muted">Latest activities</span>
-              </div>
-              {activities.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-5 px-4">
-                  <div className="w-7 h-7 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center mb-1.5">
-                    <Activity className="w-3.5 h-3.5" />
-                  </div>
-                  <p className="text-[11px] font-bold text-theme-primary">No activity yet</p>
-                  <p className="text-[9px] text-theme-muted font-semibold">Activity appears as you use BillQyro</p>
-                </div>
-              ) : (
-                <div className="p-4">
-                  <div className="relative">
-                    <div className="absolute left-[15px] top-2 bottom-2 w-[2px] bg-gradient-to-b from-theme-accent via-theme-accent/50 to-transparent rounded-full" />
-                    <div className="space-y-0">
-                      {activities.slice(0, 8).map((act, idx) => (
-                        <div key={act.id} className="relative flex items-start gap-3 py-2">
-                          <div className={`w-7 h-7 rounded-full ${act.iconBg} ${act.iconColor} flex items-center justify-center shrink-0 relative z-10 ring-2 ring-theme-card transition-transform hover:scale-110`}>
-                            <act.icon className="w-3.5 h-3.5" />
-                          </div>
-                          <div className="flex-1 min-w-0 pt-0.5">
-                            <p className="text-[11px] font-bold text-theme-primary">{act.text}</p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-[9px] text-theme-muted font-semibold">{act.subtext}</span>
-                              {act.amount > 0 && (
-                                <>
-                                  <span className="text-theme-border-strong">•</span>
-                                  <span className="text-[9px] font-bold text-theme-primary">{formatCurrency(act.amount)}</span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
             </motion.div>
 
             {/* Sync Status Bar */}
@@ -814,16 +819,11 @@ const Dashboard = ({
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <span className={`w-1.5 h-1.5 rounded-full ${
-                  syncStatus === 'Synced' ? 'bg-emerald-500' :
-                  syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-pulse' :
-                  syncStatus === 'Offline' ? 'bg-red-500' : 'bg-amber-500'
-                }`} />
-                <span className="text-[9px] font-bold text-theme-muted">
-                  {syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}
-                </span>
+                <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-pulse' : syncStatus === 'Offline' ? 'bg-red-500' : 'bg-amber-500'}`} />
+                <span className="text-[9px] font-bold text-theme-muted">{syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}</span>
               </div>
             </motion.div>
+
           </motion.div>
         </div>
       </div>
