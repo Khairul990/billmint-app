@@ -30,7 +30,9 @@ const DEFAULT_USER_STATE = {
 export const getGlobalRevenueSettings = async () => {
   if (firebaseReady) {
     try {
-      const docSnap = await getDoc(doc(db, 'adminRevenueSettings', 'global'));
+      const docPromise = getDoc(doc(db, 'adminRevenueSettings', 'global'));
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000));
+      const docSnap = await Promise.race([docPromise, timeoutPromise]);
       if (docSnap.exists()) {
         const data = docSnap.data();
         localStorage.setItem('billqyro_global_revenue_settings', JSON.stringify(data));

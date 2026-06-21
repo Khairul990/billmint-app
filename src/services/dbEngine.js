@@ -2021,7 +2021,7 @@ export const ensureInvoicePublicToken = async (invoice) => {
       if (userId && invoiceId) {
         writes.push(setDoc(doc(db, 'invoices', userId, 'items', invoiceId), publicPayload));
       }
-      await Promise.all(writes);
+      Promise.all(writes).catch(err => console.error('[ERROR] Failed to sync publicToken to Firestore async:', err));
     } catch (e) {
       console.error('[ERROR] Failed to sync publicToken to Firestore in ensureInvoicePublicToken:', e);
     }
