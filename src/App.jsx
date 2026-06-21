@@ -97,6 +97,8 @@ const PremiumPricing = React.lazy(() => import('./pages/PremiumPricing'));
 const PaymentDueScreen = React.lazy(() => import('./pages/PaymentDueScreen'));
 import QuickBillModal from './components/QuickBillModal';
 import AdminPINLogin from './pages/admin/AdminPINLogin';
+import Confetti from 'react-confetti';
+import CommandPalette from './components/CommandPalette';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -184,6 +186,25 @@ function App() {
 
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
   const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+
+  useEffect(() => {
+    const handleConfetti = () => {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000);
+    };
+    const handleCommandPalette = () => {
+      setShowCommandPalette(true);
+    };
+    window.addEventListener('trigger-confetti', handleConfetti);
+    window.addEventListener('open-command-palette', handleCommandPalette);
+    return () => {
+      window.removeEventListener('trigger-confetti', handleConfetti);
+      window.removeEventListener('open-command-palette', handleCommandPalette);
+    };
+  }, []);
+
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const realAuth = !!getAuthSession();
     const demoAuth = localStorage.getItem('billqyro_demo_session_active') === 'true' && 
@@ -1885,6 +1906,27 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
+      {showConfetti && (
+        <Confetti 
+          width={window.innerWidth} 
+          height={window.innerHeight} 
+          recycle={false} 
+          numberOfPieces={300} 
+          gravity={0.15} 
+          style={{ zIndex: 100000, position: 'fixed', top: 0, left: 0 }} 
+        />
+      )}
+      <CommandPalette 
+        isOpen={showCommandPalette} 
+        onClose={() => setShowCommandPalette(false)} 
+        onNavigate={(action) => {
+          if (action.openQuickBill) {
+            setIsQuickBillOpen(true);
+          } else if (action.tab) {
+            setCurrentTab(action.tab);
+          }
+        }} 
+      />
     </ErrorBoundary>
   );
 }

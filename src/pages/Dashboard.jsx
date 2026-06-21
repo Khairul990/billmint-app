@@ -64,6 +64,21 @@ const Dashboard = ({
 }) => {
   const [showAddCustomerSheet, setShowAddCustomerSheet] = useState(false);
   const [activeAnnouncement, setActiveAnnouncement] = useState(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  useEffect(() => {
+    // Simulate initial loading for the skeleton effect
+    const timer = setTimeout(() => setIsInitialLoad(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const getDynamicGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return { text: 'Good Morning', icon: '☀️' };
+    if (hour < 18) return { text: 'Good Afternoon', icon: '🌤️' };
+    return { text: 'Good Evening', icon: '🌙' };
+  };
+  const greeting = getDynamicGreeting();
 
   useEffect(() => {
     const loadAnnouncement = async () => {
@@ -498,67 +513,104 @@ const Dashboard = ({
               </motion.div>
             )}
 
+            {/* ===== HEADER & GREETING ===== */}
+            <div className="flex items-center justify-between pt-2 pb-4">
+              <div>
+                <h1 className="text-2xl font-black text-theme-primary tracking-tight flex items-center gap-2">
+                  <span>{greeting.icon}</span> {greeting.text}, {businessSettings?.ownerName?.split(' ')[0] || 'there'}!
+                </h1>
+                <p className="text-xs text-theme-muted font-medium mt-1">Here's what's happening with your business today.</p>
+              </div>
+              <button onClick={() => {
+                onQuickBillOpen();
+                window.dispatchEvent(new Event('trigger-confetti'));
+              }} className="px-4 py-2 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-xl shadow-sm hover:shadow-premium-hover transition-all active:scale-95 flex items-center gap-1.5">
+                <Plus className="w-4 h-4" /> Create Bill
+              </button>
+            </div>
+
             {/* ===== ROW 1: KPI CARDS ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-4 gap-4">
-              {/* Total Revenue */}
-              <div className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative overflow-hidden group hover:border-theme-accent/30 transition-colors flex flex-col justify-between">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-theme-surface text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors">
-                    <DollarSign className="w-4 h-4" />
+              {isInitialLoad ? (
+                <>
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm h-[140px] flex flex-col justify-between">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-7 h-7 rounded-lg bg-theme-surface animate-pulse" />
+                        <div className="h-3 w-24 bg-theme-surface animate-pulse rounded" />
+                      </div>
+                      <div className="h-8 w-32 bg-theme-surface animate-pulse rounded mb-4" />
+                      <div className="flex justify-between">
+                        <div className="h-3 w-12 bg-theme-surface animate-pulse rounded" />
+                        <div className="h-3 w-20 bg-theme-surface animate-pulse rounded" />
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <>
+                  {/* Total Revenue */}
+                  <div className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative overflow-hidden group hover:border-theme-accent/30 transition-colors flex flex-col justify-between">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-theme-surface text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors">
+                        <DollarSign className="w-4 h-4" />
+                      </div>
+                      <p className="text-xs font-bold text-theme-muted tracking-wide">Total Revenue</p>
+                    </div>
+                    <p className="text-3xl font-black text-theme-primary tracking-tight mb-4 tabular-nums"><AnimatedNumber value={formatCurrency(todayEarnings + totalRevenue)} /></p>
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">+8.6%</span>
+                      <span className="text-[10px] font-semibold text-theme-muted">from last month</span>
+                    </div>
                   </div>
-                  <p className="text-xs font-bold text-theme-muted tracking-wide">Total Revenue</p>
-                </div>
-                <p className="text-3xl font-black text-theme-primary tracking-tight mb-4 tabular-nums"><AnimatedNumber value={formatCurrency(todayEarnings + totalRevenue)} /></p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">+8.6%</span>
-                  <span className="text-[10px] font-semibold text-theme-muted">from last month</span>
-                </div>
-              </div>
 
-              {/* Total Invoices */}
-              <div className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative overflow-hidden group hover:border-theme-accent/30 transition-colors flex flex-col justify-between">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-theme-surface text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors">
-                    <FileText className="w-4 h-4" />
+                  {/* Total Invoices */}
+                  <div className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative overflow-hidden group hover:border-theme-accent/30 transition-colors flex flex-col justify-between">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-theme-surface text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors">
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <p className="text-xs font-bold text-theme-muted tracking-wide">Total Invoices</p>
+                    </div>
+                    <p className="text-3xl font-black text-theme-primary tracking-tight mb-4 tabular-nums"><AnimatedNumber value={invoices.length} /></p>
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">+12.4%</span>
+                      <span className="text-[10px] font-semibold text-theme-muted">from last month</span>
+                    </div>
                   </div>
-                  <p className="text-xs font-bold text-theme-muted tracking-wide">Total Invoices</p>
-                </div>
-                <p className="text-3xl font-black text-theme-primary tracking-tight mb-4 tabular-nums"><AnimatedNumber value={invoices.length} /></p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">+12.4%</span>
-                  <span className="text-[10px] font-semibold text-theme-muted">from last month</span>
-                </div>
-              </div>
 
-              {/* Pending Due */}
-              <div className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative overflow-hidden group hover:border-theme-accent/30 transition-colors flex flex-col justify-between">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-theme-surface text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors">
-                    <Clock className="w-4 h-4" />
+                  {/* Pending Due */}
+                  <div className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative overflow-hidden group hover:border-theme-accent/30 transition-colors flex flex-col justify-between">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-theme-surface text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors">
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <p className="text-xs font-bold text-theme-muted tracking-wide">Pending Due</p>
+                    </div>
+                    <p className="text-3xl font-black text-theme-primary tracking-tight mb-4 tabular-nums"><AnimatedNumber value={formatCurrency(totalDue)} /></p>
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">-7.1%</span>
+                      <span className="text-[10px] font-semibold text-theme-muted">from last month</span>
+                    </div>
                   </div>
-                  <p className="text-xs font-bold text-theme-muted tracking-wide">Pending Due</p>
-                </div>
-                <p className="text-3xl font-black text-theme-primary tracking-tight mb-4 tabular-nums"><AnimatedNumber value={formatCurrency(totalDue)} /></p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">-7.1%</span>
-                  <span className="text-[10px] font-semibold text-theme-muted">from last month</span>
-                </div>
-              </div>
 
-              {/* Active Customers */}
-              <div className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative overflow-hidden group hover:border-theme-accent/30 transition-colors flex flex-col justify-between">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-theme-surface text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors">
-                    <Users className="w-4 h-4" />
+                  {/* Active Customers */}
+                  <div className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative overflow-hidden group hover:border-theme-accent/30 transition-colors flex flex-col justify-between">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-theme-surface text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors">
+                        <Users className="w-4 h-4" />
+                      </div>
+                      <p className="text-xs font-bold text-theme-muted tracking-wide">Active Customers</p>
+                      <span className="ml-auto text-[10px] font-bold text-theme-muted bg-theme-surface px-1.5 py-0.5 rounded">NEW</span>
+                    </div>
+                    <p className="text-3xl font-black text-theme-primary tracking-tight mb-4 tabular-nums"><AnimatedNumber value={customers.length} /></p>
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">+3</span>
+                      <span className="text-[10px] font-semibold text-theme-muted">this week</span>
+                    </div>
                   </div>
-                  <p className="text-xs font-bold text-theme-muted tracking-wide">Active Customers</p>
-                </div>
-                <p className="text-3xl font-black text-theme-primary tracking-tight mb-4 tabular-nums"><AnimatedNumber value={totalCustomers} /></p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">-2.4%</span>
-                  <span className="text-[10px] font-semibold text-theme-muted">from last month</span>
-                </div>
-              </div>
+                </>
+              )}
             </motion.div>
 
             {/* ===== ROW 2: CHARTS ===== */}
