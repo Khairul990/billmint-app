@@ -510,52 +510,12 @@ const Dashboard = ({
               </div>
             </motion.div>
 
-            {/* ===== ROW 2: QUICK ACTION CARDS ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3">
-              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={onQuickBillOpen} className="flex items-center gap-4 p-4 bg-[image:var(--accent-gradient)] text-white rounded-xl shadow-sm hover:shadow-premium-hover transition-all relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0 relative z-10">
-                  <Plus className="w-5 h-5" />
-                </div>
-                <div className="relative z-10 text-left">
-                  <p className="text-xs font-bold">Create New Bill</p>
-                  <p className="text-[9px] text-white/70 font-semibold mt-0.5">Generate invoice instantly</p>
-                </div>
-              </motion.button>
-
-              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setShowAddCustomerSheet(true)} className="flex items-center gap-4 p-4 bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:shadow-premium-hover transition-all hover:border-theme-accent/30">
-                <div className="w-10 h-10 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold text-theme-primary">Add Customer</p>
-                  <p className="text-[9px] text-theme-muted font-semibold mt-0.5">Register new client</p>
-                </div>
-              </motion.button>
-
-              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setCurrentTab('due-ledger')} className="flex items-center gap-4 p-4 bg-theme-card border border-theme-border-soft rounded-xl shadow-sm hover:shadow-premium-hover transition-all hover:border-amber-500/30">
-                <div className="w-10 h-10 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                  <CreditCard className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold text-theme-primary">Collect Payment</p>
-                  <p className="text-[9px] text-theme-muted font-semibold mt-0.5">Receive pending dues</p>
-                </div>
-              </motion.button>
-            </motion.div>
 
             {/* ===== ROW 3: MAIN CONTENT (LEFT KPI + RIGHT INSIGHTS) ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
               {/* LEFT COLUMN (8/12): KPI + Revenue + Recent Bills */}
               <div className="col-span-8 space-y-4">
 
-                {/* KPI Cards in 2x2 grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  <KpiCard title="Today's Earnings" value={formatCurrency(todayEarnings)} icon={DollarSign} gradient trend={todayEarnings > 0 ? `+${formatCurrency(todayEarnings)} today` : null} />
-                  <KpiCard title="Total Collected" value={formatCurrency(totalCollected)} icon={Wallet} trend={totalCollected > 0 ? `${invoices.length} invoices` : null} />
-                  <KpiCard title="Total Due" value={formatCurrency(totalDue)} icon={Clock} trend={totalDue > 0 ? `${pendingBillsCount} unpaid` : null} />
-                  <KpiCard title="Active Customers" value={totalCustomers} icon={Users} trend={totalCustomers > 0 ? 'Registered clients' : null} />
-                </div>
 
                 {/* Revenue Overview Summary */}
                 <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
