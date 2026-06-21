@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, Users, TrendingUp, CheckCircle, XCircle, Eye, Settings as SettingsIcon, CloudLightning, Hash, RotateCcw } from 'lucide-react';
+import { ShieldAlert, Users, TrendingUp, CheckCircle, XCircle, Eye, Settings as SettingsIcon, CloudLightning, Hash, RotateCcw, Download, CheckCircle2, Info, Sliders, Save, Megaphone, Lock, Database, Upload, CircleDollarSign, ImageIcon, FileText, Trash2 } from 'lucide-react';
 import { auth } from '../../services/firebaseConfig';
 import { getCounterStatus, resetCounter } from '../../services/invoiceNumberService';
 import { toast } from 'react-hot-toast';
