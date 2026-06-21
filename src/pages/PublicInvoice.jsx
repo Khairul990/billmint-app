@@ -140,38 +140,18 @@ const PublicInvoice = ({ initialInvoice }) => {
   };
 
   if (!invoice) {
-    const requestedToken = window.location.pathname.split('/').pop() || 'N/A';
     return (
-      <div className="min-h-screen bg-theme-app flex flex-col items-center justify-center p-6 text-center text-white font-sans">
-        <AlertCircle className="w-16 h-16 text-theme-danger mb-4 animate-bounce" />
-        <h1 className="text-2xl font-black mb-2 text-white">Invoice Not Found</h1>
-        <p className="text-theme-muted text-sm max-w-md mb-8">
-          The invoice link you followed may have expired, been deleted, or contains an incorrect public token.
-        </p>
-        
-        {/* Dynamic Diagnostics Box for Developer Debugging */}
-        <div className="w-full max-w-lg bg-theme-card border border-theme-border-soft rounded-3xl p-5 text-left font-mono text-[11px] text-theme-muted space-y-2.5 shadow-2xl">
-          <div className="font-extrabold text-theme-accent border-b border-theme-border-soft pb-2 uppercase text-[10px] tracking-wider flex items-center justify-between">
-            <span>System Diagnostics (DEBUG)</span>
-            <span className="bg-theme-accent-dark text-theme-accent px-2 py-0.5 rounded-full text-[8px] font-black">Live</span>
-          </div>
-          <div>
-            <span className="text-theme-muted">Requested Token:</span>{' '}
-            <span className="text-theme-accent select-all font-bold">{requestedToken}</span>
-          </div>
-          <div>
-            <span className="text-theme-muted">Firebase Ready:</span>{' '}
-            <span className={window.billqyro_firebaseReady ? "text-theme-accent font-bold" : "text-theme-danger font-bold"}>
-              {window.billqyro_firebaseReady ? 'TRUE (Connected)' : 'FALSE (Offline fallback mode)'}
-            </span>
-          </div>
-          {window.billqyro_lastError && (
-            <div className="border-t border-theme-border-soft pt-2.5 mt-2.5">
-              <span className="text-theme-danger font-bold block mb-1">Query Error / Status:</span>
-              <pre className="whitespace-pre-wrap bg-theme-app p-3 rounded-xl border border-rose-950/40 text-rose-300 select-all font-semibold max-h-40 overflow-y-auto leading-relaxed">{window.billqyro_lastError}</pre>
-            </div>
-          )}
+      <div className="min-h-screen bg-theme-app flex flex-col items-center justify-center p-6 text-center font-sans">
+        <div className="w-20 h-20 rounded-full bg-theme-danger/10 flex items-center justify-center mb-6">
+          <AlertCircle className="w-10 h-10 text-theme-danger" />
         </div>
+        <h1 className="text-2xl font-black mb-2 text-theme-primary">Invoice Not Found</h1>
+        <p className="text-theme-muted text-sm max-w-md mb-8 leading-relaxed">
+          The invoice link may have expired, been deleted, or contains an incorrect reference. Please contact the sender for a new link.
+        </p>
+        <a href="/" className="px-6 py-3 bg-theme-accent hover:bg-theme-accent/90 text-white font-bold rounded-2xl transition-all shadow-premium">
+          Go to BillQyro
+        </a>
       </div>
     );
   }

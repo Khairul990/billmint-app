@@ -1994,14 +1994,17 @@ export const ensureInvoicePublicToken = async (invoice) => {
   const invoiceId = invoice.id || invoice._id;
   if (!invoiceId) return null;
 
-  let token = invoice.publicToken;
+  // Fast path: token already exists and is valid — return immediately
+  if (invoice.publicToken && invoice.publicToken !== 'undefined' && invoice.publicToken !== 'null' && invoice.publicToken !== '') {
+    return invoice.publicToken;
+  }
 
-  // 1. Generate secure token if missing or invalid
+  let token = invoice.publicToken;
   if (!token || token === 'undefined' || token === 'null' || token === '') {
     token = generateSecureToken();
   }
 
-  // 2. Save back to local storage invoices list (mutate a clone, not the original)
+  // Save back to local storage invoices list
   const invoices = await getInvoices();
   const idx = invoices.findIndex(inv => inv.id === invoiceId);
   if (idx !== -1) {
@@ -2009,23 +2012,21 @@ export const ensureInvoicePublicToken = async (invoice) => {
     updateLocalCache(KEYS.INVOICES, invoices);
   }
 
-  // 3. Force save/create public-safe copy and private copy in Firestore
+  // Parallel Firestore writes
   if (firebaseReady) {
     try {
       const publicPayload = { ...invoice, publicToken: token };
-
-      await firestoreSave('publicInvoices', token, publicPayload);
-
       const userId = getRealUserId();
+      const writes = [firestoreSave('publicInvoices', token, publicPayload)];
       if (userId && invoiceId) {
-        await setDoc(doc(db, 'invoices', userId, 'items', invoiceId), publicPayload);
+        writes.push(setDoc(doc(db, 'invoices', userId, 'items', invoiceId), publicPayload));
       }
+      await Promise.all(writes);
     } catch (e) {
       console.error('[ERROR] Failed to sync publicToken to Firestore in ensureInvoicePublicToken:', e);
     }
   }
 
-  // 4. Dispatch sync event
   window.dispatchEvent(new CustomEvent('billqyro_sync'));
 
   return token;

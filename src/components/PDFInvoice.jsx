@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 // Register Google Fonts to support regional currency symbols and scripts
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   businessName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#0a1128', // Dark blue corporate accent
+    color: '#0a1128',
   },
   businessSub: {
     fontSize: 8,
@@ -236,10 +236,9 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
     ...activePaymentSettings
   };
 
-  // Resolve snapshotted regional settings with proper fallbacks
   const regionalPrefs = invoice?.regionalSettingsSnapshot || {
     country: businessSettings?.country || 'India',
-    currency: businessSettings?.currency || '₹',
+    currency: businessSettings?.currency || '\u20b9',
     currencyCode: businessSettings?.currencyCode || (businessSettings?.country === 'Bangladesh' ? 'BDT' : businessSettings?.country === 'Other' ? 'USD' : 'INR'),
     language: businessSettings?.language || 'English',
     taxLabel: businessSettings?.taxLabel || (businessSettings?.country === 'Bangladesh' ? 'VAT' : businessSettings?.country === 'Other' ? 'Tax' : 'GST'),
@@ -247,10 +246,9 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
     numberFormat: businessSettings?.numberFormat || 'Indian'
   };
 
-  const currencySymbol = regionalPrefs.currency || '₹';
+  const currencySymbol = regionalPrefs.currency || '\u20b9';
   const templateId = businessSettings?.invoiceTemplate || 'modern';
   
-  // Resolve Dynamic PDF Theme accent colors
   const themePreset = businessSettings?.themePreset || 'light';
   let brandColor = '#19C3A3'; 
   let headerColor = '#0a1128';
@@ -267,7 +265,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
     headerColor = '#881337';
     tableHeaderBg = '#881337';
     totalHighlightBg = '#FFF1F2';
-  } else { // light
+  } else {
     brandColor = '#19C3A3';
     headerColor = '#14284B';
     tableHeaderBg = '#14284B';
@@ -320,9 +318,33 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
     ? `https://quickchart.io/qr?size=150&text=${encodeURIComponent(qrText)}`
     : null;
 
+  const getInvoiceTitle = (billType) => {
+    const titles = {
+      tailor: 'TAILOR INVOICE',
+      doctor: 'MEDICAL INVOICE',
+      teacher: 'TUITION INVOICE',
+      repair: 'REPAIR INVOICE',
+      retail: 'RETAIL INVOICE',
+      grocery: 'GROCERY INVOICE',
+      service: 'SERVICE INVOICE',
+      embroidery: 'EMBROIDERY INVOICE',
+    };
+    return titles[billType] || 'INVOICE';
+  };
+
+  const getDefaultNotesText = (billType) => {
+    const notes = {
+      tailor: 'Thank you for choosing our tailoring service!',
+      doctor: 'Thank you for your visit. Wishing you good health!',
+      teacher: 'Thank you for your continued learning!',
+      repair: 'Thank you for trusting us with your repair!',
+      retail: 'Thank you for shopping with us!',
+    };
+    return notes[billType] || 'Thank you for your business!';
+  };
+
   const renderTemplate1 = () => (
     <Page size="A5" style={[styles.compactPage, { fontFamily: dynamicFont }]}>
-      {/* Centered Compact Header */}
       <View style={styles.compactHeader}>
         <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#0a1128' }}>
           {businessSettings?.businessName || 'BillQyro Store'}
@@ -330,13 +352,12 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
         <Text style={{ fontSize: 7, color: '#64748b', marginTop: 2 }}>
           {businessSettings?.address || ''} | {businessSettings?.phone || ''}
         </Text>
-        <Text style={styles.compactTitle}>QUICK INVOICE</Text>
+        <Text style={styles.compactTitle}>{getInvoiceTitle(invoice.billType)}</Text>
         <Text style={{ fontSize: 8, color: '#475569', marginTop: 3 }}>
           #{invoice.invoiceNumber} | Date: {invoice.date}
         </Text>
       </View>
 
-      {/* Customer summary */}
       <View style={{ marginBottom: 10 }}>
         <Text style={{ fontSize: 7, color: '#94a3b8', fontWeight: 'bold' }}>BILL TO:</Text>
         <Text style={{ fontSize: 9, fontWeight: 'bold', color: '#0f172a' }}>{invoice.customerName}</Text>
@@ -345,7 +366,6 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
         </Text>
       </View>
 
-      {/* Compact Item Table */}
       <View style={styles.table}>
         <View style={[styles.compactTableHeader, { backgroundColor: tableHeaderBg }]}>
           <Text style={styles.compactColSN}>S.N.</Text>
@@ -359,11 +379,37 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
               <Text style={{ width: '25%' }}>Service</Text>
               <Text style={{ width: '27%' }}>Description</Text>
             </>
+          ) : invoice.billType === 'tailor' ? (
+            <Text style={styles.compactColDesc}>Work/Measurement</Text>
+          ) : invoice.billType === 'doctor' || invoice.billType === 'teacher' ? (
+            <Text style={{ width: '48%' }}>Fee Description</Text>
+          ) : invoice.billType === 'repair' ? (
+            <>
+              <Text style={{ width: '25%' }}>Service</Text>
+              <Text style={{ width: '27%' }}>Details</Text>
+            </>
+          ) : invoice.billType === 'retail' ? (
+            <>
+              <Text style={{ width: '30%' }}>Product / Variant</Text>
+              <Text style={{ width: '12%', textAlign: 'center' }}>Disc</Text>
+            </>
           ) : (
             <Text style={styles.compactColDesc}>Item & Design Description</Text>
           )}
-          <Text style={styles.compactColQty}>Qty</Text>
-          <Text style={styles.compactColRate}>Rate</Text>
+          {invoice.billType === 'doctor' || invoice.billType === 'teacher' ? (
+            <Text style={styles.compactColQty}>Month</Text>
+          ) : invoice.billType === 'retail' ? (
+            <Text style={{ width: '12%', textAlign: 'center' }}>Qty</Text>
+          ) : (
+            <Text style={styles.compactColQty}>Qty</Text>
+          )}
+          {invoice.billType === 'doctor' || invoice.billType === 'teacher' || invoice.billType === 'repair' ? (
+            <Text style={styles.compactColRate}>Amount</Text>
+          ) : invoice.billType === 'retail' ? (
+            <Text style={{ width: '12%', textAlign: 'right' }}>Price</Text>
+          ) : (
+            <Text style={styles.compactColRate}>Rate</Text>
+          )}
           <Text style={styles.compactColAmt}>Amount</Text>
         </View>
 
@@ -380,6 +426,20 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
                 <Text style={{ width: '25%' }}>{item.designNo || 'Service'}</Text>
                 <Text style={{ width: '27%' }}>{item.description || 'N/A'}</Text>
               </>
+            ) : invoice.billType === 'tailor' ? (
+              <Text style={styles.compactColDesc}>{item.description || 'Work'}</Text>
+            ) : invoice.billType === 'doctor' || invoice.billType === 'teacher' ? (
+              <Text style={{ width: '48%' }}>{item.description || 'Fee'}</Text>
+            ) : invoice.billType === 'repair' ? (
+              <>
+                <Text style={{ width: '25%' }}>{item.designNo || 'Repair'}</Text>
+                <Text style={{ width: '27%' }}>{item.description || 'N/A'}</Text>
+              </>
+            ) : invoice.billType === 'retail' ? (
+              <>
+                <Text style={{ width: '30%' }}>{item.description || 'Product'}{item.size ? ` (${item.size})` : ''}</Text>
+                <Text style={{ width: '12%', textAlign: 'center' }}>{item.discount || 0}</Text>
+              </>
             ) : (
               <Text style={styles.compactColDesc}>
                 {item.workType ? `[${item.workType}] ` : ''}
@@ -387,14 +447,21 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
                 {item.designNo && item.designNo !== 'N/A' ? ` (${item.designNo})` : ''}
               </Text>
             )}
-            <Text style={styles.compactColQty}>{item.qty}</Text>
-            <Text style={styles.compactColRate}>{parseFloat(item.rate).toFixed(2)}</Text>
+            {invoice.billType === 'retail' ? (
+              <Text style={{ width: '12%', textAlign: 'center' }}>{item.qty}</Text>
+            ) : (
+              <Text style={styles.compactColQty}>{item.qty}</Text>
+            )}
+            {invoice.billType === 'retail' ? (
+              <Text style={{ width: '12%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
+            ) : (
+              <Text style={styles.compactColRate}>{parseFloat(item.rate).toFixed(2)}</Text>
+            )}
             <Text style={styles.compactColAmt}>{parseFloat(item.amount).toFixed(2)}</Text>
           </View>
         ))}
       </View>
 
-      {/* Small Totals & QR Section */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10, borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingTop: 5 }}>
         <View style={{ width: '48%' }}>
           {qrCodeUrl ? (
@@ -416,7 +483,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
           ) : (
             <View style={{ fontSize: 6.5, color: '#64748b' }}>
               <Text style={{ fontWeight: 'bold', color: '#475569', fontSize: 7 }}>Notes:</Text>
-              <Text style={{ marginTop: 1 }}>{businessSettings?.defaultNotes || 'Thank you for your business!'}</Text>
+              <Text style={{ marginTop: 1 }}>{businessSettings?.defaultNotes || getDefaultNotesText(invoice.billType)}</Text>
             </View>
           )}
         </View>
@@ -450,12 +517,10 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
         </View>
       </View>
 
-      {/* Footer Text */}
       {businessSettings?.pdfFooter && (
         <Text style={styles.footerText}>{businessSettings.pdfFooter}</Text>
       )}
 
-      {/* Small Watermark */}
       {!isPremium && (
         <Text style={styles.watermark}>Powered by BillQyro Invoicing SaaS</Text>
       )}
@@ -464,7 +529,6 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
 
   const renderTemplate2 = () => (
     <Page size="A4" style={[styles.page, { fontFamily: dynamicFont }]}>
-      {/* Elegant Invoice Header */}
       <View style={styles.header}>
         <View style={styles.businessInfo}>
           <Text style={[styles.businessName, { color: headerColor }]}>
@@ -484,7 +548,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
         </View>
 
         <View style={styles.invoiceMeta}>
-          <Text style={[styles.invoiceTitle, { color: brandColor }]}>INVOICE</Text>
+          <Text style={[styles.invoiceTitle, { color: brandColor }]}>{getInvoiceTitle(invoice.billType)}</Text>
           <Text style={[styles.metaText, { fontWeight: 'bold', marginTop: 5 }]}>
             Invoice No: {invoice.invoiceNumber}
           </Text>
@@ -493,7 +557,6 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
         </View>
       </View>
 
-      {/* Customer details registry */}
       <View style={styles.clientSection}>
         <View style={styles.clientBox}>
           <Text style={styles.sectionTitle}>Invoiced To</Text>
@@ -516,7 +579,6 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
         </View>
       </View>
 
-      {/* Item Table */}
       <View style={styles.table}>
         <View style={[styles.tableHeader, { backgroundColor: tableHeaderBg }]}>
           <Text style={styles.colSN}>S.N.</Text>
@@ -533,6 +595,33 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
               <Text style={{ width: '30%' }}>Description</Text>
               <Text style={{ width: '10%', textAlign: 'center' }}>Qty</Text>
               <Text style={{ width: '18%', textAlign: 'right' }}>Rate</Text>
+            </>
+          ) : invoice.billType === 'tailor' ? (
+            <>
+              <Text style={{ width: '40%' }}>Work/Measurement</Text>
+              <Text style={{ width: '10%', textAlign: 'center' }}>Qty</Text>
+              <Text style={{ width: '10%', textAlign: 'right' }}>Rate</Text>
+            </>
+          ) : invoice.billType === 'doctor' || invoice.billType === 'teacher' ? (
+            <>
+              <Text style={{ width: '45%' }}>Fee Description</Text>
+              <Text style={{ width: '10%', textAlign: 'center' }}>Month</Text>
+              <Text style={{ width: '10%', textAlign: 'right' }}>Amount</Text>
+            </>
+          ) : invoice.billType === 'repair' ? (
+            <>
+              <Text style={{ width: '15%' }}>Service</Text>
+              <Text style={{ width: '30%' }}>Details</Text>
+              <Text style={{ width: '8%', textAlign: 'center' }}>Qty</Text>
+              <Text style={{ width: '10%', textAlign: 'right' }}>Amount</Text>
+            </>
+          ) : invoice.billType === 'retail' ? (
+            <>
+              <Text style={{ width: '28%' }}>Product</Text>
+              <Text style={{ width: '10%', textAlign: 'center' }}>Variant</Text>
+              <Text style={{ width: '8%', textAlign: 'center' }}>Qty</Text>
+              <Text style={{ width: '10%', textAlign: 'right' }}>Price</Text>
+              <Text style={{ width: '8%', textAlign: 'right' }}>Disc</Text>
             </>
           ) : (
             <>
@@ -564,6 +653,33 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
                 <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty}</Text>
                 <Text style={{ width: '18%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
               </>
+            ) : invoice.billType === 'tailor' ? (
+              <>
+                <Text style={{ width: '40%' }}>{item.description || 'Work'}</Text>
+                <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty}</Text>
+                <Text style={{ width: '10%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
+              </>
+            ) : invoice.billType === 'doctor' || invoice.billType === 'teacher' ? (
+              <>
+                <Text style={{ width: '45%' }}>{item.description || 'Fee'}</Text>
+                <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty}</Text>
+                <Text style={{ width: '10%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
+              </>
+            ) : invoice.billType === 'repair' ? (
+              <>
+                <Text style={{ width: '15%' }}>{item.designNo || 'Repair'}</Text>
+                <Text style={{ width: '30%' }}>{item.description || 'N/A'}</Text>
+                <Text style={{ width: '8%', textAlign: 'center' }}>{item.qty}</Text>
+                <Text style={{ width: '10%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
+              </>
+            ) : invoice.billType === 'retail' ? (
+              <>
+                <Text style={{ width: '28%' }}>{item.description || 'Product'}</Text>
+                <Text style={{ width: '10%', textAlign: 'center' }}>{item.size || 'N/A'}</Text>
+                <Text style={{ width: '8%', textAlign: 'center' }}>{item.qty}</Text>
+                <Text style={{ width: '10%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
+                <Text style={{ width: '8%', textAlign: 'right' }}>{item.discount || 0}</Text>
+              </>
             ) : (
               <>
                 <Text style={styles.colDesign}>{item.designNo || 'N/A'}</Text>
@@ -579,7 +695,6 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
         ))}
       </View>
 
-      {/* Totals segment */}
       <View style={styles.totalsContainer}>
         <View style={styles.notesBox}>
           {qrCodeUrl ? (
@@ -618,7 +733,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
           ) : (
             <View>
               <Text style={styles.notesHeader}>Notes & Business Conditions:</Text>
-              <Text>{businessSettings?.defaultNotes || 'Thank you for your business!'}</Text>
+              <Text>{businessSettings?.defaultNotes || getDefaultNotesText(invoice.billType)}</Text>
               <Text style={{ marginTop: 4 }}>{businessSettings?.terms || ''}</Text>
             </View>
           )}
@@ -663,12 +778,10 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
         </View>
       </View>
 
-      {/* Footer Text */}
       {businessSettings?.pdfFooter && (
         <Text style={styles.footerText}>{businessSettings.pdfFooter}</Text>
       )}
 
-      {/* Free tier watermark */}
       {!isPremium && (
         <Text style={styles.watermark}>Powered by BillQyro Invoicing SaaS</Text>
       )}
