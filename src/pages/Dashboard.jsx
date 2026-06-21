@@ -184,6 +184,7 @@ const Dashboard = ({
   const activities = getActivities();
   const totalCustomers = customers.length;
   const invoiceLabel = getInvoiceLabel();
+  const paidCount = invoices.filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid').length;
   const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
   const totalCollected = invoices
     .filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid' || inv.paymentStatus === 'Partial' || inv.paymentStatus === 'partial' || inv.paymentStatus === 'Partially Paid')
