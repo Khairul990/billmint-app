@@ -1714,39 +1714,7 @@ function App() {
             key="global-loader"
             exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeOut' } }}
             className="fixed inset-0 z-[9999] bg-theme-main flex flex-col items-center justify-center font-sans"
-          >
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
-              className="flex flex-col items-center"
-            >
-              {/* Premium Logo Pulse Effect */}
-              <div className="relative flex items-center justify-center w-24 h-24 mb-6">
-                <div className="absolute inset-0 bg-theme-accent/20 rounded-3xl animate-ping" style={{ animationDuration: '2s' }}></div>
-                <div className="absolute inset-0 bg-theme-accent/30 rounded-3xl blur-xl animate-pulse"></div>
-                <div className="relative z-10 w-20 h-20 bg-gradient-to-tr from-theme-accent to-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl border border-white/10">
-                  <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-              </div>
-              <h1 className="text-2xl font-black text-white tracking-tight">BillQyro</h1>
-              <p className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mt-2 animate-pulse">
-                Initializing Secure Workspace
-              </p>
-              
-              {/* Glassmorphism Skeleton Loader Bar */}
-              <div className="w-48 h-1 bg-theme-surface rounded-full mt-8 overflow-hidden shadow-inner">
-                <motion.div 
-                  initial={{ x: '-100%' }}
-                  animate={{ x: '200%' }}
-                  transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                  className="w-1/2 h-full bg-gradient-to-r from-transparent via-theme-accent to-transparent"
-                ></motion.div>
-              </div>
-            </motion.div>
-          </motion.div>
+          />
         ) : showAdminRoute ? (
           <motion.div key="admin-route" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full">
             <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>

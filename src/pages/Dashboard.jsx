@@ -8,6 +8,7 @@ import {
   Search, Link, Camera, FileSpreadsheet, ListChecks,
   AlertTriangle, ChevronRight, Circle, Briefcase
 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { formatCurrency } from '../utils/invoiceUtils';
 import PullToRefresh from '../components/PullToRefresh';
 import { syncFromFirestore, getActiveAnnouncement } from '../services/dbEngine';
@@ -188,6 +189,39 @@ const Dashboard = ({
     .filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid' || inv.paymentStatus === 'Partial' || inv.paymentStatus === 'partial' || inv.paymentStatus === 'Partially Paid')
     .reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
 
+  const getRevenueTrend = () => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toDateString();
+      const dayInv = invoices.filter(inv => {
+        const invDate = new Date(inv.createdAt);
+        return invDate.toDateString() === dateStr;
+      });
+      days.push({
+        day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        revenue: dayInv.reduce((s, inv) => s + (inv.grandTotal || inv.total || 0), 0),
+        collection: dayInv.filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid').reduce((s, inv) => s + (inv.grandTotal || inv.total || 0), 0),
+      });
+    }
+    return days;
+  };
+
+  const getPaymentBreakdown = () => {
+    const paid = invoices.filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid').length;
+    const unpaid = invoices.filter(inv => inv.paymentStatus === 'Unpaid' || inv.paymentStatus === 'unpaid').length;
+    const partial = invoices.filter(inv => inv.paymentStatus === 'Partial' || inv.paymentStatus === 'partial' || inv.paymentStatus === 'Partially Paid').length;
+    return [
+      { name: 'Paid', value: paid, color: '#10B981' },
+      { name: 'Unpaid', value: unpaid, color: '#EF4444' },
+      { name: 'Partial', value: partial, color: '#F59E0B' },
+    ];
+  };
+
+  const revenueTrend = getRevenueTrend();
+  const paymentBreakdown = getPaymentBreakdown();
+
   const statusBadge = (status) => {
     const s = (status || '').toLowerCase();
     if (s === 'paid' || s === 'paid') return { label: 'Paid', classes: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
@@ -205,30 +239,24 @@ const Dashboard = ({
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  const KpiCard = ({ title, value, icon: Icon, gradient, trend }) => (
+  const KpiCard = ({ title, value, icon: Icon, trend, trendUp = true }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-xl p-4 ${gradient ? 'bg-[image:var(--accent-gradient)] text-white shadow-premium' : 'bg-theme-card border border-theme-border-soft shadow-sm hover:shadow-premium-hover'} transition-all duration-300 lg:hover:scale-[1.02] relative overflow-hidden group border-t-2 ${gradient ? 'border-t-white/20' : 'border-t-theme-accent/20 hover:border-t-theme-accent/40'}`}
+      className="bg-theme-card border border-theme-border-soft rounded-xl p-3.5 shadow-sm hover:shadow-premium-hover transition-all duration-300 relative overflow-hidden group"
     >
-      {gradient && <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl pointer-events-none" />}
-      <div className="relative z-10">
-        <div className="flex items-center justify-between mb-0.5">
-          <span className={`text-[9px] font-bold uppercase tracking-wider ${gradient ? 'text-white/70' : 'text-theme-muted'}`}>{title}</span>
-          <div className={`p-1.5 rounded-full ${gradient ? 'bg-white/10' : 'bg-theme-accent/10 text-theme-accent group-hover:scale-110 group-hover:rotate-3 transition-all duration-300'}`}>
-            {Icon && <Icon className={`w-3.5 h-3.5 ${gradient ? 'text-white' : ''}`} />}
-          </div>
+      <div className="flex items-start justify-between mb-2">
+        <div className="p-2 rounded-lg bg-theme-accent/10 text-theme-accent group-hover:scale-110 transition-transform shrink-0">
+          {Icon && <Icon className="w-3.5 h-3.5" />}
         </div>
-        <p className={`text-xl font-black tracking-tight mt-1 tabular-nums ${gradient ? 'text-white' : 'text-theme-primary'}`}>
-          {gradient ? value : <AnimatedNumber value={value} />}
-        </p>
         {trend && (
-          <div className="flex items-center gap-1 mt-1.5">
-            <TrendingUp className={`w-3 h-3 ${gradient ? 'text-white/70' : 'text-emerald-500'}`} />
-            <span className={`text-[9px] font-bold ${gradient ? 'text-white/70' : 'text-emerald-500'}`}>{trend}</span>
-          </div>
+          <span className={`flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded ${trendUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+            <TrendingUp className={`w-2.5 h-2.5 ${!trendUp ? 'rotate-180' : ''}`} /> {trend}
+          </span>
         )}
       </div>
+      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-0.5">{title}</p>
+      <p className="text-lg font-black text-theme-primary tracking-tight tabular-nums"><AnimatedNumber value={value} /></p>
     </motion.div>
   );
 
@@ -469,300 +497,224 @@ const Dashboard = ({
               </motion.div>
             )}
 
-            {/* ===== ROW 1: PREMIUM HERO BANNER ===== */}
-            <motion.div variants={itemVariants} className="bg-[image:var(--accent-gradient)] text-white rounded-2xl p-6 shadow-premium relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-72 h-72 bg-white/[0.06] rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-10 -left-10 w-52 h-52 bg-white/[0.03] rounded-full blur-2xl pointer-events-none" />
-              <div className="absolute top-1/2 left-1/3 w-px h-24 bg-white/10 rotate-45" />
-              <div className="relative z-10">
-                <div className="flex items-start justify-between mb-5">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/60 mb-1">Welcome back,</p>
-                    <h1 className="text-2xl font-black tracking-tight">{businessSettings?.businessName || 'Your Workspace'}</h1>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={onQuickBillOpen} className="px-4 py-2.5 bg-white/20 hover:bg-white/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 backdrop-blur-sm border border-white/10">
-                      <Plus className="w-4 h-4" /> Create Bill
-                    </button>
-                    <button onClick={() => setCurrentTab('due-ledger')} className="px-4 py-2.5 bg-white/20 hover:bg-white/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 backdrop-blur-sm border border-white/10">
-                      <CreditCard className="w-4 h-4" /> Collect Payment
-                    </button>
-                  </div>
+            {/* ===== ROW 1: TOP KPI CARDS (4 compact) ===== */}
+            <motion.div variants={itemVariants} className="grid grid-cols-4 gap-3">
+              <KpiCard title="Today's Revenue" value={formatCurrency(todayEarnings)} icon={DollarSign} trend={todayEarnings > 0 ? `$${todayEarnings}` : null} />
+              <KpiCard title="Total Invoices" value={invoices.length} icon={FileText} trend={invoices.length > 0 ? 'All time' : null} />
+              <KpiCard title="Pending Due" value={formatCurrency(totalDue)} icon={Clock} trend={totalDue > 0 ? `${pendingBillsCount} bills` : null} trendUp={false} />
+              <KpiCard title="Active Customers" value={totalCustomers} icon={Users} trend={totalCustomers > 0 ? 'Total clients' : null} />
+            </motion.div>
+
+
+            {/* ===== ROW 2: CHART ROW (Revenue Bar + Payment Donut) ===== */}
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+              <div className="col-span-8 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Revenue Trend (7 days)</h3>
+                  <button onClick={() => setCurrentTab('reports')} className="flex items-center gap-1 text-[9px] font-bold text-theme-accent">
+                    Full Report <ArrowRight className="w-3 h-3" />
+                  </button>
                 </div>
-                <div className="mb-5">
-                  <p className="text-[9px] font-bold uppercase tracking-wider text-white/60 mb-1">Today's Earnings</p>
-                  <p className="text-4xl font-black tracking-tight tabular-nums">{formatCurrency(todayEarnings)}</p>
+                <div className="h-52">
+                  {getRevenueTrend().length === 0 ? (
+                    <div className="flex items-center justify-center h-full text-[10px] text-theme-muted font-semibold">No data yet — create invoices to see trends</div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={getRevenueTrend()} barCategoryGap="16%">
+                        <XAxis dataKey="date" tick={{ fontSize: 9, fill: 'var(--theme-muted)' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 9, fill: 'var(--theme-muted)' }} axisLine={false} tickLine={false} />
+                        <Tooltip
+                          contentStyle={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border-soft)', borderRadius: 8, fontSize: 10, fontWeight: 700 }}
+                          labelStyle={{ color: 'var(--theme-primary)' }}
+                        />
+                        <Bar dataKey="revenue" name="Revenue" radius={[4, 4, 0, 0]} fill="var(--theme-accent)" />
+                        <Bar dataKey="collection" name="Collected" radius={[4, 4, 0, 0]} fill="#10b981" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/5">
-                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Today's Collection</p>
-                    <p className="text-base font-black mt-0.5 tabular-nums">{formatCurrency(todayEarnings)}</p>
-                  </div>
-                  <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/5">
-                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Today's Due</p>
-                    <p className="text-base font-black mt-0.5 tabular-nums">{formatCurrency(totalDue)}</p>
-                  </div>
-                  <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/5">
-                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Active Customers</p>
-                    <p className="text-base font-black mt-0.5 tabular-nums">{totalCustomers}</p>
-                  </div>
+              </div>
+              <div className="col-span-4 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
+                <h3 className="text-sm font-extrabold text-theme-primary tracking-tight mb-3">Payment Status</h3>
+                <div className="h-44">
+                  {getPaymentBreakdown().filter(d => d.value > 0).length === 0 ? (
+                    <div className="flex items-center justify-center h-full text-[10px] text-theme-muted font-semibold">No invoices yet</div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={getPaymentBreakdown()} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={44} outerRadius={60} paddingAngle={3}>
+                          {getPaymentBreakdown().map((entry, idx) => (
+                            <Cell key={idx} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border-soft)', borderRadius: 8, fontSize: 10, fontWeight: 700 }}
+                          labelStyle={{ color: 'var(--theme-primary)' }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+                <div className="flex items-center justify-center gap-4 mt-1">
+                  {getPaymentBreakdown().map((entry, idx) => (
+                    <div key={idx} className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full" style={{ background: entry.color }} />
+                      <span className="text-[9px] font-bold text-theme-muted">{entry.name} ({entry.value})</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </motion.div>
 
-
-            {/* ===== ROW 3: MAIN CONTENT (LEFT KPI + RIGHT INSIGHTS) ===== */}
+            {/* ===== ROW 3: BILLS TABLE + DUE PANEL ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
-              {/* LEFT COLUMN (8/12): KPI + Revenue + Recent Bills */}
-              <div className="col-span-8 space-y-4">
-
-
-                {/* Revenue Overview Summary */}
-                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Revenue Overview</h3>
-                    <button onClick={() => setCurrentTab('reports')} className="flex items-center gap-1 text-[9px] font-bold text-theme-accent hover:text-theme-accent-dark transition-colors">
-                      Full Report <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Total Revenue</p>
-                      <p className="text-base font-black text-theme-primary tabular-nums mt-1"><AnimatedNumber value={formatCurrency(totalRevenue)} /></p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Total Collected</p>
-                      <p className="text-base font-black text-emerald-500 tabular-nums mt-1"><AnimatedNumber value={formatCurrency(totalCollected)} /></p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Collection Rate</p>
-                      <p className="text-base font-black text-theme-accent tabular-nums mt-1">{totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0}%</p>
-                    </div>
-                  </div>
+              <div className="col-span-8 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between p-3.5 border-b border-theme-border-soft">
+                  <h3 className="text-[11px] font-extrabold text-theme-primary tracking-tight">Recent {invoiceLabel}</h3>
+                  <button onClick={() => setCurrentTab('invoices')} className="text-[8px] font-bold text-theme-accent flex items-center gap-1">
+                    View All <ArrowRight className="w-3 h-3" />
+                  </button>
                 </div>
-
-                {/* Recent Bills (compact) */}
-                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
-                  <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
-                    <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Recent {invoiceLabel}</h3>
-                    <button onClick={() => setCurrentTab('invoices')} className="flex items-center gap-1 text-[9px] font-bold text-theme-accent">
-                      View All <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                  {recentInvoices.length === 0 ? (
-                    <div className="flex items-center gap-3 p-4">
-                      <div className="w-8 h-8 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
-                        <FileText className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-bold text-theme-primary">No {invoiceLabel.toLowerCase()} yet</p>
-                        <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Create your first invoice to get started</p>
-                      </div>
-                      <button onClick={onQuickBillOpen} className="px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-[10px] font-bold rounded-lg shadow-sm hover:shadow-md transition-all">+ Create</button>
+                {recentInvoices.length === 0 ? (
+                  <div className="flex items-center gap-3 p-4">
+                    <div className="w-7 h-7 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+                      <FileText className="w-3.5 h-3.5" />
                     </div>
-                  ) : (
+                    <p className="text-xs font-bold text-theme-primary">No {invoiceLabel.toLowerCase()} yet</p>
+                    <button onClick={onQuickBillOpen} className="ml-auto px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-[9px] font-bold rounded-lg">+ Create</button>
+                  </div>
+                ) : (
+                  <div>
+                    {/* Table Header */}
+                    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 px-3.5 py-1.5 border-b border-theme-border-soft">
+                      <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">Customer</span>
+                      <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider text-right">Amount</span>
+                      <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider text-center">Status</span>
+                      <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider text-center">Date</span>
+                    </div>
                     <div className="divide-y divide-theme-border-soft">
-                      {recentInvoices.slice(0, 4).map((inv, idx) => (
+                      {recentInvoices.slice(0, 5).map((inv, idx) => (
                         <motion.div
                           key={inv.id}
                           initial={{ opacity: 0, x: -5 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: idx * 0.03 }}
                           onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }}
-                          className="flex items-center gap-3 px-4 py-2.5 hover:bg-theme-surface transition-colors cursor-pointer group"
+                          className="grid grid-cols-[1fr_auto_auto_auto] gap-2 px-3.5 py-2 hover:bg-theme-surface transition-colors cursor-pointer items-center"
                         >
-                          <div className="w-7 h-7 rounded-lg bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                            <FileText className="w-3.5 h-3.5" />
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-bold text-theme-primary truncate">{inv.customerName || 'Walk-in'}</p>
+                            <p className="text-[8px] text-theme-muted font-semibold">{inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`}</p>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-bold text-theme-primary truncate group-hover:text-theme-accent transition-colors">{inv.customerName || 'Walk-in Customer'}</p>
-                            <p className="text-[9px] text-theme-muted font-semibold">{inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`} • {formatShortDate(inv.createdAt)}</p>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <p className="text-[11px] font-black text-theme-primary">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
-                            <span className={`inline-block text-[7px] font-bold px-1.5 py-0.5 rounded-full border ${statusBadge(inv.paymentStatus).classes}`}>{statusBadge(inv.paymentStatus).label}</span>
-                          </div>
+                          <p className="text-[10px] font-black text-theme-primary text-right tabular-nums">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
+                          <span className={`inline-block text-[7px] font-bold px-1.5 py-0.5 rounded-full border text-center ${statusBadge(inv.paymentStatus).classes}`}>{statusBadge(inv.paymentStatus).label}</span>
+                          <span className="text-[8px] font-semibold text-theme-muted text-center">{formatShortDate(inv.createdAt)}</span>
                         </motion.div>
                       ))}
                     </div>
-                  )}
-                </div>
-              </div>
-
-              {/* RIGHT COLUMN (4/12): Insights + Sync + Mini Bills */}
-              <div className="col-span-4 space-y-4">
-
-                {/* Quick Insights Card */}
-                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
-                  <h3 className="text-sm font-extrabold text-theme-primary tracking-tight mb-3">Quick Insights</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between py-2 border-b border-theme-border-soft">
-                      <p className="text-[10px] font-bold text-theme-muted">Total Bills</p>
-                      <p className="text-xs font-black text-theme-primary tabular-nums">{invoices.length}</p>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-theme-border-soft">
-                      <p className="text-[10px] font-bold text-theme-muted">Total Collected</p>
-                      <p className="text-xs font-black text-emerald-500 tabular-nums">{formatCurrency(totalCollected)}</p>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-theme-border-soft">
-                      <p className="text-[10px] font-bold text-theme-muted">Total Due</p>
-                      <p className="text-xs font-black text-amber-500 tabular-nums">{formatCurrency(totalDue)}</p>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-theme-border-soft">
-                      <p className="text-[10px] font-bold text-theme-muted">Overdue Bills</p>
-                      <p className={`text-xs font-black tabular-nums ${totalOverdue > 0 ? 'text-red-500' : 'text-theme-muted'}`}>{totalOverdue}</p>
-                    </div>
-                    <div className="flex items-center justify-between py-2">
-                      <p className="text-[10px] font-bold text-theme-muted">Upcoming Payments</p>
-                      <p className="text-xs font-black text-theme-accent tabular-nums">{totalUpcoming}</p>
-                    </div>
                   </div>
-                </div>
-
-                {/* Cloud Sync Status */}
+                )}
+              </div>
+              <div className="col-span-4 space-y-3">
                 <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-4">
+                  <h3 className="text-xs font-extrabold text-theme-primary tracking-tight mb-3">Due Overview</h3>
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-theme-accent" />
-                      <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Cloud Sync</h3>
+                    <div>
+                      <p className="text-[10px] font-bold text-theme-muted">Total Outstanding</p>
+                      <p className="text-xl font-black text-theme-primary tabular-nums mt-0.5">{formatCurrency(totalDue)}</p>
                     </div>
-                    <span className={`w-2 h-2 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-pulse' : syncStatus === 'Offline' ? 'bg-red-500' : 'bg-amber-500'}`} />
+                    <div className="text-right">
+                      <p className="text-[10px] font-bold text-theme-muted">Collection Rate</p>
+                      <p className="text-xl font-black text-theme-accent tabular-nums mt-0.5">{totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0}%</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-theme-muted mb-3">
-                    <span className={`inline-block w-1.5 h-1.5 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                    {syncStatus === 'Synced' ? 'All data synced to cloud' : syncStatus}
-                    {isAppInstalled && <span className="ml-auto text-[9px] font-bold text-theme-accent bg-theme-accent/10 px-1.5 py-0.5 rounded">Installed</span>}
-                  </div>
-
-                  {/* Recent Payments Mini */}
-                  <div className="pt-1">
-                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-2">Recent Payments</p>
-                    {recentPayments.length === 0 ? (
-                      <p className="text-[10px] text-theme-muted font-semibold py-1">No payments collected yet</p>
-                    ) : (
-                      <div className="space-y-1.5">
-                        {recentPayments.slice(0, 3).map((inv) => (
-                          <div key={inv.id} className="flex items-center justify-between py-1 px-2 rounded-lg hover:bg-theme-surface transition-colors cursor-pointer" onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }}>
-                            <p className="text-[10px] font-bold text-theme-primary truncate flex-1 min-w-0">{inv.customerName || 'Walk-in'}</p>
-                            <p className="text-[10px] font-black text-emerald-500 shrink-0 ml-2">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {installPromptEvent && !isAppInstalled && (
-                    <button onClick={onInstallApp} className="mt-3 w-full py-2 bg-[image:var(--accent-gradient)] text-white text-[9px] font-bold rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95">
-                      Install App for Offline Access
-                    </button>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-
-            {/* ===== ROW 4: ACTIVITY FEED + PENDING COLLECTION ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
-              {/* Activity Feed (8/12) */}
-              <div className="col-span-8 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Activity Feed</h3>
-                    <span className="w-1.5 h-1.5 rounded-full bg-theme-accent animate-pulse" />
+                    <div className={`flex-1 p-2 rounded-lg text-center ${totalOverdue > 0 ? 'bg-red-500/10' : 'bg-theme-surface'}`}>
+                      <p className={`text-sm font-black ${totalOverdue > 0 ? 'text-red-500' : 'text-theme-muted'}`}>{totalOverdue}</p>
+                      <p className={`text-[7px] font-bold uppercase tracking-wider ${totalOverdue > 0 ? 'text-red-500' : 'text-theme-muted/60'}`}>Overdue</p>
+                    </div>
+                    <div className="flex-1 p-2 rounded-lg bg-theme-surface text-center">
+                      <p className="text-sm font-black text-theme-accent">{totalUpcoming}</p>
+                      <p className="text-[7px] font-bold uppercase tracking-wider text-theme-muted/60">Upcoming</p>
+                    </div>
+                    <div className="flex-1 p-2 rounded-lg bg-emerald-500/10 text-center">
+                      <p className="text-sm font-black text-emerald-500">{paidCount}</p>
+                      <p className="text-[7px] font-bold uppercase tracking-wider text-emerald-500">Paid</p>
+                    </div>
                   </div>
-                  <span className="text-[9px] font-semibold text-theme-muted">Latest activities</span>
                 </div>
-                {activities.length === 0 ? (
-                  <div className="flex items-center gap-3 p-4">
-                    <div className="w-7 h-7 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
-                      <Activity className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-theme-primary">No activity yet</p>
-                      <p className="text-[10px] text-theme-muted font-semibold">Activity appears as you use BillQyro</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4">
-                    <div className="relative">
-                      <div className="absolute left-[15px] top-2 bottom-2 w-[2px] bg-gradient-to-b from-theme-accent via-theme-accent/50 to-transparent rounded-full" />
-                      <div className="space-y-0">
-                        {activities.slice(0, 6).map((act, idx) => (
-                          <div key={act.id} className="relative flex items-start gap-3 py-2">
-                            <div className={`w-7 h-7 rounded-full ${act.iconBg} ${act.iconColor} flex items-center justify-center shrink-0 relative z-10 ring-2 ring-theme-card transition-transform hover:scale-110`}>
-                              <act.icon className="w-3.5 h-3.5" />
-                            </div>
-                            <div className="flex-1 min-w-0 pt-0.5">
-                              <p className="text-[11px] font-bold text-theme-primary">{act.text}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[9px] text-theme-muted font-semibold">{act.subtext}</span>
-                                {act.amount > 0 && <><span className="text-theme-border-strong">•</span><span className="text-[9px] font-bold text-theme-primary">{formatCurrency(act.amount)}</span></>}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
 
-              {/* Pending Collection (4/12) */}
-              <div className="col-span-4 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-theme-border-soft">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Pending Collection</h3>
-                    <button onClick={() => setCurrentTab('due-ledger')} className="text-[9px] font-bold text-theme-accent hover:text-theme-accent-dark transition-colors flex items-center gap-1">Open Ledger <ArrowRight className="w-3 h-3" /></button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-2xl font-black text-theme-primary">{formatCurrency(totalDue)}</p>
-                      <p className="text-[9px] text-theme-muted font-semibold mt-0.5">Total Outstanding</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <div className={`px-3 py-1.5 rounded-xl text-center ${totalOverdue > 0 ? 'bg-red-500/10' : 'bg-theme-surface'}`}>
-                        <p className={`text-sm font-black ${totalOverdue > 0 ? 'text-red-500' : 'text-theme-muted'}`}>{totalOverdue}</p>
-                        <p className={`text-[7px] font-bold uppercase tracking-wider ${totalOverdue > 0 ? 'text-red-500' : 'text-theme-muted/60'}`}>Overdue</p>
-                      </div>
-                      <div className="px-3 py-1.5 rounded-xl bg-theme-surface text-center">
-                        <p className="text-sm font-black text-theme-accent">{totalUpcoming}</p>
-                        <p className="text-[7px] font-bold uppercase tracking-wider text-theme-muted/60">Upcoming</p>
-                      </div>
-                    </div>
+                {/* Quick Actions */}
+                <div className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm p-3">
+                  <h3 className="text-[10px] font-extrabold text-theme-primary tracking-tight mb-2">Quick Actions</h3>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    <button onClick={onQuickBillOpen} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-[image:var(--accent-gradient)] text-white hover:shadow-md transition-all active:scale-95">
+                      <Plus className="w-3.5 h-3.5" />
+                      <span className="text-[7px] font-bold">Bill</span>
+                    </button>
+                    <button onClick={() => setShowAddCustomerSheet(true)} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-theme-accent/10 text-theme-accent hover:bg-theme-accent/20 transition-all active:scale-95">
+                      <Users className="w-3.5 h-3.5" />
+                      <span className="text-[7px] font-bold">Client</span>
+                    </button>
+                    <button onClick={() => setCurrentTab('due-ledger')} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition-all active:scale-95">
+                      <CreditCard className="w-3.5 h-3.5" />
+                      <span className="text-[7px] font-bold">Collect</span>
+                    </button>
+                    <button onClick={() => setCurrentTab('reports')} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-theme-surface text-theme-primary hover:bg-theme-border-soft transition-all active:scale-95">
+                      <BarChart3 className="w-3.5 h-3.5" />
+                      <span className="text-[7px] font-bold">Reports</span>
+                    </button>
                   </div>
                 </div>
-                {pendingCollection.length === 0 ? (
-                  <div className="flex items-center gap-3 p-4">
-                    <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                      <CheckCircle className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-theme-primary">All clear!</p>
-                      <p className="text-[10px] text-theme-muted font-semibold">No pending collections</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-theme-border-soft">
-                    {pendingCollection.slice(0, 4).map((inv, idx) => {
-                      const isOverdue = inv.dueDate && new Date(inv.dueDate) < new Date();
-                      return (
-                        <div key={inv.id} onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }} className="flex items-center gap-2 px-4 py-2.5 hover:bg-theme-surface transition-colors cursor-pointer group">
-                          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isOverdue ? 'bg-red-500' : 'bg-amber-500'}`} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-bold text-theme-primary truncate group-hover:text-theme-accent transition-colors">{inv.customerName || 'Walk-in'}</p>
-                            <p className="text-[9px] text-theme-muted font-semibold">{inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`}{inv.dueDate ? ` • Due ${formatShortDate(inv.dueDate)}` : ''}</p>
-                          </div>
-                          <p className="text-[11px] font-black text-theme-primary">{formatCurrency(inv.balanceDue || inv.dueAmount || inv.grandTotal || inv.total || 0)}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                {pendingCollection.length > 4 && (
-                  <button onClick={() => setCurrentTab('due-ledger')} className="w-full py-2.5 text-[9px] font-bold text-theme-accent hover:bg-theme-surface transition-colors border-t border-theme-border-soft">
-                    View All {pendingCollection.length} Pending <ArrowRight className="w-3 h-3 inline-block ml-0.5" />
+
+                {/* Install prompt */}
+                {installPromptEvent && !isAppInstalled && (
+                  <button onClick={onInstallApp} className="w-full py-2 bg-[image:var(--accent-gradient)] text-white text-[9px] font-bold rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95">
+                    Install App for Offline Access
                   </button>
                 )}
               </div>
+            </motion.div>
+
+            {/* ===== ROW 4: ACTIVITY FEED (compact) ===== */}
+            <motion.div variants={itemVariants} className="bg-theme-card rounded-xl border border-theme-border-soft shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between p-3.5 border-b border-theme-border-soft">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-[11px] font-extrabold text-theme-primary tracking-tight">Activity Feed</h3>
+                  <span className="w-1.5 h-1.5 rounded-full bg-theme-accent animate-pulse" />
+                </div>
+                <span className="text-[8px] font-semibold text-theme-muted">Latest</span>
+              </div>
+              {activities.length === 0 ? (
+                <div className="flex items-center gap-3 p-3.5">
+                  <div className="w-7 h-7 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+                    <Activity className="w-3.5 h-3.5" />
+                  </div>
+                  <p className="text-xs font-bold text-theme-primary">No activity yet</p>
+                </div>
+              ) : (
+                <div className="p-3.5">
+                  <div className="relative">
+                    <div className="absolute left-[15px] top-2 bottom-2 w-[2px] bg-gradient-to-b from-theme-accent via-theme-accent/50 to-transparent rounded-full" />
+                    <div className="space-y-0">
+                      {activities.slice(0, 5).map((act, idx) => (
+                        <div key={act.id} className="relative flex items-start gap-3 py-1.5">
+                          <div className={`w-7 h-7 rounded-full ${act.iconBg} ${act.iconColor} flex items-center justify-center shrink-0 relative z-10 ring-2 ring-theme-card`}>
+                            <act.icon className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="flex-1 min-w-0 pt-0.5">
+                            <p className="text-[10px] font-bold text-theme-primary">{act.text}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-[8px] text-theme-muted font-semibold">{act.subtext}</span>
+                              {act.amount > 0 && <><span className="text-theme-border-strong">•</span><span className="text-[8px] font-bold text-theme-primary">{formatCurrency(act.amount)}</span></>}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </motion.div>
 
             {/* Sync Status Bar */}
