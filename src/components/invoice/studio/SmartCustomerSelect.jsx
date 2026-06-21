@@ -3,9 +3,12 @@ import { useInvoice } from '../../../contexts/InvoiceContext';
 import { UserPlus, Search, ChevronDown, Check, Phone, Mail, MapPin, MessageCircle, Clock, IndianRupee, Star, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CustomerInsightsPane from './CustomerInsightsPane';
+import { getCustomerLabelByType } from '../../../config/businessPresets';
 
 const SmartCustomerSelect = ({ customers = [] }) => {
-  const { state, dispatch } = useInvoice();
+  const { state, dispatch, businessSettings } = useInvoice();
+  const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.businessType || 'retail';
+  const customerLabel = getCustomerLabelByType(wsType);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef(null);
@@ -58,7 +61,7 @@ const SmartCustomerSelect = ({ customers = [] }) => {
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-black uppercase tracking-wider text-theme-primary flex items-center gap-2">
-            <UserPlus className="w-4 h-4 text-theme-accent" /> Customer Details
+            <UserPlus className="w-4 h-4 text-theme-accent" /> {customerLabel} Details
           </h2>
           {state.customer.customerType === 'VIP' && (
             <span className="text-[10px] font-black bg-gradient-to-r from-amber-400 to-amber-600 text-white px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
@@ -79,7 +82,7 @@ const SmartCustomerSelect = ({ customers = [] }) => {
           )}
           {state.customer.name && !state.customer.id && (
             <span className="text-[10px] font-bold bg-theme-accent/10 text-theme-accent px-2 py-0.5 rounded-full border border-theme-accent/20">
-              New Customer
+              New {customerLabel}
             </span>
           )}
         </div>
@@ -88,7 +91,7 @@ const SmartCustomerSelect = ({ customers = [] }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Customer Search / Name */}
         <div className="relative" ref={dropdownRef}>
-          <label className="block text-xs font-bold text-theme-muted mb-1.5 ml-1">Customer Name *</label>
+          <label className="block text-xs font-bold text-theme-muted mb-1.5 ml-1">{customerLabel} Name *</label>
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted transition-colors group-focus-within:text-theme-accent" />
             <input
@@ -133,8 +136,8 @@ const SmartCustomerSelect = ({ customers = [] }) => {
                     ))
                   ) : (
                     <div className="p-4 text-center">
-                      <p className="text-sm font-bold text-theme-primary">No matches found</p>
-                      <p className="text-xs text-theme-muted mt-1">Press enter or click away to create new</p>
+                      <p className="text-sm font-bold text-theme-primary">No {customerLabel.toLowerCase()} found</p>
+                      <p className="text-xs text-theme-muted mt-1">Type to add new {customerLabel.toLowerCase()}</p>
                     </div>
                   )}
                 </div>
@@ -192,7 +195,7 @@ const SmartCustomerSelect = ({ customers = [] }) => {
           </div>
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-theme-muted mb-1 uppercase tracking-wider ml-1">Customer Type</label>
+          <label className="block text-[10px] font-bold text-theme-muted mb-1 uppercase tracking-wider ml-1">{customerLabel} Type</label>
           <div className="relative group">
             <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted transition-colors group-focus-within:text-theme-accent" />
             <select

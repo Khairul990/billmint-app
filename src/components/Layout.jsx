@@ -117,14 +117,38 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         return 'Invoices System';
       case 'create-invoice':
         return 'Invoice Builder';
+      case 'estimates':
+        return 'Estimates & Quotes';
+      case 'pdf-templates':
+        return 'PDF Templates';
+      case 'live-link-templates':
+        return 'Live Link Studio';
+      case 'marketplace':
+        return 'Template Marketplace';
       case 'customers':
         return 'Client CRM';
+      case 'patients':
+        return 'Patient Records';
+      case 'students':
+        return 'Student Directory';
+      case 'clients':
+        return 'Client Roster';
       case 'products':
         return 'Product & Service Catalog';
       case 'expenses':
         return 'Overhead Expense Logger';
       case 'subscription':
-        return 'SaaS Licensing Tiers';
+        return 'Subscription Plan';
+      case 'reports':
+        return 'Reports & Analytics';
+      case 'due-ledger':
+        return 'Due Ledger';
+      case 'pending-payments':
+        return 'Payment Proofs';
+      case 'backup-restore':
+        return 'Backup & Restore';
+      case 'help-center':
+        return 'Help Center';
       case 'more':
         return 'More Workspace Options';
       case 'admin-panel':

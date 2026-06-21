@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         maximumFileSizeToCacheInBytes: 5000000, // 5MB limit
+        navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/__/, /^\/api\//, /^\/publicInvoices\//],
         ignoreURLParametersMatching: [/^token/, /^secret/, /^auth/],
         cleanupOutdatedCaches: true,

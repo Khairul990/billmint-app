@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useInvoice } from '../../../contexts/InvoiceContext';
 import { toast } from 'react-hot-toast';
 import { Check, User, ShoppingBag, CreditCard, Cloud, AlertTriangle, Loader2, ArrowRight, ArrowLeft, FileText, Share2, Eye, X } from 'lucide-react';
+import { getCustomerLabelByType } from '../../../config/businessPresets';
 
 import StudioHeader from './StudioHeader';
 import SmartCustomerSelect from './SmartCustomerSelect';
@@ -13,7 +14,9 @@ import LiveInvoicePreview from '../LiveInvoicePreview';
 import { ensureInvoicePublicToken } from '../../../services/dbEngine';
 
 const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, onBack }) => {
-  const { state, dispatch } = useInvoice();
+  const { state, dispatch, businessSettings } = useInvoice();
+  const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.businessType || 'retail';
+  const customerLabel = getCustomerLabelByType(wsType);
   
   const [currentStep, setCurrentStep] = useState(1);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -75,6 +78,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
       setSaveStatus('saved');
       setLastSaved(new Date());
       savedSnapshotRef.current = JSON.stringify(state);
+      if (!silent) toast.success('Invoice saved successfully!');
       return savedInvoice;
     } catch (err) {
       console.error(err);
@@ -134,7 +138,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
   };
 
   const steps = [
-    { id: 1, title: 'Customer', icon: <User className="w-5 h-5" /> },
+    { id: 1, title: customerLabel, icon: <User className="w-5 h-5" /> },
     { id: 2, title: 'Items', icon: <ShoppingBag className="w-5 h-5" /> },
     { id: 3, title: 'Payment', icon: <CreditCard className="w-5 h-5" /> }
   ];
@@ -201,7 +205,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
           {currentStep === 1 && (
             <div className="flex flex-col gap-6 w-full">
               <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-6 shadow-sm w-full">
-                <h2 className="text-sm font-black uppercase text-theme-primary mb-4 flex items-center gap-2"><User className="w-4 h-4 text-theme-accent" /> Customer Details</h2>
+                <h2 className="text-sm font-black uppercase text-theme-primary mb-4 flex items-center gap-2"><User className="w-4 h-4 text-theme-accent" /> {customerLabel} Details</h2>
                 <SmartCustomerSelect customers={customers} />
               </div>
               

@@ -519,7 +519,7 @@ function App() {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setInstallPromptEvent(e);
-      console.log('beforeinstallprompt event stashed successfully');
+      // PWA install prompt stashed
     };
 
     const handleAppInstalled = () => {
@@ -545,7 +545,7 @@ function App() {
     if (!installPromptEvent) return;
     installPromptEvent.prompt();
     const { outcome } = await installPromptEvent.userChoice;
-    console.log(`User installation choice: ${outcome}`);
+    // User install choice handled
     setInstallPromptEvent(null);
   };
 
@@ -560,7 +560,7 @@ function App() {
   useEffect(() => {
     if (firebaseReady && auth) {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
-        console.log("Firebase authReady: ", user ? `User found (uid: ${user.uid})` : "No real user found");
+        // Firebase auth state updated
         if (user) {
           const session = getAuthSession();
           const newSession = {
@@ -589,10 +589,8 @@ function App() {
   useEffect(() => {
     if (isAuthenticated) {
       const runSync = async () => {
-        console.log('Sync start: Attempting to sync from Firestore');
         try {
           const synced = await syncFromFirestore();
-          console.log('Sync result: ', synced ? 'Success' : 'Failed/Null');
           if (synced) {
             if (synced.invoices) setInvoices(synced.invoices);
             if (synced.customers) setCustomers(synced.customers);
@@ -668,7 +666,7 @@ function App() {
   useEffect(() => {
     // Wait until boot and sync is completely finished
     if (isAuthenticated && !isAppBooting && settings && cloudSyncDone) {
-      console.log("Onboarding Check:", { setupCompleted: settings.setupCompleted, currentTab });
+      // Onboarding check complete
       const isLegacyConfigured = !!(settings.businessName && settings.businessName.trim());
       
       if (!settings.setupCompleted && !isLegacyConfigured) {

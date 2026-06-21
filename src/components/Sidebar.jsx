@@ -256,11 +256,11 @@ const Sidebar = ({
               <div className="flex items-center gap-1.5 mb-1 w-full">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 animate-pulse" />
                 <span className="text-[9px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">
-                  PRO
+                  PREMIUM
                 </span>
               </div>
               <p className="text-xs font-extrabold text-theme-primary truncate w-full group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                Upgrade to Premium
+                Unlock Premium
               </p>
               <p className="text-[10px] text-theme-muted font-medium truncate w-full">
                 Unlock unlimited billing

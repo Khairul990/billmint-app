@@ -4,9 +4,12 @@ import { User, Phone, Mail, MapPin, Search, FileText, Check } from 'lucide-react
 import * as Icons from 'lucide-react';
 import { useInvoice } from '../../../../contexts/InvoiceContext';
 import { invoiceTemplates } from '../../../../config/invoiceTemplates';
+import { getCustomerLabelByType } from '../../../../config/businessPresets';
 
 const CustomerSelectionStep = ({ customers = [] }) => {
-  const { state, dispatch } = useInvoice();
+  const { state, dispatch, businessSettings } = useInvoice();
+  const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.businessType || 'retail';
+  const customerLabel = getCustomerLabelByType(wsType);
   const { customer, saveCustomer } = state;
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -80,8 +83,8 @@ const CustomerSelectionStep = ({ customers = [] }) => {
       </div>
 
       <div className="mb-6 border-t border-theme-border-soft pt-6">
-        <h2 className="text-xl font-extrabold text-theme-primary">Billed To</h2>
-        <p className="text-sm text-theme-muted font-medium mt-1">Select an existing client or enter new details.</p>
+        <h2 className="text-xl font-extrabold text-theme-primary">{customerLabel} Details</h2>
+        <p className="text-sm text-theme-muted font-medium mt-1">Select an existing {customerLabel.toLowerCase()} or enter new details.</p>
       </div>
 
       {customers.length > 0 && (
@@ -94,7 +97,7 @@ const CustomerSelectionStep = ({ customers = [] }) => {
               onChange={handleCustomerSelect}
               className="w-full pl-10 pr-4 py-3 bg-theme-card border border-theme-border-soft rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent transition-all text-theme-primary appearance-none"
             >
-              <option value="">-- Add New Customer --</option>
+              <option value="">-- Add New {customerLabel} --</option>
               {customers.map(c => (
                 <option key={c.id} value={c.id}>{c.name} {c.phone ? `(${c.phone})` : ''}</option>
               ))}
@@ -106,7 +109,7 @@ const CustomerSelectionStep = ({ customers = [] }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 flex-1">
         {/* Name */}
         <div className="space-y-1.5 md:col-span-2">
-          <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider">Customer Name <span className="text-theme-danger">*</span></label>
+          <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider">{customerLabel} Name <span className="text-theme-danger">*</span></label>
           <div className="relative">
             <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
             <input
@@ -172,8 +175,8 @@ const CustomerSelectionStep = ({ customers = [] }) => {
           className="mt-6 p-4 bg-theme-accent-light border border-theme-accent/20 rounded-2xl flex items-center justify-between"
         >
           <div>
-            <p className="text-sm font-bold text-theme-primary">Save Customer to CRM?</p>
-            <p className="text-xs font-medium text-theme-muted">Save this customer for faster billing next time.</p>
+          <p className="text-sm font-bold text-theme-primary">Save {customerLabel} to CRM?</p>
+          <p className="text-xs font-medium text-theme-muted">Save this {customerLabel.toLowerCase()} for faster billing next time.</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" checked={saveCustomer} onChange={(e) => dispatch({ type: 'UPDATE_SAVE_CUSTOMER', payload: e.target.checked })} className="sr-only peer" />

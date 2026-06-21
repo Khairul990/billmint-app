@@ -3,11 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../services/firebaseConfig';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { ArrowLeft, CheckCircle2, XCircle, Clock, Search, ReceiptText, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, Clock, Search, ReceiptText, ExternalLink, Image as ImageIcon, ShieldCheck } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { saveInvoice, getInvoices } from '../services/dbEngine';
 
-const PendingPayments = ({ setCurrentTab, pendingPayments = [] }) => {
+const getStatusBadge = (status) => {
+  switch (status) {
+    case 'approved': return { label: 'Approved', class: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/25', icon: CheckCircle2 };
+    case 'rejected': return { label: 'Rejected', class: 'bg-red-500/15 text-red-600 border-red-500/25', icon: XCircle };
+    default: return { label: 'Pending Review', class: 'bg-amber-500/15 text-amber-600 border-amber-500/25 animate-pulse', icon: Clock };
+  }
+};
+
+const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [processingId, setProcessingId] = useState(null);
   const [selectedProof, setSelectedProof] = useState(null);
@@ -90,7 +98,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [] }) => {
         }
       }
 
-      toast.success('Payment approved and invoice updated!');
+      toast.success('Payment approved and invoice updated!', { icon: '✅', duration: 4000 });
       setSelectedProof(null);
       
     } catch (error) {
@@ -111,7 +119,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [] }) => {
         updatedAt: new Date().toISOString()
       });
 
-      toast.success('Payment proof rejected.');
+      toast.success('Payment proof has been rejected.', { icon: '❌', duration: 4000 });
       setSelectedProof(null);
       
     } catch (error) {
@@ -183,12 +191,12 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [] }) => {
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-500 flex items-center justify-center">
-                      <Clock className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center">
+                      {(() => { const badge = getStatusBadge(payment.status); const Icon = badge.icon; return <Icon className="w-5 h-5" />; })()}
                     </div>
                     <div>
-                      <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Pending Review</p>
-                      <h4 className="font-black text-theme-primary text-sm">Invoice #{payment.invoiceNumber}</h4>
+                      {(() => { const badge = getStatusBadge(payment.status); return <p className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${badge.class}`}>{badge.label}</p>; })()}
+                      <h4 className="font-black text-theme-primary text-sm mt-1">Invoice #{payment.invoiceNumber}</h4>
                     </div>
                   </div>
                   <span className="font-black text-lg text-theme-primary">
@@ -202,13 +210,17 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [] }) => {
                     <span className="text-xs font-bold text-theme-primary">{payment.customerName || 'Unknown'}</span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs text-theme-muted font-semibold">Payer</span>
+                    <span className="text-xs font-bold text-theme-primary">{payment.payerName || payment.customerName || 'Unknown'}</span>
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
                     <span className="text-xs text-theme-muted font-semibold">Method</span>
                     <span className="text-xs font-bold text-theme-primary">{payment.paymentMethod || 'UPI/Bank'}</span>
                   </div>
                   {payment.transactionId && (
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-theme-muted font-semibold">Txn ID</span>
-                      <span className="text-[10px] font-mono text-theme-primary bg-theme-card px-2 py-0.5 rounded-lg border border-theme-border-soft">{payment.transactionId}</span>
+                      <span className="text-[11px] font-mono font-black text-theme-primary bg-theme-card px-2.5 py-1 rounded-lg border border-theme-border-soft tracking-wide">{payment.transactionId}</span>
                     </div>
                   )}
                 </div>

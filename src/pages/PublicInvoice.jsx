@@ -11,7 +11,8 @@ import {
   Wallet,
   ShieldCheck,
   ArrowRight,
-  Lock
+  Lock,
+  MessageCircle
 } from 'lucide-react';
 import { downloadInvoicePDF } from '../utils/pdfUtils';
 import { toast } from 'react-hot-toast';
@@ -107,20 +108,25 @@ const PublicInvoice = ({ initialInvoice }) => {
         })
       });
 
-      // --- Cloud Function Stub Integrations ---
-      // 1. Verify Transaction ID remotely
+      // --- Cloud Function Integrations ---
       if (txnId) {
-        const verifyRes = await verifyTransactionId(txnId, invoice.balanceDue !== undefined ? invoice.balanceDue : invoice.grandTotal);
-
+        try {
+          await verifyTransactionId(txnId, invoice.balanceDue !== undefined ? invoice.balanceDue : invoice.grandTotal);
+        } catch (e) {
+          console.warn('Transaction verification unavailable:', e.message);
+        }
       }
       
-      // 2. Mock sending an acknowledgment email to the customer
       if (invoice.customerEmail) {
-        await sendPaymentReceiptEmail(invoice.id, invoice.customerEmail);
+        try {
+          await sendPaymentReceiptEmail(invoice.id, invoice.customerEmail);
+        } catch (e) {
+          console.warn('Email receipt notification unavailable:', e.message);
+        }
       }
       // -----------------------------------------
       
-      toast.success('Payment proof submitted successfully!');
+      toast.success('Payment proof submitted! The owner will verify shortly.');
       setShowPaymentModal(false);
       
       // Update local state
@@ -877,7 +883,7 @@ const PublicInvoice = ({ initialInvoice }) => {
             )}
 
             {/* Contact Business */}
-            {liveLinkPrefs.showContactButton && (business.phone || business.email) && !showPaymentModal && (
+            {liveLinkPrefs.showContactButton && (business.whatsapp || business.phone || business.email) && !showPaymentModal && (
               <div className="bg-theme-card rounded-2xl border border-theme-border-soft shadow-lg p-3 md:p-4">
                 <div className="flex items-center gap-2 mb-2 md:mb-2.5">
                   <div className="w-6 h-6 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center">
@@ -887,7 +893,13 @@ const PublicInvoice = ({ initialInvoice }) => {
                 </div>
                 <p className="text-[9px] md:text-[10px] text-theme-muted font-semibold mb-2.5 md:mb-3">Contact the business for questions about this invoice.</p>
                 <div className="flex gap-2">
-                  {business.phone && (
+                  {business.whatsapp && (
+                    <a href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I have a question about Invoice ' + invoice.invoiceNumber)}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 md:py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-bold rounded-xl transition-all cursor-pointer text-[10px] md:text-xs">
+                      <MessageCircle className="w-3 md:w-3.5 h-3 md:h-3.5" />
+                      WhatsApp
+                    </a>
+                  )}
+                  {business.phone && !business.whatsapp && (
                     <a href={`tel:${business.phone}`} className="flex-1 flex items-center justify-center gap-1.5 py-2 md:py-2.5 bg-theme-accent/10 hover:bg-theme-accent/20 text-theme-accent font-bold rounded-xl transition-all cursor-pointer text-[10px] md:text-xs">
                       <Phone className="w-3 md:w-3.5 h-3 md:h-3.5" />
                       Call
@@ -919,10 +931,12 @@ const PublicInvoice = ({ initialInvoice }) => {
             <span className="hidden sm:inline text-theme-border-soft">&bull;</span>
             <div className="flex items-center gap-1.5">
               <Lock className="w-3 h-3 md:w-3.5 md:h-3.5 text-theme-accent" />
-              <span>End-to-End Encrypted</span>
+              <span>256-bit Encrypted</span>
             </div>
             <span className="hidden sm:inline text-theme-border-soft">&bull;</span>
-            <span>Your data is protected</span>
+            <span>Invoice #{invoice.invoiceNumber}</span>
+            <span className="hidden sm:inline text-theme-border-soft">&bull;</span>
+            <span className="text-theme-accent/70">{invoice.date}</span>
           </div>
         </div>
       </footer>

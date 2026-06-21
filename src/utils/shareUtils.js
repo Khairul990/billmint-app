@@ -17,12 +17,9 @@ export function cleanPhoneNumber(phone, currencySymbol = '₹') {
   // Remove all non-digits
   let cleaned = phone.replace(/\D/g, '');
   
-  // Smart country prefix heuristics (Bangladesh & India defaults)
   if (cleaned.length === 11 && cleaned.startsWith('01')) {
-    // Bangladesh local number: "01XXXXXXXXX" (11 digits) -> add country code "88"
     cleaned = '88' + cleaned;
   } else if (cleaned.length === 10 && (cleaned.startsWith('6') || cleaned.startsWith('7') || cleaned.startsWith('8') || cleaned.startsWith('9'))) {
-    // India local number: "9XXXXXXXXX" (10 digits) -> add country code "91"
     cleaned = '91' + cleaned;
   }
   

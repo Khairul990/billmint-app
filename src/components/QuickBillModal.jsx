@@ -3,8 +3,11 @@ import BottomSheet from './BottomSheet';
 import { generateNextInvoiceNumber } from '../utils/invoiceUtils';
 import { Download, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { getCustomerLabelByType } from '../config/businessPresets';
 
 const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices }) => {
+  const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.businessType || 'retail';
+  const customerLabel = getCustomerLabelByType(wsType);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [itemService, setItemService] = useState('');
@@ -85,7 +88,7 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
         {/* Customer Section */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-bold text-theme-muted mb-1">Customer Name *</label>
+            <label className="block text-xs font-bold text-theme-muted mb-1">{customerLabel} Name *</label>
             <input
               type="text"
               value={customerName}
@@ -95,7 +98,7 @@ const QuickBillModal = ({ isOpen, onClose, onSave, businessSettings, invoices })
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-theme-muted mb-1">Phone Number</label>
+            <label className="block text-xs font-bold text-theme-muted mb-1">Phone (Optional)</label>
             <input
               type="tel"
               value={customerPhone}

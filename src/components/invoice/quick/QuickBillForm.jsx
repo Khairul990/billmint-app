@@ -3,9 +3,12 @@ import { motion } from 'framer-motion';
 import { Plus, Trash2, Save, Check } from 'lucide-react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
 import ProductSearch from '../ProductSearch';
+import { getCustomerLabelByType } from '../../../config/businessPresets';
 
 const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
   const { state, dispatch, businessSettings } = useInvoice();
+  const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.businessType || 'retail';
+  const customerLabel = getCustomerLabelByType(wsType);
   const currencySymbol = businessSettings?.currency || '₹';
 
   // Customer selection
@@ -99,12 +102,12 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
       <div className="p-4 flex-1 overflow-y-auto space-y-6">
         {/* Customer Section */}
         <div className="space-y-3">
-          <label className="text-xs font-bold text-theme-muted uppercase tracking-wider">Customer Details</label>
+          <label className="text-xs font-bold text-theme-muted uppercase tracking-wider">{customerLabel} Details</label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="relative">
               <input
                 type="text"
-                placeholder="Customer Name"
+                placeholder={customerLabel + ' Name'}
                 value={state.customer.name || ''}
                 onChange={handleCustomerNameChange}
                 className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary"
@@ -114,7 +117,7 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
                   onChange={handleCustomerSelect}
                   className="absolute right-0 top-0 bottom-0 opacity-0 cursor-pointer w-10"
                 >
-                  <option value="">New Customer</option>
+                  <option value="">New {customerLabel}</option>
                   {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               )}
