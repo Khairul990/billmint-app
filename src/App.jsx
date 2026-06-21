@@ -236,14 +236,18 @@ function App() {
       return 'admin-panel';
     }
     const saved = localStorage.getItem('billqyro_last_route');
-    if (saved && saved !== 'admin-panel') {
+    const isAuth = !!getAuthSession() || (localStorage.getItem('billqyro_demo_session_active') === 'true' && localStorage.getItem('billqyro_demo_journey_mode') === 'true' && localStorage.getItem('billqyro_demo_logged_in') === 'true');
+    if (isAuth && saved && saved !== 'admin-panel') {
       return saved;
     }
+    if (!isAuth) return 'landing';
     return 'dashboard';
   });
 
   useEffect(() => {
-    localStorage.setItem('billqyro_last_route', currentTab);
+    if (currentTab !== 'landing') {
+      localStorage.setItem('billqyro_last_route', currentTab);
+    }
     
     // Sync URL for km-admin to act like a real route
     if (currentTab === 'admin-panel') {
@@ -1202,6 +1206,9 @@ function App() {
       );
     }
     switch (activeTab) {
+      case 'landing':
+        setCurrentTab('dashboard');
+        return null;
       case 'dashboard':
         return (
           <Dashboard
@@ -1397,7 +1404,7 @@ function App() {
         return <Projects />;
       case 'delivery':
         return <Delivery />;
-      case 'subscription':
+      case 'premium-upgrade':
         if (isMaintenanceMode || activeSettings?.disablePremiumUpgrade) {
           return (
             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
@@ -1414,6 +1421,14 @@ function App() {
             </div>
           );
         }
+        return (
+          <Subscription
+            currentSubscription={subscription}
+            onUpgrade={handleSaveSubscription}
+            businessSettings={activeSettings}
+          />
+        );
+      case 'subscription':
         return (
           <PremiumPricing setCurrentTab={setCurrentTab} />
         );
@@ -1592,6 +1607,17 @@ function App() {
   }
 
   if (!isAuthenticated && (!isDemoSessionActive || !isDemoJourneyActive)) {
+    if (currentTab === 'landing') {
+      return (
+        <React.Suspense fallback={
+          <div className="flex h-screen items-center justify-center">
+            <ClassicLoader />
+          </div>
+        }>
+          <Landing onLoginClick={() => setCurrentTab('login')} />
+        </React.Suspense>
+      );
+    }
     return (
       <React.Suspense fallback={
         <div className="flex h-screen items-center justify-center">

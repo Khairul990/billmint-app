@@ -26,13 +26,18 @@ export function isAdminUser(user) {
   // IMPORTANT SECURITY NOTE: 
   // In a true production environment with untrusted clients, checking the email 
   // string on the client-side is insufficient because it can be spoofed in memory.
-  // We recommend using Firebase Custom Auth Claims. 
+  // PRODUCTION RECOMMENDATION: Use Firebase Custom Auth Claims.
   // e.g. return user.getIdTokenResult().then(idTokenResult => !!idTokenResult.claims.admin);
   
+  // PRODUCTION MODE CHECK: If VITE_ADMIN_EMAIL is set via env, use it only
+  if (import.meta.env.PROD && import.meta.env.VITE_ADMIN_EMAIL) {
+    return userEmail === import.meta.env.VITE_ADMIN_EMAIL.toLowerCase().trim();
+  }
+  
+  // DEV MODE: Allow hardcoded email for development convenience
   // MASTER OVERRIDE: Always grant access to the exact owner email
   // This prevents any Vercel environment variable misconfigurations from locking the owner out.
-  if (userEmail === "khairul2052007@gmail.com") {
-    console.warn("SECURITY ALERT: Super Admin access granted via static override.");
+  if (!import.meta.env.PROD && userEmail === "khairul2052007@gmail.com") {
     return true;
   }
   

@@ -1,0 +1,7 @@
+# BillQyro robots.txt
+User-agent: *
+Allow: /
+Disallow: /km-admin
+Disallow: /admin
+
+Sitemap: https://billqyro.com/sitemap.xml

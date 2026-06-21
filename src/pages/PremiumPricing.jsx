@@ -25,8 +25,8 @@ const PremiumPricing = ({ setCurrentTab }) => {
               <li className="flex items-start"><CheckCircle2 className="w-5 h-5 text-emerald-500 mr-3 shrink-0" /> <span className="text-sm">Local Storage Backup</span></li>
             </ul>
             
-            <button className="w-full py-4 rounded-xl bg-slate-800 text-slate-300 font-bold border border-slate-700 hover:bg-slate-700 transition-colors">
-              Current Plan
+            <button onClick={() => setCurrentTab('dashboard')} className="w-full py-4 rounded-xl bg-slate-800 text-slate-300 font-bold border border-slate-700 hover:bg-slate-700 transition-colors">
+              Go to Dashboard
             </button>
           </div>
 
@@ -46,7 +46,7 @@ const PremiumPricing = ({ setCurrentTab }) => {
               <li className="flex items-start"><CheckCircle2 className="w-5 h-5 text-rose-500 mr-3 shrink-0" /> <span className="text-sm">Pay dues weekly or monthly</span></li>
             </ul>
             
-            <button className="w-full py-4 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg">
+            <button onClick={() => setCurrentTab('premium-upgrade')} className="w-full py-4 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors shadow-lg">
               Start Pay Per Bill
             </button>
           </div>
@@ -65,7 +65,7 @@ const PremiumPricing = ({ setCurrentTab }) => {
               <li className="flex items-start"><CheckCircle2 className="w-5 h-5 text-emerald-500 mr-3 shrink-0" /> <span className="text-sm">Priority Support</span></li>
             </ul>
             
-            <button className="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold hover:opacity-90 transition-opacity shadow-lg">
+            <button onClick={() => setCurrentTab('premium-upgrade')} className="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold hover:opacity-90 transition-opacity shadow-lg">
               Upgrade to Premium
             </button>
           </div>

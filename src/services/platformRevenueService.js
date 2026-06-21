@@ -125,10 +125,14 @@ export const calculateUserRevenueState = (userId, invoices, globalSettings, subs
   if (!isPremium && platformPendingAmount > 0) {
     const maxPendingDue = globalSettings.maxPendingDue ?? 100;
     const maxUnpaidBillCount = globalSettings.maxUnpaidBillCount ?? 20;
+    const monthlyGraceLimit = globalSettings.monthlyGraceLimit ?? 5;
+    
+    const gracePendingThreshold = Math.max(0, maxPendingDue - monthlyGraceLimit);
+    const graceBillThreshold = Math.max(0, maxUnpaidBillCount - monthlyGraceLimit);
 
-    lockStatus = 'warn'; // Default soft warning if pending > 0
+    lockStatus = 'warn';
 
-    if (platformPendingAmount >= maxPendingDue * 0.8 || billableBillsCount >= maxUnpaidBillCount * 0.8) {
+    if (platformPendingAmount >= gracePendingThreshold || billableBillsCount >= graceBillThreshold) {
       lockStatus = 'grace';
       graceStatus = 'active';
     }

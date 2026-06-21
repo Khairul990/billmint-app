@@ -17,6 +17,17 @@ service cloud.firestore {
       return isAuth() && request.auth.token.email == 'khairul2052007@gmail.com';
     }
 
+    // Helper to validate workspace isolation: user can only access their own workspace
+    function isWorkspaceOwner(userId, workspaceId) {
+      return isOwner(userId) && request.resource.data.activeWorkspaceId == workspaceId;
+    }
+
+    // Helper to validate public invoice fields (no sensitive internal data)
+    function isValidPublicInvoiceData() {
+      let allowedKeys = ['paymentProofs', 'paymentStatus', 'updatedAt'];
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedKeys);
+    }
+
     // -------------------------------------------------------------------------
     // Private Workspace Data (Subcollections under user ID)
     // -------------------------------------------------------------------------
@@ -83,25 +94,22 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /publicInvoices/{publicToken} {
-      // Anyone can read a public invoice
+      // Anyone can read a public invoice (by design for live links)
       allow read: if true;
       
       // Only authenticated owners can create or delete public invoices fully
       allow create, delete: if isAuth();
       
       // Unauthenticated users (customers) can only update payment proofs
-      allow update: if isAuth() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['paymentProofs', 'paymentStatus'])
-      );
+      // Validates that only allowed fields are modified
+      allow update: if isAuth() || isValidPublicInvoiceData();
     }
 
     // Legacy fallback
     match /public_invoices/{publicToken} {
       allow read: if true;
       allow create, delete: if isAuth();
-      allow update: if isAuth() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['paymentProofs', 'paymentStatus'])
-      );
+      allow update: if isAuth() || isValidPublicInvoiceData();
     }
 
     // -------------------------------------------------------------------------

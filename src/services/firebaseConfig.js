@@ -2,6 +2,8 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+// Uncomment below when App Check is enabled in Firebase Console:
+// import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -31,6 +33,15 @@ if (hasConfig) {
     storage = getStorage(app);
     firebaseReady = true;
     window.billqyro_firebaseReady = true;
+
+    // App Check readiness (uncomment when Firebase App Check is enabled)
+    // if (typeof window !== 'undefined') {
+    //   self.FIREBASE_APPCHECK_DEBUG_TOKEN = import.meta.env.VITE_APPCHECK_DEBUG_TOKEN || true;
+    //   initializeAppCheck(app, {
+    //     provider: new ReCaptchaEnterpriseProvider(import.meta.env.VITE_APPCHECK_RECAPTCHA_KEY),
+    //     isTokenAutoRefreshEnabled: true
+    //   });
+    // }
 
   } catch (error) {
     window.billqyro_firebaseReady = false;

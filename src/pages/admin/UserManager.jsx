@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Shield, UserX, CheckCircle, Ban, Users, Inbox, Loader2 } from 'lucide-react';
+import { Search, Filter, Shield, UserX, CheckCircle, Ban, Users, Inbox, Loader2, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getAdminUsersList, getAdminPlatformRevenueStates, updateUserBlockStatus } from '../../services/dbEngine';
 import { toast } from 'react-hot-toast';
+
+const PAGE_SIZE = 20;
 
 const UserManager = () => {
   const [users, setUsers] = useState([]);
   const [revenueStates, setRevenueStates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [processingId, setProcessingId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const fetchUsersData = async () => {
+    setLoading(true);
+    setLoadError(false);
     try {
       const list = await getAdminUsersList();
       const revs = await getAdminPlatformRevenueStates();
@@ -20,6 +26,7 @@ const UserManager = () => {
       setRevenueStates(revs);
     } catch (e) {
       console.error(e);
+      setLoadError(true);
       toast.error('Failed to load user list.');
     } finally {
       setLoading(false);
@@ -29,6 +36,10 @@ const UserManager = () => {
   useEffect(() => {
     fetchUsersData();
   }, []);
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
   const handleToggleBlock = async (user) => {
     setProcessingId(user.userId);
@@ -75,11 +86,43 @@ const UserManager = () => {
     return matchesSearch;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedUsers = filteredUsers.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <span className="w-8 h-8 border-4 border-slate-700 border-t-blue-500 rounded-full animate-spin"></span>
       </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center">
+              <Users className="w-6 h-6 mr-3 text-blue-400" /> User Manager
+            </h2>
+            <p className="text-slate-400 text-sm mt-1">Manage accounts, check platform dues, and toggle suspensions.</p>
+          </div>
+        </div>
+        <div className="bg-[#1e293b]/40 backdrop-blur-md rounded-2xl border border-slate-700/50 p-12 flex flex-col items-center justify-center text-center">
+          <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mb-4">
+            <RefreshCw className="w-10 h-10 text-rose-400" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">Failed to load users</h3>
+          <p className="text-slate-400 text-sm max-w-md font-semibold mb-6">Could not fetch user data from the server. Check your connection and try again.</p>
+          <button
+            onClick={fetchUsersData}
+            className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
+          >
+            <RefreshCw className="w-4 h-4" /> Retry
+          </button>
+        </div>
+      </motion.div>
     );
   }
 
@@ -136,7 +179,7 @@ const UserManager = () => {
           <div className="col-span-2 text-right">Enforcement</div>
         </div>
 
-        {filteredUsers.length === 0 ? (
+        {paginatedUsers.length === 0 ? (
           <div className="p-12 flex flex-col items-center justify-center text-center">
             <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mb-4">
               <Inbox className="w-10 h-10 text-blue-400" />
@@ -148,7 +191,7 @@ const UserManager = () => {
           </div>
         ) : (
           <div className="divide-y divide-slate-800">
-            {filteredUsers.map((user) => {
+            {paginatedUsers.map((user) => {
               const rev = getRevenueInfo(user.userId);
               return (
                 <div 
@@ -229,7 +272,33 @@ const UserManager = () => {
           </div>
         )}
         
-      </div>
+        </div>
+        
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 border-t border-slate-700/50 bg-slate-800/30">
+            <span className="text-xs text-slate-400 font-semibold">
+              Showing {(safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, filteredUsers.length)} of {filteredUsers.length}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={safePage <= 1}
+                className="p-2 bg-slate-800 text-slate-400 rounded-lg hover:text-white hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-xs text-slate-400 font-bold px-2">{safePage} / {totalPages}</span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={safePage >= totalPages}
+                className="p-2 bg-slate-800 text-slate-400 rounded-lg hover:text-white hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
     </motion.div>
   );
 };

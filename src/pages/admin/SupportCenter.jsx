@@ -10,11 +10,12 @@ import {
 } from '../../services/dbEngine';
 
 const SupportCenter = () => {
-  const [activeSubTab, setActiveSubTab] = useState('tickets'); // 'tickets' | 'features'
+  const [activeSubTab, setActiveSubTab] = useState('tickets');
   const [tickets, setTickets] = useState([]);
   const [features, setFeatures] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [adminNote, setAdminNote] = useState({}); // ticketId -> note or requestId -> note
+  const [adminNote, setAdminNote] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
 
   const loadData = async () => {
     setIsLoading(true);
@@ -82,24 +83,35 @@ const SupportCenter = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 p-1.5 bg-slate-800/50 rounded-2xl border border-slate-700/50 w-fit">
-        <button
-          onClick={() => setActiveSubTab('tickets')}
-          className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${
-            activeSubTab === 'tickets' ? 'bg-pink-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          Support Tickets ({tickets.length})
-        </button>
-        <button
-          onClick={() => setActiveSubTab('features')}
-          className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${
-            activeSubTab === 'features' ? 'bg-pink-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          Feature Suggestions ({features.length})
-        </button>
+      {/* Tabs + Search */}
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="flex gap-2 p-1.5 bg-slate-800/50 rounded-2xl border border-slate-700/50 w-fit">
+          <button
+            onClick={() => setActiveSubTab('tickets')}
+            className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${
+              activeSubTab === 'tickets' ? 'bg-pink-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Support Tickets ({tickets.length})
+          </button>
+          <button
+            onClick={() => setActiveSubTab('features')}
+            className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${
+              activeSubTab === 'features' ? 'bg-pink-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Feature Suggestions ({features.length})
+          </button>
+        </div>
+        {activeSubTab === 'tickets' && tickets.length > 0 && (
+          <input
+            type="text"
+            placeholder="Search by email, message, or user ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-slate-800/60 text-white border border-slate-700/50 rounded-xl px-4 py-2 text-xs w-full sm:w-72 focus:outline-none focus:border-pink-500 transition-all placeholder-slate-500 font-semibold"
+          />
+        )}
       </div>
 
       {/* List Container */}
@@ -109,8 +121,17 @@ const SupportCenter = () => {
         ) : activeSubTab === 'tickets' ? (
           <div className="space-y-4">
             <h3 className="text-white font-bold mb-2">User Support Queue</h3>
-            {tickets.length > 0 ? (
-              tickets.map((ticket) => (
+            {(() => {
+              const filteredTickets = tickets.filter(t => {
+                if (!searchTerm) return true;
+                const term = searchTerm.toLowerCase();
+                return (t.message?.toLowerCase().includes(term) || '') ||
+                       (t.userEmail?.toLowerCase().includes(term) || '') ||
+                       (t.userId?.toLowerCase().includes(term) || '') ||
+                       (t.issueType?.toLowerCase().includes(term) || '');
+              });
+              return filteredTickets.length > 0 ? (
+              filteredTickets.map((ticket) => (
                 <div key={ticket.id} className="p-5 bg-[#0f172a] rounded-2xl border border-slate-700 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
                     <div className="flex items-center gap-2">
@@ -180,8 +201,8 @@ const SupportCenter = () => {
                 </div>
               ))
             ) : (
-              <div className="text-center py-10 text-slate-500 font-bold text-xs">No active support tickets in the queue.</div>
-            )}
+              <div className="text-center py-10 text-slate-500 font-bold text-xs">{searchTerm ? 'No tickets match your search.' : 'No active support tickets in the queue.'}</div>
+            )})()}
           </div>
         ) : (
           <div className="space-y-4">

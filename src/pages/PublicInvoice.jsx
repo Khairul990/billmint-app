@@ -12,7 +12,8 @@ import {
   ShieldCheck,
   ArrowRight,
   Lock,
-  MessageCircle
+  MessageCircle,
+  Share2
 } from 'lucide-react';
 import { downloadInvoicePDF } from '../utils/pdfUtils';
 import { toast } from 'react-hot-toast';
@@ -21,6 +22,12 @@ import PaymentModal from '../components/PaymentModal';
 import { doc, updateDoc, arrayUnion, collection, addDoc } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
 import { sendPaymentReceiptEmail, verifyTransactionId } from '../services/cloudFunctions';
+
+// Sanitize string input to prevent XSS in payment proofs
+const sanitizeInput = (str) => {
+  if (!str) return '';
+  return String(str).replace(/<[^>]*>/g, '').replace(/[<>"'\\]/g, '').trim();
+};
 
 const PublicInvoice = ({ initialInvoice }) => {
   const [invoice, setInvoice] = useState(initialInvoice);
@@ -43,6 +50,7 @@ const PublicInvoice = ({ initialInvoice }) => {
   const [payerPhone, setPayerPhone] = useState('');
   const [customerNote, setCustomerNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentSectionOpen, setPaymentSectionOpen] = useState(true);
 
   const handleScreenshotChange = async (e) => {
     const file = e.target.files[0];
@@ -76,18 +84,26 @@ const PublicInvoice = ({ initialInvoice }) => {
         throw new Error("Missing invoice ID");
       }
 
+      // Validate & sanitize all user input before submission
+      const sanitizedPayerName = sanitizeInput(payerName);
+      const sanitizedPayerPhone = sanitizeInput(payerPhone).slice(0, 20);
+      const sanitizedTxnId = sanitizeInput(txnId).slice(0, 100);
+      const sanitizedNote = sanitizeInput(customerNote).slice(0, 500);
+      const sanitizedMethod = ['UPI', 'bKash', 'Nagad', 'Rocket', 'Bank Transfer', 'Cash'].includes(payMethod) ? payMethod : 'Bank Transfer';
+      const sanitizedAmount = Math.max(0, Math.min(parseFloat(payAmount) || 0, 999999999));
+
       const proofData = {
         invoiceId: invoice.id,
         publicInvoiceId: invoice.id,
         ownerId: invoice.ownerId || invoice.userId || 'unknown',
         customerName: invoice.customerName || 'Unknown Customer',
-        payerName: payerName || '',
-        payerPhone: payerPhone || '',
-        amount: parseFloat(payAmount) || 0,
-        transactionId: txnId || '',
-        note: customerNote || '',
+        payerName: sanitizedPayerName,
+        payerPhone: sanitizedPayerPhone,
+        amount: sanitizedAmount,
+        transactionId: sanitizedTxnId,
+        note: sanitizedNote,
         screenshotUrl: screenshotURL,
-        paymentMethod: payMethod,
+        paymentMethod: sanitizedMethod,
         status: 'pending',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -357,6 +373,24 @@ const PublicInvoice = ({ initialInvoice }) => {
       });
   };
 
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Invoice ${invoice.invoiceNumber} - ${business.businessName}`,
+          text: `Invoice #${invoice.invoiceNumber} from ${business.businessName}. Amount: ${formatVal(dueAmount)}`,
+          url: window.location.href
+        });
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          handleCopy(window.location.href, 'Invoice link');
+        }
+      }
+    } else {
+      handleCopy(window.location.href, 'Invoice link');
+    }
+  };
+
   // Status badge style helper
   const getStatusBadgeStyle = (status) => {
     switch (status) {
@@ -384,6 +418,39 @@ const PublicInvoice = ({ initialInvoice }) => {
 
   return (
     <div className="min-h-screen bg-theme-app dark:bg-theme-surface dark:bg-theme-app py-4 md:py-10 px-4 md:px-6 flex flex-col items-center justify-between font-sans antialiased text-theme-primary dark:text-theme-primary dark:text-theme-primary">
+
+      <style>{`
+        @keyframes gradientShift {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        @keyframes qrScan {
+          0% { top: 0; opacity: 1; }
+          50% { opacity: 0.6; }
+          100% { top: 100%; opacity: 0; }
+        }
+        @keyframes waPulse {
+          0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+          70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .animate-gradient-shift {
+          background-size: 200% 200%;
+          animation: gradientShift 3s ease infinite;
+        }
+        .qr-scan-line {
+          position: absolute;
+          left: 10%;
+          right: 10%;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, rgba(16,185,129,0.8), transparent);
+          animation: qrScan 2s ease-in-out infinite;
+          z-index: 1;
+        }
+        .animate-wa-pulse {
+          animation: waPulse 2s infinite;
+        }
+      `}</style>
 
       {/* ===== TOP PREMIUM HEADER ===== */}
       <header className="max-w-5xl w-full mb-4 md:mb-5 z-10">
@@ -417,6 +484,10 @@ const PublicInvoice = ({ initialInvoice }) => {
                 <span className="hidden sm:inline">PDF</span>
               </button>
             )}
+            <button onClick={handleShare} className="flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1.5 md:py-2 bg-theme-surface hover:bg-theme-border-soft text-theme-primary font-bold text-[10px] md:text-[11px] rounded-xl transition-all cursor-pointer border border-theme-border-soft/50">
+              <Share2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
+              <span className="hidden sm:inline">Share</span>
+            </button>
             {liveLinkPrefs.allowPaymentProofSubmit && invoice.paymentStatus !== 'Paid' && invoice.paymentStatus !== 'Pending Verification' && (
               <button onClick={() => setShowPaymentModal(true)} className="flex items-center gap-1 md:gap-1.5 px-3 md:px-4 py-1.5 md:py-2 bg-[image:var(--accent-gradient)] text-theme-button-text font-black text-[10px] md:text-[11px] rounded-xl shadow-md hover:opacity-90 transition-all cursor-pointer uppercase tracking-wider border-0">
                 <Wallet className="w-3 h-3 md:w-3.5 md:h-3.5" />
@@ -434,19 +505,25 @@ const PublicInvoice = ({ initialInvoice }) => {
 
           {/* Status Banner */}
           {invoice.paymentStatus === 'Paid' && (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2.5 md:gap-3">
-              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+            <div className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2.5 md:gap-3 shadow-lg shadow-emerald-500/5">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 animate-bounce">
                 <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
               </div>
-              <p className="text-[11px] md:text-xs font-bold text-emerald-600">This invoice has been paid in full. Thank you!</p>
+              <div>
+                <p className="text-[11px] md:text-xs font-extrabold text-emerald-600">Paid in Full</p>
+                <p className="text-[9px] md:text-[10px] text-emerald-500/70 font-semibold">This invoice has been settled. Thank you!</p>
+              </div>
             </div>
           )}
           {invoice.paymentStatus === 'Pending Verification' && (
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2.5 md:gap-3">
-              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 animate-pulse">
+            <div className="bg-amber-500/10 border-2 border-amber-500/30 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2.5 md:gap-3 shadow-lg shadow-amber-500/5">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 animate-pulse">
                 <Info className="w-4 h-4 md:w-5 md:h-5 text-amber-500" />
               </div>
-              <p className="text-[11px] md:text-xs font-bold text-amber-600">Your payment is being verified. We'll update you shortly.</p>
+              <div>
+                <p className="text-[11px] md:text-xs font-extrabold text-amber-600">Payment Under Review</p>
+                <p className="text-[9px] md:text-[10px] text-amber-500/70 font-semibold">Your payment is being verified. We'll update you shortly.</p>
+              </div>
             </div>
           )}
 
@@ -645,12 +722,20 @@ const PublicInvoice = ({ initialInvoice }) => {
           <div className="w-full lg:w-[340px] shrink-0 space-y-3 md:space-y-4">
 
             {/* Amount Due Card */}
-            <div className="bg-gradient-to-br from-theme-accent to-theme-accent-dark rounded-2xl p-5 md:p-6 text-white shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-              <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white/70">Amount Due</p>
-              <p className="text-4xl md:text-5xl font-black mt-1 tracking-tight leading-none">{formatVal(dueAmount)}</p>
-              <p className="text-[10px] text-white/60 mt-2 font-bold">Invoice #{invoice.invoiceNumber}</p>
+            <div className={`rounded-2xl p-5 md:p-6 text-white shadow-xl relative overflow-hidden ${invoice.paymentStatus === 'Unpaid' || invoice.paymentStatus === 'Pending' || invoice.paymentStatus === 'Overdue' ? 'animate-gradient-shift bg-gradient-to-br from-theme-accent via-theme-accent-dark to-purple-700' : 'bg-gradient-to-br from-theme-accent to-theme-accent-dark'}`}>
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+              <div className="relative z-10">
+                <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white/70">Amount Due</p>
+                <p className="text-5xl md:text-6xl font-black mt-1 tracking-tight leading-none">{formatVal(dueAmount)}</p>
+                <p className="text-[10px] text-white/60 mt-2 font-bold">Invoice #{invoice.invoiceNumber}</p>
+                {(invoice.paymentStatus === 'Unpaid' || invoice.paymentStatus === 'Pending' || invoice.paymentStatus === 'Overdue') && (
+                  <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-white/15 backdrop-blur-sm rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    Awaiting Payment
+                  </div>
+                )}
+              </div>
               {invoice.verificationCode && (
                 <div className="mt-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-center">
                   <div className="flex items-center justify-center gap-1.5 mb-1">
@@ -667,30 +752,40 @@ const PublicInvoice = ({ initialInvoice }) => {
             {!showPaymentModal ? (
               <div className="bg-theme-card rounded-2xl border border-theme-border-soft shadow-lg overflow-hidden">
                 <div className="p-4 md:p-5 space-y-4 md:space-y-5">
-                  <div className="flex items-center gap-2.5 pb-3 border-b border-theme-border-soft">
-                    <div className="w-8 h-8 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+                  <button onClick={() => setPaymentSectionOpen(prev => !prev)} className="w-full flex items-center gap-2.5 pb-3 border-b border-theme-border-soft cursor-pointer text-left group">
+                    <div className="w-8 h-8 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0 group-hover:bg-theme-accent/20 transition-colors">
                       <Wallet className="w-4 h-4" />
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <h3 className="text-xs md:text-sm font-extrabold text-theme-primary">Payment Hub</h3>
                       <p className="text-[8px] md:text-[9px] text-theme-muted font-bold uppercase tracking-wider">Choose your payment method</p>
                     </div>
-                  </div>
+                    <svg className={`w-4 h-4 text-theme-muted transition-transform duration-300 shrink-0 ${paymentSectionOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  <div className={`overflow-hidden transition-all duration-300 ease-in-out ${paymentSectionOpen ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <div className="space-y-4 md:space-y-5">
 
                   {/* Step 1: Pay */}
                   <div className="flex items-start gap-3">
                     <div className="flex flex-col items-center">
-                      <span className="w-7 h-7 rounded-full bg-theme-accent text-white flex items-center justify-center text-[10px] font-black shrink-0">1</span>
-                      <div className="w-0.5 h-full min-h-[20px] bg-theme-border-soft mt-1"></div>
+                      <span className="w-8 h-8 rounded-xl bg-theme-accent text-white flex items-center justify-center text-xs font-black shrink-0 shadow-md shadow-theme-accent/30">1</span>
+                      <div className="w-0.5 h-full min-h-[20px] bg-gradient-to-b from-theme-accent/40 to-theme-border-soft mt-1"></div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] md:text-[11px] font-extrabold text-theme-primary">Pay using a method below</p>
-                      <p className="text-[8px] md:text-[9px] text-theme-muted font-semibold mt-0.5">Complete payment and get a Transaction ID</p>
+                      <p className="text-[8px] md:text-[9px] text-theme-muted font-semibold mt-0.5 flex items-center gap-1">
+                        <Wallet className="w-2.5 h-2.5 md:w-3 md:h-3 text-theme-accent" />
+                        Complete payment and get a Transaction ID
+                      </p>
                     </div>
                   </div>
 
                   {liveLinkPrefs.showPaymentQr && paymentPrefs.paymentQrEnabled && (
-                    <div className="bg-theme-surface rounded-xl p-4 max-w-[200px] mx-auto border-2 border-dashed border-theme-border-soft">
+                    <div className="bg-theme-surface rounded-xl p-4 max-w-[260px] mx-auto border-2 border-theme-accent/20 shadow-lg shadow-theme-accent/5 relative overflow-hidden">
+                      <div className="qr-scan-line"></div>
                       <img src={qrCodeUrl} alt="Scan to Pay QR" className="w-full h-auto object-contain rounded-lg" />
                       <p className="text-[9px] text-theme-muted font-bold uppercase text-center mt-2">Scan to Pay</p>
                       <p className="text-[7px] text-theme-muted/60 text-center">Use any UPI / banking app</p>
@@ -700,7 +795,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                   <div className="space-y-3">
                     {paymentPrefs.paymentMethod === 'UPI' && (
                       <div className="space-y-2">
-                        <a href={upiLink} className="w-full flex items-center justify-center gap-2 py-3 bg-[image:var(--accent-gradient)] text-theme-button-text font-black text-[11px] md:text-xs rounded-xl shadow-md hover:opacity-90 transition-all cursor-pointer uppercase tracking-wider border-0">
+                        <a href={upiLink} className="w-full flex items-center justify-center gap-2 py-3 bg-[image:var(--accent-gradient)] text-theme-button-text font-black text-[11px] md:text-xs rounded-xl shadow-md hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider border-0">
                           <Wallet className="w-4 h-4" />
                           Pay with UPI
                         </a>
@@ -753,12 +848,18 @@ const PublicInvoice = ({ initialInvoice }) => {
                     </div>
                   )}
 
+                    </div>
+                  </div>
+
                   {/* Step 2: Confirm */}
                   <div className="flex items-start gap-3 pt-1">
-                    <span className="w-7 h-7 rounded-full bg-theme-accent text-white flex items-center justify-center text-[10px] font-black shrink-0">2</span>
+                    <span className="w-8 h-8 rounded-xl bg-theme-accent text-white flex items-center justify-center text-xs font-black shrink-0 shadow-md shadow-theme-accent/30">2</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] md:text-[11px] font-extrabold text-theme-primary">Confirm your payment</p>
-                      <p className="text-[8px] md:text-[9px] text-theme-muted font-semibold mt-0.5">Submit proof with Transaction ID</p>
+                      <p className="text-[8px] md:text-[9px] text-theme-muted font-semibold mt-0.5 flex items-center gap-1">
+                        <CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3 text-theme-accent" />
+                        Submit proof with Transaction ID
+                      </p>
                     </div>
                   </div>
 
@@ -874,8 +975,8 @@ const PublicInvoice = ({ initialInvoice }) => {
                 <p className="text-[9px] md:text-[10px] text-theme-muted font-semibold mb-2.5 md:mb-3">Contact the business for questions about this invoice.</p>
                 <div className="flex gap-2">
                   {business.whatsapp && (
-                    <a href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I have a question about Invoice ' + invoice.invoiceNumber)}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 md:py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-bold rounded-xl transition-all cursor-pointer text-[10px] md:text-xs">
-                      <MessageCircle className="w-3 md:w-3.5 h-3 md:h-3.5" />
+                    <a href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I have a question about Invoice ' + invoice.invoiceNumber)}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2.5 md:py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-bold rounded-xl transition-all cursor-pointer text-[10px] md:text-xs animate-wa-pulse">
+                      <MessageCircle className="w-3.5 md:w-4 h-3.5 md:h-4" />
                       WhatsApp
                     </a>
                   )}
@@ -902,22 +1003,38 @@ const PublicInvoice = ({ initialInvoice }) => {
 
       {/* ===== TRUST FOOTER ===== */}
       <footer className="mt-6 md:mt-8 w-full max-w-5xl">
-        <div className="bg-theme-card/80 backdrop-blur-sm rounded-2xl border border-theme-border-soft/60 p-3 md:p-4">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 md:gap-4 text-[8px] md:text-[9px] text-theme-muted font-bold">
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3 h-3 md:w-3.5 md:h-3.5 text-theme-accent" />
-              <span>BillQyro Billing Platform</span>
+        <div className="bg-gradient-to-r from-theme-card/80 via-theme-card to-theme-card/80 backdrop-blur-sm rounded-2xl border border-theme-border-soft/60 p-4 md:p-5 shadow-lg">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3 mb-3 md:mb-4">
+            <div className="flex items-center gap-2 px-2.5 md:px-3 py-2 md:py-2.5 bg-theme-surface/50 rounded-xl border border-theme-border-soft/40">
+              <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 text-emerald-500 shrink-0" />
+              <div>
+                <p className="text-[8px] md:text-[9px] font-black text-theme-primary leading-tight">BillQyro</p>
+                <p className="text-[7px] md:text-[8px] text-theme-muted font-semibold">Billing Platform</p>
+              </div>
             </div>
-            <span className="hidden sm:inline text-theme-border-soft">&bull;</span>
-            <div className="flex items-center gap-1.5">
-              <Lock className="w-3 h-3 md:w-3.5 md:h-3.5 text-theme-accent" />
-              <span>256-bit Encrypted</span>
+            <div className="flex items-center gap-2 px-2.5 md:px-3 py-2 md:py-2.5 bg-theme-surface/50 rounded-xl border border-theme-border-soft/40">
+              <Lock className="w-4 h-4 md:w-5 md:h-5 text-indigo-500 shrink-0" />
+              <div>
+                <p className="text-[8px] md:text-[9px] font-black text-theme-primary leading-tight">256-bit</p>
+                <p className="text-[7px] md:text-[8px] text-theme-muted font-semibold">Encrypted</p>
+              </div>
             </div>
-            <span className="hidden sm:inline text-theme-border-soft">&bull;</span>
-            <span>Invoice #{invoice.invoiceNumber}</span>
-            <span className="hidden sm:inline text-theme-border-soft">&bull;</span>
-            <span className="text-theme-accent/70">{invoice.date}</span>
+            <div className="flex items-center gap-2 px-2.5 md:px-3 py-2 md:py-2.5 bg-theme-surface/50 rounded-xl border border-theme-border-soft/40">
+              <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-blue-500 shrink-0" />
+              <div>
+                <p className="text-[8px] md:text-[9px] font-black text-theme-primary leading-tight">Invoice</p>
+                <p className="text-[7px] md:text-[8px] text-theme-muted font-semibold">#{invoice.invoiceNumber}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 px-2.5 md:px-3 py-2 md:py-2.5 bg-theme-surface/50 rounded-xl border border-theme-border-soft/40">
+              <Info className="w-4 h-4 md:w-5 md:h-5 text-theme-accent shrink-0" />
+              <div>
+                <p className="text-[8px] md:text-[9px] font-black text-theme-primary leading-tight">Date</p>
+                <p className="text-[7px] md:text-[8px] text-theme-muted font-semibold">{invoice.date}</p>
+              </div>
+            </div>
           </div>
+          <p className="text-[7px] md:text-[8px] text-theme-muted/60 font-semibold text-center">Digitally compiled by BillQyro &middot; Your data is protected &middot; Secure checkout</p>
         </div>
       </footer>
 

@@ -205,9 +205,9 @@ const MoreMenu = ({
         />
         <SettingsItem 
           icon={Info} 
-          title="About" 
-          description="Privacy, Terms & Legal" 
-          onClick={() => setCurrentTab('about')} 
+          title="Privacy & Legal" 
+          description="Privacy Policy, Terms & Refund Policy" 
+          onClick={() => setCurrentTab('privacy')} 
         />
       </div>
 

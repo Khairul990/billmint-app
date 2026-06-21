@@ -18,48 +18,59 @@ const PrivacyPolicy = ({ setCurrentTab }) => {
         </div>
 
         <div className="bg-theme-card rounded-3xl p-6 md:p-10 border border-theme-border-soft shadow-premium">
-        <div className="flex items-center gap-4 mb-8 pb-6 border-b border-theme-border-soft">
-          <div className="w-12 h-12 bg-theme-accent/10 rounded-xl flex items-center justify-center text-theme-accent">
-            <Shield className="w-6 h-6" />
+          <div className="flex items-center gap-4 mb-8 pb-6 border-b border-theme-border-soft">
+            <div className="w-12 h-12 bg-theme-accent/10 rounded-xl flex items-center justify-center text-theme-accent">
+              <Shield className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-theme-primary tracking-tight">Privacy Policy</h1>
+              <p className="text-sm text-theme-muted font-medium mt-1">Last updated: {new Date().toLocaleDateString()}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-black text-theme-primary tracking-tight">Privacy Policy</h1>
-            <p className="text-sm text-theme-muted font-medium mt-1">Last updated: {new Date().toLocaleDateString()}</p>
+
+          <div className="space-y-6 text-sm text-theme-secondary leading-relaxed">
+            <section>
+              <h2 className="text-lg font-bold text-theme-primary mb-3">1. Information We Collect</h2>
+              <p>We collect information you provide directly to us when you create an account, create an invoice, or communicate with us. This includes:</p>
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Contact information (email, phone number)</li>
+                <li>Business profile data and configuration</li>
+                <li>Transaction data (invoices, customers, items)</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-bold text-theme-primary mb-3">2. How We Use Your Information</h2>
+              <p>We use the information we collect to operate, maintain, and improve our billing platform, process your transactions, and communicate with you regarding your account and our services.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-bold text-theme-primary mb-3">3. Data Storage & Security</h2>
+              <p>Our platform uses local-first architecture (IndexedDB) with cloud synchronization (Firebase). Your business data is encrypted in transit and securely stored in our cloud infrastructure. We implement standard security protocols to prevent unauthorized access.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-bold text-theme-primary mb-3">4. Third-Party Sharing</h2>
+              <p>We do not sell, trade, or rent your personal identification information to others. We may share generic aggregated demographic information not linked to any personal identification information regarding visitors and users with our business partners.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-bold text-theme-primary mb-3">5. Your Rights</h2>
+              <p>You have the right to request access to your data, request correction or deletion, and request data export. To exercise any of these rights, please contact us via the support section or use our <button onClick={() => setCurrentTab('data-deletion')} className="text-theme-accent underline hover:no-underline cursor-pointer font-bold">Data Deletion</button> tool.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-bold text-theme-primary mb-3">6. Contact Us</h2>
+              <p>If you have any questions about this Privacy Policy, the practices of this site, or your dealings with this site, please visit our <button onClick={() => setCurrentTab('support')} className="text-theme-accent underline hover:no-underline cursor-pointer font-bold">Support</button> page.</p>
+            </section>
+
+            <section className="bg-theme-surface p-4 rounded-2xl border border-theme-border-soft/60">
+              <p className="text-xs text-theme-muted font-semibold text-center">
+                Also review our <button onClick={() => setCurrentTab('terms')} className="text-theme-accent underline hover:no-underline cursor-pointer font-bold">Terms of Service</button> and <button onClick={() => setCurrentTab('refund')} className="text-theme-accent underline hover:no-underline cursor-pointer font-bold">Refund Policy</button>.
+              </p>
+            </section>
           </div>
         </div>
-
-        <div className="space-y-6 text-sm text-theme-secondary leading-relaxed">
-          <section>
-            <h2 className="text-lg font-bold text-theme-primary mb-3">1. Information We Collect</h2>
-            <p>We collect information you provide directly to us when you create an account, create an invoice, or communicate with us. This includes:</p>
-            <ul className="list-disc pl-5 mt-2 space-y-1">
-              <li>Contact information (email, phone number)</li>
-              <li>Business profile data and configuration</li>
-              <li>Transaction data (invoices, customers, items)</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-theme-primary mb-3">2. How We Use Your Information</h2>
-            <p>We use the information we collect to operate, maintain, and improve our billing platform, process your transactions, and communicate with you regarding your account and our services.</p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-theme-primary mb-3">3. Data Storage & Security</h2>
-            <p>Our platform uses local-first architecture (IndexedDB) with cloud synchronization (Firebase). Your business data is encrypted in transit and securely stored in our cloud infrastructure. We implement standard security protocols to prevent unauthorized access.</p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-theme-primary mb-3">4. Third-Party Sharing</h2>
-            <p>We do not sell, trade, or rent your personal identification information to others. We may share generic aggregated demographic information not linked to any personal identification information regarding visitors and users with our business partners.</p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-theme-primary mb-3">5. Contact Us</h2>
-            <p>If you have any questions about this Privacy Policy, the practices of this site, or your dealings with this site, please contact support.</p>
-          </section>
-        </div>
-      </div>
       </div>
     </div>
   );

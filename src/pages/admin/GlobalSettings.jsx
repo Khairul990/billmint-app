@@ -59,6 +59,7 @@ const GlobalSettings = () => {
   }, []);
 
   const handleSave = async () => {
+    if (!window.confirm('Are you sure you want to overwrite global revenue settings? This will affect all users.')) return;
     setLoading(true);
     const payload = {
       premiumModeEnabled,
