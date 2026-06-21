@@ -429,7 +429,19 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
         </div>
       </div>
 
+      {/* Empty State (when no data at all) */}
+      {invoices.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 text-center no-print">
+          <div className="w-16 h-16 rounded-2xl bg-theme-accent/10 text-theme-accent flex items-center justify-center mb-4">
+            <FileText className="w-8 h-8" />
+          </div>
+          <p className="text-sm font-bold text-theme-primary">No data yet</p>
+          <p className="text-xs text-theme-muted font-semibold mt-1">Create invoices to see reports</p>
+        </div>
+      )}
+
       {/* TABLE */}
+      {invoices.length > 0 && (
       <div className="bg-theme-card border border-theme-border-soft rounded-3xl overflow-hidden shadow-premium flex-1">
         <div className="p-5 border-b border-theme-border-soft flex items-center justify-between no-print">
           <h3 className="text-sm font-extrabold text-theme-primary">Generated Report Data</h3>
@@ -498,6 +510,7 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
           </table>
         </div>
       </div>
+      )}
       
       {/* GLOBAL PRINT STYLES */}
       <style dangerouslySetInnerHTML={{__html: `
