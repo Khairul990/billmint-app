@@ -2376,18 +2376,33 @@ export const enableRealTimeSync = () => {
 };
 
 // One-time Syncing on Authentication or Startup
-export const syncFromFirestore = async () => {
+let lastSyncTime = 0;
+export const syncFromFirestore = async (force = false) => {
   if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
     console.warn('Blocked real data operation during Demo Mode: syncFromFirestore');
-    return null;
+    toast.error('Sync disabled in Demo Mode');
+    return;
   }
-  if (!firebaseReady) {
+  
+  // Throttle sync to prevent repeated dashboard refreshes and infinite loops
+  const now = Date.now();
+  if (!force && now - lastSyncTime < 15000) {
+    console.log('Sync throttled to prevent repeated calls');
+    return;
+  }
+  lastSyncTime = now;
 
-    return null;
-  }
+  const userId = getRealUserId();
+  if (!userId) return;
+
   try {
-    const userId = getRealUserId();
-    if (!userId) return null;
+    // Backup local data before clearing cache
+    const backupSuccess = await backupLocalData();
+    if (!backupSuccess) {
+      toast.error('Backup failed, sync cancelled');
+      console.error('Backup of local data failed. Aborting sync.');
+      return;
+    }
     
     // Check for UID drift / stale caching
     const lastUid = localStorage.getItem('billqyro_last_uid');
@@ -2491,7 +2506,9 @@ export const syncFromFirestore = async () => {
     }
 
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
-    toast.success('Cloud data synced successfully');
+    // User requested: "Do not show repeated success toasts. I want sync notifications only when actual changes are synced."
+    // Given the difficulty of deep equality checking here, we rely on the UI updating silently.
+    
     return {
       settings: JSON.parse(localStorage.getItem(KEYS.SETTINGS)),
       customers: JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [],

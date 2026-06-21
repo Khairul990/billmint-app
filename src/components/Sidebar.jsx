@@ -245,17 +245,17 @@ const Sidebar = ({
       >
         <button
           onClick={() => setCurrentTab('subscription')}
-          className={`w-full group relative overflow-hidden rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-orange-600/10 hover:from-amber-500/20 hover:to-orange-600/20 hover:border-amber-500/30 hover:shadow-lg transition-all duration-300 ${
-            isCollapsed ? 'p-2 flex items-center justify-center' : 'p-3 text-left flex flex-col items-start gap-1'
+          className={`w-full group relative overflow-hidden rounded-xl border-2 border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-orange-600/10 hover:from-amber-500/20 hover:to-orange-600/20 hover:border-amber-500/40 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300 ${
+            isCollapsed ? 'p-2 flex items-center justify-center' : 'p-3.5 text-left flex flex-col items-start gap-1'
           }`}
         >
           {isCollapsed ? (
-            <Sparkles className="w-5 h-5 text-amber-500" />
+            <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
           ) : (
             <>
               <div className="flex items-center gap-1.5 mb-1 w-full">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 animate-pulse" />
-                <span className="text-[9px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span className="text-[8px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/15 px-1.5 py-0.5 rounded-sm">
                   PREMIUM
                 </span>
               </div>
@@ -263,7 +263,7 @@ const Sidebar = ({
                 Unlock Premium
               </p>
               <p className="text-[10px] text-theme-muted font-medium truncate w-full">
-                Unlock unlimited billing
+                Unlimited billing & features
               </p>
             </>
           )}

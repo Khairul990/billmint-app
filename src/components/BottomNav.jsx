@@ -30,7 +30,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
                   triggerLightHaptic();
                   onQuickBillOpen();
                 }}
-                className="w-13 h-13 w-[52px] h-[52px] bg-gradient-to-tr from-theme-accent to-theme-accent-dark rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(20,184,166,0.4)] border-[3px] border-white dark:border-theme-card transform active:scale-90 hover:scale-105 transition-all"
+                className="w-[54px] h-[54px] bg-gradient-to-tr from-theme-accent to-theme-accent-dark rounded-full flex items-center justify-center text-white shadow-[0_0_24px_-4px_var(--accent-glow)] border-[3px] border-white dark:border-theme-card transform active:scale-85 hover:scale-105 hover:shadow-[0_0_30px_-4px_var(--accent-glow)] transition-all duration-200"
               >
                 <div className="w-6 h-6 font-bold text-2xl leading-none flex items-center justify-center -mt-0.5">+</div>
               </button>
@@ -52,17 +52,20 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
               triggerLightHaptic();
               setCurrentTab(tab.id);
             }}
-            className="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-2xl transition-all cursor-pointer min-w-[44px] min-h-[44px]"
+            className="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-2xl transition-all cursor-pointer min-w-[44px] min-h-[44px] group"
           >
-            <div className={`p-1.5 rounded-xl transition-all duration-300 ${
+            <div className={`relative p-1.5 rounded-xl transition-all duration-200 ${
               isActive 
                 ? 'bg-[image:var(--accent-gradient)] text-white shadow-md shadow-theme-glow scale-110' 
                 : 'text-theme-muted hover:text-theme-muted hover:bg-theme-app'
             }`}>
               <div className="relative">
                 <Icon className="w-5 h-5" />
+                {isActive && (
+                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-3 h-[2px] bg-white/70 rounded-full" />
+                )}
                 {tab.id === 'due' && pendingPaymentsCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-theme-card">
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-theme-card animate-pulse">
                     {pendingPaymentsCount > 9 ? '9+' : pendingPaymentsCount}
                   </span>
                 )}
