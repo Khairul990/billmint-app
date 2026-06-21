@@ -15,6 +15,7 @@ import {
   BookOpen,
   PieChart,
   FileSpreadsheet,
+  FileText,
   Palette,
   Smartphone,
   Store,
@@ -127,9 +128,21 @@ const MoreMenu = ({
         )}
       </div>
 
-      {/* Finance Section */}
-      <SectionTitle title="Finance" />
+      {/* Bills & Finance Section */}
+      <SectionTitle title="Bills & Finance" />
       <div className="bg-theme-card rounded-3xl border border-theme-border-soft shadow-premium">
+        <SettingsItem 
+          icon={FileSpreadsheet} 
+          title="Invoices" 
+          description="View and manage all bills" 
+          onClick={() => setCurrentTab('invoices')} 
+        />
+        <SettingsItem 
+          icon={FileText} 
+          title="Estimates" 
+          description="Quotes and proposals" 
+          onClick={() => setCurrentTab('estimates')} 
+        />
         {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('reports')) && (
           <SettingsItem 
             icon={PieChart} 

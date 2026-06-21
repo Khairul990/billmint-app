@@ -13,7 +13,8 @@ import {
   Clock,
   Banknote,
   Save,
-  Loader2
+  Loader2,
+  Plus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { saveInvoice } from '../../services/dbEngine';
@@ -22,7 +23,7 @@ import { saveInvoice } from '../../services/dbEngine';
  * Customer Ledger Modal
  * Displays a comprehensive view of a customer's history and metrics.
  */
-const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymbol = '₹' }) => {
+const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymbol = '₹', onCreateBill }) => {
   if (!isOpen || !customer) return null;
 
   // 1. Filter invoices for this customer
@@ -188,15 +189,29 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
             </div>
 
             {/* Quick Actions */}
-            {totalDue > 0 && (
-              <button
-                onClick={generateWhatsAppReminder}
-                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition-transform active:scale-95"
-              >
-                <MessageCircle className="w-5 h-5" />
-                <span>Send WhatsApp Reminder</span>
-              </button>
-            )}
+            <div className="grid grid-cols-2 gap-2">
+              {onCreateBill && (
+                <button
+                  onClick={() => {
+                    onCreateBill(customer);
+                    onClose();
+                  }}
+                  className="py-3.5 bg-theme-accent hover:bg-theme-accent-dark text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-transform active:scale-95"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>New Bill</span>
+                </button>
+              )}
+              {totalDue > 0 && (
+                <button
+                  onClick={generateWhatsAppReminder}
+                  className="py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition-transform active:scale-95"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span>Remind</span>
+                </button>
+              )}
+            </div>
 
             {/* Timeline */}
             <div className="space-y-4">

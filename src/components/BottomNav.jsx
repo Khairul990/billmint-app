@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FileSpreadsheet, Users, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, CreditCard, Users, MoreHorizontal } from 'lucide-react';
 import { triggerLightHaptic } from '../utils/feedback';
 import { getCustomerLabelByType, getInvoiceLabelByType } from '../config/businessPresets';
 
@@ -18,15 +18,15 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
   const getInvoiceLabel = () => getInvoiceLabelByType(wsType);
 
   const tabs = [
-    { id: 'dashboard', label: "Today's Business", icon: LayoutDashboard },
-    { id: 'invoices', label: getInvoiceLabel(), icon: FileSpreadsheet },
+    { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
+    { id: 'due', label: 'Due', icon: CreditCard, badge: pendingPaymentsCount },
     { id: 'create', isAction: true },
     { id: 'customers', label: getCustomerLabel(), icon: Users },
     { id: 'more', label: 'More', icon: MoreHorizontal },
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-theme-card dark:bg-theme-card/95 dark:bg-[#070c18]/80 backdrop-blur-xl border-t border-theme-border-soft dark:border-theme-border-soft/80 dark:border-white/5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] px-3 py-2 flex items-center justify-around pb-6 transition-colors duration-300">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-theme-card/95 dark:bg-theme-card/95 dark:bg-[#070c18] backdrop-blur-xl border-t border-theme-border-soft dark:border-theme-border-soft/80 dark:border-white/5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center justify-around transition-colors duration-300">
       {tabs.map((tab) => {
         if (tab.isAction) {
           return (
@@ -47,8 +47,9 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
         const Icon = tab.icon;
         const isActive = 
           currentTab === tab.id || 
-          (tab.id === 'invoices' && currentTab === 'create-invoice') ||
-          (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings', 'help-center', 'estimates', 'pdf-templates', 'live-link-templates', 'marketplace', 'backup-restore'].includes(currentTab));
+          (tab.id === 'create' && currentTab === 'create-invoice') ||
+          (tab.id === 'due' && ['due-ledger', 'pending-payments'].includes(currentTab)) ||
+          (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings', 'help-center', 'estimates', 'pdf-templates', 'live-link-templates', 'marketplace', 'backup-restore', 'invoices', 'reports'].includes(currentTab));
         
         return (
           <button
@@ -66,7 +67,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
             }`}>
               <div className="relative">
                 <Icon className="w-6 h-6" />
-                {tab.id === 'more' && pendingPaymentsCount > 0 && (
+                {tab.badge > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse border-2 border-white dark:border-[#070c18]">
                     {pendingPaymentsCount}
                   </span>

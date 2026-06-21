@@ -12,6 +12,7 @@ import {
   Mail,
   UserPlus,
   MapPin,
+  FileText,
 } from 'lucide-react';
 import BottomSheet from '../components/BottomSheet';
 import PullToRefresh from '../components/PullToRefresh';
@@ -25,7 +26,7 @@ import CustomerLedger from '../components/customers/CustomerLedger';
  * @param {Function} onSaveCustomer - saves or edits customer in state/storage
  * @param {Function} onDeleteCustomer - deletes customer
  */
-const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCustomer, businessSettings }) => {
+const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCustomer, businessSettings, onCreateBill }) => {
   const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.type || 'retail';
   const customerLabel = getCustomerLabelByType(wsType);
   const [searchQuery, setSearchQuery] = useState('');
@@ -164,12 +165,20 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
               <h3 className="text-base font-extrabold text-theme-primary dark:text-theme-primary">{cust.name}</h3>
             </div>
             {/* Action buttons */}
-            <div className="flex gap-1 mt-2" onClick={(e) => e.stopPropagation()}>
-              <button onClick={() => openEditModal(cust)} className="p-2 md:p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light rounded-xl transition-all" title="Edit Contact">
-                <Edit2 className="w-5 h-5" />
+            <div className="flex items-center gap-1.5 mt-3" onClick={(e) => e.stopPropagation()}>
+              {onCreateBill && (
+                <button onClick={() => { onCreateBill(cust); }} className="flex-1 py-2 bg-theme-accent/10 text-theme-accent hover:bg-theme-accent/20 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1 min-h-[36px]">
+                  <Plus className="w-3.5 h-3.5" /> Bill
+                </button>
+              )}
+              <button onClick={() => setLedgerCustomer(cust)} className="flex-1 py-2 bg-theme-app border border-theme-border-soft hover:border-theme-accent/30 rounded-xl text-[10px] font-bold text-theme-muted hover:text-theme-primary transition-all flex items-center justify-center gap-1 min-h-[36px]">
+                <FileText className="w-3.5 h-3.5" /> Ledger
               </button>
-              <button onClick={() => handleDelete(cust.id)} className="p-2 md:p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all" title="Delete Contact">
-                <Trash2 className="w-5 h-5" />
+              <button onClick={() => openEditModal(cust)} className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 rounded-xl transition-all" title="Edit Contact">
+                <Edit2 className="w-4 h-4" />
+              </button>
+              <button onClick={() => handleDelete(cust.id)} className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all" title="Delete Contact">
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
             {/* Meta info */}
@@ -278,6 +287,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
           onClose={() => setLedgerCustomer(null)}
           customer={ledgerCustomer}
           invoices={invoices}
+          onCreateBill={onCreateBill}
         />
       </div>
     </PullToRefresh>

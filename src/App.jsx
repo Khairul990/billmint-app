@@ -1258,6 +1258,7 @@ function App() {
         return (
           <AuditLogs setCurrentTab={setCurrentTab} />
         );
+      case 'due':
       case 'due-ledger':
         return (
           <DueLedger 
@@ -1362,6 +1363,10 @@ function App() {
             onSaveCustomer={handleSaveCustomer}
             onDeleteCustomer={handleDeleteCustomer}
             businessSettings={activeSettings}
+            onCreateBill={(cust) => {
+              setEditingInvoice({ customerName: cust.name });
+              setCurrentTab('create-invoice');
+            }}
           />
         );
       case 'products':

@@ -420,16 +420,20 @@ const Invoices = ({
         ))}
 
         {filteredInvoices.length === 0 && (
-            <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium relative overflow-hidden">
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] dark:opacity-5 grayscale">
-                <img src="/brand/billqyro-icon.png" alt="Watermark" className="w-64 h-64 object-contain scale-125" />
-              </div>
-              <div className="relative z-10">
-                <img src="/brand/billqyro-icon.png" alt="Empty" className="w-12 h-12 object-contain mx-auto mb-3 opacity-40 grayscale drop-shadow-sm" />
-                <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">No invoices yet</h4>
-                <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
-                  No invoices found. Create your first bill to see transaction records here!
-                </p>
+            <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-10 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium relative overflow-hidden">
+              <div className="relative z-10 flex flex-col items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+                  <FileText className="w-8 h-8" />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-theme-primary">No bills yet</h4>
+                  <p className="text-xs text-theme-muted font-semibold mt-1">
+                    Create your first bill to see records here
+                  </p>
+                </div>
+                <button onClick={() => { onEditInvoice(null); setCurrentTab('create-invoice'); }} className="px-5 py-2.5 bg-theme-accent text-white text-xs font-bold rounded-xl transition-colors">
+                  Create Bill
+                </button>
               </div>
             </div>
           )}
@@ -715,6 +719,68 @@ const Invoices = ({
               />
             </div>
             
+            {/* Mobile Sticky Bottom Action Bar (thumb zone) */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-[10000] bg-theme-card/95 backdrop-blur-xl border-t border-theme-border-soft px-4 py-3 flex items-center justify-around pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+              <button
+                onClick={async () => {
+                  try {
+                    const token = await ensureInvoicePublicToken(viewingInvoice);
+                    if (!token) { toast.error('Could not create live link.'); return; }
+                    const updatedInvoice = { ...viewingInvoice, publicToken: token };
+                    const link = generateWhatsAppShareLink(updatedInvoice, currencySymbol, businessSettings);
+                    window.open(link, '_blank');
+                  } catch (err) { toast.error('Could not create live link.'); }
+                }}
+                className="flex flex-col items-center gap-1 min-w-[60px]"
+              >
+                <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+                  <WhatsAppIcon className="w-5 h-5" />
+                </div>
+                <span className="text-[9px] font-bold text-theme-muted">Share</span>
+              </button>
+              <button
+                onClick={() => onDownloadPDF(viewingInvoice)}
+                className="flex flex-col items-center gap-1 min-w-[60px]"
+              >
+                <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+                  <Download className="w-5 h-5" />
+                </div>
+                <span className="text-[9px] font-bold text-theme-muted">PDF</span>
+              </button>
+              <button
+                onClick={async () => {
+                  const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
+                  if (!isLiveLinkEnabled) { toast.error('Live Link is disabled.'); return; }
+                  try {
+                    const token = await ensureInvoicePublicToken(viewingInvoice);
+                    if (!token) { toast.error('Could not create live link.'); return; }
+                    const liveLink = `${window.location.origin}/invoice/${token}`;
+                    await navigator.clipboard.writeText(liveLink);
+                    toast.success('Live Link copied!');
+                  } catch (err) { toast.error('Could not create live link.'); }
+                }}
+                className="flex flex-col items-center gap-1 min-w-[60px]"
+              >
+                <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+                  <Link className="w-5 h-5" />
+                </div>
+                <span className="text-[9px] font-bold text-theme-muted">Link</span>
+              </button>
+              <button
+                onClick={() => {
+                  onEditInvoice(viewingInvoice);
+                  setViewingInvoice(null);
+                  setCurrentTab('create-invoice');
+                }}
+                className="flex flex-col items-center gap-1 min-w-[60px]"
+              >
+                <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+                  <Edit className="w-5 h-5" />
+                </div>
+                <span className="text-[9px] font-bold text-theme-muted">Edit</span>
+              </button>
+            </div>
+
             {/* Print Only Embedded Capture Zone */}
             <div className="hidden print:block print:absolute print:inset-0 bg-theme-card dark:bg-theme-card">
               <InvoicePreview 

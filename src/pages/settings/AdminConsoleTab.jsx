@@ -384,9 +384,9 @@ const AdminConsoleTab = (props) => {
                           <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-theme-primary">Maintenance Lockout</span>
                           <button
                             onClick={() => setMaintenanceMode(!maintenanceMode)}
-                            className={`w-10 h-5 rounded-full relative transition-colors duration-300 focus:outline-none ${maintenanceMode ? 'bg-theme-danger' : 'bg-theme-border-strong dark:bg-theme-surface'}`}
+                            className={`w-10 h-5 rounded-full relative transition-all duration-500 ease-in-out shadow-inner flex items-center p-0.5 focus:outline-none ${maintenanceMode ? 'bg-[image:var(--accent-gradient)] shadow-sm shadow-theme-accent/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5'}`}
                           >
-                            <div className={`w-3.5 h-3.5 bg-theme-card dark:bg-theme-card rounded-full absolute top-0.5 transition-all duration-300 ${maintenanceMode ? 'left-6' : 'left-0.5'}`}></div>
+                            <div className={`w-4 h-4 bg-white rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ${maintenanceMode ? 'translate-x-5' : 'translate-x-0'}`}></div>
                           </button>
                         </div>
                       </div>

@@ -197,9 +197,9 @@ const BusinessProfileTab = (props) => {
                         document.documentElement.classList.remove('dark');
                       }
                     }}
-                    className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${darkMode ? 'bg-theme-accent' : 'bg-theme-border-strong dark:bg-theme-surface'}`}
+                    className={`relative w-12 h-6 rounded-full transition-all duration-500 ease-in-out shadow-inner flex items-center p-1 focus:outline-none ${darkMode ? 'bg-[image:var(--accent-gradient)] shadow-md shadow-theme-accent/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5'}`}
                   >
-                    <span className={`absolute top-1 left-1 bg-theme-card w-4 h-4 rounded-full transition-transform duration-300 ${darkMode ? 'translate-x-6' : ''}`} />
+                    <span className={`w-4 h-4 bg-white rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ${darkMode ? 'translate-x-6' : 'translate-x-0'}`} />
                   </button>
                 </div>
 
@@ -644,9 +644,9 @@ const BusinessProfileTab = (props) => {
               <button
                 type="button"
                 onClick={() => setPaymentQrEnabled(!paymentQrEnabled)}
-                className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${paymentQrEnabled ? 'bg-theme-accent' : 'bg-theme-border-strong dark:bg-theme-surface'}`}
+                className={`w-12 h-6 rounded-full relative transition-all duration-500 ease-in-out shadow-inner flex items-center p-1 focus:outline-none ${paymentQrEnabled ? 'bg-[image:var(--accent-gradient)] shadow-md shadow-theme-accent/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5'}`}
               >
-                <div className={`w-4 h-4 bg-theme-card dark:bg-theme-card rounded-full absolute top-1 transition-all duration-300 ${paymentQrEnabled ? 'left-7' : 'left-1'}`}></div>
+                <div className={`w-4 h-4 bg-white rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ${paymentQrEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
               </button>
             </div>
 
@@ -770,9 +770,9 @@ const BusinessProfileTab = (props) => {
                   <button
                     type="button"
                     onClick={() => setShowQrInPdf(!showQrInPdf)}
-                    className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${showQrInPdf ? 'bg-theme-accent' : 'bg-theme-border-strong dark:bg-theme-surface'}`}
+                    className={`w-12 h-6 rounded-full relative transition-all duration-500 ease-in-out shadow-inner flex items-center p-1 focus:outline-none ${showQrInPdf ? 'bg-[image:var(--accent-gradient)] shadow-md shadow-theme-accent/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5'}`}
                   >
-                    <div className={`w-4 h-4 bg-theme-card dark:bg-theme-card rounded-full absolute top-1 transition-all duration-300 ${showQrInPdf ? 'left-7' : 'left-1'}`}></div>
+                    <div className={`w-4 h-4 bg-white rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ${showQrInPdf ? 'translate-x-6' : 'translate-x-0'}`}></div>
                   </button>
                 </div>
 
@@ -784,9 +784,9 @@ const BusinessProfileTab = (props) => {
                   <button
                     type="button"
                     onClick={() => setShowQrInPreview(!showQrInPreview)}
-                    className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none ${showQrInPreview ? 'bg-theme-accent' : 'bg-theme-border-strong dark:bg-theme-surface'}`}
+                    className={`w-12 h-6 rounded-full relative transition-all duration-500 ease-in-out shadow-inner flex items-center p-1 focus:outline-none ${showQrInPreview ? 'bg-[image:var(--accent-gradient)] shadow-md shadow-theme-accent/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5'}`}
                   >
-                    <div className={`w-4 h-4 bg-theme-card dark:bg-theme-card rounded-full absolute top-1 transition-all duration-300 ${showQrInPreview ? 'left-7' : 'left-1'}`}></div>
+                    <div className={`w-4 h-4 bg-white rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ${showQrInPreview ? 'translate-x-6' : 'translate-x-0'}`}></div>
                   </button>
                 </div>
               </>
@@ -949,9 +949,9 @@ const BusinessProfileTab = (props) => {
                   <button
                     type="button"
                     onClick={() => item.setter(!item.state)}
-                    className={`w-9 h-5 rounded-full relative transition-colors duration-300 shrink-0 mt-0.5 focus:outline-none ${item.state ? 'bg-theme-accent' : 'bg-slate-350 dark:bg-theme-surface'}`}
+                    className={`w-9 h-5 rounded-full relative transition-all duration-500 ease-in-out shadow-inner flex items-center p-1 shrink-0 mt-0.5 focus:outline-none ${item.state ? 'bg-[image:var(--accent-gradient)] shadow-sm shadow-theme-accent/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5'}`}
                   >
-                    <div className={`w-3 h-3 bg-theme-card dark:bg-theme-card rounded-full absolute top-1 transition-all duration-300 ${item.state ? 'left-5' : 'left-1'}`}></div>
+                    <div className={`w-3 h-3 bg-white rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ${item.state ? 'translate-x-4' : 'translate-x-0'}`}></div>
                   </button>
                 </div>
               ))}

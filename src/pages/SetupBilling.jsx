@@ -487,7 +487,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                   onClick={() => setPaymentQrEnabled(!paymentQrEnabled)}
                   className={`w-10 h-5.5 rounded-full relative transition-colors duration-300 focus:outline-none ${paymentQrEnabled ? 'bg-theme-accent' : 'bg-theme-border-strong dark:bg-theme-surface'}`}
                 >
-                  <div className={`w-3.5 h-3.5 bg-theme-card dark:bg-theme-card rounded-full absolute top-1 transition-all duration-300 ${paymentQrEnabled ? 'left-5.5' : 'left-1'}`}></div>
+                  <div className={`w-4 h-4 bg-white rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ${paymentQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
                 </button>
               </div>
 

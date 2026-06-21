@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { UserPlus, Search, ChevronDown, Check, Phone, Mail, MapPin, MessageCircle, Clock, IndianRupee, Star, History } from 'lucide-react';
+import { UserPlus, Search, ChevronDown, ChevronRight, Check, Phone, Mail, MapPin, MessageCircle, Clock, IndianRupee, Star, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CustomerInsightsPane from './CustomerInsightsPane';
 import { getCustomerLabelByType } from '../../../config/businessPresets';
@@ -11,6 +11,7 @@ const SmartCustomerSelect = ({ customers = [] }) => {
   const customerLabel = getCustomerLabelByType(wsType);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const dropdownRef = useRef(null);
 
   // Close dropdown on outside click
@@ -179,8 +180,16 @@ const SmartCustomerSelect = ({ customers = [] }) => {
         </div>
       )}
 
-      {/* Advanced Details (Always visible fields as requested) */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+      {/* Collapsible Advanced Details */}
+      <button
+        onClick={() => setShowAdvanced(!showAdvanced)}
+        className="flex items-center gap-2 text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors pt-2"
+      >
+        {showAdvanced ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+        {showAdvanced ? 'Hide Details' : 'Add Details'}
+      </button>
+      {showAdvanced && (
+      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
         <div>
           <label className="block text-[10px] font-bold text-theme-muted mb-1 uppercase tracking-wider ml-1">WhatsApp</label>
           <div className="relative group">
@@ -236,6 +245,7 @@ const SmartCustomerSelect = ({ customers = [] }) => {
           </div>
         </div>
       </motion.div>
+      )}
 
       {/* AI Customer Insights */}
       <CustomerInsightsPane customerId={state.customer.id} />
