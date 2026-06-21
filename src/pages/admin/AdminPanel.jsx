@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import AdminLayout from './AdminLayout';
 import AdminDashboard from './AdminDashboard';
 import UserManager from './UserManager';
@@ -13,26 +14,34 @@ import BackupCenter from './BackupCenter';
 import ChangelogManager from './ChangelogManager';
 import SupportCenter from './SupportCenter';
 import AnnouncementManager from './AnnouncementManager';
+import { pageVariants } from '../../utils/animations';
 
 const AdminPanel = ({ currentTab, setCurrentTab }) => {
   const [activeAdminTab, setActiveAdminTab] = useState('dashboard');
 
   return (
-    <AdminLayout setCurrentTab={setCurrentTab} activeAdminTab={activeAdminTab} setActiveAdminTab={setActiveAdminTab}>
-      {activeAdminTab === 'dashboard' && <AdminDashboard />}
-      {activeAdminTab === 'users' && <UserManager />}
-      {activeAdminTab === 'premium' && <PremiumControlCenter />}
-      {activeAdminTab === 'payments' && <PaymentProofCenter />}
-      {activeAdminTab === 'settings' && <GlobalSettings />}
-      {activeAdminTab === 'features' && <FeatureSwitchCenter />}
-      {activeAdminTab === 'lab' && <OwnerTestLab />}
-      {activeAdminTab === 'health' && <AppHealthCenter />}
-      {activeAdminTab === 'security' && <SecurityCenter />}
-      {activeAdminTab === 'backup' && <BackupCenter />}
-      {activeAdminTab === 'changelog' && <ChangelogManager />}
-      {activeAdminTab === 'support' && <SupportCenter />}
-      {activeAdminTab === 'announcements' && <AnnouncementManager />}
-    </AdminLayout>
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <AdminLayout setCurrentTab={setCurrentTab} activeAdminTab={activeAdminTab} setActiveAdminTab={setActiveAdminTab}>
+        {activeAdminTab === 'dashboard' && <AdminDashboard />}
+        {activeAdminTab === 'users' && <UserManager />}
+        {activeAdminTab === 'premium' && <PremiumControlCenter />}
+        {activeAdminTab === 'payments' && <PaymentProofCenter />}
+        {activeAdminTab === 'settings' && <GlobalSettings />}
+        {activeAdminTab === 'features' && <FeatureSwitchCenter />}
+        {activeAdminTab === 'lab' && <OwnerTestLab />}
+        {activeAdminTab === 'health' && <AppHealthCenter />}
+        {activeAdminTab === 'security' && <SecurityCenter />}
+        {activeAdminTab === 'backup' && <BackupCenter />}
+        {activeAdminTab === 'changelog' && <ChangelogManager />}
+        {activeAdminTab === 'support' && <SupportCenter />}
+        {activeAdminTab === 'announcements' && <AnnouncementManager />}
+      </AdminLayout>
+    </motion.div>
   );
 };
 

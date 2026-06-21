@@ -9,7 +9,6 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
   const wsType = activeWorkspace.type || 'retail';
 
   const getCustomerLabel = () => getCustomerLabelByType(wsType);
-  const getInvoiceLabel = () => getInvoiceLabelByType(wsType);
 
   const tabs = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
@@ -20,65 +19,65 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-theme-card/95 backdrop-blur-xl border-t border-theme-border-soft shadow-[0_-10px_30px_rgba(0,0,0,0.08)] px-3 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center justify-around transition-colors duration-300" style={{ height: 'calc(64px + env(safe-area-inset-bottom))', minHeight: '64px' }}>
-      {tabs.map((tab) => {
-        if (tab.isAction) {
-          return (
-            <div key="action" className="relative -top-4 flex-1 flex justify-center">
-              <button
-                onClick={() => {
-                  triggerLightHaptic();
-                  onQuickBillOpen();
-                }}
-                className="w-[54px] h-[54px] bg-gradient-to-tr from-theme-accent to-theme-accent-dark rounded-full flex items-center justify-center text-white shadow-[0_0_24px_-4px_var(--accent-glow)] border-[3px] border-white dark:border-theme-card transform active:scale-85 hover:scale-105 hover:shadow-[0_0_30px_-4px_var(--accent-glow)] transition-all duration-200"
-              >
-                <div className="w-6 h-6 font-bold text-2xl leading-none flex items-center justify-center -mt-0.5">+</div>
-              </button>
-            </div>
-          );
-        }
-
-        const Icon = tab.icon;
-        const isActive = 
-          currentTab === tab.id || 
-          (tab.id === 'create' && currentTab === 'create-invoice') ||
-          (tab.id === 'due' && ['due-ledger', 'pending-payments'].includes(currentTab)) ||
-          (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings', 'help-center', 'estimates', 'pdf-templates', 'live-link-templates', 'marketplace', 'backup-restore', 'invoices', 'reports'].includes(currentTab));
-        
-        return (
-          <button
-            key={tab.id}
-            onClick={() => {
-              triggerLightHaptic();
-              setCurrentTab(tab.id);
-            }}
-            className="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-2xl transition-all cursor-pointer min-w-[44px] min-h-[44px] group"
-          >
-            <div className={`relative p-1.5 rounded-xl transition-all duration-200 ${
-              isActive 
-                ? 'bg-[image:var(--accent-gradient)] text-white shadow-md shadow-theme-glow scale-110' 
-                : 'text-theme-muted hover:text-theme-muted hover:bg-theme-app'
-            }`}>
-              <div className="relative">
-                <Icon className="w-5 h-5" />
-                {isActive && (
-                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-3 h-[2px] bg-white/70 rounded-full" />
-                )}
-                {tab.id === 'due' && pendingPaymentsCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-theme-card animate-pulse">
-                    {pendingPaymentsCount > 9 ? '9+' : pendingPaymentsCount}
-                  </span>
-                )}
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-theme-border-soft safe-area-bottom backdrop-blur-2xl"
+      style={{ height: 'calc(64px + env(safe-area-inset-bottom))', minHeight: '64px' }}
+    >
+      <div className="flex items-center justify-around h-full px-2">
+        {tabs.map((tab) => {
+          if (tab.isAction) {
+            return (
+              <div key="action" className="relative -top-3 flex-1 flex justify-center">
+                <button
+                  onClick={() => {
+                    triggerLightHaptic();
+                    onQuickBillOpen();
+                  }}
+                  className="w-14 h-14 rounded-full bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-lg shadow-theme-glow border-[3px] border-white dark:border-[#1a1a2e] active:scale-90 hover:scale-105 transition-all duration-200"
+                >
+                  <span className="text-2xl font-light leading-none -mt-0.5">+</span>
+                </button>
               </div>
-            </div>
-            <span className={`text-[9px] mt-0.5 tracking-tight ${
-              isActive ? 'text-theme-accent font-bold' : 'text-theme-muted font-medium'
-            }`}>
-              {tab.label}
-            </span>
-          </button>
-        );
-      })}
+            );
+          }
+
+          const Icon = tab.icon;
+          const isActive = 
+            currentTab === tab.id || 
+            (tab.id === 'due' && ['due-ledger', 'pending-payments'].includes(currentTab)) ||
+            (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings', 'help-center', 'estimates', 'pdf-templates', 'live-link-templates', 'marketplace', 'backup-restore', 'invoices', 'reports'].includes(currentTab));
+          
+          return (
+            <button
+              key={tab.id}
+              onClick={() => {
+                triggerLightHaptic();
+                setCurrentTab(tab.id);
+              }}
+              className="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition-all cursor-pointer min-w-[44px] group relative"
+            >
+              <div className={`relative p-1.5 rounded-xl transition-all duration-200 ${
+                isActive 
+                  ? 'bg-[image:var(--accent-gradient)] text-white shadow-md scale-110' 
+                  : 'text-theme-muted hover:text-theme-muted hover:bg-theme-app'
+              }`}>
+                <div className="relative">
+                  <Icon className="w-5 h-5" />
+                  {tab.badge > 0 && tab.id === 'due' && (
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-theme-danger text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-theme-card animate-pulse-soft">
+                      {tab.badge > 9 ? '9+' : tab.badge}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <span className={`text-[9px] mt-0.5 font-semibold tracking-tight ${
+                isActive ? 'text-theme-accent' : 'text-theme-muted'
+              }`}>
+                {tab.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </nav>
   );
 };

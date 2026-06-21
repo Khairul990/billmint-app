@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { 
   BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, 
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend 
@@ -8,6 +9,7 @@ import {
   TrendingUp, DollarSign, FileText, CheckCircle2, AlertCircle, Clock
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
+import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
 
 const COLORS = {
   emerald: '#10b981',
@@ -22,13 +24,12 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
   const currencySymbol = businessSettings?.currency || '₹';
 
   // --- FILTERS STATE ---
-  const [dateRange, setDateRange] = useState('This Month'); // 'All Time', 'Today', 'This Week', 'This Month', 'Custom'
+  const [dateRange, setDateRange] = useState('This Month');
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
-  const [docType, setDocType] = useState('All'); // 'All', 'Invoice', 'Estimate', 'Quotation'
-  const [paymentStatus, setPaymentStatus] = useState('All'); // 'All', 'Paid', 'Partial', 'Unpaid', 'Overdue'
+  const [docType, setDocType] = useState('All');
+  const [paymentStatus, setPaymentStatus] = useState('All');
 
-  // --- HELPER FUNCTIONS ---
   const isDateInRange = (dateString, rangeType, start, end) => {
     if (!dateString) return false;
     const d = new Date(dateString);
@@ -59,23 +60,18 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
     return true;
   };
 
-  // --- MEMOIZED DATA PROCESSOR ---
   const { 
     filteredData, 
     metrics, 
     charts 
   } = useMemo(() => {
-    // 1. Sanitize & Filter
     const processed = invoices.filter(inv => {
-      // Document Type Fallback
       const type = inv.documentType || (inv.billType === 'Estimate' ? 'Estimate' : 'Invoice');
       if (docType !== 'All' && type !== docType) return false;
 
-      // Date Filtering
       const targetDate = inv.date || inv.createdAt;
       if (!isDateInRange(targetDate, dateRange, customStart, customEnd)) return false;
 
-      // Payment Status Filtering (Estimates usually don't have payment status, handle gracefully)
       const pStatus = inv.paymentStatus || 'Unpaid';
       if (paymentStatus !== 'All' && pStatus !== paymentStatus) return false;
 
@@ -95,16 +91,14 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
         parsedDue: Math.max(0, grandTotal - paid),
         parsedStatus: inv.paymentStatus || 'Unpaid'
       };
-    }).sort((a, b) => b.parsedDate - a.parsedDate); // Sort newest first
+    }).sort((a, b) => b.parsedDate - a.parsedDate);
 
-    // 2. Compute Metrics
     const counts = { Invoice: 0, Estimate: 0, Quotation: 0 };
     let totalSales = 0;
     let totalCollected = 0;
     let totalDue = 0;
     let totalOverdue = 0;
     
-    // For charts
     const salesByDate = {};
     const salesByCustomer = {};
     const salesByItem = {};
@@ -113,7 +107,6 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
     processed.forEach(inv => {
       counts[inv.parsedType] = (counts[inv.parsedType] || 0) + 1;
       
-      // We only sum revenue metrics for actual Invoices
       if (inv.parsedType === 'Invoice') {
         totalSales += inv.parsedTotal;
         totalCollected += inv.parsedPaid;
@@ -123,20 +116,16 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
           totalOverdue += inv.parsedDue;
         }
 
-        // Status pie chart
         statusBreakdown[inv.parsedStatus] = (statusBreakdown[inv.parsedStatus] || 0) + 1;
 
-        // Area chart by date
         const dateStr = inv.parsedDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
         if (!salesByDate[dateStr]) salesByDate[dateStr] = 0;
         salesByDate[dateStr] += inv.parsedTotal;
 
-        // Top Customer
         const custName = inv.customerName || 'Unknown';
         if (!salesByCustomer[custName]) salesByCustomer[custName] = 0;
         salesByCustomer[custName] += inv.parsedTotal;
 
-        // Top Items
         if (inv.items && Array.isArray(inv.items)) {
           inv.items.forEach(item => {
             const name = item.item || item.description || 'Unknown Item';
@@ -148,7 +137,6 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
       }
     });
 
-    // 3. Format Charts
     const areaChartData = Object.keys(salesByDate).map(date => ({ date, revenue: salesByDate[date] })).reverse();
     
     const topCustomers = Object.keys(salesByCustomer)
@@ -185,7 +173,6 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
     };
   }, [invoices, dateRange, customStart, customEnd, docType, paymentStatus]);
 
-  // --- ACTIONS ---
   const exportCSV = () => {
     if (filteredData.length === 0) return alert("No data to export.");
     
@@ -224,295 +211,368 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
     window.print();
   };
 
-  return (
-    <div className="space-y-6 pb-24 h-full flex flex-col print-container">
-      
-      {/* HEADER & FILTERS */}
-      <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium no-print">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5 pb-5 border-b border-theme-border-soft">
-          <div>
-            <h2 className="text-xl font-extrabold text-theme-primary flex items-center gap-2">
-              <PieChartIcon className="w-6 h-6 text-theme-accent" />
-              Business Reports
-            </h2>
-            <p className="text-xs text-theme-muted font-bold uppercase tracking-wider mt-1">ANALYTICS & EXPORTS</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={exportCSV}
-              className="px-4 py-2 bg-theme-surface hover:bg-theme-surface/80 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary flex items-center gap-2 transition-all active:scale-95"
-            >
-              <Download className="w-4 h-4" /> Export CSV
-            </button>
-            <button 
-              onClick={handlePrint}
-              className="px-4 py-2 bg-[image:var(--accent-gradient)] text-white shadow-lg shadow-theme-accent/20 rounded-xl text-xs font-bold flex items-center gap-2 transition-all active:scale-95"
-            >
-              <Printer className="w-4 h-4" /> Print Report
-            </button>
-          </div>
-        </div>
+  const dateOptions = ['All Time', 'Today', 'This Week', 'This Month', 'Custom'];
+  const docOptions = ['All', 'Invoice', 'Estimate', 'Quotation'];
+  const paymentOptions = ['All', 'Paid', 'Partial', 'Unpaid', 'Overdue'];
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Time Period</label>
-            <select 
-              value={dateRange} 
-              onChange={e => setDateRange(e.target.value)}
-              className="w-full px-3 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all"
-            >
-              <option value="All Time">All Time</option>
-              <option value="Today">Today</option>
-              <option value="This Week">This Week</option>
-              <option value="This Month">This Month</option>
-              <option value="Custom">Custom Range</option>
-            </select>
-          </div>
-          
-          {dateRange === 'Custom' && (
-            <div className="space-y-1.5 flex gap-2">
-              <div className="flex-1">
-                <label className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Start</label>
-                <input 
-                  type="date" 
-                  value={customStart} 
-                  onChange={e => setCustomStart(e.target.value)}
-                  className="w-full px-2 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-[10px] font-bold text-theme-primary focus:border-theme-accent"
-                />
+  return (
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      className="page-premium pb-28 h-full flex flex-col print-container"
+    >
+      {/* HEADER SECTION */}
+      <div className="hero-premium section-spacing-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="icon-premium icon-premium-lg">
+                <PieChartIcon className="w-5 h-5" />
               </div>
-              <div className="flex-1">
-                <label className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">End</label>
-                <input 
-                  type="date" 
-                  value={customEnd} 
-                  onChange={e => setCustomEnd(e.target.value)}
-                  className="w-full px-2 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-[10px] font-bold text-theme-primary focus:border-theme-accent"
-                />
+              <div>
+                <h1 className="hero-premium-title">Business Reports</h1>
+                <p className="hero-premium-subtitle">Analytics, metrics & exports for your business</p>
               </div>
             </div>
-          )}
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Document Type</label>
-            <select 
-              value={docType} 
-              onChange={e => setDocType(e.target.value)}
-              className="w-full px-3 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all"
-            >
-              <option value="All">All Documents</option>
-              <option value="Invoice">Invoices Only</option>
-              <option value="Estimate">Estimates Only</option>
-              <option value="Quotation">Quotations Only</option>
-            </select>
           </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Payment Status</label>
-            <select 
-              value={paymentStatus} 
-              onChange={e => setPaymentStatus(e.target.value)}
-              className="w-full px-3 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all"
+          <div className="flex items-center gap-2">
+            <motion.button
+              variants={staggerItem}
+              onClick={exportCSV}
+              className="btn-premium-outline text-xs"
             >
-              <option value="All">All Statuses</option>
-              <option value="Paid">Paid</option>
-              <option value="Partial">Partial</option>
-              <option value="Unpaid">Unpaid</option>
-              <option value="Overdue">Overdue</option>
-            </select>
+              <Download className="w-4 h-4" /> Export CSV
+            </motion.button>
+            <motion.button
+              variants={staggerItem}
+              onClick={handlePrint}
+              className="btn-premium text-xs"
+            >
+              <Printer className="w-4 h-4" /> Print Report
+            </motion.button>
           </div>
         </div>
       </div>
 
-      {/* PRINT HEADER ONLY VISIBLE ON PRINT */}
+      {/* PREMIUM FILTER BAR */}
+      <motion.div variants={staggerItem} className="card-premium p-4 section-spacing no-print">
+        <div className="section-header mb-3">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-theme-accent" />
+            <h3 className="section-header-title">Filters</h3>
+          </div>
+          <span className="badge-premium badge-info">{filteredData.length} records</span>
+        </div>
+        <div className="filter-bar">
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto">
+            <label className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Time Period</label>
+            <div className="flex flex-wrap gap-1.5">
+              {dateOptions.map(opt => (
+                <button
+                  key={opt}
+                  onClick={() => setDateRange(opt)}
+                  className={`filter-chip ${dateRange === opt ? 'active' : ''}`}
+                >
+                  {opt === 'Custom' && dateRange === 'Custom' ? 'Custom Range' : opt}
+                </button>
+              ))}
+            </div>
+          </div>
+          {dateRange === 'Custom' && (
+            <div className="flex gap-2 w-full sm:w-auto">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Start</label>
+                <input
+                  type="date"
+                  value={customStart}
+                  onChange={e => setCustomStart(e.target.value)}
+                  className="input-premium text-xs"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">End</label>
+                <input
+                  type="date"
+                  value={customEnd}
+                  onChange={e => setCustomEnd(e.target.value)}
+                  className="input-premium text-xs"
+                />
+              </div>
+            </div>
+          )}
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto">
+            <label className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Document Type</label>
+            <div className="flex flex-wrap gap-1.5">
+              {docOptions.map(opt => (
+                <button
+                  key={opt}
+                  onClick={() => setDocType(opt)}
+                  className={`filter-chip ${docType === opt ? 'active' : ''}`}
+                >
+                  {opt === 'All' ? 'All Docs' : opt}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto">
+            <label className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Payment Status</label>
+            <div className="flex flex-wrap gap-1.5">
+              {paymentOptions.map(opt => (
+                <button
+                  key={opt}
+                  onClick={() => setPaymentStatus(opt)}
+                  className={`filter-chip ${paymentStatus === opt ? 'active' : ''}`}
+                >
+                  {opt === 'All' ? 'All Statuses' : opt}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* PRINT HEADER */}
       <div className="hidden print:block mb-8 text-center border-b pb-4">
         <h1 className="text-2xl font-bold">Business Report - {businessSettings?.businessName}</h1>
         <p className="text-sm">Filter: {dateRange} | Type: {docType} | Status: {paymentStatus}</p>
       </div>
 
-      {/* SUMMARY CARDS */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-sm flex flex-col">
-          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1 flex items-center gap-1"><DollarSign className="w-3 h-3 text-theme-accent" /> Total Billed</span>
-          <span className="text-xl font-black text-theme-primary">{formatCurrency(metrics.totalSales, currencySymbol)}</span>
-        </div>
-        <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-sm flex flex-col">
-          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Collected</span>
-          <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(metrics.totalCollected, currencySymbol)}</span>
-        </div>
-        <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-sm flex flex-col">
-          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1 flex items-center gap-1"><Clock className="w-3 h-3 text-amber-500" /> Pending Due</span>
-          <span className="text-xl font-black text-amber-600 dark:text-amber-400">{formatCurrency(metrics.totalDue, currencySymbol)}</span>
-        </div>
-        <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-sm flex flex-col">
-          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1 flex items-center gap-1"><AlertCircle className="w-3 h-3 text-rose-500" /> Overdue</span>
-          <span className="text-xl font-black text-rose-600 dark:text-rose-400">{formatCurrency(metrics.totalOverdue, currencySymbol)}</span>
-        </div>
-        
-        <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-sm flex flex-col">
-          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1">Doc Counts</span>
-          <span className="text-sm font-black text-theme-primary">{metrics.invoiceCount} INV | {metrics.estimateCount} EST</span>
-        </div>
-        <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-sm flex flex-col">
-          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1">Avg Invoice</span>
-          <span className="text-sm font-black text-theme-primary">{formatCurrency(metrics.avgValue, currencySymbol)}</span>
-        </div>
-        <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-sm flex flex-col">
-          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1">Top Customer</span>
-          <span className="text-sm font-black text-theme-primary truncate">{metrics.topCustomer}</span>
-        </div>
-        <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-sm flex flex-col">
-          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1">Top Item</span>
-          <span className="text-sm font-black text-theme-primary truncate">{metrics.topItem}</span>
-        </div>
-      </div>
+      {/* PREMIUM STATS GRID */}
+      <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="stats-grid section-spacing">
+        <motion.div variants={staggerItem} className="stat-premium">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide flex items-center gap-1.5">
+              <DollarSign className="w-3.5 h-3.5 text-theme-accent" />
+              Total Billed
+            </span>
+          </div>
+          <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums">{formatCurrency(metrics.totalSales, currencySymbol)}</p>
+        </motion.div>
+        <motion.div variants={staggerItem} className="stat-premium">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              Collected
+            </span>
+          </div>
+          <p className="text-xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight tabular-nums">{formatCurrency(metrics.totalCollected, currencySymbol)}</p>
+        </motion.div>
+        <motion.div variants={staggerItem} className="stat-premium">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-amber-500" />
+              Pending Due
+            </span>
+          </div>
+          <p className="text-xl font-black text-amber-600 dark:text-amber-400 tracking-tight tabular-nums">{formatCurrency(metrics.totalDue, currencySymbol)}</p>
+        </motion.div>
+        <motion.div variants={staggerItem} className="stat-premium">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide flex items-center gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
+              Overdue
+            </span>
+          </div>
+          <p className="text-xl font-black text-rose-600 dark:text-rose-400 tracking-tight tabular-nums">{formatCurrency(metrics.totalOverdue, currencySymbol)}</p>
+        </motion.div>
+        <motion.div variants={staggerItem} className="stat-premium">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Document Counts</span>
+            <span className="badge-premium badge-info text-2xs">{metrics.invoiceCount + metrics.estimateCount + metrics.quotationCount} total</span>
+          </div>
+          <div className="flex items-center gap-3 mt-1">
+            <span className="text-sm font-black text-theme-primary tabular-nums">{metrics.invoiceCount} <span className="text-2xs font-bold text-theme-muted">INV</span></span>
+            <span className="text-theme-border-strong">|</span>
+            <span className="text-sm font-black text-theme-primary tabular-nums">{metrics.estimateCount} <span className="text-2xs font-bold text-theme-muted">EST</span></span>
+            <span className="text-theme-border-strong">|</span>
+            <span className="text-sm font-black text-theme-primary tabular-nums">{metrics.quotationCount} <span className="text-2xs font-bold text-theme-muted">QTN</span></span>
+          </div>
+        </motion.div>
+        <motion.div variants={staggerItem} className="stat-premium">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Average Invoice</span>
+            <TrendingUp className="w-3.5 h-3.5 text-theme-accent" />
+          </div>
+          <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums">{formatCurrency(metrics.avgValue, currencySymbol)}</p>
+        </motion.div>
+        <motion.div variants={staggerItem} className="stat-premium">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Top Customer</span>
+            <span className="badge-premium badge-success text-2xs">Leader</span>
+          </div>
+          <p className="text-xl font-black text-theme-primary tracking-tight truncate">{metrics.topCustomer}</p>
+        </motion.div>
+        <motion.div variants={staggerItem} className="stat-premium">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Top Item</span>
+            <span className="badge-premium badge-info text-2xs">Best Seller</span>
+          </div>
+          <p className="text-xl font-black text-theme-primary tracking-tight truncate">{metrics.topItem}</p>
+        </motion.div>
+      </motion.div>
 
       {/* CHARTS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 no-print">
-        {/* Revenue Trend */}
-        <div className="bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-premium flex flex-col min-h-[300px]">
-          <h3 className="text-sm font-extrabold text-theme-primary mb-4">Revenue Trend (Invoices)</h3>
-          <div className="flex-1 min-h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={charts.areaChartData}>
-                <defs>
-                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-soft)" opacity={0.5} />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'var(--muted)' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'var(--muted)' }} width={50} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border-soft)', borderRadius: '1rem', fontSize: '12px', fontWeight: 'bold' }}
-                  itemStyle={{ color: 'var(--accent)' }}
-                />
-                <Area type="monotone" dataKey="revenue" stroke="var(--accent)" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
-              </AreaChart>
-            </ResponsiveContainer>
+      {invoices.length > 0 && (
+        <motion.div variants={staggerItem} className="grid grid-cols-1 lg:grid-cols-2 gap-4 section-spacing no-print">
+          <div className="card-premium p-5 flex flex-col min-h-[320px]">
+            <div className="section-header mb-4">
+              <div>
+                <h3 className="section-header-title">Revenue Trend (Invoices)</h3>
+                <p className="section-header-subtitle">Daily revenue over the selected period</p>
+              </div>
+            </div>
+            <div className="flex-1 min-h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={charts.areaChartData}>
+                  <defs>
+                    <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-soft)" opacity={0.5} />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'var(--muted)' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'var(--muted)' }} width={50} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-soft)', borderRadius: '0.75rem', fontSize: '12px', fontWeight: 'bold', boxShadow: '0 10px 25px -3px rgba(7,13,25,0.08)' }}
+                    itemStyle={{ color: 'var(--accent)' }}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="var(--accent)" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
 
-        {/* Status Pie */}
-        <div className="bg-theme-card border border-theme-border-soft rounded-3xl p-5 shadow-premium flex flex-col min-h-[300px]">
-          <h3 className="text-sm font-extrabold text-theme-primary mb-4">Payment Status Breakdown</h3>
-          <div className="flex-1 min-h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={charts.pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={5}
-                  dataKey="value"
-                  label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}
-                >
-                  {charts.pieData.map((entry, index) => {
-                    const colors = {
-                      'Paid': COLORS.emerald,
-                      'Partial': COLORS.amber,
-                      'Unpaid': COLORS.slate,
-                      'Overdue': COLORS.rose
-                    };
-                    return <Cell key={`cell-${index}`} fill={colors[entry.name] || COLORS.accent} />;
-                  })}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border-soft)', borderRadius: '1rem', fontSize: '12px', fontWeight: 'bold' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="card-premium p-5 flex flex-col min-h-[320px]">
+            <div className="section-header mb-4">
+              <div>
+                <h3 className="section-header-title">Payment Status Breakdown</h3>
+                <p className="section-header-subtitle">Distribution of invoice payment statuses</p>
+              </div>
+            </div>
+            <div className="flex-1 min-h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={charts.pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={5}
+                    dataKey="value"
+                    label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    labelLine={false}
+                  >
+                    {charts.pieData.map((entry, index) => {
+                      const colors = {
+                        'Paid': COLORS.emerald,
+                        'Partial': COLORS.amber,
+                        'Unpaid': COLORS.slate,
+                        'Overdue': COLORS.rose
+                      };
+                      return <Cell key={`cell-${index}`} fill={colors[entry.name] || COLORS.accent} />;
+                    })}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-soft)', borderRadius: '0.75rem', fontSize: '12px', fontWeight: 'bold', boxShadow: '0 10px 25px -3px rgba(7,13,25,0.08)' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      )}
 
-      {/* Empty State (when no data at all) */}
+      {/* PREMIUM EMPTY STATE */}
       {invoices.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center no-print">
-          <div className="w-16 h-16 rounded-2xl bg-theme-accent/10 text-theme-accent flex items-center justify-center mb-4">
-            <FileText className="w-8 h-8" />
+        <motion.div variants={staggerItem} className="card-premium no-print">
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <FileText className="w-5 h-5" />
+            </div>
+            <p className="empty-state-title">No data yet</p>
+            <p className="empty-state-text">Create invoices to see detailed business reports and analytics</p>
           </div>
-          <p className="text-sm font-bold text-theme-primary">No data yet</p>
-          <p className="text-xs text-theme-muted font-semibold mt-1">Create invoices to see reports</p>
-        </div>
+        </motion.div>
       )}
 
       {/* TABLE */}
       {invoices.length > 0 && (
-      <div className="bg-theme-card border border-theme-border-soft rounded-3xl overflow-hidden shadow-premium flex-1">
-        <div className="p-5 border-b border-theme-border-soft flex items-center justify-between no-print">
-          <h3 className="text-sm font-extrabold text-theme-primary">Generated Report Data</h3>
-          <span className="text-xs font-bold text-theme-muted bg-theme-surface px-3 py-1 rounded-full">{filteredData.length} records</span>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead>
-              <tr className="bg-theme-surface border-b border-theme-border-soft text-[10px] text-theme-muted font-bold uppercase tracking-wider">
-                <th className="p-4 pl-5">Date</th>
-                <th className="p-4">Doc No</th>
-                <th className="p-4">Customer</th>
-                <th className="p-4">Type</th>
-                <th className="p-4 text-right">Total</th>
-                <th className="p-4 text-right">Paid</th>
-                <th className="p-4 text-right">Due</th>
-                <th className="p-4 pr-5 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-theme-border-soft">
-              {filteredData.map(doc => (
-                <tr key={doc.id} className="hover:bg-theme-surface transition-colors">
-                  <td className="p-4 pl-5 text-xs font-semibold text-theme-primary whitespace-nowrap">
-                    {doc.parsedDate.toLocaleDateString()}
-                  </td>
-                  <td className="p-4 text-xs font-black text-theme-primary whitespace-nowrap">
-                    {doc.invoiceNumber || 'N/A'}
-                  </td>
-                  <td className="p-4 text-xs font-semibold text-theme-primary truncate max-w-[150px]">
-                    {doc.customerName || 'Unknown'}
-                  </td>
-                  <td className="p-4">
-                    <span className="text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider bg-theme-accent/10 text-theme-accent">
-                      {doc.parsedType}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right text-xs font-black text-theme-primary">
-                    {formatCurrency(doc.parsedTotal, currencySymbol)}
-                  </td>
-                  <td className="p-4 text-right text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                    {formatCurrency(doc.parsedPaid, currencySymbol)}
-                  </td>
-                  <td className="p-4 text-right text-xs font-bold text-rose-600 dark:text-rose-400">
-                    {formatCurrency(doc.parsedDue, currencySymbol)}
-                  </td>
-                  <td className="p-4 pr-5 text-center">
-                    <span className={`text-[9px] px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider whitespace-nowrap ${
-                      doc.parsedStatus === 'Paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50' : 
-                      doc.parsedStatus === 'Partial' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50' : 
-                      doc.parsedStatus === 'Overdue' ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900/50' :
-                      'bg-theme-app text-theme-secondary border-theme-border-soft dark:bg-theme-surface/60 dark:text-theme-primary dark:border-theme-border-strong/50'
-                    }`}>
-                      {doc.parsedStatus}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {filteredData.length === 0 && (
+        <motion.div variants={staggerItem} className="card-premium overflow-hidden flex-1">
+          <div className="section-header p-5 border-b border-theme-border-soft no-print">
+            <div>
+              <h3 className="section-header-title">Generated Report Data</h3>
+              <p className="section-header-subtitle">Detailed document breakdown for the selected filters</p>
+            </div>
+            <span className="badge-premium badge-info">{filteredData.length} records</span>
+          </div>
+          <div className="overflow-x-auto scroll-premium">
+            <table className="table-premium min-w-[800px]">
+              <thead>
                 <tr>
-                  <td colSpan="8" className="p-8 text-center text-sm font-semibold text-theme-muted">
-                    No documents found for the selected filters.
-                  </td>
+                  <th>Date</th>
+                  <th>Doc No</th>
+                  <th>Customer</th>
+                  <th>Type</th>
+                  <th className="text-right">Total</th>
+                  <th className="text-right">Paid</th>
+                  <th className="text-right">Due</th>
+                  <th className="text-center">Status</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              </thead>
+              <tbody>
+                {filteredData.map(doc => (
+                  <tr key={doc.id}>
+                    <td className="whitespace-nowrap">
+                      {doc.parsedDate.toLocaleDateString()}
+                    </td>
+                    <td className="font-black whitespace-nowrap">
+                      {doc.invoiceNumber || 'N/A'}
+                    </td>
+                    <td className="truncate max-w-[150px]">
+                      {doc.customerName || 'Unknown'}
+                    </td>
+                    <td>
+                      <span className="badge-premium badge-info text-2xs uppercase">
+                        {doc.parsedType}
+                      </span>
+                    </td>
+                    <td className="text-right font-black">
+                      {formatCurrency(doc.parsedTotal, currencySymbol)}
+                    </td>
+                    <td className="text-right font-bold text-emerald-600 dark:text-emerald-400">
+                      {formatCurrency(doc.parsedPaid, currencySymbol)}
+                    </td>
+                    <td className="text-right font-bold text-rose-600 dark:text-rose-400">
+                      {formatCurrency(doc.parsedDue, currencySymbol)}
+                    </td>
+                    <td className="text-center">
+                      <span className={`badge-premium text-2xs uppercase whitespace-nowrap ${
+                        doc.parsedStatus === 'Paid' ? 'badge-success' : 
+                        doc.parsedStatus === 'Partial' ? 'badge-warning' : 
+                        doc.parsedStatus === 'Overdue' ? 'badge-danger' :
+                        'badge-info'
+                      }`}>
+                        {doc.parsedStatus}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {filteredData.length === 0 && (
+                  <tr>
+                    <td colSpan="8" className="text-center empty-state-text py-8">
+                      No documents found for the selected filters.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
       )}
       
-      {/* GLOBAL PRINT STYLES */}
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           body { background: white !important; color: black !important; }
@@ -524,7 +584,7 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
           span { color: black !important; background: transparent !important; border: none !important; }
         }
       `}} />
-    </div>
+    </motion.div>
   );
 };
 

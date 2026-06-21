@@ -3,6 +3,8 @@ import { Users, FileText, IndianRupee, Activity, Crown, Store, Clock, Database, 
 import { motion } from 'framer-motion';
 import { getFakeAdminData } from '../../utils/demoDataManager';
 import { getAdminUsersList, getAdminAllPaymentProofs, getAdminPlatformRevenueStates } from '../../services/dbEngine';
+import { pageVariants } from '../../utils/animations';
+import { KPISkeleton } from '../../components/PremiumSkeleton';
 
 const AdminDashboard = () => {
   const [fakeData, setFakeData] = useState(null);
@@ -89,18 +91,32 @@ const AdminDashboard = () => {
   const displayUsers = fakeData ? fakeData.totalUsers : realStats.totalUsers;
   const displayPremium = fakeData ? fakeData.premiumUsers : realStats.premiumUsers;
   const displayPendingProofs = fakeData ? fakeData.pendingPayments : realStats.pendingPayments;
-  
+
+  if (loading) {
+    return (
+      <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-8">
+        <div className="section-header">
+          <div>
+            <h2 className="section-header-title">Dashboard Overview</h2>
+            <p className="section-header-subtitle">Loading platform metrics...</p>
+          </div>
+        </div>
+        <KPISkeleton count={6} />
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div 
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
       className="space-y-8"
     >
-      <div className="flex items-center justify-between">
+      <div className="section-header">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Dashboard Overview</h2>
-          <p className="text-slate-400 text-sm mt-1">Real-time metrics and platform status.</p>
+          <h2 className="section-header-title">Dashboard Overview</h2>
+          <p className="section-header-subtitle">Real-time metrics and platform status.</p>
         </div>
       </div>
       
@@ -118,7 +134,7 @@ const AdminDashboard = () => {
         )}
 
         {/* Total Users */}
-        <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
+        <motion.div variants={itemVariants} className="card-premium relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-400"></div>
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center text-slate-400 font-medium">
@@ -132,7 +148,7 @@ const AdminDashboard = () => {
         </motion.div>
         
         {/* Premium Users */}
-        <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
+        <motion.div variants={itemVariants} className="card-premium relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center text-slate-400 font-medium">
@@ -146,14 +162,14 @@ const AdminDashboard = () => {
         </motion.div>
 
         {/* Pending Proofs */}
-        <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
+        <motion.div variants={itemVariants} className="card-premium relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-400"></div>
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center text-slate-400 font-medium">
               <Clock className="w-5 h-5 mr-2 text-amber-400" /> Pending Proofs
             </div>
             {displayPendingProofs > 0 && (
-              <span className="px-2 py-0.5 bg-rose-500/20 text-rose-400 text-[10px] font-black rounded border border-rose-500/30 animate-pulse">Action Required</span>
+              <span className="badge-premium px-2 py-0.5 bg-rose-500/20 text-rose-400 text-[10px] font-black rounded border border-rose-500/30 animate-pulse">Action Required</span>
             )}
           </div>
           <div className="text-4xl font-black text-white">{displayPendingProofs}</div>
@@ -161,7 +177,7 @@ const AdminDashboard = () => {
         </motion.div>
 
         {/* Total Collected Revenue */}
-        <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
+        <motion.div variants={itemVariants} className="card-premium relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center text-slate-400 font-medium">
@@ -175,7 +191,7 @@ const AdminDashboard = () => {
         </motion.div>
 
         {/* Total Platform Dues */}
-        <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
+        <motion.div variants={itemVariants} className="card-premium relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-red-500"></div>
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center text-slate-400 font-medium">
@@ -189,7 +205,7 @@ const AdminDashboard = () => {
         </motion.div>
 
         {/* Locked Users Count */}
-        <motion.div variants={itemVariants} className="relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
+        <motion.div variants={itemVariants} className="card-premium relative group bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-slate-500/50 transition-all overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-blue-500"></div>
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center text-slate-400 font-medium">
@@ -205,15 +221,17 @@ const AdminDashboard = () => {
       </div>
       
       {/* Platform Health Panel */}
-      <motion.div variants={itemVariants} className="bg-[#1e293b]/60 backdrop-blur-md p-8 rounded-3xl border border-slate-700/50 mt-8">
-        <h3 className="font-bold text-white text-lg mb-6 flex items-center">
-          <Activity className="w-5 h-5 mr-3 text-rose-500" /> 
-          Platform Health & Status
-        </h3>
+      <motion.div variants={itemVariants} className="card-premium bg-[#1e293b]/60 backdrop-blur-md p-8 rounded-3xl border border-slate-700/50 mt-8">
+        <div className="section-header mb-6">
+          <h3 className="section-header-title flex items-center">
+            <Activity className="w-5 h-5 mr-3 text-rose-500" /> 
+            Platform Health & Status
+          </h3>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          <div className="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/40 border border-slate-700/30">
+          <div className="stat-premium flex items-start space-x-4 p-4 rounded-xl bg-slate-800/40 border border-slate-700/30">
             <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
               <Database className="w-6 h-6" />
             </div>
@@ -222,13 +240,13 @@ const AdminDashboard = () => {
               <p className="text-white font-bold mt-1">Operational</p>
             </div>
             <div className="ml-auto">
-              <span className="flex items-center px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">
+              <span className="badge-premium flex items-center px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">
                 <CheckCircle2 className="w-3 h-3 mr-1" /> Healthy
               </span>
             </div>
           </div>
 
-          <div className="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/40 border border-slate-700/30">
+          <div className="stat-premium flex items-start space-x-4 p-4 rounded-xl bg-slate-800/40 border border-slate-700/30">
             <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
               <RefreshCw className="w-6 h-6" />
             </div>
@@ -237,13 +255,13 @@ const AdminDashboard = () => {
               <p className="text-white font-bold mt-1">Real-time active</p>
             </div>
             <div className="ml-auto">
-              <span className="flex items-center px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">
+              <span className="badge-premium flex items-center px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">
                 <CheckCircle2 className="w-3 h-3 mr-1" /> Healthy
               </span>
             </div>
           </div>
 
-          <div className="flex items-start space-x-4 p-4 rounded-xl bg-slate-800/40 border border-slate-700/30">
+          <div className="stat-premium flex items-start space-x-4 p-4 rounded-xl bg-slate-800/40 border border-slate-700/30">
             <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
               <ShieldCheck className="w-6 h-6" />
             </div>
@@ -252,7 +270,7 @@ const AdminDashboard = () => {
               <p className="text-white font-bold mt-1">Session Secured</p>
             </div>
             <div className="ml-auto">
-              <span className="flex items-center px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">
+              <span className="badge-premium flex items-center px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">
                 <CheckCircle2 className="w-3 h-3 mr-1" /> Healthy
               </span>
             </div>

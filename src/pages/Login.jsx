@@ -1,6 +1,7 @@
 import { toast } from 'react-hot-toast';
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { pageVariants } from '../utils/animations';
 import {
   ArrowRight,
   Building2,
@@ -717,7 +718,7 @@ function ShowcasePanel() {
 
       <div className="relative z-10 flex items-center justify-between">
         <BrandMark small />
-        <div className="rounded-full border border-theme-border-soft bg-theme-accent-light px-3 py-1 text-[10px] font-black uppercase tracking-wide text-theme-accent shadow-glow">
+        <div className="badge-premium rounded-full border border-theme-border-soft bg-theme-accent-light px-3 py-1 text-[10px] font-black uppercase tracking-wide text-theme-accent shadow-glow">
           {isPaused ? "Paused Preview" : "Sample Workflow"}
         </div>
       </div>
@@ -951,7 +952,7 @@ function LoginPanel({ onLoginSuccess }) {
           setCardHover(true);
         }}
         onMouseLeave={() => setCardHover(false)}
-        className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface/80 p-6 shadow-2xl shadow-theme-glow/5 backdrop-blur-xl transition-colors duration-300 sm:p-7"
+        className="card-premium glass glass-strong relative w-full max-w-md overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface/80 p-6 shadow-2xl shadow-theme-glow/5 backdrop-blur-xl transition-colors duration-300 sm:p-7"
       >
         <motion.div
           aria-hidden="true"
@@ -981,11 +982,12 @@ function LoginPanel({ onLoginSuccess }) {
           transition={{ duration: 0.25 }}
         />
         <div className="relative z-10">
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-theme-accent via-purple-500/80 to-theme-accent rounded-t-[2rem]" />
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="mb-8">
           <BrandMark />
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-theme-border-soft bg-theme-accent-light px-3 py-1 text-[10px] font-black uppercase tracking-wide text-theme-accent">
+          <div className="badge-premium mb-3 inline-flex items-center gap-2 rounded-full border border-theme-border-soft bg-theme-accent-light px-3 py-1 text-[10px] font-black uppercase tracking-wide text-theme-accent">
             {isLoginMode ? 'Secure Login' : 'Create Account'} <span className="h-1.5 w-1.5 rounded-full bg-theme-accent" />
           </div>
           <h1 className="text-3xl font-black tracking-tight text-theme-primary sm:text-4xl">
@@ -1016,7 +1018,7 @@ function LoginPanel({ onLoginSuccess }) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your Name"
-                  className="h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-11 pr-4 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
+                  className="input-premium premium-focus h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-11 pr-4 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
                 />
               </div>
             </motion.label>
@@ -1028,11 +1030,11 @@ function LoginPanel({ onLoginSuccess }) {
                 <Mail className="h-[18px] w-[18px] text-theme-muted group-focus-within:text-theme-accent transition-colors" />
               </div>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-11 pr-4 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="input-premium premium-focus h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-11 pr-4 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
               />
             </div>
           </motion.label>
@@ -1041,11 +1043,11 @@ function LoginPanel({ onLoginSuccess }) {
             <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent">Password</span>
             <div className="relative">
               <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-4 pr-12 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="input-premium premium-focus h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-4 pr-12 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
               />
               <button
                 type="button"
@@ -1074,7 +1076,7 @@ function LoginPanel({ onLoginSuccess }) {
             <ShimmerButton
               type="submit"
               disabled={isSigningIn}
-              className="w-full h-[52px]"
+              className="btn-premium w-full h-[52px]"
               shimmerColor="#ffffff"
               background="var(--accent-gradient)"
             >
@@ -1106,7 +1108,7 @@ function LoginPanel({ onLoginSuccess }) {
             type="button" 
             onClick={handleGoogleLogin}
             disabled={isSigningIn}
-            className="flex h-[52px] w-full items-center justify-center gap-3 rounded-[22px] border border-theme-border-soft bg-theme-surface text-sm font-bold text-theme-muted transition-all hover:bg-theme-card hover:text-theme-primary hover:shadow-[0_0_15px_rgba(0,0,0,0.05)] disabled:opacity-70 disabled:cursor-not-allowed"
+            className="btn-premium flex h-[52px] w-full items-center justify-center gap-3 rounded-[22px] border border-theme-border-soft bg-theme-surface text-sm font-bold text-theme-muted transition-all hover:bg-theme-card hover:text-theme-primary hover:shadow-[0_0_15px_rgba(0,0,0,0.05)] disabled:opacity-70 disabled:cursor-not-allowed"
           >
             <span className="grid h-6 w-6 place-items-center rounded-full bg-theme-app text-xs font-black text-theme-primary">G</span>
             {isSigningIn && !email && !password ? "Connecting to Google..." : "Continue with Google"}
@@ -1120,6 +1122,18 @@ function LoginPanel({ onLoginSuccess }) {
             <>Already have an account? <button type="button" onClick={() => { setIsLoginMode(true); setError(''); }} className="font-bold text-theme-accent hover:text-theme-primary transition-colors cursor-pointer">Sign in instead</button></>
           )}
         </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 0.5 }}
+          className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[10px] font-semibold text-theme-muted"
+        >
+          <span className="flex items-center gap-1.5"><Check size={11} className="text-theme-accent" /> 256-bit Encryption</span>
+          <span className="flex items-center gap-1.5"><Check size={11} className="text-theme-accent" /> SOC 2 Compliant</span>
+          <span className="flex items-center gap-1.5"><Check size={11} className="text-theme-accent" /> 99.9% Uptime</span>
+          <span className="flex items-center gap-1.5"><Check size={11} className="text-theme-accent" /> Secure Cloud</span>
+        </motion.div>
               </div>
       </motion.div>
     </section>
@@ -1128,8 +1142,14 @@ function LoginPanel({ onLoginSuccess }) {
 
 export default function Login({ onLoginSuccess }) {
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-theme-app p-4 text-theme-primary sm:p-6 lg:p-8">
-      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface shadow-2xl shadow-theme-glow/10 lg:min-h-[680px]">
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="relative min-h-screen w-full overflow-hidden bg-theme-app p-4 text-theme-primary sm:p-6 lg:p-8"
+    >
+      <div className="card-premium relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface shadow-2xl shadow-theme-glow/10 lg:min-h-[680px]">
         <div className="hidden lg:flex lg:w-full">
           <ShowcasePanel />
           <LoginPanel onLoginSuccess={onLoginSuccess} />
@@ -1139,6 +1159,6 @@ export default function Login({ onLoginSuccess }) {
           <LoginPanel onLoginSuccess={onLoginSuccess} />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

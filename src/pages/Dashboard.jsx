@@ -13,6 +13,10 @@ import { formatCurrency } from '../utils/invoiceUtils';
 import PullToRefresh from '../components/PullToRefresh';
 import { syncFromFirestore, getActiveAnnouncement } from '../services/dbEngine';
 import AddCustomerSheet from '../components/AddCustomerSheet';
+import StatCard from '../components/StatCard';
+import { KPISkeleton, ChartSkeleton } from '../components/PremiumSkeleton';
+import ActivityFeed from '../components/ActivityFeed';
+import QuickActions from '../components/QuickActions';
 
 const AnimatedNumber = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(null);
@@ -532,83 +536,41 @@ const Dashboard = ({
             {/* ===== ROW 1: KPI CARDS ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-4 gap-4">
               {isInitialLoad ? (
-                <>
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm h-[140px] flex flex-col justify-between">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="w-7 h-7 rounded-lg bg-theme-surface animate-pulse" />
-                        <div className="h-3 w-24 bg-theme-surface animate-pulse rounded" />
-                      </div>
-                      <div className="h-8 w-32 bg-theme-surface animate-pulse rounded mb-4" />
-                      <div className="flex justify-between">
-                        <div className="h-3 w-12 bg-theme-surface animate-pulse rounded" />
-                        <div className="h-3 w-20 bg-theme-surface animate-pulse rounded" />
-                      </div>
-                    </div>
-                  ))}
-                </>
+                <KPISkeleton count={4} />
               ) : (
                 <>
-                  {/* Total Revenue */}
-                  <div className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative overflow-hidden group hover:border-theme-accent/30 transition-colors flex flex-col justify-between">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-theme-surface text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors">
-                        <DollarSign className="w-4 h-4" />
-                      </div>
-                      <p className="text-xs font-bold text-theme-muted tracking-wide">Total Revenue</p>
-                    </div>
-                    <p className="text-3xl font-black text-theme-primary tracking-tight mb-4 tabular-nums"><AnimatedNumber value={formatCurrency(todayEarnings + totalRevenue)} /></p>
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">+8.6%</span>
-                      <span className="text-[10px] font-semibold text-theme-muted">from last month</span>
-                    </div>
-                  </div>
-
-                  {/* Total Invoices */}
-                  <div className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative overflow-hidden group hover:border-theme-accent/30 transition-colors flex flex-col justify-between">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-theme-surface text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors">
-                        <FileText className="w-4 h-4" />
-                      </div>
-                      <p className="text-xs font-bold text-theme-muted tracking-wide">Total Invoices</p>
-                    </div>
-                    <p className="text-3xl font-black text-theme-primary tracking-tight mb-4 tabular-nums"><AnimatedNumber value={invoices.length} /></p>
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">+12.4%</span>
-                      <span className="text-[10px] font-semibold text-theme-muted">from last month</span>
-                    </div>
-                  </div>
-
-                  {/* Pending Due */}
-                  <div className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative overflow-hidden group hover:border-theme-accent/30 transition-colors flex flex-col justify-between">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-theme-surface text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors">
-                        <Clock className="w-4 h-4" />
-                      </div>
-                      <p className="text-xs font-bold text-theme-muted tracking-wide">Pending Due</p>
-                    </div>
-                    <p className="text-3xl font-black text-theme-primary tracking-tight mb-4 tabular-nums"><AnimatedNumber value={formatCurrency(totalDue)} /></p>
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">-7.1%</span>
-                      <span className="text-[10px] font-semibold text-theme-muted">from last month</span>
-                    </div>
-                  </div>
-
-                  {/* Active Customers */}
-                  <div className="bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative overflow-hidden group hover:border-theme-accent/30 transition-colors flex flex-col justify-between">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-theme-surface text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors">
-                        <Users className="w-4 h-4" />
-                      </div>
-                      <p className="text-xs font-bold text-theme-muted tracking-wide">Active Customers</p>
-                      <span className="ml-auto text-[10px] font-bold text-theme-muted bg-theme-surface px-1.5 py-0.5 rounded">NEW</span>
-                    </div>
-                    <p className="text-3xl font-black text-theme-primary tracking-tight mb-4 tabular-nums"><AnimatedNumber value={customers.length} /></p>
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">+3</span>
-                      <span className="text-[10px] font-semibold text-theme-muted">this week</span>
-                    </div>
-                  </div>
+                  <StatCard
+                    title="Total Revenue"
+                    value={formatCurrency(todayEarnings + totalRevenue)}
+                    icon={DollarSign}
+                    trend="+8.6%"
+                    trendUp={true}
+                    subtitle="Revenue across all invoices"
+                  />
+                  <StatCard
+                    title="Total Invoices"
+                    value={invoices.length}
+                    icon={FileText}
+                    trend="+12.4%"
+                    trendUp={true}
+                    subtitle="Total invoices generated"
+                  />
+                  <StatCard
+                    title="Pending Due"
+                    value={formatCurrency(totalDue)}
+                    icon={Clock}
+                    trend="7.1%"
+                    trendUp={false}
+                    subtitle="Outstanding collections"
+                  />
+                  <StatCard
+                    title="Active Customers"
+                    value={customers.length}
+                    icon={Users}
+                    trend="+3"
+                    trendUp={true}
+                    subtitle="Registered customers"
+                  />
                 </>
               )}
             </motion.div>
@@ -616,13 +578,13 @@ const Dashboard = ({
             {/* ===== ROW 2: CHARTS ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
               {/* Traffic / Revenue Trend */}
-              <div className="col-span-8 bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative">
-                <div className="flex items-center justify-between mb-4">
+              <div className="col-span-8 card-premium p-5">
+                <div className="section-header">
                   <div>
-                    <h3 className="text-sm font-bold text-theme-primary">Revenue Trend</h3>
-                    <p className="text-[11px] text-theme-muted font-medium mt-0.5">Daily revenue activity across the selected time period.</p>
+                    <h3 className="section-header-title">Revenue Trend</h3>
+                    <p className="section-header-subtitle">Daily revenue activity across the selected time period.</p>
                   </div>
-                  <button onClick={() => setCurrentTab('reports')} className="px-3 py-1.5 border border-theme-border-soft rounded-lg flex items-center gap-2 text-[11px] font-semibold text-theme-muted hover:bg-theme-surface hover:text-theme-primary transition-colors">
+                  <button onClick={() => setCurrentTab('reports')} className="btn-premium-ghost text-xs">
                     <BarChart3 className="w-3.5 h-3.5" /> Select range <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -650,8 +612,8 @@ const Dashboard = ({
               </div>
 
               {/* Sessions By Device / Payment Breakdown */}
-              <div className="col-span-4 bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative flex flex-col">
-                <h3 className="text-sm font-bold text-theme-primary mb-6">Payment Breakdown</h3>
+              <div className="col-span-4 card-premium p-5 flex flex-col">
+                <h3 className="section-header-title mb-6">Payment Breakdown</h3>
                 <div className="flex-1 flex flex-col items-center justify-center">
                   <div className="h-[220px] w-full relative">
                     <ResponsiveContainer width="100%" height="100%">
@@ -693,9 +655,13 @@ const Dashboard = ({
             {/* ===== ROW 3: BOTTOM AREA ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
               {/* Recent Bills List */}
-              <div className="col-span-8 bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative">
-                <h3 className="text-sm font-bold text-theme-primary mb-1">Recent Invoices</h3>
-                <p className="text-[11px] text-theme-muted font-medium mb-6">Most recent invoices generated.</p>
+              <div className="col-span-8 card-premium p-5">
+                <div className="section-header">
+                  <div>
+                    <h3 className="section-header-title">Recent Invoices</h3>
+                    <p className="section-header-subtitle">Most recent invoices generated.</p>
+                  </div>
+                </div>
                 <div className="space-y-5">
                   {recentInvoices.length === 0 ? (
                     <p className="text-sm text-theme-muted font-medium p-4 bg-theme-surface rounded-xl">No recent invoices.</p>
@@ -724,32 +690,53 @@ const Dashboard = ({
               </div>
 
               {/* Quick Insights List */}
-              <div className="col-span-4 bg-theme-card border border-theme-border-soft rounded-xl p-5 shadow-sm relative flex flex-col">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-bold text-theme-primary">Quick Insights</h3>
-                  <button onClick={onQuickBillOpen} className="px-3 py-1.5 border border-theme-border-soft rounded-lg flex items-center gap-1.5 text-[10px] font-bold text-theme-primary hover:bg-theme-surface transition-colors">
+              <div className="col-span-4 card-premium p-5 flex flex-col">
+                <div className="section-header">
+                  <h3 className="section-header-title">Quick Insights</h3>
+                  <button onClick={onQuickBillOpen} className="btn-premium-ghost text-xs">
                     <Plus className="w-3.5 h-3.5" /> Create
                   </button>
                 </div>
-                <p className="text-[11px] text-theme-muted font-medium mb-8">Metrics generating the highest engagement.</p>
+                <p className="section-header-subtitle mb-6">Metrics generating the highest engagement.</p>
 
-                <div className="space-y-6 flex-1">
-                  <div className="p-4 rounded-xl bg-theme-surface/50 border border-theme-border-soft">
-                    <p className="text-[11px] font-bold text-theme-muted uppercase tracking-wider mb-1.5">Collection Rate</p>
+                <div className="space-y-4 flex-1">
+                  <div className="stat-premium !p-4">
+                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1.5">Collection Rate</p>
                     <p className="text-2xl font-black text-theme-primary mb-1 tabular-nums">{totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0}%</p>
-                    <p className="text-[10px] text-emerald-500 font-bold">+2.4% than last Week</p>
+                    <p className="text-2xs text-emerald-500 font-bold">+2.4% than last Week</p>
                   </div>
-                  <div className="p-4 rounded-xl bg-theme-surface/50 border border-theme-border-soft">
-                    <p className="text-[11px] font-bold text-theme-muted uppercase tracking-wider mb-1.5">Overdue Bills</p>
+                  <div className="stat-premium !p-4">
+                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1.5">Overdue Bills</p>
                     <p className="text-2xl font-black text-theme-primary mb-1 tabular-nums">{totalOverdue}</p>
-                    <p className="text-[10px] text-red-500 font-bold">-1.2% than last Week</p>
+                    <p className="text-2xs text-red-500 font-bold">-1.2% than last Week</p>
                   </div>
-                  <div className="p-4 rounded-xl bg-theme-surface/50 border border-theme-border-soft">
-                    <p className="text-[11px] font-bold text-theme-muted uppercase tracking-wider mb-1.5">Total Outstanding</p>
+                  <div className="stat-premium !p-4">
+                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1.5">Total Outstanding</p>
                     <p className="text-2xl font-black text-theme-primary mb-1 tabular-nums">{formatCurrency(totalDue)}</p>
-                    <p className="text-[10px] text-emerald-500 font-bold">+5.1% than last Week</p>
+                    <p className="text-2xs text-emerald-500 font-bold">+5.1% than last Week</p>
                   </div>
                 </div>
+              </div>
+            </motion.div>
+
+            {/* ===== ROW 4: ACTIVITY FEED + QUICK ACTIONS ===== */}
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+              <div className="col-span-7">
+                <ActivityFeed activities={activities} maxItems={6} />
+              </div>
+              <div className="col-span-5">
+                <QuickActions
+                  actions={[
+                    { id: 'new-bill', label: 'New Bill', icon: Plus, color: 'bg-theme-accent', action: 'onQuickBillOpen' },
+                    { id: 'invoices', label: 'View Bills', icon: FileText, color: 'bg-blue-500', action: 'invoices' },
+                    { id: 'customers', label: 'Customers', icon: Users, color: 'bg-emerald-500', action: 'customers' },
+                    { id: 'collect', label: 'Collect Due', icon: CreditCard, color: 'bg-amber-500', action: 'due-ledger' },
+                  ]}
+                  onAction={(action) => {
+                    if (action === 'onQuickBillOpen') onQuickBillOpen();
+                  }}
+                  setCurrentTab={setCurrentTab}
+                />
               </div>
             </motion.div>
 
@@ -763,7 +750,7 @@ const Dashboard = ({
             )}
 
             {/* Sync Status Bar */}
-            <motion.div variants={itemVariants} className="flex items-center justify-between p-3 bg-theme-card rounded-xl border border-theme-border-soft shadow-sm">
+            <motion.div variants={itemVariants} className="card-premium flex items-center justify-between p-3">
               <div className="flex items-center gap-2">
                 <Shield className="w-3.5 h-3.5 text-theme-accent" />
                 <span className="text-[10px] font-bold text-theme-primary">

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { staggerContainer, staggerItem, fadeInUp } from '../utils/animations';
 import { ArrowRight, CheckCircle2, FileSpreadsheet, ShieldCheck, TrendingUp, Users, Sparkles, Download, Link2, Smartphone, Printer, CreditCard, Star, HelpCircle, ChevronDown, MessageCircle, Mail, MapPin, DollarSign, Clock, BarChart3, QrCode, Globe, Zap } from 'lucide-react';
 import Logo from '../components/Logo';
 
@@ -53,8 +54,8 @@ const Landing = ({ onLoginClick }) => {
 
   return (
     <div className="min-h-screen bg-theme-app text-theme-primary font-sans selection:bg-theme-accent selection:text-white flex flex-col">
-      {/* Navbar */}
-      <nav className="border-b border-theme-border-soft bg-theme-surface/80 backdrop-blur-md sticky top-0 z-50">
+      {/* ===== PREMIUM GLASS NAVBAR ===== */}
+      <nav className="glass border-b border-theme-border-soft/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Logo type="horizontal" forceWhiteText={false} />
           
@@ -69,7 +70,7 @@ const Landing = ({ onLoginClick }) => {
           
           <div className="flex items-center gap-4">
             <button onClick={onLoginClick} className="text-sm font-bold text-theme-muted hover:text-theme-primary transition-colors hidden sm:block">Log in</button>
-            <button onClick={onLoginClick} className="px-6 py-2.5 bg-theme-accent hover:opacity-90 text-white text-sm font-black rounded-xl shadow-premium transition-all active:scale-95">Get Started Free</button>
+            <button onClick={onLoginClick} className="btn-premium px-6 py-2.5 text-sm">Get Started Free</button>
             
             {/* Mobile hamburger */}
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-theme-primary">
@@ -82,7 +83,7 @@ const Landing = ({ onLoginClick }) => {
         
         {/* Mobile Nav */}
         {mobileMenuOpen && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="md:hidden border-t border-theme-border-soft bg-theme-card px-6 py-4 space-y-3">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="md:hidden border-t border-theme-border-soft/50 bg-theme-card/95 backdrop-blur-md px-6 py-4 space-y-3">
             <button onClick={() => scrollTo('features')} className="block w-full text-left text-sm font-bold text-theme-primary py-2">Features</button>
             <button onClick={() => scrollTo('templates')} className="block w-full text-left text-sm font-bold text-theme-primary py-2">Templates</button>
             <button onClick={() => scrollTo('pricing')} className="block w-full text-left text-sm font-bold text-theme-primary py-2">Pricing</button>
@@ -93,27 +94,27 @@ const Landing = ({ onLoginClick }) => {
       </nav>
 
       {/* ===== HERO ===== */}
-      <section className="relative overflow-hidden">
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-theme-accent opacity-[0.03] dark:opacity-[0.05] blur-[120px] rounded-full pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-6 py-16 lg:py-28 flex flex-col lg:flex-row items-center gap-12 relative z-10">
           <div className="flex-1 text-center lg:text-left space-y-8">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-theme-surface border border-theme-border-soft shadow-sm">
               <span className="w-2 h-2 rounded-full bg-theme-accent animate-pulse"></span>
-              <span className="text-xs font-bold text-theme-primary tracking-wide">The future of billing is here</span>
+              <span className="badge-premium text-[10px] tracking-wide">The future of billing is here</span>
             </motion.div>
             <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight text-theme-primary leading-[1.1]">
               Smart billing for <br className="hidden lg:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-theme-accent to-theme-accent/60">modern business.</span>
+              <span className="text-gradient-premium">modern business.</span>
             </motion.h1>
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-base sm:text-lg text-theme-muted max-w-2xl mx-auto lg:mx-0 font-medium leading-relaxed">
               Streamline your invoicing process, manage customers effortlessly, and get paid faster with BillQyro's premium SaaS platform.
             </motion.p>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-              <button onClick={onLoginClick} className="w-full sm:w-auto px-8 py-4 bg-theme-accent hover:opacity-90 text-white font-black rounded-2xl shadow-premium shadow-theme-accent/20 transition-all flex items-center justify-center gap-2 active:scale-95">
+              <button onClick={onLoginClick} className="btn-premium w-full sm:w-auto px-8 py-4 text-base">
                 Start Invoicing Now
                 <ArrowRight className="w-5 h-5" />
               </button>
-              <button onClick={() => scrollTo('features')} className="w-full sm:w-auto px-8 py-4 bg-theme-surface hover:bg-theme-border-soft/20 text-theme-primary font-bold rounded-2xl border border-theme-border-soft transition-all active:scale-95">
+              <button onClick={() => scrollTo('features')} className="btn-premium-outline w-full sm:w-auto px-8 py-4 text-base">
                 Explore Features
               </button>
             </motion.div>
@@ -125,7 +126,7 @@ const Landing = ({ onLoginClick }) => {
           </div>
 
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4, duration: 0.8 }} className="flex-1 w-full relative">
-            <div className="relative rounded-3xl overflow-hidden border border-theme-border-soft shadow-2xl bg-theme-card">
+            <div className="card-premium rounded-3xl overflow-hidden border border-theme-border-soft shadow-2xl bg-theme-card">
               <div className="aspect-video bg-theme-surface w-full p-2 flex flex-col">
                 <div className="flex gap-1.5 p-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-rose-400"></div>
@@ -164,35 +165,35 @@ const Landing = ({ onLoginClick }) => {
             </div>
           </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ===== FEATURES ===== */}
-      <section id="features" className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
+      <motion.section id="features" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Powerful Features</span>
+            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Powerful Features</span>
             <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Everything you need to run your billing.</h2>
             <p className="text-theme-muted font-medium max-w-2xl mx-auto">Powerful features wrapped in an elegant interface, designed specifically for modern teams and growing businesses.</p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {features.map((feature, idx) => (
-              <motion.div key={idx} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.05 }} className="p-6 sm:p-8 bg-theme-app border border-theme-border-soft rounded-3xl hover:border-theme-accent/30 transition-all duration-300 group hover:shadow-lg hover:shadow-theme-accent/5">
+              <motion.div key={idx} variants={staggerItem} className="card-premium p-6 sm:p-8 rounded-3xl hover:border-theme-accent/30 transition-all duration-300 group hover:shadow-lg hover:shadow-theme-accent/5">
                 <div className="w-12 h-12 rounded-2xl bg-theme-card border border-theme-border-soft flex items-center justify-center mb-5 group-hover:scale-110 transition-transform group-hover:bg-theme-accent/10 group-hover:border-theme-accent/30"><feature.icon className="w-6 h-6 text-theme-accent" /></div>
                 <h3 className="text-lg font-bold text-theme-primary mb-2">{feature.title}</h3>
                 <p className="text-sm text-theme-muted font-medium leading-relaxed">{feature.desc}</p>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ===== LIVE LINK SHOWCASE ===== */}
-      <section className="border-t border-theme-border-soft py-20 lg:py-28">
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="flex-1">
-              <span className="inline-block text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Live Invoice Link</span>
-              <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Share invoices with a <span className="text-transparent bg-clip-text bg-gradient-to-r from-theme-accent to-theme-accent/60">secure link.</span></h2>
+              <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Live Invoice Link</span>
+              <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Share invoices with a <span className="text-gradient-premium">secure link.</span></h2>
               <p className="text-theme-muted font-medium text-base leading-relaxed mb-8 max-w-xl">Customers can view their invoice online, scan QR codes to pay, and submit payment proof — all without creating an account.</p>
               <div className="space-y-4">
                 {[
@@ -206,7 +207,7 @@ const Landing = ({ onLoginClick }) => {
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="flex-1 w-full">
-              <div className="bg-theme-card border border-theme-border-soft rounded-3xl p-6 shadow-xl">
+              <div className="card-premium rounded-3xl p-6 shadow-xl">
                 <div className="flex items-center gap-3 mb-4 pb-4 border-b border-theme-border-soft">
                   <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center font-bold text-sm">B</div>
                   <div><p className="text-sm font-extrabold text-theme-primary">Business Name</p><p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Digital Invoice · INV-2026-0001</p></div>
@@ -235,10 +236,10 @@ const Landing = ({ onLoginClick }) => {
             </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ===== PDF SHOWCASE ===== */}
-      <section className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="flex-1 order-2 lg:order-1 w-full">
@@ -266,8 +267,8 @@ const Landing = ({ onLoginClick }) => {
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="flex-1 order-1 lg:order-2">
-              <span className="inline-block text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Premium PDF</span>
-              <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Professional <span className="text-transparent bg-clip-text bg-gradient-to-r from-theme-accent to-theme-accent/60">A4/A5 PDF</span> invoices.</h2>
+              <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Premium PDF</span>
+              <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Professional <span className="text-gradient-premium">A4/A5 PDF</span> invoices.</h2>
               <p className="text-theme-muted font-medium text-base leading-relaxed mb-8 max-w-xl">Generate beautiful PDF invoices with your logo, business details, QR code, and category-specific layouts. Ready to print or share.</p>
               <div className="space-y-4">
                 {[
@@ -282,30 +283,30 @@ const Landing = ({ onLoginClick }) => {
             </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ===== TEMPLATES ===== */}
-      <section id="templates" className="border-t border-theme-border-soft py-20 lg:py-28">
+      <motion.section id="templates" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Category Templates</span>
-            <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Templates for every <span className="text-transparent bg-clip-text bg-gradient-to-r from-theme-accent to-theme-accent/60">business type.</span></h2>
+            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Category Templates</span>
+            <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Templates for every <span className="text-gradient-premium">business type.</span></h2>
             <p className="text-theme-muted font-medium max-w-2xl mx-auto">Pre-built templates with custom fields tailored for each industry.</p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {templates.map((tpl, idx) => (
-              <motion.div key={idx} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.05 }} className="p-5 sm:p-6 bg-theme-app border border-theme-border-soft rounded-2xl hover:border-theme-accent/30 transition-all duration-300 group cursor-default">
+              <motion.div key={idx} variants={staggerItem} className="card-premium p-5 sm:p-6 rounded-2xl hover:border-theme-accent/30 transition-all duration-300 group cursor-default">
                 <div className="text-3xl mb-3">{tpl.icon}</div>
                 <h3 className="text-lg font-bold text-theme-primary mb-1">{tpl.name}</h3>
                 <p className="text-sm text-theme-muted font-medium">{tpl.desc}</p>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ===== STATS ===== */}
-      <section className="border-t border-theme-border-soft bg-theme-surface py-16">
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-16">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {[
@@ -314,7 +315,7 @@ const Landing = ({ onLoginClick }) => {
               { number: '99.9%', label: 'Uptime Guarantee', icon: ShieldCheck },
               { number: '₹2Cr+', label: 'Invoices Processed', icon: TrendingUp },
             ].map((stat, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="text-center">
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="text-center stat-premium rounded-2xl">
                 <div className="w-12 h-12 rounded-2xl bg-theme-accent/10 text-theme-accent flex items-center justify-center mx-auto mb-3"><stat.icon className="w-6 h-6" /></div>
                 <p className="text-2xl sm:text-3xl font-black text-theme-primary">{stat.number}</p>
                 <p className="text-sm text-theme-muted font-semibold mt-1">{stat.label}</p>
@@ -322,20 +323,20 @@ const Landing = ({ onLoginClick }) => {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ===== PRICING ===== */}
-      <section id="pricing" className="border-t border-theme-border-soft py-20 lg:py-28">
+      <motion.section id="pricing" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Simple Pricing</span>
-            <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Transparent plans for <span className="text-transparent bg-clip-text bg-gradient-to-r from-theme-accent to-theme-accent/60">every business.</span></h2>
+            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Simple Pricing</span>
+            <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Transparent plans for <span className="text-gradient-premium">every business.</span></h2>
             <p className="text-theme-muted font-medium max-w-2xl mx-auto">Start free, upgrade when you need more. No hidden fees.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
+          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
             {pricingPlans.map((plan, idx) => (
-              <motion.div key={idx} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.1 }} className={`relative p-6 sm:p-8 rounded-3xl border-2 transition-all duration-300 ${
-                plan.popular ? 'border-theme-accent bg-theme-accent/5 shadow-xl shadow-theme-accent/10 scale-[1.02] md:scale-105' : 'border-theme-border-soft bg-theme-app hover:border-theme-accent/30'
+              <motion.div key={idx} variants={staggerItem} className={`relative p-6 sm:p-8 rounded-3xl border-2 transition-all duration-300 ${
+                plan.popular ? 'border-theme-accent bg-theme-accent/5 shadow-xl shadow-theme-accent/10 scale-[1.02] md:scale-105' : 'card-premium hover:border-theme-accent/30'
               }`}>
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[image:var(--accent-gradient)] text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">Most Popular</div>
@@ -355,20 +356,20 @@ const Landing = ({ onLoginClick }) => {
                 }`}>{plan.cta}</button>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ===== FAQ ===== */}
-      <section id="faq" className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
+      <motion.section id="faq" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
         <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-12">
-            <span className="inline-block text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">FAQ</span>
+            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">FAQ</span>
             <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Frequently asked questions.</h2>
           </div>
-          <div className="space-y-3">
+          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="space-y-3">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-theme-app border border-theme-border-soft rounded-2xl overflow-hidden">
+              <motion.div key={idx} variants={staggerItem} className="card-premium rounded-2xl overflow-hidden">
                 <button onClick={() => setFaqOpen(faqOpen === idx ? null : idx)} className="w-full flex items-center justify-between p-4 sm:p-5 text-left cursor-pointer">
                   <span className="text-sm sm:text-base font-bold text-theme-primary pr-4">{faq.q}</span>
                   <ChevronDown className={`w-5 h-5 text-theme-muted shrink-0 transition-transform duration-300 ${faqOpen === idx ? 'rotate-180' : ''}`} />
@@ -376,27 +377,27 @@ const Landing = ({ onLoginClick }) => {
                 <motion.div initial={false} animate={{ height: faqOpen === idx ? 'auto' : 0, opacity: faqOpen === idx ? 1 : 0 }} className="overflow-hidden">
                   <p className="px-4 sm:px-5 pb-4 sm:pb-5 text-sm text-theme-muted font-medium leading-relaxed">{faq.a}</p>
                 </motion.div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ===== CTA ===== */}
-      <section className="border-t border-theme-border-soft py-20 lg:py-28">
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <span className="inline-block text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Get Started</span>
+            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Get Started</span>
             <h2 className="text-3xl md:text-5xl font-black text-theme-primary tracking-tight mb-4">Ready to simplify your billing?</h2>
             <p className="text-theme-muted font-medium text-base sm:text-lg max-w-2xl mx-auto mb-8">Join thousands of businesses using BillQyro to create, manage, and track invoices effortlessly.</p>
-            <button onClick={onLoginClick} className="px-8 sm:px-12 py-4 sm:py-5 bg-[image:var(--accent-gradient)] text-white font-black text-base sm:text-lg rounded-2xl shadow-premium shadow-theme-accent/20 hover:opacity-90 transition-all active:scale-95 inline-flex items-center gap-3">
+            <button onClick={onLoginClick} className="btn-premium px-8 sm:px-12 py-4 sm:py-5 text-base sm:text-lg">
               Get Started Free
               <ArrowRight className="w-5 h-5" />
             </button>
             <p className="text-xs text-theme-muted font-semibold mt-4">No credit card required · 15 free invoices · Cancel anytime</p>
           </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ===== CONTACT ===== */}
       <section id="contact" className="border-t border-theme-border-soft bg-theme-surface py-16">

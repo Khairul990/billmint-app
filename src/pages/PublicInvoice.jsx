@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { pageVariants } from '../utils/animations';
 import {
   Phone,
   Mail,
@@ -13,7 +15,11 @@ import {
   ArrowRight,
   Lock,
   MessageCircle,
-  Share2
+  Share2,
+  Fingerprint,
+  Sparkles,
+  Globe,
+  Banknote
 } from 'lucide-react';
 import { downloadInvoicePDF } from '../utils/pdfUtils';
 import { toast } from 'react-hot-toast';
@@ -157,18 +163,25 @@ const PublicInvoice = ({ initialInvoice }) => {
 
   if (!invoice) {
     return (
-      <div className="min-h-screen bg-theme-app flex flex-col items-center justify-center p-6 text-center font-sans">
-        <div className="w-20 h-20 rounded-full bg-theme-danger/10 flex items-center justify-center mb-6">
-          <AlertCircle className="w-10 h-10 text-theme-danger" />
+      <motion.div
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        <div className="min-h-screen bg-theme-app flex flex-col items-center justify-center p-6 text-center font-sans">
+          <div className="w-20 h-20 rounded-2xl bg-theme-danger/10 flex items-center justify-center mb-6">
+            <AlertCircle className="w-10 h-10 text-theme-danger" />
+          </div>
+          <h1 className="text-2xl font-black mb-2 text-theme-primary">Invoice Not Found</h1>
+          <p className="text-theme-muted text-sm max-w-md mb-8 leading-relaxed">
+            The invoice link may have expired, been deleted, or contains an incorrect reference. Please contact the sender for a new link.
+          </p>
+          <a href="/" className="btn-premium">
+            Go to BillQyro
+          </a>
         </div>
-        <h1 className="text-2xl font-black mb-2 text-theme-primary">Invoice Not Found</h1>
-        <p className="text-theme-muted text-sm max-w-md mb-8 leading-relaxed">
-          The invoice link may have expired, been deleted, or contains an incorrect reference. Please contact the sender for a new link.
-        </p>
-        <a href="/" className="px-6 py-3 bg-theme-accent hover:bg-theme-accent/90 text-white font-bold rounded-2xl transition-all shadow-premium">
-          Go to BillQyro
-        </a>
-      </div>
+      </motion.div>
     );
   }
 
@@ -395,7 +408,7 @@ const PublicInvoice = ({ initialInvoice }) => {
   const getStatusBadgeStyle = (status) => {
     switch (status) {
       case 'Paid':
-        return 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shadow-sm';
+        return 'badge-success';
       case 'Partially Paid':
         return 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/25 shadow-sm';
       case 'Verified':
@@ -403,12 +416,12 @@ const PublicInvoice = ({ initialInvoice }) => {
       case 'Submitted':
         return 'bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/25 shadow-sm';
       case 'Pending Verification':
-        return 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 shadow-sm animate-pulse';
+        return 'badge-warning animate-pulse';
       case 'Pending':
       case 'Unpaid':
         return 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700';
       case 'Overdue':
-        return 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 shadow-sm';
+        return 'badge-danger';
       case 'Cancelled':
         return 'bg-theme-surface dark:bg-theme-card text-theme-muted dark:bg-theme-card dark:text-theme-muted border border-theme-border-soft dark:border-theme-border-soft';
       default:
@@ -417,6 +430,12 @@ const PublicInvoice = ({ initialInvoice }) => {
   };
 
   return (
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
     <div className="min-h-screen bg-theme-app dark:bg-theme-surface dark:bg-theme-app py-4 md:py-10 px-4 md:px-6 flex flex-col items-center justify-between font-sans antialiased text-theme-primary dark:text-theme-primary dark:text-theme-primary">
 
       <style>{`
@@ -452,15 +471,17 @@ const PublicInvoice = ({ initialInvoice }) => {
         }
       `}</style>
 
-      {/* ===== TOP PREMIUM HEADER ===== */}
+      {/* ===== TOP PREMIUM HEADER WITH BUSINESS BRANDING ===== */}
       <header className="max-w-5xl w-full mb-4 md:mb-5 z-10">
-        <div className="flex items-center justify-between gap-2 md:gap-3 bg-theme-card/90 backdrop-blur-xl p-3 md:p-4 rounded-2xl border border-theme-border-soft/80 shadow-lg shadow-black/5">
+        <div className="card-premium glass-strong flex items-center justify-between gap-2 md:gap-3 p-3 md:p-4 rounded-2xl">
           <div className="flex items-center gap-2 md:gap-3 min-w-0">
-            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-theme-accent to-theme-accent-dark text-white flex items-center justify-center font-bold text-sm shadow-md shrink-0">
+            <div className="logo-frame shrink-0">
               {business.logoUrl ? (
-                <img src={business.logoUrl} alt="" className="w-7 h-7 md:w-8 md:h-8 object-contain rounded-lg" />
+                <img src={business.logoUrl} alt="" className="w-full h-full object-contain" />
               ) : (
-                business.businessName?.charAt(0) || 'B'
+                <span className="font-extrabold text-sm text-theme-primary">
+                  {business.businessName?.charAt(0) || 'B'}
+                </span>
               )}
             </div>
             <div className="min-w-0">
@@ -472,24 +493,24 @@ const PublicInvoice = ({ initialInvoice }) => {
                 </span>
               </div>
               <p className="text-[8px] md:text-[9px] font-bold text-theme-muted uppercase tracking-wider flex items-center gap-1">
-                <ShieldCheck className="w-2.5 h-2.5 md:w-3 md:h-3 text-theme-accent" />
-                Digital Invoice · {invoice.invoiceNumber}
+                <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 text-theme-accent" />
+                Digital Invoice &middot; {invoice.invoiceNumber}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
             {liveLinkPrefs.allowCustomerPdfDownload && (
-              <button onClick={handleDownloadPDF} className="flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1.5 md:py-2 bg-theme-surface hover:bg-theme-border-soft text-theme-primary font-bold text-[10px] md:text-[11px] rounded-xl transition-all cursor-pointer border border-theme-border-soft/50">
+              <button onClick={handleDownloadPDF} className="btn-premium-outline px-2.5 md:px-3 py-1.5 md:py-2 text-[10px] md:text-[11px]">
                 <FileDown className="w-3 h-3 md:w-3.5 md:h-3.5" />
                 <span className="hidden sm:inline">PDF</span>
               </button>
             )}
-            <button onClick={handleShare} className="flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1.5 md:py-2 bg-theme-surface hover:bg-theme-border-soft text-theme-primary font-bold text-[10px] md:text-[11px] rounded-xl transition-all cursor-pointer border border-theme-border-soft/50">
+            <button onClick={handleShare} className="btn-premium-outline px-2.5 md:px-3 py-1.5 md:py-2 text-[10px] md:text-[11px]">
               <Share2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
               <span className="hidden sm:inline">Share</span>
             </button>
             {liveLinkPrefs.allowPaymentProofSubmit && invoice.paymentStatus !== 'Paid' && invoice.paymentStatus !== 'Pending Verification' && (
-              <button onClick={() => setShowPaymentModal(true)} className="flex items-center gap-1 md:gap-1.5 px-3 md:px-4 py-1.5 md:py-2 bg-[image:var(--accent-gradient)] text-theme-button-text font-black text-[10px] md:text-[11px] rounded-xl shadow-md hover:opacity-90 transition-all cursor-pointer uppercase tracking-wider border-0">
+              <button onClick={() => setShowPaymentModal(true)} className="btn-premium px-3 md:px-4 py-1.5 md:py-2 text-[10px] md:text-[11px]">
                 <Wallet className="w-3 h-3 md:w-3.5 md:h-3.5" />
                 <span className="text-[10px] md:text-[11px]">Pay Now</span>
               </button>
@@ -505,7 +526,7 @@ const PublicInvoice = ({ initialInvoice }) => {
 
           {/* Status Banner */}
           {invoice.paymentStatus === 'Paid' && (
-            <div className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2.5 md:gap-3 shadow-lg shadow-emerald-500/5">
+            <div className="card-premium overflow-hidden bg-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2.5 md:gap-3 shadow-lg shadow-emerald-500/5">
               <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 animate-bounce">
                 <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
               </div>
@@ -516,7 +537,7 @@ const PublicInvoice = ({ initialInvoice }) => {
             </div>
           )}
           {invoice.paymentStatus === 'Pending Verification' && (
-            <div className="bg-amber-500/10 border-2 border-amber-500/30 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2.5 md:gap-3 shadow-lg shadow-amber-500/5">
+            <div className="card-premium overflow-hidden bg-amber-500/10 border-2 border-amber-500/30 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2.5 md:gap-3 shadow-lg shadow-amber-500/5">
               <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 animate-pulse">
                 <Info className="w-4 h-4 md:w-5 md:h-5 text-amber-500" />
               </div>
@@ -528,7 +549,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           )}
 
           {/* Premium Invoice Card */}
-          <div className={`bg-theme-card rounded-2xl border border-theme-border-soft shadow-lg overflow-hidden ${tplStyles.container}`}>
+          <div className={`card-premium overflow-hidden ${tplStyles.container}`}>
             {activeTemplate === 'classic' && <div className="h-2 bg-gradient-to-r from-theme-accent to-theme-accent-dark w-full"></div>}
 
             <div className="p-3 md:p-6 space-y-4 md:space-y-5">
@@ -538,7 +559,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                 <div>
                   <div className="flex items-center gap-2 md:gap-2.5">
                     <h2 className="text-lg md:text-2xl font-black text-theme-primary tracking-tight">Invoice</h2>
-                    <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest px-2 md:px-2.5 py-0.5 md:py-1 rounded-full ${getStatusBadgeStyle(invoice.paymentStatus)}`}>
+                    <span className={`badge-premium ${getStatusBadgeStyle(invoice.paymentStatus)}`}>
                       {invoice.paymentStatus}
                     </span>
                   </div>
@@ -604,7 +625,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                           ) : invoice.billType === 'custom' ? (
                             <><td className="py-2 md:py-2.5 px-2 md:px-3 font-extrabold text-theme-primary">{item.itemService || 'Item'}</td><td className="py-2 md:py-2.5 px-2 md:px-3">{item.description || '—'}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-center">{item.qty}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-right">{formatVal(item.rate)}</td></>
                           ) : (
-                            <><td className="py-2 md:py-2.5 px-2 md:px-3 font-extrabold text-theme-primary">{item.designNo || '—'}</td><td className="py-2 md:py-2.5 px-2 md:px-3"><span className="px-1.5 md:px-2 py-0.5 rounded-full bg-theme-surface text-[8px] md:text-[9px] font-black">{item.workType || 'Work'}</span></td><td className="py-2 md:py-2.5 px-2 md:px-3">{item.description || '—'}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-center">{item.qty}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-right">{formatVal(item.rate)}</td></>
+                            <><td className="py-2 md:py-2.5 px-2 md:px-3 font-extrabold text-theme-primary">{item.designNo || '—'}</td><td className="py-2 md:py-2.5 px-2 md:px-3"><span className="badge-premium bg-theme-surface text-theme-muted text-[8px] md:text-[9px]">{item.workType || 'Work'}</span></td><td className="py-2 md:py-2.5 px-2 md:px-3">{item.description || '—'}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-center">{item.qty}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-right">{formatVal(item.rate)}</td></>
                           )}
                           <td className="py-2 md:py-2.5 px-2 md:px-3 text-right font-black text-theme-primary">{formatVal(item.amount)}</td>
                         </tr>
@@ -674,7 +695,7 @@ const PublicInvoice = ({ initialInvoice }) => {
         {/* ===== RIGHT: PAYMENT / STATUS SIDEBAR ===== */}
         {invoice.paymentStatus === 'Paid' ? (
           <div className="w-full lg:w-[340px] shrink-0 space-y-3 md:space-y-4">
-            <div className="bg-theme-card rounded-2xl border border-emerald-500/25 shadow-lg p-4 md:p-5 space-y-3 md:space-y-4 relative overflow-hidden">
+            <div className="card-premium overflow-hidden border border-emerald-500/25 shadow-lg p-4 md:p-5 space-y-3 md:space-y-4 relative">
               <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/8 rounded-full blur-3xl pointer-events-none"></div>
               <div className="flex items-center gap-3">
                 <div className="w-10 md:w-11 h-10 md:h-11 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
@@ -704,11 +725,12 @@ const PublicInvoice = ({ initialInvoice }) => {
                 <div className="pt-2 md:pt-2.5 border-t border-theme-border-soft">
                   <p className="text-[8px] md:text-[9px] text-theme-muted font-bold mb-1.5 md:mb-2">Need help?</p>
                   <div className="flex gap-2">
-                    {business.phone && <a href={`tel:${business.phone}`} className="flex-1 py-1.5 md:py-2 bg-theme-surface hover:bg-theme-border-soft text-theme-primary font-bold rounded-xl text-[10px] md:text-xs text-center transition-all cursor-pointer"><Phone className="w-3 md:w-3.5 h-3 md:h-3.5 inline mr-1" />Call</a>}
-                    {business.email && <a href={`mailto:${business.email}?subject=Receipt%20${invoice.invoiceNumber}`} className="flex-1 py-1.5 md:py-2 bg-theme-surface hover:bg-theme-border-soft text-theme-primary font-bold rounded-xl text-[10px] md:text-xs text-center transition-all cursor-pointer"><Mail className="w-3 md:w-3.5 h-3 md:h-3.5 inline mr-1" />Email</a>}
+                    {business.phone && <a href={`tel:${business.phone}`} className="btn-premium-outline flex-1 py-1.5 md:py-2 text-[10px] md:text-xs"><Phone className="w-3 md:w-3.5 h-3 md:h-3.5 inline mr-1" />Call</a>}
+                    {business.email && <a href={`mailto:${business.email}?subject=Receipt%20${invoice.invoiceNumber}`} className="btn-premium-outline flex-1 py-1.5 md:py-2 text-[10px] md:text-xs"><Mail className="w-3 md:w-3.5 h-3 md:h-3.5 inline mr-1" />Email</a>}
                   </div>
                 </div>
               )}
+              {/* Premium Trust Badge */}
               <div className="bg-emerald-500/5 rounded-xl p-2.5 md:p-3 text-center">
                 <div className="flex items-center justify-center gap-1.5 text-[8px] md:text-[9px] text-emerald-600 font-bold">
                   <ShieldCheck className="w-3 h-3" />
@@ -721,8 +743,8 @@ const PublicInvoice = ({ initialInvoice }) => {
         ) : (
           <div className="w-full lg:w-[340px] shrink-0 space-y-3 md:space-y-4">
 
-            {/* Amount Due Card */}
-            <div className={`rounded-2xl p-5 md:p-6 text-white shadow-xl relative overflow-hidden ${invoice.paymentStatus === 'Unpaid' || invoice.paymentStatus === 'Pending' || invoice.paymentStatus === 'Overdue' ? 'animate-gradient-shift bg-gradient-to-br from-theme-accent via-theme-accent-dark to-purple-700' : 'bg-gradient-to-br from-theme-accent to-theme-accent-dark'}`}>
+            {/* Amount Due Card with Premium Gradient */}
+            <div className={`card-premium-elevated rounded-2xl p-5 md:p-6 text-white shadow-xl relative overflow-hidden ${invoice.paymentStatus === 'Unpaid' || invoice.paymentStatus === 'Pending' || invoice.paymentStatus === 'Overdue' ? 'animate-gradient-shift bg-gradient-to-br from-theme-accent via-theme-accent-dark to-purple-700' : 'bg-gradient-to-br from-theme-accent to-theme-accent-dark'}`}>
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
               <div className="relative z-10">
@@ -739,20 +761,25 @@ const PublicInvoice = ({ initialInvoice }) => {
               {invoice.verificationCode && (
                 <div className="mt-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-center">
                   <div className="flex items-center justify-center gap-1.5 mb-1">
-                    <Lock className="w-3 h-3 text-white/70" />
+                    <Fingerprint className="w-3 h-3 text-white/70" />
                     <p className="text-[8px] uppercase tracking-widest font-black text-white/70">Reference Code</p>
                   </div>
                   <p className="text-xl md:text-2xl font-black tracking-[0.15em] text-white">{invoice.verificationCode}</p>
                   <p className="text-[7px] text-white/50 mt-1.5 font-semibold">Include this code in your payment note</p>
                 </div>
               )}
+              {/* Premium Trust Indicator */}
+              <div className="relative z-10 mt-4 flex items-center gap-2 text-white/50 text-[7px] font-semibold">
+                <Lock className="w-2.5 h-2.5" />
+                <span>Secured by 256-bit encryption</span>
+              </div>
             </div>
 
             {/* Payment Hub / Proof Form */}
             {!showPaymentModal ? (
-              <div className="bg-theme-card rounded-2xl border border-theme-border-soft shadow-lg overflow-hidden">
+              <div className="card-premium overflow-hidden">
                 <div className="p-4 md:p-5 space-y-4 md:space-y-5">
-                  <button onClick={() => setPaymentSectionOpen(prev => !prev)} className="w-full flex items-center gap-2.5 pb-3 border-b border-theme-border-soft cursor-pointer text-left group">
+                  <button onClick={() => setPaymentSectionOpen(prev => !prev)} className="w-full flex items-center gap-2.5 pb-3 border-b border-theme-border-soft cursor-pointer text-left group premium-focus rounded-lg">
                     <div className="w-8 h-8 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0 group-hover:bg-theme-accent/20 transition-colors">
                       <Wallet className="w-4 h-4" />
                     </div>
@@ -784,7 +811,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                   </div>
 
                   {liveLinkPrefs.showPaymentQr && paymentPrefs.paymentQrEnabled && (
-                    <div className="bg-theme-surface rounded-xl p-4 max-w-[260px] mx-auto border-2 border-theme-accent/20 shadow-lg shadow-theme-accent/5 relative overflow-hidden">
+                    <div className="qr-premium mx-auto relative overflow-hidden">
                       <div className="qr-scan-line"></div>
                       <img src={qrCodeUrl} alt="Scan to Pay QR" className="w-full h-auto object-contain rounded-lg" />
                       <p className="text-[9px] text-theme-muted font-bold uppercase text-center mt-2">Scan to Pay</p>
@@ -795,11 +822,11 @@ const PublicInvoice = ({ initialInvoice }) => {
                   <div className="space-y-3">
                     {paymentPrefs.paymentMethod === 'UPI' && (
                       <div className="space-y-2">
-                        <a href={upiLink} className="w-full flex items-center justify-center gap-2 py-3 bg-[image:var(--accent-gradient)] text-theme-button-text font-black text-[11px] md:text-xs rounded-xl shadow-md hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider border-0">
+                        <a href={upiLink} className="btn-premium w-full py-3 text-[11px] md:text-xs">
                           <Wallet className="w-4 h-4" />
                           Pay with UPI
                         </a>
-                        <div className="flex items-center justify-between px-3 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl text-[10px] md:text-xs font-bold">
+                        <div className="flex items-center justify-between px-3 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl text-[10px] md:text-xs font-bold premium-focus">
                           <span className="text-theme-muted truncate mr-2">UPI: <strong className="text-theme-primary">{paymentPrefs.upiId}</strong></span>
                           <button onClick={() => handleCopy(paymentPrefs.upiId, 'UPI ID')} className="text-theme-accent hover:text-theme-accent/70 cursor-pointer shrink-0 ml-2"><Copy className="w-3.5 h-3.5" /></button>
                         </div>
@@ -812,7 +839,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                           { name: 'Nagad', num: paymentPrefs.nagadNumber, color: 'border-orange-500/20 bg-orange-500/5 text-orange-500' },
                           { name: 'Rocket', num: paymentPrefs.rocketNumber, color: 'border-theme-border-soft bg-theme-accent-light text-theme-accent' }
                         ].map(mfs => !mfs.num ? null : (
-                          <div key={mfs.name} className={`flex items-center justify-between px-3 py-2.5 border rounded-xl text-[10px] md:text-xs font-black ${mfs.color}`}>
+                          <div key={mfs.name} className={`flex items-center justify-between px-3 py-2.5 border rounded-xl text-[10px] md:text-xs font-black ${mfs.color} premium-focus`}>
                             <span className="uppercase">{mfs.name}: <strong className="text-theme-primary font-extrabold ml-1">{mfs.num}</strong></span>
                             <button type="button" onClick={() => handleCopy(mfs.num, mfs.name)} className="text-theme-muted hover:text-theme-primary cursor-pointer shrink-0 ml-2"><Copy className="w-3.5 h-3.5" /></button>
                           </div>
@@ -864,16 +891,37 @@ const PublicInvoice = ({ initialInvoice }) => {
                   </div>
 
                   {liveLinkPrefs.allowPaymentProofSubmit && (
-                    <button onClick={() => setShowPaymentModal(true)} className="w-full flex items-center justify-center gap-2 py-3 md:py-3.5 bg-[image:var(--accent-gradient)] text-theme-button-text font-black text-[11px] md:text-xs rounded-xl shadow-md hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider border-0">
+                    <button onClick={() => setShowPaymentModal(true)} className="btn-premium w-full py-3 md:py-3.5 text-[11px] md:text-xs">
                       <CheckCircle2 className="w-4 h-4" />
                       <span>I Have Paid</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   )}
+
+                  {/* Premium Trust Badge Section */}
+                  <div className="divider-premium"></div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-theme-surface/50">
+                      <ShieldCheck className="w-3 h-3 text-emerald-500 shrink-0" />
+                      <span className="text-[7px] text-theme-muted font-semibold">SSL Secure</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-theme-surface/50">
+                      <Lock className="w-3 h-3 text-indigo-500 shrink-0" />
+                      <span className="text-[7px] text-theme-muted font-semibold">Encrypted</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-theme-surface/50">
+                      <Globe className="w-3 h-3 text-blue-500 shrink-0" />
+                      <span className="text-[7px] text-theme-muted font-semibold">Verified</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-theme-surface/50">
+                      <Banknote className="w-3 h-3 text-amber-500 shrink-0" />
+                      <span className="text-[7px] text-theme-muted font-semibold">Protected</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="bg-theme-card rounded-2xl border border-theme-border-soft shadow-lg overflow-hidden">
+              <div className="card-premium overflow-hidden">
                 <div className="p-4 md:p-5 space-y-4 md:space-y-5">
                   <div className="flex items-center gap-3 pb-3 md:pb-4 border-b border-theme-border-soft">
                     <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
@@ -891,15 +939,15 @@ const PublicInvoice = ({ initialInvoice }) => {
                   <form onSubmit={handleSubmitProof} className="space-y-3 md:space-y-4">
                     <div>
                       <label className="block mb-1 text-theme-muted font-bold uppercase text-[8px] md:text-[9px] tracking-wider">Full Name (Optional)</label>
-                      <input type="text" value={payerName} onChange={e => setPayerName(e.target.value)} placeholder="Your name" className="w-full px-3 md:px-3.5 py-2 md:py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary font-bold text-[11px] md:text-xs" />
+                      <input type="text" value={payerName} onChange={e => setPayerName(e.target.value)} placeholder="Your name" className="input-premium premium-focus" />
                     </div>
                     <div>
                       <label className="block mb-1 text-theme-muted font-bold uppercase text-[8px] md:text-[9px] tracking-wider">Phone (Optional)</label>
-                      <input type="text" value={payerPhone} onChange={e => setPayerPhone(e.target.value)} placeholder="Your phone number" className="w-full px-3 md:px-3.5 py-2 md:py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary font-bold text-[11px] md:text-xs" />
+                      <input type="text" value={payerPhone} onChange={e => setPayerPhone(e.target.value)} placeholder="Your phone number" className="input-premium premium-focus" />
                     </div>
                     <div>
                       <label className="block mb-1 text-theme-muted font-bold uppercase text-[8px] md:text-[9px] tracking-wider">Payment Method *</label>
-                      <select required value={payMethod} onChange={e => setPayMethod(e.target.value)} className="w-full px-3 md:px-3.5 py-2 md:py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary font-bold text-[11px] md:text-xs">
+                      <select required value={payMethod} onChange={e => setPayMethod(e.target.value)} className="input-premium premium-focus">
                         {country === 'India' && <option value="UPI">UPI Transfer</option>}
                         {country === 'Bangladesh' && <><option value="bKash">bKash</option><option value="Nagad">Nagad</option><option value="Rocket">Rocket</option></>}
                         <option value="Bank Transfer">Bank Transfer</option>
@@ -910,19 +958,19 @@ const PublicInvoice = ({ initialInvoice }) => {
                       <label className="block mb-1 text-theme-muted font-bold uppercase text-[8px] md:text-[9px] tracking-wider">Amount Paid *</label>
                       <div className="relative">
                         <span className="absolute inset-y-0 left-0 pl-3 md:pl-3.5 flex items-center text-theme-muted font-bold text-[11px] md:text-xs">{currencySymbol}</span>
-                        <input type="number" step="0.01" required value={payAmount} onChange={e => setPayAmount(e.target.value)} placeholder="0.00" className="w-full pl-7 md:pl-8 pr-3 md:pr-3.5 py-2 md:py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary font-extrabold text-xs md:text-sm" />
+                        <input type="number" step="0.01" required value={payAmount} onChange={e => setPayAmount(e.target.value)} placeholder="0.00" className="input-premium premium-focus pl-7 md:pl-8" />
                       </div>
                     </div>
                     <div>
                       <label className="block mb-1 text-theme-muted font-bold uppercase text-[8px] md:text-[9px] tracking-wider">Transaction ID {liveLinkPrefs.requireTransactionId ? '*' : '(Optional)'}</label>
-                      <input type="text" required={liveLinkPrefs.requireTransactionId} value={txnId} onChange={e => setTxnId(e.target.value)} placeholder="e.g. TXN10003028" className="w-full px-3 md:px-3.5 py-2 md:py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary font-bold text-[11px] md:text-xs" />
+                      <input type="text" required={liveLinkPrefs.requireTransactionId} value={txnId} onChange={e => setTxnId(e.target.value)} placeholder="e.g. TXN10003028" className="input-premium premium-focus" />
                     </div>
                     <div>
                       <label className="block mb-1 text-theme-muted font-bold uppercase text-[8px] md:text-[9px] tracking-wider">Screenshot {liveLinkPrefs.requirePaymentScreenshot ? '*' : '(Optional)'}</label>
                       <div className="flex items-center gap-3">
                         <div className="relative flex-1">
                           <input type="file" accept="image/*" required={liveLinkPrefs.requirePaymentScreenshot} onChange={handleScreenshotChange} className="hidden" id="payment-proof-upload" />
-                          <label htmlFor="payment-proof-upload" className="w-full flex items-center justify-center gap-2 py-3 md:py-3.5 bg-theme-surface border-2 border-dashed border-theme-border-soft rounded-xl cursor-pointer hover:bg-theme-app/80 hover:border-theme-accent/40 transition-all text-theme-muted text-[10px] md:text-xs font-bold">
+                          <label htmlFor="payment-proof-upload" className="w-full flex items-center justify-center gap-2 py-3 md:py-3.5 bg-theme-surface border-2 border-dashed border-theme-border-soft rounded-xl cursor-pointer hover:bg-theme-app/80 hover:border-theme-accent/40 transition-all text-theme-muted text-[10px] md:text-xs font-bold premium-focus">
                             <Upload className="w-4 h-4" />
                             <span>{screenshot ? 'Change Screenshot' : 'Upload Screenshot'}</span>
                           </label>
@@ -937,11 +985,11 @@ const PublicInvoice = ({ initialInvoice }) => {
                     </div>
                     <div>
                       <label className="block mb-1 text-theme-muted font-bold uppercase text-[8px] md:text-[9px] tracking-wider">Note (Optional)</label>
-                      <textarea value={customerNote} onChange={e => setCustomerNote(e.target.value)} placeholder="Any details for the verification" rows="2" className="w-full px-3 md:px-3.5 py-2 md:py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary text-[11px] md:text-xs resize-none" />
+                      <textarea value={customerNote} onChange={e => setCustomerNote(e.target.value)} placeholder="Any details for the verification" rows="2" className="input-premium premium-focus resize-none" />
                     </div>
                     <div className="flex items-center gap-2 md:gap-3 pt-1 md:pt-2">
-                      <button type="button" onClick={() => setShowPaymentModal(false)} className="flex-1 py-2.5 md:py-3 bg-theme-surface hover:bg-theme-border-soft text-theme-primary font-bold rounded-xl transition-all cursor-pointer text-[11px] md:text-xs">Back</button>
-                      <button type="submit" disabled={isSubmitting} className="flex-1 py-2.5 md:py-3 bg-[image:var(--accent-gradient)] text-theme-button-text font-black rounded-xl shadow-md hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[11px] md:text-xs disabled:opacity-50 border-0">
+                      <button type="button" onClick={() => setShowPaymentModal(false)} className="btn-premium-outline flex-1 py-2.5 md:py-3 text-[11px] md:text-xs">Back</button>
+                      <button type="submit" disabled={isSubmitting} className="btn-premium flex-1 py-2.5 md:py-3 text-[11px] md:text-xs disabled:opacity-50">
                         {isSubmitting ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <span>Submit Proof</span>}
                       </button>
                     </div>
@@ -952,7 +1000,7 @@ const PublicInvoice = ({ initialInvoice }) => {
 
             {/* Payment Status Info */}
             {invoice.paymentStatus === 'Pending Verification' && (
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 md:p-4 flex items-start gap-2.5 md:gap-3">
+              <div className="card-premium overflow-hidden bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 md:p-4 flex items-start gap-2.5 md:gap-3">
                 <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
                   <Info className="w-4 h-4 md:w-5 md:h-5 text-amber-500" />
                 </div>
@@ -963,9 +1011,9 @@ const PublicInvoice = ({ initialInvoice }) => {
               </div>
             )}
 
-            {/* Contact Business */}
+            {/* Contact Business with WhatsApp */}
             {liveLinkPrefs.showContactButton && (business.whatsapp || business.phone || business.email) && !showPaymentModal && (
-              <div className="bg-theme-card rounded-2xl border border-theme-border-soft shadow-lg p-3 md:p-4">
+              <div className="card-premium overflow-hidden p-3 md:p-4">
                 <div className="flex items-center gap-2 mb-2 md:mb-2.5">
                   <div className="w-6 h-6 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center">
                     <Phone className="w-3 h-3" />
@@ -975,19 +1023,19 @@ const PublicInvoice = ({ initialInvoice }) => {
                 <p className="text-[9px] md:text-[10px] text-theme-muted font-semibold mb-2.5 md:mb-3">Contact the business for questions about this invoice.</p>
                 <div className="flex gap-2">
                   {business.whatsapp && (
-                    <a href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I have a question about Invoice ' + invoice.invoiceNumber)}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2.5 md:py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-bold rounded-xl transition-all cursor-pointer text-[10px] md:text-xs animate-wa-pulse">
+                    <a href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I have a question about Invoice ' + invoice.invoiceNumber)}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2.5 md:py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-bold rounded-xl transition-all cursor-pointer text-[10px] md:text-xs animate-wa-pulse premium-focus">
                       <MessageCircle className="w-3.5 md:w-4 h-3.5 md:h-4" />
                       WhatsApp
                     </a>
                   )}
                   {business.phone && !business.whatsapp && (
-                    <a href={`tel:${business.phone}`} className="flex-1 flex items-center justify-center gap-1.5 py-2 md:py-2.5 bg-theme-accent/10 hover:bg-theme-accent/20 text-theme-accent font-bold rounded-xl transition-all cursor-pointer text-[10px] md:text-xs">
+                    <a href={`tel:${business.phone}`} className="flex-1 flex items-center justify-center gap-1.5 py-2 md:py-2.5 bg-theme-accent/10 hover:bg-theme-accent/20 text-theme-accent font-bold rounded-xl transition-all cursor-pointer text-[10px] md:text-xs premium-focus">
                       <Phone className="w-3 md:w-3.5 h-3 md:h-3.5" />
                       Call
                     </a>
                   )}
                   {business.email && (
-                    <a href={`mailto:${business.email}?subject=Invoice%20${invoice.invoiceNumber}`} className="flex-1 flex items-center justify-center gap-1.5 py-2 md:py-2.5 bg-theme-accent/10 hover:bg-theme-accent/20 text-theme-accent font-bold rounded-xl transition-all cursor-pointer text-[10px] md:text-xs">
+                    <a href={`mailto:${business.email}?subject=Invoice%20${invoice.invoiceNumber}`} className="flex-1 flex items-center justify-center gap-1.5 py-2 md:py-2.5 bg-theme-accent/10 hover:bg-theme-accent/20 text-theme-accent font-bold rounded-xl transition-all cursor-pointer text-[10px] md:text-xs premium-focus">
                       <Mail className="w-3 md:w-3.5 h-3 md:h-3.5" />
                       Email
                     </a>
@@ -1003,19 +1051,19 @@ const PublicInvoice = ({ initialInvoice }) => {
 
         {/* ===== STICKY PAY BUTTON (Mobile Only) ===== */}
         {invoice.paymentStatus !== 'Paid' && invoice.paymentStatus !== 'Pending Verification' && (
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-theme-card/95 backdrop-blur-xl border-t border-theme-border-soft px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(0,0,0,0.08)]">
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-theme-card/95 backdrop-blur-xl border-t border-theme-border-soft px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(0,0,0,0.08)] safe-area-bottom">
             <div className="flex items-center gap-3">
               <div className="flex-1">
                 <p className="text-[8px] text-theme-muted font-bold uppercase tracking-wider">Amount Due</p>
                 <p className="text-lg font-black text-rose-500">{formatVal(dueAmount)}</p>
               </div>
               {liveLinkPrefs.allowPaymentProofSubmit ? (
-                <button onClick={() => setShowPaymentModal(true)} className="px-6 py-3 bg-[image:var(--accent-gradient)] text-white font-black text-sm rounded-xl shadow-lg active:scale-95 transition-all flex items-center gap-2">
+                <button onClick={() => setShowPaymentModal(true)} className="btn-premium px-6 py-3 text-sm">
                   <Wallet className="w-4 h-4" />
                   Pay Now
                 </button>
               ) : (
-                <a href={`https://wa.me/${business.whatsapp?.replace(/\D/g, '') || business.phone?.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I want to pay for Invoice ' + invoice.invoiceNumber)}`} target="_blank" rel="noopener noreferrer" className="px-6 py-3 bg-emerald-500 text-white font-black text-sm rounded-xl shadow-lg active:scale-95 transition-all flex items-center gap-2">
+                <a href={`https://wa.me/${business.whatsapp?.replace(/\D/g, '') || business.phone?.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I want to pay for Invoice ' + invoice.invoiceNumber)}`} target="_blank" rel="noopener noreferrer" className="btn-premium px-6 py-3 text-sm bg-emerald-500 shadow-lg shadow-emerald-500/25" style={{ backgroundImage: 'none', background: '#10B981' }}>
                   <MessageCircle className="w-4 h-4" />
                   Pay via WhatsApp
                 </a>
@@ -1026,7 +1074,7 @@ const PublicInvoice = ({ initialInvoice }) => {
 
         {/* ===== TRUST FOOTER ===== */}
         <footer className={`mt-6 md:mt-8 w-full max-w-5xl ${invoice.paymentStatus !== 'Paid' && invoice.paymentStatus !== 'Pending Verification' ? 'pb-[calc(80px+env(safe-area-inset-bottom))] lg:pb-0' : ''}`}>
-        <div className="bg-gradient-to-r from-theme-card/80 via-theme-card to-theme-card/80 backdrop-blur-sm rounded-2xl border border-theme-border-soft/60 p-4 md:p-5 shadow-lg">
+        <div className="card-premium overflow-hidden bg-gradient-to-r from-theme-card/80 via-theme-card to-theme-card/80 backdrop-blur-sm rounded-2xl border border-theme-border-soft/60 p-4 md:p-5 shadow-lg">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3 mb-3 md:mb-4">
             <div className="flex items-center gap-2 px-2.5 md:px-3 py-2 md:py-2.5 bg-theme-surface/50 rounded-xl border border-theme-border-soft/40">
               <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 text-emerald-500 shrink-0" />
@@ -1062,6 +1110,7 @@ const PublicInvoice = ({ initialInvoice }) => {
       </footer>
 
     </div>
+    </motion.div>
   );
 };
 

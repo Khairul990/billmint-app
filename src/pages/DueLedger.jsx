@@ -1,19 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { Clock, Search, CheckCircle2, AlertCircle, CreditCard, ChevronRight, Calendar, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Clock, Search, CheckCircle2, AlertCircle, CreditCard, ChevronRight, Calendar, X, Bell, User, DollarSign, TrendingUp, TrendingDown, Send, Eye, Ban } from 'lucide-react';
+import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
+import { formatCurrency } from '../utils/invoiceUtils';
+import { CardSkeleton } from '../components/PremiumSkeleton';
 import CustomerLedger from '../components/customers/CustomerLedger';
 
 const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [loading, setLoading] = useState(false);
   const currencySymbol = businessSettings?.currency || '₹';
-
-  const formatCurrency = (amount) => {
-    const formattedNum = new Intl.NumberFormat('en-IN', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2
-    }).format(amount || 0);
-    return `${currencySymbol} ${formattedNum}`;
-  };
 
   const dueBills = useMemo(() => {
     return invoices
@@ -56,6 +53,22 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
     grouped.today.reduce((sum, b) => sum + b.dueAmount, 0)
   , [grouped.today]);
 
+  const totalDueThisWeek = useMemo(() => 
+    grouped.thisWeek.reduce((sum, b) => sum + b.dueAmount, 0)
+  , [grouped.thisWeek]);
+
+  const totalOverdue = useMemo(() => 
+    grouped.today.length
+  , [grouped.today]);
+
+  const totalUpcoming = useMemo(() => 
+    grouped.older.reduce((sum, b) => sum + b.dueAmount, 0)
+  , [grouped.older]);
+
+  const totalOutstanding = useMemo(() => 
+    dueBills.reduce((sum, b) => sum + b.dueAmount, 0)
+  , [dueBills]);
+
   const filteredToday = grouped.today.filter(b => 
     b.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     b.invoiceNumber?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -69,62 +82,209 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
     b.invoiceNumber?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const Section = ({ title, icon: Icon, bills, accent }) => {
+  const allFilteredEmpty = filteredToday.length === 0 && filteredThisWeek.length === 0 && filteredOlder.length === 0;
+
+  const getUrgencyBadge = (bill) => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor((now - bill.dueDate) / (1000 * 60 * 60 * 24));
+
+    if (diffDays > 7) return { label: 'Critical', class: 'badge-danger' };
+    if (diffDays > 0) return { label: 'Overdue', class: 'badge-warning' };
+    if (diffDays === 0) return { label: 'Due Today', class: 'badge-danger' };
+    return { label: 'Upcoming', class: 'badge-info' };
+  };
+
+  const getStatusBadge = (bill) => {
+    if (bill.status === 'partial') return { label: 'Partial', class: 'badge-warning' };
+    return { label: 'Unpaid', class: 'badge-danger' };
+  };
+
+  const handleMarkPaid = (bill) => {
+    if (bill.customerId) {
+      const customer = customers.find(c => c.id === bill.customerId);
+      setSelectedCustomer(customer || { id: bill.customerId, name: bill.customerName });
+    } else {
+      setSelectedCustomer({ id: null, name: bill.customerName });
+    }
+  };
+
+  const handleOpenCustomer = (bill) => {
+    if (bill.customerId) {
+      const customer = customers.find(c => c.id === bill.customerId);
+      setSelectedCustomer(customer || { id: bill.customerId, name: bill.customerName });
+    } else {
+      setSelectedCustomer({ id: null, name: bill.customerName });
+    }
+  };
+
+  const handleSendReminder = (bill) => {
+    if (bill.customerId) {
+      const customer = customers.find(c => c.id === bill.customerId);
+      setSelectedCustomer(customer || { id: bill.customerId, name: bill.customerName });
+    } else {
+      setSelectedCustomer({ id: null, name: bill.customerName });
+    }
+  };
+
+  const Section = ({ title, icon: Icon, bills, accent, accentBg, badgeColor }) => {
     if (bills.length === 0 && !searchQuery) return null;
     return (
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <div className={`w-8 h-8 rounded-xl ${accent} flex items-center justify-center`}>
-            <Icon className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <h3 className="text-sm font-extrabold text-theme-primary">{title}</h3>
-            <p className="text-[10px] font-bold text-theme-muted">{bills.length} bill{bills.length !== 1 ? 's' : ''}</p>
-          </div>
-        </div>
-        <div className="space-y-2 mb-6">
-          {bills.map((bill, idx) => (
-            <div key={bill.id} className="p-4 bg-theme-card rounded-2xl border border-theme-border-soft active:scale-[0.98] transition-all">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-theme-primary truncate">{bill.customerName || 'Walk-in Customer'}</p>
-                  <p className="text-xs text-theme-muted font-semibold mt-0.5">
-                    {bill.invoiceNumber || `#${bill.id?.slice(0, 6)}`} • Due {bill.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </p>
-                </div>
-                <div className="text-right ml-3">
-                  <p className="text-sm font-black text-theme-primary">{formatCurrency(bill.dueAmount)}</p>
-                  <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 ${
-                    bill.status === 'partial' ? 'bg-amber-500/10 text-amber-500' : 'bg-rose-500/10 text-rose-500'
-                  }`}>
-                    {bill.status === 'partial' ? 'Partial' : 'Unpaid'}
-                  </span>
-                </div>
-              </div>
+      <motion.div variants={staggerItem} className="mb-6">
+        <div className="section-header">
+          <div className="flex items-center gap-2">
+            <div className={`w-8 h-8 rounded-xl ${accentBg} flex items-center justify-center`}>
+              <Icon className="w-4 h-4 text-white" />
             </div>
-          ))}
-          {bills.length === 0 && searchQuery && (
-            <p className="text-xs text-theme-muted font-semibold text-center py-4">No bills match your search</p>
-          )}
+            <div>
+              <h3 className="section-header-title">{title}</h3>
+              <p className="section-header-subtitle">{bills.length} bill{bills.length !== 1 ? 's' : ''}</p>
+            </div>
+          </div>
+          <span className={`badge-premium ${badgeColor}`}>{bills.length} pending</span>
         </div>
-      </div>
+        <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-2">
+          {bills.map((bill, idx) => {
+            const urgency = getUrgencyBadge(bill);
+            const status = getStatusBadge(bill);
+            return (
+              <motion.div
+                key={bill.id}
+                variants={staggerItem}
+                className="card-premium p-4 group"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-theme-surface flex items-center justify-center text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors shrink-0">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-bold text-theme-primary truncate">{bill.customerName || 'Walk-in Customer'}</p>
+                        <span className={`badge-premium ${urgency.class}`}>{urgency.label}</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-xs text-theme-muted font-semibold">
+                          {bill.invoiceNumber || `#${bill.id?.slice(0, 6)}`}
+                        </p>
+                        <span className="text-theme-border-strong">•</span>
+                        <p className="text-xs text-theme-muted font-semibold">
+                          Due {bill.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
+                        <span className={`badge-premium ${status.class}`}>{status.label}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-black text-theme-primary tabular-nums">{formatCurrency(bill.dueAmount, currencySymbol)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-theme-border-soft">
+                  <button
+                    onClick={() => handleMarkPaid(bill)}
+                    className="btn-premium-ghost text-[10px] !min-h-[32px] !py-1.5 !px-3"
+                  >
+                    <CheckCircle2 className="w-3 h-3" /> Mark Paid
+                  </button>
+                  <button
+                    onClick={() => handleSendReminder(bill)}
+                    className="btn-premium-ghost text-[10px] !min-h-[32px] !py-1.5 !px-3"
+                  >
+                    <Send className="w-3 h-3" /> Remind
+                  </button>
+                  <button
+                    onClick={() => handleOpenCustomer(bill)}
+                    className="btn-premium-ghost text-[10px] !min-h-[32px] !py-1.5 !px-3"
+                  >
+                    <Eye className="w-3 h-3" /> Customer
+                  </button>
+                </div>
+              </motion.div>
+            );
+          })}
+          {bills.length === 0 && searchQuery && (
+            <div className="empty-state py-6">
+              <div className="empty-state-icon">
+                <Search className="w-5 h-5" />
+              </div>
+              <p className="empty-state-title">No results found</p>
+              <p className="empty-state-text">No bills match your search for "{searchQuery}"</p>
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
     );
   };
 
-  return (
-    <div className="space-y-4 pb-24 max-w-2xl mx-auto p-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-base font-extrabold text-theme-primary tracking-tight">Due Center</h2>
-          <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mt-0.5">PENDING COLLECTIONS</p>
+  if (loading) {
+    return (
+      <div className="page-premium">
+        <div className="stats-grid mb-6">
+          {[1, 2, 3, 4].map(i => (
+            <CardSkeleton key={i} lines={2} />
+          ))}
         </div>
-        <div className="text-right">
-          <p className="text-lg font-black text-rose-500">{formatCurrency(totalDueToday)}</p>
-          <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Due Today</p>
+        <CardSkeleton lines={6} />
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      className="page-premium pb-24"
+    >
+      <div className="hero-premium">
+        <h1 className="hero-premium-title">Due Ledger</h1>
+        <p className="hero-premium-subtitle">Track and collect pending payments</p>
+      </div>
+
+      <div className="stats-grid mb-6">
+        <div className="stat-premium">
+          <div className="flex items-center justify-between mb-2">
+            <div className="icon-premium icon-premium-sm">
+              <AlertCircle className="w-4 h-4" />
+            </div>
+            <span className="badge-premium badge-danger">{totalOverdue} bills</span>
+          </div>
+          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Overdue</p>
+          <p className="text-xl font-black text-theme-primary tabular-nums">{formatCurrency(totalDueToday, currencySymbol)}</p>
+        </div>
+        <div className="stat-premium">
+          <div className="flex items-center justify-between mb-2">
+            <div className="icon-premium icon-premium-sm bg-amber-500/10 text-amber-500">
+              <Calendar className="w-4 h-4" />
+            </div>
+            <span className="badge-premium badge-warning">{grouped.thisWeek.length} bills</span>
+          </div>
+          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Due This Week</p>
+          <p className="text-xl font-black text-theme-primary tabular-nums">{formatCurrency(totalDueThisWeek, currencySymbol)}</p>
+        </div>
+        <div className="stat-premium">
+          <div className="flex items-center justify-between mb-2">
+            <div className="icon-premium icon-premium-sm">
+              <Clock className="w-4 h-4" />
+            </div>
+            <span className="badge-premium badge-info">{grouped.older.length} bills</span>
+          </div>
+          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Upcoming</p>
+          <p className="text-xl font-black text-theme-primary tabular-nums">{formatCurrency(totalUpcoming, currencySymbol)}</p>
+        </div>
+        <div className="stat-premium">
+          <div className="flex items-center justify-between mb-2">
+            <div className="icon-premium icon-premium-sm bg-emerald-500/10 text-emerald-500">
+              <DollarSign className="w-4 h-4" />
+            </div>
+            <span className="badge-premium badge-success">{dueBills.length} total</span>
+          </div>
+          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Total Outstanding</p>
+          <p className="text-xl font-black text-theme-primary tabular-nums">{formatCurrency(totalOutstanding, currencySymbol)}</p>
         </div>
       </div>
 
-      <div className="relative">
+      <div className="toolbar-premium mb-6">
         <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted pointer-events-none">
           <Search className="w-4 h-4" />
         </span>
@@ -133,21 +293,66 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by customer or bill number..."
-          className="w-full pl-10 pr-4 py-2.5 bg-theme-card border border-theme-border-soft rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent transition-all text-theme-primary"
+          className="input-premium"
         />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="btn-premium-ghost !min-h-[44px] !px-3"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
-      <Section title="Due Now / Overdue" icon={AlertCircle} bills={filteredToday} accent="bg-rose-500" />
-      <Section title="Due This Week" icon={Calendar} bills={filteredThisWeek} accent="bg-amber-500" />
-      <Section title="Upcoming" icon={Clock} bills={filteredOlder} accent="bg-theme-accent" />
+      <motion.div variants={staggerContainer} initial="hidden" animate="visible">
+        <Section
+          title="Due Now / Overdue"
+          icon={AlertCircle}
+          bills={filteredToday}
+          accent="bg-rose-500"
+          accentBg="bg-rose-500"
+          badgeColor="badge-danger"
+        />
+        <Section
+          title="Due This Week"
+          icon={Calendar}
+          bills={filteredThisWeek}
+          accent="bg-amber-500"
+          accentBg="bg-amber-500"
+          badgeColor="badge-warning"
+        />
+        <Section
+          title="Upcoming"
+          icon={Clock}
+          bills={filteredOlder}
+          accent="bg-theme-accent"
+          accentBg="bg-theme-accent"
+          badgeColor="badge-info"
+        />
+      </motion.div>
 
       {!searchQuery && grouped.today.length === 0 && grouped.thisWeek.length === 0 && grouped.older.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
-            <CheckCircle2 className="w-8 h-8" />
+        <div className="card-premium p-5">
+          <div className="empty-state py-8">
+            <div className="empty-state-icon">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+            <p className="empty-state-title">All clear!</p>
+            <p className="empty-state-text">No pending bills due. You're all caught up.</p>
           </div>
-          <p className="text-sm font-bold text-theme-primary">All clear!</p>
-          <p className="text-xs text-theme-muted font-semibold mt-1">No pending bills due</p>
+        </div>
+      )}
+
+      {searchQuery && allFilteredEmpty && (
+        <div className="card-premium p-5">
+          <div className="empty-state py-8">
+            <div className="empty-state-icon">
+              <Search className="w-5 h-5" />
+            </div>
+            <p className="empty-state-title">No matching bills</p>
+            <p className="empty-state-text">Try adjusting your search to find what you're looking for.</p>
+          </div>
         </div>
       )}
 
@@ -158,7 +363,7 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
         invoices={invoices}
         currencySymbol={currencySymbol}
       />
-    </div>
+    </motion.div>
   );
 };
 

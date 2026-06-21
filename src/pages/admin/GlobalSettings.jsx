@@ -3,6 +3,8 @@ import { Settings as SettingsIcon, Globe, ShieldAlert, Zap, Sliders, CreditCard 
 import { motion } from 'framer-motion';
 import { getGlobalRevenueSettings, saveGlobalRevenueSettings } from '../../services/dbEngine';
 import { toast } from 'react-hot-toast';
+import { pageVariants } from '../../utils/animations';
+import { CardSkeleton } from '../../components/PremiumSkeleton';
 
 const ToggleSwitch = ({ label, enabled, setEnabled }) => (
   <label className="flex items-center justify-between cursor-pointer group">
@@ -92,28 +94,43 @@ const GlobalSettings = () => {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <span className="w-8 h-8 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin"></span>
-      </div>
+      <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-6">
+        <div className="section-header">
+          <div>
+            <h2 className="section-header-title flex items-center">
+              <Sliders className="w-6 h-6 mr-3 text-emerald-400" /> Revenue Settings (Owner)
+            </h2>
+            <p className="section-header-subtitle">Loading configuration...</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CardSkeleton lines={4} />
+          <CardSkeleton lines={4} />
+          <div className="lg:col-span-2">
+            <CardSkeleton lines={6} />
+          </div>
+        </div>
+      </motion.div>
     );
   }
 
   return (
     <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
       className="space-y-6"
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div className="section-header flex-col md:flex-row gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight flex items-center">
+          <h2 className="section-header-title flex items-center">
             <Sliders className="w-6 h-6 mr-3 text-emerald-400" /> Revenue Settings (Owner)
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Configure global monetization parameters and limits.</p>
+          <p className="section-header-subtitle">Configure global monetization parameters and limits.</p>
         </div>
         <button 
           onClick={handleSave}
-          className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-emerald-500/20 cursor-pointer"
+          className="btn-premium px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-emerald-500/20 cursor-pointer"
         >
           Save Changes
         </button>
@@ -122,10 +139,12 @@ const GlobalSettings = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Core Settings */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 space-y-6">
-          <h3 className="font-bold text-white flex items-center border-b border-slate-700/50 pb-4">
-            <Globe className="w-5 h-5 mr-2 text-blue-400" /> Monetization Modes
-          </h3>
+        <div className="card-premium bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 space-y-6">
+          <div className="section-header border-b border-slate-700/50 pb-4 mb-0">
+            <h3 className="section-header-title flex items-center">
+              <Globe className="w-5 h-5 mr-2 text-blue-400" /> Monetization Modes
+            </h3>
+          </div>
           <ToggleSwitch 
             label="Enable Premium Subscriptions" 
             enabled={premiumModeEnabled} 
@@ -139,17 +158,19 @@ const GlobalSettings = () => {
         </div>
 
         {/* UPI Payments */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 space-y-5">
-          <h3 className="font-bold text-white flex items-center border-b border-slate-700/50 pb-4">
-            <CreditCard className="w-5 h-5 mr-2 text-purple-400" /> UPI Payment Details
-          </h3>
+        <div className="card-premium bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 space-y-5">
+          <div className="section-header border-b border-slate-700/50 pb-4 mb-0">
+            <h3 className="section-header-title flex items-center">
+              <CreditCard className="w-5 h-5 mr-2 text-purple-400" /> UPI Payment Details
+            </h3>
+          </div>
           <div>
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Platform UPI ID</label>
             <input 
               type="text"
               value={upiId}
               onChange={(e) => setUpiId(e.target.value)}
-              className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono"
+              className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono"
             />
           </div>
           <div>
@@ -158,16 +179,18 @@ const GlobalSettings = () => {
               type="text"
               value={payeeName}
               onChange={(e) => setPayeeName(e.target.value)}
-              className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+              className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
             />
           </div>
         </div>
 
         {/* Business Limits */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 lg:col-span-2 space-y-6">
-          <h3 className="font-bold text-white flex items-center border-b border-slate-700/50 pb-4">
-            <Zap className="w-5 h-5 mr-2 text-amber-400" /> Pricing & Lock Parameters
-          </h3>
+        <div className="card-premium bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 lg:col-span-2 space-y-6">
+          <div className="section-header border-b border-slate-700/50 pb-4 mb-0">
+            <h3 className="section-header-title flex items-center">
+              <Zap className="w-5 h-5 mr-2 text-amber-400" /> Pricing & Lock Parameters
+            </h3>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
@@ -176,7 +199,7 @@ const GlobalSettings = () => {
                 type="number" 
                 value={freeBillLimit}
                 onChange={(e) => setFreeBillLimit(e.target.value)}
-                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+                className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
               />
             </div>
             
@@ -186,7 +209,7 @@ const GlobalSettings = () => {
                 type="number" 
                 value={chargePerBill}
                 onChange={(e) => setChargePerBill(e.target.value)}
-                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+                className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
               />
             </div>
 
@@ -197,7 +220,7 @@ const GlobalSettings = () => {
                 value={percentageChargeSetting}
                 onChange={(e) => setPercentageChargeSetting(e.target.value)}
                 placeholder="e.g. 1% of bill value (Overrides flat charge)"
-                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+                className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
               />
             </div>
 
@@ -207,7 +230,7 @@ const GlobalSettings = () => {
                 type="number" 
                 value={monthlyGraceLimit}
                 onChange={(e) => setMonthlyGraceLimit(e.target.value)}
-                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+                className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
               />
             </div>
 
@@ -217,7 +240,7 @@ const GlobalSettings = () => {
                 type="number" 
                 value={maxPendingDue}
                 onChange={(e) => setMaxPendingDue(e.target.value)}
-                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+                className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
               />
             </div>
 
@@ -227,7 +250,7 @@ const GlobalSettings = () => {
                 type="number" 
                 value={maxUnpaidBillCount}
                 onChange={(e) => setMaxUnpaidBillCount(e.target.value)}
-                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+                className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
               />
             </div>
           </div>
@@ -237,7 +260,7 @@ const GlobalSettings = () => {
             <select
               value={lockBehavior}
               onChange={(e) => setLockBehavior(e.target.value)}
-              className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer"
+              className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer"
             >
               <option value="bill_creation">Lock New Bill Creation Only</option>
               <option value="none">No Lock (Warning Only)</option>

@@ -99,6 +99,7 @@ import QuickBillModal from './components/QuickBillModal';
 import AdminPINLogin from './pages/admin/AdminPINLogin';
 import Confetti from 'react-confetti';
 import CommandPalette from './components/CommandPalette';
+import { pageVariants } from './utils/animations';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -1822,15 +1823,15 @@ function App() {
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentTab}
-                    initial={{ opacity: 0, y: 3 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -3 }}
-                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                    variants={pageVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
                     className="w-full h-full flex flex-col"
                   >
                     <React.Suspense fallback={
                       <div className="flex flex-1 min-h-[calc(100vh-250px)] items-center justify-center">
-                        <ClassicLoader />
+                        <ClassicLoader text="Loading..." />
                       </div>
                     }>
                       {renderTabContent()}

@@ -1,40 +1,51 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
-/**
- * Premium KPI Stats Card
- * @param {string} title
- * @param {string|number} value
- * @param {React.Component} icon - Lucide Icon component
- * @param {string} trend - Optional string, e.g. "+12.5% this month"
- * @param {boolean} trendUp - Optional trend direction flag
- * @param {string} accentColor - Tailwind color classes for the icon e.g. "bg-theme-accent-light text-theme-accent"
- */
-const StatCard = ({ title, value, icon: Icon, trend, trendUp = true, accentColor = "bg-theme-accent-light text-theme-accent" }) => {
-  return (
-    <div className="bg-theme-card dark:bg-theme-card rounded-2xl p-5 border border-theme-border-soft dark:border-theme-border-soft/80 transition-colors duration-200">
-      <div className="flex items-center justify-between">
-        <div>
-          <span className="text-xs font-semibold text-theme-muted dark:text-theme-muted uppercase tracking-wider">{title}</span>
-          <h3 className="text-2xl font-bold text-theme-primary dark:text-theme-primary mt-1 tabular-nums">{value}</h3>
+const StatCard = ({ title, value, icon: Icon, trend, trendUp = true, accentColor, subtitle, onClick, loading = false }) => {
+  if (loading) {
+    return (
+      <div className="stat-premium">
+        <div className="flex items-center justify-between mb-3">
+          <div className="skeleton-block" style={{ width: '2.5rem', height: '2.5rem' }} />
+          <div className="skeleton-block" style={{ width: '3.5rem', height: '1rem', borderRadius: '9999px' }} />
         </div>
-        <div className={`p-3 rounded-xl ${accentColor} transition-transform duration-200`}>
-          {Icon && <Icon className="w-6 h-6" />}
-        </div>
+        <div className="skeleton-line mb-2" style={{ width: '60%' }} />
+        <div className="skeleton-line" style={{ width: '40%' }} />
       </div>
-      
-      {trend && (
-        <div className="flex items-center mt-3">
-          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-            trendUp 
-              ? 'bg-theme-accent-light dark:bg-theme-accent-light/30 text-theme-accent dark:text-theme-accent' 
-              : 'bg-theme-danger/5 dark:bg-rose-950/30 text-theme-danger dark:text-theme-danger'
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="stat-premium group cursor-pointer"
+      onClick={onClick}
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="icon-premium shrink-0 group-hover:scale-110 transition-transform duration-300">
+          {Icon && <Icon className="w-4 h-4" />}
+        </div>
+        {trend && (
+          <span className={`flex items-center gap-1 text-2xs font-bold px-2 py-0.5 rounded-full ${
+            trendUp
+              ? 'bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20'
+              : 'bg-red-500/10 text-red-500 dark:bg-red-500/20'
           }`}>
+            {trendUp ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
             {trend}
           </span>
-          <span className="text-xs text-theme-muted dark:text-theme-muted ml-2">vs last month</span>
-        </div>
+        )}
+      </div>
+      <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">{title}</p>
+      <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums">{value}</p>
+      {subtitle && (
+        <p className="text-2xs text-theme-muted font-medium mt-1">{subtitle}</p>
       )}
-    </div>
+    </motion.div>
   );
 };
 
