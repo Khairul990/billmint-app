@@ -67,7 +67,7 @@ const CompactSummaryStrip = () => {
               <input
                 type="number"
                 value={state.totals.discountAmount || ''}
-                onChange={(e) => dispatch({ type: 'UPDATE_TOTALS', payload: { discountAmount: e.target.value } })}
+                onChange={(e) => dispatch({ type: 'UPDATE_TOTALS', payload: { discountAmount: parseFloat(e.target.value) || 0 } })}
                 placeholder="0.00"
                 className="w-full bg-transparent outline-none text-sm font-black text-rose-600 dark:text-rose-400 tabular-nums"
               />
@@ -83,7 +83,7 @@ const CompactSummaryStrip = () => {
               <input
                 type="number"
                 value={state.totals.taxPercentage || ''}
-                onChange={(e) => dispatch({ type: 'UPDATE_TOTALS', payload: { taxPercentage: e.target.value } })}
+                onChange={(e) => dispatch({ type: 'UPDATE_TOTALS', payload: { taxPercentage: parseFloat(e.target.value) || 0 } })}
                 placeholder="0"
                 className="w-full bg-transparent outline-none text-sm font-black text-theme-primary tabular-nums"
               />

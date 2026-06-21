@@ -119,7 +119,56 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
         updatedAt: new Date().toISOString()
       });
 
-      toast.success('Payment proof has been rejected.', { icon: '❌', duration: 4000 });
+      // Revert public invoice back from 'Pending Verification' to its original status
+      if (payment.invoiceId) {
+        const publicInvRef = doc(db, 'public_invoices', payment.invoiceId);
+        const pInvDoc = await getDoc(publicInvRef);
+        if (pInvDoc.exists()) {
+          const pData = pInvDoc.data();
+          const grandTotal = pData.grandTotal || 0;
+          const currentPaid = parseFloat(pData.amountPaid) || 0;
+          const paymentAmount = parseFloat(payment.amount) || 0;
+          const revertedPaid = Math.max(0, currentPaid - paymentAmount);
+          const revertedBalance = Math.max(0, grandTotal - revertedPaid);
+          let revertedStatus = pData.paymentStatus;
+          if (revertedBalance <= 0 && revertedPaid > 0) revertedStatus = 'Paid';
+          else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
+          else revertedStatus = 'Partially Paid';
+
+          await updateDoc(publicInvRef, {
+            paymentStatus: revertedStatus,
+            status: revertedStatus,
+            amountPaid: revertedPaid,
+            balanceDue: revertedBalance
+          });
+        }
+
+        // Also revert local invoice
+        const localInvoices = await getInvoices();
+        const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
+        if (existingInvoice) {
+          const grandTotal = parseFloat(existingInvoice.grandTotal) || 0;
+          const currentPaid = parseFloat(existingInvoice.amountPaid) || 0;
+          const paymentAmount = parseFloat(payment.amount) || 0;
+          const revertedPaid = Math.max(0, currentPaid - paymentAmount);
+          const revertedBalance = Math.max(0, grandTotal - revertedPaid);
+          let revertedStatus = existingInvoice.status;
+          if (revertedBalance <= 0 && revertedPaid > 0) revertedStatus = 'Paid';
+          else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
+          else revertedStatus = 'Partially Paid';
+
+          await saveInvoice({
+            ...existingInvoice,
+            status: revertedStatus,
+            paymentStatus: revertedStatus,
+            amountPaid: revertedPaid,
+            balanceDue: revertedBalance
+          });
+          window.dispatchEvent(new Event('billqyro_sync'));
+        }
+      }
+
+      toast.success('Payment proof has been rejected and invoice status reverted.', { icon: '❌', duration: 4000 });
       setSelectedProof(null);
       
     } catch (error) {

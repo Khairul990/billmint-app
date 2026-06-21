@@ -189,6 +189,11 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
   const exportCSV = () => {
     if (filteredData.length === 0) return alert("No data to export.");
     
+    const escapeCSV = (val) => {
+      const str = String(val ?? '');
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+    
     const headers = ['Date', 'Document No', 'Type', 'Customer', 'Total Amount', 'Paid Amount', 'Due Amount', 'Status'];
     const rows = filteredData.map(inv => [
       inv.parsedDate.toLocaleDateString(),
@@ -201,17 +206,18 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
       inv.parsedStatus
     ]);
 
-    let csvContent = "data:text/csv;charset=utf-8," 
-      + headers.join(",") + "\n"
-      + rows.map(e => e.map(cell => `"${cell}"`).join(",")).join("\n");
+    const BOM = '\uFEFF';
+    const csvString = BOM + headers.join(',') + '\n' + 
+      rows.map(row => row.map(escapeCSV).join(',')).join('\n');
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `BillQyro_Report_${new Date().getTime()}.csv`);
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `BillQyro_Report_${Date.now()}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
   };
 
   const handlePrint = () => {

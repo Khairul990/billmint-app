@@ -838,7 +838,7 @@ function App() {
         email: payload.customerEmail || '',
         address: payload.customerAddress || ''
       };
-      const updatedCustomers = await saveCustomer(newCustomer);
+      const { updatedCustomers } = await saveCustomer(newCustomer);
       setCustomers(updatedCustomers);
     }
 

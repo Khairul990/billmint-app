@@ -79,7 +79,7 @@ const PublicInvoice = ({ initialInvoice }) => {
       const proofData = {
         invoiceId: invoice.id,
         publicInvoiceId: invoice.id,
-        businessOwnerUid: invoice.userId || invoice.businessSnapshot?.ownerUid || 'unknown',
+        ownerId: invoice.ownerId || invoice.userId || 'unknown',
         customerName: invoice.customerName || 'Unknown Customer',
         payerName: payerName || '',
         payerPhone: payerPhone || '',

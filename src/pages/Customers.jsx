@@ -32,6 +32,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
   
   // Modals / Add-Edit states
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [ledgerCustomer, setLedgerCustomer] = useState(null);
 
@@ -60,23 +61,28 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
     setIsModalOpen(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (!name) {
       alert('Please specify a client name.');
       return;
     }
-
-    const payload = {
-      id: editingCustomer ? editingCustomer.id : null,
-      name,
-      phone,
-      email,
-      address,
-    };
-
-    onSaveCustomer(payload);
-    setIsModalOpen(false);
+    setIsSaving(true);
+    try {
+      const payload = {
+        id: editingCustomer ? editingCustomer.id : null,
+        name,
+        phone,
+        email,
+        address,
+      };
+      await onSaveCustomer(payload);
+      setIsModalOpen(false);
+    } catch (err) {
+      alert('Failed to save. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleDelete = (id) => {
@@ -257,9 +263,10 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full py-4 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-2xl font-bold hover:opacity-90 shadow-md shadow-theme-glow hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                disabled={isSaving}
+                className="w-full py-4 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-2xl font-bold hover:opacity-90 shadow-md shadow-theme-glow hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <Save className="w-4 h-4" />
+                {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <Save className="w-4 h-4" />}
                 <span>{editingCustomer ? 'Update ' + customerLabel : 'Register ' + customerLabel}</span>
               </button>
             </div>
