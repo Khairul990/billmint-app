@@ -2412,16 +2412,6 @@ export const syncFromFirestore = async (force = false) => {
     }
     localStorage.setItem('billqyro_last_uid', userId);
 
-    // Backup local data before clearing cache
-    const backupSuccess = await backupLocalData();
-    if (!backupSuccess) {
-      toast.error('Backup failed, sync cancelled');
-      console.error('Backup of local data failed. Aborting sync.');
-      return;
-    }
-    toast.success('Local data backed up on this device');
-
-
     // 1. Flush offline transactions first to avoid losing offline work
     if (navigator.onLine) {
       await syncOfflineTransactions();
