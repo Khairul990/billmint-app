@@ -310,40 +310,40 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         </div>
       </div>
 
-      {/* Success Modal */}
+      {/* Success Sheet - Bottom Sheet Style */}
       {savedInvoiceResult && (
-        <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-end justify-center" onClick={handleCloseSuccess}>
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-theme-surface border border-theme-border-soft rounded-3xl shadow-2xl w-full max-w-sm p-6"
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-theme-card border border-theme-border-soft rounded-t-3xl shadow-2xl w-full max-w-lg p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
           >
-            <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+            <div className="w-12 h-1.5 bg-theme-border-soft rounded-full mx-auto mb-4"></div>
+            <div className="text-center mb-5">
+              <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="w-8 h-8 text-emerald-500" />
               </div>
-              <h2 className="text-xl font-black text-theme-primary">Invoice Saved!</h2>
-              <p className="text-sm font-bold text-theme-muted mt-1">
-                Invoice #{savedInvoiceResult.invoiceNumber} has been saved successfully.
+              <h2 className="text-lg font-black text-theme-primary">Invoice Saved</h2>
+              <p className="text-xs font-bold text-theme-muted mt-0.5">
+                #{savedInvoiceResult.invoiceNumber} · {state.totals.grandTotal.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}
               </p>
-              <div className="mt-3 bg-theme-app rounded-xl p-3 border border-theme-border-soft">
-                <p className="text-xs font-bold text-theme-muted">Total Amount</p>
-                <p className="text-2xl font-black text-theme-primary">₹{state.totals.grandTotal.toLocaleString()}</p>
-              </div>
             </div>
 
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleOpenLiveLink}
                 disabled={!liveLink}
-                className="w-full py-3.5 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-2xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-3.5 bg-[image:var(--accent-gradient)] text-white rounded-2xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 shadow-md"
               >
                 <ExternalLink className="w-4 h-4" /> Open Live Link
               </button>
               <button
                 onClick={handleShareWhatsApp}
                 disabled={!liveLink}
-                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
               >
                 <MessageCircle className="w-4 h-4" /> Share WhatsApp
               </button>
@@ -354,12 +354,6 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
                 className="w-full py-3.5 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
               >
                 <Download className="w-4 h-4" /> Download PDF
-              </button>
-              <button
-                onClick={handleCloseSuccess}
-                className="w-full py-3 bg-transparent hover:bg-theme-border-soft text-theme-muted hover:text-theme-primary text-sm font-bold rounded-2xl transition-colors"
-              >
-                Back to Invoices
               </button>
             </div>
           </motion.div>

@@ -11,18 +11,8 @@ import { motion } from 'framer-motion';
 import AnimatedBorderTrail from './AnimatedBorderTrail';
 import { AnimatedThemeToggler } from './AnimatedThemeToggler';
 
-/**
- * Global App Layout Shell
- * @param {React.ReactNode} children - inner page node
- * @param {string} currentTab - active state key
- * @param {Function} setCurrentTab - state update dispatcher
- * @param {Function} onLogout - logout event callback
- * @param {Object} businessSettings - current active business details
- */
 const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncSource, syncStatus }) => {
-  // Theme and Mode state
   const [themeColor, setThemeColor] = useState(() => {
-    // Migration: If old themePreset is "dark", default to "light" color (dark mode handled below)
     const preset = businessSettings?.themeColor || businessSettings?.themePreset || localStorage.getItem('billqyro_theme_color') || 'light';
     return preset === 'dark' ? 'light' : preset;
   });
@@ -47,13 +37,11 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
     };
   }, []);
 
-  // Close dropdowns on outside click or tab change
   useEffect(() => {
     setIsAccountMenuOpen(false);
     setIsNotificationMenuOpen(false);
   }, [currentTab]);
 
-  // Global Keyboard Shortcut: Ctrl + K for Search Focus
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -97,12 +85,9 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       const newDarkMode = !prev;
       const currentSettings = getSettings() || {};
       currentSettings.darkMode = newDarkMode;
-      
-      // Clear legacy dark preset so it doesn't conflict
       if (currentSettings.themePreset === 'dark') {
         currentSettings.themePreset = 'light';
       }
-      
       saveSettings(currentSettings);
       window.dispatchEvent(new CustomEvent('billqyro_sync'));
       return newDarkMode;
@@ -162,7 +147,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
   return (
     <div className="h-[100dvh] bg-theme-app flex flex-col lg:flex-row w-full font-sans antialiased text-theme-primary transition-colors duration-300 overflow-hidden">
-      {/* Desktop Sidebar (Hidden on Mobile) */}
       <Sidebar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
@@ -179,8 +163,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         flushSyncQueue={flushSyncQueue}
       />
 
-      {/* Main Content Region */}
-      <div className="flex-1 flex flex-col min-w-0 w-full max-w-full pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0 overflow-y-auto overflow-x-hidden bg-theme-app transition-colors duration-300 relative z-10">
+      <div className="flex-1 flex flex-col min-w-0 w-full max-w-full pb-[calc(64px+env(safe-area-inset-bottom))] lg:pb-0 overflow-y-auto overflow-x-hidden bg-theme-app transition-colors duration-300 relative z-10">
         
         {localStorage.getItem('billqyro_demo_session_active') === 'true' && (
           <div className="bg-amber-500 text-amber-950 font-black text-xs py-1.5 text-center uppercase tracking-widest z-50 relative shadow-md flex items-center justify-center gap-2">
@@ -196,21 +179,21 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
           </div>
         )}
 
-        {/* Header Block with Premium Dual-Theme Layout */}
-        <header className="sticky top-0 z-40 bg-theme-card/80 backdrop-blur-xl border-b border-theme-accent/50 px-4 sm:px-6 py-4 md:py-5 text-theme-primary shadow-sm transition-all duration-300">
-          {/* Subtle Ambient Background Gradients wrapped to prevent overflow spill */}
+        {/* ===== PREMIUM HEADER ===== */}
+        {/* Desktop: Full featured header. Mobile: Compact 2-row (max-height 110px) */}
+        <header className="sticky top-0 z-40 bg-theme-card/80 backdrop-blur-xl border-b border-theme-accent/50 text-theme-primary shadow-sm transition-all duration-300">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-0 right-0 w-64 h-64 bg-theme-surface dark:bg-theme-surface/5 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
             <div className="absolute -bottom-10 left-10 w-48 h-48 bg-theme-accent-light dark:bg-theme-accent-light rounded-full blur-2xl"></div>
           </div>
 
-          <div className="max-w-full w-full mx-auto px-4 lg:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+          {/* ===== DESKTOP HEADER (unchanged) ===== */}
+          <div className="max-w-full w-full mx-auto px-4 lg:px-6 hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10 py-4 md:py-5">
             
-            {/* LEFT: Workspace Info */}
             <div className="flex items-start md:items-center gap-3">
               <div className="flex flex-col">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-theme-muted bg-theme-app px-2.5 py-0.5 rounded-full border border-theme-border-soft backdrop-blur-md hidden sm:block">
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-theme-muted bg-theme-app px-2.5 py-0.5 rounded-full border border-theme-border-soft backdrop-blur-md">
                     Active Workspace
                   </span>
                   <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-theme-accent bg-theme-accent-light border border-theme-accent/15 px-2 py-0.5 rounded-full">
@@ -224,7 +207,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                     setActiveWorkspace={setActiveWorkspace}
                     setCurrentTab={setCurrentTab}
                   />
-                  {/* Sync Status Badge */}
                   {localStorage.getItem('billqyro_demo_session_active') === 'true' ? (
                     <div className="relative group ml-2">
                       <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors text-amber-500 bg-amber-500/10 border border-amber-500/20">
@@ -265,7 +247,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               </div>
             </div>
 
-            {/* CENTER: Global Search Bar */}
             <div className="flex-1 max-w-xl hidden md:block px-4">
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -273,6 +254,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 </div>
                 <input
                   ref={searchInputRef}
+                  data-search-input
                   type="text"
                   placeholder="Search invoices, customers, products..."
                   className="block w-full pl-10 pr-14 py-2.5 bg-theme-surface border border-theme-accent/50 rounded-full text-sm font-semibold shadow-sm text-theme-primary placeholder-theme-secondary focus:bg-theme-card focus:outline-none focus:ring-2 focus:ring-theme-accent/50 focus:border-theme-accent transition-all duration-300 hover:shadow-md hover:border-theme-accent/70"
@@ -285,15 +267,12 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               </div>
             </div>
 
-            {/* RIGHT: Actions & Profile */}
             <div className="flex items-center gap-2 sm:gap-3 justify-end">
-              {/* Mobile Search Icon */}
               <button className="md:hidden w-11 h-11 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden">
                 <AnimatedBorderTrail />
                 <Search className="w-5 h-5 relative z-10" />
               </button>
 
-              {/* Notifications Dropdown */}
               <div className="relative">
                 <button 
                   onClick={() => setIsNotificationMenuOpen(!isNotificationMenuOpen)}
@@ -313,7 +292,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                         <span className="text-[10px] font-bold text-theme-accent bg-theme-accent-light px-2 py-0.5 rounded-full">3 New</span>
                       </div>
                       <div className="max-h-80 overflow-y-auto no-scrollbar p-2 space-y-1">
-                        {/* Dummy Notifications */}
                         <div className="p-3 hover:bg-theme-surface rounded-xl transition-colors cursor-pointer flex gap-3">
                           <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
                             <ShieldCheck className="w-4 h-4" />
@@ -347,7 +325,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 )}
               </div>
 
-              {/* Theme Toggle */}
               <AnimatedThemeToggler
                 className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden"
                 variant="circle"
@@ -363,7 +340,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 <AnimatedBorderTrail />
               </AnimatedThemeToggler>
 
-              {/* Settings Action */}
               <button
                 onClick={() => setCurrentTab('settings')}
                 className="hidden sm:flex w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden"
@@ -373,7 +349,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 <SettingsIcon className="w-5 h-5 relative z-10" />
               </button>
 
-              {/* Premium Account Dropdown Container */}
               <div className="relative flex items-center">
                 <button
                   onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
@@ -388,13 +363,11 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   )}
                 </button>
 
-                {/* Profile Dropdown Menu */}
                 {isAccountMenuOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsAccountMenuOpen(false)} />
                     <div className="absolute top-14 right-0 w-80 bg-theme-card rounded-3xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
                       
-                      {/* Top Profile Section */}
                       <div className="p-5 bg-theme-surface/50 border-b border-theme-border-soft flex items-center gap-3">
                         <div className="w-12 h-12 rounded-xl bg-theme-card shadow-sm border border-theme-border-soft flex items-center justify-center overflow-hidden shrink-0">
                           {businessSettings?.logoUrl ? (
@@ -413,7 +386,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                         </div>
                       </div>
                       
-                      {/* Premium Workspace Card */}
                       <div className="p-4">
                         <div className="bg-[image:var(--accent-gradient)] rounded-2xl p-4 shadow-premium relative overflow-hidden text-white">
                           <div className="absolute inset-0 bg-white/10 mix-blend-overlay"></div>
@@ -441,7 +413,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                         </div>
                       </div>
 
-                      {/* Menu Links */}
                       <div className="px-3 pb-3 space-y-1 border-b border-theme-border-soft">
                         <button onClick={() => { setCurrentTab('dashboard'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
                           <User className="w-4 h-4 text-theme-muted" /> Profile
@@ -463,10 +434,9 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                         </button>
                       </div>
 
-                      {/* What's New Section */}
                       <div className="p-4 bg-theme-surface/30">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs font-black text-theme-primary">🚀 What's New</span>
+                          <span className="text-xs font-black text-theme-primary">What's New</span>
                           <span className="text-[9px] font-bold text-theme-accent bg-theme-accent-light px-2 py-0.5 rounded-full">v2.0</span>
                         </div>
                         <ul className="text-[10px] font-semibold text-theme-muted space-y-1 ml-4 list-disc">
@@ -478,7 +448,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                         <p className="text-[9px] text-theme-muted/70 mt-3 font-semibold">Last Updated: Just now</p>
                       </div>
 
-                      {/* Logout */}
                       <div className="p-2 border-t border-theme-border-soft">
                         {isAuthenticated ? (
                           <button
@@ -502,15 +471,110 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               </div>
             </div>
           </div>
+
+          {/* ===== MOBILE HEADER: Compact 2-Row (max 110px) ===== */}
+          <div className="md:hidden flex flex-col relative z-10">
+            {/* Row 1: Workspace + Sync Badge */}
+            <div className="flex items-center justify-between px-4 pt-2 pb-1">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <WorkspaceSwitcher
+                  businessWorkspaces={businessWorkspaces}
+                  activeWorkspaceId={activeWorkspaceId}
+                  setActiveWorkspace={setActiveWorkspace}
+                  setCurrentTab={setCurrentTab}
+                  mobile
+                />
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {syncStatus === 'Synced' ? (
+                  <span className="flex items-center gap-1 text-[8px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
+                    <span className="w-1 h-1 rounded-full bg-emerald-500"></span>
+                    Synced
+                  </span>
+                ) : syncStatus === 'Offline' ? (
+                  <span className="flex items-center gap-1 text-[8px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full border border-red-500/20">
+                    <span className="w-1 h-1 rounded-full bg-red-500"></span>
+                    Offline
+                  </span>
+                ) : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? (
+                  <span className="flex items-center gap-1 text-[8px] font-bold text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded-full border border-blue-500/20 animate-pulse">
+                    <span className="w-1 h-1 rounded-full bg-blue-500 animate-ping"></span>
+                    Sync
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-[8px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full border border-amber-500/20">
+                    <span className="w-1 h-1 rounded-full bg-amber-500"></span>
+                    Pending
+                  </span>
+                )}
+                <span className="flex items-center gap-1 text-[8px] font-bold text-theme-accent bg-theme-accent-light px-1.5 py-0.5 rounded-full border border-theme-accent/15">
+                  <ShieldCheck className="w-2 h-2" />
+                  Secure
+                </span>
+              </div>
+            </div>
+            {/* Row 2: Search + Notification + Theme + Profile */}
+            <div className="flex items-center justify-end gap-1.5 px-4 pb-2 pt-0">
+              <button
+                onClick={() => document.querySelector('[data-search-input]')?.focus()}
+                className="w-9 h-9 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary active:scale-95 transition-all"
+              >
+                <Search className="w-[18px] h-[18px]" />
+              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setIsNotificationMenuOpen(!isNotificationMenuOpen)}
+                  className="w-9 h-9 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary active:scale-95 transition-all"
+                >
+                  <Bell className="w-[18px] h-[18px]" />
+                  {pendingPaymentsCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-theme-card">
+                      {pendingPaymentsCount}
+                    </span>
+                  )}
+                </button>
+                {isNotificationMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsNotificationMenuOpen(false)} />
+                    <div className="absolute top-12 right-0 w-72 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden">
+                      <div className="p-3 border-b border-theme-border-soft">
+                        <p className="text-xs font-bold text-theme-primary">Notifications</p>
+                      </div>
+                      <div className="p-2">
+                        <p className="text-[10px] text-theme-muted text-center py-4 font-semibold">No new notifications</p>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+              <AnimatedThemeToggler
+                className="w-9 h-9 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary active:scale-95 transition-all"
+                variant="circle"
+                theme={isDarkMode ? "dark" : "light"}
+                onThemeChange={(newTheme) => {
+                  const newDarkMode = newTheme === "dark";
+                  if (newDarkMode !== isDarkMode) toggleTheme();
+                }}
+              />
+              <button
+                onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
+                className="w-9 h-9 rounded-xl bg-[image:var(--accent-gradient)] text-theme-button-text flex items-center justify-center active:scale-95 transition-transform overflow-hidden border border-white/10 shadow-sm"
+              >
+                {businessSettings?.logoUrl ? (
+                  <img src={businessSettings.logoUrl} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="font-black text-sm">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
+                )}
+              </button>
+            </div>
+          </div>
         </header>
 
-        {/* Dynamic Page Content Shell */}
-        <main className={`flex-1 min-w-0 w-full mx-auto ${currentTab === 'create-invoice' ? 'p-0 max-w-none' : 'max-w-full p-4 md:px-6 md:py-6'}`}>
+        <main className={`flex-1 min-w-0 w-full mx-auto ${currentTab === 'create-invoice' ? 'p-0 max-w-none' : 'max-w-full p-3 md:px-6 md:py-6'}`}>
           {children}
         </main>
       </div>
 
-      {/* Mobile Floating Bottom Nav Menu (Hidden on Desktop) */}
       <BottomNav 
         currentTab={currentTab} 
         setCurrentTab={setCurrentTab} 

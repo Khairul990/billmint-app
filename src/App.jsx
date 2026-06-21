@@ -1859,10 +1859,12 @@ function App() {
               </Layout>
             )}
             <Toaster
-              position="bottom-right"
+              position="bottom-center"
               toastOptions={{
-                className: 'text-sm font-bold',
-                style: { borderRadius: '12px', background: '#fff', color: '#1e293b' }
+                className: 'text-sm font-bold toast-above-nav',
+                style: { borderRadius: '12px', background: '#fff', color: '#1e293b', marginBottom: 'calc(72px + env(safe-area-inset-bottom))' },
+                success: { duration: 3000 },
+                error: { duration: 4000 },
               }}
             />
             {/* Sync Badge moved to Layout Header */}

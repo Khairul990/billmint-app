@@ -17,7 +17,9 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${invoice.invoiceNumber || 'Invoice'}.pdf`;
+    const safeBusinessName = (businessSettings?.businessName || 'Business').replace(/[^a-zA-Z0-9]/g, '_');
+    const today = new Date().toISOString().split('T')[0];
+    link.download = `Invoice_${invoice.invoiceNumber || '000'}_${safeBusinessName}_${today}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

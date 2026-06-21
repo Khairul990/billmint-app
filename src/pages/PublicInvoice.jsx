@@ -999,10 +999,33 @@ const PublicInvoice = ({ initialInvoice }) => {
           </div>
         )}
 
-      </div>
+        </div>
 
-      {/* ===== TRUST FOOTER ===== */}
-      <footer className="mt-6 md:mt-8 w-full max-w-5xl">
+        {/* ===== STICKY PAY BUTTON (Mobile Only) ===== */}
+        {invoice.paymentStatus !== 'Paid' && invoice.paymentStatus !== 'Pending Verification' && (
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-theme-card/95 backdrop-blur-xl border-t border-theme-border-soft px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <p className="text-[8px] text-theme-muted font-bold uppercase tracking-wider">Amount Due</p>
+                <p className="text-lg font-black text-rose-500">{formatVal(dueAmount)}</p>
+              </div>
+              {liveLinkPrefs.allowPaymentProofSubmit ? (
+                <button onClick={() => setShowPaymentModal(true)} className="px-6 py-3 bg-[image:var(--accent-gradient)] text-white font-black text-sm rounded-xl shadow-lg active:scale-95 transition-all flex items-center gap-2">
+                  <Wallet className="w-4 h-4" />
+                  Pay Now
+                </button>
+              ) : (
+                <a href={`https://wa.me/${business.whatsapp?.replace(/\D/g, '') || business.phone?.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I want to pay for Invoice ' + invoice.invoiceNumber)}`} target="_blank" rel="noopener noreferrer" className="px-6 py-3 bg-emerald-500 text-white font-black text-sm rounded-xl shadow-lg active:scale-95 transition-all flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4" />
+                  Pay via WhatsApp
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ===== TRUST FOOTER ===== */}
+        <footer className={`mt-6 md:mt-8 w-full max-w-5xl ${invoice.paymentStatus !== 'Paid' && invoice.paymentStatus !== 'Pending Verification' ? 'pb-[calc(80px+env(safe-area-inset-bottom))] lg:pb-0' : ''}`}>
         <div className="bg-gradient-to-r from-theme-card/80 via-theme-card to-theme-card/80 backdrop-blur-sm rounded-2xl border border-theme-border-soft/60 p-4 md:p-5 shadow-lg">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3 mb-3 md:mb-4">
             <div className="flex items-center gap-2 px-2.5 md:px-3 py-2 md:py-2.5 bg-theme-surface/50 rounded-xl border border-theme-border-soft/40">

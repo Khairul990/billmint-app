@@ -295,6 +295,9 @@ const getCategoryWording = (billType) => {
     case 'retail': return { items: 'Products', qty: 'Qty', price: 'Unit Price', noteLabel: 'Sales Notes & Terms' };
     case 'custom': return { items: 'Services', qty: 'Qty', price: 'Rate', noteLabel: 'Notes & Terms' };
     case 'doctor': return { items: 'Treatments', qty: 'Qty', price: 'Fee', noteLabel: 'Medical Notes' };
+    case 'tailor': return { items: 'Garments', qty: 'Qty', price: 'Stitching Charge', noteLabel: 'Tailoring Notes' };
+    case 'embroidery': return { items: 'Designs', qty: 'Qty', price: 'Embroidery Rate', noteLabel: 'Embroidery Notes' };
+    case 'teacher': return { items: 'Subjects', qty: 'Months', price: 'Fee', noteLabel: 'Tuition Notes' };
     default: return { items: 'Description', qty: 'Qty', price: 'Rate', noteLabel: 'Notes & Terms' };
   }
 };
@@ -355,6 +358,8 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
   else if (templateId === 'embroidery') { tPrimary = '#831843'; tAccent = '#ec4899'; }
   else if (templateId === 'doctor') { tPrimary = '#064e3b'; tAccent = '#10b981'; }
   else if (templateId === 'repair') { tPrimary = '#451a03'; tAccent = '#f97316'; }
+  else if (templateId === 'tailor') { tPrimary = '#1e1b4b'; tAccent = '#6366f1'; }
+  else if (templateId === 'teacher') { tPrimary = '#064e3b'; tAccent = '#10b981'; }
 
   const useA5 = pageSize === 'A5';
   const pageStyle = useA5 ? styles.pageA5 : styles.page;

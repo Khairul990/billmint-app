@@ -615,6 +615,40 @@ body {
   }
 }
 
+/* Toast Safe Area - Avoid bottom nav overlap */
+.toast-above-nav {
+  margin-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
+}
+@media (min-width: 1024px) {
+  .toast-above-nav {
+    margin-bottom: 1rem !important;
+  }
+}
+
+/* Ensure bottom nav doesn't clip main content on mobile */
+@media (max-width: 1023px) {
+  .main-content-pad {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Prevent card cropping on smallest screens */
+@media (max-width: 360px) {
+  .hero-compact-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .hero-compact-grid > * {
+    padding: 0.5rem;
+  }
+}
+
+/* Smooth bottom nav transitions */
+.bottom-nav-safe {
+  height: calc(64px + env(safe-area-inset-bottom));
+  min-height: 64px;
+}
+
 /* Magic UI Animated Theme Toggler View Transitions */
 ::view-transition-old(root),
 ::view-transition-new(root) {

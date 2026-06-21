@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, CreditCard, Bell, ArrowRight, Receipt, AlertCircle, Shield, Megaphone } from 'lucide-react';
+import { Plus, CreditCard, Bell, ArrowRight, Receipt, AlertCircle, Shield, Megaphone, FileText } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import PullToRefresh from '../components/PullToRefresh';
 import { syncFromFirestore, getActiveAnnouncement } from '../services/dbEngine';
@@ -91,8 +91,9 @@ const Dashboard = ({
 
   return (
     <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
-      <div className="p-4 max-w-2xl mx-auto space-y-4 pb-24">
+      <div className="px-3 sm:px-4 max-w-2xl mx-auto space-y-3 pb-4">
 
+        {/* Pending Payments Banner */}
         {pendingPaymentsCount > 0 && (
           <motion.button
             initial={{ opacity: 0, y: -10 }}
@@ -111,6 +112,7 @@ const Dashboard = ({
           </motion.button>
         )}
 
+        {/* Announcement */}
         {activeAnnouncement && (
           <div className={`p-3 rounded-2xl border ${
             activeAnnouncement.type === 'urgent' ? 'bg-theme-danger/10 border-theme-danger/30' :
@@ -127,6 +129,7 @@ const Dashboard = ({
           </div>
         )}
 
+        {/* Revenue Lock Banner */}
         {['warn', 'grace', 'locked'].includes(revenueStatus.lockStatus) && (
           <div className={`p-4 rounded-2xl border ${
             revenueStatus.lockStatus === 'warn' ? 'bg-theme-warning/10 border-theme-warning/30' :
@@ -155,63 +158,65 @@ const Dashboard = ({
           </div>
         )}
 
-        <div className="bg-[image:var(--accent-gradient)] text-white rounded-3xl p-5 shadow-premium relative overflow-hidden">
+        {/* ===== PREMIUM HERO CARD ===== */}
+        <div className="bg-[image:var(--accent-gradient)] text-white rounded-2xl p-4 shadow-premium relative overflow-hidden">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
           <div className="relative z-10">
-            <p className="text-[10px] font-black tracking-widest text-white/70 uppercase mb-1">
-              {businessSettings?.activeWorkspaceName || 'Dashboard'}
-            </p>
-            <h1 className="text-xl font-extrabold tracking-tight">
-              {businessSettings?.businessName || 'Welcome'}
-            </h1>
-            <div className="grid grid-cols-3 gap-3 mt-4">
-              <div className="bg-white/10 rounded-2xl p-3 backdrop-blur-sm">
-                <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Today</p>
-                <p className="text-lg font-black mt-0.5">{formatCurrency(todayEarnings)}</p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[9px] font-black tracking-widest text-white/70 uppercase">
+                {businessSettings?.businessName || 'Dashboard'}
+              </p>
+              <span className="text-[8px] font-bold text-white/60 bg-white/10 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                Today's Collection
+              </span>
+            </div>
+            <p className="text-2xl font-black tracking-tight">{formatCurrency(todayEarnings)}</p>
+            <div className="grid grid-cols-2 gap-2 mt-3">
+              <div className="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm">
+                <p className="text-[8px] font-bold text-white/70 uppercase tracking-wider">Total Due</p>
+                <p className="text-base font-black mt-0.5">{formatCurrency(totalDue)}</p>
               </div>
-              <div className="bg-white/10 rounded-2xl p-3 backdrop-blur-sm">
-                <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Due</p>
-                <p className="text-lg font-black mt-0.5">{formatCurrency(totalDue)}</p>
-              </div>
-              <div className="bg-white/10 rounded-2xl p-3 backdrop-blur-sm">
-                <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Pending</p>
-                <p className="text-lg font-black mt-0.5">{pendingPaymentsCount}</p>
+              <div className="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm">
+                <p className="text-[8px] font-bold text-white/70 uppercase tracking-wider">Pending Bills</p>
+                <p className="text-base font-black mt-0.5">{pendingPaymentsCount || 0}</p>
               </div>
             </div>
-            <div className="flex gap-2 mt-4">
-              <button onClick={onQuickBillOpen} className="flex-1 flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 rounded-2xl py-3 font-bold text-sm transition-colors">
-                <Plus className="w-4 h-4" />
+            <div className="flex gap-2 mt-3">
+              <button onClick={onQuickBillOpen} className="flex-1 flex items-center justify-center gap-1.5 bg-white/20 hover:bg-white/30 rounded-xl py-2.5 font-bold text-xs transition-colors active:scale-[0.98]">
+                <Plus className="w-3.5 h-3.5" />
                 New Bill
               </button>
-              <button onClick={() => setCurrentTab('due-ledger')} className="flex-1 flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 rounded-2xl py-3 font-bold text-sm transition-colors">
-                <CreditCard className="w-4 h-4" />
+              <button onClick={() => setCurrentTab('due-ledger')} className="flex-1 flex items-center justify-center gap-1.5 bg-white/20 hover:bg-white/30 rounded-xl py-2.5 font-bold text-xs transition-colors active:scale-[0.98]">
+                <CreditCard className="w-3.5 h-3.5" />
                 Collect Due
               </button>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-theme-card rounded-2xl border border-theme-border-soft">
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-theme-accent" />
-            <span className="text-xs font-bold text-theme-primary">
+        {/* Sync Status Bar */}
+        <div className="flex items-center justify-between p-2.5 bg-theme-card rounded-xl border border-theme-border-soft">
+          <div className="flex items-center gap-1.5">
+            <Shield className="w-3.5 h-3.5 text-theme-accent" />
+            <span className="text-[10px] font-bold text-theme-primary">
               {isAppInstalled ? 'Installed' : 'Works offline'}
             </span>
           </div>
-          <span className="text-xs font-bold text-theme-muted">
-            {syncStatus === 'Synced' ? 'Synced' : 'Syncing...'}
+          <span className="text-[10px] font-bold text-theme-muted">
+            {syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}
           </span>
         </div>
 
+        {/* ===== HOME FEED: Recent Bills ===== */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-extrabold text-theme-primary tracking-tight">
-              {getInvoiceLabel()}
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-base font-extrabold text-theme-primary tracking-tight">
+              Recent {getInvoiceLabel()}
             </h2>
             {invoices.length > 5 && (
-              <button onClick={() => setCurrentTab('invoices')} className="flex items-center gap-1 text-xs font-bold text-theme-accent">
+              <button onClick={() => setCurrentTab('invoices')} className="flex items-center gap-1 text-[10px] font-bold text-theme-accent">
                 View All
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3 h-3" />
               </button>
             )}
           </div>
@@ -220,42 +225,45 @@ const Dashboard = ({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               onClick={onQuickBillOpen}
-              className="w-full p-6 bg-theme-card rounded-2xl border border-dashed border-theme-border-soft flex flex-col items-center gap-3 text-center hover:border-theme-accent/50 transition-colors"
+              className="w-full py-8 bg-theme-card rounded-2xl border border-dashed border-theme-border-soft flex flex-col items-center gap-3 text-center hover:border-theme-accent/50 transition-colors"
             >
-              <div className="w-14 h-14 rounded-2xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
-                <Receipt className="w-7 h-7" />
+              <div className="w-12 h-12 rounded-2xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+                <FileText className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm font-bold text-theme-primary">No {getInvoiceLabel()} yet</p>
-                <p className="text-xs text-theme-muted font-semibold mt-0.5">Tap here to create your first bill</p>
+                <p className="text-sm font-bold text-theme-primary">Create your first bill</p>
+                <p className="text-[11px] text-theme-muted font-semibold mt-0.5">Tap to get started</p>
+              </div>
+              <div className="mt-1 px-4 py-2 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-xl shadow-md">
+                + Create Bill
               </div>
             </motion.button>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {recentInvoices.map((inv, idx) => (
                 <motion.div
                   key={inv.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
+                  transition={{ delay: idx * 0.03 }}
                   onClick={() => {
                     onViewInvoice(inv);
                     setCurrentTab('invoices');
                   }}
-                  className="p-4 bg-theme-card rounded-2xl border border-theme-border-soft active:scale-[0.98] transition-all cursor-pointer"
+                  className="p-3.5 bg-theme-card rounded-xl border border-theme-border-soft active:scale-[0.98] transition-all cursor-pointer"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-theme-primary truncate">
                         {inv.customerName || 'Walk-in Customer'}
                       </p>
-                      <p className="text-xs text-theme-muted font-semibold mt-0.5">
+                      <p className="text-[10px] text-theme-muted font-semibold mt-0.5">
                         {new Date(inv.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • {inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`}
                       </p>
                     </div>
-                    <div className="text-right ml-3">
+                    <div className="text-right ml-2">
                       <p className="text-sm font-black text-theme-primary">{formatCurrency(inv.total || 0)}</p>
-                      <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 ${
+                      <span className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full mt-0.5 ${
                         inv.status === 'paid' ? 'bg-green-500/10 text-green-500' :
                         inv.status === 'partial' ? 'bg-theme-warning/10 text-theme-warning' :
                         'bg-theme-danger/10 text-theme-danger'
