@@ -643,7 +643,7 @@ const Settings = ({
   }[firebaseStatus];
 
   return (
-    <div className="max-w-4xl mx-auto pb-12 relative font-sans text-theme-primary dark:text-theme-primary dark:text-theme-secondary">
+    <div className="max-w-7xl mx-auto pb-12 relative font-sans text-theme-primary dark:text-theme-primary dark:text-theme-secondary">
       {/* Toast Notification */}
       {showToast && (
         <div className="fixed top-6 right-6 bg-theme-accent text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
