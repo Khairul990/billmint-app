@@ -268,7 +268,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3 justify-end">
-              <button className="md:hidden w-11 h-11 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden">
+              <button title="Search" aria-label="Search" className="md:hidden w-11 h-11 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden">
                 <AnimatedBorderTrail />
                 <Search className="w-5 h-5 relative z-10" />
               </button>
@@ -276,6 +276,8 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div className="relative">
                 <button 
                   onClick={() => setIsNotificationMenuOpen(!isNotificationMenuOpen)}
+                  title="Notifications"
+                  aria-label="Notifications"
                   className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden"
                 >
                   <AnimatedBorderTrail />
@@ -517,6 +519,8 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             <div className="flex items-center justify-end gap-1.5 px-4 pb-2 pt-0">
               <button
                 onClick={() => document.querySelector('[data-search-input]')?.focus()}
+                title="Search"
+                aria-label="Search"
                 className="w-9 h-9 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary active:scale-95 transition-all"
               >
                 <Search className="w-[18px] h-[18px]" />
@@ -524,6 +528,8 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div className="relative">
                 <button
                   onClick={() => setIsNotificationMenuOpen(!isNotificationMenuOpen)}
+                  title="Notifications"
+                  aria-label="Notifications"
                   className="w-9 h-9 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary active:scale-95 transition-all"
                 >
                   <Bell className="w-[18px] h-[18px]" />
@@ -555,9 +561,13 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   const newDarkMode = newTheme === "dark";
                   if (newDarkMode !== isDarkMode) toggleTheme();
                 }}
+                title={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
+                aria-label={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
               />
               <button
                 onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
+                title="Account"
+                aria-label="Account"
                 className="w-9 h-9 rounded-xl bg-[image:var(--accent-gradient)] text-theme-button-text flex items-center justify-center active:scale-95 transition-transform overflow-hidden border border-white/10 shadow-sm"
               >
                 {businessSettings?.logoUrl ? (

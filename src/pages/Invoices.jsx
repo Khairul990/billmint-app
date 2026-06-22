@@ -341,7 +341,7 @@ const Invoices = ({
               onEditInvoice(null); // Clear editing state
               setCurrentTab('create-invoice');
             }}
-            className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md transition-shadow cursor-pointer"
+            className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-premium transition-shadow cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Invoice</span>
@@ -447,7 +447,7 @@ const Invoices = ({
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => { onEditInvoice(null); setCurrentTab('create-invoice'); }}
-        className="fixed bottom-4 right-4 md:hidden flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-sm px-4 py-3 rounded-full shadow-lg z-20"
+        className="fixed bottom-4 right-4 md:hidden flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-sm px-4 py-3 rounded-full shadow-premium z-20"
       >
         <Plus className="w-5 h-5" />
         <span>Create Invoice</span>
@@ -464,7 +464,7 @@ const Invoices = ({
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-theme-app dark:bg-theme-surface w-full max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-2xl relative animate-scaleUp border border-white/10 flex flex-col my-10"
+            className="bg-theme-app dark:bg-theme-surface w-full max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-premium relative animate-scaleUp border border-white/10 flex flex-col my-10"
           >
             
             {/* Modal Top Actions Header Bar */}

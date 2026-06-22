@@ -193,7 +193,7 @@ export default function Support({ onBack }) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <a href="mailto:support@billqyro.com" className="bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium hover:shadow-lg transition-all duration-300 block group">
+              <a href="mailto:support@billqyro.com" className="bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium hover:shadow-premium-hover transition-all duration-300 block group">
                 <div className="w-12 h-12 bg-theme-accent/10 text-theme-accent rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Mail className="w-6 h-6" />
                 </div>
@@ -202,7 +202,7 @@ export default function Support({ onBack }) {
                 <span className="text-theme-accent font-bold text-sm">support@billqyro.com &rarr;</span>
               </a>
 
-              <a href="#" className="bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium hover:shadow-lg transition-all duration-300 block group">
+              <a href="#" className="bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium hover:shadow-premium-hover transition-all duration-300 block group">
                 <div className="w-12 h-12 bg-theme-success/10 text-theme-success rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <MessageCircle className="w-6 h-6" />
                 </div>
@@ -325,12 +325,12 @@ export default function Support({ onBack }) {
                       <div>
                         <div className="flex justify-between items-start mb-2">
                           <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${
-                            ticket.issueType === 'Bug' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                            ticket.issueType === 'Bug' ? 'bg-theme-danger/10 text-theme-danger border-theme-danger/20' : 'bg-theme-accent/10 text-theme-accent border-theme-accent/20'
                           }`}>
                             {ticket.issueType}
                           </span>
                           <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${
-                            ticket.status === 'Open' ? 'bg-amber-500/15 text-amber-500 border-amber-500/20' : 'bg-emerald-500/15 text-emerald-500 border-emerald-500/20'
+                            ticket.status === 'Open' ? 'bg-theme-warning/15 text-theme-warning border-theme-warning/20' : 'bg-emerald-500/15 text-emerald-500 border-emerald-500/20'
                           }`}>
                             {ticket.status}
                           </span>
@@ -419,9 +419,9 @@ export default function Support({ onBack }) {
                           <span className="font-extrabold text-sm text-theme-primary">{req.title}</span>
                           <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${
                             req.status === 'Done' ? 'bg-emerald-500/15 text-emerald-500 border-emerald-500/20' : 
-                            req.status === 'Planned' ? 'bg-blue-500/15 text-blue-500 border-blue-500/20' : 
-                            req.status === 'Rejected' ? 'bg-rose-500/15 text-rose-500 border-rose-500/20' : 
-                            'bg-slate-500/15 text-slate-500 border-slate-500/20'
+                            req.status === 'Planned' ? 'bg-theme-accent/15 text-theme-accent border-theme-accent/20' : 
+                            req.status === 'Rejected' ? 'bg-theme-danger/15 text-theme-danger border-theme-danger/20' : 
+                            'bg-theme-muted/15 text-theme-muted border-theme-muted/20'
                           }`}>
                             {req.status}
                           </span>
@@ -469,9 +469,9 @@ export default function Support({ onBack }) {
                         <span className="text-sm font-black text-theme-accent font-mono">{log.version}</span>
                         <span className="text-[10px] text-theme-muted font-mono font-bold">{new Date(log.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                         <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded border ${
-                          log.type === 'fix' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 
+                          log.type === 'fix' ? 'bg-theme-danger/10 text-theme-danger border-theme-danger/20' : 
                           log.type === 'new' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                          'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                          'bg-theme-accent/10 text-theme-accent border-theme-accent/20'
                         }`}>
                           {log.type}
                         </span>

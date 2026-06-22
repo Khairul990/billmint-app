@@ -64,12 +64,34 @@ const templateFeatures = {
 };
 
 const templateCategory = {
-  classic: 'General',
-  modern: 'General',
-  minimal: 'General',
-  retail: 'Retail',
-  professional: 'Corporate',
-  embroidery: 'Fashion',
+  classic: 'Classic',
+  modern: 'Modern',
+  minimal: 'Classic',
+  retail: 'Business',
+  professional: 'Professional',
+  embroidery: 'Business',
+  doctor: 'Professional',
+  repair: 'Business'
+};
+
+const previewGradients = {
+  classic: 'from-blue-400 to-blue-600',
+  modern: 'from-indigo-800 to-purple-900',
+  minimal: 'from-gray-100 to-gray-300',
+  retail: 'from-yellow-300 to-amber-500',
+  professional: 'from-slate-800 to-blue-900',
+  embroidery: 'from-pink-300 to-rose-500',
+  doctor: 'from-emerald-400 to-teal-600',
+  repair: 'from-orange-400 to-red-500'
+};
+
+const templateStyles = {
+  classic: 'Classic',
+  modern: 'Modern',
+  minimal: 'Minimal',
+  retail: 'Business',
+  professional: 'Professional',
+  embroidery: 'Boutique',
   doctor: 'Medical',
   repair: 'Service'
 };
@@ -77,9 +99,10 @@ const templateCategory = {
 const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subscription }) => {
   const [previewTemplate, setPreviewTemplate] = useState(null);
   const [filterCategory, setFilterCategory] = useState('All');
+  const [useAnimId, setUseAnimId] = useState(null);
   const activeTemplate = businessSettings?.selectedPdfTemplate || 'classic';
   const isPremium = subscription?.status === 'premium';
-  const categories = ['All', 'General', 'Retail', 'Corporate', 'Fashion', 'Medical', 'Service'];
+  const categories = ['All', 'Classic', 'Modern', 'Business', 'Professional'];
 
   const filteredTemplates = filterCategory === 'All'
     ? templates
@@ -175,29 +198,39 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                   </div>
                 )}
 
-                {/* Template Tag Badges */}
+                {/* Size + Style Badges */}
                 <div className="absolute bottom-3 left-3 z-10 flex flex-wrap gap-1">
-                  {tags.map(tag => (
-                    <span key={tag} className="bg-black/50 backdrop-blur-sm text-white text-[7px] font-bold uppercase px-1.5 py-0.5 rounded border border-white/10">
-                      {tag}
+                  {tags.filter(t => t === 'A4' || t === 'A5' || t === 'Letter').map(sz => (
+                    <span key={sz} className="bg-black/60 backdrop-blur-sm text-white text-[7px] font-bold uppercase px-1.5 py-0.5 rounded border border-white/10 flex items-center gap-1">
+                      <FileSpreadsheet className="w-2 h-2" /> {sz}
                     </span>
                   ))}
+                  <span className={`bg-black/50 backdrop-blur-sm text-white text-[7px] font-bold uppercase px-1.5 py-0.5 rounded border border-white/10 flex items-center gap-1 ${templateStyles[tpl.id] === 'Professional' ? 'border-amber-300/30' : ''}`}>
+                    <Palette className="w-2 h-2" /> {templateStyles[tpl.id]}
+                  </span>
                 </div>
 
+                {tpl.id === 'classic' && (
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20">
+                    <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[7px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1">
+                      <Star className="w-2.5 h-2.5" /> Featured
+                    </span>
+                  </div>
+                )}
+
                 {/* Mockup Preview Area */}
-                <div className={`h-40 w-full ${tpl.color} flex flex-col items-center justify-center p-4 relative`}>
-                  {/* Abstract Invoice Shape */}
-                  <div className="w-24 h-32 bg-theme-card rounded shadow-sm border border-black/5 flex flex-col p-2">
-                    <div className="w-full h-4 bg-theme-border-soft rounded-sm mb-2" />
-                    <div className="w-1/2 h-2 bg-theme-app rounded-sm mb-4" />
-                    <div className="w-full h-1 bg-theme-app mb-1" />
-                    <div className="w-full h-1 bg-theme-app mb-1" />
-                    <div className="w-full h-1 bg-theme-app mb-4" />
-                    <div className="mt-auto w-1/3 h-3 bg-theme-accent/20 rounded-sm self-end" />
+                <div className={`h-40 w-full bg-gradient-to-br ${previewGradients[tpl.id] || 'from-gray-400 to-gray-600'} flex flex-col items-center justify-center p-4 relative overflow-hidden`}>
+                  <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-2 shadow-lg border border-white/20">
+                      <FileText className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-white font-black text-xs tracking-wider text-center drop-shadow-lg">{tpl.name}</span>
+                    <span className="text-white/60 text-[8px] font-bold mt-1 uppercase tracking-widest">Template</span>
                   </div>
                   
                   {isLocked && (
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center z-20">
                       <div className="bg-black/80 p-3 rounded-xl">
                         <Lock className="w-6 h-6 text-amber-400" />
                       </div>
@@ -221,7 +254,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                   
                   <div className="mt-auto flex gap-2">
                     <button
-                      onClick={() => handleApply(tpl.id, tpl.type)}
+                      onClick={() => { handleApply(tpl.id, tpl.type); setUseAnimId(tpl.id); setTimeout(() => setUseAnimId(null), 1500); }}
                       className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 btn-premium ${
                         isActive 
                           ? 'bg-emerald-500/10 text-emerald-600 cursor-default' 
@@ -231,11 +264,13 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                       }`}
                     >
                       {isActive ? (
-                        <>Active Template</>
+                        <><CheckCircle2 className="w-3.5 h-3.5" /> Active</>
                       ) : isLocked ? (
                         <><Lock className="w-3.5 h-3.5" /> Unlock Pro</>
+                      ) : useAnimId === tpl.id ? (
+                        <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Applied!</motion.span>
                       ) : (
-                        <>Apply Template</>
+                        <>Use Template</>
                       )}
                     </button>
                     {!isLocked && (
@@ -270,15 +305,14 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className={`h-56 w-full ${tpl.color} flex items-center justify-center p-6 relative`}>
-                <div className="w-40 h-48 bg-theme-card rounded shadow-md border border-black/5 flex flex-col p-3">
-                  <div className="w-full h-5 bg-theme-border-soft rounded-sm mb-2" />
-                  <div className="w-2/3 h-3 bg-theme-app rounded-sm mb-5" />
-                  <div className="w-full h-1.5 bg-theme-app mb-1.5" />
-                  <div className="w-full h-1.5 bg-theme-app mb-1.5" />
-                  <div className="w-full h-1.5 bg-theme-app mb-1.5" />
-                  <div className="w-3/4 h-1.5 bg-theme-app mb-5" />
-                  <div className="mt-auto w-1/2 h-4 bg-theme-accent/20 rounded-sm self-end" />
+              <div className={`h-56 w-full bg-gradient-to-br ${previewGradients[tpl.id] || 'from-gray-400 to-gray-600'} flex items-center justify-center p-6 relative`}>
+                <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3 shadow-xl border border-white/20">
+                    <FileText className="w-8 h-8 text-white" />
+                  </div>
+                  <span className="text-white font-black text-lg tracking-wider text-center drop-shadow-lg">{tpl.name}</span>
+                  <span className="text-white/60 text-[9px] font-bold mt-1 uppercase tracking-widest">PDF Template</span>
                 </div>
               </div>
               <div className="p-4 space-y-3">

@@ -72,7 +72,7 @@ const DesignBook = () => {
         </button>
       </div>
 
-      <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-3 gap-3 md:gap-4">
+      <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
         {stats.map((s, i) => (
           <motion.div key={i} variants={staggerItem} className="card-premium p-4 md:p-5 flex flex-col items-center text-center">
             <s.icon className={`w-6 h-6 ${s.color} mb-1`} />
@@ -86,6 +86,105 @@ const DesignBook = () => {
         <Search className="w-5 h-5 text-theme-muted shrink-0 ml-1" />
         <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by design name, customer, category..." className="input-premium w-full bg-transparent border-0 outline-none text-sm font-semibold text-theme-primary placeholder:text-theme-muted/50" />
       </div>
+
+      {/* CATEGORY STAT CARDS */}
+      <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {(() => {
+          const embr = items.filter(i => (i.category || '').toLowerCase().includes('embroidery')).length;
+          const tailor = items.filter(i => (i.category || '').toLowerCase().includes('tailor')).length;
+          const general = items.filter(i => {
+            const c = (i.category || '').toLowerCase();
+            return !c.includes('embroidery') && !c.includes('tailor') && c !== '';
+          }).length;
+          const uncat = items.filter(i => !i.category).length;
+          return [
+            { label: 'Embroidery', count: embr, color: 'text-pink-500', bg: 'bg-pink-500/10' },
+            { label: 'Tailor', count: tailor, color: 'text-violet-500', bg: 'bg-violet-500/10' },
+            { label: 'General / Other', count: general + uncat, color: 'text-amber-500', bg: 'bg-amber-500/10' }
+          ].map((c, i) => (
+            <motion.div key={i} variants={staggerItem} className="card-premium p-3 flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl ${c.bg} ${c.color} flex items-center justify-center text-lg font-black`}>{c.count}</div>
+              <div>
+                <p className="text-sm font-black text-theme-primary">{c.count}</p>
+                <p className="text-[10px] font-bold text-theme-muted">{c.label}</p>
+              </div>
+            </motion.div>
+          ));
+        })()}
+      </motion.div>
+
+      {/* RECENT DESIGNS */}
+      {items.length > 0 && (
+        <motion.div variants={staggerContainer} initial="hidden" animate="visible">
+          <div className="section-header mb-3">
+            <h3 className="section-header-title">Recent Designs</h3>
+            <span className="badge-premium badge-info">Last {Math.min(4, items.length)}</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {[...items].sort((a, b) => b.createdAt - a.createdAt).slice(0, 4).map(item => (
+              <motion.div key={item.id} variants={staggerItem} className="card-premium p-4 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-pink-500/10 text-pink-500 flex items-center justify-center font-bold text-sm shrink-0">{item.designName.charAt(0).toUpperCase()}</div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-extrabold text-theme-primary truncate">{item.designName}</p>
+                  <p className="text-[10px] text-theme-muted font-semibold">
+                    {item.category && <span className="badge-premium bg-violet-500/10 text-violet-600 px-2 py-0.5 rounded-full text-[9px] font-bold mr-1">{item.category}</span>}
+                    {item.stitchCount && `${Number(item.stitchCount).toLocaleString()} st`}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* DESIGN TIPS */}
+      <motion.div variants={staggerItem} className="card-premium p-4">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-xl bg-violet-500/10 text-violet-500 flex items-center justify-center shrink-0">
+            <Palette className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Embroidery & Tailor Tips</p>
+            <p className="text-xs font-semibold text-theme-primary leading-relaxed">
+              {[
+                'Always digitize complex designs before stitching to avoid thread breaks and fabric puckering.',
+                'Use a stabilizer matching your fabric weight for crisp, clean embroidery results.',
+                'Keep a swatch book of thread colors for quick client approvals and matching.',
+                'Measure twice, cut once — accurate fabric measurement reduces waste by up to 30%.'
+              ][Math.floor(Date.now() / 86400000) % 4]}
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* QUICK ADD SECTION */}
+      <motion.div variants={staggerItem} className="card-premium p-4">
+        <div className="section-header mb-3">
+          <h3 className="section-header-title">Quick Add Presets</h3>
+          <span className="badge-premium badge-info">Common designs</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {[
+            { name: 'Floral Motif', cat: 'Embroidery' },
+            { name: 'Jacquard Design', cat: 'Embroidery' },
+            { name: 'Kurta Pattern', cat: 'Tailor' },
+            { name: 'Salwar Set', cat: 'Tailor' }
+          ].map((preset, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                setForm({ designName: preset.name, customerName: '', category: preset.cat, stitchCount: '', colors: '', notes: '' });
+                setEditItem(null);
+                setModalOpen(true);
+              }}
+              className="p-3 rounded-xl bg-theme-surface border border-theme-border-soft hover:border-theme-accent/30 transition-all text-left"
+            >
+              <p className="text-xs font-extrabold text-theme-primary">{preset.name}</p>
+              <p className="text-[9px] text-theme-muted font-semibold">{preset.cat}</p>
+            </button>
+          ))}
+        </div>
+      </motion.div>
 
       {filtered.length === 0 ? (
         <motion.div variants={staggerItem} initial="hidden" animate="visible" className="flex flex-col items-center justify-center p-12 bg-theme-card rounded-3xl border border-theme-border-soft border-dashed text-center">
@@ -109,8 +208,8 @@ const DesignBook = () => {
                   </div>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => openEdit(item)} className="p-1.5 rounded-lg hover:bg-theme-accent/10 text-theme-muted hover:text-theme-accent transition-colors"><Edit2 className="w-3.5 h-3.5" /></button>
-                  <button onClick={() => handleDelete(item.id)} className="p-1.5 rounded-lg hover:bg-theme-danger/10 text-theme-muted hover:text-theme-danger transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                  <button title="Edit design" aria-label="Edit design" onClick={() => openEdit(item)} className="p-1.5 rounded-lg hover:bg-theme-accent/10 text-theme-muted hover:text-theme-accent transition-colors"><Edit2 className="w-3.5 h-3.5" /></button>
+                  <button title="Delete design" aria-label="Delete design" onClick={() => handleDelete(item.id)} className="p-1.5 rounded-lg hover:bg-theme-danger/10 text-theme-muted hover:text-theme-danger transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
               </div>
               <div className="space-y-1.5 text-xs font-semibold text-theme-muted">

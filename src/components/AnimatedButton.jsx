@@ -15,6 +15,7 @@ const AnimatedButton = ({
   onClick,
   className = '',
   disabled = false,
+  isLoading = false,
   ...props
 }) => {
   const [ripples, setRipples] = useState([]);
@@ -51,10 +52,15 @@ const AnimatedButton = ({
       whileTap="tap"
       onClick={handleClick}
       disabled={disabled}
-      className={`relative overflow-hidden select-none ${variantClasses[variant]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+      className={`relative overflow-hidden select-none ${variantClasses[variant]} ${disabled || isLoading ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
       {...props}
     >
-      {children}
+      {isLoading ? (
+        <span className="flex items-center gap-2">
+          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <span>Loading...</span>
+        </span>
+      ) : children}
       {ripples.map((ripple) => (
         <span
           key={ripple.id}

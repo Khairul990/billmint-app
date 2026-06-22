@@ -123,7 +123,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
 
           <button
             onClick={openAddModal}
-            className="hidden md:flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="hidden md:flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-premium hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
             <UserPlus className="w-4 h-4" />
             <span>+ Add {customerLabel}</span>
@@ -132,7 +132,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={openAddModal}
-            className="fixed bottom-4 right-4 md:hidden flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white rounded-full p-4 shadow-lg hover:scale-105 transition-transform"
+            className="fixed bottom-4 right-4 md:hidden flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white rounded-full p-4 shadow-premium hover:scale-105 transition-transform"
             aria-label={'Add ' + customerLabel}
           >
             <UserPlus className="w-6 h-6" />
@@ -275,7 +275,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
               <button
                 type="submit"
                 disabled={isSaving}
-                className="w-full py-4 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-2xl font-bold hover:opacity-90 shadow-md shadow-theme-glow hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-4 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-2xl font-bold hover:opacity-90 shadow-premium transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <Save className="w-4 h-4" />}
                 <span>{editingCustomer ? 'Update ' + customerLabel : 'Register ' + customerLabel}</span>

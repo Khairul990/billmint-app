@@ -69,7 +69,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
                   )}
                 </div>
               </div>
-              <span className={`text-[9px] mt-0.5 font-semibold tracking-tight ${
+              <span className={`text-[10px] sm:text-xs mt-0.5 font-semibold tracking-tight ${
                 isActive ? 'text-theme-accent' : 'text-theme-muted'
               }`}>
                 {tab.label}

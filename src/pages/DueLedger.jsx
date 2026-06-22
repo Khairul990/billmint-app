@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Search, CheckCircle2, AlertCircle, CreditCard, ChevronRight, Calendar, X, Bell, User, DollarSign, TrendingUp, TrendingDown, Send, Eye, Ban } from 'lucide-react';
+import { Clock, Search, CheckCircle2, AlertCircle, CreditCard, ChevronRight, Calendar, X, Bell, User, DollarSign, TrendingUp, TrendingDown, Send, Eye, Ban, Download } from 'lucide-react';
 import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { CardSkeleton } from '../components/PremiumSkeleton';
@@ -284,6 +284,41 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
         </div>
       </div>
 
+      {/* DUE SUMMARY */}
+      <motion.div variants={staggerItem} className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+        <div className="stat-premium !p-3">
+          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Total Due Amount</p>
+          <p className="text-lg font-black text-theme-primary tabular-nums">{formatCurrency(totalOutstanding, currencySymbol)}</p>
+        </div>
+        <div className="stat-premium !p-3">
+          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Overdue %</p>
+          <p className="text-lg font-black text-rose-500 tabular-nums">
+            {dueBills.length > 0 ? Math.round((grouped.today.length / dueBills.length) * 100) : 0}%
+          </p>
+        </div>
+        <div className="stat-premium !p-3">
+          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Avg Days Overdue</p>
+          <p className="text-lg font-black text-theme-primary tabular-nums">
+            {grouped.today.length > 0
+              ? Math.round(grouped.today.reduce((s, b) => s + Math.max(0, Math.floor((new Date() - b.dueDate) / (1000 * 60 * 60 * 24))), 0) / grouped.today.length)
+              : 0}d
+          </p>
+        </div>
+      </motion.div>
+
+      {/* QUICK ACTIONS */}
+      <motion.div variants={staggerItem} className="flex items-center gap-2 mb-4 flex-wrap">
+        <button className="btn-premium text-[10px] !min-h-[36px] !px-4 flex items-center gap-1.5 bg-theme-accent text-white">
+          <Bell className="w-3.5 h-3.5" /> Send Reminder to All
+        </button>
+        <button className="btn-premium text-[10px] !min-h-[36px] !px-4 flex items-center gap-1.5 bg-emerald-500 text-white">
+          <CheckCircle2 className="w-3.5 h-3.5" /> Mark Paid
+        </button>
+        <button className="btn-premium text-[10px] !min-h-[36px] !px-4 flex items-center gap-1.5 bg-theme-card border border-theme-border-soft text-theme-primary">
+          <Download className="w-3.5 h-3.5" /> Export Due List
+        </button>
+      </motion.div>
+
       <div className="toolbar-premium mb-6">
         <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted pointer-events-none">
           <Search className="w-4 h-4" />
@@ -334,12 +369,29 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
 
       {!searchQuery && grouped.today.length === 0 && grouped.thisWeek.length === 0 && grouped.older.length === 0 && (
         <div className="card-premium p-5">
-          <div className="empty-state py-8">
+          <div className="empty-state py-6">
             <div className="empty-state-icon">
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <p className="empty-state-title">All clear!</p>
             <p className="empty-state-text">No pending bills due. You're all caught up.</p>
+          </div>
+          <div className="border-t border-theme-border-soft pt-4 mt-2">
+            <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-2">Collection Tips</p>
+            <div className="space-y-2">
+              <div className="flex items-start gap-2 text-xs text-theme-muted font-semibold">
+                <span className="w-5 h-5 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0 text-[10px] font-bold">1</span>
+                <span>Send invoice reminders 24 hours before the due date for best results.</span>
+              </div>
+              <div className="flex items-start gap-2 text-xs text-theme-muted font-semibold">
+                <span className="w-5 h-5 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0 text-[10px] font-bold">2</span>
+                <span>Offer a 2% early payment discount to encourage faster settlements.</span>
+              </div>
+              <div className="flex items-start gap-2 text-xs text-theme-muted font-semibold">
+                <span className="w-5 h-5 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0 text-[10px] font-bold">3</span>
+                <span>Follow up overdue accounts with a phone call — it works better than email.</span>
+              </div>
+            </div>
           </div>
         </div>
       )}

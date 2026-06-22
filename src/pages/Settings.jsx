@@ -43,7 +43,8 @@ import {
   Info,
   Smartphone,
   Search,
-  AlertCircle
+  AlertCircle,
+  X
 } from 'lucide-react';
 
 import {
@@ -92,6 +93,36 @@ const compressImage = (file, maxWidth = 400) => {
     };
   });
 };
+
+const ALL_THEMES = [
+  { id: 'obsidian-gold', name: 'Obsidian Gold', category: 'Premium', gradient: 'linear-gradient(90deg, #B8860B, #1F2937, #FFF9EC)' },
+  { id: 'arctic-teal', name: 'Arctic Teal', category: 'Business', gradient: 'linear-gradient(90deg, #009E7F, #0F766E, #F4FFFD)' },
+  { id: 'sapphire-noir', name: 'Sapphire Noir', category: 'Business', gradient: 'linear-gradient(90deg, #2563EB, #1E3A8A, #F7FAFF)' },
+  { id: 'rose-platinum', name: 'Rose Platinum', category: 'Premium', gradient: 'linear-gradient(90deg, #C75C75, #8B3A4A, #FFF7FA)' },
+  { id: 'carbon-violet', name: 'Carbon Violet', category: 'Business', gradient: 'linear-gradient(90deg, #7C3AFF, #4C1D95, #FAF7FF)' },
+  { id: 'graphite-copper', name: 'Graphite Copper', category: 'Premium', gradient: 'linear-gradient(90deg, #B76535, #4B2A1A, #FFF8F2)' },
+  { id: 'arctic-diamond', name: 'Arctic Diamond', category: 'Light', gradient: 'linear-gradient(90deg, #60A5FA, #CBD5E1, #F3F7FC)' },
+  { id: 'emerald-royal', name: 'Emerald Royal', category: 'Premium', gradient: 'linear-gradient(90deg, #10B981, #D4AF37, #F0FDF4)' },
+  { id: 'midnight-ruby', name: 'Midnight Ruby', category: 'Premium', gradient: 'linear-gradient(90deg, #C0392B, #7F1D1D, #FFF1F2)' },
+  { id: 'titanium-blue', name: 'Titanium Blue', category: 'Business', gradient: 'linear-gradient(90deg, #2563EB, #94A3B8, #F8FAFC)' },
+  { id: 'pink-blossom', name: 'Pink Blossom', category: 'Light', gradient: 'linear-gradient(90deg, #F472B6, #EC4899, #FFF1F2)' },
+  { id: 'ocean-waves', name: 'Ocean Waves', category: 'Business', gradient: 'linear-gradient(90deg, #0EA5E9, #0284C7, #F0F9FF)' },
+  { id: 'lush-green', name: 'Lush Green', category: 'Business', gradient: 'linear-gradient(90deg, #22C55E, #16A34A, #F0FDF4)' },
+  { id: 'sunset-orange', name: 'Sunset Orange', category: 'Business', gradient: 'linear-gradient(90deg, #F97316, #EA580C, #FFF7ED)' },
+  { id: 'midnight-blue', name: 'Midnight Blue', category: 'Dark', gradient: 'linear-gradient(90deg, #1E3A5F, #0F1B2D, #F8FAFC)' },
+  { id: 'royal-purple', name: 'Royal Purple', category: 'Business', gradient: 'linear-gradient(90deg, #A855F7, #7C3AED, #FAF5FF)' },
+  { id: 'crimson-red', name: 'Crimson Red', category: 'Business', gradient: 'linear-gradient(90deg, #DC2626, #B91C1C, #FEF2F2)' },
+  { id: 'slate-gray', name: 'Slate Gray', category: 'Dark', gradient: 'linear-gradient(90deg, #64748B, #475569, #F8FAFC)' },
+  { id: 'warm-amber', name: 'Warm Amber', category: 'Business', gradient: 'linear-gradient(90deg, #D97706, #B45309, #FFFBEB)' },
+  { id: 'cyber-teal', name: 'Cyber Teal', category: 'Business', gradient: 'linear-gradient(90deg, #14B8A6, #0D9488, #F0FDFA)' },
+  { id: 'soft-lavender', name: 'Soft Lavender', category: 'Light', gradient: 'linear-gradient(90deg, #C4B5FD, #A78BFA, #FAF5FF)' },
+  { id: 'ocean-deep', name: 'Ocean Deep', category: 'Dark', gradient: 'linear-gradient(90deg, #1D4ED8, #1E40AF, #EFF6FF)' },
+  { id: 'forest-pine', name: 'Forest Pine', category: 'Dark', gradient: 'linear-gradient(90deg, #047857, #065F46, #ECFDF5)' },
+  { id: 'cherry-blossom', name: 'Cherry Blossom', category: 'Light', gradient: 'linear-gradient(90deg, #F43F5E, #E11D48, #FFF1F2)' },
+  { id: 'gold-coast', name: 'Gold Coast', category: 'Premium', gradient: 'linear-gradient(90deg, #F59E0B, #D97706, #FFFBEB)' }
+];
+
+const THEME_CATEGORIES = ['All', 'Light', 'Dark', 'Premium', 'Business'];
 
 const getThemePreviewColors = (preset) => {
   const isDark = document.documentElement.classList.contains('dark');
@@ -315,10 +346,35 @@ const Settings = ({
   const [enableHaptics, setEnableHaptics] = useState(true);
   const [enableSounds, setEnableSounds] = useState(true);
 
+  const tabSections = {
+    profile: { count: 6, keywords: ['business', 'company', 'name', 'owner', 'logo', 'phone', 'whatsapp', 'email', 'address', 'profile'] },
+    theme: { count: 3, keywords: ['theme', 'color', 'dark', 'light', 'mode', 'preset', 'brand', 'studio'] },
+    regional: { count: 6, keywords: ['country', 'currency', 'language', 'tax', 'date', 'number', 'regional', 'format'] },
+    payment: { count: 8, keywords: ['payment', 'upi', 'qr', 'bkash', 'nagad', 'rocket', 'gateway', 'pay'] },
+    preferences: { count: 7, keywords: ['invoice', 'template', 'prefix', 'tax', 'notes', 'terms', 'footer', 'brand', 'color', 'preference'] },
+    livelink: { count: 7, keywords: ['live', 'link', 'customer', 'portal', 'qr', 'pdf', 'proof'] },
+    ai: { count: 3, keywords: ['ai', 'gemini', 'twilio', 'whatsapp', 'integration', 'bot'] },
+    team: { count: 1, keywords: ['team', 'cashier', 'invite', 'member'] },
+    premiumux: { count: 2, keywords: ['ux', 'haptic', 'sound', 'premium', 'mobile'] },
+    pwa: { count: 1, keywords: ['pwa', 'install', 'app', 'download'] },
+    storage: { count: 5, keywords: ['storage', 'backup', 'cache', 'data', 'reset', 'export', 'import', 'clean'] }
+  };
+
   const [showToast, setShowToast] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDirty, setIsDirty] = useState(false);
+  const [themeSearch, setThemeSearch] = useState('');
+  const [themeCategory, setThemeCategory] = useState('All');
+  const [favoriteThemes, setFavoriteThemes] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('billqyro_favorite_themes') || '[]');
+    } catch { return []; }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('billqyro_favorite_themes', JSON.stringify(favoriteThemes));
+  }, [favoriteThemes]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const isInitialized = useRef(false);
@@ -402,6 +458,40 @@ const Settings = ({
       return () => clearTimeout(timer);
     }
   }, [settings]);
+
+  useEffect(() => {
+    if (!isInitialized.current) return;
+    const handleBeforeUnload = (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDirty]);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) return;
+    const q = searchQuery.toLowerCase();
+    const firstMatch = Object.entries(tabSections).find(([, section]) =>
+      section.keywords.some((k) => k.includes(q))
+    );
+    if (firstMatch) {
+      setActiveTab(firstMatch[0]);
+    }
+  }, [searchQuery]);
 
   useEffect(() => {
     if (!isInitialized.current) return;
@@ -690,7 +780,7 @@ const Settings = ({
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="max-w-7xl mx-auto pb-24 relative font-sans text-theme-primary dark:text-theme-primary dark:text-theme-secondary"
+      className="max-w-7xl mx-auto pb-24 relative font-sans text-theme-primary dark:text-theme-secondary"
     >
       {/* Loading Skeleton */}
       {isLoading && (
@@ -712,7 +802,7 @@ const Settings = ({
       <>
       {/* Toast Notification */}
       {showToast && (
-        <div className="fixed top-6 right-6 bg-theme-accent text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-theme-accent text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
           <CheckCircle2 className="w-5 h-5" />
           <span className="font-bold text-sm tracking-wide">Settings saved successfully</span>
         </div>
@@ -724,18 +814,21 @@ const Settings = ({
           <h1 className="text-2xl font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">Business settings</h1>
           <p className="text-xs text-theme-muted dark:text-theme-muted font-medium mt-0.5">Configure your company profile and invoicing configurations.</p>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="btn-premium flex items-center justify-center gap-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-bold text-xs px-6 py-3 rounded-xl shadow-glow active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {isSaving ? (
-            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : (
-            <Save className="w-4 h-4" />
-          )}
-          <span>{isSaving ? 'Saving...' : 'Save Settings'}</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <span className="hidden sm:inline text-[10px] text-theme-muted font-semibold">Ctrl+S to save</span>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="btn-premium flex items-center justify-center gap-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-bold text-xs px-6 py-3 rounded-xl shadow-glow active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isSaving ? (
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            <span>{isSaving ? 'Saving...' : 'Save Settings'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Settings Search Bar */}
@@ -759,7 +852,7 @@ const Settings = ({
       </div>
 
       {/* Modern Chip-Premium Tab Selection Menu */}
-      <div className="flex bg-theme-surface dark:bg-theme-card dark:bg-theme-card/60 p-1.5 rounded-2xl mb-6 overflow-x-auto no-scrollbar gap-1 chip-premium">
+      <div className="sticky top-0 z-30 flex bg-theme-surface dark:bg-theme-card/60 p-1.5 rounded-2xl mb-6 overflow-x-auto no-scrollbar gap-1 chip-premium shadow-sm">
         {[
           { id: 'profile', label: 'Profile', icon: Building2 },
           { id: 'theme', label: 'Theme Studio', icon: Palette },
@@ -772,7 +865,18 @@ const Settings = ({
           { id: 'premiumux', label: 'UX', icon: Smartphone },
           { id: 'pwa', label: 'App', icon: Download },
           { id: 'storage', label: 'Backup', icon: Database }
-        ].map((tab) => {
+        ]
+          .filter((tab) => {
+            if (!searchQuery.trim()) return true;
+            const q = searchQuery.toLowerCase();
+            const section = tabSections[tab.id];
+            return (
+              tab.label.toLowerCase().includes(q) ||
+              tab.id.includes(q) ||
+              section?.keywords.some((k) => k.includes(q))
+            );
+          })
+          .map((tab) => {
           const Icon = tab.icon;
           const isSelected = activeTab === tab.id;
           return (
@@ -788,6 +892,7 @@ const Settings = ({
               <Icon className={`w-5 h-5 mb-1.5 ${isSelected ? 'text-white' : 'text-theme-muted'}`} />
               <span className={`text-[10px] font-bold tracking-wide uppercase ${isSelected ? 'text-white' : 'text-theme-muted'}`}>
                 {tab.label}
+                <span className={`ml-1 text-[8px] ${isSelected ? 'text-white/70' : 'text-theme-muted/60'}`}>({tabSections[tab.id]?.count || 0})</span>
               </span>
             </button>
           );
@@ -821,7 +926,7 @@ const Settings = ({
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder="e.g. BillQyro Technologies"
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
                 />
               </div>
 
@@ -834,7 +939,7 @@ const Settings = ({
                     value={ownerName}
                     onChange={(e) => setOwnerName(e.target.value)}
                     placeholder="e.g. John Doe"
-                    className="input-premium w-full pl-10 pr-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium"
+                    className="input-premium w-full pl-10 pr-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium"
                   />
                 </div>
               </div>
@@ -881,7 +986,7 @@ const Settings = ({
                     value={logoUrl}
                     onChange={(e) => setLogoUrl(e.target.value)}
                     placeholder="Or paste logo image URL..."
-                    className="input-premium w-full pl-9 pr-4 py-2 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-accent dark:text-theme-accent font-medium text-xs"
+                    className="input-premium w-full pl-9 pr-4 py-2 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-accent dark:text-theme-accent font-medium text-xs"
                   />
                 </div>
 
@@ -917,7 +1022,7 @@ const Settings = ({
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+91 98765 00000"
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium"
                 />
               </div>
 
@@ -928,7 +1033,7 @@ const Settings = ({
                   value={whatsapp}
                   onChange={(e) => setWhatsapp(e.target.value)}
                   placeholder="+91 98765 00000"
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium"
                 />
               </div>
 
@@ -960,7 +1065,7 @@ const Settings = ({
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Full office address details..."
                     rows="2"
-                    className="input-premium w-full pl-10 pr-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium resize-none text-xs"
+                    className="input-premium w-full pl-10 pr-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium resize-none text-xs"
                   />
                 </div>
               </div>
@@ -984,6 +1089,179 @@ const Settings = ({
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Theme Search & Filter */}
+            <div className="card-premium p-5 space-y-4">
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+                  <input
+                    type="text"
+                    value={themeSearch}
+                    onChange={(e) => setThemeSearch(e.target.value)}
+                    placeholder="Search themes..."
+                    className="input-premium w-full pl-10 pr-4 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary"
+                  />
+                  {themeSearch && (
+                    <button onClick={() => setThemeSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+                <span className="text-[10px] font-bold text-theme-muted whitespace-nowrap">
+                  {ALL_THEMES.filter(t => (themeCategory === 'All' || t.category === themeCategory) && t.name.toLowerCase().includes(themeSearch.toLowerCase())).length} themes
+                </span>
+              </div>
+              <div className="flex gap-2 overflow-x-auto hide-scrollbar">
+                {THEME_CATEGORIES.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setThemeCategory(cat)}
+                    className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all chip-premium ${
+                      themeCategory === cat
+                        ? 'bg-theme-accent text-white shadow-md shadow-theme-accent/30'
+                        : 'bg-theme-app dark:bg-theme-surface text-theme-muted hover:text-theme-primary border border-theme-border-soft'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Theme Preview Grid */}
+            <div className="card-premium p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">All Themes</h3>
+                <span className="badge-premium text-[9px] font-black text-theme-muted bg-theme-card px-3 py-1 rounded-full border border-theme-border-soft">
+                  {ALL_THEMES.length} Available
+                </span>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                {ALL_THEMES
+                  .filter(t => (themeCategory === 'All' || t.category === themeCategory) && t.name.toLowerCase().includes(themeSearch.toLowerCase()))
+                  .map((theme) => {
+                    const isDefault = themeColor === theme.id;
+                    const isFav = favoriteThemes.includes(theme.id);
+                    return (
+                      <motion.div
+                        key={theme.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                        className={`card-premium rounded-2xl overflow-hidden border-2 transition-all duration-300 relative group ${
+                          isDefault
+                            ? 'border-theme-accent shadow-md shadow-theme-accent/20'
+                            : 'border-theme-border-soft hover:border-theme-accent/40'
+                        }`}
+                      >
+                        {/* Color Preview Gradient Bar */}
+                        <div className="h-10 w-full" style={{ background: theme.gradient }} />
+
+                        {/* Favorite Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFavoriteThemes(prev =>
+                              prev.includes(theme.id)
+                                ? prev.filter(id => id !== theme.id)
+                                : [...prev, theme.id]
+                            );
+                          }}
+                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-black/40 z-10"
+                        >
+                          <Star className={`w-3 h-3 ${isFav ? 'text-amber-400 fill-amber-400' : 'text-white/70'}`} />
+                        </button>
+
+                        {/* Badges */}
+                        <div className="absolute top-1 left-1 flex gap-1">
+                          {isDefault && (
+                            <span className="bg-theme-accent text-white text-[7px] font-black px-1.5 py-0.5 rounded-full shadow-sm badge-premium">
+                              Default
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Theme Name & Category */}
+                        <div className="p-2.5">
+                          <p className="text-[10px] font-extrabold text-theme-primary truncate">{theme.name}</p>
+                          <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">{theme.category}</span>
+                        </div>
+
+                        {/* Hover Actions Overlay */}
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-2xl">
+                          <button
+                            onClick={() => {
+                              setThemeColor(theme.id);
+                              document.documentElement.setAttribute('data-theme', theme.id);
+                              import('../utils/themeIcon').then(m => m.updateFaviconForTheme(theme.id));
+                              toast.success(`Previewing ${theme.name}`);
+                            }}
+                            className="px-2.5 py-1.5 bg-white/90 text-gray-900 text-[9px] font-black rounded-lg hover:bg-white transition-all"
+                          >
+                            Preview
+                          </button>
+                          <button
+                            onClick={() => {
+                              setThemeColor(theme.id);
+                              document.documentElement.setAttribute('data-theme', theme.id);
+                              import('../utils/themeIcon').then(m => m.updateFaviconForTheme(theme.id));
+                              toast.success(`${theme.name} applied!`);
+                            }}
+                            className="px-2.5 py-1.5 bg-theme-accent text-white text-[9px] font-black rounded-lg hover:opacity-90 transition-all btn-premium"
+                          >
+                            Apply
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFavoriteThemes(prev =>
+                                prev.includes(theme.id)
+                                  ? prev.filter(id => id !== theme.id)
+                                  : [...prev, theme.id]
+                              );
+                            }}
+                            className={`px-2.5 py-1.5 rounded-lg text-[9px] font-black transition-all ${
+                              isFav
+                                ? 'bg-amber-400/90 text-white'
+                                : 'bg-white/90 text-gray-900 hover:bg-white'
+                            }`}
+                          >
+                            <Star className={`w-3 h-3 ${isFav ? 'fill-white' : ''}`} />
+                          </button>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+              </div>
+            </div>
+
+            {/* Set as Default + Add extra themes to existing list */}
+            <div className="card-premium p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-theme-accent/20 flex items-center justify-center">
+                  <Star className="w-5 h-5 text-theme-accent" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Default Theme</h3>
+                  <p className="text-[10px] text-theme-muted font-semibold">
+                    Current: {ALL_THEMES.find(t => t.id === themeColor)?.name || themeColor}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setThemeColor(themeColor);
+                  document.documentElement.setAttribute('data-theme', themeColor);
+                  import('../utils/themeIcon').then(m => m.updateFaviconForTheme(themeColor));
+                  toast.success(`"${ALL_THEMES.find(t => t.id === themeColor)?.name || themeColor}" set as default!`);
+                }}
+                className="btn-premium text-[10px] px-4 py-2 bg-theme-accent text-white"
+              >
+                <Check className="w-3.5 h-3.5" /> Set as Default
+              </button>
             </div>
 
             <div className="spacer-divider h-px bg-gradient-to-r from-transparent via-theme-border-soft to-transparent my-2" />
@@ -1353,7 +1631,7 @@ const Settings = ({
                 <select
                   value={country}
                   onChange={(e) => handleCountryAutoConfigure(e.target.value)}
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 >
                   <option value="India">🇮🇳 India</option>
                   <option value="Bangladesh">🇧🇩 Bangladesh</option>
@@ -1366,7 +1644,7 @@ const Settings = ({
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 >
                   <option value="English">English</option>
                   <option value="Bengali">Bengali (বাংলা)</option>
@@ -1382,7 +1660,7 @@ const Settings = ({
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
                   placeholder="e.g. ₹, ৳, $, €"
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 />
               </div>
 
@@ -1393,7 +1671,7 @@ const Settings = ({
                   value={currencyCode}
                   onChange={(e) => setCurrencyCode(e.target.value)}
                   placeholder="e.g. INR, BDT, USD"
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 />
               </div>
 
@@ -1407,7 +1685,7 @@ const Settings = ({
                       setTaxLabel(e.target.value);
                     }
                   }}
-                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold mb-2"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold mb-2"
                 >
                   <option value="GST">GST</option>
                   <option value="VAT">VAT</option>
@@ -1421,7 +1699,7 @@ const Settings = ({
                   value={taxLabel === 'Custom' ? '' : taxLabel}
                   onChange={(e) => setTaxLabel(e.target.value)}
                   placeholder="Enter custom tax label..."
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 />
               )}
                 </div>
@@ -1432,7 +1710,7 @@ const Settings = ({
                 <select
                   value={dateFormat}
                   onChange={(e) => setDateFormat(e.target.value)}
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 >
                   <option value="DD/MM/YYYY">DD/MM/YYYY (e.g. 24/05/2026)</option>
                   <option value="MM/DD/YYYY">MM/DD/YYYY (e.g. 05/24/2026)</option>
@@ -1446,7 +1724,7 @@ const Settings = ({
                 <select
                   value={numberFormat}
                   onChange={(e) => setNumberFormat(e.target.value)}
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 >
                   <option value="Indian">12,34,567.89 (Indian lakh/crore)</option>
                   <option value="Standard">1,234,567.89 (Standard international)</option>
@@ -1463,7 +1741,7 @@ const Settings = ({
                     value={vatTax}
                     onChange={(e) => setVatTax(e.target.value)}
                     placeholder="e.g. 7.5"
-                    className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                    className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                   />
                 </div>
               )}
@@ -1509,7 +1787,7 @@ const Settings = ({
                     <select
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                      className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                     >
                       {country === 'India' && <option value="UPI">UPI (Unified Payments Interface - India)</option>}
                       {country === 'Bangladesh' && (
@@ -1532,7 +1810,7 @@ const Settings = ({
                         value={upiId}
                         onChange={(e) => setUpiId(e.target.value)}
                         placeholder="e.g. business@okaxis"
-                        className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                        className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                       />
                     </div>
                   )}
@@ -1545,7 +1823,7 @@ const Settings = ({
                         value={bkashNumber}
                         onChange={(e) => setBkashNumber(e.target.value)}
                         placeholder="e.g. 017XXXXXXXX"
-                        className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                        className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                       />
                     </div>
                   )}
@@ -1558,7 +1836,7 @@ const Settings = ({
                         value={nagadNumber}
                         onChange={(e) => setNagadNumber(e.target.value)}
                         placeholder="e.g. 019XXXXXXXX"
-                        className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                        className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                       />
                     </div>
                   )}
@@ -1571,7 +1849,7 @@ const Settings = ({
                         value={rocketNumber}
                         onChange={(e) => setRocketNumber(e.target.value)}
                         placeholder="e.g. 018XXXXXXXX"
-                        className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                        className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                       />
                     </div>
                   )}
@@ -1584,7 +1862,7 @@ const Settings = ({
                         value={customPaymentLink}
                         onChange={(e) => setCustomPaymentLink(e.target.value)}
                         placeholder="e.g. Bank name: X, A/C: Y, IFSC: Z or PayPal link..."
-                        className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium"
+                        className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium"
                       />
                     </div>
                   )}
@@ -1596,7 +1874,7 @@ const Settings = ({
                       value={payeeName}
                       onChange={(e) => setPayeeName(e.target.value)}
                       placeholder="e.g. BillQyro store"
-                      className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                      className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                     />
                   </div>
 
@@ -1607,7 +1885,7 @@ const Settings = ({
                       value={paymentNote}
                       onChange={(e) => setPaymentNote(e.target.value)}
                       placeholder="e.g. Please scan to complete payment."
-                      className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-medium"
+                      className="w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-medium"
                     />
                   </div>
                 </div>
@@ -1666,7 +1944,7 @@ const Settings = ({
                 <select
                   value={invoiceTemplate}
                   onChange={(e) => setInvoiceTemplate(e.target.value)}
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 >
                   <option value="modern">Modern A4 Template Layout</option>
                   <option value="classic">Classic A5 Template Layout</option>
@@ -1678,7 +1956,7 @@ const Settings = ({
                 <select
                   value={defaultBillingTemplate}
                   onChange={(e) => setDefaultBillingTemplate(e.target.value)}
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 >
                   <option value="embroidery">Embroidery / Sewing / Fashion</option>
                   <option value="grocery">Grocery / Kirana Shop</option>
@@ -1695,7 +1973,7 @@ const Settings = ({
                   value={invoicePrefix}
                   onChange={(e) => setInvoicePrefix(e.target.value)}
                   placeholder="e.g. INV-"
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 />
               </div>
 
@@ -1706,7 +1984,7 @@ const Settings = ({
                   value={gstNumber}
                   onChange={(e) => setGstNumber(e.target.value)}
                   placeholder="e.g. 29AAAAA0000A1Z5"
-                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold uppercase"
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold uppercase"
                 />
               </div>
 
@@ -1745,7 +2023,7 @@ const Settings = ({
                   onChange={(e) => setDefaultNotes(e.target.value)}
                   placeholder="Thank you for your business!"
                   rows="2"
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium resize-none text-xs"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium resize-none text-xs"
                 />
               </div>
 
@@ -1756,7 +2034,7 @@ const Settings = ({
                   onChange={(e) => setTerms(e.target.value)}
                   placeholder="1. Payment is expected within due date."
                   rows="2"
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium resize-none text-xs"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium resize-none text-xs"
                 />
               </div>
 
@@ -1767,7 +2045,7 @@ const Settings = ({
                   value={pdfFooter}
                   onChange={(e) => setPdfFooter(e.target.value)}
                   placeholder="e.g. This is a computer generated invoice."
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-medium"
                 />
               </div>
             </div>

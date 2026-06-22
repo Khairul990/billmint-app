@@ -337,6 +337,29 @@ const Dashboard = ({
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
+  const MiniHealthCircle = ({ value, label }) => {
+    const size = 44;
+    const sw = 4;
+    const r = (size - sw) / 2;
+    const c = 2 * Math.PI * r;
+    const offset = c - (value / 100) * c;
+    const color = value >= 70 ? '#10B981' : value >= 40 ? '#F59E0B' : '#EF4444';
+    return (
+      <div className="flex flex-col items-center gap-1 group">
+        <div className="relative transition-transform duration-300 group-hover:scale-110" style={{ width: size, height: size }}>
+          <svg width={size} height={size} className="-rotate-90">
+            <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--theme-border-soft)" strokeWidth={sw} />
+            <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={offset} style={{ transition: 'stroke-dashoffset 1s ease' }} />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-[10px] font-black tabular-nums" style={{ color }}>{value}</span>
+          </div>
+        </div>
+        <span className="text-[6px] font-bold text-theme-muted uppercase tracking-wider text-center leading-tight">{label}</span>
+      </div>
+    );
+  };
+
   const KpiCard = ({ title, value, icon: Icon, trend, trendUp = true }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -510,23 +533,29 @@ const Dashboard = ({
             </div>
           </motion.div>
 
-          {/* ===== MOBILE HEALTH SCORE + COLLECTION ===== */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="card-premium p-4 flex flex-col items-center">
-              <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-2">Health</p>
-              <div className="relative w-20 h-20 mb-1">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
-                  <circle cx="40" cy="40" r="34" fill="none" stroke="var(--theme-border-soft)" strokeWidth="6" />
-                  <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeDasharray={`${healthScore * 2.136} 213.6`} className={healthScore >= 70 ? 'text-emerald-500' : healthScore >= 40 ? 'text-amber-500' : 'text-red-500'} />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className={`text-xl font-black ${healthScore >= 70 ? 'text-emerald-500' : healthScore >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{healthScore}</span>
-                </div>
-              </div>
-              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${healthScore >= 70 ? 'bg-emerald-500/10 text-emerald-500' : healthScore >= 40 ? 'bg-amber-500/10 text-amber-500' : 'bg-red-500/10 text-red-500'}`}>
-                {healthScore >= 70 ? 'Great' : healthScore >= 40 ? 'Fair' : 'Low'}
+          {/* ===== MOBILE HEALTH SCORE + SUB-METRICS ===== */}
+          <div className="card-premium p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Business Health</p>
+              <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full ${overallHealth >= 70 ? 'bg-emerald-500/10 text-emerald-500' : overallHealth >= 40 ? 'bg-amber-500/10 text-amber-500' : 'bg-red-500/10 text-red-500'}`}>
+                {overallHealth >= 70 ? 'Great' : overallHealth >= 40 ? 'Fair' : 'Low'}
               </span>
             </div>
+            <div className="flex items-center justify-around gap-2">
+              <MiniHealthCircle value={billsHealth} label="Bills" />
+              <MiniHealthCircle value={paymentHealth} label="Payment" />
+              <MiniHealthCircle value={customerHealth} label="Customers" />
+              <MiniHealthCircle value={activityHealth} label="Activity" />
+              <MiniHealthCircle value={dueHealth} label="Due" />
+            </div>
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <div className="w-full h-1.5 bg-theme-surface rounded-full overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-1000 ${overallHealth >= 70 ? 'bg-emerald-500' : overallHealth >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${overallHealth}%` }} />
+              </div>
+              <span className="text-[9px] font-black text-theme-primary shrink-0 tabular-nums">{overallHealth}/100</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <div className="card-premium p-4 flex flex-col justify-center">
               <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-2">Collection</p>
               <p className="text-2xl font-black text-theme-primary tabular-nums">{collectionRate}%</p>
@@ -534,6 +563,21 @@ const Dashboard = ({
                 <div className={`h-full rounded-full ${collectionRate >= 70 ? 'bg-emerald-500' : collectionRate >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${collectionRate}%` }} />
               </div>
               <p className="text-[9px] text-theme-muted font-medium mt-1.5">{formatCurrency(totalCollected)} collected</p>
+            </div>
+            <div className="card-premium p-4 flex flex-col justify-center">
+              <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-2">Collection Trend</p>
+              {collectionTrendData.length === 0 ? (
+                <p className="text-[9px] text-theme-muted font-medium">No data</p>
+              ) : (
+                <div className="h-20 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={collectionTrendData}>
+                      <Bar dataKey="collection" fill="#10B981" radius={[2,2,0,0]} stackId="a" />
+                      <Bar dataKey="pending" fill="#F59E0B" radius={[2,2,0,0]} stackId="a" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </div>
           </div>
 
@@ -599,7 +643,7 @@ const Dashboard = ({
                   <p className="text-sm font-bold text-theme-primary">Create your first bill</p>
                   <p className="text-[11px] text-theme-muted font-semibold mt-0.5">Tap to get started</p>
                 </div>
-                <div className="mt-1 px-4 py-2 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-xl shadow-md">
+                <div className="mt-1 px-4 py-2 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-xl shadow-premium">
                   + Create Bill
                 </div>
               </motion.button>
@@ -639,6 +683,47 @@ const Dashboard = ({
             )}
           </div>
 
+          {/* ===== MOBILE TOP CUSTOMERS ===== */}
+          {topCustomers.length > 0 && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-premium p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-extrabold text-theme-primary">Top Customers</h3>
+              </div>
+              <div className="space-y-2">
+                {topCustomers.slice(0, 5).map((c, i) => (
+                  <div key={c.name} className="flex items-center justify-between p-2 bg-theme-surface rounded-xl">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-5 h-5 rounded-full bg-theme-accent/10 text-theme-accent text-[8px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
+                      <span className="text-[10px] font-bold text-theme-primary truncate">{c.name}</span>
+                    </div>
+                    <span className="text-[10px] font-black text-theme-primary tabular-nums">{formatCurrency(c.total)}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* ===== MOBILE DUE OVERVIEW ===== */}
+          {dueNext7Days.length > 0 && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-premium p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-extrabold text-theme-primary">Due in Next 7 Days</h3>
+                <span className="text-[9px] font-bold text-amber-500">{dueNext7Days.length} bills</span>
+              </div>
+              <div className="space-y-1.5">
+                {dueNext7Days.slice(0, 3).map(inv => (
+                  <div key={inv.id} className="flex items-center justify-between p-2 bg-theme-surface rounded-xl">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold text-theme-primary truncate">{inv.customerName || 'Walk-in'}</p>
+                      <p className="text-[8px] text-theme-muted font-medium">Due {formatShortDate(inv.dueDate)}</p>
+                    </div>
+                    <span className="text-[10px] font-black text-theme-primary tabular-nums">{formatCurrency(inv.grandTotal || inv.total || 0)}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
           {/* ===== MOBILE CUSTOMER INSIGHTS ===== */}
           <div className="card-premium p-4">
             <div className="flex items-center justify-between mb-3">
@@ -662,6 +747,29 @@ const Dashboard = ({
               </div>
             </div>
           </div>
+
+          {/* ===== MOBILE BUSINESS INSIGHTS ===== */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-premium p-4">
+            <h3 className="text-xs font-extrabold text-theme-primary mb-3">Business Insights</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-2.5 bg-theme-surface rounded-xl">
+                <p className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">Busiest Day</p>
+                <p className="text-xs font-black text-theme-primary mt-0.5">{busiestDay !== 'N/A' ? busiestDay : 'N/A'}</p>
+              </div>
+              <div className="p-2.5 bg-theme-surface rounded-xl">
+                <p className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">Avg Invoice</p>
+                <p className="text-xs font-black text-theme-primary mt-0.5">{formatCurrency(avgInvoiceValue)}</p>
+              </div>
+              <div className="p-2.5 bg-theme-surface rounded-xl">
+                <p className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">Collection Rate</p>
+                <p className="text-xs font-black text-theme-primary mt-0.5">{collectionRate}%</p>
+              </div>
+              <div className="p-2.5 bg-theme-surface rounded-xl">
+                <p className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">Top Customer</p>
+                <p className="text-xs font-black text-theme-primary mt-0.5 truncate">{topCustomers[0]?.name || 'N/A'}</p>
+              </div>
+            </div>
+          </motion.div>
 
           {/* ===== MOBILE WORKSPACE INFO ===== */}
           <div className="card-premium p-4">
@@ -777,6 +885,45 @@ const Dashboard = ({
               </div>
             </motion.div>
 
+            {/* ===== TODAY'S QUICK STATS ===== */}
+            <motion.div variants={itemVariants} className="stats-grid">
+              {(() => {
+                const today = new Date().toDateString();
+                const billsToday = invoices.filter(i => new Date(i.createdAt).toDateString() === today).length;
+                const collectedToday = invoices
+                  .filter(i => {
+                    const d = new Date(i.updatedAt || i.createdAt).toDateString();
+                    return d === today && (i.paymentStatus === 'Paid' || i.paymentStatus === 'paid');
+                  })
+                  .reduce((s, i) => s + (i.grandTotal || i.total || 0), 0);
+                const dueToday = invoices.filter(i => {
+                  if (i.paymentStatus === 'Paid' || i.paymentStatus === 'paid') return false;
+                  const dueDate = i.dueDate ? new Date(i.dueDate).toDateString() : null;
+                  return dueDate === today;
+                }).length;
+                const newCustToday = customers.filter(c => {
+                  const d = c.createdAt ? new Date(c.createdAt).toDateString() : null;
+                  return d === today;
+                }).length;
+                return [
+                  { label: 'Bills Created Today', value: billsToday, icon: FileText, color: 'text-theme-accent' },
+                  { label: 'Amount Collected Today', value: formatCurrency(collectedToday), icon: DollarSign, color: 'text-emerald-500' },
+                  { label: 'Due Bills Today', value: dueToday, icon: Clock, color: 'text-amber-500' },
+                  { label: 'New Customers Today', value: newCustToday, icon: Users, color: 'text-blue-500' }
+                ].map((s, i) => (
+                  <motion.div key={i} variants={itemVariants} className="stat-premium">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`icon-premium icon-premium-sm ${s.color}`}>
+                        <s.icon className="w-4 h-4" />
+                      </span>
+                    </div>
+                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-0.5">{s.label}</p>
+                    <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums">{s.value}</p>
+                  </motion.div>
+                ));
+              })()}
+            </motion.div>
+
             {/* ===== QUICK ACTION BAR ===== */}
             <motion.div variants={itemVariants} className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
               <button onClick={onQuickBillOpen} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-[image:var(--accent-gradient)] text-white rounded-xl shadow-sm hover:shadow-premium-hover transition-all active:scale-95 shrink-0">
@@ -840,20 +987,27 @@ const Dashboard = ({
               <div className="col-span-4 card-premium p-5 flex flex-col">
                 <div className="section-header">
                   <h3 className="section-header-title">Business Health</h3>
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${overallHealth >= 70 ? 'bg-emerald-500/10 text-emerald-500' : overallHealth >= 40 ? 'bg-amber-500/10 text-amber-500' : 'bg-red-500/10 text-red-500'}`}>
+                    {overallHealth >= 70 ? 'Excellent' : overallHealth >= 40 ? 'Fair' : 'Critical'}
+                  </span>
                 </div>
-                <div className="flex-1 flex flex-col items-center justify-center">
-                  <div className="relative w-32 h-32 mb-3">
+                <div className="flex-1 flex flex-col items-center justify-center gap-4">
+                  <div className="relative w-28 h-28">
                     <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
                       <circle cx="60" cy="60" r="52" fill="none" stroke="var(--theme-border-soft)" strokeWidth="8" />
-                      <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeDasharray={`${healthScore * 3.267} 326.7`} className={healthScore >= 70 ? 'text-emerald-500' : healthScore >= 40 ? 'text-amber-500' : 'text-red-500'} />
+                      <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeDasharray={`${overallHealth * 3.267} 326.7`} className={overallHealth >= 70 ? 'text-emerald-500' : overallHealth >= 40 ? 'text-amber-500' : 'text-red-500'} />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className={`text-3xl font-black ${healthScore >= 70 ? 'text-emerald-500' : healthScore >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{healthScore}</span>
+                      <span className={`text-3xl font-black ${overallHealth >= 70 ? 'text-emerald-500' : overallHealth >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{overallHealth}</span>
                     </div>
                   </div>
-                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${healthScore >= 70 ? 'bg-emerald-500/10 text-emerald-500' : healthScore >= 40 ? 'bg-amber-500/10 text-amber-500' : 'bg-red-500/10 text-red-500'}`}>
-                    {healthScore >= 70 ? 'Excellent' : healthScore >= 40 ? 'Needs Attention' : 'Critical'}
-                  </span>
+                  <div className="grid grid-cols-5 gap-2 w-full">
+                    <MiniHealthCircle value={billsHealth} label="Bills" />
+                    <MiniHealthCircle value={paymentHealth} label="Payment" />
+                    <MiniHealthCircle value={customerHealth} label="Cust." />
+                    <MiniHealthCircle value={activityHealth} label="Activity" />
+                    <MiniHealthCircle value={dueHealth} label="Due" />
+                  </div>
                 </div>
               </div>
               <div className="col-span-8 card-premium p-5">
@@ -889,7 +1043,7 @@ const Dashboard = ({
             {/* ===== ROW 2: CHARTS ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
               {/* Traffic / Revenue Trend */}
-              <div className="col-span-8 card-premium p-5">
+              <div className="col-span-6 card-premium p-5">
                 <div className="section-header">
                   <div>
                     <h3 className="section-header-title">Revenue Trend</h3>
@@ -900,11 +1054,11 @@ const Dashboard = ({
                   </button>
                 </div>
                 <div className="h-[280px] w-full mt-6">
-                  {getRevenueTrend().length === 0 ? (
+                  {revenueTrend.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-xs text-theme-muted">No data available</div>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={getRevenueTrend().reverse()} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <AreaChart data={[...revenueTrend].reverse()} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="var(--theme-accent)" stopOpacity={0.4}/>
@@ -922,8 +1076,35 @@ const Dashboard = ({
                 </div>
               </div>
 
+              {/* Collection Trend */}
+              <div className="col-span-3 card-premium p-5 flex flex-col">
+                <div className="section-header">
+                  <h3 className="section-header-title">Collection Trend</h3>
+                </div>
+                <div className="flex-1 h-[280px] w-full mt-6">
+                  {collectionTrendData.length === 0 ? (
+                    <div className="flex items-center justify-center h-full text-xs text-theme-muted">No data</div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={collectionTrendData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--theme-border-soft)" opacity={0.5} />
+                        <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'var(--theme-muted)' }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'var(--theme-muted)' }} dx={-10} />
+                        <Tooltip contentStyle={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border-soft)', borderRadius: '12px' }} itemStyle={{ fontSize: '12px', fontWeight: 700 }} />
+                        <Bar dataKey="collection" name="Collected" fill="#10B981" radius={[3,3,0,0]} stackId="a" />
+                        <Bar dataKey="pending" name="Pending" fill="#F59E0B" radius={[3,3,0,0]} stackId="a" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+                <div className="flex items-center justify-center gap-4 mt-2 text-[9px] font-bold">
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" /> Collected</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-amber-500" /> Pending</span>
+                </div>
+              </div>
+
               {/* Sessions By Device / Payment Breakdown */}
-              <div className="col-span-4 card-premium p-5 flex flex-col">
+              <div className="col-span-3 card-premium p-5 flex flex-col">
                 <h3 className="section-header-title mb-6">Payment Breakdown</h3>
                 <div className="flex-1 flex flex-col items-center justify-center">
                   <div className="h-[220px] w-full relative">
@@ -933,8 +1114,8 @@ const Dashboard = ({
                           data={getPaymentBreakdown()}
                           cx="50%"
                           cy="50%"
-                          innerRadius={70}
-                          outerRadius={95}
+                          innerRadius={65}
+                          outerRadius={90}
                           paddingAngle={3}
                           dataKey="value"
                           stroke="none"
@@ -947,15 +1128,15 @@ const Dashboard = ({
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <p className="text-xl font-black text-theme-primary">{formatCurrency(totalCollected)}</p>
-                      <p className="text-[11px] text-theme-muted font-bold uppercase mt-0.5">Collected</p>
+                      <p className="text-lg font-black text-theme-primary">{formatCurrency(totalCollected)}</p>
+                      <p className="text-[10px] text-theme-muted font-bold uppercase mt-0.5">Collected</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-center gap-6 mt-8 w-full">
+                  <div className="flex items-center justify-center gap-4 mt-6 w-full">
                     {getPaymentBreakdown().map((entry, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ background: entry.color }} />
-                        <span className="text-xs font-bold text-theme-primary">{entry.name}</span>
+                      <div key={idx} className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ background: entry.color }} />
+                        <span className="text-[10px] font-bold text-theme-primary">{entry.name}</span>
                       </div>
                     ))}
                   </div>
@@ -1017,6 +1198,66 @@ const Dashboard = ({
                     <span className="text-xs font-bold text-theme-primary">Switch Workspace</span>
                     <ChevronRight className="w-4 h-4 text-theme-muted" />
                   </button>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ===== TOP CUSTOMERS + BUSINESS INSIGHTS ===== */}
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+              <div className="col-span-6 card-premium p-5">
+                <div className="section-header">
+                  <div>
+                    <h3 className="section-header-title">Top Customers</h3>
+                    <p className="section-header-subtitle">Highest billing customers.</p>
+                  </div>
+                  <button onClick={() => setCurrentTab('customers')} className="btn-premium-ghost text-xs">View All <ChevronRight className="w-3 h-3" /></button>
+                </div>
+                <div className="mt-6 space-y-2">
+                  {topCustomers.length === 0 ? (
+                    <p className="text-xs text-theme-muted font-medium text-center py-6">No customer data yet.</p>
+                  ) : (
+                    topCustomers.map((c, i) => (
+                      <motion.div key={c.name} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="flex items-center justify-between p-3 rounded-xl bg-theme-surface hover:bg-theme-accent/5 transition-colors">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-[9px] font-black ${i === 0 ? 'bg-amber-500/20 text-amber-500' : 'bg-theme-accent/10 text-theme-accent'}`}>
+                            {i + 1}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-theme-primary truncate">{c.name}</p>
+                          </div>
+                        </div>
+                        <p className="text-xs font-black text-theme-primary tabular-nums">{formatCurrency(c.total)}</p>
+                      </motion.div>
+                    ))
+                  )}
+                </div>
+              </div>
+              <div className="col-span-6 card-premium p-5">
+                <div className="section-header">
+                  <h3 className="section-header-title">Business Insights</h3>
+                </div>
+                <p className="section-header-subtitle mb-6">Key metrics driving your business.</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="stat-premium !p-4">
+                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Busiest Day</p>
+                    <p className="text-2xl font-black text-theme-primary tabular-nums">{busiestDay !== 'N/A' ? busiestDay : '-'}</p>
+                    <p className="text-2xs text-theme-muted font-medium mt-1">Most invoice creation day</p>
+                  </div>
+                  <div className="stat-premium !p-4">
+                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Avg Invoice</p>
+                    <p className="text-2xl font-black text-theme-primary tabular-nums">{formatCurrency(avgInvoiceValue)}</p>
+                    <p className="text-2xs text-theme-muted font-medium mt-1">Per invoice</p>
+                  </div>
+                  <div className="stat-premium !p-4">
+                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Collection Rate</p>
+                    <p className="text-2xl font-black text-theme-primary tabular-nums">{collectionRate}%</p>
+                    <p className="text-2xs text-emerald-500 font-medium mt-1">Overall rate</p>
+                  </div>
+                  <div className="stat-premium !p-4">
+                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Top Customer</p>
+                    <p className="text-xl font-black text-theme-primary truncate">{topCustomers[0]?.name || '-'}</p>
+                    <p className="text-2xs text-theme-accent font-medium mt-1">Highest spender</p>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -1127,6 +1368,33 @@ const Dashboard = ({
                 )}
               </div>
             </motion.div>
+
+            {/* ===== DUE OVERVIEW ===== */}
+            {dueNext7Days.length > 0 && (
+              <motion.div variants={itemVariants} className="card-premium p-5">
+                <div className="section-header">
+                  <div>
+                    <h3 className="section-header-title">Due in Next 7 Days</h3>
+                    <p className="section-header-subtitle">Invoices requiring attention soon.</p>
+                  </div>
+                  <button onClick={() => setCurrentTab('due-ledger')} className="btn-premium-ghost text-xs">
+                    Collect Due <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+                <div className="mt-6 grid grid-cols-5 gap-3">
+                  {dueNext7Days.map(inv => (
+                    <div key={inv.id} className="p-3 rounded-xl bg-theme-surface border border-amber-500/10 hover:border-amber-500/30 transition-colors">
+                      <p className="text-[10px] font-bold text-theme-primary truncate">{inv.customerName || 'Walk-in'}</p>
+                      <p className="text-[8px] text-theme-muted font-medium mt-0.5">Due {formatShortDate(inv.dueDate)}</p>
+                      <p className="text-xs font-black text-theme-primary mt-1 tabular-nums">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
+                      <span className={`inline-block mt-1 text-[8px] font-bold px-1.5 py-0.5 rounded-full ${new Date(inv.dueDate) < new Date() ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                        {new Date(inv.dueDate) < new Date() ? 'Overdue' : 'Upcoming'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
             {/* ===== ROW 4: ACTIVITY FEED + QUICK ACTIONS ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">

@@ -49,6 +49,7 @@ import { db, firebaseReady } from '../services/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import { pageVariants, staggerContainer, staggerItem, fadeInUp } from '../utils/animations';
+import PremiumEmptyState from '../components/PremiumEmptyState';
 
 const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
   const [showUpgradeForm, setShowUpgradeForm] = useState(false);
@@ -76,7 +77,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
   const [platformNote, setPlatformNote] = useState('');
   const [submittingPlatformProof, setSubmittingPlatformProof] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
-  const [billCount, setBillCount] = useState(10);
+  const [billCount, setBillCount] = useState(20);
 
   const country = businessSettings?.country || 'India';
   const currencySymbol = businessSettings?.currency || '₹';
@@ -102,6 +103,10 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
   };
 
   const activePricing = getPricing(selectedPlan);
+  const perBillRate = Math.round((activePricing.amount / (businessSettings?.freeInvoiceLimit || 15)) * 1.5);
+  const payPerBillCost = billCount * perBillRate;
+  const premiumPrice = activePricing.amount;
+  const savings = Math.max(0, payPerBillCost - premiumPrice);
 
   useEffect(() => {
     setPaidAmount(activePricing.amount.toString());
@@ -407,6 +412,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                 {!isPremium ? 'Currently Active Starter' : 'Downgrade Unavailable'}
               </div>
             </div>
+            <p className="text-[10px] text-theme-accent font-bold mt-3 text-center">Best for freelancers starting out</p>
           </motion.div>
    
           <motion.div variants={staggerItem} className="h-full">
@@ -481,9 +487,51 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                     </button>
                   )}
                 </div>
+            <p className="text-[10px] text-amber-600 font-bold mt-3 text-center">Perfect for growing businesses</p>
               </div>
             </ShineBorder>
           </motion.div>
+        </motion.div>
+
+        <motion.div variants={fadeInUp} className="card-premium bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft shadow-premium mt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
+              <BarChart3 className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-theme-primary">Pricing Calculator</h3>
+              <p className="text-[11px] text-theme-muted font-semibold mt-0.5">Compare Pay Per Bill vs Premium to see your savings</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="text-[10px] font-bold text-theme-muted uppercase tracking-wider block mb-1.5">Monthly Bills</label>
+              <input
+                type="number"
+                value={billCount}
+                onChange={(e) => setBillCount(Math.max(0, Math.min(500, parseInt(e.target.value) || 0)))}
+                min={0}
+                max={500}
+                className="input-premium w-full bg-theme-surface border border-theme-border-soft rounded-xl px-4 py-3 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent"
+              />
+              <p className="text-[9px] text-theme-muted font-medium mt-1">Slide to your expected monthly volume</p>
+            </div>
+            <div className="stat-premium bg-theme-surface p-4 rounded-2xl border border-theme-border-soft/60 flex flex-col justify-center">
+              <p className="text-[10px] uppercase font-black text-theme-muted tracking-wider">Pay Per Bill</p>
+              <p className="text-2xl font-black text-theme-primary mt-1 tabular-nums">{currencySymbol}{payPerBillCost.toFixed(0)}</p>
+              <p className="text-[9px] text-theme-muted font-medium mt-0.5">at {currencySymbol}{perBillRate}/invoice</p>
+            </div>
+            <div className="stat-premium bg-theme-surface p-4 rounded-2xl border border-theme-border-soft/60 flex flex-col justify-center">
+              <p className="text-[10px] uppercase font-black text-theme-muted tracking-wider">Premium ({selectedPlan})</p>
+              <p className="text-2xl font-black text-theme-primary mt-1 tabular-nums">{currencySymbol}{premiumPrice}</p>
+              <p className="text-[9px] text-theme-muted font-medium mt-0.5">unlimited invoices</p>
+            </div>
+            <div className="stat-premium bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 p-4 rounded-2xl flex flex-col justify-center">
+              <p className="text-[10px] uppercase font-black text-emerald-600 tracking-wider">You Save</p>
+              <p className="text-2xl font-black text-emerald-500 mt-1 tabular-nums">{currencySymbol}{savings}</p>
+              <p className="text-[9px] text-emerald-600/70 font-medium mt-0.5">{savings > 0 ? `${((savings / payPerBillCost) * 100).toFixed(0)}% cheaper with Premium` : 'Premium is cost-effective'}</p>
+            </div>
+          </div>
         </motion.div>
 
         <motion.div variants={fadeInUp} className="card-premium bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft shadow-premium mt-8">
@@ -622,6 +670,52 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
               );
             })}
           </motion.div>
+        </motion.div>
+
+        {/* MONTHLY SAVINGS CALCULATOR */}
+        <motion.div variants={fadeInUp} className="card-premium bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft shadow-premium mt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm">
+              <BarChart3 className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-theme-primary">Monthly Savings Calculator</h3>
+              <p className="text-[11px] text-theme-muted font-semibold mt-0.5">See how much you save with Premium vs Pay Per Bill</p>
+            </div>
+          </div>
+          <div className="space-y-5">
+            <div>
+              <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider mb-2">Bills per Month</label>
+              <div className="flex items-center gap-4">
+                <input
+                  type="range"
+                  min="5"
+                  max="100"
+                  value={billCount}
+                  onChange={(e) => setBillCount(parseInt(e.target.value))}
+                  className="input-premium flex-1 accent-theme-accent"
+                />
+                <span className="stat-premium !p-2 min-w-[60px] text-center text-lg font-black text-theme-primary tabular-nums">{billCount}</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="stat-premium !p-4 text-center">
+                <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Pay Per Bill</p>
+                <p className="text-xl font-black text-rose-500 tabular-nums">{currencySymbol}{(payPerBillCost).toFixed(0)}</p>
+                <p className="text-[9px] text-theme-muted font-medium mt-1">{currencySymbol}{perBillRate} per bill</p>
+              </div>
+              <div className="stat-premium !p-4 text-center border-theme-accent/30">
+                <p className="text-2xs font-bold text-theme-accent uppercase tracking-premium-wide mb-1">Premium Cost</p>
+                <p className="text-xl font-black text-theme-primary tabular-nums">{currencySymbol}{premiumPrice}</p>
+                <p className="text-[9px] text-theme-muted font-medium mt-1">per month</p>
+              </div>
+              <div className="stat-premium !p-4 text-center bg-emerald-500/5 border-emerald-500/20">
+                <p className="text-2xs font-bold text-emerald-600 uppercase tracking-premium-wide mb-1">You Save</p>
+                <p className="text-xl font-black text-emerald-600 tabular-nums">{currencySymbol}{savings.toFixed(0)}</p>
+                <p className="text-[9px] text-emerald-600/70 font-medium mt-1">{savings > 0 ? `${Math.round((savings / payPerBillCost) * 100)}% less` : 'Equal cost'}</p>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
         <motion.div variants={fadeInUp} className="card-premium bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft shadow-premium mt-8">
@@ -813,7 +907,12 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
           <motion.div variants={staggerItem} className="card-premium bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium">
             <h3 className="section-header text-lg font-black text-theme-primary mb-4">Dues Payment History</h3>
             {platformProofs.length === 0 ? (
-              <p className="text-xs text-theme-muted font-bold italic py-4">No payment proofs submitted yet.</p>
+              <PremiumEmptyState
+                icon={Upload}
+                title="No payment proofs yet"
+                description="Submit your first platform payment proof to record your dues payment history"
+                className="min-h-[200px]"
+              />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {platformProofs.map((proof) => (

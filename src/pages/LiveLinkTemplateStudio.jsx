@@ -17,7 +17,10 @@ import {
   CreditCard,
   Globe,
   Star,
-  Layers
+  Layers,
+  Sun,
+  X,
+  Eye
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -47,14 +50,14 @@ const staggerItem = {
 };
 
 const templateCategory = {
-  classic: 'General',
-  modern: 'General',
-  mobile: 'Mobile',
-  retail: 'Retail',
+  classic: 'Classic',
+  modern: 'Modern',
+  mobile: 'Mobile-first',
+  retail: 'Mobile-first',
   corporate: 'Corporate',
-  boutique: 'Fashion',
-  clinic: 'Medical',
-  repair: 'Service'
+  boutique: 'Classic',
+  clinic: 'Classic',
+  repair: 'Corporate'
 };
 
 const templateDevices = {
@@ -79,11 +82,41 @@ const templateFeatures = {
   repair: ['QR Code', 'Payment Links', 'Status']
 };
 
+const featureBadgeMapping = {
+  classic: ['QR', 'Payment'],
+  modern: ['QR', 'Payment', 'Branded'],
+  mobile: ['QR', 'WhatsApp', 'Share'],
+  retail: ['QR', 'Payment', 'Share'],
+  corporate: ['QR', 'Payment', 'Branded', 'Share'],
+  boutique: ['QR', 'Branded', 'WhatsApp'],
+  clinic: ['QR', 'Payment'],
+  repair: ['QR', 'Payment', 'WhatsApp']
+};
+
+const templateTheme = {
+  classic: 'Light',
+  modern: 'Dark',
+  mobile: 'Both',
+  retail: 'Light',
+  corporate: 'Dark',
+  boutique: 'Light',
+  clinic: 'Light',
+  repair: 'Dark'
+};
+
+const loadRatings = () => {
+  try { return JSON.parse(localStorage.getItem('ll_template_ratings') || '{}'); } catch { return {}; }
+};
+const saveRatings = (r) => localStorage.setItem('ll_template_ratings', JSON.stringify(r));
+
 const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCurrentTab }) => {
   const [selectedTemplate, setSelectedTemplate] = useState('classic');
   const [filterCategory, setFilterCategory] = useState('All');
+  const [ratings, setRatings] = useState(loadRatings);
+  const [previewModal, setPreviewModal] = useState(null);
+  const [previewDevice, setPreviewDevice] = useState('mobile');
   const isProUser = subscription?.status === 'active';
-  const categories = ['All', 'General', 'Mobile', 'Retail', 'Corporate', 'Fashion', 'Medical', 'Service'];
+  const categories = ['All', 'Classic', 'Modern', 'Mobile-first', 'Corporate'];
 
   const filteredTemplates = filterCategory === 'All'
     ? liveLinkTemplates
@@ -294,7 +327,47 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
                   </h3>
                   <p className="text-[10px] text-theme-muted font-medium mb-2">{template.desc}</p>
 
-                  {/* Theme Feature Badges */}
+                  {/* Theme + View Mode Badges */}
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    <span className={`text-[7px] font-bold px-1.5 py-0.5 rounded border flex items-center gap-1 ${templateTheme[template.id] === 'Both' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : templateTheme[template.id] === 'Dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-theme-card text-theme-primary border-theme-border-soft'}`}>
+                      {templateTheme[template.id] === 'Both' ? <Layers className="w-2 h-2" /> : templateTheme[template.id] === 'Dark' ? <Monitor className="w-2 h-2" /> : <Sun className="w-2 h-2" />} {templateTheme[template.id]} Mode
+                    </span>
+                  </div>
+
+                  {/* Feature Badges (QR, Payment, Branded, WhatsApp, Share) */}
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {(featureBadgeMapping[template.id] || []).map(feat => {
+                      const featColors = {
+                        QR: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+                        Payment: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+                        Branded: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+                        WhatsApp: 'bg-green-500/10 text-green-500 border-green-500/20',
+                        Share: 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                      };
+                      return (
+                        <span key={feat} className={`text-[7px] font-bold px-1.5 py-0.5 rounded border flex items-center gap-1 ${featColors[feat] || 'bg-theme-accent/10 text-theme-accent border-theme-accent/20'}`}>
+                          {feat === 'QR' && <QrCode className="w-2 h-2" />}
+                          {feat === 'Payment' && <CreditCard className="w-2 h-2" />}
+                          {feat === 'Branded' && <Star className="w-2 h-2" />}
+                          {feat === 'WhatsApp' && <Globe className="w-2 h-2" />}
+                          {feat === 'Share' && <Layers className="w-2 h-2" />}
+                          {feat}
+                        </span>
+                      );
+                    })}
+                  </div>
+
+                  {/* Rating Stars */}
+                  <div className="flex items-center gap-0.5 mb-2">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button key={star} onClick={(e) => { e.stopPropagation(); const r = { ...ratings, [template.id]: star }; setRatings(r); saveRatings(r); }} className="transition-transform hover:scale-110">
+                        <Star className={`w-3 h-3 ${(ratings[template.id] || 0) >= star ? 'text-amber-400 fill-amber-400' : 'text-theme-border-soft'}`} />
+                      </button>
+                    ))}
+                    <span className="text-[7px] text-theme-muted font-bold ml-1">{ratings[template.id] ? `${ratings[template.id]}/5` : ''}</span>
+                  </div>
+
+                  {/* Existing feature badges */}
                   <div className="flex flex-wrap gap-1">
                     {features.map(feat => (
                       <span key={feat} className="text-[7px] font-bold bg-theme-accent/10 text-theme-accent px-1.5 py-0.5 rounded border border-theme-accent/20 flex items-center gap-1">
@@ -304,9 +377,10 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
                   </div>
                 </div>
 
+                <div className="flex gap-2 mt-3">
                 <button
                   onClick={() => handleApplyTemplate(template)}
-                  className={`w-full py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 btn-premium ${
+                  className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 btn-premium ${
                     isActive 
                       ? 'bg-theme-accent/10 text-theme-accent cursor-default border border-theme-accent/20' 
                       : isLocked
@@ -322,12 +396,97 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
                     'Apply Template'
                   )}
                 </button>
+                <button
+                  onClick={() => setPreviewModal(template.id)}
+                  className="py-3 px-4 rounded-xl text-xs font-bold transition-all bg-theme-app dark:bg-theme-surface border border-theme-border-soft text-theme-muted hover:bg-theme-accent hover:text-white flex items-center gap-1.5"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+              </div>
               </div>
             </motion.div>
           );
         })}
       </motion.div>
       )}
+
+      {/* Preview Modal */}
+      {previewModal && (() => {
+        const tpl = liveLinkTemplates.find(t => t.id === previewModal);
+        if (!tpl) return null;
+        const devices = templateDevices[tpl.id] || [];
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => { setPreviewModal(null); setPreviewDevice('mobile'); }}>
+            <div className="bg-theme-card rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl border border-theme-border-soft" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
+                <div className="flex items-center gap-3">
+                  <h3 className="font-extrabold text-theme-primary text-sm">{tpl.name}</h3>
+                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${tpl.type === 'free' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white'}`}>
+                    {tpl.type === 'free' ? 'FREE' : 'PRO'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* Device toggle */}
+                  {devices.length > 0 && (
+                    <div className="flex bg-theme-surface rounded-lg p-0.5 gap-0.5">
+                      {devices.includes('Mobile') && (
+                        <button onClick={() => setPreviewDevice('mobile')} className={`p-1.5 rounded-md transition-all ${previewDevice === 'mobile' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}>
+                          <Smartphone className="w-4 h-4" />
+                        </button>
+                      )}
+                      {devices.includes('Tablet') && (
+                        <button onClick={() => setPreviewDevice('tablet')} className={`p-1.5 rounded-md transition-all ${previewDevice === 'tablet' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}>
+                          <Tablet className="w-4 h-4" />
+                        </button>
+                      )}
+                      {devices.includes('Desktop') && (
+                        <button onClick={() => setPreviewDevice('desktop')} className={`p-1.5 rounded-md transition-all ${previewDevice === 'desktop' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}>
+                          <Monitor className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <button onClick={() => { setPreviewModal(null); setPreviewDevice('mobile'); }} className="p-1.5 rounded-lg hover:bg-theme-app text-theme-muted">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              
+              {/* Preview Content */}
+              <div className="bg-gradient-to-br from-theme-app to-theme-surface p-6 flex items-center justify-center min-h-[320px] relative overflow-hidden">
+                <div className={`${previewDevice === 'mobile' ? 'w-[280px] rounded-[2.5rem] border-4 border-gray-800 dark:border-gray-600 shadow-2xl overflow-hidden bg-theme-card h-[500px]' : previewDevice === 'tablet' ? 'w-[450px] rounded-2xl border-4 border-gray-800 dark:border-gray-600 shadow-2xl overflow-hidden bg-theme-card h-[400px]' : 'w-full max-w-2xl rounded-xl border border-theme-border-soft shadow-xl overflow-hidden bg-theme-card h-[380px]'} transition-all duration-300`}>
+                  <div className="h-full w-full relative overflow-hidden">
+                    {/* Device top bar for mobile/tablet */}
+                    {(previewDevice === 'mobile' || previewDevice === 'tablet') && (
+                      <div className="h-6 bg-gray-800 dark:bg-gray-900 flex items-center justify-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                      </div>
+                    )}
+                    <div className={`${(previewDevice === 'mobile' || previewDevice === 'tablet') ? 'h-[calc(100%-24px)]' : 'h-full'}`}>
+                      {renderPreview(tpl.id)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-4 border-t border-theme-border-soft flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-theme-muted font-semibold">Previewing:</span>
+                  <span className="text-[10px] font-bold text-theme-primary capitalize">{previewDevice}</span>
+                </div>
+                <button
+                  onClick={() => { handleApplyTemplate(tpl); setPreviewModal(null); setPreviewDevice('mobile'); }}
+                  className="px-4 py-2 bg-theme-accent text-white text-xs font-bold rounded-xl hover:shadow-md transition-all active:scale-95"
+                >
+                  Use This Template
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </motion.div>
   );
 };

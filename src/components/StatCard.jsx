@@ -20,10 +20,12 @@ const StatCard = ({ title, value, icon: Icon, trend, trendUp = true, accentColor
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="stat-premium group cursor-pointer"
+      className="stat-premium group cursor-pointer hover:shadow-premium-xl"
       onClick={onClick}
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.2 }}
+      whileHover={{ scale: 1.01, y: -2 }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+      style={{ transition: 'box-shadow 0.25s ease' }}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="icon-premium shrink-0 group-hover:scale-110 transition-transform duration-300">

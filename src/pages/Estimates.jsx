@@ -214,7 +214,7 @@ const Estimates = ({
               // The user needs to manually select "Estimate" in the wizard for now, as CreateInvoiceWizard manages the dropdown
               toast('Remember to select "Estimate" as the Bill Type!', { icon: '💡' });
             }}
-            className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md transition-shadow cursor-pointer"
+            className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-premium transition-shadow cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Create Estimate</span>

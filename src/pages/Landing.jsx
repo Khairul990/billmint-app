@@ -243,26 +243,26 @@ const Landing = ({ onLoginClick }) => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="flex-1 order-2 lg:order-1 w-full">
-              <div className="bg-theme-card rounded-2xl border border-theme-border-soft shadow-xl p-4 sm:p-6 max-w-md mx-auto lg:mx-0">
+              <div className="bg-theme-card rounded-2xl border border-theme-border-soft shadow-premium p-4 sm:p-6 max-w-md mx-auto lg:mx-0">
                 <div className="flex items-center gap-3 mb-4 pb-3 border-b-2 border-theme-border-soft">
-                  <div className="w-10 h-10 rounded-lg bg-[#14284B] text-white flex items-center justify-center font-bold">B</div>
-                  <div><p className="text-sm font-bold text-slate-900 dark:text-white">Business Name</p><p className="text-[9px] text-slate-500 font-semibold">GSTIN: 29AAAAA0000A1Z5</p></div>
-                  <div className="ml-auto text-right"><p className="text-[10px] font-bold text-slate-900 dark:text-white">INVOICE</p><p className="text-[8px] text-slate-500">#INV-2026-0001</p></div>
+                  <div className="w-10 h-10 rounded-lg bg-theme-accent text-white flex items-center justify-center font-bold">B</div>
+                  <div><p className="text-sm font-bold text-theme-primary">Business Name</p><p className="text-[9px] text-theme-muted font-semibold">GSTIN: 29AAAAA0000A1Z5</p></div>
+                  <div className="ml-auto text-right"><p className="text-[10px] font-bold text-theme-primary">INVOICE</p><p className="text-[8px] text-theme-muted">#INV-2026-0001</p></div>
                 </div>
                 <div className="flex gap-3 mb-4 text-[10px]">
-                  <div className="flex-1"><p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Bill To</p><p className="font-bold text-slate-900 dark:text-white">Customer Name</p><p className="text-slate-500">Phone: +91 98765 43210</p></div>
-                  <div className="flex-1 text-right"><p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Date</p><p className="font-bold text-slate-900 dark:text-white">15/06/2026</p><p className="text-slate-500">Due: 30/06/2026</p></div>
+                  <div className="flex-1"><p className="text-[8px] font-bold text-theme-muted uppercase mb-1">Bill To</p><p className="font-bold text-theme-primary">Customer Name</p><p className="text-theme-muted">Phone: +91 98765 43210</p></div>
+                  <div className="flex-1 text-right"><p className="text-[8px] font-bold text-theme-muted uppercase mb-1">Date</p><p className="font-bold text-theme-primary">15/06/2026</p><p className="text-theme-muted">Due: 30/06/2026</p></div>
                 </div>
-                <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden text-[9px] mb-3">
-                  <div className="flex bg-slate-100 dark:bg-slate-800 font-bold p-2 text-slate-600 dark:text-slate-300">
+                <div className="border border-theme-border-soft rounded-lg overflow-hidden text-[9px] mb-3">
+                  <div className="flex bg-theme-surface font-bold p-2 text-theme-muted">
                     <div className="flex-1">Item</div><div className="w-12 text-center">Qty</div><div className="w-16 text-right">Rate</div><div className="w-16 text-right">Amount</div>
                   </div>
-                  <div className="flex p-2 border-t border-slate-100 dark:border-slate-700"><div className="flex-1 font-bold text-slate-900 dark:text-white">Product/Service</div><div className="w-12 text-center text-slate-600">2</div><div className="w-16 text-right text-slate-600">₹500</div><div className="w-16 text-right font-bold text-slate-900 dark:text-white">₹1,000</div></div>
+                  <div className="flex p-2 border-t border-theme-border-soft"><div className="flex-1 font-bold text-theme-primary">Product/Service</div><div className="w-12 text-center text-theme-muted">2</div><div className="w-16 text-right text-theme-muted">₹500</div><div className="w-16 text-right font-bold text-theme-primary">₹1,000</div></div>
                 </div>
                 <div className="text-right space-y-1 text-[10px]">
-                  <div className="flex justify-between"><span className="text-slate-500">Subtotal</span><span className="font-bold text-slate-900 dark:text-white">₹1,000</span></div>
-                  <div className="flex justify-between"><span className="text-slate-500">GST (18%)</span><span className="font-bold text-slate-900 dark:text-white">₹180</span></div>
-                  <div className="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-1"><span className="font-bold text-slate-900 dark:text-white">Grand Total</span><span className="font-bold text-lg text-theme-accent">₹1,180</span></div>
+                  <div className="flex justify-between"><span className="text-theme-muted">Subtotal</span><span className="font-bold text-theme-primary">₹1,000</span></div>
+                  <div className="flex justify-between"><span className="text-theme-muted">GST (18%)</span><span className="font-bold text-theme-primary">₹180</span></div>
+                  <div className="flex justify-between border-t border-theme-border-soft pt-1"><span className="font-bold text-theme-primary">Grand Total</span><span className="font-bold text-lg text-theme-accent">₹1,180</span></div>
                 </div>
               </div>
             </motion.div>

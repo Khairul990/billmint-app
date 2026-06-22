@@ -20,9 +20,9 @@ import { syncFromFirestore } from '../services/dbEngine';
 
 const CATEGORIES = [
   { name: 'Supplies', color: 'bg-theme-accent-light text-theme-accent', border: 'border-theme-border-soft' },
-  { name: 'Utilities', color: 'bg-amber-100 text-amber-700', border: 'border-theme-warning/30' },
+  { name: 'Utilities', color: 'bg-theme-warning/10 text-theme-warning', border: 'border-theme-warning/30' },
   { name: 'Salaries & Wages', color: 'bg-theme-accent-light text-theme-accent', border: 'border-theme-border-soft' },
-  { name: 'Rent & Maintenance', color: 'bg-rose-100 text-rose-700', border: 'border-theme-danger/30' },
+  { name: 'Rent & Maintenance', color: 'bg-theme-danger/10 text-theme-danger', border: 'border-theme-danger/30' },
   { name: 'Marketing', color: 'bg-theme-accent-light text-theme-accent', border: 'border-theme-border-soft' },
   { name: 'Other', color: 'bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted', border: 'border-theme-border-soft' }
 ];
@@ -93,7 +93,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
 
         <button
           onClick={() => setShowAddForm(true)}
-          className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+          className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-premium hover:scale-[1.02] active:scale-[0.98] transition-all"
         >
           <Plus className="w-4 h-4" />
           <span>Log Expense</span>
@@ -203,7 +203,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
 
             <button
               type="submit"
-              className="w-full py-4 mt-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-2xl font-bold shadow-md shadow-theme-glow hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              className="w-full py-4 mt-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-2xl font-bold shadow-premium transition-all flex items-center justify-center gap-2"
             >
               <Receipt className="w-4 h-4" />
               <span>Confirm Log Cost</span>

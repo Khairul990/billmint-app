@@ -148,7 +148,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
 
           <button
             onClick={openAddModal}
-            className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-premium hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Add New Product/Service</span>
@@ -214,7 +214,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   <div className="mt-3 flex items-center gap-2 flex-wrap">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
                       prod.stockQty <= (prod.lowStockThreshold || 5) 
-                        ? 'bg-theme-danger/5 text-theme-danger border border-rose-100' 
+                        ? 'bg-theme-danger/5 text-theme-danger border border-theme-danger/20' 
                         : 'bg-theme-accent-light text-theme-accent border border-theme-border-soft'
                     }`}>
                       {prod.stockQty <= (prod.lowStockThreshold || 5) && <BadgeAlert className="w-3 h-3" />}
@@ -352,7 +352,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full py-4 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-2xl font-bold hover:opacity-90 shadow-md shadow-theme-glow hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-2xl font-bold hover:opacity-90 shadow-premium transition-all flex items-center justify-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 <span>{editingProduct ? 'Save Changes' : 'Add to Catalog'}</span>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Palette,
@@ -236,6 +236,59 @@ const DesignStudio = ({ setCurrentTab }) => {
         })}
       </div>
 
+      {/* RECENT ACTIVITY */}
+      <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="lg:col-span-3 card-premium p-4">
+          <div className="section-header mb-3">
+            <h3 className="section-header-title">Recent Activity</h3>
+            <span className="badge-premium badge-info">Last 5</span>
+          </div>
+          <div className="space-y-2">
+            {(() => {
+              const raw = localStorage.getItem('billqyro_design_activity');
+              const activities = raw ? JSON.parse(raw) : [];
+              const defaults = [
+                { action: 'Template updated', detail: 'PDF Classic layout', time: Date.now() - 86400000 * 2 },
+                { action: 'Brand color changed', detail: 'Obsidian Gold applied', time: Date.now() - 86400000 * 4 },
+                { action: 'New template created', detail: 'Link Mobile First', time: Date.now() - 86400000 * 7 },
+                { action: 'Category activated', detail: 'Embroidery Studio', time: Date.now() - 86400000 * 10 },
+                { action: 'Theme updated', detail: 'Dark mode refined', time: Date.now() - 86400000 * 14 }
+              ];
+              return (activities.length > 0 ? activities : defaults).slice(0, 5).map((a, i) => (
+                <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-theme-surface hover:bg-theme-accent/5 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+                    <FileText className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-theme-primary">{a.action}</p>
+                    <p className="text-[10px] text-theme-muted font-medium">{a.detail}</p>
+                  </div>
+                  <span className="text-[9px] text-theme-muted font-semibold shrink-0">
+                    {new Date(a.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
+        <div className="lg:col-span-1 grid grid-cols-1 gap-3">
+          <div className="card-premium p-4 text-center">
+            <p className="text-xl font-black text-theme-primary">18+</p>
+            <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Total Templates</p>
+          </div>
+          <div className="card-premium p-4 text-center">
+            <p className="text-xl font-black text-emerald-500">12</p>
+            <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Active Templates</p>
+          </div>
+          <div className="card-premium p-4 text-center">
+            <p className="text-xl font-black text-theme-primary">
+              {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </p>
+            <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Last Modified</p>
+          </div>
+        </div>
+      </motion.div>
+
       {/* Overview Tab */}
       {activeSubTab === 'overview' && (
         <motion.div
@@ -295,6 +348,52 @@ const DesignStudio = ({ setCurrentTab }) => {
               );
             })}
           </motion.div>
+
+          {/* Theme Preview Grid */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Theme Preview</h3>
+              <button onClick={() => handleNavigation('settings')} className="text-[9px] font-bold text-theme-accent hover:underline transition-all">View All Themes</button>
+            </div>
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+              {THEME_PREVIEWS.map((theme) => (
+                <motion.button
+                  key={theme.id}
+                  whileHover={{ scale: 1.06, y: -3 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleNavigation('settings')}
+                  className="card-premium p-3 flex flex-col items-center gap-2 cursor-pointer group"
+                >
+                  <div className={`w-full h-10 rounded-xl bg-gradient-to-br ${theme.gradient} shadow-md group-hover:shadow-lg transition-all duration-300`} />
+                  <span className="text-[9px] font-bold text-theme-primary text-center leading-tight">{theme.name}</span>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Quick Actions</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {QUICK_ACTIONS.map((action) => {
+                const ActionIcon = action.icon;
+                return (
+                  <motion.button
+                    key={action.id}
+                    whileHover={{ scale: 1.03, y: -2 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => handleNavigation(action.action)}
+                    className="card-premium p-4 flex items-center gap-3 cursor-pointer group"
+                  >
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-md group-hover:shadow-lg transition-all`}>
+                      <ActionIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-[11px] font-extrabold text-theme-primary">{action.label}</span>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
         </motion.div>
       )}
 
@@ -323,14 +422,30 @@ const DesignStudio = ({ setCurrentTab }) => {
               </button>
             </div>
           </div>
+          {/* Category Filter Chips */}
+          <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+            {TEMPLATE_CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setTemplateCategory(cat)}
+                className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
+                  templateCategory === cat
+                    ? 'bg-theme-accent text-white shadow-md shadow-theme-accent/30'
+                    : 'bg-theme-card text-theme-muted hover:text-theme-primary border border-theme-border-soft'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {TEMPLATE_PREVIEWS.map((tpl) => {
+            {TEMPLATE_PREVIEWS.filter(t => templateCategory === 'All' || t.label.toLowerCase().includes(templateCategory.toLowerCase())).map((tpl) => {
               const TplIcon = tpl.icon;
               return (
                 <motion.div
                   key={tpl.id}
-                  whileHover={{ y: -3, transition: { duration: 0.2 } }}
-                  className="card-premium p-5 flex items-center gap-4"
+                  whileHover={{ scale: 1.02, y: -3, transition: { duration: 0.2 } }}
+                  className="card-premium p-5 flex items-center gap-4 cursor-pointer"
                 >
                   <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tpl.gradient} flex items-center justify-center shadow-md shrink-0`}>
                     <TplIcon className="w-7 h-7 text-white" />
@@ -512,6 +627,41 @@ const DesignStudio = ({ setCurrentTab }) => {
           </div>
         </div>
       </div>
+
+      {/* Design Tips */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="card-premium p-5 flex items-center gap-4"
+      >
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0 shadow-md">
+          <Lightbulb className="w-5 h-5 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] font-black text-theme-primary uppercase tracking-wider">Design Tip</span>
+            <span className="text-[8px] font-bold text-theme-muted bg-theme-card px-2 py-0.5 rounded-full border border-theme-border-soft">
+              {currentTipIndex + 1}/{DESIGN_TIPS.length}
+            </span>
+          </div>
+          <motion.p
+            key={currentTipIndex}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-[11px] font-semibold text-theme-muted leading-relaxed"
+          >
+            {DESIGN_TIPS[currentTipIndex]}
+          </motion.p>
+        </div>
+        <button
+          onClick={() => setCurrentTipIndex(prev => (prev + 1) % DESIGN_TIPS.length)}
+          className="w-8 h-8 rounded-xl bg-theme-card border border-theme-border-soft flex items-center justify-center shrink-0 hover:bg-theme-accent/10 transition-all"
+        >
+          <RotateCcw className="w-3.5 h-3.5 text-theme-muted" />
+        </button>
+      </motion.div>
     </motion.div>
   );
 };

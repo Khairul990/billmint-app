@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Store, 
-  Scissors, 
-  Stethoscope, 
-  Wrench, 
-  Cpu, 
-  Smartphone, 
+import {
+  Store,
+  Scissors,
+  Stethoscope,
+  Wrench,
+  Cpu,
+  Smartphone,
   ShoppingBag,
   CheckCircle2,
   Lock,
   FileText,
   Star,
-  Sparkles
+  Sparkles,
+  Eye,
+  X,
+  ExternalLink,
+  Clock,
+  Globe
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -30,7 +35,8 @@ const BUSINESS_PACKS = [
       selectedPdfTemplate: 'classic',
       selectedLiveLinkTemplate: 'retail'
     },
-    features: ['Standard Columns', 'Retail Checkout Link', 'Variant & Discount']
+    features: ['Standard Columns', 'Retail Checkout Link', 'Variant & Discount'],
+    templateCounts: { pdf: 3, live: 2 }
   },
   {
     id: 'embroidery',
@@ -45,7 +51,8 @@ const BUSINESS_PACKS = [
       selectedPdfTemplate: 'modern',
       selectedLiveLinkTemplate: 'classic'
     },
-    features: ['Design No & Work Type', 'Modern PDF Layout', 'Simple Payment Link']
+    features: ['Design No & Work Type', 'Modern PDF Layout', 'Simple Payment Link'],
+    templateCounts: { pdf: 2, live: 1 }
   },
   {
     id: 'repair',
@@ -60,7 +67,8 @@ const BUSINESS_PACKS = [
       selectedPdfTemplate: 'repair',
       selectedLiveLinkTemplate: 'repair'
     },
-    features: ['Problem Details Col', 'Labour + Parts', 'Workshop Live Link']
+    features: ['Problem Details Col', 'Labour + Parts', 'Workshop Live Link'],
+    templateCounts: { pdf: 3, live: 2 }
   },
   {
     id: 'clinic',
@@ -75,7 +83,8 @@ const BUSINESS_PACKS = [
       selectedPdfTemplate: 'doctor',
       selectedLiveLinkTemplate: 'clinic'
     },
-    features: ['Medical Disclaimer', 'Clinic PDF', 'Clean Patient Link']
+    features: ['Medical Disclaimer', 'Clinic PDF', 'Clean Patient Link'],
+    templateCounts: { pdf: 2, live: 3 }
   },
   {
     id: 'tailor',
@@ -90,7 +99,8 @@ const BUSINESS_PACKS = [
       selectedPdfTemplate: 'boutique',
       selectedLiveLinkTemplate: 'boutique'
     },
-    features: ['Elegant Branding', 'Boutique PDF', 'Premium Payment View']
+    features: ['Elegant Branding', 'Boutique PDF', 'Premium Payment View'],
+    templateCounts: { pdf: 3, live: 3 }
   },
   {
     id: 'electronics',
@@ -105,7 +115,8 @@ const BUSINESS_PACKS = [
       selectedPdfTemplate: 'modern',
       selectedLiveLinkTemplate: 'modern'
     },
-    features: ['Card Layout', 'Variant Columns', 'Modern Link']
+    features: ['Card Layout', 'Variant Columns', 'Modern Link'],
+    templateCounts: { pdf: 2, live: 2 }
   },
   {
     id: 'mobile',
@@ -120,7 +131,8 @@ const BUSINESS_PACKS = [
       selectedPdfTemplate: 'classic',
       selectedLiveLinkTemplate: 'mobile'
     },
-    features: ['Mobile First Link', 'Fast Checkout', 'Standard PDF']
+    features: ['Mobile First Link', 'Fast Checkout', 'Standard PDF'],
+    templateCounts: { pdf: 3, live: 1 }
   }
 ];
 
@@ -141,12 +153,18 @@ const staggerItem = {
 const TemplateMarketplace = ({ settings, onSaveSettings, subscription, setCurrentTab }) => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [previewPack, setPreviewPack] = useState(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
   
   const isProUser = subscription?.status === 'active';
   const currentPackId = settings?.businessCategory || 'retail';
 
-  const categories = ['All', 'Retail', 'Service', 'Fashion', 'Medical'];
+  const categories = ['All', 'Retail', 'Fashion', 'Service', 'Medical', 'Electronics'];
 
   const handleApplyPack = async (pack) => {
     if (pack.type === 'pro' && !isProUser) {
@@ -184,6 +202,7 @@ const TemplateMarketplace = ({ settings, onSaveSettings, subscription, setCurren
     if (activeCategory === 'Service' && pack.id === 'repair') return true;
     if (activeCategory === 'Fashion' && ['embroidery', 'tailor'].includes(pack.id)) return true;
     if (activeCategory === 'Medical' && pack.id === 'clinic') return true;
+    if (activeCategory === 'Electronics' && pack.id === 'electronics') return true;
     return false;
   });
 
@@ -247,22 +266,32 @@ const TemplateMarketplace = ({ settings, onSaveSettings, subscription, setCurren
         </div>
       ) : (
         <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredPacks.map(pack => {
+          {filteredPacks.map((pack, index) => {
             const isActive = currentPackId === pack.id;
             const isLocked = pack.type === 'pro' && !isProUser;
             const Icon = pack.icon;
+            const tc = pack.templateCounts || { pdf: 2, live: 2 };
 
             return (
               <motion.div 
                 key={pack.id}
                 variants={staggerItem}
                 whileHover={{ scale: 1.02, y: -4 }}
-                className={`bg-theme-card rounded-3xl p-6 border-2 transition-all duration-300 flex flex-col justify-between card-premium ${
+                className={`bg-theme-card rounded-3xl p-6 border-2 transition-all duration-300 flex flex-col justify-between card-premium relative ${
                   isActive 
                     ? 'border-theme-accent shadow-premium scale-[1.02]' 
                     : 'border-theme-border-soft hover:border-theme-accent/40 shadow-sm'
                 }`}
               >
+                {/* Featured Badge */}
+                {index === 0 && (
+                  <div className="absolute -top-2 -right-2 z-10">
+                    <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full shadow-lg shadow-amber-500/30 flex items-center gap-1 badge-premium">
+                      <Star className="w-2.5 h-2.5" /> Featured
+                    </span>
+                  </div>
+                )}
+
                 {pack.type === 'pro' && (
                   <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-t-3xl" />
                 )}
@@ -282,7 +311,14 @@ const TemplateMarketplace = ({ settings, onSaveSettings, subscription, setCurren
                     </div>
                   </div>
 
+                  {/* Template Count Badges */}
                   <div className="flex flex-wrap gap-1.5 mb-3">
+                    <span className="text-[8px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/20 flex items-center gap-1 badge-premium">
+                      <FileText className="w-2.5 h-2.5" /> PDF: {tc.pdf}
+                    </span>
+                    <span className="text-[8px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1 badge-premium">
+                      <Globe className="w-2.5 h-2.5" /> Live: {tc.live}
+                    </span>
                     <span className="text-[8px] font-bold bg-theme-app px-2 py-0.5 rounded-full text-theme-muted border border-theme-border-soft flex items-center gap-1">
                       <FileText className="w-2.5 h-2.5" /> {pack.features.length} Features
                     </span>
@@ -311,27 +347,149 @@ const TemplateMarketplace = ({ settings, onSaveSettings, subscription, setCurren
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleApplyPack(pack)}
-                  className={`w-full py-3.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 btn-premium ${
-                    isActive 
-                      ? 'bg-theme-accent/10 text-theme-accent cursor-default border border-theme-accent/20' 
-                      : isLocked
-                        ? 'bg-theme-warning/10 text-theme-warning hover:bg-theme-warning/20 border border-theme-warning/30'
-                        : 'bg-theme-app dark:bg-theme-surface hover:bg-theme-accent hover:text-white border border-theme-border-soft text-theme-primary'
-                  }`}
-                >
-                  {isActive ? (
-                    <>Active Pack <CheckCircle2 className="w-4 h-4" /></>
-                  ) : isLocked ? (
-                    <>Unlock to Apply</>
-                  ) : (
-                    'Apply Pack'
-                  )}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setPreviewPack(pack)}
+                    className={`flex-1 py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 btn-premium border border-theme-border-soft bg-theme-app dark:bg-theme-surface hover:bg-theme-card text-theme-primary`}
+                  >
+                    <Eye className="w-4 h-4" /> Preview
+                  </button>
+                  <button
+                    onClick={() => handleApplyPack(pack)}
+                    className={`flex-[2] py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 btn-premium ${
+                      isActive 
+                        ? 'bg-theme-accent/10 text-theme-accent cursor-default border border-theme-accent/20' 
+                        : isLocked
+                          ? 'bg-theme-warning/10 text-theme-warning hover:bg-theme-warning/20 border border-theme-warning/30'
+                          : 'bg-theme-app dark:bg-theme-surface hover:bg-theme-accent hover:text-white border border-theme-border-soft text-theme-primary'
+                    }`}
+                  >
+                    {isActive ? (
+                      <>Active <CheckCircle2 className="w-4 h-4" /></>
+                    ) : isLocked ? (
+                      <>Unlock</>
+                    ) : (
+                      'Apply Pack'
+                    )}
+                  </button>
+                </div>
               </motion.div>
             );
           })}
+        </motion.div>
+      )}
+
+      {/* Preview Modal */}
+      {previewPack && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setPreviewPack(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            onClick={e => e.stopPropagation()}
+            className="bg-theme-card rounded-3xl border border-theme-border-soft shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${previewPack.color}`}>
+                  <previewPack.icon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-lg text-theme-primary">{previewPack.name}</h3>
+                  <p className="text-[10px] text-theme-muted font-semibold">{previewPack.desc}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setPreviewPack(null)}
+                className="w-8 h-8 rounded-xl bg-theme-app border border-theme-border-soft flex items-center justify-center hover:bg-theme-danger/10 hover:border-theme-danger/30 transition-all"
+              >
+                <X className="w-4 h-4 text-theme-muted" />
+              </button>
+            </div>
+
+            {/* Large Preview Card */}
+            <div className="bg-theme-app rounded-2xl border border-theme-border-soft p-6 mb-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${previewPack.color}`}>
+                  <previewPack.icon className="w-8 h-8" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-extrabold text-base text-theme-primary">{previewPack.name}</h4>
+                    <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full badge-premium ${
+                      previewPack.type === 'free'
+                        ? 'bg-theme-success/10 text-theme-success border border-theme-success/20'
+                        : 'bg-theme-warning/10 text-theme-warning border border-theme-warning/20'
+                    }`}>
+                      {previewPack.type === 'free' ? 'FREE' : 'PRO'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-theme-muted font-semibold">{previewPack.desc}</p>
+                </div>
+              </div>
+
+              {/* Detail Section */}
+              <div className="space-y-3">
+                <p className="text-[9px] uppercase tracking-widest font-black text-theme-muted">Features Breakdown</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {previewPack.features.map((feat, i) => (
+                    <div key={i} className="flex items-center gap-2 text-[11px] font-bold text-theme-secondary bg-theme-card rounded-xl px-3 py-2 border border-theme-border-soft">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-theme-accent shrink-0" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Template Details */}
+              {(previewPack.templateCounts) && (
+                <div className="mt-4 pt-4 border-t border-theme-border-soft">
+                  <p className="text-[9px] uppercase tracking-widest font-black text-theme-muted mb-2">Available Templates</p>
+                  <div className="flex gap-3">
+                    <span className="text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-full border border-blue-500/20 flex items-center gap-1.5">
+                      <FileText className="w-3 h-3" /> PDF Templates: {previewPack.templateCounts.pdf}
+                    </span>
+                    <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20 flex items-center gap-1.5">
+                      <Globe className="w-3 h-3" /> Live Links: {previewPack.templateCounts.live}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setPreviewPack(null)}
+                className="flex-1 py-3 rounded-xl text-xs font-black border border-theme-border-soft bg-theme-app hover:bg-theme-card transition-all text-theme-primary"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => { handleApplyPack(previewPack); setPreviewPack(null); }}
+                className={`flex-[2] py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 btn-premium ${
+                  currentPackId === previewPack.id
+                    ? 'bg-theme-accent/10 text-theme-accent cursor-default border border-theme-accent/20'
+                    : (previewPack.type === 'pro' && !isProUser)
+                      ? 'bg-theme-warning/10 text-theme-warning hover:bg-theme-warning/20 border border-theme-warning/30'
+                      : 'bg-theme-app dark:bg-theme-surface hover:bg-theme-accent hover:text-white border border-theme-border-soft text-theme-primary'
+                }`}
+              >
+                {currentPackId === previewPack.id ? (
+                  <>Active Pack <CheckCircle2 className="w-4 h-4" /></>
+                ) : (previewPack.type === 'pro' && !isProUser) ? (
+                  <>Unlock to Apply</>
+                ) : (
+                  'Apply This Pack'
+                )}
+              </button>
+            </div>
+          </motion.div>
         </motion.div>
       )}
     </motion.div>

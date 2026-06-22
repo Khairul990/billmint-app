@@ -89,9 +89,9 @@ const GuideDetailModal = ({ guide, onClose }) => {
                     {guide.duration}
                   </div>
                   <div className={`px-2 py-0.5 rounded-md ${
-                      guide.difficulty === 'beginner' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
-                      guide.difficulty === 'intermediate' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                      'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+                      guide.difficulty === 'beginner' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                      guide.difficulty === 'intermediate' ? 'bg-theme-warning/10 text-theme-warning' :
+                      'bg-theme-danger/10 text-theme-danger'
                     }`}>
                       {guide.difficulty}
                   </div>
@@ -255,7 +255,7 @@ const HelpCenter = () => {
         {!searchQuery && (
           <section>
             <h2 className="text-2xl font-black text-theme-primary mb-6 flex items-center gap-2">
-              <Zap className="w-6 h-6 text-amber-500" /> Quick Start Guide
+              <Zap className="w-6 h-6 text-theme-accent" /> Quick Start Guide
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {welcomeCards.map((card, i) => {
@@ -312,7 +312,7 @@ const HelpCenter = () => {
                         <IconComponent className="w-6 h-6 text-theme-accent" />
                       </div>
                       {guide.premium && (
-                        <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider rounded-lg border border-amber-200 dark:border-amber-900/50 shadow-sm">PRO</span>
+                        <span className="px-3 py-1 bg-theme-warning/10 text-theme-warning text-[10px] font-black uppercase tracking-wider rounded-lg border border-theme-warning/30">PRO</span>
                       )}
                     </div>
                     
@@ -360,20 +360,20 @@ const HelpCenter = () => {
             {/* SECTION 6: TROUBLESHOOTING CENTER */}
             <section>
               <h2 className="text-2xl font-black text-theme-primary mb-6 flex items-center gap-2">
-                <AlertTriangle className="w-6 h-6 text-rose-500" /> Troubleshooting Center
+                <AlertTriangle className="w-6 h-6 text-theme-danger" /> Troubleshooting Center
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {troubleshootIssues.map((issue, i) => (
                   <div key={i} className="bg-theme-card border border-theme-border-soft p-5 rounded-2xl shadow-sm">
                     <h3 className="text-sm font-black text-theme-primary mb-3 flex items-start gap-2">
-                      <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" /> {issue.problem}
+                      <ShieldAlert className="w-4 h-4 text-theme-danger shrink-0 mt-0.5" /> {issue.problem}
                     </h3>
                     <div className="space-y-3 pl-6">
-                      <div className="bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 p-3 rounded-xl text-xs font-bold border border-rose-100 dark:border-rose-900/30">
+                      <div className="bg-theme-danger/5 text-theme-danger p-3 rounded-xl text-xs font-bold border border-theme-danger/20">
                         <span className="uppercase tracking-wider text-[10px] block mb-1 opacity-70">Likely Cause:</span>
                         {issue.cause}
                       </div>
-                      <div className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 p-3 rounded-xl text-xs font-bold border border-emerald-100 dark:border-emerald-900/30">
+                      <div className="bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 p-3 rounded-xl text-xs font-bold border border-emerald-500/20">
                         <span className="uppercase tracking-wider text-[10px] block mb-1 opacity-70">Solution:</span>
                         {issue.solution}
                       </div>
@@ -386,21 +386,21 @@ const HelpCenter = () => {
             {/* SECTION 7: VIDEO LEARNING READY */}
             <section>
               <h2 className="text-2xl font-black text-theme-primary mb-6 flex items-center gap-2">
-                <Video className="w-6 h-6 text-indigo-500" /> Video Learning
+                <Video className="w-6 h-6 text-theme-accent" /> Video Learning
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {videos.map((vid, i) => (
-                  <div key={i} className="group cursor-pointer">
-                    <div className="w-full aspect-video bg-theme-surface border border-theme-border-soft rounded-2xl mb-3 flex items-center justify-center relative overflow-hidden group-hover:border-indigo-500/50 transition-colors">
+                    <div key={i} className="group cursor-pointer">
+                    <div className="w-full aspect-video bg-theme-surface border border-theme-border-soft rounded-2xl mb-3 flex items-center justify-center relative overflow-hidden group-hover:border-theme-accent/50 transition-colors">
                       <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors"></div>
-                      <div className="w-12 h-12 bg-white/90 rounded-full shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform z-10">
-                        <Play className="w-5 h-5 text-indigo-600 ml-1" />
+                      <div className="w-12 h-12 bg-white/90 rounded-full shadow-premium flex items-center justify-center group-hover:scale-110 transition-transform z-10">
+                        <Play className="w-5 h-5 text-theme-accent ml-1" />
                       </div>
                       <span className="absolute bottom-3 right-3 bg-black/70 text-white text-[10px] font-bold px-2 py-1 rounded-md">
                         {vid.duration}
                       </span>
                     </div>
-                    <h4 className="text-sm font-bold text-theme-primary group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{vid.title}</h4>
+                    <h4 className="text-sm font-bold text-theme-primary group-hover:text-theme-accent transition-colors">{vid.title}</h4>
                   </div>
                 ))}
               </div>

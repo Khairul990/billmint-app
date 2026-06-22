@@ -444,7 +444,7 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
         <motion.div variants={staggerItem} className="stat-premium">
           <div className="flex items-center justify-between mb-3">
             <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Total Invoices</span>
-            <FileText className="w-4 h-4 text-blue-500" />
+            <FileText className="w-4 h-4 text-theme-accent" />
           </div>
           <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums">{metrics.invoiceCount}</p>
         </motion.div>
@@ -627,6 +627,28 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
         </motion.div>
       )}
       
+      {/* BUSINESS TIPS */}
+      <motion.div variants={staggerItem} className="card-premium p-4 no-print">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+            <TrendingUp className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Tip of the Day</p>
+            <p className="text-xs font-semibold text-theme-primary leading-relaxed">
+              {[
+                'Send invoice reminders 2 days before the due date to improve on-time payment rates.',
+                'Offer small discounts for early payments to encourage faster collections.',
+                'Review your top-selling items monthly to optimize your inventory and pricing strategy.',
+                'Categorize expenses to identify tax-deductible costs and save money at year-end.',
+                'Set payment terms clearly on every invoice to avoid confusion and delays.',
+                'Follow up on overdue invoices within 24 hours for the best recovery rate.'
+              ][Math.floor(Date.now() / 86400000) % 6]}
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           body { background: white !important; color: black !important; }

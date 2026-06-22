@@ -16,13 +16,13 @@ import {
   Cloud,
   Server,
   ArrowRight,
-  Archive,
-  Info
+  Archive
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { exportBackup } from '../services/dbEngine';
 import { pageVariants, staggerContainer, staggerItem, modalOverlayVariants, modalContentVariants } from '../utils/animations';
 import { CardSkeleton } from '../components/PremiumSkeleton';
+import PremiumEmptyState from '../components/PremiumEmptyState';
 
 const BackupRestore = ({ settings, invoices, customers, products, expenses, onImportBackup }) => {
   const [isExporting, setIsExporting] = useState(false);
@@ -162,17 +162,12 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
         <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
       
       {totalRecords === 0 ? (
-        <motion.div variants={staggerItem} className="card-premium p-10 md:p-12 rounded-2xl border border-dashed border-theme-border-soft bg-theme-card text-center">
-          <div className="w-20 h-20 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-5 shadow-sm glass">
-            <Database className="w-10 h-10" />
-          </div>
-          <h2 className="text-xl font-black text-theme-primary mb-2">No Backup Data Yet</h2>
-          <p className="text-sm font-semibold text-theme-muted mb-6 max-w-md mx-auto">
-            You haven't created any records yet. Add invoices, customers, products, or expenses first, then come back to create your first backup.
-          </p>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft text-[10px] font-bold text-theme-muted">
-            <Info className="w-3.5 h-3.5" /> Your backup data will appear here once you start recording business data
-          </div>
+        <motion.div variants={staggerItem}>
+          <PremiumEmptyState
+            icon={Database}
+            title="No Backup Data Yet"
+            description="You haven't created any records yet. Add invoices, customers, products, or expenses first, then come back to create your first backup."
+          />
         </motion.div>
       ) : (
         <>
