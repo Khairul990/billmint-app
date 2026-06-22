@@ -243,7 +243,7 @@ const Landing = ({ onLoginClick }) => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="flex-1 order-2 lg:order-1 w-full">
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-theme-border-soft shadow-xl p-4 sm:p-6 max-w-md mx-auto lg:mx-0">
+              <div className="bg-theme-card rounded-2xl border border-theme-border-soft shadow-xl p-4 sm:p-6 max-w-md mx-auto lg:mx-0">
                 <div className="flex items-center gap-3 mb-4 pb-3 border-b-2 border-theme-border-soft">
                   <div className="w-10 h-10 rounded-lg bg-[#14284B] text-white flex items-center justify-center font-bold">B</div>
                   <div><p className="text-sm font-bold text-slate-900 dark:text-white">Business Name</p><p className="text-[9px] text-slate-500 font-semibold">GSTIN: 29AAAAA0000A1Z5</p></div>

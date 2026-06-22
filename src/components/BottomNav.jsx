@@ -32,7 +32,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
                     triggerLightHaptic();
                     onQuickBillOpen();
                   }}
-                  className="w-14 h-14 rounded-full bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-lg shadow-theme-glow border-[3px] border-white dark:border-[#1a1a2e] active:scale-90 hover:scale-105 transition-all duration-200"
+                  className="w-14 h-14 rounded-full bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-lg shadow-theme-glow border-[3px] border-theme-border-soft dark:border-slate-800 active:scale-90 hover:scale-105 transition-all duration-200"
                 >
                   <span className="text-2xl font-light leading-none -mt-0.5">+</span>
                 </button>
@@ -63,7 +63,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
                 <div className="relative">
                   <Icon className="w-5 h-5" />
                   {tab.badge > 0 && tab.id === 'due' && (
-                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-theme-danger text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-theme-card animate-pulse-soft">
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-theme-danger text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-theme-border-soft dark:border-slate-800 animate-pulse-soft">
                       {tab.badge > 9 ? '9+' : tab.badge}
                     </span>
                   )}

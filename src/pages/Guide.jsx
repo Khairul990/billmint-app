@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedPage from '../components/AnimatedPage';
 import { Search, X, Clock, ChevronRight, Play, CheckCircle2, Languages } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { guides, categories, faqs } from '../data/guides';
@@ -188,7 +189,8 @@ const Guide = () => {
   }, [searchQuery, selectedCategory]);
   
   return (
-    <div className="min-h-screen bg-theme-app dark:bg-theme-app p-4 md:p-6 pb-24">
+    <AnimatedPage>
+      <div className="min-h-screen bg-theme-app dark:bg-theme-app p-4 md:p-6 pb-24">
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Header Section */}
@@ -400,6 +402,7 @@ const Guide = () => {
         />
       )}
     </div>
+    </AnimatedPage>
   );
 };
 

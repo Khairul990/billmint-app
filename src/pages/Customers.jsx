@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import AnimatedPage from '../components/AnimatedPage';
 import {
   Users,
   Plus,
@@ -109,8 +110,9 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
   };
 
   return (
-    <PullToRefresh onRefresh={handleRefresh}>
-      <div className="space-y-6 pb-32">
+    <AnimatedPage>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-6 pb-32">
         
         {/* Header Panel */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -290,7 +292,8 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
           onCreateBill={onCreateBill}
         />
       </div>
-    </PullToRefresh>
+        </PullToRefresh>
+    </AnimatedPage>
   );
 };
 

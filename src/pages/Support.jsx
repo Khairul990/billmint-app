@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AnimatedPage from '../components/AnimatedPage';
 import { LifeBuoy, ArrowLeft, Mail, MessageCircle, FileText, Check, AlertCircle, Plus, Send, Upload, Inbox, CheckCircle } from 'lucide-react';
 import { 
   getAuthSession, 
@@ -139,7 +140,8 @@ export default function Support({ onBack }) {
   };
 
   return (
-    <div className="min-h-screen bg-theme-app text-theme-primary font-sans pb-24">
+    <AnimatedPage>
+      <div className="min-h-screen bg-theme-app text-theme-primary font-sans pb-24">
       {/* Header bar */}
       <div className="bg-theme-card border-b border-theme-border-soft sticky top-0 z-20 shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -489,5 +491,6 @@ export default function Support({ onBack }) {
 
       </div>
     </div>
+    </AnimatedPage>
   );
 }

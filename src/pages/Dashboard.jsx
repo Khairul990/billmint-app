@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import AnimatedPage from '../components/AnimatedPage';
 import {
   Plus, CreditCard, Bell, ArrowRight, Receipt, AlertCircle,
   Shield, ShieldCheck, Megaphone, FileText, DollarSign, Users, Clock,
@@ -320,8 +321,9 @@ const Dashboard = ({
   };
 
   return (
-    <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
-      <div>
+    <AnimatedPage>
+      <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
+        <div>
         {/* ===== MOBILE VIEW (< 1024px) ===== */}
         <div className="lg:hidden px-3 sm:px-4 max-w-2xl mx-auto space-y-3 pb-4">
           {pendingPaymentsCount > 0 && (
@@ -1148,6 +1150,7 @@ const Dashboard = ({
         businessSettings={businessSettings}
       />
     </PullToRefresh>
+    </AnimatedPage>
   );
 };
 

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedPage from '../components/AnimatedPage';
 import { 
   Search, X, Clock, ChevronRight, Play, CheckCircle2, 
   HelpCircle, BookOpen, Video, LifeBuoy, AlertTriangle, 
@@ -197,7 +198,8 @@ const HelpCenter = () => {
   };
 
   return (
-    <div className="min-h-screen bg-theme-app pb-24">
+    <AnimatedPage>
+      <div className="min-h-screen bg-theme-app pb-24">
       
       {/* HEADER BANNER */}
       <div className="bg-theme-card border-b border-theme-border-soft px-4 md:px-8 py-10 md:py-16 relative overflow-hidden">
@@ -435,6 +437,7 @@ const HelpCenter = () => {
         />
       )}
     </div>
+    </AnimatedPage>
   );
 };
 

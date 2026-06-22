@@ -187,7 +187,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                 {/* Mockup Preview Area */}
                 <div className={`h-40 w-full ${tpl.color} flex flex-col items-center justify-center p-4 relative`}>
                   {/* Abstract Invoice Shape */}
-                  <div className="w-24 h-32 bg-white rounded shadow-sm border border-black/5 flex flex-col p-2">
+                  <div className="w-24 h-32 bg-theme-card rounded shadow-sm border border-black/5 flex flex-col p-2">
                     <div className="w-full h-4 bg-theme-border-soft rounded-sm mb-2" />
                     <div className="w-1/2 h-2 bg-theme-app rounded-sm mb-4" />
                     <div className="w-full h-1 bg-theme-app mb-1" />
@@ -271,7 +271,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                 </button>
               </div>
               <div className={`h-56 w-full ${tpl.color} flex items-center justify-center p-6 relative`}>
-                <div className="w-40 h-48 bg-white rounded shadow-md border border-black/5 flex flex-col p-3">
+                <div className="w-40 h-48 bg-theme-card rounded shadow-md border border-black/5 flex flex-col p-3">
                   <div className="w-full h-5 bg-theme-border-soft rounded-sm mb-2" />
                   <div className="w-2/3 h-3 bg-theme-app rounded-sm mb-5" />
                   <div className="w-full h-1.5 bg-theme-app mb-1.5" />

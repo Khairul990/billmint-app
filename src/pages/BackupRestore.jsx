@@ -36,6 +36,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
   });
   const [autoBackupFrequency, setAutoBackupFrequency] = useState('weekly');
   const [isAutoBackupEnabled, setIsAutoBackupEnabled] = useState(false);
+  const [progressPercent, setProgressPercent] = useState(0);
 
   const lastBackupDate = localStorage.getItem('last_backup_date') || 'Never';
   const totalRecords = (invoices?.length || 0) + (customers?.length || 0) + (products?.length || 0) + (expenses?.length || 0);
@@ -50,7 +51,13 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
   const handleExport = async () => {
     try {
       setIsExporting(true);
+      setProgressPercent(0);
+      const progressTimer = setInterval(() => {
+        setProgressPercent(p => Math.min(p + 15, 85));
+      }, 400);
       const backupData = await exportBackup();
+      clearInterval(progressTimer);
+      setProgressPercent(100);
       const dataStr = JSON.stringify(backupData, null, 2);
       const dataBlob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(dataBlob);
@@ -73,6 +80,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
       toast.error('Failed to export backup.');
     } finally {
       setIsExporting(false);
+      setProgressPercent(0);
     }
   };
 
@@ -118,8 +126,14 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
     if (!pendingImportData || !onImportBackup) return;
     
     setIsImporting(true);
+    setProgressPercent(0);
+    const progressTimer = setInterval(() => {
+      setProgressPercent(p => Math.min(p + 25, 90));
+    }, 200);
     try {
       onImportBackup(pendingImportData);
+      clearInterval(progressTimer);
+      setProgressPercent(100);
       toast.success('Data restored successfully!');
       setShowConfirmModal(false);
       setPendingImportData(null);
@@ -127,6 +141,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
       toast.error('Failed to restore data.');
     } finally {
       setIsImporting(false);
+      setProgressPercent(0);
     }
   };
 
@@ -146,6 +161,22 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
       ) : (
         <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
       
+      {totalRecords === 0 ? (
+        <motion.div variants={staggerItem} className="card-premium p-10 md:p-12 rounded-2xl border border-dashed border-theme-border-soft bg-theme-card text-center">
+          <div className="w-20 h-20 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-5 shadow-sm glass">
+            <Database className="w-10 h-10" />
+          </div>
+          <h2 className="text-xl font-black text-theme-primary mb-2">No Backup Data Yet</h2>
+          <p className="text-sm font-semibold text-theme-muted mb-6 max-w-md mx-auto">
+            You haven't created any records yet. Add invoices, customers, products, or expenses first, then come back to create your first backup.
+          </p>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft text-[10px] font-bold text-theme-muted">
+            <Info className="w-3.5 h-3.5" /> Your backup data will appear here once you start recording business data
+          </div>
+        </motion.div>
+      ) : (
+        <>
+
       {/* Header */}
       <motion.div variants={staggerItem} className="section-header flex items-center gap-4 border-b border-theme-border-soft pb-6 mb-6">
         <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 flex items-center justify-center shadow-sm glass">
@@ -193,6 +224,10 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
         </div>
       </motion.div>
 
+      <motion.div variants={staggerItem}>
+        <div className="divider-premium my-2" />
+      </motion.div>
+
       {/* Main Actions */}
       <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
         
@@ -217,7 +252,8 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
               ].map(({ key, label }) => (
                 <label
                   key={key}
-                  className="flex items-center gap-2 p-2 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft cursor-pointer hover:border-theme-accent/30 transition-colors"
+                  className="flex items-center gap-2 p-2 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft cursor-pointer hover:border-theme-accent/30 transition-colors tooltip-premium"
+                  title={`Include ${label.toLowerCase()} in this backup`}
                 >
                   <input
                     type="checkbox"
@@ -236,6 +272,22 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
               </div>
             )}
           </div>
+          {isExporting && (
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] font-bold text-theme-muted">Exporting...</span>
+                <span className="text-[10px] font-black text-theme-accent">{progressPercent}%</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-theme-app dark:bg-theme-surface overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercent}%` }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full rounded-full bg-gradient-to-r from-theme-accent to-indigo-400"
+                />
+              </div>
+            </div>
+          )}
           <button
             onClick={handleExport}
             disabled={isExporting}
@@ -262,7 +314,8 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
             {/* Drag & Drop Zone */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-theme-border-soft rounded-2xl p-6 mb-4 text-center cursor-pointer hover:border-theme-accent/50 hover:bg-theme-accent/5 transition-all"
+              className="border-2 border-dashed border-theme-border-soft rounded-2xl p-6 mb-4 text-center cursor-pointer hover:border-theme-accent/50 hover:bg-theme-accent/5 transition-all tooltip-premium"
+              title="Click to browse or drag a .json backup file here"
             >
               <UploadCloud className="w-8 h-8 text-theme-muted mx-auto mb-2" />
               <p className="text-[11px] font-bold text-theme-muted">Drop backup file here or tap to browse</p>
@@ -286,14 +339,35 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
             ref={fileInputRef}
             onChange={handleFileChange}
           />
+          {isImporting && (
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] font-bold text-theme-muted">Restoring...</span>
+                <span className="text-[10px] font-black text-theme-accent">{progressPercent}%</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-theme-app dark:bg-theme-surface overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercent}%` }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-indigo-400"
+                />
+              </div>
+            </div>
+          )}
           <button
             onClick={() => fileInputRef.current?.click()}
+            disabled={isImporting}
             className="btn-premium w-full"
           >
             <Archive className="w-4 h-4" /> Restore Backup
           </button>
         </div>
 
+      </motion.div>
+
+      <motion.div variants={staggerItem}>
+        <div className="divider-premium my-2" />
       </motion.div>
 
       {/* Auto Backup Recommendation */}
@@ -328,6 +402,40 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
             {isAutoBackupEnabled ? 'Disable Auto Backup' : 'Enable Auto Backup'}
           </button>
         </div>
+      </motion.div>
+
+      <motion.div variants={staggerItem}>
+        <div className="divider-premium my-2" />
+      </motion.div>
+
+      {/* Safety Warning */}
+      <motion.div variants={staggerItem} className="card-premium p-5 md:p-6 rounded-2xl border-2 border-amber-200 dark:border-amber-900/40 bg-gradient-to-br from-amber-50/80 to-white dark:from-amber-950/20 dark:to-theme-card shadow-premium">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-sm">
+            <AlertTriangle className="w-6 h-6" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-black text-theme-primary mb-1">Keep Multiple Backup Copies</h3>
+            <p className="text-[11px] font-semibold text-theme-muted leading-relaxed">
+              Store your backup files in at least <strong className="font-black text-amber-600 dark:text-amber-400">two different locations</strong> (e.g., local download + cloud storage). A single backup creates a single point of failure — protect your business with redundancy.
+            </p>
+            <div className="flex flex-wrap gap-2 mt-3">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-[10px] font-bold text-amber-700 dark:text-amber-300">
+                <Server className="w-3 h-3" /> Local Drive
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-[10px] font-bold text-blue-700 dark:text-blue-300">
+                <Cloud className="w-3 h-3" /> Cloud Storage
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
+                <RefreshCw className="w-3 h-3" /> Regular Exports
+              </span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div variants={staggerItem}>
+        <div className="divider-premium my-2" />
       </motion.div>
 
       {/* Safety Information */}
@@ -386,9 +494,15 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
         </div>
       </motion.div>
 
-      {/* Shield footer */}
-      <motion.div variants={staggerItem} className="flex items-center justify-center gap-2 text-[10px] font-bold text-theme-muted uppercase tracking-widest">
-        <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Your data stays on your device until synced.
+      {/* Data Protection Note */}
+      <motion.div variants={staggerItem} className="flex flex-col items-center gap-3 pt-2">
+        <div className="divider-premium w-full" />
+        <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-theme-muted uppercase tracking-widest">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Your data is encrypted in transit and stays on your device until you explicitly export or sync
+        </div>
+        <p className="text-[9px] font-semibold text-theme-muted/60 text-center max-w-lg">
+          Backup files are standard JSON. For sensitive data, consider encrypting backup files before storing them in cloud services. BillQyro never transmits your data to any external server without your direct action.
+        </p>
       </motion.div>
 
       {/* Confirmation Modal */}
@@ -398,14 +512,14 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-theme-card/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-theme-card/60 backdrop-blur-xl"
         >
           <motion.div
             variants={modalContentVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-theme-card rounded-3xl w-full max-w-md shadow-2xl border border-theme-border-soft overflow-hidden"
+            className="bg-theme-card/95 backdrop-blur-md rounded-3xl w-full max-w-md shadow-2xl border border-theme-border-soft overflow-hidden glass"
           >
             <div className="bg-rose-500 p-6 flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4">
@@ -421,9 +535,16 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
                   {new Date(pendingImportData.timestamp).toLocaleString()}
                 </span>
               </p>
+
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                <p className="text-[11px] font-bold text-amber-700 dark:text-amber-400">
+                  This will replace all current data with backup data
+                </p>
+              </div>
               
               <div className="bg-theme-app dark:bg-theme-surface rounded-xl p-4 text-[11px] font-semibold text-theme-muted space-y-2 border border-theme-border-soft">
-                <p>• Current data will be erased</p>
+                <p>• Current data will be erased and replaced</p>
                 <p>• {pendingImportData.invoices?.length || 0} Invoices will be imported</p>
                 <p>• {pendingImportData.customers?.length || 0} Customers will be imported</p>
               </div>
@@ -450,6 +571,9 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
             </div>
           </motion.div>
         </motion.div>
+      )}
+
+        </>
       )}
 
         </motion.div>

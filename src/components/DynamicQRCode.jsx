@@ -3,7 +3,7 @@ import { QRCodeSVG } from 'qrcode.react';
 
 const DynamicQRCode = ({ value, size = 120, logoUrl }) => {
   return (
-    <div className="bg-white dark:bg-[#1a1a2e] p-2 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 inline-block">
+    <div className="bg-theme-card dark:bg-slate-800 p-2 rounded-xl shadow-sm border border-theme-border-soft dark:border-slate-700 inline-block">
       <QRCodeSVG
         value={value}
         size={size}

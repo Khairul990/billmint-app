@@ -414,11 +414,11 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
               gradient="from-violet-600 via-fuchsia-500 to-amber-500"
               className="h-full"
             >
-              <div className="bg-gradient-to-br from-slate-900 via-violet-950 to-slate-900 h-full text-white rounded-[calc(1.5rem-2px)] p-6 shadow-premium flex flex-col justify-between relative overflow-hidden card-premium">
+                <div className="bg-gradient-to-br from-white via-violet-50 to-white dark:from-slate-900 dark:via-violet-950 dark:to-slate-900 h-full text-theme-primary dark:text-white rounded-[calc(1.5rem-2px)] p-6 shadow-premium flex flex-col justify-between relative overflow-hidden card-premium">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/20 rounded-full blur-3xl pointer-events-none"></div>
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none"></div>
                 {isPremium && (
-                  <span className="badge-premium absolute top-4 right-4 z-20 text-[9px] font-extrabold uppercase bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 border border-white/20">
+                  <span className="badge-premium absolute top-4 right-4 z-20 text-[9px] font-extrabold uppercase bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 border border-amber-400/30 dark:border-white/20">
                     <Sparkles className="w-2.5 h-2.5" /> Active Plan
                   </span>
                 )}
@@ -426,44 +426,44 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                 <div className="space-y-4 relative z-10">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-extrabold text-amber-400 text-sm uppercase tracking-wider">Premium Growth</h3>
-                      <span className="badge-premium text-[8px] font-extrabold bg-white/10 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider">SaaS Tier</span>
+                      <h3 className="font-extrabold text-amber-600 dark:text-amber-400 text-sm uppercase tracking-wider">Premium Growth</h3>
+                      <span className="badge-premium text-[8px] font-extrabold bg-amber-500/10 dark:bg-white/10 text-amber-600 dark:text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider">SaaS Tier</span>
                     </div>
                     {!isPremium && (
-                      <span className="badge-premium py-1 px-2.5 text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border border-amber-500/20 rounded-full flex items-center gap-1 shadow-sm">
+                      <span className="badge-premium py-1 px-2.5 text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-full flex items-center gap-1 shadow-sm">
                         <Flame size={12} /> Most Popular
                       </span>
                     )}
                   </div>
                 
-                  <div className="border-t border-b border-white/10 py-4">
+                  <div className="border-t border-b border-theme-border-soft dark:border-white/10 py-4">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-[10px] font-bold text-amber-400/70 uppercase tracking-wider">From</span>
+                      <span className="text-[10px] font-bold text-amber-600/70 dark:text-amber-400/70 uppercase tracking-wider">From</span>
                     </div>
-                    <h4 className="text-3xl font-black text-white tracking-tight">
+                    <h4 className="text-3xl font-black text-theme-primary dark:text-white tracking-tight">
                       {formatCurrency(country === 'India' ? 499 : country === 'Bangladesh' ? 600 : 9, currencySymbol)}
-                      <span className="text-xs text-amber-400 font-bold"> / month</span>
+                      <span className="text-xs text-amber-600 dark:text-amber-400 font-bold"> / month</span>
                     </h4>
-                    <p className="text-[9.5px] text-amber-300/70 font-medium mt-1">Or save more: <span className="text-amber-400 font-bold">{getPricing('Yearly').label}</span></p>
+                    <p className="text-[9.5px] text-amber-600/70 dark:text-amber-300/70 font-medium mt-1">Or save more: <span className="text-amber-600 dark:text-amber-400 font-bold">{getPricing('Yearly').label}</span></p>
                   </div>
    
-                  <ul className="space-y-3 text-xs font-semibold text-white/90">
+                  <ul className="space-y-3 text-xs font-semibold text-theme-primary/90 dark:text-white/90">
                     {premiumBenefits.map((b, i) => (
                       <li key={i} className="flex items-start gap-2.5 group">
                         <span className="w-5 h-5 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0 mt-0.5 shadow-sm shadow-amber-500/30">
                           <Check className="w-3 h-3 text-white" />
                         </span>
-                        <span className="group-hover:text-white transition-colors">{b}</span>
+                          <span className="group-hover:text-theme-primary dark:group-hover:text-white transition-colors">{b}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
        
-                <div className="mt-8 pt-4 border-t border-white/10 relative z-10">
+                <div className="mt-8 pt-4 border-t border-theme-border-soft dark:border-white/10 relative z-10">
                   {isPremium ? (
-                    <div className="w-full py-3.5 bg-white/10 border border-white/25 rounded-2xl text-center text-xs font-bold text-white flex flex-col gap-0.5 backdrop-blur-sm">
+                    <div className="w-full py-3.5 bg-theme-surface/80 dark:bg-white/10 border border-theme-border-soft dark:border-white/25 rounded-2xl text-center text-xs font-bold text-theme-primary dark:text-white flex flex-col gap-0.5 backdrop-blur-sm">
                       <span>Premium Plan Active</span>
-                      <span className="text-[9px] font-medium text-white/70 font-mono">Expires: {getExpiryDateString()}</span>
+                      <span className="text-[9px] font-medium text-theme-muted dark:text-white/70 font-mono">Expires: {getExpiryDateString()}</span>
                     </div>
                   ) : (
                     <button
@@ -891,7 +891,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                         <img
                           src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent('upi://pay?pa=billqyro@okaxis&pn=BillQyro%20SaaS&am=' + activePricing.amount + '&cu=INR&tn=SaaS%20Upgrade')}`}
                           alt="Admin UPI QR"
-                          className="w-28 h-28 object-contain rounded-xl border border-white mt-1 shadow-sm bg-theme-card p-1"
+                          className="w-28 h-28 object-contain rounded-xl border border-theme-border-soft mt-1 shadow-sm bg-theme-card p-1"
                         />
                       </div>
                       <div className="space-y-1">

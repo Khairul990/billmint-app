@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AnimatedPage from '../components/AnimatedPage';
 import { 
   Layers, 
   Plus, 
@@ -134,8 +135,9 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
   };
 
   return (
-    <PullToRefresh onRefresh={handleRefresh}>
-      <div className="space-y-6 pb-24">
+    <AnimatedPage>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-6 pb-24">
         
         {/* Header Panel */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -359,7 +361,8 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
           </form>
         </CenteredModal>
       </div>
-    </PullToRefresh>
+        </PullToRefresh>
+    </AnimatedPage>
   );
 };
 

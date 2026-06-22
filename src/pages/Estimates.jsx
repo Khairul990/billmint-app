@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedPage from '../components/AnimatedPage';
 import InvoiceCard from '../components/InvoiceCard';
 import InvoicePreview from '../components/InvoicePreview';
 import { 
@@ -185,8 +186,9 @@ const Estimates = ({
   };
 
   return (
-    <PullToRefresh onRefresh={handleRefresh}>
-      <motion.div 
+    <AnimatedPage>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <motion.div 
         className="space-y-6 pb-24"
         variants={containerVariants}
         initial="hidden"
@@ -434,7 +436,8 @@ const Estimates = ({
         document.body
       )}
       </motion.div>
-    </PullToRefresh>
+      </PullToRefresh>
+    </AnimatedPage>
   );
 };
 

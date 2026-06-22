@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import AnimatedPage from "../components/AnimatedPage";
 import { ArrowRight, Eye, EyeOff, Mail, ShieldCheck } from "lucide-react";
 import Logo from "../components/Logo";
 
@@ -32,7 +33,8 @@ export default function DemoLogin({ onDemoLoginSuccess }) {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-theme-app p-4 text-theme-primary sm:p-6 lg:p-8 flex items-center justify-center">
+    <AnimatedPage>
+      <div className="relative min-h-screen w-full bg-theme-app p-4 text-theme-primary sm:p-6 lg:p-8 flex items-center justify-center">
       <section className="flex items-center justify-center w-full max-w-lg">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
@@ -143,5 +145,6 @@ export default function DemoLogin({ onDemoLoginSuccess }) {
         </motion.div>
       </section>
     </div>
+    </AnimatedPage>
   );
 }

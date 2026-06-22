@@ -123,7 +123,7 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
     switch (tplId) {
       case 'classic':
         return (
-          <div className="flex flex-col gap-1 p-2 bg-white h-full w-full border border-gray-200">
+          <div className="flex flex-col gap-1 p-2 bg-theme-card dark:bg-slate-800 h-full w-full border border-gray-200">
             <div className="h-4 w-1/3 bg-gray-300"></div>
             <div className="h-2 w-1/4 bg-gray-200 mt-2"></div>
             <div className="mt-auto h-8 w-full bg-blue-500 rounded text-[6px] text-white flex items-center justify-center font-bold">Pay Now</div>
@@ -132,7 +132,7 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
       case 'modern':
         return (
           <div className="flex flex-col gap-1 p-2 bg-gray-100 h-full w-full">
-            <div className="bg-white p-2 rounded shadow-sm flex flex-col gap-1 h-full">
+              <div className="bg-theme-card p-2 rounded shadow-sm flex flex-col gap-1 h-full">
               <div className="h-3 w-1/3 bg-indigo-500 rounded"></div>
               <div className="h-2 w-1/2 bg-gray-200 rounded mt-2"></div>
               <div className="mt-auto h-8 w-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded text-[6px] text-white flex items-center justify-center font-bold">Pay Now</div>
@@ -163,14 +163,14 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
             <div className="h-4 w-1/3 bg-emerald-500"></div>
             <div className="h-1 border-b border-theme-border-strong w-full my-1"></div>
             <div className="h-10 w-full bg-theme-surface"></div>
-            <div className="mt-auto h-8 w-full bg-white text-[6px] text-theme-primary flex items-center justify-center font-bold">Secure Payment</div>
+            <div className="mt-auto h-8 w-full bg-theme-card text-[6px] text-theme-primary flex items-center justify-center font-bold">Secure Payment</div>
           </div>
         );
       case 'boutique':
         return (
           <div className="flex flex-col gap-1 p-2 bg-rose-50 h-full w-full border border-rose-200">
             <div className="h-4 w-1/2 bg-rose-400 mx-auto rounded-full"></div>
-            <div className="h-10 w-full bg-white border border-rose-100 rounded mt-2"></div>
+            <div className="h-10 w-full bg-theme-card border border-rose-100 rounded mt-2"></div>
             <div className="mt-auto h-8 w-full bg-rose-500 rounded text-[6px] text-white flex items-center justify-center font-bold">Complete Order</div>
           </div>
         );
@@ -178,7 +178,7 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
         return (
           <div className="flex flex-col gap-1 p-2 bg-blue-50 h-full w-full border-t-8 border-blue-500">
             <div className="h-4 w-1/4 bg-blue-600 rounded"></div>
-            <div className="h-8 w-full bg-white rounded shadow-sm mt-2"></div>
+            <div className="h-8 w-full bg-theme-card rounded shadow-sm mt-2"></div>
             <div className="h-4 w-full bg-red-100 mt-1"></div>
             <div className="mt-auto h-8 w-full bg-blue-600 rounded text-[6px] text-white flex items-center justify-center font-bold">Pay Bill</div>
           </div>

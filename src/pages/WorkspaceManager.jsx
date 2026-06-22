@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AnimatedPage from '../components/AnimatedPage';
 import { 
   Store, 
   Plus, 
@@ -110,7 +111,8 @@ const WorkspaceManager = ({
   };
 
   return (
-    <div className="max-w-2xl mx-auto pb-24">
+    <AnimatedPage>
+      <div className="max-w-2xl mx-auto pb-24">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <button 
@@ -270,6 +272,7 @@ const WorkspaceManager = ({
         )}
       </AnimatePresence>
     </div>
+    </AnimatedPage>
   );
 };
 

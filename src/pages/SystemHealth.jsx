@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AnimatedPage from '../components/AnimatedPage';
 import { ArrowLeft, HardDrive, Wifi, WifiOff, RefreshCcw, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { BillQyroDB } from '../services/localDb';
@@ -211,7 +212,8 @@ const SystemHealth = ({ setCurrentTab }) => {
   const APP_VERSION = "2.0.1 - " + new Date().toISOString().split('T')[0];
 
   return (
-    <div className="max-w-4xl mx-auto pb-12 relative font-sans animate-fade-in space-y-6">
+    <AnimatedPage>
+      <div className="max-w-4xl mx-auto pb-12 relative font-sans animate-fade-in space-y-6">
       <button 
         onClick={() => setCurrentTab('more')}
         className="flex items-center gap-2 text-theme-muted hover:text-theme-primary transition-colors cursor-pointer"
@@ -347,6 +349,7 @@ const SystemHealth = ({ setCurrentTab }) => {
         </div>
       </div>
     </div>
+    </AnimatedPage>
   );
 };
 

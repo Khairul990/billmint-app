@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedPage from '../components/AnimatedPage';
 import { 
   Plus, 
   Trash2, 
@@ -74,8 +75,9 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
   };
 
   return (
-    <PullToRefresh onRefresh={handleRefresh}>
-      <motion.div 
+    <AnimatedPage>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <motion.div 
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -15 }}
@@ -291,7 +293,8 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
 
       </div>
       </motion.div>
-    </PullToRefresh>
+      </PullToRefresh>
+    </AnimatedPage>
   );
 };
 

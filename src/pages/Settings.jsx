@@ -319,6 +319,7 @@ const Settings = ({
   const [isDragging, setIsDragging] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const isInitialized = useRef(false);
 
@@ -419,26 +420,32 @@ const Settings = ({
 
   const handleSave = (e) => {
     if (e) e.preventDefault();
+    setIsSaving(true);
     if (!businessName) {
       alert('Please specify a Business Name.');
+      setIsSaving(false);
       return;
     }
 
     if (paymentQrEnabled) {
       if (paymentMethod === 'UPI' && !upiId.trim()) {
         alert('Please specify your UPI ID.');
+        setIsSaving(false);
         return;
       }
       if (paymentMethod === 'bKash' && !bkashNumber.trim()) {
         alert('Please specify your bKash Number.');
+        setIsSaving(false);
         return;
       }
       if (paymentMethod === 'Nagad' && !nagadNumber.trim()) {
         alert('Please specify your Nagad Number.');
+        setIsSaving(false);
         return;
       }
       if (paymentMethod === 'Manual' && !customPaymentLink.trim()) {
         alert('Please specify your Custom Payment Link / QR Text.');
+        setIsSaving(false);
         return;
       }
     }
@@ -513,7 +520,10 @@ const Settings = ({
 
     // Show Toast
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3500);
+    setTimeout(() => {
+      setShowToast(false);
+      setIsSaving(false);
+    }, 3500);
   };
 
   const handleExport = async () => {
@@ -659,7 +669,7 @@ const Settings = ({
 
   const firebaseStatusColor = {
     connected: 'bg-theme-accent-light text-theme-accent border-theme-border-soft dark:bg-theme-accent/10 dark:text-theme-accent dark:border-theme-accent/30',
-    offline: 'bg-theme-warning/5 text-amber-700 border-theme-warning/30 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900',
+    offline: 'bg-theme-warning/5 text-theme-warning border-theme-warning/30 dark:bg-theme-warning/5 dark:text-theme-warning dark:border-theme-warning/30',
     'not-configured': 'bg-theme-app dark:bg-theme-surface text-theme-muted border-theme-border-soft dark:bg-theme-surface/40 dark:text-theme-muted dark:border-theme-border-soft',
   }[firebaseStatus];
 
@@ -716,10 +726,15 @@ const Settings = ({
         </div>
         <button
           onClick={handleSave}
-          className="btn-premium flex items-center justify-center gap-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-bold text-xs px-6 py-3 rounded-xl shadow-glow active:scale-[0.98] transition-all cursor-pointer"
+          disabled={isSaving}
+          className="btn-premium flex items-center justify-center gap-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-bold text-xs px-6 py-3 rounded-xl shadow-glow active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          <Save className="w-4 h-4" />
-          <span>Save Settings</span>
+          {isSaving ? (
+            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <Save className="w-4 h-4" />
+          )}
+          <span>{isSaving ? 'Saving...' : 'Save Settings'}</span>
         </button>
       </div>
 
@@ -792,7 +807,7 @@ const Settings = ({
                 </div>
                 <div>
                   <h2 className="section-header-title">Business Profile</h2>
-                  <p className="section-header-subtitle">Public Company Details</p>
+                  <p className="section-header-subtitle">Manage your business identity — company name, owner details, logo, and contact information that appears on every invoice.</p>
                 </div>
               </div>
             </div>
@@ -806,7 +821,7 @@ const Settings = ({
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder="e.g. BillQyro Technologies"
-                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-slate-805 dark:text-theme-primary font-bold"
+                  className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
                 />
               </div>
 
@@ -827,7 +842,7 @@ const Settings = ({
               <div>
                 <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Business Logo URL</label>
                 <div
-                  className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${isDragging ? 'border-theme-accent bg-theme-accent-light dark:bg-teal-950/20' : 'border-theme-border-soft bg-theme-app dark:bg-theme-surface hover:bg-theme-surface dark:bg-theme-card dark:border-theme-border-soft dark:bg-theme-surface/40 dark:hover:bg-slate-850'
+                  className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${isDragging ? 'border-theme-accent bg-theme-accent-light dark:bg-teal-950/20' : 'border-theme-border-soft bg-theme-app dark:bg-theme-surface hover:bg-theme-surface dark:bg-theme-card dark:border-theme-border-soft dark:bg-theme-surface/40 dark:hover:bg-theme-surface/60'
                     }`}
                   onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                   onDragLeave={() => setIsDragging(false)}
@@ -872,7 +887,7 @@ const Settings = ({
 
                 {logoUrl && (
                   <div className="mt-3 relative inline-block group">
-                    <img src={logoUrl} alt="Logo" className="h-12 w-auto object-contain rounded-lg border border-theme-border-soft dark:border-slate-750 p-1 bg-theme-card dark:bg-theme-card" onError={(e) => e.target.style.display = 'none'} />
+                    <img src={logoUrl} alt="Logo" className="h-12 w-auto object-contain rounded-lg border border-theme-border-soft dark:border-theme-border-soft p-1 bg-theme-card dark:bg-theme-card" onError={(e) => e.target.style.display = 'none'} />
                     <button
                       type="button"
                       onClick={() => setLogoUrl('')}
@@ -880,9 +895,20 @@ const Settings = ({
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
+                </div>
+              )}
+              {!storageInfo && (
+                <div className="flex flex-col items-center justify-center py-10 space-y-3">
+                  <div className="w-14 h-14 rounded-2xl bg-theme-accent-light dark:bg-theme-accent-light/20 text-theme-accent flex items-center justify-center">
+                    <HardDrive className="w-7 h-7" />
                   </div>
-                )}
-              </div>
+                  <div className="text-center max-w-xs">
+                    <h3 className="text-xs font-extrabold text-theme-primary">Storage data loading</h3>
+                    <p className="text-[10px] text-theme-muted font-medium mt-1">Switch to this tab to view storage usage and backup options.</p>
+                  </div>
+                </div>
+              )}
+            </div>
 
               <div>
                 <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Phone Number</label>
@@ -915,10 +941,10 @@ const Settings = ({
                     value={loggedInEmail}
                     readOnly
                     title="Contact email is locked to your verified Google account identity for security."
-                    className="w-full pl-10 pr-20 py-3 bg-slate-100 dark:bg-theme-card/40 border border-slate-200 dark:border-slate-700/50 rounded-xl focus:outline-none text-theme-muted dark:text-theme-muted font-medium cursor-not-allowed opacity-90 shadow-inner"
+                    className="w-full pl-10 pr-20 py-3 bg-theme-surface/50 dark:bg-theme-card/40 border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl focus:outline-none text-theme-muted dark:text-theme-muted font-medium cursor-not-allowed opacity-90 shadow-inner"
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <span className="bg-emerald-100 dark:bg-emerald-900/40 text-theme-success dark:text-emerald-400 border border-theme-success/30 dark:border-emerald-800 text-[9px] font-extrabold uppercase px-2 py-1 rounded-lg tracking-wider flex items-center gap-1 shadow-sm">
+                    <span className="bg-theme-success/10 dark:bg-theme-success/10 text-theme-success dark:text-theme-success border border-theme-success/30 dark:border-theme-success/30 text-[9px] font-extrabold uppercase px-2 py-1 rounded-lg tracking-wider flex items-center gap-1 shadow-sm">
                       <Check className="w-2.5 h-2.5" /> Verified
                     </span>
                   </div>
@@ -954,7 +980,7 @@ const Settings = ({
                   </div>
                   <div>
                     <h2 className="section-header-title">Brand Theme Studio</h2>
-                    <p className="section-header-subtitle">Customize the look of your BillQyro workspace and invoice PDF</p>
+                    <p className="section-header-subtitle">Personalize your workspace and invoice output with curated color presets, light/dark mode, and interface language.</p>
                   </div>
                 </div>
               </div>
@@ -1057,7 +1083,7 @@ const Settings = ({
                               </div>
                               <p className="text-[10px] text-theme-muted dark:text-theme-muted font-semibold leading-relaxed">{preset.desc}</p>
                               
-                              <div className="mt-3 flex rounded-xl overflow-hidden border border-black/10 dark:border-white/10 shadow-inner">
+                              <div className="mt-3 flex rounded-xl overflow-hidden border border-theme-border-soft dark:border-theme-border-soft shadow-inner">
                                 
                                 <div className="flex-1 p-2 flex gap-1.5" style={{ backgroundColor: lightColors.background }}>
                                   <div className="w-5 rounded shadow-sm p-1 space-y-1" style={{ backgroundColor: lightColors.sidebar }}>
@@ -1105,16 +1131,22 @@ const Settings = ({
                         import('../utils/themeIcon').then(m => m.updateFaviconForTheme(themeColor));
                         toast.success(`Previewing ${themeColor} theme!`);
                       }}
-                      className="btn-premium-outline w-full py-3 bg-theme-surface hover:bg-theme-border-soft/75 dark:bg-theme-card dark:hover:bg-slate-750 text-theme-primary dark:text-theme-secondary font-black text-xs rounded-xl shadow-sm transition-all active:scale-[0.98] cursor-pointer uppercase tracking-wider"
+                      className="btn-premium-outline w-full py-3 bg-theme-surface hover:bg-theme-border-soft/75 dark:bg-theme-card dark:hover:bg-theme-surface/80 text-theme-primary dark:text-theme-secondary font-black text-xs rounded-xl shadow-sm transition-all active:scale-[0.98] cursor-pointer uppercase tracking-wider"
                     >
                       Test UI Live Now
                     </button>
                     <button
                       type="button"
                       onClick={() => handleSave(null)}
-                      className="btn-premium w-full py-3 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-black text-xs rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer uppercase tracking-wider"
+                      disabled={isSaving}
+                      className="btn-premium w-full py-3 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-black text-xs rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed uppercase tracking-wider"
                     >
-                      Save Theme
+                      {isSaving ? (
+                        <span className="inline-flex items-center gap-2">
+                          <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Saving...
+                        </span>
+                      ) : 'Save Theme'}
                     </button>
                     <button
                       type="button"
@@ -1159,7 +1191,7 @@ const Settings = ({
                       const colors = getThemePreviewColors(themeColor);
                       return (
                         <div className="border border-theme-border-soft/60 dark:border-theme-border-soft rounded-2xl p-4 space-y-3 relative overflow-hidden flex flex-col justify-between" style={{ backgroundColor: colors.background }}>
-                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/40 dark:bg-black/30 px-1.5 py-0.5 rounded border border-theme-border-soft/10">PC Workspace</span>
+                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/40 dark:bg-theme-card/80 px-1.5 py-0.5 rounded border border-theme-border-soft/10">PC Workspace</span>
                           <div className="space-y-2">
                             <span className="text-[8px] font-black uppercase text-theme-muted tracking-wider block">Desktop Dashboard</span>
                             <div className="flex gap-2">
@@ -1204,7 +1236,7 @@ const Settings = ({
                       const colors = getThemePreviewColors(themeColor);
                       return (
                         <div className="border border-theme-border-soft/60 dark:border-theme-border-soft rounded-2xl p-4 flex flex-col justify-between items-center relative overflow-hidden bg-theme-app min-h-[145px]">
-                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/10 px-1.5 py-0.5 rounded border border-white/5">Smartphone UI</span>
+                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/10 px-1.5 py-0.5 rounded border border-theme-border-soft/20">Smartphone UI</span>
                           {/* Mobile Screen Shell */}
                           <div className="w-3/4 flex-1 border border-white/10 bg-theme-card rounded-t-xl overflow-hidden flex flex-col justify-between" style={{ backgroundColor: colors.background }}>
                             {/* Mobile header */}
@@ -1242,7 +1274,7 @@ const Settings = ({
                       const colors = getThemePreviewColors(themeColor);
                       return (
                         <div className="border border-theme-border-soft/60 dark:border-theme-border-soft rounded-2xl p-4 bg-theme-surface dark:bg-theme-card flex flex-col justify-between items-center relative overflow-hidden min-h-[145px]">
-                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/40 dark:bg-black/30 px-1.5 py-0.5 rounded border border-theme-border-soft/10">Printable PDF</span>
+                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/40 dark:bg-theme-card/80 px-1.5 py-0.5 rounded border border-theme-border-soft/10">Printable PDF</span>
                           {/* Mini paper sheet */}
                           <div className="w-[85%] flex-1 bg-theme-card border border-theme-border-soft shadow-sm p-2 flex flex-col justify-between">
                             {/* Header accent */}
@@ -1310,7 +1342,7 @@ const Settings = ({
                 </div>
                 <div>
                   <h2 className="section-header-title">Regional Settings</h2>
-                  <p className="section-header-subtitle">Localization, currency, and language</p>
+                  <p className="section-header-subtitle">Configure country-specific currency, tax labels, date formats, and number notations for regionally accurate invoices.</p>
                 </div>
               </div>
             </div>
@@ -1449,13 +1481,13 @@ const Settings = ({
                 </div>
                 <div>
                   <h2 className="section-header-title">Payment Settings</h2>
-                  <p className="section-header-subtitle">Automated billing QR configuration</p>
+                  <p className="section-header-subtitle">Set up digital payment integration via UPI, bKash, Nagad, or custom QR codes for instant invoice collection.</p>
                 </div>
               </div>
             </div>
 
             {/* Enable switch */}
-            <div className="flex items-center justify-between p-4 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-slate-750 rounded-2xl">
+            <div className="flex items-center justify-between p-4 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-2xl">
               <div>
                 <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-theme-secondary block tooltip-premium" title="Toggle QR code payment integration on all generated invoices">Enable Automated Scan-to-Pay QR Code</span>
                 <span className="text-[10px] text-theme-muted font-medium">Embed automated scanning codes on bills and invoice pages</span>
@@ -1575,13 +1607,13 @@ const Settings = ({
                       value={paymentNote}
                       onChange={(e) => setPaymentNote(e.target.value)}
                       placeholder="e.g. Please scan to complete payment."
-                      className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-slate-855 dark:text-theme-primary font-medium"
+                      className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-medium"
                     />
                   </div>
                 </div>
 
                 {/* PDF/Preview checks */}
-                <div className="flex items-center justify-between p-3.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-slate-750 rounded-2xl">
+                <div className="flex items-center justify-between p-3.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-2xl">
                   <div>
                     <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-theme-secondary block">Show QR in PDF Invoice</span>
                     <span className="text-[9px] text-theme-muted font-medium">Render the QR code on generated PDF documents</span>
@@ -1595,7 +1627,7 @@ const Settings = ({
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between p-3.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-slate-750 rounded-2xl">
+                <div className="flex items-center justify-between p-3.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-2xl">
                   <div>
                     <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-theme-secondary block">Show QR on Local Preview</span>
                     <span className="text-[9px] text-theme-muted font-medium">Render the QR code on invoice previews inside dashboard</span>
@@ -1619,11 +1651,11 @@ const Settings = ({
             <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-theme-accent-light dark:bg-theme-accent-light/40 text-theme-accent dark:text-theme-accent flex items-center justify-center shrink-0">
-                  <Palette className="w-5 h-5" />
+                  <FileText className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="section-header-title">Invoice Preferences</h2>
-                  <p className="section-header-subtitle">Invoice templates, numbering, and color accents</p>
+                  <p className="section-header-subtitle">Control invoice layout templates, numbering prefixes, default tax rates, brand colors, and document notes.</p>
                 </div>
               </div>
             </div>
@@ -1752,7 +1784,7 @@ const Settings = ({
                 </div>
                 <div>
                   <h2 className="section-header-title">Customer Live Link Settings</h2>
-                  <p className="section-header-subtitle">Configure what public customers see and interact with</p>
+                  <p className="section-header-subtitle">Define customer-facing invoice portal features — payment options, PDF downloads, proof submission, and support access.</p>
                 </div>
               </div>
             </div>
@@ -1772,7 +1804,7 @@ const Settings = ({
               ].map((item, idx) => (
                 <div key={idx} className="flex items-start justify-between p-3.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl">
                   <div className="mr-3">
-                    <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-slate-250 block">{item.label}</span>
+                    <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-theme-secondary block">{item.label}</span>
                     <span className="text-[9px] text-theme-muted dark:text-theme-muted font-semibold">{item.desc}</span>
                   </div>
                   <button
@@ -1799,7 +1831,7 @@ const Settings = ({
                 </div>
                 <div>
                   <h2 className="section-header-title">Premium Mobile UX</h2>
-                  <p className="section-header-subtitle">Configure haptic vibrations and premium sounds</p>
+                  <p className="section-header-subtitle">Toggle haptic feedback and premium sound effects for a polished, tactile user experience.</p>
                 </div>
               </div>
             </div>
@@ -1811,7 +1843,7 @@ const Settings = ({
               ].map((item, idx) => (
                 <div key={idx} className="flex items-start justify-between p-3.5 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl">
                   <div className="mr-3">
-                    <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-slate-250 block">{item.label}</span>
+                    <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-theme-secondary block">{item.label}</span>
                     <span className="text-[9px] text-theme-muted dark:text-theme-muted font-semibold">{item.desc}</span>
                   </div>
                   <button
@@ -1837,8 +1869,8 @@ const Settings = ({
                     <Database className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="section-header-title">Data Backup & Storage</h2>
-                    <p className="section-header-subtitle">Monitor and manage your business data safely</p>
+                  <h2 className="section-header-title">Data Backup & Storage</h2>
+                  <p className="section-header-subtitle">Export full backups, monitor storage health, clear temporary cache, clean drafts, and reset data safely.</p>
                   </div>
                 </div>
               </div>
@@ -1855,7 +1887,7 @@ const Settings = ({
                     </div>
                     <div className="w-full bg-theme-border-soft dark:bg-theme-border-soft/50 rounded-full h-3 overflow-hidden">
                       <div 
-                        className={`h-3 rounded-full transition-all duration-1000 ${storageInfo.percentage > 95 ? 'bg-red-500' : storageInfo.percentage > 80 ? 'bg-theme-warning/50' : 'bg-theme-success'}`} 
+                        className={`h-3 rounded-full transition-all duration-1000 ${storageInfo.percentage > 95 ? 'bg-theme-danger' : storageInfo.percentage > 80 ? 'bg-theme-warning/50' : 'bg-theme-success'}`} 
                         style={{ width: `${storageInfo.percentage}%` }}
                       ></div>
                     </div>
@@ -1867,7 +1899,7 @@ const Settings = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                     <button 
                       onClick={handleExport}
-                      className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left"
+                      className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-success/30 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left"
                     >
                       <Database className="text-theme-success" size={24} />
                       <div>
@@ -1882,9 +1914,9 @@ const Settings = ({
                       </div>
                       <button 
                       onClick={handleClearCacheOnly}
-                      className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 transition-colors text-left h-full"
+className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-accent/20 bg-theme-accent/5 hover:bg-theme-accent/10 transition-colors text-left h-full"
                       >
-                        <RotateCcw className="text-blue-500" size={24} />
+                        <RotateCcw className="text-theme-accent" size={24} />
                         <div>
                           <div className="font-semibold text-theme-text dark:text-theme-dark-text">Clear App Cache</div>
                           <div className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft">Fixes UI bugs by resetting temporary local cache</div>
@@ -1898,12 +1930,12 @@ const Settings = ({
                       </div>
                       <button 
                       onClick={() => setShowResetModal(true)}
-                      className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 transition-colors text-left h-full"
+className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-danger/30 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left h-full"
                       >
-                        <Trash2 className="text-red-500" size={24} />
+                        <Trash2 className="text-theme-danger" size={24} />
                         <div>
-                          <div className="font-semibold text-red-600 dark:text-red-400">Reset All Data</div>
-                          <div className="text-xs text-red-500/80">Wipe invoices, customers & settings and start fresh</div>
+                          <div className="font-semibold text-theme-danger dark:text-theme-danger">Reset All Data</div>
+                          <div className="text-xs text-theme-danger/80">Wipe invoices, customers & settings and start fresh</div>
                         </div>
                       </button>
                     </div>
@@ -1912,7 +1944,7 @@ const Settings = ({
                       <>
                         <button 
                           onClick={handleCleanTemporaryData}
-                          className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left"
+                          className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-success/30 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left"
                         >
                           <RefreshCw className="text-theme-success" size={24} />
                           <div>
@@ -1923,7 +1955,7 @@ const Settings = ({
 
                         <button 
                           onClick={handleCleanDuplicateDrafts}
-                          className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-amber-500/20 bg-theme-warning/50/5 hover:bg-theme-warning/10 transition-colors text-left"
+                          className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-warning/30 bg-theme-warning/5 hover:bg-theme-warning/10 transition-colors text-left"
                         >
                           <Trash2 className="text-theme-warning" size={24} />
                           <div>
@@ -1933,18 +1965,18 @@ const Settings = ({
                         </button>
                         <button 
                           onClick={handleClearAllLocalData}
-                          className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-theme-danger/10 transition-colors text-left md:col-span-1"
+                          className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-danger/20 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left md:col-span-1"
                         >
                           <ShieldAlert className="text-theme-danger" size={24} />
                           <div>
-                            <div className="font-semibold text-red-600 dark:text-theme-danger">HARD RESET (Admin)</div>
+                            <div className="font-semibold text-theme-danger dark:text-theme-danger">HARD RESET (Admin)</div>
                             <div className="text-xs text-theme-danger/80">Completely wipe ALL local storage</div>
                           </div>
                         </button>
 
                         <button 
                           onClick={handleEmptyTrash}
-                          className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-rose-500/20 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left md:col-span-1"
+                          className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-danger/30 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left md:col-span-1"
                         >
                           <Trash2 className="text-theme-danger" size={24} />
                           <div>
@@ -1971,7 +2003,7 @@ const Settings = ({
                 </div>
                 <div>
                   <h2 className="section-header-title">Install BillQyro App</h2>
-                  <p className="section-header-subtitle">Run BillQyro as a premium standalone software</p>
+                  <p className="section-header-subtitle">Install BillQyro as a standalone app for offline access, faster performance, and a dedicated workspace window.</p>
                 </div>
               </div>
             </div>
@@ -1987,7 +2019,7 @@ const Settings = ({
                 </p>
               </div>
             ) : installPromptEvent ? (
-              <div className="p-6 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-slate-850 rounded-3xl text-center space-y-4">
+              <div className="p-6 bg-theme-app dark:bg-theme-surface dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-3xl text-center space-y-4">
                 <div className="w-16 h-16 bg-gradient-to-tr from-theme-accent to-theme-accent-dark rounded-2xl flex items-center justify-center mx-auto shadow-glow text-white flex items-center justify-center font-black text-xl">
                   BQ
                 </div>
@@ -2006,12 +2038,12 @@ const Settings = ({
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="p-5 bg-theme-warning/5 dark:bg-amber-950/20 border border-theme-warning/30 dark:border-amber-900/60 rounded-2xl flex gap-3">
+                <div className="p-5 bg-theme-warning/5 dark:bg-theme-warning/5 border border-theme-warning/30 dark:border-theme-warning/30 rounded-2xl flex gap-3">
                   <div className="p-2 bg-theme-card dark:bg-theme-card rounded-xl text-theme-warning shadow-xs h-fit flex items-center justify-center">
                     <Info className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black text-amber-900 dark:text-amber-300 uppercase tracking-widest mb-1">Manual Installation Guide</h4>
+                    <h4 className="text-xs font-black text-theme-warning dark:text-theme-warning uppercase tracking-widest mb-1">Manual Installation Guide</h4>
                     <p className="text-[11px] font-semibold text-theme-muted dark:text-theme-muted leading-relaxed">
                       Native one-click installation is not supported by your current browser environment (e.g. iOS Safari) or the app is already installed. Follow the quick instructions below to install manually!
                     </p>
@@ -2021,7 +2053,7 @@ const Settings = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Apple iOS */}
                   <div className="bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 p-5 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft space-y-3">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-slate-650 dark:text-theme-muted uppercase">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-theme-muted dark:text-theme-muted uppercase">
                       🍎 Apple iOS (iPhone/iPad)
                     </div>
                     <ol className="text-xs text-theme-muted dark:text-theme-muted font-semibold space-y-2 list-decimal list-inside">
@@ -2034,7 +2066,7 @@ const Settings = ({
 
                   {/* Android Chrome */}
                   <div className="bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 p-5 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft space-y-3">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-slate-650 dark:text-theme-muted uppercase">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-theme-muted dark:text-theme-muted uppercase">
                       🤖 Android Mobile (Chrome)
                     </div>
                     <ol className="text-xs text-theme-muted dark:text-theme-muted font-semibold space-y-2 list-decimal list-inside">
@@ -2047,7 +2079,7 @@ const Settings = ({
 
                   {/* Desktop PCs */}
                   <div className="bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 p-5 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft space-y-3">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-slate-655 dark:text-theme-muted uppercase">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-theme-muted dark:text-theme-muted uppercase">
                       💻 Desktop Computers
                     </div>
                     <ol className="text-xs text-theme-muted dark:text-theme-muted font-semibold space-y-2 list-decimal list-inside">
@@ -2081,7 +2113,7 @@ const Settings = ({
                 </div>
                 <div>
                   <h2 className="section-header-title">AI & Integrations</h2>
-                  <p className="section-header-subtitle">Configure API Keys for Automations.</p>
+                  <p className="section-header-subtitle">Connect your Gemini API key for AI bill scanning and Twilio credentials for automated WhatsApp payment reminders.</p>
                 </div>
               </div>
             </div>
@@ -2130,26 +2162,32 @@ const Settings = ({
           <div className="card-premium p-6 md:p-8">
             <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft pb-4 mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-theme-accent-light dark:bg-theme-accent-light/40 text-theme-accent dark:text-theme-accent flex items-center justify-center shrink-0">
                   <Users className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="section-header-title">Team Management</h2>
-                  <p className="section-header-subtitle">Invite cashiers and manage roles.</p>
+                  <p className="section-header-subtitle">Invite cashiers with limited bill-creation access while keeping your dashboard and expenses private.</p>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="bg-theme-app dark:bg-theme-surface p-4 rounded-2xl border border-theme-border-soft text-center">
-                <p className="text-xs text-theme-muted font-bold">Role-Based Access Control (RBAC) allows you to invite Cashiers who can only create bills, but cannot view your Dashboard or Expenses.</p>
-                <button
-                  className="btn-premium mt-4 bg-[image:var(--accent-gradient)] text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => alert("Firebase Auth modification required: Please set up a Firebase Cloud Function to send email invites and assign custom claims for 'cashier' role.")}
-                >
-                  + Invite Cashier
-                </button>
+            <div className="flex flex-col items-center justify-center py-12 space-y-5">
+              <div className="w-16 h-16 rounded-2xl bg-theme-accent-light dark:bg-theme-accent-light/20 text-theme-accent flex items-center justify-center">
+                <Users className="w-8 h-8" />
               </div>
+              <div className="text-center max-w-sm">
+                <h3 className="text-sm font-extrabold text-theme-primary">No Team Members Yet</h3>
+                <p className="text-xs text-theme-muted font-medium mt-1.5 leading-relaxed">
+                  Invite cashiers to help manage billing. They can create invoices without accessing your dashboard, reports, or expenses.
+                </p>
+              </div>
+              <button
+                className="btn-premium bg-[image:var(--accent-gradient)] text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => alert("Firebase Auth modification required: Please set up a Firebase Cloud Function to send email invites and assign custom claims for 'cashier' role.")}
+              >
+                + Invite Cashier
+              </button>
             </div>
           </div>
         </div>
@@ -2159,14 +2197,14 @@ const Settings = ({
       {/* Reset All Data Modal */}
       {showResetModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 max-w-md w-full border border-red-500/30 shadow-2xl space-y-5">
+          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 max-w-md w-full border border-theme-danger/30 shadow-2xl space-y-5">
             <div className="flex items-center gap-3 border-b border-theme-border-soft pb-4">
-              <div className="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-theme-danger/10 text-theme-danger flex items-center justify-center">
                 <ShieldAlert className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="text-lg font-black text-theme-primary dark:text-theme-primary">Reset Account Data</h3>
-                <p className="text-[10px] text-red-500 font-bold uppercase tracking-wider">Danger Zone</p>
+                <p className="text-[10px] text-theme-danger font-bold uppercase tracking-wider">Danger Zone</p>
               </div>
             </div>
             
@@ -2183,7 +2221,7 @@ const Settings = ({
               <button
                 type="button"
                 onClick={handleExport}
-                className="btn-premium-outline w-full px-4 py-3 bg-theme-surface border border-theme-border-soft hover:bg-slate-100 dark:hover:bg-slate-800 text-theme-primary text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-colors"
+                className="btn-premium-outline w-full px-4 py-3 bg-theme-surface border border-theme-border-soft hover:bg-theme-surface dark:hover:bg-theme-surface/60 text-theme-primary text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-colors"
               >
                 <Download className="w-4 h-4" />
                 Download Backup Data
@@ -2196,7 +2234,7 @@ const Settings = ({
                     resetAccountKeepAuth();
                   }
                 }}
-                className="btn-premium w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors"
+                className="btn-premium w-full px-4 py-3 bg-theme-danger hover:bg-theme-danger/80 text-white text-sm font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
                 Yes, Reset All Data
@@ -2219,7 +2257,7 @@ const Settings = ({
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               {isDirty && (
-                <span className="flex items-center gap-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-3 py-1.5 rounded-full border border-amber-200 dark:border-amber-800/50">
+                <span className="flex items-center gap-1.5 text-[11px] font-bold text-theme-warning dark:text-theme-warning bg-theme-warning/5 dark:bg-theme-warning/5 px-3 py-1.5 rounded-full border border-theme-warning/30 dark:border-theme-warning/30">
                   <AlertCircle className="w-3.5 h-3.5" />
                   Unsaved changes
                 </span>
@@ -2232,10 +2270,20 @@ const Settings = ({
             </div>
             <button
               onClick={(e) => { handleSave(e); }}
-              className="btn-premium flex items-center gap-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-black text-xs px-6 py-3 rounded-xl shadow-glow active:scale-[0.98] transition-all cursor-pointer"
+              disabled={isSaving}
+              className="btn-premium flex items-center gap-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-black text-xs px-6 py-3 rounded-xl shadow-glow active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Save className="w-4 h-4" />
-              <span>Save Changes</span>
+              {isSaving ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  <span>Save Changes</span>
+                </>
+              )}
             </button>
           </div>
         </div>

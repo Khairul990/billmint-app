@@ -1,4 +1,4 @@
-/* 9. Sunset Orange */
+  /* 9. Sunset Orange */
   [data-theme="sunset-orange"] {
     --app-bg: #fff5f0;
     --app-bg-soft: #fff5f0;
@@ -677,9 +677,11 @@
   --sidebar-text: #e0e0e0;
   --input-bg: #151515;
   --chart-primary: #212121;
-  --status-success: #10B981;
-  --status-danger: #EF4444;
-}
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+
 
 /* 21. Crimson Gold */
 [data-theme="crimson-gold"] {
