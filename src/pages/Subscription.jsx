@@ -315,16 +315,28 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
       exit="exit"
       className="space-y-6 pb-24 max-w-5xl mx-auto"
     >
-      <div className="text-center space-y-2">
-        <span className="badge-premium text-[10px] uppercase font-black tracking-widest text-theme-accent bg-theme-accent-light dark:bg-theme-accent/10 dark:text-theme-accent px-3.5 py-1.5 rounded-full border border-theme-border-soft dark:border-theme-accent/30">
-          Billing & Plans
-        </span>
-        <h2 className="section-header text-2xl md:text-3xl font-black text-theme-primary tracking-tight">
-          Select Your Workspace Capacity
-        </h2>
-        <p className="text-xs md:text-sm text-theme-muted font-semibold max-w-md mx-auto">
-          Scale your invoicing with real vector PDF compilers, offline IndexedDB storage, and snapshotted company billing templates.
-        </p>
+      {/* PREMIUM HERO */}
+      <div className="relative overflow-hidden rounded-2xl bg-[image:var(--accent-gradient)] p-6 md:p-8 shadow-premium">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div className="relative z-10 text-center">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm text-white text-[9px] font-black uppercase tracking-widest mb-3">
+            <Award className="w-3 h-3" /> Billing & Plans
+          </span>
+          <h2 className="text-2xl md:text-4xl font-black text-white tracking-tight mt-2">
+            {isPremium ? 'Your Premium Workspace' : 'Scale Your Business'}
+          </h2>
+          <p className="text-sm md:text-base text-white/80 font-semibold max-w-xl mx-auto mt-2">
+            {isPremium
+              ? 'Enjoy unlimited access to all premium features with cloud sync and priority support.'
+              : 'Choose the perfect plan that grows with your business. No hidden fees, cancel anytime.'}
+          </p>
+          <div className="flex items-center justify-center gap-4 mt-4 text-white/70 text-xs font-semibold">
+            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-300" /> {isPremium ? 'Unlimited invoices' : '15 free invoices'}</span>
+            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-300" /> {isPremium ? 'Cloud backup' : 'Offline mode'}</span>
+            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-300" /> Priority support</span>
+          </div>
+        </div>
       </div>
 
       <div className="flex bg-theme-surface border border-theme-border-soft rounded-2xl p-1 max-w-sm mx-auto mt-4 glass">

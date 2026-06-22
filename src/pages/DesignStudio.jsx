@@ -93,9 +93,11 @@ const STUDIO_SECTIONS = [
 
 const SUB_TABS = [
   { id: 'overview', label: 'Overview', icon: Grid3X3 },
-  { id: 'templates', label: 'Templates', icon: Layers },
-  { id: 'brand', label: 'Brand', icon: PaintBucket },
-  { id: 'categories', label: 'Categories', icon: Tags }
+  { id: 'themes', label: 'Themes', icon: Palette },
+  { id: 'pdf-templates', label: 'PDF Templates', icon: FileText },
+  { id: 'live-link', label: 'Live Link', icon: Globe },
+  { id: 'branding', label: 'Branding', icon: PaintBucket },
+  { id: 'presets', label: 'Presets', icon: Briefcase }
 ];
 
 const BUSINESS_CATEGORIES = [
@@ -156,10 +158,45 @@ const DESIGN_TIPS = [
 
 const TEMPLATE_CATEGORIES = ['All', 'Retail', 'Embroidery', 'Tailor', 'Clinic', 'Repair'];
 
-const DesignStudio = ({ setCurrentTab }) => {
+const ALL_THEMES = [
+  { id: 'obsidian-gold', name: 'Obsidian Gold', category: 'Premium', gradient: 'linear-gradient(135deg, #B8860B, #1F2937)' },
+  { id: 'arctic-teal', name: 'Arctic Teal', category: 'Business', gradient: 'linear-gradient(135deg, #009E7F, #0F766E)' },
+  { id: 'sapphire-noir', name: 'Sapphire Noir', category: 'Business', gradient: 'linear-gradient(135deg, #2563EB, #1E3A8A)' },
+  { id: 'rose-platinum', name: 'Rose Platinum', category: 'Premium', gradient: 'linear-gradient(135deg, #C75C75, #8B3A4A)' },
+  { id: 'carbon-violet', name: 'Carbon Violet', category: 'Business', gradient: 'linear-gradient(135deg, #7C3AFF, #4C1D95)' },
+  { id: 'graphite-copper', name: 'Graphite Copper', category: 'Premium', gradient: 'linear-gradient(135deg, #B76535, #4B2A1A)' },
+  { id: 'arctic-diamond', name: 'Arctic Diamond', category: 'Light', gradient: 'linear-gradient(135deg, #60A5FA, #CBD5E1)' },
+  { id: 'emerald-royal', name: 'Emerald Royal', category: 'Premium', gradient: 'linear-gradient(135deg, #10B981, #D4AF37)' },
+  { id: 'midnight-ruby', name: 'Midnight Ruby', category: 'Premium', gradient: 'linear-gradient(135deg, #C0392B, #7F1D1D)' },
+  { id: 'titanium-blue', name: 'Titanium Blue', category: 'Business', gradient: 'linear-gradient(135deg, #2563EB, #94A3B8)' },
+  { id: 'pink-blossom', name: 'Pink Blossom', category: 'Light', gradient: 'linear-gradient(135deg, #F472B6, #EC4899)' },
+  { id: 'ocean-waves', name: 'Ocean Waves', category: 'Business', gradient: 'linear-gradient(135deg, #0EA5E9, #0284C7)' },
+  { id: 'sunset-orange', name: 'Sunset Orange', category: 'Business', gradient: 'linear-gradient(135deg, #F97316, #EA580C)' },
+  { id: 'royal-purple', name: 'Royal Purple', category: 'Business', gradient: 'linear-gradient(135deg, #A855F7, #7C3AED)' },
+  { id: 'cyber-teal', name: 'Cyber Teal', category: 'Business', gradient: 'linear-gradient(135deg, #14B8A6, #0D9488)' },
+  { id: 'soft-lavender', name: 'Soft Lavender', category: 'Light', gradient: 'linear-gradient(135deg, #C4B5FD, #A78BFA)' },
+  { id: 'gold-coast', name: 'Gold Coast', category: 'Premium', gradient: 'linear-gradient(135deg, #F59E0B, #D97706)' }
+];
+
+const THEME_CATEGORIES = ['All', 'Light', 'Dark', 'Premium', 'Business'];
+
+const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
   const [activeSubTab, setActiveSubTab] = useState('overview');
   const [templateCategory, setTemplateCategory] = useState('All');
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [favoriteThemes, setFavoriteThemes] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('billqyro_design_favorites') || '[]'); } catch { return []; }
+  });
+
+  const toggleFavorite = (themeId) => {
+    setFavoriteThemes(prev => {
+      const next = prev.includes(themeId) ? prev.filter(id => id !== themeId) : [...prev, themeId];
+      localStorage.setItem('billqyro_design_favorites', JSON.stringify(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -397,10 +434,10 @@ const DesignStudio = ({ setCurrentTab }) => {
         </motion.div>
       )}
 
-      {/* Templates Tab */}
-      {activeSubTab === 'templates' && (
+      {/* Themes Tab */}
+      {activeSubTab === 'themes' && (
         <motion.div
-          key="templates"
+          key="themes"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
@@ -408,28 +445,21 @@ const DesignStudio = ({ setCurrentTab }) => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">Template Library</h2>
-              <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Browse all available PDF and Live Link templates</p>
+              <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">Theme Studio</h2>
+              <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Browse, preview, and apply premium color themes</p>
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => handleNavigation('pdf-templates')} className="btn-premium text-[10px] px-4 py-2">
-                <FileText className="w-3.5 h-3.5" />
-                PDF Studio
-              </button>
-              <button onClick={() => handleNavigation('live-link-templates')} className="btn-premium text-[10px] px-4 py-2">
-                <Globe className="w-3.5 h-3.5" />
-                Link Studio
-              </button>
-            </div>
+            <button onClick={() => handleNavigation('settings')} className="btn-premium text-[10px] px-4 py-2">
+              <Palette className="w-3.5 h-3.5" />
+              All Themes
+            </button>
           </div>
-          {/* Category Filter Chips */}
           <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
-            {TEMPLATE_CATEGORIES.map((cat) => (
+            {THEME_CATEGORIES.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setTemplateCategory(cat)}
+                onClick={() => setActiveCategory(cat)}
                 className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
-                  templateCategory === cat
+                  activeCategory === cat
                     ? 'bg-theme-accent text-white shadow-md shadow-theme-accent/30'
                     : 'bg-theme-card text-theme-muted hover:text-theme-primary border border-theme-border-soft'
                 }`}
@@ -438,28 +468,91 @@ const DesignStudio = ({ setCurrentTab }) => {
               </button>
             ))}
           </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {ALL_THEMES.filter(t => (activeCategory === 'All' || t.category === activeCategory) && (searchQuery === '' || t.name.toLowerCase().includes(searchQuery.toLowerCase()))).map((theme) => (
+              <motion.button
+                key={theme.id}
+                whileHover={{ scale: 1.05, y: -3 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => {
+                  toggleFavorite(theme.id);
+                }}
+                className="card-premium p-4 flex flex-col items-center gap-2 cursor-pointer group relative"
+              >
+                <div className="w-full h-16 rounded-xl shadow-md" style={{ background: theme.gradient }} />
+                <span className="text-[9px] font-bold text-theme-primary text-center leading-tight mt-1">{theme.name}</span>
+                <span className="text-[7px] font-bold text-theme-muted uppercase tracking-wider">{theme.category}</span>
+                {favoriteThemes.includes(theme.id) && (
+                  <div className="absolute top-2 right-2 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center">
+                    <Star className="w-2.5 h-2.5 text-white" />
+                  </div>
+                )}
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleFavorite(theme.id); }}
+                  className={`absolute top-2 left-2 p-1 rounded-full transition-all ${favoriteThemes.includes(theme.id) ? 'text-amber-500' : 'text-theme-muted opacity-0 group-hover:opacity-100'}`}
+                >
+                  <Star className="w-3 h-3" />
+                </button>
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* PDF Templates Tab */}
+      {activeSubTab === 'pdf-templates' && (
+        <motion.div
+          key="pdf-templates"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-5"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">PDF Templates</h2>
+              <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Design professional invoice PDFs</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => handleNavigation('pdf-templates')} className="btn-premium text-[10px] px-4 py-2">
+                <FileText className="w-3.5 h-3.5" />
+                Open Studio
+              </button>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {TEMPLATE_PREVIEWS.filter(t => templateCategory === 'All' || t.label.toLowerCase().includes(templateCategory.toLowerCase())).map((tpl) => {
+            {TEMPLATE_PREVIEWS.filter(t => t.type === 'PDF').map((tpl) => {
               const TplIcon = tpl.icon;
               return (
                 <motion.div
                   key={tpl.id}
-                  whileHover={{ scale: 1.02, y: -3, transition: { duration: 0.2 } }}
-                  className="card-premium p-5 flex items-center gap-4 cursor-pointer"
+                  whileHover={{ scale: 1.02, y: -3 }}
+                  className="card-premium p-5 cursor-pointer group"
                 >
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tpl.gradient} flex items-center justify-center shadow-md shrink-0`}>
-                    <TplIcon className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-extrabold text-theme-primary truncate">{tpl.label}</h4>
-                      <span className="badge-premium text-[8px] font-black bg-theme-accent/10 text-theme-accent border border-theme-accent/20 px-2 py-0.5 rounded-full shrink-0">
-                        {tpl.type}
-                      </span>
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tpl.gradient} flex items-center justify-center shadow-md shrink-0`}>
+                      <TplIcon className="w-7 h-7 text-white" />
                     </div>
-                    <p className="text-[10px] font-semibold text-theme-muted mt-0.5">{tpl.desc}</p>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-extrabold text-theme-primary">{tpl.label}</h4>
+                      <p className="text-[10px] font-semibold text-theme-muted mt-0.5">{tpl.desc}</p>
+                    </div>
                   </div>
-                  <Eye className="w-4 h-4 text-theme-muted shrink-0" />
+                  <div className="aspect-[4/3] bg-theme-surface rounded-xl border border-theme-border-soft p-3 flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-20 bg-theme-muted/20 rounded"></div>
+                      <div className="h-4 w-16 bg-theme-muted/20 rounded ml-auto"></div>
+                    </div>
+                    <div className="flex-1 bg-theme-muted/10 rounded"></div>
+                    <div className="flex gap-2">
+                      <div className="h-4 w-12 bg-theme-muted/20 rounded"></div>
+                      <div className="h-4 w-12 bg-theme-muted/20 rounded"></div>
+                      <div className="h-4 w-16 bg-theme-muted/20 rounded ml-auto"></div>
+                    </div>
+                  </div>
+                  <button onClick={() => handleNavigation('pdf-templates')} className="w-full mt-3 btn-premium text-[10px] py-2">
+                    <Eye className="w-3 h-3" /> Customize Template
+                  </button>
                 </motion.div>
               );
             })}
@@ -467,10 +560,67 @@ const DesignStudio = ({ setCurrentTab }) => {
         </motion.div>
       )}
 
-      {/* Brand Tab */}
-      {activeSubTab === 'brand' && (
+      {/* Live Link Templates Tab */}
+      {activeSubTab === 'live-link' && (
         <motion.div
-          key="brand"
+          key="live-link"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-5"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">Live Link Templates</h2>
+              <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Beautiful payment links for your customers</p>
+            </div>
+            <button onClick={() => handleNavigation('live-link-templates')} className="btn-premium text-[10px] px-4 py-2">
+              <Globe className="w-3.5 h-3.5" />
+              Open Studio
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {TEMPLATE_PREVIEWS.filter(t => t.type === 'Live Link').map((tpl) => {
+              const TplIcon = tpl.icon;
+              return (
+                <motion.div
+                  key={tpl.id}
+                  whileHover={{ scale: 1.02, y: -3 }}
+                  className="card-premium p-5 cursor-pointer group"
+                >
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tpl.gradient} flex items-center justify-center shadow-md shrink-0`}>
+                      <TplIcon className="w-7 h-7 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-extrabold text-theme-primary">{tpl.label}</h4>
+                      <p className="text-[10px] font-semibold text-theme-muted mt-0.5">{tpl.desc}</p>
+                    </div>
+                  </div>
+                  <div className="aspect-[3/4] bg-theme-surface rounded-xl border border-theme-border-soft p-3 flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-theme-accent/20"></div>
+                      <div className="h-3 w-24 bg-theme-muted/20 rounded"></div>
+                    </div>
+                    <div className="flex-1 bg-gradient-to-br from-theme-accent/20 to-theme-accent/10 rounded-xl flex items-center justify-center">
+                      <Globe className="w-8 h-8 text-theme-muted/30" />
+                    </div>
+                    <div className="h-6 w-full bg-theme-accent/20 rounded-lg"></div>
+                  </div>
+                  <button onClick={() => handleNavigation('live-link-templates')} className="w-full mt-3 btn-premium text-[10px] py-2">
+                    <Eye className="w-3 h-3" /> Customize Link
+                  </button>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Branding Tab */}
+      {activeSubTab === 'branding' && (
+        <motion.div
+          key="branding"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
@@ -519,13 +669,25 @@ const DesignStudio = ({ setCurrentTab }) => {
               Configure
             </button>
           </div>
+          <div className="card-premium p-6">
+            <h3 className="text-sm font-extrabold text-theme-primary mb-4">Brand Preview</h3>
+            <div className="aspect-video bg-theme-surface rounded-xl border border-theme-border-soft flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-[image:var(--accent-gradient)] flex items-center justify-center shadow-md mb-3">
+                  <Building2 className="w-8 h-8 text-white" />
+                </div>
+                <p className="text-sm font-bold text-theme-primary">{businessSettings?.businessName || 'Your Brand'}</p>
+                <p className="text-[10px] text-theme-muted font-medium mt-1">Your brand preview will appear here</p>
+              </div>
+            </div>
+          </div>
         </motion.div>
       )}
 
-      {/* Categories Tab */}
-      {activeSubTab === 'categories' && (
+      {/* Business Presets Tab */}
+      {activeSubTab === 'presets' && (
         <motion.div
-          key="categories"
+          key="presets"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
@@ -533,7 +695,7 @@ const DesignStudio = ({ setCurrentTab }) => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">Business Categories</h2>
+              <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">Business Presets</h2>
               <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Templates and workflows tailored to your industry</p>
             </div>
             <button onClick={() => handleNavigation('marketplace')} className="btn-premium text-[10px] px-4 py-2">
@@ -566,6 +728,7 @@ const DesignStudio = ({ setCurrentTab }) => {
           </div>
         </motion.div>
       )}
+
 
       {/* Quick Stats */}
       <motion.div

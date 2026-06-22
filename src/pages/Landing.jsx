@@ -325,6 +325,69 @@ const Landing = ({ onLoginClick }) => {
         </div>
       </motion.section>
 
+      {/* ===== TESTIMONIALS ===== */}
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Testimonials</span>
+            <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Trusted by <span className="text-gradient-premium">business owners</span></h2>
+            <p className="text-theme-muted font-medium max-w-2xl mx-auto">See what our customers say about their BillQyro experience.</p>
+          </div>
+          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-6">
+            {[
+              { name: 'Rajesh Kumar', role: 'Retail Store Owner', location: 'Mumbai', avatar: 'RK', text: 'BillQyro transformed how I manage my billing. The PDF invoices look professional and my customers love the payment links.', rating: 5 },
+              { name: 'Fatima Begum', role: 'Embroidery Studio', location: 'Dhaka', avatar: 'FB', text: 'The embroidery-specific template with design numbers and work types saved me hours. Best billing app for Bangladeshi businesses!', rating: 5 },
+              { name: 'Ananya Sharma', role: 'Clinic Manager', location: 'Delhi', avatar: 'AS', text: 'Switched from paper prescriptions to BillQyro. The medical disclaimers on invoices and patient management are exactly what we needed.', rating: 5 }
+            ].map((t, i) => (
+              <motion.div key={i} variants={staggerItem} className="card-premium p-6 sm:p-8 rounded-3xl hover:border-theme-accent/30 transition-all duration-300">
+                <div className="flex items-center gap-1 mb-4">
+                  {[...Array(t.rating)].map((_, j) => (
+                    <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <p className="text-sm text-theme-muted font-medium leading-relaxed mb-6">"{t.text}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[image:var(--accent-gradient)] flex items-center justify-center text-white text-xs font-black">{t.avatar}</div>
+                  <div>
+                    <p className="text-sm font-bold text-theme-primary">{t.name}</p>
+                    <p className="text-xs text-theme-muted font-medium">{t.role} • {t.location}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* ===== CUSTOMER BENEFITS ===== */}
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Why Choose BillQyro</span>
+            <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Built for <span className="text-gradient-premium">growing businesses</span></h2>
+            <p className="text-theme-muted font-medium max-w-2xl mx-auto">Everything you need to run your billing operations smoothly.</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: Zap, title: 'Lightning Fast', desc: 'Create invoices in under 30 seconds with smart auto-fill and templates' },
+              { icon: ShieldCheck, title: 'Bank-Grade Security', desc: '256-bit encryption with Firebase authentication and Firestore rules' },
+              { icon: Smartphone, title: 'Works Anywhere', desc: 'PWA-enabled with full offline support. Create invoices even on a train' },
+              { icon: Globe, title: 'Multi-Currency', desc: 'Support for INR, BDT, USD with automatic tax configuration per country' },
+              { icon: Download, title: 'Professional PDFs', desc: 'A4 and A5 PDF with your logo, QR codes, and category-specific templates' },
+              { icon: MessageCircle, title: 'WhatsApp Integration', desc: 'Send invoices and payment reminders directly via WhatsApp' }
+            ].map((benefit, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex items-start gap-4 p-4">
+                <div className="w-12 h-12 rounded-2xl bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0"><benefit.icon className="w-6 h-6" /></div>
+                <div>
+                  <h3 className="text-base font-bold text-theme-primary mb-1">{benefit.title}</h3>
+                  <p className="text-sm text-theme-muted font-medium leading-relaxed">{benefit.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </motion.section>
+
       {/* ===== PRICING ===== */}
       <motion.section id="pricing" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">

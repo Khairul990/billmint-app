@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import AnimatedPage from '../components/AnimatedPage';
 import {
@@ -7,7 +7,8 @@ import {
   CheckCircle, Activity, Calendar, TrendingUp, Wallet,
   BarChart3, RefreshCw, MoreHorizontal, Eye, Download,
   Search, Link, Camera, FileSpreadsheet, ListChecks,
-  AlertTriangle, ChevronRight, Circle, Briefcase
+  AlertTriangle, ChevronRight, Circle, Briefcase,
+  Zap, Target, Percent, Building2, Smartphone, Globe
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid } from 'recharts';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -462,51 +463,63 @@ const Dashboard = ({
             </div>
           )}
 
-          <div className="bg-[image:var(--accent-gradient)] text-white rounded-2xl p-4 shadow-premium relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+          {/* PREMIUM MOBILE HERO */}
+          <div className="bg-[image:var(--accent-gradient)] text-white rounded-2xl p-5 shadow-premium relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[9px] font-black tracking-widest text-white/70 uppercase">
-                  {businessSettings?.businessName || 'Dashboard'}
-                </p>
-                <span className="text-[8px] font-bold text-white/60 bg-white/10 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
-                  Today's Collection
-                </span>
-              </div>
-              <p className="text-2xl font-black tracking-tight tabular-nums">{formatCurrency(todayEarnings)}</p>
-              <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar pb-1">
-                <div className="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm min-w-[120px] flex-1">
-                  <p className="text-[8px] font-bold text-white/70 uppercase tracking-wider">Total Due</p>
-                  <p className="text-base font-black mt-0.5 tabular-nums">{formatCurrency(totalDue)}</p>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-white/15 backdrop-blur-sm flex items-center justify-center">
+                    <Building2 className="w-3.5 h-3.5" />
+                  </div>
+                  <p className="text-[9px] font-black tracking-widest text-white/70 uppercase">
+                    {businessSettings?.businessName || 'Dashboard'}
+                  </p>
                 </div>
-                <div className="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm min-w-[120px] flex-1">
-                  <p className="text-[8px] font-bold text-white/70 uppercase tracking-wider">Pending Bills</p>
-                  <p className="text-base font-black mt-0.5 tabular-nums">{pendingBillsCount}</p>
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/10 backdrop-blur-sm">
+                  <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+                  <span className="text-[7px] font-bold text-white/80 uppercase tracking-wider">{syncStatus === 'Synced' ? 'Live' : syncStatus}</span>
                 </div>
               </div>
-              <div className="flex gap-2 mt-3">
-                <button onClick={onQuickBillOpen} className="flex-1 flex items-center justify-center gap-1.5 bg-white/20 hover:bg-white/30 rounded-xl py-2.5 font-bold text-xs transition-colors active:scale-[0.98]">
-                  <Plus className="w-3.5 h-3.5" />
-                  New Bill
-                </button>
-                <button onClick={() => setCurrentTab('due-ledger')} className="flex-1 flex items-center justify-center gap-1.5 bg-white/20 hover:bg-white/30 rounded-xl py-2.5 font-bold text-xs transition-colors active:scale-[0.98]">
-                  <CreditCard className="w-3.5 h-3.5" />
-                  Collect Due
-                </button>
+              <p className="text-[8px] text-white/60 font-semibold mt-1">
+                {workspaceName} • {workspaceType.charAt(0).toUpperCase() + workspaceType.slice(1)}
+              </p>
+              <div className="mt-3">
+                <p className="text-[9px] font-bold text-white/60 uppercase tracking-wider">Today's Collection</p>
+                <p className="text-3xl font-black tracking-tight tabular-nums mt-0.5">{formatCurrency(todayEarnings)}</p>
+              </div>
+              <div className="grid grid-cols-3 gap-2 mt-3">
+                <div className="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm">
+                  <p className="text-[7px] font-bold text-white/60 uppercase tracking-wider">Monthly</p>
+                  <p className="text-sm font-black mt-0.5 tabular-nums">{formatCurrency(totalRevenue)}</p>
+                </div>
+                <div className="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm">
+                  <p className="text-[7px] font-bold text-white/60 uppercase tracking-wider">Due</p>
+                  <p className="text-sm font-black mt-0.5 tabular-nums">{formatCurrency(totalDue)}</p>
+                </div>
+                <div className="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm">
+                  <p className="text-[7px] font-bold text-white/60 uppercase tracking-wider">Rate</p>
+                  <p className="text-sm font-black mt-0.5 tabular-nums">{collectionRate}%</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-2.5 bg-theme-card rounded-xl border border-theme-border-soft">
-            <div className="flex items-center gap-1.5">
-              <Shield className="w-3.5 h-3.5 text-theme-accent" />
-              <span className="text-[10px] font-bold text-theme-primary">
-                {isAppInstalled ? 'Installed' : 'Works offline'}
-              </span>
-            </div>
-            <span className="text-[10px] font-bold text-theme-muted">
-              {syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}
-            </span>
+          {/* PREMIUM MOBILE QUICK ACTION BAR */}
+          <div className="flex gap-2">
+            <button onClick={onQuickBillOpen} className="flex-1 flex items-center justify-center gap-1.5 bg-[image:var(--accent-gradient)] text-white rounded-xl py-3 font-bold text-[10px] shadow-sm active:scale-[0.97] transition-all">
+              <Plus className="w-3.5 h-3.5" /> New Bill
+            </button>
+            <button onClick={() => setShowAddCustomerSheet(true)} className="flex-1 flex items-center justify-center gap-1.5 bg-theme-card border border-theme-border-soft rounded-xl py-3 font-bold text-[10px] text-theme-primary active:scale-[0.97] transition-all">
+              <Users className="w-3.5 h-3.5" /> Customer
+            </button>
+            <button onClick={() => setCurrentTab('due-ledger')} className="flex-1 flex items-center justify-center gap-1.5 bg-theme-card border border-theme-border-soft rounded-xl py-3 font-bold text-[10px] text-theme-primary active:scale-[0.97] transition-all">
+              <CreditCard className="w-3.5 h-3.5" /> Collect
+            </button>
+            <button onClick={() => setCurrentTab('reports')} className="flex-1 flex items-center justify-center gap-1.5 bg-theme-card border border-theme-border-soft rounded-xl py-3 font-bold text-[10px] text-theme-primary active:scale-[0.97] transition-all">
+              <BarChart3 className="w-3.5 h-3.5" /> Reports
+            </button>
           </div>
 
           {/* ===== MOBILE WELCOME AREA ===== */}
@@ -522,14 +535,6 @@ const Dashboard = ({
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 {syncStatus === 'Synced' ? 'Live' : syncStatus}
               </div>
-            </div>
-            <div className="flex gap-2 mt-3">
-              <button onClick={onQuickBillOpen} className="flex-1 flex items-center justify-center gap-1.5 bg-[image:var(--accent-gradient)] text-white rounded-xl py-2.5 font-bold text-[10px] transition-colors active:scale-[0.98]">
-                <Plus className="w-3 h-3" /> New Invoice
-              </button>
-              <button onClick={() => setShowAddCustomerSheet(true)} className="flex-1 flex items-center justify-center gap-1.5 bg-theme-card border border-theme-border-soft rounded-xl py-2.5 font-bold text-[10px] text-theme-primary transition-colors active:scale-[0.98]">
-                <Users className="w-3 h-3" /> Add Customer
-              </button>
             </div>
           </motion.div>
 
@@ -885,7 +890,58 @@ const Dashboard = ({
               </div>
             </motion.div>
 
-            {/* ===== TODAY'S QUICK STATS ===== */}
+            {/* ===== PREMIUM HERO SECTION ===== */}
+            <motion.div variants={itemVariants} className="bg-[image:var(--accent-gradient)] rounded-2xl p-6 shadow-premium relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <h1 className="text-2xl font-black text-white tracking-tight">
+                        {greeting.text}, {businessSettings?.ownerName?.split(' ')[0] || 'there'}!
+                      </h1>
+                      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/15 backdrop-blur-sm text-white border border-white/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        {syncStatus === 'Synced' ? 'Live' : syncStatus}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 mt-1">
+                      <p className="text-xs text-white/80 font-medium">
+                        <Building2 className="w-3 h-3 inline mr-1" />
+                        {workspaceName} • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                      </p>
+                      <span className="text-white/30">|</span>
+                      <p className="text-xs text-white/70 font-medium">{workspaceType.charAt(0).toUpperCase() + workspaceType.slice(1)} Workspace</p>
+                    </div>
+                  </div>
+                  <button onClick={() => { onQuickBillOpen(); window.dispatchEvent(new Event('trigger-confetti')); }} 
+                    className="flex items-center gap-2 px-5 py-2.5 bg-white text-theme-primary text-xs font-black rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95 shrink-0">
+                    <Plus className="w-4 h-4" /> Create Bill
+                  </button>
+                </div>
+                <div className="grid grid-cols-4 gap-4 mt-5">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5">
+                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Today's Earnings</p>
+                    <p className="text-xl font-black text-white mt-0.5 tabular-nums">{formatCurrency(todayEarnings)}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5">
+                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Monthly Revenue</p>
+                    <p className="text-xl font-black text-white mt-0.5 tabular-nums">{formatCurrency(totalRevenue)}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5">
+                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Total Due</p>
+                    <p className="text-xl font-black text-white mt-0.5 tabular-nums">{formatCurrency(totalDue)}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5">
+                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Collection Rate</p>
+                    <p className="text-xl font-black text-white mt-0.5 tabular-nums">{collectionRate}%</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ===== QUICK STATS ROW ===== */}
             <motion.div variants={itemVariants} className="stats-grid">
               {(() => {
                 const today = new Date().toDateString();
