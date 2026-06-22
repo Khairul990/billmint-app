@@ -3,5 +3,7 @@ User-agent: *
 Allow: /
 Disallow: /km-admin
 Disallow: /admin
+Disallow: /invoice/*
+Disallow: /onboarding
 
 Sitemap: https://billqyro.com/sitemap.xml

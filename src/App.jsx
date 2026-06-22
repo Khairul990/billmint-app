@@ -1413,7 +1413,7 @@ function App() {
       case 'appointments':
         return <Appointments />;
       case 'orders':
-        return <Orders />;
+        return <Orders invoices={activeInvoices} customers={activeCustomers} businessSettings={activeSettings} setCurrentTab={setCurrentTab} />;
       case 'patients':
         return <Patients />;
       case 'students':

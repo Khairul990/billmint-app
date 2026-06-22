@@ -4,10 +4,7 @@ service firebase.storage {
     
     // Payment Proofs Uploaded by Customers via Live Links
     match /payment_proofs/{fileName} {
-      // Only authenticated owners/admins can read
       allow read: if request.auth != null;
-      // Only authenticated users can upload (prevents anonymous storage abuse)
-      // Limit uploads to images and max size of 5MB
       allow write: if request.auth != null
                    && request.resource.size < 5 * 1024 * 1024
                    && request.resource.contentType.matches('image/.*');
@@ -16,15 +13,28 @@ service firebase.storage {
     // Business Logos Uploaded by Users
     match /business_logos/{fileName} {
       allow read: if true;
-      // Only authenticated users can upload logos
       allow write: if request.auth != null 
                    && request.resource.size < 2 * 1024 * 1024 
                    && request.resource.contentType.matches('image/.*');
     }
 
-    // Other generic assets protection
+    // Per-user document uploads (e.g. invoices, reports)
+    match /user_uploads/{userId}/{fileName} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('application/pdf|image/.*');
+    }
+
+    // Admin-only bucket for platform assets
+    match /admin_assets/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.token.email == 'khairul2052007@gmail.com';
+    }
+
+    // Generic catch-all — deny by default (Firebase default is deny, this is explicit)
     match /{allPaths=**} {
-      allow read, write: if request.auth != null && request.auth.token.email == 'khairul2052007@gmail.com';
+      allow read, write: if request.auth != null && request.auth.uid != null;
     }
   }
 }

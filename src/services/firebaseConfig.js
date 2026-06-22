@@ -2,7 +2,8 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-// Uncomment below when App Check is enabled in Firebase Console:
+// App Check — Firebase Abuse Prevention
+// To enable: Set VITE_APPCHECK_RECAPTCHA_KEY in .env, then uncomment the two lines below
 // import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 
 const firebaseConfig = {
@@ -34,7 +35,14 @@ if (hasConfig) {
     firebaseReady = true;
     window.billqyro_firebaseReady = true;
 
-    // App Check readiness (uncomment when Firebase App Check is enabled)
+    // ============================================================
+    // FIREBASE APP CHECK — UNCOMMENT FOR PRODUCTION ABUSE PREVENTION
+    // ============================================================
+    // Prerequisites:
+    // 1. Enable App Check in Firebase Console > App Check
+    // 2. Set VITE_APPCHECK_RECAPTCHA_KEY in .env.production
+    // 3. Set VITE_APPCHECK_DEBUG_TOKEN in .env.local for dev testing
+    //
     // if (typeof window !== 'undefined') {
     //   self.FIREBASE_APPCHECK_DEBUG_TOKEN = import.meta.env.VITE_APPCHECK_DEBUG_TOKEN || true;
     //   initializeAppCheck(app, {

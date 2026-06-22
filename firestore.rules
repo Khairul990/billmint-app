@@ -159,5 +159,19 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // -------------------------------------------------------------------------
+    // Rate Limiting & Security Notes
+    // -------------------------------------------------------------------------
+    // NOTE: Firestore native rules do NOT support rate limiting.
+    // For production rate limiting, deploy a Cloud Function that sits
+    // in front of write operations, or use Firebase Extensions.
+    //
+    // All collections follow the principle of least privilege:
+    // - Users can only read/write their own data (userId subcollections)
+    // - Admin/owner email is hardcoded for rule-level access
+    // - Public invoice reads are open (by design for live links)
+    // - Payment proof updates are restricted to allowed fields only
+    // - Role escalation fields (role, isAdmin, plan) are blocked on usersList
   }
 }
