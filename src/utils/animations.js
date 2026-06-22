@@ -268,3 +268,56 @@ export const gridItem = {
     }
   }
 };
+
+// Reusable hover scale effect
+export const scaleOnHover = {
+  rest: { scale: 1 },
+  hover: {
+    scale: 1.03,
+    transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
+  },
+  tap: { scale: 0.97 }
+};
+
+// Button press animation
+export const buttonTap = {
+  rest: { scale: 1 },
+  hover: {
+    scale: 1.02,
+    transition: { duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }
+  },
+  tap: {
+    scale: 0.95,
+    transition: { duration: 0.1, ease: [0.25, 0.1, 0.25, 1] }
+  }
+};
+
+// Individual list item animation with slide + fade
+export const listItem = {
+  hidden: { opacity: 0, x: -12 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.25,
+      ease: [0.25, 0.1, 0.25, 1]
+    }
+  },
+  exit: {
+    opacity: 0,
+    x: 12,
+    transition: { duration: 0.15 }
+  }
+};
+
+// Card flip animation
+export const cardFlip = {
+  front: {
+    rotateY: 0,
+    transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+  },
+  back: {
+    rotateY: 180,
+    transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+  }
+};

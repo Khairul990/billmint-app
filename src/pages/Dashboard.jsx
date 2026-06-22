@@ -209,6 +209,32 @@ const Dashboard = ({
     .filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid' || inv.paymentStatus === 'Partial' || inv.paymentStatus === 'partial' || inv.paymentStatus === 'Partially Paid')
     .reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
 
+  const healthScore = Math.min(100, Math.round(
+    (invoices.length > 0 ? Math.min(paidCount / invoices.length, 1) * 40 : 0) +
+    (totalRevenue > 0 ? Math.min(totalCollected / totalRevenue, 1) * 30 : 0) +
+    (totalCustomers > 0 ? Math.min(totalCustomers / 10, 1) * 30 : 0)
+  ));
+  const collectionRate = totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0;
+  const newCustomersThisMonth = (() => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    return customers.filter(c => c.createdAt && new Date(c.createdAt) >= startOfMonth).length;
+  })();
+  const activeCustomers = customers.filter(c => {
+    if (!c.updatedAt && !c.createdAt) return false;
+    const lastActive = new Date(c.updatedAt || c.createdAt);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return lastActive >= thirtyDaysAgo;
+  }).length;
+  const workspaceName = businessSettings?.businessWorkspaces?.find(
+    ws => ws.id === businessSettings.activeWorkspaceId
+  )?.name || businessSettings?.businessName || 'Default';
+  const workspaceType = businessSettings?.businessWorkspaces?.find(
+    ws => ws.id === businessSettings.activeWorkspaceId
+  )?.type || 'retail';
+  const enabledModulesCount = businessSettings?.businessModules?.filter(m => m.enabled)?.length || 0;
+
   const getRevenueTrend = () => {
     const days = [];
     for (let i = 6; i >= 0; i--) {
@@ -407,6 +433,93 @@ const Dashboard = ({
             </span>
           </div>
 
+          {/* ===== MOBILE WELCOME AREA ===== */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass p-4 rounded-2xl">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <h2 className="text-lg font-black text-theme-primary">
+                  <span>{greeting.icon}</span> {greeting.text}, {businessSettings?.ownerName?.split(' ')[0] || 'there'}!
+                </h2>
+                <p className="text-[10px] text-theme-muted font-medium mt-0.5">{businessSettings?.businessName || 'Your Business'} • {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+              </div>
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-[8px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                {syncStatus === 'Synced' ? 'Live' : syncStatus}
+              </div>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button onClick={onQuickBillOpen} className="flex-1 flex items-center justify-center gap-1.5 bg-[image:var(--accent-gradient)] text-white rounded-xl py-2.5 font-bold text-[10px] transition-colors active:scale-[0.98]">
+                <Plus className="w-3 h-3" /> New Invoice
+              </button>
+              <button onClick={() => setShowAddCustomerSheet(true)} className="flex-1 flex items-center justify-center gap-1.5 bg-theme-card border border-theme-border-soft rounded-xl py-2.5 font-bold text-[10px] text-theme-primary transition-colors active:scale-[0.98]">
+                <Users className="w-3 h-3" /> Add Customer
+              </button>
+            </div>
+          </motion.div>
+
+          {/* ===== MOBILE HEALTH SCORE + COLLECTION ===== */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="card-premium p-4 flex flex-col items-center">
+              <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-2">Health</p>
+              <div className="relative w-20 h-20 mb-1">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="var(--theme-border-soft)" strokeWidth="6" />
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeDasharray={`${healthScore * 2.136} 213.6`} className={healthScore >= 70 ? 'text-emerald-500' : healthScore >= 40 ? 'text-amber-500' : 'text-red-500'} />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className={`text-xl font-black ${healthScore >= 70 ? 'text-emerald-500' : healthScore >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{healthScore}</span>
+                </div>
+              </div>
+              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${healthScore >= 70 ? 'bg-emerald-500/10 text-emerald-500' : healthScore >= 40 ? 'bg-amber-500/10 text-amber-500' : 'bg-red-500/10 text-red-500'}`}>
+                {healthScore >= 70 ? 'Great' : healthScore >= 40 ? 'Fair' : 'Low'}
+              </span>
+            </div>
+            <div className="card-premium p-4 flex flex-col justify-center">
+              <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-2">Collection</p>
+              <p className="text-2xl font-black text-theme-primary tabular-nums">{collectionRate}%</p>
+              <div className="w-full h-2 bg-theme-surface rounded-full overflow-hidden mt-2">
+                <div className={`h-full rounded-full ${collectionRate >= 70 ? 'bg-emerald-500' : collectionRate >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${collectionRate}%` }} />
+              </div>
+              <p className="text-[9px] text-theme-muted font-medium mt-1.5">{formatCurrency(totalCollected)} collected</p>
+            </div>
+          </div>
+
+          {/* ===== MOBILE RECENT PAYMENTS ===== */}
+          <div className="card-premium p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-extrabold text-theme-primary">Recent Payments</h3>
+              {recentPayments.length > 5 && (
+                <button onClick={() => setCurrentTab('due-ledger')} className="text-[9px] font-bold text-theme-accent">View All</button>
+              )}
+            </div>
+            {recentPayments.length === 0 ? (
+              <p className="text-[11px] text-theme-muted font-medium">No payments yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {recentPayments.slice(0, 5).map((payment, idx) => {
+                  const badge = statusBadge(payment.paymentStatus);
+                  return (
+                    <div key={payment.id || idx} className="flex items-center justify-between p-2.5 bg-theme-surface rounded-xl">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-theme-primary truncate">{payment.customerName || 'Walk-in'}</p>
+                          <p className="text-[9px] text-theme-muted font-medium">{formatShortDate(payment.updatedAt || payment.createdAt)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-black text-theme-primary tabular-nums">{formatCurrency(payment.grandTotal || payment.total || 0)}</p>
+                        <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${badge.classes}`}>{badge.label}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <div>
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-base font-extrabold text-theme-primary tracking-tight">
@@ -472,6 +585,70 @@ const Dashboard = ({
               </div>
             )}
           </div>
+
+          {/* ===== MOBILE CUSTOMER INSIGHTS ===== */}
+          <div className="card-premium p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-extrabold text-theme-primary">Customer Insights</h3>
+              <button onClick={() => setCurrentTab('customers')} className="text-[9px] font-bold text-theme-accent flex items-center gap-0.5">
+                View <ChevronRight className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="stat-premium !p-3 text-center">
+                <p className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">Total</p>
+                <p className="text-lg font-black text-theme-primary tabular-nums">{totalCustomers}</p>
+              </div>
+              <div className="stat-premium !p-3 text-center">
+                <p className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">New</p>
+                <p className="text-lg font-black text-theme-primary tabular-nums">{newCustomersThisMonth}</p>
+              </div>
+              <div className="stat-premium !p-3 text-center">
+                <p className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">Active</p>
+                <p className="text-lg font-black text-theme-primary tabular-nums">{activeCustomers}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* ===== MOBILE WORKSPACE INFO ===== */}
+          <div className="card-premium p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-extrabold text-theme-primary">Workspace</h3>
+              <span className="badge-premium text-[8px]">{enabledModulesCount} modules</span>
+            </div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[9px] text-theme-muted font-semibold">Name</span>
+              <span className="text-[9px] font-bold text-theme-primary">{workspaceName}</span>
+            </div>
+            <div className="divider-premium" />
+            <div className="flex items-center justify-between mt-2 mb-2">
+              <span className="text-[9px] text-theme-muted font-semibold">Type</span>
+              <span className="text-[9px] font-bold text-theme-primary capitalize">{workspaceType}</span>
+            </div>
+            <div className="divider-premium" />
+            <button onClick={() => setCurrentTab('settings')} className="w-full flex items-center justify-between mt-2 p-2.5 rounded-xl bg-theme-surface">
+              <span className="text-[9px] font-bold text-theme-primary">Switch Workspace</span>
+              <ChevronRight className="w-3.5 h-3.5 text-theme-muted" />
+            </button>
+          </div>
+
+          {/* ===== MOBILE SYNC STATUS ===== */}
+          <div className="card-premium flex items-center justify-between p-3">
+            <div className="flex items-center gap-2">
+              <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${syncStatus === 'Synced' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                {syncStatus === 'Synced' ? <ShieldCheck className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
+              </div>
+              <div>
+                <span className={`text-[9px] font-bold ${syncStatus === 'Synced' ? 'text-emerald-500' : 'text-red-500'}`}>
+                  {syncStatus === 'Synced' ? 'Connected' : 'Disconnected'}
+                </span>
+                <p className="text-[8px] text-theme-muted font-medium">Synced just now</p>
+              </div>
+            </div>
+            <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+              {syncStatus === 'Synced' ? 'Healthy' : 'Pending'}
+            </span>
+          </div>
         </div>
 
         {/* ===== DESKTOP VIEW (>= 1024px) ===== */}
@@ -517,21 +694,51 @@ const Dashboard = ({
               </motion.div>
             )}
 
-            {/* ===== HEADER & GREETING ===== */}
-            <div className="flex items-center justify-between pt-2 pb-4">
-              <div>
-                <h1 className="text-2xl font-black text-theme-primary tracking-tight flex items-center gap-2">
-                  <span>{greeting.icon}</span> {greeting.text}, {businessSettings?.ownerName?.split(' ')[0] || 'there'}!
-                </h1>
-                <p className="text-xs text-theme-muted font-medium mt-1">Here's what's happening with your business today.</p>
+            {/* ===== WELCOME AREA ===== */}
+            <motion.div variants={itemVariants} className="glass p-5 rounded-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-1">
+                    <h1 className="text-2xl font-black text-theme-primary tracking-tight">
+                      <span>{greeting.icon}</span> {greeting.text}, {businessSettings?.ownerName?.split(' ')[0] || 'there'}!
+                    </h1>
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      {syncStatus === 'Synced' ? 'Live' : syncStatus}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <p className="text-xs text-theme-muted font-medium">
+                      {businessSettings?.businessName || 'Your Business'} • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                    <span className="text-theme-border-soft">|</span>
+                    <p className="text-xs text-theme-muted font-medium">Here's what's happening today.</p>
+                  </div>
+                </div>
+                <button onClick={() => {
+                  onQuickBillOpen();
+                  window.dispatchEvent(new Event('trigger-confetti'));
+                }} className="px-4 py-2 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-xl shadow-sm hover:shadow-premium-hover transition-all active:scale-95 flex items-center gap-1.5 shrink-0">
+                  <Plus className="w-4 h-4" /> Create Bill
+                </button>
               </div>
-              <button onClick={() => {
-                onQuickBillOpen();
-                window.dispatchEvent(new Event('trigger-confetti'));
-              }} className="px-4 py-2 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-xl shadow-sm hover:shadow-premium-hover transition-all active:scale-95 flex items-center gap-1.5">
-                <Plus className="w-4 h-4" /> Create Bill
+            </motion.div>
+
+            {/* ===== QUICK ACTION BAR ===== */}
+            <motion.div variants={itemVariants} className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
+              <button onClick={onQuickBillOpen} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-[image:var(--accent-gradient)] text-white rounded-xl shadow-sm hover:shadow-premium-hover transition-all active:scale-95 shrink-0">
+                <Plus className="w-4 h-4" /> New Invoice
               </button>
-            </div>
+              <button onClick={() => setShowAddCustomerSheet(true)} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-theme-card border border-theme-border-soft text-theme-primary rounded-xl hover:bg-theme-surface transition-all active:scale-95 shrink-0">
+                <Users className="w-4 h-4" /> Add Customer
+              </button>
+              <button onClick={() => setCurrentTab('due-ledger')} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-theme-card border border-theme-border-soft text-theme-primary rounded-xl hover:bg-theme-surface transition-all active:scale-95 shrink-0">
+                <CreditCard className="w-4 h-4" /> Log Payment
+              </button>
+              <button onClick={() => setCurrentTab('reports')} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-theme-card border border-theme-border-soft text-theme-primary rounded-xl hover:bg-theme-surface transition-all active:scale-95 shrink-0">
+                <BarChart3 className="w-4 h-4" /> View Reports
+              </button>
+            </motion.div>
 
             {/* ===== ROW 1: KPI CARDS ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-4 gap-4">
@@ -573,6 +780,57 @@ const Dashboard = ({
                   />
                 </>
               )}
+            </motion.div>
+
+            {/* ===== BUSINESS HEALTH + COLLECTION SUMMARY ===== */}
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+              <div className="col-span-4 card-premium p-5 flex flex-col">
+                <div className="section-header">
+                  <h3 className="section-header-title">Business Health</h3>
+                </div>
+                <div className="flex-1 flex flex-col items-center justify-center">
+                  <div className="relative w-32 h-32 mb-3">
+                    <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                      <circle cx="60" cy="60" r="52" fill="none" stroke="var(--theme-border-soft)" strokeWidth="8" />
+                      <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeDasharray={`${healthScore * 3.267} 326.7`} className={healthScore >= 70 ? 'text-emerald-500' : healthScore >= 40 ? 'text-amber-500' : 'text-red-500'} />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className={`text-3xl font-black ${healthScore >= 70 ? 'text-emerald-500' : healthScore >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{healthScore}</span>
+                    </div>
+                  </div>
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${healthScore >= 70 ? 'bg-emerald-500/10 text-emerald-500' : healthScore >= 40 ? 'bg-amber-500/10 text-amber-500' : 'bg-red-500/10 text-red-500'}`}>
+                    {healthScore >= 70 ? 'Excellent' : healthScore >= 40 ? 'Needs Attention' : 'Critical'}
+                  </span>
+                </div>
+              </div>
+              <div className="col-span-8 card-premium p-5">
+                <div className="section-header">
+                  <div>
+                    <h3 className="section-header-title">Collection Summary</h3>
+                    <p className="section-header-subtitle">Track your collection progress against targets.</p>
+                  </div>
+                  <span className="text-2xl font-black text-theme-primary tabular-nums">{collectionRate}%</span>
+                </div>
+                <div className="mt-6 space-y-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-theme-muted font-semibold">Collected</p>
+                      <p className="text-lg font-black text-theme-primary tabular-nums">{formatCurrency(totalCollected)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-theme-muted font-semibold">Target</p>
+                      <p className="text-lg font-black text-theme-primary tabular-nums">{formatCurrency(totalRevenue)}</p>
+                    </div>
+                  </div>
+                  <div className="w-full h-3 bg-theme-surface rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full transition-all duration-1000 ${collectionRate >= 70 ? 'bg-emerald-500' : collectionRate >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${collectionRate}%` }} />
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-theme-muted font-medium">
+                    <span>Collection Rate: {collectionRate}%</span>
+                    <span>{totalRevenue > 0 ? totalCollected.toLocaleString() : 0} / {totalRevenue.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
             </motion.div>
 
             {/* ===== ROW 2: CHARTS ===== */}
@@ -652,6 +910,64 @@ const Dashboard = ({
               </div>
             </motion.div>
 
+            {/* ===== CUSTOMER INSIGHTS + WORKSPACE INFO ===== */}
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+              <div className="col-span-7 card-premium p-5">
+                <div className="section-header">
+                  <div>
+                    <h3 className="section-header-title">Customer Insights</h3>
+                    <p className="section-header-subtitle">Customer engagement and growth metrics.</p>
+                  </div>
+                  <button onClick={() => setCurrentTab('customers')} className="btn-premium-ghost text-xs">
+                    View All <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-3 mt-6">
+                  <div className="stat-premium !p-4">
+                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Total</p>
+                    <p className="text-2xl font-black text-theme-primary tabular-nums">{totalCustomers}</p>
+                    <p className="text-2xs text-theme-muted font-medium mt-1">Registered</p>
+                  </div>
+                  <div className="stat-premium !p-4">
+                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">New This Month</p>
+                    <p className="text-2xl font-black text-theme-primary tabular-nums">{newCustomersThisMonth}</p>
+                    <p className="text-2xs text-emerald-500 font-medium mt-1">This month</p>
+                  </div>
+                  <div className="stat-premium !p-4">
+                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Active</p>
+                    <p className="text-2xl font-black text-theme-primary tabular-nums">{activeCustomers}</p>
+                    <p className="text-2xs text-theme-accent font-medium mt-1">Last 30d</p>
+                  </div>
+                </div>
+              </div>
+              <div className="col-span-5 card-premium p-5 flex flex-col">
+                <div className="section-header">
+                  <h3 className="section-header-title">Workspace Info</h3>
+                </div>
+                <div className="flex-1 space-y-4 mt-6">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-theme-muted font-semibold">Workspace</span>
+                    <span className="text-xs font-bold text-theme-primary">{workspaceName}</span>
+                  </div>
+                  <div className="divider-premium" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-theme-muted font-semibold">Type</span>
+                    <span className="text-xs font-bold text-theme-primary capitalize">{workspaceType}</span>
+                  </div>
+                  <div className="divider-premium" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-theme-muted font-semibold">Enabled Modules</span>
+                    <span className="badge-premium text-xs">{enabledModulesCount}</span>
+                  </div>
+                  <div className="divider-premium" />
+                  <button onClick={() => setCurrentTab('settings')} className="w-full flex items-center justify-between p-3 rounded-xl bg-theme-surface hover:bg-theme-accent/5 transition-colors">
+                    <span className="text-xs font-bold text-theme-primary">Switch Workspace</span>
+                    <ChevronRight className="w-4 h-4 text-theme-muted" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+
             {/* ===== ROW 3: BOTTOM AREA ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
               {/* Recent Bills List */}
@@ -719,6 +1035,46 @@ const Dashboard = ({
               </div>
             </motion.div>
 
+            {/* ===== RECENT PAYMENTS ===== */}
+            <motion.div variants={itemVariants} className="card-premium p-5">
+              <div className="section-header">
+                <div>
+                  <h3 className="section-header-title">Recent Payments</h3>
+                  <p className="section-header-subtitle">Latest payment transactions recorded.</p>
+                </div>
+                {recentPayments.length > 5 && (
+                  <button onClick={() => setCurrentTab('due-ledger')} className="btn-premium-ghost text-xs">
+                    View All <ChevronRight className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+              <div className="mt-6 space-y-3">
+                {recentPayments.length === 0 ? (
+                  <p className="text-sm text-theme-muted font-medium p-4 bg-theme-surface rounded-xl">No payments recorded yet.</p>
+                ) : (
+                  recentPayments.slice(0, 5).map((payment, idx) => (
+                    <div key={payment.id || idx} className="flex items-center justify-between p-3 rounded-xl bg-theme-surface hover:bg-theme-accent/5 transition-colors">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                          <CheckCircle className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-theme-primary truncate">{payment.customerName || 'Walk-in Customer'}</p>
+                          <p className="text-[10px] text-theme-muted font-semibold">{formatShortDate(payment.updatedAt || payment.createdAt)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <p className="text-sm font-black text-theme-primary tabular-nums">{formatCurrency(payment.grandTotal || payment.total || 0)}</p>
+                        <span className={`badge-premium text-[9px] ${statusBadge(payment.paymentStatus).classes}`}>
+                          {statusBadge(payment.paymentStatus).label}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+
             {/* ===== ROW 4: ACTIVITY FEED + QUICK ACTIONS ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
               <div className="col-span-7">
@@ -749,22 +1105,32 @@ const Dashboard = ({
               </motion.div>
             )}
 
-            {/* Sync Status Bar */}
-            <motion.div variants={itemVariants} className="card-premium flex items-center justify-between p-3">
-              <div className="flex items-center gap-2">
-                <Shield className="w-3.5 h-3.5 text-theme-accent" />
-                <span className="text-[10px] font-bold text-theme-primary">
-                  {isAppInstalled ? 'Installed • Works offline' : 'Available offline'}
-                </span>
+            {/* Sync Status Indicator */}
+            <motion.div variants={itemVariants} className="card-premium flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${syncStatus === 'Synced' ? 'bg-emerald-500/10 text-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}`}>
+                  {syncStatus === 'Synced' ? <ShieldCheck className="w-4 h-4" /> : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-pulse' : 'bg-red-500'}`} />
+                    <span className="text-xs font-bold text-theme-primary">{syncStatus === 'Synced' ? 'Connected' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'Syncing' : syncStatus === 'Offline' ? 'Disconnected' : 'Warning'}</span>
+                  </div>
+                  <p className="text-[10px] text-theme-muted font-medium mt-0.5">Last sync: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 px-2.5 py-1 bg-theme-surface rounded-lg">
+                  <span className="text-[9px] text-theme-muted font-semibold">Data Health</span>
+                  <span className={`text-[9px] font-bold ${syncStatus === 'Synced' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                    {syncStatus === 'Synced' ? 'Good' : 'Pending'}
+                  </span>
+                </div>
                 {installPromptEvent && !isAppInstalled && (
-                  <button onClick={onInstallApp} className="ml-2 px-2.5 py-1 bg-[image:var(--accent-gradient)] text-white text-[8px] font-bold rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95">
+                  <button onClick={onInstallApp} className="px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-[9px] font-bold rounded-lg shadow-sm hover:shadow-premium-hover transition-all active:scale-95">
                     Install App
                   </button>
                 )}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-pulse' : syncStatus === 'Offline' ? 'bg-red-500' : 'bg-amber-500'}`} />
-                <span className="text-[9px] font-bold text-theme-muted">{syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}</span>
               </div>
             </motion.div>
 

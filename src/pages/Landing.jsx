@@ -222,7 +222,7 @@ const Landing = ({ onLoginClick }) => {
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <div className="bg-theme-surface rounded-xl p-3 border border-theme-border-soft text-center">
-                    <div className="w-16 h-16 mx-auto bg-white rounded-lg border border-theme-border-soft flex items-center justify-center">
+                    <div className="w-16 h-16 mx-auto bg-theme-surface rounded-lg border border-theme-border-soft flex items-center justify-center">
                       <QrCode className="w-8 h-8 text-theme-muted" />
                     </div>
                     <p className="text-[9px] mt-2 font-bold text-theme-muted">Scan to Pay</p>

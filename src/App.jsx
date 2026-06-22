@@ -71,6 +71,7 @@ const PublicInvoice = React.lazy(() => import('./pages/PublicInvoice'));
 const PendingPayments = React.lazy(() => import('./pages/PendingPayments'));
 const DueLedger = React.lazy(() => import('./pages/DueLedger'));
 const TemplateMarketplace = React.lazy(() => import('./pages/TemplateMarketplace'));
+const DesignStudio = React.lazy(() => import('./pages/DesignStudio'));
 const BackupRestore = React.lazy(() => import('./pages/BackupRestore'));
 const Reports = React.lazy(() => import('./pages/Reports'));
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
@@ -1518,6 +1519,10 @@ function App() {
             subscription={subscription}
             setCurrentTab={setCurrentTab}
           />
+        );
+      case 'design-studio':
+        return (
+          <DesignStudio setCurrentTab={setCurrentTab} />
         );
       case 'backup-restore':
         return (

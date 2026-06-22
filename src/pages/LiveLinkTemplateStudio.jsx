@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Palette, 
   CheckCircle2, 
@@ -9,7 +10,14 @@ import {
   Stethoscope, 
   Wrench,
   ShoppingBag,
-  LayoutTemplate
+  LayoutTemplate,
+  Monitor,
+  Tablet,
+  QrCode,
+  CreditCard,
+  Globe,
+  Star,
+  Layers
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -24,9 +32,62 @@ const liveLinkTemplates = [
   { id: 'repair', name: 'Service & Repair', type: 'pro', icon: Wrench, desc: 'Job/Service status focused.' }
 ];
 
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+};
+
+const staggerContainer = {
+  animate: { transition: { staggerChildren: 0.07 } }
+};
+
+const staggerItem = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } }
+};
+
+const templateCategory = {
+  classic: 'General',
+  modern: 'General',
+  mobile: 'Mobile',
+  retail: 'Retail',
+  corporate: 'Corporate',
+  boutique: 'Fashion',
+  clinic: 'Medical',
+  repair: 'Service'
+};
+
+const templateDevices = {
+  classic: ['Desktop', 'Tablet', 'Mobile'],
+  modern: ['Desktop', 'Tablet', 'Mobile'],
+  mobile: ['Mobile'],
+  retail: ['Desktop', 'Mobile'],
+  corporate: ['Desktop'],
+  boutique: ['Desktop', 'Tablet'],
+  clinic: ['Desktop', 'Tablet', 'Mobile'],
+  repair: ['Desktop', 'Mobile']
+};
+
+const templateFeatures = {
+  classic: ['QR Code', 'Payment Links'],
+  modern: ['QR Code', 'Payment Links', 'Branded'],
+  mobile: ['QR Code', 'Mobile Optimized'],
+  retail: ['QR Code', 'Checkout'],
+  corporate: ['QR Code', 'Payment Links', 'Branded', 'Analytics'],
+  boutique: ['QR Code', 'Branded', 'Custom Colors'],
+  clinic: ['QR Code', 'Payment Links', 'Medical'],
+  repair: ['QR Code', 'Payment Links', 'Status']
+};
+
 const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCurrentTab }) => {
   const [selectedTemplate, setSelectedTemplate] = useState('classic');
+  const [filterCategory, setFilterCategory] = useState('All');
   const isProUser = subscription?.status === 'active';
+  const categories = ['All', 'General', 'Mobile', 'Retail', 'Corporate', 'Fashion', 'Medical', 'Service'];
+
+  const filteredTemplates = filterCategory === 'All'
+    ? liveLinkTemplates
+    : liveLinkTemplates.filter(t => templateCategory[t.id] === filterCategory);
 
   useEffect(() => {
     if (settings && settings.customerLiveLinkSettings && settings.customerLiveLinkSettings.selectedLiveLinkTemplate) {
@@ -137,8 +198,8 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
   };
 
   return (
-    <div className="p-4 md:p-8 w-full space-y-6">
-      <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-6 mb-6">
+    <motion.div variants={pageVariants} initial="initial" animate="animate" className="p-4 md:p-8 w-full space-y-6">
+      <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-6 mb-6 section-header">
         <div className="w-12 h-12 rounded-2xl bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-950/30 dark:text-fuchsia-400 flex items-center justify-center shadow-sm">
           <Smartphone className="w-6 h-6" />
         </div>
@@ -148,29 +209,65 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {liveLinkTemplates.map((template) => {
+      {/* Category Filter */}
+      <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+        {categories.map(cat => (
+          <button
+            key={cat}
+            onClick={() => setFilterCategory(cat)}
+            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all chip-premium ${
+              filterCategory === cat 
+                ? 'bg-theme-accent text-white shadow-md' 
+                : 'bg-theme-app dark:bg-theme-surface text-theme-muted hover:bg-theme-card border border-theme-border-soft'
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {filteredTemplates.length === 0 ? (
+        <p className="text-sm text-theme-muted text-center py-12 font-semibold">No templates in this category yet.</p>
+      ) : (
+      <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {filteredTemplates.map((template) => {
           const isActive = selectedTemplate === template.id;
           const Icon = template.icon;
           const isLocked = template.type === 'pro' && !isProUser;
+          const devices = templateDevices[template.id] || [];
+          const features = templateFeatures[template.id] || [];
 
           return (
-            <div 
+            <motion.div 
               key={template.id} 
-              className={`relative bg-theme-card dark:bg-theme-card rounded-3xl overflow-hidden border-2 transition-all duration-300 shadow-premium flex flex-col ${isActive ? 'border-theme-accent ring-4 ring-theme-accent/20 scale-[1.02]' : 'border-theme-border-soft hover:border-theme-accent/50'}`}
+              variants={staggerItem}
+              whileHover={{ y: -6, scale: 1.02 }}
+              className={`relative bg-theme-card dark:bg-theme-card rounded-3xl overflow-hidden border-2 transition-all duration-300 shadow-premium flex flex-col card-premium ${isActive ? 'border-theme-accent ring-4 ring-theme-accent/20 scale-[1.02]' : 'border-theme-border-soft hover:border-theme-accent/50'}`}
             >
               {/* Type Badge */}
               <div className="absolute top-3 right-3 z-10 flex gap-2">
                 {template.type === 'free' ? (
-                  <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 shadow-sm backdrop-blur-md">FREE</span>
+                  <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 shadow-sm backdrop-blur-md badge-premium">FREE</span>
                 ) : (
-                  <span className="bg-gradient-to-r from-amber-200 to-yellow-400 text-amber-900 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full shadow-sm">PRO</span>
+                  <span className="bg-gradient-to-r from-amber-200 to-yellow-400 text-amber-900 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full shadow-sm badge-premium">PRO</span>
                 )}
                 {isActive && (
                   <span className="bg-theme-accent text-white text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" /> Active
                   </span>
                 )}
+              </div>
+
+              {/* Device Preview Indicators */}
+              <div className="absolute top-3 left-3 z-10 flex gap-1">
+                {devices.map(device => {
+                  const DeviceIcon = device === 'Desktop' ? Monitor : device === 'Tablet' ? Tablet : Smartphone;
+                  return (
+                    <span key={device} className="bg-black/40 backdrop-blur-sm text-white text-[7px] font-bold px-1.5 py-0.5 rounded border border-white/10 flex items-center gap-1">
+                      <DeviceIcon className="w-2.5 h-2.5" />
+                    </span>
+                  );
+                })}
               </div>
 
               {/* Preview Window */}
@@ -195,12 +292,21 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
                     <Icon className="w-4 h-4 text-theme-muted" />
                     {template.name}
                   </h3>
-                  <p className="text-[10px] text-theme-muted font-medium">{template.desc}</p>
+                  <p className="text-[10px] text-theme-muted font-medium mb-2">{template.desc}</p>
+
+                  {/* Theme Feature Badges */}
+                  <div className="flex flex-wrap gap-1">
+                    {features.map(feat => (
+                      <span key={feat} className="text-[7px] font-bold bg-theme-accent/10 text-theme-accent px-1.5 py-0.5 rounded border border-theme-accent/20 flex items-center gap-1">
+                        <Star className="w-2 h-2" /> {feat}
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
                 <button
                   onClick={() => handleApplyTemplate(template)}
-                  className={`w-full py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                  className={`w-full py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 btn-premium ${
                     isActive 
                       ? 'bg-theme-accent/10 text-theme-accent cursor-default border border-theme-accent/20' 
                       : isLocked
@@ -217,11 +323,12 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
                   )}
                 </button>
               </div>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
-    </div>
+      </motion.div>
+      )}
+    </motion.div>
   );
 };
 

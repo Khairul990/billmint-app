@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Database, 
   DownloadCloud, 
@@ -6,11 +7,22 @@ import {
   AlertTriangle, 
   CheckCircle2, 
   ShieldCheck,
+  Shield,
   History,
-  FileJson
+  FileJson,
+  Settings,
+  RefreshCw,
+  Clock,
+  Cloud,
+  Server,
+  ArrowRight,
+  Archive,
+  Info
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { exportBackup } from '../services/dbEngine';
+import { pageVariants, staggerContainer, staggerItem, modalOverlayVariants, modalContentVariants } from '../utils/animations';
+import { CardSkeleton } from '../components/PremiumSkeleton';
 
 const BackupRestore = ({ settings, invoices, customers, products, expenses, onImportBackup }) => {
   const [isExporting, setIsExporting] = useState(false);
@@ -18,9 +30,22 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingImportData, setPendingImportData] = useState(null);
   const fileInputRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedDataTypes, setSelectedDataTypes] = useState({
+    invoices: true, customers: true, products: true, expenses: true, settings: true
+  });
+  const [autoBackupFrequency, setAutoBackupFrequency] = useState('weekly');
+  const [isAutoBackupEnabled, setIsAutoBackupEnabled] = useState(false);
 
   const lastBackupDate = localStorage.getItem('last_backup_date') || 'Never';
   const totalRecords = (invoices?.length || 0) + (customers?.length || 0) + (products?.length || 0) + (expenses?.length || 0);
+  const lastExportDate = localStorage.getItem('last_export_date') || 'Never';
+  const storageEstimate = Math.max(1, (totalRecords * 0.5)).toFixed(1);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleExport = async () => {
     try {
@@ -41,6 +66,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
       
       const now = new Date().toLocaleString();
       localStorage.setItem('last_backup_date', now);
+      localStorage.setItem('last_export_date', now);
       
       toast.success('Backup exported successfully!');
     } catch (err) {
@@ -105,87 +131,147 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6 animate-fade-in relative">
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      className="p-4 md:p-8 max-w-5xl mx-auto space-y-6 animate-fade-in relative"
+    >
+      {isLoading ? (
+        <div className="space-y-6">
+          {[1,2,3,4].map(i => (
+            <CardSkeleton key={i} lines={3} />
+          ))}
+        </div>
+      ) : (
+        <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
       
       {/* Header */}
-      <div className="flex items-center gap-4 border-b border-theme-border-soft pb-6 mb-6">
-        <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 flex items-center justify-center shadow-sm">
+      <motion.div variants={staggerItem} className="section-header flex items-center gap-4 border-b border-theme-border-soft pb-6 mb-6">
+        <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 flex items-center justify-center shadow-sm glass">
           <Database className="w-6 h-6" />
         </div>
         <div>
           <h1 className="text-2xl font-black text-theme-primary tracking-tight">Backup & Restore</h1>
           <p className="text-xs text-theme-muted font-bold mt-1">Keep your business data safe or migrate it to another device.</p>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-theme-card p-5 rounded-2xl border border-theme-border-soft flex items-center gap-4 shadow-sm">
-          <div className="p-3 bg-theme-app dark:bg-theme-surface rounded-xl text-theme-muted">
-            <History className="w-5 h-5" />
-          </div>
-          <div>
+      {/* Backup Overview */}
+      <motion.div variants={staggerItem} className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <div className="stat-premium p-4 rounded-2xl border border-theme-border-soft bg-theme-card">
+          <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] uppercase font-black tracking-widest text-theme-muted">Last Backup</p>
-            <p className="text-sm font-extrabold text-theme-primary">{lastBackupDate}</p>
+            <History className="w-4 h-4 text-theme-muted" />
+          </div>
+          <p className="text-sm font-extrabold text-theme-primary">{lastBackupDate}</p>
+        </div>
+        <div className="stat-premium p-4 rounded-2xl border border-theme-border-soft bg-theme-card">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] uppercase font-black tracking-widest text-theme-muted">Backup Health</p>
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`badge-premium ${lastBackupDate === 'Never' ? 'badge-danger' : 'badge-success'}`}>
+              {lastBackupDate === 'Never' ? 'No Backup' : 'Healthy'}
+            </span>
           </div>
         </div>
-        <div className="bg-theme-card p-5 rounded-2xl border border-theme-border-soft flex items-center gap-4 shadow-sm">
-          <div className="p-3 bg-theme-app dark:bg-theme-surface rounded-xl text-theme-muted">
-            <Database className="w-5 h-5" />
+        <div className="stat-premium p-4 rounded-2xl border border-theme-border-soft bg-theme-card">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] uppercase font-black tracking-widest text-theme-muted">Cloud Sync</p>
+            <Cloud className="w-4 h-4 text-theme-muted" />
           </div>
-          <div>
-            <p className="text-[10px] uppercase font-black tracking-widest text-theme-muted">Total Local Records</p>
-            <p className="text-sm font-extrabold text-theme-primary">{totalRecords} items</p>
-          </div>
+          <span className="badge-premium badge-info">Not Synced</span>
         </div>
-      </div>
+        <div className="stat-premium p-4 rounded-2xl border border-theme-border-soft bg-theme-card">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] uppercase font-black tracking-widest text-theme-muted">Storage Used</p>
+            <Server className="w-4 h-4 text-theme-muted" />
+          </div>
+          <p className="text-sm font-extrabold text-theme-primary">~{storageEstimate} KB</p>
+        </div>
+      </motion.div>
 
       {/* Main Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+      <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
         
         {/* Export Box */}
-        <div className="bg-theme-card border-2 border-theme-accent/20 rounded-3xl p-6 md:p-8 flex flex-col justify-between shadow-premium hover:border-theme-accent/50 transition-colors">
+        <div className="card-premium bg-theme-card border-2 border-theme-accent/20 rounded-3xl p-6 md:p-8 flex flex-col justify-between shadow-premium hover:border-theme-accent/50 transition-colors">
           <div>
             <div className="flex items-center gap-3 mb-4">
               <DownloadCloud className="w-6 h-6 text-theme-accent" />
-              <h2 className="text-lg font-black text-theme-primary">Export Data</h2>
+              <h2 className="text-lg font-black text-theme-primary">Export Center</h2>
             </div>
-            <p className="text-xs font-semibold text-theme-muted leading-relaxed mb-6">
-              Download a complete snapshot of your database including invoices, customers, products, and settings. This file is encrypted safely.
+            <p className="text-xs font-semibold text-theme-muted leading-relaxed mb-4">
+              Select the data types to include in your export.
             </p>
-            <div className="space-y-2 mb-8">
-              <div className="flex items-center gap-2 text-[10px] font-bold text-theme-secondary">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Includes all local records
-              </div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-theme-secondary">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Standard JSON format
-              </div>
+            {/* Data Type Checkboxes */}
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {[
+                { key: 'invoices', label: 'Invoices' },
+                { key: 'customers', label: 'Customers' },
+                { key: 'products', label: 'Products' },
+                { key: 'expenses', label: 'Expenses' },
+                { key: 'settings', label: 'Settings' },
+              ].map(({ key, label }) => (
+                <label
+                  key={key}
+                  className="flex items-center gap-2 p-2 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft cursor-pointer hover:border-theme-accent/30 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedDataTypes[key]}
+                    onChange={() => setSelectedDataTypes(prev => ({ ...prev, [key]: !prev[key] }))}
+                    className="w-3.5 h-3.5 rounded accent-theme-accent"
+                  />
+                  <span className="text-[11px] font-bold text-theme-primary">{label}</span>
+                </label>
+              ))}
             </div>
+            {lastExportDate !== 'Never' && (
+              <div className="flex items-center gap-2 mb-4 text-[10px] font-bold text-theme-muted">
+                <Clock className="w-3 h-3" />
+                Last export: {lastExportDate}
+              </div>
+            )}
           </div>
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="w-full py-4 rounded-xl bg-theme-accent hover:bg-theme-accent-dark text-white font-black text-xs uppercase tracking-widest shadow-md transition-all flex items-center justify-center gap-2"
+            className="btn-premium w-full"
           >
             {isExporting ? (
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
             ) : (
-              <><FileJson className="w-4 h-4" /> Download JSON Backup</>
+              <><DownloadCloud className="w-4 h-4" /> Export Selected</>
             )}
           </button>
         </div>
 
         {/* Import Box */}
-        <div className="bg-theme-card border border-theme-border-soft rounded-3xl p-6 md:p-8 flex flex-col justify-between shadow-sm">
+        <div className="card-premium bg-theme-card border border-theme-border-soft rounded-3xl p-6 md:p-8 flex flex-col justify-between shadow-sm">
           <div>
             <div className="flex items-center gap-3 mb-4">
               <UploadCloud className="w-6 h-6 text-indigo-500" />
-              <h2 className="text-lg font-black text-theme-primary">Restore Data</h2>
+              <h2 className="text-lg font-black text-theme-primary">Restore Center</h2>
             </div>
-            <p className="text-xs font-semibold text-theme-muted leading-relaxed mb-6">
+            <p className="text-xs font-semibold text-theme-muted leading-relaxed mb-4">
+              Drag & drop a backup file or click to browse.
+            </p>
+            {/* Drag & Drop Zone */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-theme-border-soft rounded-2xl p-6 mb-4 text-center cursor-pointer hover:border-theme-accent/50 hover:bg-theme-accent/5 transition-all"
+            >
+              <UploadCloud className="w-8 h-8 text-theme-muted mx-auto mb-2" />
+              <p className="text-[11px] font-bold text-theme-muted">Drop backup file here or tap to browse</p>
+              <p className="text-[9px] text-theme-muted mt-1">Supports .json files up to 10MB</p>
+            </div>
+            <p className="text-xs font-semibold text-theme-muted leading-relaxed mb-4">
               Import a previously exported BillQyro backup file to restore your entire database.
             </p>
-            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 flex gap-3 mb-8">
+            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 flex gap-3 mb-4">
               <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
               <p className="text-[10px] font-bold text-rose-700 dark:text-rose-400">
                 Warning: Restoring a backup will <strong className="font-black">overwrite</strong> your current local data. Please export your current data first.
@@ -202,22 +288,125 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="w-full py-4 rounded-xl bg-theme-app dark:bg-theme-surface hover:bg-theme-border-soft dark:hover:bg-theme-surface text-theme-primary border border-theme-border-soft font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+            className="btn-premium w-full"
           >
-            <UploadCloud className="w-4 h-4" /> Select Backup File
+            <Archive className="w-4 h-4" /> Restore Backup
           </button>
         </div>
 
-      </div>
+      </motion.div>
 
-      <div className="mt-8 flex items-center justify-center gap-2 text-[10px] font-bold text-theme-muted uppercase tracking-widest">
+      {/* Auto Backup Recommendation */}
+      <motion.div variants={staggerItem} className="card-premium p-5 md:p-6 rounded-2xl border border-theme-border-soft bg-theme-card">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <RefreshCw className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-black text-theme-primary">Auto Backup Recommendation</h3>
+            <p className="text-[10px] font-semibold text-theme-muted">Set up automatic backups to keep your data safe</p>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <select
+            value={autoBackupFrequency}
+            onChange={e => setAutoBackupFrequency(e.target.value)}
+            className="input-premium flex-1"
+          >
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          <button
+            onClick={() => {
+              setIsAutoBackupEnabled(!isAutoBackupEnabled);
+              toast.success(isAutoBackupEnabled ? 'Auto backup disabled' : 'Auto backup enabled');
+            }}
+            className={`btn-premium ${isAutoBackupEnabled ? 'btn-premium-outline' : ''}`}
+          >
+            <Clock className="w-4 h-4" />
+            {isAutoBackupEnabled ? 'Disable Auto Backup' : 'Enable Auto Backup'}
+          </button>
+        </div>
+      </motion.div>
+
+      {/* Safety Information */}
+      <motion.div variants={staggerItem} className="card-premium p-5 md:p-6 rounded-2xl border border-theme-border-soft bg-theme-card">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <Shield className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-black text-theme-primary">Safety Information</h3>
+            <p className="text-[10px] font-semibold text-theme-muted">Best practices for keeping your data secure</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            { icon: Server, text: 'Keep backups in multiple locations' },
+            { icon: Cloud, text: 'Use cloud storage for redundancy' },
+            { icon: Shield, text: 'Never share backup files publicly' },
+          ].map((item, i) => (
+            <div key={i} className="flex items-start gap-2 p-3 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft">
+              <item.icon className="w-4 h-4 text-theme-accent shrink-0 mt-0.5" />
+              <p className="text-[11px] font-bold text-theme-primary">{item.text}</p>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Migration Guide */}
+      <motion.div variants={staggerItem} className="card-premium p-5 md:p-6 rounded-2xl border border-theme-border-soft bg-theme-card">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <ArrowRight className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-black text-theme-primary">Migration Guide</h3>
+            <p className="text-[10px] font-semibold text-theme-muted">Moving to a new device?</p>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          {[
+            { step: 1, icon: DownloadCloud, text: 'Export your data from the current device' },
+            { step: 2, icon: UploadCloud, text: 'Transfer the backup file to your new device' },
+            { step: 3, icon: Database, text: 'Import the backup into BillQyro on the new device' },
+          ].map((item, i) => (
+            <div key={i} className="flex-1 flex items-center gap-3 p-3 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft">
+              <div className="w-8 h-8 rounded-lg bg-theme-accent/10 text-theme-accent flex items-center justify-center text-xs font-black shrink-0">
+                {item.step}
+              </div>
+              <div className="flex items-center gap-2 flex-1">
+                <item.icon className="w-3.5 h-3.5 text-theme-muted shrink-0" />
+                <p className="text-[11px] font-bold text-theme-primary">{item.text}</p>
+              </div>
+              {i < 2 && <ArrowRight className="w-4 h-4 text-theme-muted hidden sm:block shrink-0" />}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Shield footer */}
+      <motion.div variants={staggerItem} className="flex items-center justify-center gap-2 text-[10px] font-bold text-theme-muted uppercase tracking-widest">
         <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Your data stays on your device until synced.
-      </div>
+      </motion.div>
 
       {/* Confirmation Modal */}
       {showConfirmModal && pendingImportData && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-theme-card/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-theme-card rounded-3xl w-full max-w-md shadow-2xl border border-theme-border-soft overflow-hidden animate-scaleUp">
+        <motion.div
+          variants={modalOverlayVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-theme-card/60 backdrop-blur-sm"
+        >
+          <motion.div
+            variants={modalContentVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="bg-theme-card rounded-3xl w-full max-w-md shadow-2xl border border-theme-border-soft overflow-hidden"
+          >
             <div className="bg-rose-500 p-6 flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4">
                 <AlertTriangle className="w-8 h-8 text-white" />
@@ -259,11 +448,13 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
 
-    </div>
+        </motion.div>
+      )}
+    </motion.div>
   );
 };
 

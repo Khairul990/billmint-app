@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, FileText } from 'lucide-react';
 import { logout } from '../services/dbEngine';
 import { triggerLightHaptic } from '../utils/feedback';
 import { t } from '../utils/i18n';
@@ -52,30 +52,45 @@ const Sidebar = ({
 
   let menuItems = [
     { id: 'dashboard', label: "Today's Business", icon: LayoutDashboard },
+
+    { type: 'label', label: 'Billing' },
     { id: 'invoices', label: getInvoiceLabel(), icon: FileSpreadsheet, module: 'billing' },
     { id: 'estimates', label: 'Estimates & Quotes', icon: FileSpreadsheet },
-    { id: 'marketplace', label: 'Template Marketplace', icon: Store },
-    { id: 'pdf-templates', label: 'PDF Templates', icon: Palette },
-    { id: 'live-link-templates', label: 'Live Link Studio', icon: Smartphone },
+
+    { type: 'label', label: 'Customers' },
     { id: 'customers', label: getCustomerLabel(), icon: Users, module: 'customers' },
     { id: 'patients', label: 'Patient Records', icon: Users, module: 'patients' },
     { id: 'students', label: 'Student Directory', icon: Users, module: 'students' },
     { id: 'clients', label: 'Client Roster', icon: Users, module: 'clients' },
-    { id: 'appointments', label: 'Appointments', icon: Users, module: 'appointments' },
+
+    { type: 'label', label: 'Collections' },
+    { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen, module: 'dueLedger' },
+    { id: 'pending-payments', label: 'Payment Proofs', icon: Bell, module: 'paymentProofs' },
+
+    { type: 'label', label: 'Analytics' },
+    { id: 'reports', label: 'Reports', icon: PieChart, module: 'reports' },
+    { id: 'expenses', label: t('expenses'), icon: TrendingDown, module: 'expenses' },
+
+    { type: 'label', label: 'Design Studio' },
+    { id: 'design-studio', label: 'Design Studio Hub', icon: Palette },
+    { id: 'marketplace', label: 'Template Marketplace', icon: Store },
+    { id: 'pdf-templates', label: 'PDF Templates', icon: FileText },
+    { id: 'live-link-templates', label: 'Live Link Studio', icon: Smartphone },
+
+    { type: 'label', label: 'Operations' },
+    { id: 'products', label: t('products'), icon: Layers, module: 'products' },
+    { id: 'orders', label: 'Orders', icon: ShoppingBag, module: 'orders' },
+    { id: 'appointments', label: 'Appointments', icon: Calendar, module: 'appointments' },
+    { id: 'delivery', label: 'Delivery Tracking', icon: Truck, module: 'delivery' },
     { id: 'measurements', label: 'Measurements', icon: Scissors, module: 'measurements' },
-    { id: 'designBook', label: 'Design Book', icon: Palette, module: 'designBook' },
+    { id: 'designBook', label: 'Design Book', icon: BookOpen, module: 'designBook' },
     { id: 'devices', label: 'Device Management', icon: Wrench, module: 'devices' },
     { id: 'serviceJobs', label: 'Service Jobs', icon: Wrench, module: 'serviceJobs' },
     { id: 'projects', label: 'Projects', icon: Briefcase, module: 'projects' },
-    { id: 'orders', label: 'Orders', icon: Store, module: 'orders' },
-    { id: 'delivery', label: 'Delivery Tracking', icon: Store, module: 'delivery' },
-    { id: 'reports', label: 'Reports', icon: PieChart, module: 'reports' },
-    { id: 'expenses', label: t('expenses'), icon: TrendingDown, module: 'expenses' },
-    { id: 'backup-restore', label: 'Backup & Restore', icon: Database },
-    { id: 'products', label: t('products'), icon: Layers, module: 'products' },
-    { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen, module: 'dueLedger' },
-    { id: 'pending-payments', label: 'Payment Proofs', icon: Bell, module: 'paymentProofs' },
+
+    { type: 'label', label: 'System' },
     { id: 'subscription', label: 'Subscription Plan', icon: Sparkles },
+    { id: 'backup-restore', label: 'Backup & Restore', icon: Database },
     { id: 'help-center', label: 'Help Center', icon: HelpCircle },
   ];
 
@@ -162,7 +177,15 @@ const Sidebar = ({
         style={{ padding: isCollapsed ? '8px 8px' : '8px 12px', transition: isMounted ? 'padding 180ms ease' : 'none' }}
       >
         <div className="space-y-0.5">
-          {menuItems.map((item) => {
+          {menuItems.map((item, idx) => {
+            if (item.type === 'label') {
+              if (isCollapsed) return <div key={`label-${idx}`} className="h-2" />;
+              return (
+                <div key={`label-${idx}`} className="pt-3 pb-1 px-3.5">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-theme-sidebar-text/30">{item.label}</p>
+                </div>
+              );
+            }
             const Icon = item.icon;
             const isActive = currentTab === item.id || (item.id === 'invoices' && currentTab === 'create-invoice');
 

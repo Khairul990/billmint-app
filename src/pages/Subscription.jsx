@@ -1,25 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Check, 
-  Sparkles, 
-  CreditCard, 
-  ShieldCheck, 
-  Lock, 
-  Globe, 
-  ChevronRight,
-  TrendingUp,
-  Sliders,
-  Palette,
-  Clock,
+  Award,
   ArrowRight,
-  Upload,
-  Image as ImageIcon,
-  CheckCircle,
-  XCircle,
-  HelpCircle,
   AlertCircle,
+  BarChart3,
+  Check, 
+  CheckCircle,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Cloud,
+  CreditCard, 
+  Database,
   Flame,
+  FileText,
+  Globe, 
+  HeadphonesIcon,
+  HelpCircle,
+  Image as ImageIcon,
+  Lock, 
+  Palette,
+  Percent,
+  Server,
+  Shield,
+  ShieldCheck, 
+  Sliders,
+  Smartphone,
+  Sparkles, 
+  TrendingUp,
+  Upload,
+  Users,
+  XCircle,
   Zap
 } from 'lucide-react';
 import ShineBorder from '../components/ShineBorder';
@@ -63,6 +75,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
   const [platformScreenshotBase64, setPlatformScreenshotBase64] = useState('');
   const [platformNote, setPlatformNote] = useState('');
   const [submittingPlatformProof, setSubmittingPlatformProof] = useState(false);
+  const [openFaq, setOpenFaq] = useState(null);
 
   const country = businessSettings?.country || 'India';
   const currencySymbol = businessSettings?.currency || '₹';
@@ -164,6 +177,46 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
     'Advanced operating expenses tracking',
     'Direct WhatsApp due reminder panel',
     'Dedicated Cloud Backup Sync',
+  ];
+
+  const planComparisonFeatures = [
+    { name: 'Invoice Creation Limit', free: 'Up to 15/mo', premium: 'Unlimited' },
+    { name: 'Invoice Templates', free: 'Basic Standard', premium: 'Premium A4 & A5' },
+    { name: 'Watermark Removal', free: <XCircle className="w-4 h-4 text-rose-500" />, premium: <CheckCircle className="w-4 h-4 text-emerald-500" /> },
+    { name: 'Custom Corporate Logo', free: <XCircle className="w-4 h-4 text-rose-500" />, premium: <CheckCircle className="w-4 h-4 text-emerald-500" /> },
+    { name: 'Branding Colors', free: <XCircle className="w-4 h-4 text-rose-500" />, premium: <CheckCircle className="w-4 h-4 text-emerald-500" /> },
+    { name: 'Expense Tracking', free: <XCircle className="w-4 h-4 text-rose-500" />, premium: <CheckCircle className="w-4 h-4 text-emerald-500" /> },
+    { name: 'WhatsApp Reminders', free: <XCircle className="w-4 h-4 text-rose-500" />, premium: <CheckCircle className="w-4 h-4 text-emerald-500" /> },
+    { name: 'Cloud Backup Sync', free: <XCircle className="w-4 h-4 text-rose-500" />, premium: <CheckCircle className="w-4 h-4 text-emerald-500" /> },
+    { name: 'API Access', free: <XCircle className="w-4 h-4 text-rose-500" />, premium: <CheckCircle className="w-4 h-4 text-emerald-500" /> },
+    { name: 'Priority Support', free: <XCircle className="w-4 h-4 text-rose-500" />, premium: <CheckCircle className="w-4 h-4 text-emerald-500" /> },
+  ];
+
+  const faqItems = [
+    { q: 'What payment methods do you accept?', a: 'We accept UPI, bKash, Nagad, Rocket, bank transfers, and PayPal depending on your region. All transactions are processed securely via encrypted gateways.' },
+    { q: 'How long does premium activation take?', a: 'Premium activation typically takes 1\u201324 hours after payment verification. You will receive an email confirmation once your workspace is upgraded.' },
+    { q: 'Can I switch between plans?', a: 'Yes, you can upgrade from Free to Premium at any time. Downgrade options are available upon request after your current billing cycle ends.' },
+    { q: 'Is there a free trial for Premium?', a: 'You can explore all features with the Free plan indefinitely. Upgrade to Premium or use Pay Per Bill when you need unlimited access.' },
+    { q: 'Can I get a refund if I upgrade?', a: 'We offer full refunds within 7 days of premium activation if you are not satisfied with the service. No questions asked.' },
+    { q: 'What happens after my premium expires?', a: 'Your account will revert to the Free plan with limited features. All your data remains safe and accessible in your workspace.' },
+  ];
+
+  const benefits = [
+    { icon: Zap, title: 'Unlimited Invoices', desc: 'Create as many professional invoices as you need with zero restrictions or caps.' },
+    { icon: Palette, title: 'Premium Templates', desc: 'Access exclusive A4 & A5 templates with advanced customization options.' },
+    { icon: Cloud, title: 'Cloud Backup Sync', desc: 'Your invoices and data are automatically backed up to the cloud securely.' },
+    { icon: TrendingUp, title: 'Expense Tracking', desc: 'Track operating expenses and get detailed financial insights.' },
+    { icon: Smartphone, title: 'WhatsApp Reminders', desc: 'Send automated due payment reminders directly via WhatsApp.' },
+    { icon: HeadphonesIcon, title: 'Priority Support', desc: 'Get priority access to our support team for faster issue resolution.' },
+  ];
+
+  const trustBadges = [
+    { icon: Shield, title: 'Secure Payments', desc: 'SSL encrypted transactions' },
+    { icon: Lock, title: '256-bit Encryption', desc: 'Bank-grade data security' },
+    { icon: Server, title: '99.9% Uptime', desc: 'Reliable cloud infrastructure' },
+    { icon: Award, title: 'SOC 2 Compliant', desc: 'Industry security standards' },
+    { icon: Database, title: 'Data Backup', desc: 'Automated daily backups' },
+    { icon: Clock, title: 'Instant Activation', desc: 'Quick premium activation' },
   ];
 
   const handleScreenshotChange = (file) => {
@@ -311,7 +364,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
         </motion.div>
       )}
 
-      {activeRevenueTab === 'premium' && (
+      {activeRevenueTab === 'premium' && (<>
         <motion.div
           variants={staggerContainer}
           initial="hidden"
@@ -431,6 +484,183 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
             </ShineBorder>
           </motion.div>
         </motion.div>
+
+        <motion.div variants={fadeInUp} className="card-premium bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft shadow-premium mt-8">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <div>
+              <h3 className="text-sm font-black text-theme-primary">Plan Comparison</h3>
+              <p className="text-[11px] text-theme-muted font-semibold mt-0.5">See what each plan includes in detail</p>
+            </div>
+            <span className="badge-premium text-[9px] bg-theme-surface text-theme-muted border-theme-border-soft font-bold px-3 py-1">{planComparisonFeatures.length} features</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="table-premium w-full">
+              <thead>
+                <tr className="border-b border-theme-border-soft/60">
+                  <th className="p-3 pl-0 text-[10px] font-black text-theme-muted uppercase tracking-wider text-left">Feature</th>
+                  <th className="p-3 text-[10px] font-black text-theme-muted uppercase tracking-wider text-center">Free</th>
+                  <th className="p-3 text-[10px] font-black text-theme-accent uppercase tracking-wider text-center">Premium</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-theme-border-soft/30">
+                {planComparisonFeatures.map((feat, i) => (
+                  <tr key={i} className="hover:bg-theme-surface/50 transition-colors">
+                    <td className="p-3 pl-0 text-xs text-theme-primary font-bold">{feat.name}</td>
+                    <td className="p-3 text-xs text-center text-theme-muted font-semibold">{feat.free}</td>
+                    <td className="p-3 text-xs text-center text-theme-primary font-semibold">{feat.premium}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+
+        <motion.div variants={fadeInUp} className="mt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-theme-primary">Why Upgrade to Premium?</h3>
+              <p className="text-[11px] text-theme-muted font-semibold mt-0.5">Unlock the full power of BillQyro for your business</p>
+            </div>
+          </div>
+          <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {benefits.map((bene, i) => {
+              const BeneIcon = bene.icon;
+              return (
+                <motion.div key={i} variants={staggerItem} className="card-premium bg-theme-card p-5 rounded-2xl border border-theme-border-soft hover:border-theme-accent/30 transition-all group">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 flex items-center justify-center text-amber-500 mb-3 group-hover:scale-110 transition-transform">
+                    <BeneIcon className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-sm font-black text-theme-primary mb-1">{bene.title}</h4>
+                  <p className="text-[11px] text-theme-muted font-semibold leading-relaxed">{bene.desc}</p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </motion.div>
+
+        {!isPremium && (
+          <motion.div variants={fadeInUp} className="card-premium bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium mt-8">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 rounded-xl bg-theme-accent-light text-theme-accent flex items-center justify-center">
+                <BarChart3 className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-theme-primary">Usage & Limits</h3>
+                <p className="text-[11px] text-theme-muted font-semibold mt-0.5">Your current free plan usage overview</p>
+              </div>
+            </div>
+            <div className="space-y-5">
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-xs font-bold text-theme-primary flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-theme-muted" /> Invoice Usage
+                  </span>
+                  <span className="text-[10px] font-bold text-theme-muted tabular-nums">
+                    {Math.min(revenueState?.totalBillsCreated || 0, globalRevenueSettings?.freeBillLimit || businessSettings?.freeInvoiceLimit || 15)} / {globalRevenueSettings?.freeBillLimit || businessSettings?.freeInvoiceLimit || 15}
+                  </span>
+                </div>
+                <div className="progress-premium">
+                  <div
+                    className="progress-premium-bar"
+                    style={{ width: `${Math.min(100, ((revenueState?.totalBillsCreated || 0) / (globalRevenueSettings?.freeBillLimit || businessSettings?.freeInvoiceLimit || 15)) * 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-xs font-bold text-theme-primary flex items-center gap-1.5">
+                    <Database className="w-3.5 h-3.5 text-theme-muted" /> Storage
+                  </span>
+                  <span className="text-[10px] font-bold text-theme-muted">Local Only</span>
+                </div>
+                <div className="progress-premium">
+                  <div className="progress-premium-bar" style={{ width: '60%' }}></div>
+                </div>
+                <p className="text-[9px] text-theme-muted font-medium mt-1">Upgrade for cloud backup & sync</p>
+              </div>
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-xs font-bold text-theme-primary flex items-center gap-1.5">
+                    <Percent className="w-3.5 h-3.5 text-theme-muted" /> Premium Features
+                  </span>
+                  <span className="text-[10px] font-bold text-theme-muted">Locked</span>
+                </div>
+                <div className="progress-premium">
+                  <div className="progress-premium-bar bg-theme-muted/30" style={{ width: '0%' }}></div>
+                </div>
+                <p className="text-[9px] text-theme-muted font-medium mt-1">Go Premium to unlock all features</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        <motion.div variants={fadeInUp} className="mt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+              <Shield className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-theme-primary">Trust & Security</h3>
+              <p className="text-[11px] text-theme-muted font-semibold mt-0.5">Your data is protected with enterprise-grade security</p>
+            </div>
+          </div>
+          <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {trustBadges.map((badge, i) => {
+              const BadgeIcon = badge.icon;
+              return (
+                <motion.div key={i} variants={staggerItem} className="card-premium bg-theme-card p-5 rounded-2xl border border-theme-border-soft flex flex-col items-center text-center hover:border-emerald-500/30 transition-all group">
+                  <div className="w-11 h-11 rounded-2xl bg-theme-surface flex items-center justify-center text-emerald-500 mb-3 group-hover:scale-110 transition-transform shadow-sm">
+                    <BadgeIcon className="w-5 h-5" />
+                  </div>
+                  <p className="text-sm font-bold text-theme-primary">{badge.title}</p>
+                  <p className="text-[10px] text-theme-muted font-semibold mt-1">{badge.desc}</p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </motion.div>
+
+        <motion.div variants={fadeInUp} className="card-premium bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft shadow-premium mt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 rounded-xl bg-theme-accent-light text-theme-accent flex items-center justify-center">
+              <HelpCircle className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-theme-primary">Frequently Asked Questions</h3>
+              <p className="text-[11px] text-theme-muted font-semibold mt-0.5">Everything you need to know about billing & upgrading</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {faqItems.map((faq, i) => (
+              <div key={i} className="accordion-premium border-theme-border-soft rounded-2xl overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="accordion-premium-header w-full flex items-center justify-between p-4 text-xs font-black text-theme-primary bg-theme-surface/50 hover:bg-theme-surface transition-colors cursor-pointer rounded-2xl"
+                >
+                  <span className="text-left pr-2">{faq.q}</span>
+                  <ChevronDown className={`w-4 h-4 text-theme-muted shrink-0 transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`} />
+                </button>
+                <AnimatePresence>
+                  {openFaq === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: 'easeInOut' }}
+                      className="overflow-hidden"
+                    >
+                      <p className="px-4 pb-4 text-[11px] text-theme-muted font-semibold leading-relaxed">{faq.a}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </>
       )}
 
       {activeRevenueTab === 'dues' && revenueState && (
