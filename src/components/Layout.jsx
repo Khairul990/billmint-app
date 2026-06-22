@@ -592,6 +592,9 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         pendingPaymentsCount={pendingPaymentsCount}
         businessSettings={businessSettings}
       />
+
+      {/* Safe area spacer for mobile notch/home indicator */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 h-[env(safe-area-inset-bottom)] bg-theme-card pointer-events-none z-50" />
     </div>
   );
 };

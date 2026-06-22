@@ -20,9 +20,27 @@ import {
   Layers,
   Sun,
   X,
-  Eye
+  Eye,
+  FileText,
+  Download,
+  Settings,
+  Sparkles,
+  ArrowRight,
+  Search,
+  Filter,
+  Grid,
+  Type,
+  Image,
+  Pen,
+  Sliders,
+  Plus,
+  RotateCcw,
+  Maximize,
+  Minimize,
+  RefreshCw
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { BUSINESS_PRESETS } from '../config/businessPresets';
 
 const liveLinkTemplates = [
   { id: 'classic', name: 'Clean Classic', type: 'free', icon: LayoutTemplate, desc: 'Simple, timeless layout.' },
@@ -32,7 +50,13 @@ const liveLinkTemplates = [
   { id: 'corporate', name: 'Premium Corporate', type: 'pro', icon: Building2, desc: 'Professional enterprise look.' },
   { id: 'boutique', name: 'Boutique / Tailor', type: 'pro', icon: Briefcase, desc: 'Elegant fashion/order style.' },
   { id: 'clinic', name: 'Clinic / Medical', type: 'pro', icon: Stethoscope, desc: 'Clean medical design.' },
-  { id: 'repair', name: 'Service & Repair', type: 'pro', icon: Wrench, desc: 'Job/Service status focused.' }
+  { id: 'repair', name: 'Service & Repair', type: 'pro', icon: Wrench, desc: 'Job/Service status focused.' },
+  { id: 'executive', name: 'Executive Portal', type: 'pro', icon: Building2, desc: 'High-end executive client portal with premium branding.' },
+  { id: 'saas', name: 'SaaS Dashboard', type: 'pro', icon: LayoutTemplate, desc: 'Modern SaaS subscription billing view.' },
+  { id: 'teacher', name: 'Teacher Portal', type: 'pro', icon: Globe, desc: 'School fee collection portal for parents.' },
+  { id: 'medical', name: 'Medical Portal', type: 'pro', icon: Stethoscope, desc: 'Clinic and hospital bill payment portal.' },
+  { id: 'tailor', name: 'Tailor Studio', type: 'pro', icon: Briefcase, desc: 'Custom fashion and tailoring order portal.' },
+  { id: 'embroidery', name: 'Embroidery Pro', type: 'pro', icon: Briefcase, desc: 'Embroidery design order view for clients.' }
 ];
 
 const pageVariants = {
@@ -57,7 +81,13 @@ const templateCategory = {
   corporate: 'Corporate',
   boutique: 'Classic',
   clinic: 'Classic',
-  repair: 'Corporate'
+  repair: 'Corporate',
+  executive: 'Corporate',
+  saas: 'Modern',
+  teacher: 'Classic',
+  medical: 'Classic',
+  tailor: 'Classic',
+  embroidery: 'Classic'
 };
 
 const templateDevices = {
@@ -68,7 +98,13 @@ const templateDevices = {
   corporate: ['Desktop'],
   boutique: ['Desktop', 'Tablet'],
   clinic: ['Desktop', 'Tablet', 'Mobile'],
-  repair: ['Desktop', 'Mobile']
+  repair: ['Desktop', 'Mobile'],
+  executive: ['Desktop', 'Tablet'],
+  saas: ['Desktop', 'Mobile'],
+  teacher: ['Desktop', 'Mobile'],
+  medical: ['Desktop', 'Tablet', 'Mobile'],
+  tailor: ['Desktop', 'Tablet'],
+  embroidery: ['Desktop', 'Mobile']
 };
 
 const templateFeatures = {
@@ -79,7 +115,13 @@ const templateFeatures = {
   corporate: ['QR Code', 'Payment Links', 'Branded', 'Analytics'],
   boutique: ['QR Code', 'Branded', 'Custom Colors'],
   clinic: ['QR Code', 'Payment Links', 'Medical'],
-  repair: ['QR Code', 'Payment Links', 'Status']
+  repair: ['QR Code', 'Payment Links', 'Status'],
+  executive: ['QR Code', 'Branded', 'Analytics', 'Watermark'],
+  saas: ['QR Code', 'Auto-Pay', 'Analytics'],
+  teacher: ['QR Code', 'Fee Details'],
+  medical: ['QR Code', 'Insurance', 'Payment Links'],
+  tailor: ['QR Code', 'Custom Colors', 'Branded'],
+  embroidery: ['QR Code', 'Branded']
 };
 
 const featureBadgeMapping = {
@@ -90,7 +132,13 @@ const featureBadgeMapping = {
   corporate: ['QR', 'Payment', 'Branded', 'Share'],
   boutique: ['QR', 'Branded', 'WhatsApp'],
   clinic: ['QR', 'Payment'],
-  repair: ['QR', 'Payment', 'WhatsApp']
+  repair: ['QR', 'Payment', 'WhatsApp'],
+  executive: ['QR', 'Payment', 'Branded', 'Share'],
+  saas: ['QR', 'Payment', 'Branded'],
+  teacher: ['QR', 'Payment'],
+  medical: ['QR', 'Payment'],
+  tailor: ['QR', 'Branded', 'WhatsApp'],
+  embroidery: ['QR', 'Branded']
 };
 
 const templateTheme = {
@@ -101,8 +149,35 @@ const templateTheme = {
   corporate: 'Dark',
   boutique: 'Light',
   clinic: 'Light',
-  repair: 'Dark'
+  repair: 'Dark',
+  executive: 'Dark',
+  saas: 'Dark',
+  teacher: 'Light',
+  medical: 'Light',
+  tailor: 'Light',
+  embroidery: 'Light'
 };
+
+const themePresets = [
+  { id: 'light', name: 'Light', icon: Sun, colors: 'bg-amber-100 text-amber-600 border-amber-200' },
+  { id: 'dark', name: 'Dark', icon: Monitor, colors: 'bg-gray-800 text-white border-gray-700' },
+  { id: 'modern', name: 'Modern', icon: Layers, colors: 'bg-indigo-100 text-indigo-600 border-indigo-200' },
+  { id: 'classic', name: 'Classic', icon: LayoutTemplate, colors: 'bg-blue-100 text-blue-600 border-blue-200' }
+];
+
+const ctaPresets = [
+  { id: 'payNow', name: 'Pay Now', icon: CreditCard, desc: 'Direct payment CTA' },
+  { id: 'viewInvoice', name: 'View Invoice', icon: FileText, desc: 'View before paying' },
+  { id: 'download', name: 'Download', icon: Download, desc: 'Download invoice' },
+  { id: 'contact', name: 'Contact', icon: Globe, desc: 'Contact business' }
+];
+
+const conversionLayouts = [
+  { id: 'modern', name: 'Modern', icon: LayoutTemplate, desc: 'Card-based modern layout' },
+  { id: 'classic', name: 'Classic', icon: FileText, desc: 'Traditional layout' },
+  { id: 'minimal', name: 'Minimal', icon: Type, desc: 'Clean minimal design' },
+  { id: 'bold', name: 'Bold', icon: Sparkles, desc: 'High-contrast bold style' }
+];
 
 const loadRatings = () => {
   try { return JSON.parse(localStorage.getItem('ll_template_ratings') || '{}'); } catch { return {}; }
@@ -115,12 +190,24 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
   const [ratings, setRatings] = useState(loadRatings);
   const [previewModal, setPreviewModal] = useState(null);
   const [previewDevice, setPreviewDevice] = useState('mobile');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTheme, setSelectedTheme] = useState('light');
+  const [selectedCta, setSelectedCta] = useState('payNow');
+  const [selectedConversion, setSelectedConversion] = useState('modern');
+  const [showBrandPresets, setShowBrandPresets] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState(null);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+
   const isProUser = subscription?.status === 'active';
   const categories = ['All', 'Classic', 'Modern', 'Mobile-first', 'Corporate'];
 
-  const filteredTemplates = filterCategory === 'All'
-    ? liveLinkTemplates
-    : liveLinkTemplates.filter(t => templateCategory[t.id] === filterCategory);
+  const filteredTemplates = liveLinkTemplates.filter(t => {
+    const matchesCategory = filterCategory === 'All' || templateCategory[t.id] === filterCategory;
+    const matchesSearch = searchQuery === '' || 
+      t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      t.desc.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   useEffect(() => {
     if (settings && settings.customerLiveLinkSettings && settings.customerLiveLinkSettings.selectedLiveLinkTemplate) {
@@ -130,7 +217,6 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
 
   const handleApplyTemplate = async (template) => {
     if (template.type === 'pro' && !isProUser) {
-      // Direct them to subscription page
       toast.error('This is a Premium template. Please upgrade to unlock.');
       if (setCurrentTab) setCurrentTab('subscription');
       return;
@@ -140,7 +226,10 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
       ...settings,
       customerLiveLinkSettings: {
         ...(settings.customerLiveLinkSettings || {}),
-        selectedLiveLinkTemplate: template.id
+        selectedLiveLinkTemplate: template.id,
+        themePreset: selectedTheme,
+        ctaPreset: selectedCta,
+        conversionLayout: selectedConversion
       }
     };
 
@@ -225,6 +314,59 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
             <div className="mt-auto h-8 w-full bg-yellow-500 text-[6px] text-zinc-900 flex items-center justify-center font-bold uppercase tracking-widest">Pay Invoice</div>
           </div>
         );
+      case 'executive':
+        return (
+          <div className="flex flex-col gap-1 p-2 bg-slate-900 h-full w-full border border-slate-700">
+            <div className="h-4 w-1/2 bg-slate-600 mx-auto"></div>
+            <div className="h-1 border-b border-slate-700 w-full my-1"></div>
+            <div className="h-8 w-full bg-slate-800 rounded"></div>
+            <div className="mt-auto h-8 w-full bg-gradient-to-r from-amber-500 to-orange-500 rounded text-[6px] text-white flex items-center justify-center font-bold">Executive Pay</div>
+          </div>
+        );
+      case 'saas':
+        return (
+          <div className="flex flex-col gap-1 p-2 bg-violet-50 h-full w-full border border-violet-200">
+            <div className="h-3 w-1/3 bg-violet-500 rounded"></div>
+            <div className="h-4 w-full bg-white rounded mt-1 border border-violet-100"></div>
+            <div className="h-4 w-full bg-white rounded border border-violet-100"></div>
+            <div className="mt-auto h-8 w-full bg-violet-600 rounded text-[6px] text-white flex items-center justify-center font-bold">Subscribe Now</div>
+          </div>
+        );
+      case 'teacher':
+        return (
+          <div className="flex flex-col gap-1 p-2 bg-sky-50 h-full w-full border-t-8 border-sky-400">
+            <div className="h-3 w-1/3 bg-sky-500 rounded"></div>
+            <div className="h-6 w-full bg-white rounded mt-1"></div>
+            <div className="mt-auto h-8 w-full bg-sky-500 rounded text-[6px] text-white flex items-center justify-center font-bold">Pay Fee</div>
+          </div>
+        );
+      case 'medical':
+        return (
+          <div className="flex flex-col gap-1 p-2 bg-teal-50 h-full w-full border border-teal-200">
+            <div className="h-4 w-1/4 bg-teal-600 rounded"></div>
+            <div className="h-6 w-full bg-white rounded mt-1 border border-teal-100"></div>
+            <div className="h-3 w-full bg-red-100 mt-1"></div>
+            <div className="mt-auto h-8 w-full bg-teal-600 rounded text-[6px] text-white flex items-center justify-center font-bold">Pay Medical Bill</div>
+          </div>
+        );
+      case 'tailor':
+        return (
+          <div className="flex flex-col gap-1 p-2 bg-rose-50 h-full w-full border border-rose-200">
+            <div className="h-4 w-1/2 bg-rose-400 mx-auto rounded-full"></div>
+            <div className="h-6 w-full bg-white rounded mt-1 border border-rose-100"></div>
+            <div className="h-2 w-2/3 bg-rose-200 mx-auto mt-1"></div>
+            <div className="mt-auto h-8 w-full bg-rose-500 rounded text-[6px] text-white flex items-center justify-center font-bold">Order Now</div>
+          </div>
+        );
+      case 'embroidery':
+        return (
+          <div className="flex flex-col gap-1 p-2 bg-purple-50 h-full w-full border border-purple-200">
+            <div className="h-4 w-1/3 bg-purple-500 mx-auto rounded"></div>
+            <div className="h-6 w-full bg-white rounded mt-1 border border-purple-100"></div>
+            <div className="h-2 w-1/2 bg-purple-300 mx-auto mt-1"></div>
+            <div className="mt-auto h-8 w-full bg-purple-600 rounded text-[6px] text-white flex items-center justify-center font-bold">View Design</div>
+          </div>
+        );
       default:
         return <div className="bg-gray-100 h-full w-full"></div>;
     }
@@ -240,6 +382,23 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
           <h1 className="text-2xl font-black text-theme-primary tracking-tight">Live Link Template Studio</h1>
           <p className="text-xs text-theme-muted font-bold mt-1">Select how your customers see your public invoice payment links.</p>
         </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+        <input
+          type="text"
+          placeholder="Search templates..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-3 rounded-xl bg-theme-card border border-theme-border-soft text-theme-primary text-sm font-semibold placeholder:text-theme-muted/60 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent/30 transition-all input-premium"
+        />
+        {searchQuery && (
+          <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Category Filter */}
@@ -259,8 +418,196 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
         ))}
       </div>
 
+      {/* Theme Presets */}
+      <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 glass">
+        <div className="flex items-center gap-2 mb-3">
+          <Palette className="w-4 h-4 text-theme-accent" />
+          <span className="text-[10px] font-extrabold text-theme-primary uppercase tracking-wider">Theme Presets</span>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+          {themePresets.map(tp => (
+            <button
+              key={tp.id}
+              onClick={() => setSelectedTheme(tp.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                selectedTheme === tp.id
+                  ? 'bg-theme-accent text-white shadow-md ring-2 ring-theme-accent/30'
+                  : 'bg-theme-app text-theme-muted hover:bg-theme-card border border-theme-border-soft'
+              }`}
+            >
+              <tp.icon className="w-4 h-4" />
+              {tp.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA Presets */}
+      <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 glass">
+        <div className="flex items-center gap-2 mb-3">
+          <ArrowRight className="w-4 h-4 text-theme-accent" />
+          <span className="text-[10px] font-extrabold text-theme-primary uppercase tracking-wider">CTA Presets</span>
+          <span className="text-[7px] text-theme-muted font-bold ml-auto">Choose what action button appears</span>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+          {ctaPresets.map(cta => (
+            <button
+              key={cta.id}
+              onClick={() => setSelectedCta(cta.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                selectedCta === cta.id
+                  ? 'bg-theme-accent text-white shadow-md ring-2 ring-theme-accent/30'
+                  : 'bg-theme-app text-theme-muted hover:bg-theme-card border border-theme-border-soft'
+              }`}
+            >
+              <cta.icon className="w-4 h-4" />
+              <span>{cta.name}</span>
+              <span className="text-[7px] opacity-70 hidden md:inline">{cta.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Conversion Layouts */}
+      <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 glass">
+        <div className="flex items-center gap-2 mb-3">
+          <Grid className="w-4 h-4 text-theme-accent" />
+          <span className="text-[10px] font-extrabold text-theme-primary uppercase tracking-wider">Conversion Layouts</span>
+          <span className="text-[7px] text-theme-muted font-bold ml-auto">Page layout style</span>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+          {conversionLayouts.map(layout => (
+            <button
+              key={layout.id}
+              onClick={() => setSelectedConversion(layout.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                selectedConversion === layout.id
+                  ? 'bg-theme-accent text-white shadow-md ring-2 ring-theme-accent/30'
+                  : 'bg-theme-app text-theme-muted hover:bg-theme-card border border-theme-border-soft'
+              }`}
+            >
+              <layout.icon className="w-4 h-4" />
+              <span>{layout.name}</span>
+              <span className="text-[7px] opacity-70 hidden md:inline">{layout.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Brand Presets Toggle */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => setShowBrandPresets(!showBrandPresets)}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            showBrandPresets
+              ? 'bg-theme-accent text-white shadow-md'
+              : 'bg-theme-card border border-theme-border-soft text-theme-muted hover:border-theme-accent/50'
+          }`}
+        >
+          <Image className="w-3.5 h-3.5" />
+          Brand Presets
+          <motion.span animate={{ rotate: showBrandPresets ? 180 : 0 }}><ArrowRight className="w-3 h-3" /></motion.span>
+        </button>
+        <button
+          onClick={() => setShowAnalytics(!showAnalytics)}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            showAnalytics
+              ? 'bg-theme-accent text-white shadow-md'
+              : 'bg-theme-card border border-theme-border-soft text-theme-muted hover:border-theme-accent/50'
+          }`}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          Analytics
+          <motion.span animate={{ rotate: showAnalytics ? 180 : 0 }}><ArrowRight className="w-3 h-3" /></motion.span>
+        </button>
+      </div>
+
+      {/* Brand Presets Section */}
+      {showBrandPresets && (
+        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 space-y-4 glass">
+          <div className="flex items-center gap-2 mb-1">
+            <Image className="w-4 h-4 text-theme-accent" />
+            <span className="text-xs font-extrabold text-theme-primary uppercase tracking-wider">Brand Presets</span>
+            <span className="text-[8px] text-theme-muted font-bold ml-auto">Pick your business type for suggested templates</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+            {BUSINESS_PRESETS.filter(p => p.id !== 'billing_only').slice(0, 10).map(preset => (
+              <button
+                key={preset.id}
+                onClick={() => {
+                  setSelectedPreset(preset.id);
+                  const llCategories = {
+                    retail: 'Mobile-first',
+                    grocery: 'Mobile-first',
+                    service: 'Corporate',
+                    doctor: 'Classic',
+                    teacher: 'Classic',
+                    tailor: 'Classic',
+                    embroidery: 'Classic',
+                    freelance: 'Corporate',
+                    restaurant: 'Mobile-first',
+                    custom: 'All'
+                  };
+                  setFilterCategory(llCategories[preset.id] || 'All');
+                  toast.success(`Showing ${preset.label} templates`);
+                }}
+                className={`p-3 rounded-xl border text-left transition-all hover:scale-[1.03] ${
+                  selectedPreset === preset.id
+                    ? 'bg-theme-accent/10 border-theme-accent text-theme-accent'
+                    : 'bg-theme-app border-theme-border-soft text-theme-muted hover:border-theme-accent/50'
+                }`}
+              >
+                <p className="text-[10px] font-extrabold text-theme-primary truncate">{preset.label}</p>
+                <p className="text-[7px] text-theme-muted font-medium mt-0.5 line-clamp-1">{preset.shortDesc}</p>
+              </button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Analytics Section */}
+      {showAnalytics && (
+        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 space-y-4 glass">
+          <div className="flex items-center gap-2 mb-1">
+            <Sparkles className="w-4 h-4 text-theme-accent" />
+            <span className="text-xs font-extrabold text-theme-primary uppercase tracking-wider">Live Link Analytics</span>
+            <span className="text-[8px] text-theme-muted font-bold ml-auto">Mock data — upgrade for live tracking</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50">
+              <p className="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Views</p>
+              <p className="text-2xl font-black text-theme-primary mt-1">1,284</p>
+              <p className="text-[8px] text-theme-muted font-medium mt-1 flex items-center gap-1"><Sparkles className="w-2.5 h-2.5 text-emerald-500" /> +12% vs last month</p>
+            </div>
+            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50">
+              <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Clicks</p>
+              <p className="text-2xl font-black text-theme-primary mt-1">847</p>
+              <p className="text-[8px] text-theme-muted font-medium mt-1 flex items-center gap-1"><Sparkles className="w-2.5 h-2.5 text-emerald-500" /> 66% click rate</p>
+            </div>
+            <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/50">
+              <p className="text-[9px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Conversions</p>
+              <p className="text-2xl font-black text-theme-primary mt-1">523</p>
+              <p className="text-[8px] text-theme-muted font-medium mt-1 flex items-center gap-1"><Sparkles className="w-2.5 h-2.5 text-emerald-500" /> 61.7% conversion</p>
+            </div>
+            <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50">
+              <p className="text-[9px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Revenue</p>
+              <p className="text-2xl font-black text-theme-primary mt-1">$12.4k</p>
+              <p className="text-[8px] text-theme-muted font-medium mt-1 flex items-center gap-1"><Sparkles className="w-2.5 h-2.5 text-emerald-500" /> +8.3% vs last month</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-center gap-2 text-[9px] text-theme-muted font-bold p-2 rounded-lg bg-theme-app border border-dashed border-theme-border-soft">
+            <RefreshCw className="w-3 h-3" /> Real-time analytics available on Premium plan
+          </div>
+        </motion.div>
+      )}
+
       {filteredTemplates.length === 0 ? (
-        <p className="text-sm text-theme-muted text-center py-12 font-semibold">No templates in this category yet.</p>
+        <div className="text-center py-12">
+          <p className="text-sm text-theme-muted font-semibold">No templates matching your search.</p>
+          <button onClick={() => { setSearchQuery(''); setFilterCategory('All'); }} className="mt-2 text-xs text-theme-accent font-bold hover:underline flex items-center gap-1 justify-center">
+            <RefreshCw className="w-3 h-3" /> Reset filters
+          </button>
+        </div>
       ) : (
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredTemplates.map((template) => {
@@ -424,6 +771,9 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
                   <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${tpl.type === 'free' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white'}`}>
                     {tpl.type === 'free' ? 'FREE' : 'PRO'}
                   </span>
+                  <span className="text-[8px] font-bold text-theme-muted bg-theme-app px-2 py-0.5 rounded-full border border-theme-border-soft">
+                    {selectedConversion.charAt(0).toUpperCase() + selectedConversion.slice(1)} Layout
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   {/* Device toggle */}
@@ -475,6 +825,12 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-theme-muted font-semibold">Previewing:</span>
                   <span className="text-[10px] font-bold text-theme-primary capitalize">{previewDevice}</span>
+                  <span className="w-px h-3 bg-theme-border-soft mx-1" />
+                  <span className="text-[10px] text-theme-muted font-semibold">CTA:</span>
+                  <span className="text-[10px] font-bold text-theme-primary capitalize">{ctaPresets.find(c => c.id === selectedCta)?.name || 'Pay Now'}</span>
+                  <span className="w-px h-3 bg-theme-border-soft mx-1" />
+                  <span className="text-[10px] text-theme-muted font-semibold">Theme:</span>
+                  <span className="text-[10px] font-bold text-theme-primary capitalize">{selectedTheme}</span>
                 </div>
                 <button
                   onClick={() => { handleApplyTemplate(tpl); setPreviewModal(null); setPreviewDevice('mobile'); }}

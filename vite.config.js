@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ['favicon.ico', 'favicon-16x16.png', 'favicon-32x32.png', 'apple-touch-icon.png'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        maximumFileSizeToCacheInBytes: 5000000, // 5MB limit
+        maximumFileSizeToCacheInBytes: 5000000,
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/__/, /^\/api\//, /^\/publicInvoices\//],
         ignoreURLParametersMatching: [/^token/, /^secret/, /^auth/],
@@ -29,30 +29,10 @@ export default defineConfig(({ mode }) => ({
         start_url: '/',
         scope: '/',
         icons: [
-          {
-            src: 'icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          {
-            src: 'icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          {
-            src: 'icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable'
-          },
-          {
-            src: 'apple-touch-icon.png',
-            sizes: '180x180',
-            type: 'image/png',
-            purpose: 'any'
-          }
+          { src: 'icon-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'apple-touch-icon.png', sizes: '180x180', type: 'image/png', purpose: 'any' }
         ]
       },
       devOptions: {
@@ -62,21 +42,32 @@ export default defineConfig(({ mode }) => ({
     })
   ],
   build: {
+    sourcemap: false,
+    cssCodeSplit: true,
+    target: 'es2020',
     minify: mode === 'android' ? false : 'terser',
-    sourcemap: mode === 'android' ? false : undefined,
     terserOptions: mode === 'android' ? undefined : {
       compress: {
         drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        passes: 2
       },
-      mangle: false, // Prevents Windows Defender false positive detections
+      mangle: mode === 'android' ? false : { properties: { regex: /^_private_/ } },
+      format: { comments: false }
     },
     rollupOptions: {
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
           'firebase-vendor': ['firebase/app', 'firebase/firestore', 'firebase/auth'],
-          'ui-vendor': ['lucide-react', 'framer-motion', 'react-hot-toast']
-        }
+          'ui-vendor': ['lucide-react', 'framer-motion', 'react-hot-toast'],
+          'chart-vendor': ['recharts'],
+          'pdf-vendor': ['@react-pdf/renderer'],
+          'dnd-vendor': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities']
+        },
+        inlineDynamicImports: false,
+        hoistTransitiveImports: true
       }
     },
     chunkSizeWarningLimit: 3000
