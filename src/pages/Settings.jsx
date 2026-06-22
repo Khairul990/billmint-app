@@ -1562,3 +1562,661 @@ const Settings = ({
               </div>
             </div>
           )}
+          {/* ============ BILLING ============ */}
+          {activeCategory === 'billing' && (
+            <>
+              {/* Payment Settings */}
+              <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+                <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><QrCode className="w-5 h-5" /></div>
+                    <div>
+                      <h2 className="section-header-title">Payment Settings</h2>
+                      <p className="section-header-subtitle">Set up digital payment integration via UPI, bKash, Nagad, or custom QR codes.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <ToggleSwitch enabled={paymentQrEnabled} onChange={setPaymentQrEnabled} label="Enable Automated Scan-to-Pay QR Code" description="Embed automated scanning codes on bills and invoice pages" />
+
+                {paymentQrEnabled && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div>
+                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Primary Payment Method</label>
+                        <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold">
+                          {country === 'India' && <option value="UPI">UPI (India)</option>}
+                          {country === 'Bangladesh' && (<><option value="bKash">bKash (Bangladesh)</option><option value="Nagad">Nagad (Bangladesh)</option><option value="Rocket">Rocket (Bangladesh)</option></>)}
+                          <option value="Manual">Manual QR / Custom Bank Details</option>
+                        </select>
+                      </div>
+                      {country === 'India' && (
+                        <div>
+                          <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">UPI ID</label>
+                          <input type="text" value={upiId} onChange={(e) => setUpiId(e.target.value)} placeholder="e.g. business@okaxis" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
+                        </div>
+                      )}
+                      {country === 'Bangladesh' && paymentMethod === 'bKash' && (
+                        <div>
+                          <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">bKash Wallet Number</label>
+                          <input type="text" value={bkashNumber} onChange={(e) => setBkashNumber(e.target.value)} placeholder="e.g. 017XXXXXXXX" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
+                        </div>
+                      )}
+                      {country === 'Bangladesh' && paymentMethod === 'Nagad' && (
+                        <div>
+                          <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Nagad Account Number</label>
+                          <input type="text" value={nagadNumber} onChange={(e) => setNagadNumber(e.target.value)} placeholder="e.g. 019XXXXXXXX" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
+                        </div>
+                      )}
+                      {country === 'Bangladesh' && paymentMethod === 'Rocket' && (
+                        <div>
+                          <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Rocket Account Number</label>
+                          <input type="text" value={rocketNumber} onChange={(e) => setRocketNumber(e.target.value)} placeholder="e.g. 018XXXXXXXX" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
+                        </div>
+                      )}
+                      {country === 'Other' && (
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Manual / Bank Details / QR Link</label>
+                          <input type="text" value={customPaymentLink} onChange={(e) => setCustomPaymentLink(e.target.value)} placeholder="e.g. Bank name: X, A/C: Y, IFSC: Z" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium" />
+                        </div>
+                      )}
+                      <div>
+                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Payee / Account Name</label>
+                        <input type="text" value={payeeName} onChange={(e) => setPayeeName(e.target.value)} placeholder="e.g. BillQyro store" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">QR Payment Footnote</label>
+                        <input type="text" value={paymentNote} onChange={(e) => setPaymentNote(e.target.value)} placeholder="e.g. Please scan to pay." className="w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium" />
+                      </div>
+                    </div>
+                    <ToggleSwitch enabled={showQrInPdf} onChange={setShowQrInPdf} label="Show QR in PDF Invoice" description="Render QR code on generated PDF documents" />
+                    <ToggleSwitch enabled={showQrInPreview} onChange={setShowQrInPreview} label="Show QR on Local Preview" description="Render QR code on invoice previews inside dashboard" />
+                  </>
+                )}
+              </div>
+
+              {/* Invoice Preferences */}
+              <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+                <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><FileText className="w-5 h-5" /></div>
+                    <div>
+                      <h2 className="section-header-title">Invoice Preferences</h2>
+                      <p className="section-header-subtitle">Control invoice layout, numbering, default tax rates, brand colors, and document notes.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Invoice Layout Template</label>
+                    <select value={invoiceTemplate} onChange={(e) => setInvoiceTemplate(e.target.value)} className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold">
+                      <option value="modern">Modern A4 Template</option>
+                      <option value="classic">Classic A5 Template</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Default Form Field Layout</label>
+                    <select value={defaultBillingTemplate} onChange={(e) => setDefaultBillingTemplate(e.target.value)} className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold">
+                      <option value="embroidery">Embroidery / Fashion</option>
+                      <option value="grocery">Grocery / Kirana Shop</option>
+                      <option value="repair">Mobile Repair / Service</option>
+                      <option value="retail">Retail Shopping Store</option>
+                      <option value="custom">Standard Flexible Bill</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Invoice Number Prefix</label>
+                    <input type="text" value={invoicePrefix} onChange={(e) => setInvoicePrefix(e.target.value)} placeholder="e.g. INV-" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Tax ID / GST Number</label>
+                    <input type="text" value={gstNumber} onChange={(e) => setGstNumber(e.target.value)} placeholder="e.g. 29AAAAA0000A1Z5" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold uppercase" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-2 uppercase tracking-wide flex items-center gap-2"><Palette className="w-3.5 h-3.5" /> Corporate Brand Color</label>
+                    <div className="flex flex-wrap gap-3">
+                      {[{ name: 'Teal', hex: '#14b8a6' }, { name: 'Indigo', hex: '#6366f1' }, { name: 'Rose', hex: '#f43f5e' }, { name: 'Blue', hex: '#3b82f6' }, { name: 'Emerald', hex: '#10b981' }, { name: 'Amber', hex: '#f59e0b' }, { name: 'Slate', hex: '#475569' }].map((color) => (
+                        <button key={color.hex} type="button" onClick={() => setBrandColor(color.hex)} style={{ backgroundColor: color.hex }} title={color.name} className={'w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer tooltip-premium ' + (brandColor === color.hex ? 'ring-4 ring-offset-2 scale-110' : 'hover:scale-105')}>
+                          {brandColor === color.hex && <CheckCircle2 className="w-5 h-5 text-white" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Default Invoice Notes</label>
+                    <textarea value={defaultNotes} onChange={(e) => setDefaultNotes(e.target.value)} placeholder="Thank you for your business!" rows="2" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium resize-none text-xs" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Terms & Conditions</label>
+                    <textarea value={terms} onChange={(e) => setTerms(e.target.value)} placeholder="1. Payment is expected within due date." rows="2" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium resize-none text-xs" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">PDF Footer Note</label>
+                    <input type="text" value={pdfFooter} onChange={(e) => setPdfFooter(e.target.value)} placeholder="e.g. Computer generated invoice." className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer Live Link Settings */}
+              <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+                <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Link className="w-5 h-5" /></div>
+                    <div>
+                      <h2 className="section-header-title">Customer Live Link Settings</h2>
+                      <p className="section-header-subtitle">Define customer-facing invoice portal features.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { state: enableLiveLink, setter: setEnableLiveLink, label: 'Enable Secure Live Link', desc: 'Generate unique public URL endpoints' },
+                    { state: showPaymentQrOnLink, setter: setShowPaymentQrOnLink, label: 'Show Payment QR Code', desc: 'Display scan-to-pay QR on public pages' },
+                    { state: allowPdfDownload, setter: setAllowPdfDownload, label: 'Allow Customer PDF Download', desc: 'Let clients print/download invoice PDFs' },
+                    { state: allowPaymentProofSubmit, setter: setAllowPaymentProofSubmit, label: 'Allow Payment Proof Submission', desc: 'Enable "I Have Paid" flow' },
+                    { state: showPaidDueAmount, setter: setShowPaidDueAmount, label: 'Show Paid & Due Amounts', desc: 'Display collected vs balance due' },
+                    { state: showContactButton, setter: setShowContactButton, label: 'Show Contact Support Button', desc: 'Embed email/phone links for customers' },
+                    { state: requireTransactionId, setter: setRequireTransactionId, label: 'Require Transaction Reference ID', desc: 'Make Transaction ID mandatory' },
+                    { state: requirePaymentScreenshot, setter: setRequirePaymentScreenshot, label: 'Require Payment Screenshot', desc: 'Make file upload mandatory for proof' }
+                  ].map((item, idx) => (
+                    <ToggleSwitch key={idx} enabled={item.state} onChange={item.setter} label={item.label} description={item.desc} />
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+          {/* ============ TEMPLATES ============ */}
+          {activeCategory === 'templates' && (
+            <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+              <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><LayoutTemplate className="w-5 h-5" /></div>
+                  <div>
+                    <h2 className="section-header-title">Invoice Templates</h2>
+                    <p className="section-header-subtitle">Configure invoice layouts, PDF visible fields, and document structure.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Primary Invoice Layout</label>
+                  <select value={invoiceTemplate} onChange={(e) => setInvoiceTemplate(e.target.value)} className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold">
+                    <option value="modern">Modern A4 Template</option>
+                    <option value="classic">Classic A5 Template</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Default Field Layout</label>
+                  <select value={defaultBillingTemplate} onChange={(e) => setDefaultBillingTemplate(e.target.value)} className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold">
+                    <option value="embroidery">Embroidery / Fashion</option>
+                    <option value="grocery">Grocery / Kirana</option>
+                    <option value="repair">Repair / Service</option>
+                    <option value="retail">Retail Store</option>
+                    <option value="custom">Standard Flex Bill</option>
+                  </select>
+                </div>
+              </div>
+              <div className="divider-premium h-px bg-gradient-to-r from-transparent via-theme-border-soft to-transparent" />
+              <div className="flex items-center justify-between p-4 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl">
+                <div>
+                  <span className="text-xs font-bold text-theme-primary block">PDF Visible Fields</span>
+                  <span className="text-[9px] text-theme-muted font-semibold mt-0.5 block">Customize which fields appear on PDF invoices per template type.</span>
+                </div>
+                <span className="badge-premium text-[9px] font-black text-theme-accent bg-theme-accent-light px-3 py-1.5 rounded-full border border-theme-accent/30">{defaultBillingTemplate} template active</span>
+              </div>
+            </div>
+          )}
+
+          {/* ============ NOTIFICATIONS ============ */}
+          {activeCategory === 'notifications' && (
+            <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+              <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Bell className="w-5 h-5" /></div>
+                  <div>
+                    <h2 className="section-header-title">Notification Preferences</h2>
+                    <p className="section-header-subtitle">Control how and when you receive alerts about invoices, payments, and system updates.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <ToggleSwitch enabled={emailNotifications} onChange={setEmailNotifications} label="Email Notifications" description="Receive invoice and payment updates via email" />
+                <ToggleSwitch enabled={whatsappNotifications} onChange={setWhatsappNotifications} label="WhatsApp Notifications" description="Get real-time updates through WhatsApp (requires Twilio)" />
+                <ToggleSwitch enabled={dueDateReminders} onChange={setDueDateReminders} label="Due Date Reminders" description="Automatic reminders before invoice due dates" />
+                <ToggleSwitch enabled={paymentConfirmation} onChange={setPaymentConfirmation} label="Payment Confirmations" description="Get notified when a customer submits payment proof" />
+                <ToggleSwitch enabled={securityAlerts} onChange={setSecurityAlerts} label="Security Alerts" description="Receive alerts about login activity and security changes" />
+                <ToggleSwitch enabled={marketingEmails} onChange={setMarketingEmails} label="Marketing & Updates" description="Product updates, tips, and promotional content" />
+              </div>
+            </div>
+          )}
+
+          {/* ============ SECURITY ============ */}
+          {activeCategory === 'security' && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="card-premium p-6 md:p-8 space-y-6">
+                <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Shield className="w-5 h-5" /></div>
+                    <div>
+                      <h2 className="section-header-title">Security & API Keys</h2>
+                      <p className="section-header-subtitle">Manage API credentials, monitor account security, and configure database provider.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Account Security Status */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-theme-success" />
+                      <span className="text-[10px] font-black uppercase tracking-wider text-theme-success">Account Status</span>
+                    </div>
+                    <p className="text-xs font-bold text-theme-primary">Authenticated</p>
+                    <p className="text-[9px] text-theme-muted font-medium truncate">{loggedInEmail}</p>
+                  </div>
+                  <div className="bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Key className="w-4 h-4 text-theme-accent" />
+                      <span className="text-[10px] font-black uppercase tracking-wider text-theme-accent">Database Provider</span>
+                    </div>
+                    <p className="text-xs font-bold text-theme-primary capitalize">{dbProvider}</p>
+                    <select value={dbProvider} onChange={(e) => handleSetDbProvider(e.target.value)} className="text-[9px] w-full bg-transparent border border-theme-border-soft rounded-lg px-2 py-1 text-theme-muted font-bold outline-none cursor-pointer">
+                      <option value="firebase">Firebase</option>
+                      <option value="indexeddb">IndexedDB (Local)</option>
+                    </select>
+                  </div>
+                  <div className="bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Wifi className="w-4 h-4 text-theme-accent" />
+                      <span className="text-[10px] font-black uppercase tracking-wider text-theme-accent">Sync Status</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={'w-2 h-2 rounded-full ' + firebaseStatusDot}></span>
+                      <p className="text-xs font-bold text-theme-primary">{firebaseStatusLabel}</p>
+                    </div>
+                    <p className="text-[9px] text-theme-muted font-medium">Last online: {isOnline ? 'Connected' : 'Disconnected'}</p>
+                  </div>
+                </div>
+
+                {/* Gemini API Key */}
+                <div className="space-y-4 pt-2">
+                  <div>
+                    <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5 tooltip-premium" title="Get your free API key from Google AI Studio">Gemini API Key (AI Scanner)</label>
+                    <input type="password" value={geminiApiKey} onChange={(e) => setGeminiApiKey(e.target.value)} placeholder="AIzaSy..." className="input-premium w-full bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-2xl px-4 py-3.5 text-xs font-bold text-theme-primary placeholder-theme-muted focus:ring-2 focus:ring-theme-accent/20 outline-none transition-all" />
+                    <p className="text-[10px] text-theme-muted font-medium mt-1.5">Required for AI Bill Scanner. Get a free key from Google AI Studio.</p>
+                  </div>
+                  <div className="pt-4 border-t border-theme-border-soft/60">
+                    <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">Twilio Account SID (WhatsApp Bot)</label>
+                    <input type="text" value={twilioAccountSid} onChange={(e) => setTwilioAccountSid(e.target.value)} placeholder="AC..." className="w-full bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl px-4 py-3.5 text-xs font-bold text-theme-primary focus:ring-2 focus:ring-theme-accent/20 outline-none transition-all mb-3" />
+                    <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">Twilio Auth Token</label>
+                    <input type="password" value={twilioAuthToken} onChange={(e) => setTwilioAuthToken(e.target.value)} placeholder="Auth token..." className="input-premium w-full bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl px-4 py-3.5 text-xs font-bold text-theme-primary focus:ring-2 focus:ring-theme-accent/20 outline-none transition-all" />
+                    <p className="text-[10px] text-theme-muted font-medium mt-1.5">Required for automated due-date reminders via WhatsApp.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* ============ BACKUP ============ */}
+          {activeCategory === 'backup' && (
+            <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+              <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Database className="w-5 h-5" /></div>
+                  <div>
+                    <h2 className="section-header-title">Data Backup & Storage</h2>
+                    <p className="section-header-subtitle">Export full backups, monitor storage health, clear temporary cache, and reset data safely.</p>
+                  </div>
+                </div>
+              </div>
+
+              {storageInfo && (
+                <div className="space-y-4">
+                  <div className="stat-premium bg-theme-bg/50 dark:bg-theme-dark-bg/50 rounded-2xl p-6 border border-theme-border-soft relative overflow-hidden group hover:border-theme-accent/30 transition-all duration-300">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold text-theme-text dark:text-theme-dark-text">LocalStorage Usage</span>
+                      <span className={'font-bold ' + (storageInfo.percentage > 95 ? 'text-theme-danger' : storageInfo.percentage > 80 ? 'text-theme-warning' : 'text-theme-success')}>
+                        {storageInfo.percentage}% ({storageInfo.kb}/{storageInfo.limitKb} KB)
+                      </span>
+                    </div>
+                    <div className="w-full bg-theme-border-soft dark:bg-theme-border-soft/50 rounded-full h-3 overflow-hidden">
+                      <div className={'h-3 rounded-full transition-all duration-1000 ' + (storageInfo.percentage > 95 ? 'bg-theme-danger' : storageInfo.percentage > 80 ? 'bg-theme-warning/50' : 'bg-theme-success')} style={{ width: storageInfo.percentage + '%' }}></div>
+                    </div>
+                    <p className="text-xs text-theme-text-soft dark:text-theme-dark-text-soft mt-2">
+                      {storageInfo.percentage > 95 ? 'CRITICAL: Clear cache or delete items.' : storageInfo.percentage > 80 ? 'WARNING: Usage is getting high.' : 'SAFE: Storage is healthy.'}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onClick={handleExport} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-success/30 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left col-span-1">
+                      <Database className="text-theme-success" size={24} />
+                      <div>
+                        <div className="font-semibold text-theme-text dark:text-theme-dark-text">Download Full Backup</div>
+                        <div className="text-xs text-theme-text-soft">Save complete JSON backup of workspace</div>
+                      </div>
+                    </button>
+
+                    <label className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-accent/20 bg-theme-accent/5 hover:bg-theme-accent/10 transition-colors text-left cursor-pointer col-span-1">
+                      <Upload className="text-theme-accent" size={24} />
+                      <div>
+                        <div className="font-semibold text-theme-text">Import Backup File</div>
+                        <div className="text-xs text-theme-text-soft">Restore from a previously saved backup</div>
+                      </div>
+                      <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+                    </label>
+
+                    <button onClick={handleClearCacheOnly} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-warning/30 bg-theme-warning/5 hover:bg-theme-warning/10 transition-colors text-left">
+                      <RotateCcw className="text-theme-warning" size={24} />
+                      <div>
+                        <div className="font-semibold text-theme-text">Clear App Cache</div>
+                        <div className="text-xs text-theme-text-soft">Reset temporary cache, keep your data</div>
+                      </div>
+                    </button>
+
+                    <button onClick={() => setShowResetModal(true)} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-danger/30 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left">
+                      <Trash2 className="text-theme-danger" size={24} />
+                      <div>
+                        <div className="font-semibold text-theme-danger">Reset All Data</div>
+                        <div className="text-xs text-theme-danger/80">Wipe invoices, customers & settings</div>
+                      </div>
+                    </button>
+
+                    {isAdmin && (
+                      <>
+                        <button onClick={handleCleanTemporaryData} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-success/30 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left">
+                          <RefreshCw className="text-theme-success" size={24} />
+                          <div>
+                            <div className="font-semibold text-theme-text">Clean Temporary Data</div>
+                            <div className="text-xs text-theme-text-soft">Clear logs & old sync queue</div>
+                          </div>
+                        </button>
+                        <button onClick={handleCleanDuplicateDrafts} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-warning/30 bg-theme-warning/5 hover:bg-theme-warning/10 transition-colors text-left">
+                          <Trash2 className="text-theme-warning" size={24} />
+                          <div>
+                            <div className="font-semibold text-theme-text">Clean Duplicate Drafts</div>
+                            <div className="text-xs text-theme-text-soft">Remove empty/zero drafts</div>
+                          </div>
+                        </button>
+                        <button onClick={handleClearAllLocalData} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-danger/20 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left">
+                          <ShieldAlert className="text-theme-danger" size={24} />
+                          <div>
+                            <div className="font-semibold text-theme-danger">Hard Reset (Admin)</div>
+                            <div className="text-xs text-theme-danger/80">Completely wipe ALL local storage</div>
+                          </div>
+                        </button>
+                        <button onClick={handleEmptyTrash} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-danger/30 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left">
+                          <Trash2 className="text-theme-danger" size={24} />
+                          <div>
+                            <div className="font-semibold text-theme-danger">Empty Trash Data</div>
+                            <div className="text-xs text-theme-danger/80">Permanently delete soft-deleted invoices</div>
+                          </div>
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  {isAdmin && (
+                    <div className="bg-theme-warning/5 border border-theme-warning/30 rounded-2xl p-4 flex items-center gap-3">
+                      <ShieldAlert className="w-5 h-5 text-theme-warning shrink-0" />
+                      <p className="text-[10px] font-semibold text-theme-warning/90">Admin tools: Use granular wipes below to selectively clear data types without full reset.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {!storageInfo && (
+                <div className="flex flex-col items-center justify-center py-10 space-y-3">
+                  <div className="w-14 h-14 rounded-2xl bg-theme-accent-light dark:bg-theme-accent-light/20 text-theme-accent flex items-center justify-center"><HardDrive className="w-7 h-7" /></div>
+                  <div className="text-center max-w-xs">
+                    <h3 className="text-xs font-extrabold text-theme-primary">Storage data loading</h3>
+                    <p className="text-[10px] text-theme-muted font-medium mt-1">View storage usage and backup options.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ============ SUBSCRIPTION ============ */}
+          {activeCategory === 'subscription' && (
+            <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+              <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><CreditCard className="w-5 h-5" /></div>
+                  <div>
+                    <h2 className="section-header-title">Subscription & Billing</h2>
+                    <p className="section-header-subtitle">Manage your plan, view usage limits, and upgrade for premium features.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 bg-gradient-to-br from-theme-accent/5 to-theme-accent/10 border border-theme-accent/20 rounded-3xl text-center space-y-4">
+                <div className="w-16 h-16 bg-gradient-to-tr from-theme-accent to-theme-accent-dark rounded-2xl flex items-center justify-center mx-auto shadow-md">
+                  <Zap className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-extrabold text-theme-primary dark:text-theme-primary">Free Plan Active</h3>
+                <p className="text-xs text-theme-muted max-w-md mx-auto leading-relaxed font-semibold">
+                  You are currently on the Free Starter plan. Upgrade to Premium for unlimited invoices, premium templates, live invoice links, and priority support.
+                </p>
+                <div className="inline-flex items-center gap-2 text-[10px] text-theme-muted font-semibold bg-theme-app dark:bg-theme-surface px-4 py-2 rounded-full border border-theme-border-soft">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-theme-success" />
+                  {invoices.length} invoices created this month
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { icon: FileText, label: 'Invoice Limit', value: '15 / month', desc: 'Free plan limit' },
+                  { icon: Users, label: 'Customers', value: customers.length, desc: 'Total customers' },
+                  { icon: CircleDollarSign, label: 'Revenue Tracked', value: '₹' + totalRevenue.toLocaleString(), desc: 'All time total' }
+                ].map((stat, i) => (
+                  <div key={i} className="bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl p-4 text-center">
+                    <stat.icon className="w-5 h-5 text-theme-accent mx-auto mb-2" />
+                    <p className="text-xs font-bold text-theme-muted uppercase tracking-wider">{stat.label}</p>
+                    <p className="text-lg font-extrabold text-theme-primary mt-1">{stat.value}</p>
+                    <p className="text-[9px] text-theme-muted font-medium mt-1">{stat.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              <button onClick={() => window.open('/premium-pricing', '_self')} className="btn-premium w-full py-4 bg-[image:var(--accent-gradient)] text-white font-black text-sm rounded-xl shadow-glow hover:opacity-90 transition-all">
+                <Zap className="w-4 h-4" /> Upgrade to Premium — Unlock Everything
+              </button>
+            </div>
+          )}
+          {/* ============ INTEGRATIONS ============ */}
+          {activeCategory === 'integrations' && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="card-premium p-6 md:p-8 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent-light blur-3xl opacity-30 rounded-full pointer-events-none"></div>
+                <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Puzzle className="w-5 h-5" /></div>
+                    <div>
+                      <h2 className="section-header-title">Integrations</h2>
+                      <p className="section-header-subtitle">Connect third-party services to extend BillQyro capabilities.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Gemini Integration */}
+                  <div className="bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white flex items-center justify-center shadow-sm"><Sparkles className="w-5 h-5" /></div>
+                        <div>
+                          <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Google Gemini AI</h3>
+                          <p className="text-[9px] text-theme-muted font-semibold">AI-powered bill scanning & data extraction</p>
+                        </div>
+                      </div>
+                      <span className={'badge-premium text-[8px] font-black uppercase px-2 py-1 rounded-full border ' + (geminiApiKey ? 'bg-theme-success/10 text-theme-success border-theme-success/30' : 'bg-theme-muted/10 text-theme-muted border-theme-muted/20')}>{geminiApiKey ? 'Connected' : 'Not Connected'}</span>
+                    </div>
+                    <input type="password" value={geminiApiKey} onChange={(e) => setGeminiApiKey(e.target.value)} placeholder="Enter Gemini API Key..." className="input-premium w-full bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl px-4 py-3 text-xs font-bold text-theme-primary focus:ring-2 focus:ring-theme-accent/20 outline-none transition-all" />
+                    <p className="text-[9px] text-theme-muted font-medium">Get your free API key from Google AI Studio.</p>
+                  </div>
+
+                  {/* Twilio Integration */}
+                  <div className="bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-400 to-red-600 text-white flex items-center justify-center shadow-sm"><MessageCircle className="w-5 h-5" /></div>
+                        <div>
+                          <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Twilio WhatsApp</h3>
+                          <p className="text-[9px] text-theme-muted font-semibold">Automated payment reminders via WhatsApp</p>
+                        </div>
+                      </div>
+                      <span className={'badge-premium text-[8px] font-black uppercase px-2 py-1 rounded-full border ' + (twilioAccountSid && twilioAuthToken ? 'bg-theme-success/10 text-theme-success border-theme-success/30' : 'bg-theme-muted/10 text-theme-muted border-theme-muted/20')}>{twilioAccountSid && twilioAuthToken ? 'Connected' : 'Not Connected'}</span>
+                    </div>
+                    <input type="text" value={twilioAccountSid} onChange={(e) => setTwilioAccountSid(e.target.value)} placeholder="Twilio Account SID..." className="w-full bg-theme-card border border-theme-border-soft rounded-xl px-4 py-3 text-xs font-bold text-theme-primary focus:ring-2 focus:ring-theme-accent/20 outline-none transition-all mb-2" />
+                    <input type="password" value={twilioAuthToken} onChange={(e) => setTwilioAuthToken(e.target.value)} placeholder="Twilio Auth Token..." className="input-premium w-full bg-theme-card border border-theme-border-soft rounded-xl px-4 py-3 text-xs font-bold text-theme-primary focus:ring-2 focus:ring-theme-accent/20 outline-none transition-all" />
+                  </div>
+
+                  {/* Future Integrations */}
+                  <div className="bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl p-5">
+                    <h3 className="text-xs font-black text-theme-muted uppercase tracking-wider mb-4">Coming Soon</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {[
+                        { icon: Zap, name: 'Zapier', desc: 'Automate workflows', color: 'from-amber-400 to-orange-500' },
+                        { icon: MessageCircle, name: 'Slack', desc: 'Invoice notifications', color: 'from-purple-400 to-purple-600' },
+                        { icon: CircleDollarSign, name: 'Stripe', desc: 'Payment processing', color: 'from-blue-400 to-indigo-500' },
+                        { icon: Headphones, name: 'Zoho', desc: 'CRM sync', color: 'from-green-400 to-emerald-500' },
+                        { icon: BarChart3, name: 'QuickBooks', desc: 'Accounting sync', color: 'from-teal-400 to-cyan-500' },
+                        { icon: CloudLightning, name: 'Webhooks', desc: 'Custom callbacks', color: 'from-rose-400 to-pink-500' }
+                      ].map((item, i) => (
+                        <div key={i} className="bg-theme-card dark:bg-theme-card/40 border border-theme-border-soft/50 rounded-xl p-3.5 text-center opacity-40 hover:opacity-70 transition-opacity">
+                          <div className={'w-8 h-8 rounded-lg bg-gradient-to-br ' + item.color + ' text-white flex items-center justify-center mx-auto mb-2 shadow-sm'}><item.icon className="w-4 h-4" /></div>
+                          <p className="text-[11px] font-extrabold text-theme-primary">{item.name}</p>
+                          <p className="text-[8px] text-theme-muted font-semibold">{item.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ============ ADVANCED ============ */}
+          {activeCategory === 'advanced' && (
+            <>
+              {/* Team Management */}
+              <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+                <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Users className="w-5 h-5" /></div>
+                    <div>
+                      <h2 className="section-header-title">Team Management</h2>
+                      <p className="section-header-subtitle">Invite cashiers with limited bill-creation access.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center justify-center py-10 space-y-5">
+                  <div className="w-16 h-16 rounded-2xl bg-theme-accent-light dark:bg-theme-accent-light/20 text-theme-accent flex items-center justify-center"><Users className="w-8 h-8" /></div>
+                  <div className="text-center max-w-sm">
+                    <h3 className="text-sm font-extrabold text-theme-primary">No Team Members Yet</h3>
+                    <p className="text-xs text-theme-muted font-medium mt-1.5 leading-relaxed">Invite cashiers to help manage billing without accessing your dashboard or expenses.</p>
+                  </div>
+                  <button className="btn-premium bg-[image:var(--accent-gradient)] text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md cursor-pointer hover:opacity-90 transition-opacity" onClick={() => alert("Firebase Auth modification required.")}>+ Invite Cashier</button>
+                </div>
+              </div>
+
+              {/* Premium UX */}
+              <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+                <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Smartphone className="w-5 h-5" /></div>
+                    <div>
+                      <h2 className="section-header-title">Premium Mobile UX</h2>
+                      <p className="section-header-subtitle">Toggle haptic feedback and premium sound effects.</p>
+                    </div>
+                  </div>
+                </div>
+                <ToggleSwitch enabled={enableHaptics} onChange={setEnableHaptics} label="Enable Haptic Feedback" description="Vibrate on success, errors, and key actions" />
+                <ToggleSwitch enabled={enableSounds} onChange={setEnableSounds} label="Enable Premium Sounds" description="Play audio cues when bills are saved" />
+              </div>
+
+              {/* Advanced Data Tools */}
+              {isAdmin && (
+                <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn border-theme-danger/20">
+                  <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-theme-danger/10 text-theme-danger flex items-center justify-center shrink-0"><ShieldAlert className="w-5 h-5" /></div>
+                      <div>
+                        <h2 className="section-header-title text-theme-danger">Danger Zone</h2>
+                        <p className="section-header-subtitle">Granular data management tools for administrators.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onClick={() => handleGranularWipe('Invoices')} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-danger/30 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left"><Trash2 className="text-theme-danger" size={24} /><div><div className="font-semibold text-theme-danger">Wipe All Invoices</div><div className="text-xs text-theme-danger/80">Permanently delete all invoice records</div></div></button>
+                    <button onClick={() => handleGranularWipe('Customers')} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-danger/30 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left"><Users className="text-theme-danger" size={24} /><div><div className="font-semibold text-theme-danger">Wipe All Customers</div><div className="text-xs text-theme-danger/80">Permanently delete all customer records</div></div></button>
+                    <button onClick={() => handleGranularWipe('Products')} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-danger/30 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left"><FileText className="text-theme-danger" size={24} /><div><div className="font-semibold text-theme-danger">Wipe All Products</div><div className="text-xs text-theme-danger/80">Permanently delete all product records</div></div></button>
+                    <button onClick={() => handleGranularWipe('Expenses')} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-danger/30 bg-theme-danger/5 hover:bg-theme-danger/10 transition-colors text-left"><CircleDollarSign className="text-theme-danger" size={24} /><div><div className="font-semibold text-theme-danger">Wipe All Expenses</div><div className="text-xs text-theme-danger/80">Permanently delete all expense records</div></div></button>
+                    <button onClick={handleForceSync} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-accent/20 bg-theme-accent/5 hover:bg-theme-accent/10 transition-colors text-left"><RefreshCw className="text-theme-accent" size={24} /><div><div className="font-semibold text-theme-text">Force Cloud Sync</div><div className="text-xs text-theme-text-soft">Sync local data with cloud provider</div></div></button>
+                    <button onClick={handleResetData} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-warning/30 bg-theme-warning/5 hover:bg-theme-warning/10 transition-colors text-left"><RotateCcw className="text-theme-warning" size={24} /><div><div className="font-semibold text-theme-warning">Reset to Demo Data</div><div className="text-xs text-theme-warning/80">Load default demo assets</div></div></button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+        </div>{/* END content area */}
+      </div>{/* END sidebar+content layout */}
+      {/* Reset All Data Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 md:p-8 max-w-md w-full border border-theme-danger/30 shadow-2xl space-y-5">
+            <div className="flex items-center gap-3 border-b border-theme-border-soft pb-4">
+              <div className="w-12 h-12 rounded-xl bg-theme-danger/10 text-theme-danger flex items-center justify-center"><ShieldAlert className="w-6 h-6" /></div>
+              <div>
+                <h3 className="text-lg font-black text-theme-primary">Reset Account Data</h3>
+                <p className="text-[10px] text-theme-danger font-bold uppercase tracking-wider">Danger Zone</p>
+              </div>
+            </div>
+            <p className="text-sm text-theme-muted font-medium leading-relaxed">
+              You are about to permanently wipe all your data including invoices, customers, products, and settings. <strong className="text-theme-primary">This cannot be undone.</strong>
+            </p>
+            <div className="bg-theme-app dark:bg-theme-surface p-4 rounded-2xl border border-theme-border-soft text-xs text-theme-muted font-medium space-y-2">
+              <p>💡 <strong className="text-theme-primary">Recommendation:</strong> Download a full backup before resetting.</p>
+            </div>
+            <div className="flex flex-col gap-3 pt-2">
+              <button type="button" onClick={handleExport} className="btn-premium-outline w-full px-4 py-3 bg-theme-surface border border-theme-border-soft hover:bg-theme-surface/60 text-theme-primary text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-colors">
+                <Download className="w-4 h-4" /> Download Backup Data
+              </button>
+              <button type="button" onClick={() => { if (confirm("Are you absolutely sure you want to delete all data?")) { resetAccountKeepAuth(); } }} className="btn-premium w-full px-4 py-3 bg-theme-danger hover:bg-theme-danger/80 text-white text-sm font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors">
+                <Trash2 className="w-4 h-4" /> Yes, Reset All Data
+              </button>
+              <button type="button" onClick={() => setShowResetModal(false)} className="w-full px-4 py-3 text-theme-muted hover:text-theme-primary text-sm font-bold rounded-xl transition-colors">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sticky Save Button Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 glass border-t border-theme-border-soft px-4 py-3 shadow-2xl">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            {isDirty && (
+              <span className="flex items-center gap-1.5 text-[11px] font-bold text-theme-warning dark:text-theme-warning bg-theme-warning/5 dark:bg-theme-warning/5 px-3 py-1.5 rounded-full border border-theme-warning/30">
+                <AlertCircle className="w-3.5 h-3.5" /> Unsaved changes
+              </span>
+            )}
+            {!isDirty && (
+              <span className="text-[11px] font-bold text-theme-muted px-3 py-1.5">All changes saved</span>
+            )}
+          </div>
+          <button onClick={(e) => { handleSave(e); }} disabled={isSaving} className="btn-premium flex items-center gap-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-black text-xs px-6 py-3 rounded-xl shadow-glow active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+            {isSaving ? (
+              <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /><span>Saving...</span></>
+            ) : (
+              <><Save className="w-4 h-4" /><span>Save Changes</span></>
+            )}
+          </button>
+        </div>
+      </div>
+      </>)}
+    </motion.div>
+  );
+};
+
+export default Settings;
