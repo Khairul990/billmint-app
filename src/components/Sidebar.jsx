@@ -173,7 +173,7 @@ const Sidebar = ({
       </div>
 
       {/* Nav Menu */}
-      <nav className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden no-scrollbar"
+      <nav className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar"
         style={{ padding: isCollapsed ? '8px 8px' : '8px 12px', transition: isMounted ? 'padding 180ms ease' : 'none' }}
       >
         <div className="space-y-0.5">

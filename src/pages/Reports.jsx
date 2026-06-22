@@ -338,6 +338,26 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
         <p className="text-sm">Filter: {dateRange} | Type: {docType} | Status: {paymentStatus}</p>
       </div>
 
+      {/* EXPORT / SUMMARY BAR */}
+      <motion.div variants={staggerItem} className="card-premium p-3 flex items-center justify-between no-print">
+        <div className="flex items-center gap-3">
+          <span className="badge-premium badge-info">{filteredData.length} records</span>
+          {metrics.totalSales > 0 && (
+            <span className="text-2xs text-theme-muted font-bold">
+              Collection: {Math.round((metrics.totalCollected / metrics.totalSales) * 100)}%
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={exportCSV} className="btn-premium-ghost text-[10px] !min-h-[32px] !px-3">
+            <Download className="w-3 h-3" /> CSV
+          </button>
+          <button onClick={handlePrint} className="btn-premium-ghost text-[10px] !min-h-[32px] !px-3">
+            <Printer className="w-3 h-3" /> Print
+          </button>
+        </div>
+      </motion.div>
+
       {/* PREMIUM STATS GRID */}
       <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="stats-grid section-spacing">
         <motion.div variants={staggerItem} className="stat-premium">
@@ -409,6 +429,40 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
             <span className="badge-premium badge-info text-2xs">Best Seller</span>
           </div>
           <p className="text-xl font-black text-theme-primary tracking-tight truncate">{metrics.topItem}</p>
+        </motion.div>
+      </motion.div>
+
+      {/* QUICK INSIGHTS */}
+      <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="stats-grid section-spacing no-print">
+        <motion.div variants={staggerItem} className="stat-premium">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Total Revenue</span>
+            <DollarSign className="w-4 h-4 text-theme-accent" />
+          </div>
+          <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums">{formatCurrency(metrics.totalSales, currencySymbol)}</p>
+        </motion.div>
+        <motion.div variants={staggerItem} className="stat-premium">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Total Invoices</span>
+            <FileText className="w-4 h-4 text-blue-500" />
+          </div>
+          <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums">{metrics.invoiceCount}</p>
+        </motion.div>
+        <motion.div variants={staggerItem} className="stat-premium">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Avg per Invoice</span>
+            <TrendingUp className="w-4 h-4 text-emerald-500" />
+          </div>
+          <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums">{formatCurrency(metrics.avgValue, currencySymbol)}</p>
+        </motion.div>
+        <motion.div variants={staggerItem} className="stat-premium">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide">Collection Rate</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+          </div>
+          <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums">
+            {metrics.totalSales > 0 ? Math.round((metrics.totalCollected / metrics.totalSales) * 100) : 0}%
+          </p>
         </motion.div>
       </motion.div>
 

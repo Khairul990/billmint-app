@@ -24,7 +24,13 @@ import {
   Grid3X3,
   PaintBucket,
   Briefcase,
-  Star
+  Star,
+  User,
+  BarChart3,
+  LayoutDashboard,
+  Lightbulb,
+  X,
+  RotateCcw
 } from 'lucide-react';
 import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
 
@@ -121,8 +127,46 @@ const BRAND_COLORS = [
   { name: 'Crimson', hex: '#C0392B' }
 ];
 
+const THEME_PREVIEWS = [
+  { id: 'obsidian-gold', name: 'Obsidian Gold', gradient: 'from-amber-500 to-yellow-500', color: '#B8860B' },
+  { id: 'arctic-teal', name: 'Arctic Teal', gradient: 'from-teal-500 to-emerald-400', color: '#009E7F' },
+  { id: 'sapphire-noir', name: 'Sapphire Noir', gradient: 'from-blue-600 to-indigo-500', color: '#2563EB' },
+  { id: 'rose-platinum', name: 'Rose Platinum', gradient: 'from-rose-500 to-pink-400', color: '#C75C75' },
+  { id: 'carbon-violet', name: 'Carbon Violet', gradient: 'from-violet-600 to-purple-500', color: '#7C3AFF' },
+  { id: 'emerald-royal', name: 'Emerald Royal', gradient: 'from-emerald-600 to-green-400', color: '#10B981' }
+];
+
+const QUICK_ACTIONS = [
+  { id: 'create-invoice', label: 'Create Invoice', icon: FileText, action: 'invoices', gradient: 'from-blue-500 to-cyan-500' },
+  { id: 'add-customer', label: 'Add Customer', icon: User, action: 'customers', gradient: 'from-emerald-500 to-teal-500' },
+  { id: 'view-reports', label: 'View Reports', icon: BarChart3, action: 'reports', gradient: 'from-violet-500 to-purple-500' },
+  { id: 'go-dashboard', label: 'Go to Dashboard', icon: LayoutDashboard, action: 'dashboard', gradient: 'from-amber-500 to-orange-500' }
+];
+
+const DESIGN_TIPS = [
+  'Use contrasting colors for better readability on invoices.',
+  'Keep your logo resolution high for print-ready PDFs.',
+  'Test your live payment link on mobile before sending.',
+  'Add your business social links to build customer trust.',
+  'Use category-specific templates for professional billing.',
+  'Dark mode reduces eye strain during night billing sessions.',
+  'Preview your invoice before sending to catch any errors.',
+  'Consistent branding across invoices builds recognition.'
+];
+
+const TEMPLATE_CATEGORIES = ['All', 'Retail', 'Embroidery', 'Tailor', 'Clinic', 'Repair'];
+
 const DesignStudio = ({ setCurrentTab }) => {
   const [activeSubTab, setActiveSubTab] = useState('overview');
+  const [templateCategory, setTemplateCategory] = useState('All');
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTipIndex(prev => (prev + 1) % DESIGN_TIPS.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleNavigation = (cta) => {
     setCurrentTab(cta);

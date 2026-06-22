@@ -269,6 +269,57 @@ const Dashboard = ({
   const revenueTrend = getRevenueTrend();
   const paymentBreakdown = getPaymentBreakdown();
 
+  const billsHealth = invoices.length > 0 ? Math.min(100, Math.round((paidCount / invoices.length) * 100)) : 0;
+  const paymentHealth = collectionRate;
+  const customerHealth = totalCustomers > 0 ? Math.min(100, Math.round((newCustomersThisMonth / Math.max(totalCustomers, 1)) * 200)) : 0;
+  const activityHealth = Math.min(100, activities.length * 10);
+  const dueHealth = pendingCollection.length > 0 ? Math.min(100, Math.max(0, 100 - Math.round((totalOverdue / pendingCollection.length) * 100))) : 100;
+  const overallHealth = Math.round((billsHealth + paymentHealth + customerHealth + activityHealth + dueHealth) / 5);
+
+  const getTopCustomers = () => {
+    const customerTotals = {};
+    invoices.forEach(inv => {
+      const name = inv.customerName || 'Walk-in';
+      customerTotals[name] = (customerTotals[name] || 0) + (inv.grandTotal || inv.total || 0);
+    });
+    return Object.entries(customerTotals)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([name, total]) => ({ name, total }));
+  };
+
+  const getDueInNext7Days = () => {
+    const now = new Date();
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    return invoices
+      .filter(inv => {
+        if (inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid') return false;
+        if (!inv.dueDate) return false;
+        const due = new Date(inv.dueDate);
+        return due >= now && due <= nextWeek;
+      })
+      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+  };
+
+  const getBusiestDay = () => {
+    const dayCounts = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
+    invoices.forEach(inv => {
+      const day = new Date(inv.createdAt).toLocaleDateString('en-US', { weekday: 'short' });
+      if (dayCounts[day] !== undefined) dayCounts[day]++;
+    });
+    return Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+  };
+
+  const topCustomers = getTopCustomers();
+  const dueNext7Days = getDueInNext7Days();
+  const busiestDay = getBusiestDay();
+  const avgInvoiceValue = totalRevenue > 0 ? totalRevenue / invoices.length : 0;
+  const collectionTrendData = revenueTrend.map(d => ({
+    ...d,
+    pending: Math.max(0, d.revenue - d.collection)
+  }));
+
   const statusBadge = (status) => {
     const s = (status || '').toLowerCase();
     if (s === 'paid' || s === 'paid') return { label: 'Paid', classes: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };

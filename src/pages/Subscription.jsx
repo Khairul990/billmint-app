@@ -76,6 +76,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
   const [platformNote, setPlatformNote] = useState('');
   const [submittingPlatformProof, setSubmittingPlatformProof] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
+  const [billCount, setBillCount] = useState(10);
 
   const country = businessSettings?.country || 'India';
   const currencySymbol = businessSettings?.currency || '₹';
