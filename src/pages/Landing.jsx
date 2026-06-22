@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { staggerContainer, staggerItem, fadeInUp } from '../utils/animations';
-import { ArrowRight, CheckCircle2, FileSpreadsheet, ShieldCheck, TrendingUp, Users, Sparkles, Download, Link2, Smartphone, Printer, CreditCard, Star, HelpCircle, ChevronDown, MessageCircle, Mail, MapPin, DollarSign, Clock, BarChart3, QrCode, Globe, Zap } from 'lucide-react';
+import { ArrowRight, CheckCircle2, FileSpreadsheet, ShieldCheck, TrendingUp, Users, Sparkles, Download, Link2, Smartphone, Printer, CreditCard, Star, HelpCircle, ChevronDown, MessageCircle, Mail, MapPin, DollarSign, Clock, BarChart3, Globe, Zap } from 'lucide-react';
 import Logo from '../components/Logo';
 
 const Landing = ({ onLoginClick }) => {
@@ -29,18 +29,18 @@ const Landing = ({ onLoginClick }) => {
   ];
 
   const templates = [
-    { name: 'Tailor', icon: '✂️', desc: 'Measurements, stitching, design tracking' },
-    { name: 'Embroidery', icon: '🧵', desc: 'Design no, work type, size, rate per piece' },
-    { name: 'Doctor', icon: '🩺', desc: 'Consultation fees, prescriptions, clinic management' },
-    { name: 'Teacher', icon: '📚', desc: 'Tuition fees, subject-wise billing, monthly tracking' },
-    { name: 'Retail', icon: '🏪', desc: 'Product sales, variants, discounts, stock tracking' },
-    { name: 'Repair', icon: '🔧', desc: 'Service orders, parts cost, labour charges' },
+    { name: 'Tailor', icon: '\u2702\uFE0F', desc: 'Measurements, stitching, design tracking' },
+    { name: 'Embroidery', icon: '\uD83E\uDDF5', desc: 'Design no, work type, size, rate per piece' },
+    { name: 'Doctor', icon: '\uD83E\uDDBA', desc: 'Consultation fees, prescriptions, clinic management' },
+    { name: 'Teacher', icon: '\uD83D\uDCDA', desc: 'Tuition fees, subject-wise billing, monthly tracking' },
+    { name: 'Retail', icon: '\uD83C\uDFEA', desc: 'Product sales, variants, discounts, stock tracking' },
+    { name: 'Repair', icon: '\uD83D\uDD27', desc: 'Service orders, parts cost, labour charges' },
   ];
 
   const pricingPlans = [
-    { name: 'Free', price: '₹0', period: 'forever', features: ['15 invoices', 'Basic PDF', 'Customer management', 'Cloud sync'], cta: 'Get Started', popular: false },
-    { name: 'Premium', price: '₹199', period: '/month', features: ['Unlimited invoices', 'Premium PDF templates', 'Live invoice links', 'Payment proofs', 'WhatsApp sharing', 'Advanced reports', 'Priority support'], cta: 'Start Free Trial', popular: true },
-    { name: 'Lifetime', price: '₹1,999', period: 'one-time', features: ['Everything in Premium', 'All future updates', 'Priority support', 'Early access features', 'Custom branding'], cta: 'Get Lifetime', popular: false },
+    { name: 'Free', price: '\u20B90', period: 'forever', features: ['15 invoices', 'Basic PDF', 'Customer management', 'Cloud sync'], cta: 'Get Started', popular: false },
+    { name: 'Premium', price: '\u20B9199', period: '/month', features: ['Unlimited invoices', 'Premium PDF templates', 'Live invoice links', 'Payment proofs', 'WhatsApp sharing', 'Advanced reports', 'Priority support'], cta: 'Start Free Trial', popular: true },
+    { name: 'Lifetime', price: '\u20B91,999', period: 'one-time', features: ['Everything in Premium', 'All future updates', 'Priority support', 'Early access features', 'Custom branding'], cta: 'Get Lifetime', popular: false },
   ];
 
   const faqs = [
@@ -48,7 +48,7 @@ const Landing = ({ onLoginClick }) => {
     { q: 'Can I use BillQyro offline?', a: 'Absolutely. BillQyro is a Progressive Web App (PWA) that works offline. Create invoices, manage customers, and sync automatically when reconnected.' },
     { q: 'Is my data secure?', a: 'Enterprise-grade security. All data is encrypted in transit and at rest. Firebase authentication and Firestore rules ensure complete data isolation between users.' },
     { q: 'Can customers pay online?', a: 'Yes! Share a live invoice link. Customers can view details, scan QR codes, make payments, and upload payment proof for verification.' },
-    { q: 'What invoice templates are available?', a: 'BillQyro supports Tailor, Embroidery, Doctor, Teacher, Retail, Repair, Grocery, and Custom templates — each with tailored fields.' },
+    { q: 'What invoice templates are available?', a: 'BillQyro supports Tailor, Embroidery, Doctor, Teacher, Retail, Repair, Grocery, and Custom templates \u2014 each with tailored fields.' },
     { q: 'Can I export invoices as PDF?', a: 'Yes. Generate professional A4 or A5 PDF invoices with your logo, business info, QR code, and itemized details.' },
   ];
 
@@ -58,20 +58,21 @@ const Landing = ({ onLoginClick }) => {
       <nav className="glass border-b border-theme-border-soft/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Logo type="horizontal" forceWhiteText={false} />
-          
+
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-6">
             <button onClick={() => scrollTo('features')} className="text-sm font-bold text-theme-muted hover:text-theme-primary transition-colors">Features</button>
+            <button onClick={() => scrollTo('screenshots')} className="text-sm font-bold text-theme-muted hover:text-theme-primary transition-colors">Screenshots</button>
             <button onClick={() => scrollTo('templates')} className="text-sm font-bold text-theme-muted hover:text-theme-primary transition-colors">Templates</button>
             <button onClick={() => scrollTo('pricing')} className="text-sm font-bold text-theme-muted hover:text-theme-primary transition-colors">Pricing</button>
             <button onClick={() => scrollTo('faq')} className="text-sm font-bold text-theme-muted hover:text-theme-primary transition-colors">FAQ</button>
             <button onClick={() => scrollTo('contact')} className="text-sm font-bold text-theme-muted hover:text-theme-primary transition-colors">Contact</button>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <button onClick={onLoginClick} className="text-sm font-bold text-theme-muted hover:text-theme-primary transition-colors hidden sm:block">Log in</button>
             <button onClick={onLoginClick} className="btn-premium px-6 py-2.5 text-sm">Get Started Free</button>
-            
+
             {/* Mobile hamburger */}
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-theme-primary">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -80,11 +81,12 @@ const Landing = ({ onLoginClick }) => {
             </button>
           </div>
         </div>
-        
+
         {/* Mobile Nav */}
         {mobileMenuOpen && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="md:hidden border-t border-theme-border-soft/50 bg-theme-card/95 backdrop-blur-md px-6 py-4 space-y-3">
             <button onClick={() => scrollTo('features')} className="block w-full text-left text-sm font-bold text-theme-primary py-2">Features</button>
+            <button onClick={() => scrollTo('screenshots')} className="block w-full text-left text-sm font-bold text-theme-primary py-2">Screenshots</button>
             <button onClick={() => scrollTo('templates')} className="block w-full text-left text-sm font-bold text-theme-primary py-2">Templates</button>
             <button onClick={() => scrollTo('pricing')} className="block w-full text-left text-sm font-bold text-theme-primary py-2">Pricing</button>
             <button onClick={() => scrollTo('faq')} className="block w-full text-left text-sm font-bold text-theme-primary py-2">FAQ</button>
@@ -161,7 +163,7 @@ const Landing = ({ onLoginClick }) => {
             </div>
             <div className="absolute -bottom-4 -left-4 bg-theme-card p-3 sm:p-4 rounded-2xl border border-theme-border-soft shadow-premium flex items-center gap-3 sm:gap-4" style={{ animation: 'bounce 3s ease-in-out infinite' }}>
               <div className="w-10 h-10 rounded-full bg-theme-accent/10 flex items-center justify-center"><TrendingUp className="w-5 h-5 text-theme-accent" /></div>
-              <div><p className="text-[10px] uppercase font-bold text-theme-muted">Total Revenue</p><p className="text-base sm:text-lg font-black text-theme-primary">₹12,450</p></div>
+              <div><p className="text-[10px] uppercase font-bold text-theme-muted">Total Revenue</p><p className="text-base sm:text-lg font-black text-theme-primary">{'\u20B9'}12,450</p></div>
             </div>
           </motion.div>
         </div>
@@ -187,18 +189,83 @@ const Landing = ({ onLoginClick }) => {
         </div>
       </motion.section>
 
+      {/* ===== SCREENSHOTS ===== */}
+      <motion.section id="screenshots" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Dashboard Preview</span>
+            <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">See BillQyro in <span className="text-gradient-premium">action.</span></h2>
+            <p className="text-theme-muted font-medium max-w-2xl mx-auto">A clean, powerful dashboard that puts you in control of your entire billing workflow.</p>
+          </div>
+          <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="card-premium rounded-3xl overflow-hidden border border-theme-border-soft shadow-2xl bg-theme-card max-w-5xl mx-auto">
+            <div className="aspect-video bg-theme-surface w-full p-3 flex flex-col">
+              <div className="flex gap-1.5 p-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-rose-400"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-theme-warning"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+              </div>
+              <div className="flex-1 bg-theme-app rounded-xl border border-theme-border-soft p-4 sm:p-6 grid grid-cols-3 gap-4">
+                {/* Sidebar */}
+                <div className="col-span-1 space-y-3">
+                  <div className="h-8 w-full bg-theme-surface rounded-lg border border-theme-border-soft"></div>
+                  <div className="h-8 w-full bg-theme-accent/10 rounded-lg border border-theme-accent/20"></div>
+                  <div className="h-8 w-full bg-theme-surface rounded-lg border border-theme-border-soft"></div>
+                  <div className="h-8 w-full bg-theme-surface rounded-lg border border-theme-border-soft"></div>
+                  <div className="h-8 w-full bg-theme-surface rounded-lg border border-theme-border-soft"></div>
+                </div>
+                {/* Main Content */}
+                <div className="col-span-2 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="h-6 w-40 bg-theme-muted/10 rounded"></div>
+                    <div className="h-8 w-28 bg-theme-accent/20 rounded-lg"></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="h-24 bg-theme-surface rounded-xl border border-theme-border-soft p-3 flex flex-col justify-between">
+                      <div className="h-3 w-16 bg-theme-muted/20 rounded"></div>
+                      <div className="h-7 w-28 bg-theme-accent/30 rounded"></div>
+                    </div>
+                    <div className="h-24 bg-theme-surface rounded-xl border border-theme-border-soft p-3 flex flex-col justify-between">
+                      <div className="h-3 w-16 bg-theme-muted/20 rounded"></div>
+                      <div className="h-7 w-24 bg-emerald-400/30 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="flex-1 bg-theme-surface rounded-xl border border-theme-border-soft p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="h-3 w-3 rounded-full bg-theme-accent"></div>
+                      <div className="h-3 w-40 bg-theme-muted/20 rounded"></div>
+                      <div className="h-3 w-20 bg-theme-muted/20 rounded ml-auto"></div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-3 w-full bg-theme-muted/10 rounded"></div>
+                      <div className="h-3 w-5/6 bg-theme-muted/10 rounded"></div>
+                      <div className="h-3 w-4/6 bg-theme-muted/10 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex flex-wrap items-center justify-center gap-6 mt-10 text-theme-muted text-sm font-semibold">
+            <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-theme-accent" /> Real-time revenue tracking</div>
+            <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-theme-accent" /> Invoice status overview</div>
+            <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-theme-accent" /> Client activity feed</div>
+            <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-theme-accent" /> Quick action shortcuts</div>
+          </motion.div>
+        </div>
+      </motion.section>
+
       {/* ===== LIVE LINK SHOWCASE ===== */}
-      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="flex-1">
               <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Live Invoice Link</span>
               <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Share invoices with a <span className="text-gradient-premium">secure link.</span></h2>
-              <p className="text-theme-muted font-medium text-base leading-relaxed mb-8 max-w-xl">Customers can view their invoice online, scan QR codes to pay, and submit payment proof — all without creating an account.</p>
+              <p className="text-theme-muted font-medium text-base leading-relaxed mb-8 max-w-xl">Customers can view their invoice online, scan QR codes to pay, and submit payment proof \u2014 all without creating an account.</p>
               <div className="space-y-4">
                 {[
                   { icon: Link2, text: 'Unique secure link per invoice' },
-                  { icon: QrCode, text: 'UPI / bKash / Nagad QR codes' },
+                  { icon: CreditCard, text: 'UPI / bKash / Nagad QR codes' },
                   { icon: ShieldCheck, text: 'Payment proof upload & verification' },
                   { icon: MessageCircle, text: 'WhatsApp & contact buttons' },
                 ].map((item, i) => (
@@ -210,12 +277,12 @@ const Landing = ({ onLoginClick }) => {
               <div className="card-premium rounded-3xl p-6 shadow-xl">
                 <div className="flex items-center gap-3 mb-4 pb-4 border-b border-theme-border-soft">
                   <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center font-bold text-sm">B</div>
-                  <div><p className="text-sm font-extrabold text-theme-primary">Business Name</p><p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Digital Invoice · INV-2026-0001</p></div>
+                  <div><p className="text-sm font-extrabold text-theme-primary">Business Name</p><p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Digital Invoice {'\u00B7'} INV-2026-0001</p></div>
                   <div className="ml-auto px-3 py-1.5 bg-theme-surface rounded-xl border border-theme-border-soft text-[10px] font-bold flex items-center gap-1"><Download className="w-3 h-3" /> PDF</div>
                 </div>
                 <div className="bg-gradient-to-br from-theme-accent to-theme-accent-dark text-white rounded-2xl p-5 shadow-lg">
                   <p className="text-[9px] font-black uppercase tracking-widest text-white/70">Amount Due</p>
-                  <p className="text-4xl sm:text-5xl font-black mt-1 tracking-tight leading-none">₹1,500</p>
+                  <p className="text-4xl sm:text-5xl font-black mt-1 tracking-tight leading-none">{'\u20B9'}1,500</p>
                   <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-white/15 backdrop-blur-sm rounded-full text-[8px] font-black uppercase tracking-wider">
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Awaiting Payment
                   </div>
@@ -223,7 +290,7 @@ const Landing = ({ onLoginClick }) => {
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <div className="bg-theme-surface rounded-xl p-3 border border-theme-border-soft text-center">
                     <div className="w-16 h-16 mx-auto bg-theme-surface rounded-lg border border-theme-border-soft flex items-center justify-center">
-                      <QrCode className="w-8 h-8 text-theme-muted" />
+                      <CreditCard className="w-8 h-8 text-theme-muted" />
                     </div>
                     <p className="text-[9px] mt-2 font-bold text-theme-muted">Scan to Pay</p>
                   </div>
@@ -239,7 +306,7 @@ const Landing = ({ onLoginClick }) => {
       </motion.section>
 
       {/* ===== PDF SHOWCASE ===== */}
-      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="flex-1 order-2 lg:order-1 w-full">
@@ -257,12 +324,12 @@ const Landing = ({ onLoginClick }) => {
                   <div className="flex bg-theme-surface font-bold p-2 text-theme-muted">
                     <div className="flex-1">Item</div><div className="w-12 text-center">Qty</div><div className="w-16 text-right">Rate</div><div className="w-16 text-right">Amount</div>
                   </div>
-                  <div className="flex p-2 border-t border-theme-border-soft"><div className="flex-1 font-bold text-theme-primary">Product/Service</div><div className="w-12 text-center text-theme-muted">2</div><div className="w-16 text-right text-theme-muted">₹500</div><div className="w-16 text-right font-bold text-theme-primary">₹1,000</div></div>
+                  <div className="flex p-2 border-t border-theme-border-soft"><div className="flex-1 font-bold text-theme-primary">Product/Service</div><div className="w-12 text-center text-theme-muted">2</div><div className="w-16 text-right text-theme-muted">{'\u20B9'}500</div><div className="w-16 text-right font-bold text-theme-primary">{'\u20B9'}1,000</div></div>
                 </div>
                 <div className="text-right space-y-1 text-[10px]">
-                  <div className="flex justify-between"><span className="text-theme-muted">Subtotal</span><span className="font-bold text-theme-primary">₹1,000</span></div>
-                  <div className="flex justify-between"><span className="text-theme-muted">GST (18%)</span><span className="font-bold text-theme-primary">₹180</span></div>
-                  <div className="flex justify-between border-t border-theme-border-soft pt-1"><span className="font-bold text-theme-primary">Grand Total</span><span className="font-bold text-lg text-theme-accent">₹1,180</span></div>
+                  <div className="flex justify-between"><span className="text-theme-muted">Subtotal</span><span className="font-bold text-theme-primary">{'\u20B9'}1,000</span></div>
+                  <div className="flex justify-between"><span className="text-theme-muted">GST (18%)</span><span className="font-bold text-theme-primary">{'\u20B9'}180</span></div>
+                  <div className="flex justify-between border-t border-theme-border-soft pt-1"><span className="font-bold text-theme-primary">Grand Total</span><span className="font-bold text-lg text-theme-accent">{'\u20B9'}1,180</span></div>
                 </div>
               </div>
             </motion.div>
@@ -274,7 +341,7 @@ const Landing = ({ onLoginClick }) => {
                 {[
                   { icon: Printer, text: 'A4 and A5 page sizes' },
                   { icon: FileSpreadsheet, text: '6+ category-specific templates' },
-                  { icon: QrCode, text: 'UPI/bKash/Nagad QR codes on PDF' },
+                  { icon: CreditCard, text: 'UPI/bKash/Nagad QR codes on PDF' },
                   { icon: Download, text: 'Professional filename: Invoice_Number_Business_Date.pdf' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0"><item.icon className="w-4 h-4" /></div><p className="text-sm font-bold text-theme-primary">{item.text}</p></div>
@@ -286,7 +353,7 @@ const Landing = ({ onLoginClick }) => {
       </motion.section>
 
       {/* ===== TEMPLATES ===== */}
-      <motion.section id="templates" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
+      <motion.section id="templates" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Category Templates</span>
@@ -306,14 +373,14 @@ const Landing = ({ onLoginClick }) => {
       </motion.section>
 
       {/* ===== STATS ===== */}
-      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-16">
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-16">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {[
               { number: '10K+', label: 'Invoices Generated', icon: FileSpreadsheet },
               { number: '500+', label: 'Active Businesses', icon: Users },
               { number: '99.9%', label: 'Uptime Guarantee', icon: ShieldCheck },
-              { number: '₹2Cr+', label: 'Invoices Processed', icon: TrendingUp },
+              { number: '\u20B92Cr+', label: 'Invoices Processed', icon: TrendingUp },
             ].map((stat, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="text-center stat-premium rounded-2xl">
                 <div className="w-12 h-12 rounded-2xl bg-theme-accent/10 text-theme-accent flex items-center justify-center mx-auto mb-3"><stat.icon className="w-6 h-6" /></div>
@@ -326,7 +393,7 @@ const Landing = ({ onLoginClick }) => {
       </motion.section>
 
       {/* ===== TESTIMONIALS ===== */}
-      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Testimonials</span>
@@ -350,7 +417,7 @@ const Landing = ({ onLoginClick }) => {
                   <div className="w-10 h-10 rounded-full bg-[image:var(--accent-gradient)] flex items-center justify-center text-white text-xs font-black">{t.avatar}</div>
                   <div>
                     <p className="text-sm font-bold text-theme-primary">{t.name}</p>
-                    <p className="text-xs text-theme-muted font-medium">{t.role} • {t.location}</p>
+                    <p className="text-xs text-theme-muted font-medium">{t.role} {'\u2022'} {t.location}</p>
                   </div>
                 </div>
               </motion.div>
@@ -360,7 +427,7 @@ const Landing = ({ onLoginClick }) => {
       </motion.section>
 
       {/* ===== CUSTOMER BENEFITS ===== */}
-      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Why Choose BillQyro</span>
@@ -389,7 +456,7 @@ const Landing = ({ onLoginClick }) => {
       </motion.section>
 
       {/* ===== PRICING ===== */}
-      <motion.section id="pricing" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
+      <motion.section id="pricing" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Simple Pricing</span>
@@ -424,7 +491,7 @@ const Landing = ({ onLoginClick }) => {
       </motion.section>
 
       {/* ===== FAQ ===== */}
-      <motion.section id="faq" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
+      <motion.section id="faq" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
         <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-12">
             <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">FAQ</span>
@@ -447,7 +514,7 @@ const Landing = ({ onLoginClick }) => {
       </motion.section>
 
       {/* ===== CTA ===== */}
-      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
+      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Get Started</span>
@@ -457,15 +524,15 @@ const Landing = ({ onLoginClick }) => {
               Get Started Free
               <ArrowRight className="w-5 h-5" />
             </button>
-            <p className="text-xs text-theme-muted font-semibold mt-4">No credit card required · 15 free invoices · Cancel anytime</p>
+            <p className="text-xs text-theme-muted font-semibold mt-4">No credit card required {'\u00B7'} 15 free invoices {'\u00B7'} Cancel anytime</p>
           </motion.div>
         </div>
       </motion.section>
 
       {/* ===== CONTACT ===== */}
-      <section id="contact" className="border-t border-theme-border-soft bg-theme-surface py-16">
+      <section id="contact" className="border-t border-theme-border-soft py-16 bg-theme-app">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
               <h3 className="text-base font-black text-theme-primary mb-4">Contact</h3>
               <div className="space-y-3 text-sm text-theme-muted font-medium">
@@ -473,32 +540,67 @@ const Landing = ({ onLoginClick }) => {
                 <div className="flex items-center gap-2"><MessageCircle className="w-4 h-4 text-theme-accent" /> WhatsApp: +91 98765 43210</div>
                 <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-theme-accent" /> BillQyro Technologies, India</div>
               </div>
+              <div className="mt-6">
+                <h3 className="text-base font-black text-theme-primary mb-4">Send a Message</h3>
+                <div className="space-y-3">
+                  <input type="text" placeholder="Your name" className="w-full px-4 py-2.5 rounded-xl bg-theme-surface border border-theme-border-soft text-sm text-theme-primary placeholder-theme-muted/50 font-medium focus:outline-none focus:border-theme-accent/50 transition-colors" />
+                  <input type="email" placeholder="Your email" className="w-full px-4 py-2.5 rounded-xl bg-theme-surface border border-theme-border-soft text-sm text-theme-primary placeholder-theme-muted/50 font-medium focus:outline-none focus:border-theme-accent/50 transition-colors" />
+                  <textarea rows={3} placeholder="Your message" className="w-full px-4 py-2.5 rounded-xl bg-theme-surface border border-theme-border-soft text-sm text-theme-primary placeholder-theme-muted/50 font-medium focus:outline-none focus:border-theme-accent/50 transition-colors resize-none"></textarea>
+                  <button className="btn-premium w-full py-3 text-sm justify-center">Send Message</button>
+                </div>
+              </div>
             </div>
             <div>
               <h3 className="text-base font-black text-theme-primary mb-4">Product</h3>
               <div className="space-y-2 text-sm text-theme-muted font-medium">
                 <button onClick={() => scrollTo('features')} className="block hover:text-theme-accent transition-colors">Features</button>
+                <button onClick={() => scrollTo('screenshots')} className="block hover:text-theme-accent transition-colors">Screenshots</button>
                 <button onClick={() => scrollTo('templates')} className="block hover:text-theme-accent transition-colors">Templates</button>
                 <button onClick={() => scrollTo('pricing')} className="block hover:text-theme-accent transition-colors">Pricing</button>
                 <button onClick={() => scrollTo('faq')} className="block hover:text-theme-accent transition-colors">FAQ</button>
               </div>
             </div>
             <div>
+              <h3 className="text-base font-black text-theme-primary mb-4">Company</h3>
+              <div className="space-y-2 text-sm text-theme-muted font-medium">
+                <button className="block hover:text-theme-accent transition-colors">About Us</button>
+                <button className="block hover:text-theme-accent transition-colors">Blog</button>
+                <button className="block hover:text-theme-accent transition-colors">Careers</button>
+                <button className="block hover:text-theme-accent transition-colors">Press Kit</button>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-base font-black text-theme-primary mb-4">Support</h3>
+              <div className="space-y-2 text-sm text-theme-muted font-medium">
+                <button className="block hover:text-theme-accent transition-colors">Help Center</button>
+                <button className="block hover:text-theme-accent transition-colors">Documentation</button>
+                <button className="block hover:text-theme-accent transition-colors">API Reference</button>
+                <button className="block hover:text-theme-accent transition-colors">Status Page</button>
+              </div>
+            </div>
+          </div>
+          <div className="mt-12 pt-8 border-t border-theme-border-soft grid md:grid-cols-2 gap-4">
+            <div>
               <h3 className="text-base font-black text-theme-primary mb-4">Legal</h3>
               <div className="space-y-2 text-sm text-theme-muted font-medium">
                 <button onClick={() => window.open('/privacy', '_blank')} className="block hover:text-theme-accent transition-colors">Privacy Policy</button>
                 <button onClick={() => window.open('/terms', '_blank')} className="block hover:text-theme-accent transition-colors">Terms of Service</button>
                 <button onClick={() => window.open('/refund', '_blank')} className="block hover:text-theme-accent transition-colors">Refund Policy</button>
+                <button onClick={() => window.open('/gdpr', '_blank')} className="block hover:text-theme-accent transition-colors">GDPR Compliance</button>
               </div>
+            </div>
+            <div className="md:text-right">
+              <p className="text-xs text-theme-muted font-semibold mb-1">{'\u00A9'} {new Date().getFullYear()} BillQyro Inc. All rights reserved.</p>
+              <p className="text-xs text-theme-muted/60 font-medium">Made with <Sparkles className="w-3 h-3 inline text-theme-accent" /> for modern businesses.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ===== FOOTER ===== */}
-      <footer className="border-t border-theme-border-soft py-8 bg-theme-app text-center">
+      <footer className="border-t border-theme-border-soft py-8 bg-theme-surface text-center">
         <Logo type="horizontal" forceWhiteText={false} />
-        <p className="text-theme-muted text-xs font-semibold mt-4">© {new Date().getFullYear()} BillQyro Inc. All rights reserved.</p>
+        <p className="text-theme-muted text-xs font-semibold mt-4">{'\u00A9'} {new Date().getFullYear()} BillQyro Inc. All rights reserved.</p>
       </footer>
     </div>
   );

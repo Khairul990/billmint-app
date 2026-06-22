@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Palette,
   FileText,
@@ -180,12 +180,27 @@ const ALL_THEMES = [
 
 const THEME_CATEGORIES = ['All', 'Light', 'Dark', 'Premium', 'Business'];
 
+const TEMPLATE_COMPARISON_FEATURES = [
+  { feature: 'Watermark Support', pdf: false, link: true },
+  { feature: 'Logo Placement', pdf: true, link: true },
+  { feature: 'Custom Colors', pdf: true, link: true },
+  { feature: 'QR Code', pdf: true, link: true },
+  { feature: 'Multiple Pages', pdf: true, link: false },
+  { feature: 'Payment Links', pdf: false, link: true },
+  { feature: 'Mobile Optimized', pdf: false, link: true },
+  { feature: 'A4 / A5 Sizes', pdf: true, link: false },
+  { feature: 'Print Ready', pdf: true, link: false },
+  { feature: 'Shareable URL', pdf: false, link: true }
+];
+
 const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
   const [activeSubTab, setActiveSubTab] = useState('overview');
   const [templateCategory, setTemplateCategory] = useState('All');
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [businessFilter, setBusinessFilter] = useState('All');
+  const [showCompare, setShowCompare] = useState(false);
   const [favoriteThemes, setFavoriteThemes] = useState(() => {
     try { return JSON.parse(localStorage.getItem('billqyro_design_favorites') || '[]'); } catch { return []; }
   });
@@ -207,6 +222,15 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
 
   const handleNavigation = (cta) => {
     setCurrentTab(cta);
+  };
+
+  const logActivity = (action, detail) => {
+    try {
+      const raw = localStorage.getItem('billqyro_design_activity');
+      const activities = raw ? JSON.parse(raw) : [];
+      activities.unshift({ action, detail, time: Date.now() });
+      localStorage.setItem('billqyro_design_activity', JSON.stringify(activities.slice(0, 20)));
+    } catch {}
   };
 
   return (
@@ -252,25 +276,27 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
         </p>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex gap-1.5 bg-theme-card/60 rounded-2xl p-1.5 border border-theme-border-soft max-w-xl">
-        {SUB_TABS.map((tab) => {
-          const TabIcon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all ${
-                activeSubTab === tab.id
-                  ? 'bg-theme-accent text-white shadow-md shadow-theme-accent/30'
-                  : 'text-theme-muted hover:text-theme-primary hover:bg-theme-card'
-              }`}
-            >
-              <TabIcon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          );
-        })}
+      {/* Glass Pill-Style Tab Navigation */}
+      <div className="glass rounded-2xl p-1.5 border border-theme-border-soft overflow-x-auto hide-scrollbar">
+        <div className="flex gap-1.5 min-w-max md:min-w-0">
+          {SUB_TABS.map((tab) => {
+            const TabIcon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveSubTab(tab.id)}
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-200 whitespace-nowrap ${
+                  activeSubTab === tab.id
+                    ? 'bg-theme-accent text-white shadow-md shadow-theme-accent/30 scale-105'
+                    : 'text-theme-muted hover:text-theme-primary hover:bg-theme-card/80'
+                }`}
+              >
+                <TabIcon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* RECENT ACTIVITY */}
@@ -443,16 +469,32 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
           transition={{ duration: 0.2 }}
           className="space-y-5"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">Theme Studio</h2>
               <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Browse, preview, and apply premium color themes</p>
             </div>
-            <button onClick={() => handleNavigation('settings')} className="btn-premium text-[10px] px-4 py-2">
-              <Palette className="w-3.5 h-3.5" />
-              All Themes
-            </button>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search themes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-40 md:w-48 px-3 py-2 pl-8 rounded-xl bg-theme-card border border-theme-border-soft text-[10px] font-semibold text-theme-primary placeholder:text-theme-muted/50 focus:outline-none focus:border-theme-accent/50 transition-all"
+                />
+                <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <button onClick={() => handleNavigation('settings')} className="btn-premium text-[10px] px-4 py-2">
+                <Palette className="w-3.5 h-3.5" />
+                All Themes
+              </button>
+            </div>
           </div>
+
+          {/* Category Filter Chips */}
           <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
             {THEME_CATEGORIES.map((cat) => (
               <button
@@ -468,6 +510,25 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
               </button>
             ))}
           </div>
+
+          {/* Color Swatches Section */}
+          <div className="card-premium p-4">
+            <div className="section-header mb-3">
+              <h3 className="section-header-title">Color Swatches</h3>
+              <span className="badge-premium badge-info">{BRAND_COLORS.length} colors</span>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {BRAND_COLORS.map((c) => (
+                <div key={c.hex} className="flex items-center gap-2 bg-theme-app rounded-xl px-3 py-2 border border-theme-border-soft">
+                  <div className="w-6 h-6 rounded-lg shadow-sm border border-white/10" style={{ backgroundColor: c.hex }} />
+                  <span className="text-[10px] font-bold text-theme-primary">{c.name}</span>
+                  <span className="text-[8px] font-mono text-theme-muted">{c.hex}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Theme Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {ALL_THEMES.filter(t => (activeCategory === 'All' || t.category === activeCategory) && (searchQuery === '' || t.name.toLowerCase().includes(searchQuery.toLowerCase()))).map((theme) => (
               <motion.button
@@ -476,6 +537,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
                 whileTap={{ scale: 0.97 }}
                 onClick={() => {
                   toggleFavorite(theme.id);
+                  logActivity('Theme favorited', theme.name);
                 }}
                 className="card-premium p-4 flex flex-col items-center gap-2 cursor-pointer group relative"
               >
@@ -483,19 +545,38 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
                 <span className="text-[9px] font-bold text-theme-primary text-center leading-tight mt-1">{theme.name}</span>
                 <span className="text-[7px] font-bold text-theme-muted uppercase tracking-wider">{theme.category}</span>
                 {favoriteThemes.includes(theme.id) && (
-                  <div className="absolute top-2 right-2 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center">
+                  <div className="absolute top-2 right-2 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center shadow-sm">
                     <Star className="w-2.5 h-2.5 text-white" />
                   </div>
                 )}
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleFavorite(theme.id); }}
-                  className={`absolute top-2 left-2 p-1 rounded-full transition-all ${favoriteThemes.includes(theme.id) ? 'text-amber-500' : 'text-theme-muted opacity-0 group-hover:opacity-100'}`}
+                  className={`absolute top-2 left-2 p-1 rounded-full transition-all ${
+                    favoriteThemes.includes(theme.id)
+                      ? 'text-amber-500 bg-amber-500/10'
+                      : 'text-theme-muted opacity-0 group-hover:opacity-100'
+                  }`}
                 >
                   <Star className="w-3 h-3" />
                 </button>
               </motion.button>
             ))}
           </div>
+          {ALL_THEMES.filter(t => (activeCategory === 'All' || t.category === activeCategory) && (searchQuery === '' || t.name.toLowerCase().includes(searchQuery.toLowerCase()))).length === 0 && (
+            <div className="empty-state py-8">
+              <div className="empty-state-icon">
+                <Palette className="w-6 h-6" />
+              </div>
+              <p className="empty-state-title">No themes found</p>
+              <p className="empty-state-text">Try adjusting your search or filter criteria.</p>
+              <button
+                onClick={() => { setSearchQuery(''); setActiveCategory('All'); }}
+                className="btn-premium text-[10px] mt-2"
+              >
+                <RotateCcw className="w-3 h-3" /> Reset Filters
+              </button>
+            </div>
+          )}
         </motion.div>
       )}
 
@@ -508,18 +589,79 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
           transition={{ duration: 0.2 }}
           className="space-y-5"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">PDF Templates</h2>
               <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Design professional invoice PDFs</p>
             </div>
             <div className="flex gap-2">
+              <button
+                onClick={() => setShowCompare(!showCompare)}
+                className={`btn-premium text-[10px] px-4 py-2 ${showCompare ? 'bg-theme-accent text-white' : ''}`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                Compare
+              </button>
               <button onClick={() => handleNavigation('pdf-templates')} className="btn-premium text-[10px] px-4 py-2">
                 <FileText className="w-3.5 h-3.5" />
                 Open Studio
               </button>
             </div>
           </div>
+
+          {/* Template Comparison View */}
+          {showCompare && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="card-premium p-5 overflow-hidden"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Feature Comparison</h3>
+                <button onClick={() => setShowCompare(false)} className="text-theme-muted hover:text-theme-primary transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="overflow-x-auto hide-scrollbar">
+                <table className="w-full text-left text-[10px]">
+                  <thead>
+                    <tr className="border-b border-theme-border-soft">
+                      <th className="py-2 pr-4 font-black text-theme-primary uppercase tracking-wider">Feature</th>
+                      <th className="py-2 px-4 font-black text-theme-primary uppercase tracking-wider text-center">
+                        <FileText className="w-3.5 h-3.5 inline-block mr-1" />PDF
+                      </th>
+                      <th className="py-2 px-4 font-black text-theme-primary uppercase tracking-wider text-center">
+                        <Globe className="w-3.5 h-3.5 inline-block mr-1" />Live Link
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {TEMPLATE_COMPARISON_FEATURES.map((item) => (
+                      <tr key={item.feature} className="border-b border-theme-border-soft/50">
+                        <td className="py-2.5 pr-4 font-semibold text-theme-primary">{item.feature}</td>
+                        <td className="py-2.5 px-4 text-center">
+                          {item.pdf ? (
+                            <CheckCircle2 className="w-4 h-4 text-theme-success mx-auto" />
+                          ) : (
+                            <X className="w-4 h-4 text-theme-muted/40 mx-auto" />
+                          )}
+                        </td>
+                        <td className="py-2.5 px-4 text-center">
+                          {item.link ? (
+                            <CheckCircle2 className="w-4 h-4 text-theme-success mx-auto" />
+                          ) : (
+                            <X className="w-4 h-4 text-theme-muted/40 mx-auto" />
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {TEMPLATE_PREVIEWS.filter(t => t.type === 'PDF').map((tpl) => {
               const TplIcon = tpl.icon;
@@ -569,16 +711,79 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
           transition={{ duration: 0.2 }}
           className="space-y-5"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">Live Link Templates</h2>
               <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Beautiful payment links for your customers</p>
             </div>
-            <button onClick={() => handleNavigation('live-link-templates')} className="btn-premium text-[10px] px-4 py-2">
-              <Globe className="w-3.5 h-3.5" />
-              Open Studio
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowCompare(!showCompare)}
+                className={`btn-premium text-[10px] px-4 py-2 ${showCompare ? 'bg-theme-accent text-white' : ''}`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                Compare
+              </button>
+              <button onClick={() => handleNavigation('live-link-templates')} className="btn-premium text-[10px] px-4 py-2">
+                <Globe className="w-3.5 h-3.5" />
+                Open Studio
+              </button>
+            </div>
           </div>
+
+          {/* Comparison View for Live Link */}
+          {showCompare && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="card-premium p-5 overflow-hidden"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Feature Comparison</h3>
+                <button onClick={() => setShowCompare(false)} className="text-theme-muted hover:text-theme-primary transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="overflow-x-auto hide-scrollbar">
+                <table className="w-full text-left text-[10px]">
+                  <thead>
+                    <tr className="border-b border-theme-border-soft">
+                      <th className="py-2 pr-4 font-black text-theme-primary uppercase tracking-wider">Feature</th>
+                      <th className="py-2 px-4 font-black text-theme-primary uppercase tracking-wider text-center">
+                        <FileText className="w-3.5 h-3.5 inline-block mr-1" />PDF
+                      </th>
+                      <th className="py-2 px-4 font-black text-theme-primary uppercase tracking-wider text-center">
+                        <Globe className="w-3.5 h-3.5 inline-block mr-1" />Live Link
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {TEMPLATE_COMPARISON_FEATURES.map((item) => (
+                      <tr key={item.feature} className="border-b border-theme-border-soft/50">
+                        <td className="py-2.5 pr-4 font-semibold text-theme-primary">{item.feature}</td>
+                        <td className="py-2.5 px-4 text-center">
+                          {item.pdf ? (
+                            <CheckCircle2 className="w-4 h-4 text-theme-success mx-auto" />
+                          ) : (
+                            <X className="w-4 h-4 text-theme-muted/40 mx-auto" />
+                          )}
+                        </td>
+                        <td className="py-2.5 px-4 text-center">
+                          {item.link ? (
+                            <CheckCircle2 className="w-4 h-4 text-theme-success mx-auto" />
+                          ) : (
+                            <X className="w-4 h-4 text-theme-muted/40 mx-auto" />
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {TEMPLATE_PREVIEWS.filter(t => t.type === 'Live Link').map((tpl) => {
               const TplIcon = tpl.icon;
@@ -626,7 +831,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
           transition={{ duration: 0.2 }}
           className="space-y-5"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">Brand Identity</h2>
               <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Manage your business look and feel</p>
@@ -693,7 +898,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
           transition={{ duration: 0.2 }}
           className="space-y-5"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">Business Presets</h2>
               <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Templates and workflows tailored to your industry</p>
@@ -703,8 +908,37 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
               Marketplace
             </button>
           </div>
+
+          {/* Business Category Filter Chips */}
+          <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+            <button
+              onClick={() => setBusinessFilter('All')}
+              className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
+                businessFilter === 'All'
+                  ? 'bg-theme-accent text-white shadow-md shadow-theme-accent/30'
+                  : 'bg-theme-card text-theme-muted hover:text-theme-primary border border-theme-border-soft'
+              }`}
+            >
+              All
+            </button>
+            {BUSINESS_CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setBusinessFilter(cat.id)}
+                className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                  businessFilter === cat.id
+                    ? 'bg-theme-accent text-white shadow-md shadow-theme-accent/30'
+                    : 'bg-theme-card text-theme-muted hover:text-theme-primary border border-theme-border-soft'
+                }`}
+              >
+                <cat.icon className="w-3 h-3" />
+                {cat.name.split(' / ')[0]}
+              </button>
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-            {BUSINESS_CATEGORIES.map((cat) => {
+            {BUSINESS_CATEGORIES.filter(cat => businessFilter === 'All' || cat.id === businessFilter).map((cat) => {
               const CatIcon = cat.icon;
               return (
                 <motion.div
@@ -728,7 +962,6 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
           </div>
         </motion.div>
       )}
-
 
       {/* Quick Stats */}
       <motion.div
@@ -791,7 +1024,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
         </div>
       </div>
 
-      {/* Design Tips */}
+      {/* Design Tips Rotating Carousel */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -808,15 +1041,29 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
               {currentTipIndex + 1}/{DESIGN_TIPS.length}
             </span>
           </div>
-          <motion.p
-            key={currentTipIndex}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-            className="text-[11px] font-semibold text-theme-muted leading-relaxed"
-          >
-            {DESIGN_TIPS[currentTipIndex]}
-          </motion.p>
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={currentTipIndex}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.3 }}
+              className="text-[11px] font-semibold text-theme-muted leading-relaxed"
+            >
+              {DESIGN_TIPS[currentTipIndex]}
+            </motion.p>
+          </AnimatePresence>
+        </div>
+        <div className="flex items-center gap-1">
+          {DESIGN_TIPS.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentTipIndex(idx)}
+              className={`w-1.5 h-1.5 rounded-full transition-all ${
+                idx === currentTipIndex ? 'bg-theme-accent w-3' : 'bg-theme-muted/30'
+              }`}
+            />
+          ))}
         </div>
         <button
           onClick={() => setCurrentTipIndex(prev => (prev + 1) % DESIGN_TIPS.length)}

@@ -8,7 +8,8 @@ import {
   BarChart3, RefreshCw, MoreHorizontal, Eye, Download,
   Search, Link, Camera, FileSpreadsheet, ListChecks,
   AlertTriangle, ChevronRight, Circle, Briefcase,
-  Zap, Target, Percent, Building2, Smartphone, Globe
+  Zap, Target, Percent, Building2, Smartphone, Globe,
+  ArrowUpRight, ArrowDownRight, Timer, TrendingDown
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid } from 'recharts';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -73,7 +74,6 @@ const Dashboard = ({
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    // Simulate initial loading for the skeleton effect
     const timer = setTimeout(() => setIsInitialLoad(false), 800);
     return () => clearTimeout(timer);
   }, []);
@@ -323,7 +323,7 @@ const Dashboard = ({
 
   const statusBadge = (status) => {
     const s = (status || '').toLowerCase();
-    if (s === 'paid' || s === 'paid') return { label: 'Paid', classes: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+    if (s === 'paid') return { label: 'Paid', classes: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
     if (s === 'partial' || s === 'partially paid') return { label: 'Partial', classes: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
     return { label: 'Due', classes: 'bg-red-500/10 text-red-500 border-red-500/20' };
   };
@@ -386,21 +386,21 @@ const Dashboard = ({
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.05 }
+      transition: { staggerChildren: 0.04 }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
+    hidden: { opacity: 0, y: 12 },
     visible: { opacity: 1, y: 0 }
   };
 
   return (
     <AnimatedPage>
       <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
-        <div>
+        <div className="min-h-screen bg-theme-surface/50">
         {/* ===== MOBILE VIEW (< 1024px) ===== */}
-        <div className="lg:hidden px-3 sm:px-4 max-w-2xl mx-auto space-y-3 pb-4">
+        <div className="lg:hidden px-3 sm:px-4 max-w-2xl mx-auto space-y-3 pb-4 pt-2">
           {pendingPaymentsCount > 0 && (
             <motion.button
               initial={{ opacity: 0, y: -10 }}
@@ -524,7 +524,7 @@ const Dashboard = ({
 
           {/* ===== MOBILE WELCOME AREA ===== */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass p-4 rounded-2xl">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-black text-theme-primary">
                   <span>{greeting.icon}</span> {greeting.text}, {businessSettings?.ownerName?.split(' ')[0] || 'there'}!
@@ -560,14 +560,16 @@ const Dashboard = ({
               <span className="text-[9px] font-black text-theme-primary shrink-0 tabular-nums">{overallHealth}/100</span>
             </div>
           </div>
+
+          {/* ===== MOBILE COLLECTION CENTER ===== */}
           <div className="grid grid-cols-2 gap-3">
             <div className="card-premium p-4 flex flex-col justify-center">
-              <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-2">Collection</p>
+              <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-2">Collection Rate</p>
               <p className="text-2xl font-black text-theme-primary tabular-nums">{collectionRate}%</p>
               <div className="w-full h-2 bg-theme-surface rounded-full overflow-hidden mt-2">
                 <div className={`h-full rounded-full ${collectionRate >= 70 ? 'bg-emerald-500' : collectionRate >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${collectionRate}%` }} />
               </div>
-              <p className="text-[9px] text-theme-muted font-medium mt-1.5">{formatCurrency(totalCollected)} collected</p>
+              <p className="text-[9px] text-theme-muted font-medium mt-1.5">{formatCurrency(totalCollected)} collected of {formatCurrency(totalRevenue)}</p>
             </div>
             <div className="card-premium p-4 flex flex-col justify-center">
               <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-2">Collection Trend</p>
@@ -586,18 +588,71 @@ const Dashboard = ({
             </div>
           </div>
 
+          {/* ===== MOBILE PAYMENT BREAKDOWN + REVENUE TREND ===== */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="card-premium p-4">
+              <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-3">Payment Split</p>
+              <div className="h-28 w-full">
+                {paymentBreakdown.every(p => p.value === 0) ? (
+                  <p className="text-[9px] text-theme-muted font-medium">No data</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={paymentBreakdown} cx="50%" cy="50%" innerRadius={24} outerRadius={38} paddingAngle={3} dataKey="value" stroke="none">
+                        {paymentBreakdown.map((entry, idx) => (
+                          <Cell key={idx} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border-soft)', borderRadius: '8px', fontSize: '10px' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+              <div className="flex items-center justify-center gap-2 mt-1">
+                {paymentBreakdown.filter(p => p.value > 0).map((e, i) => (
+                  <span key={i} className="flex items-center gap-1 text-[7px] font-bold text-theme-muted">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: e.color }} />{e.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="card-premium p-4">
+              <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-3">Revenue Trend</p>
+              <div className="h-28 w-full">
+                {revenueTrend.length === 0 ? (
+                  <p className="text-[9px] text-theme-muted font-medium">No data</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={revenueTrend}>
+                      <defs>
+                        <linearGradient id="revTrendMob" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="var(--theme-accent)" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="var(--theme-accent)" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <Area type="monotone" dataKey="revenue" stroke="var(--theme-accent)" strokeWidth={2} fill="url(#revTrendMob)" />
+                      <Tooltip contentStyle={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border-soft)', borderRadius: '8px', fontSize: '10px' }} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* ===== MOBILE RECENT PAYMENTS ===== */}
           <div className="card-premium p-4">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-extrabold text-theme-primary">Recent Payments</h3>
               {recentPayments.length > 5 && (
                 <button onClick={() => setCurrentTab('due-ledger')} className="text-[9px] font-bold text-theme-accent">View All</button>
               )}
             </div>
             {recentPayments.length === 0 ? (
-              <p className="text-[11px] text-theme-muted font-medium">No payments yet.</p>
+              <div className="p-3 bg-theme-surface rounded-xl text-center">
+                <p className="text-[11px] text-theme-muted font-medium">No payments recorded yet.</p>
+              </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {recentPayments.slice(0, 5).map((payment, idx) => {
                   const badge = statusBadge(payment.paymentStatus);
                   return (
@@ -622,15 +677,13 @@ const Dashboard = ({
             )}
           </div>
 
+          {/* ===== MOBILE RECENT INVOICES ===== */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-base font-extrabold text-theme-primary tracking-tight">
-                Recent {invoiceLabel}
-              </h2>
+              <h2 className="text-base font-extrabold text-theme-primary tracking-tight">Recent {invoiceLabel}</h2>
               {invoices.length > 5 && (
                 <button onClick={() => setCurrentTab('invoices')} className="flex items-center gap-1 text-[10px] font-bold text-theme-accent">
-                  View All
-                  <ArrowRight className="w-3 h-3" />
+                  View All <ArrowRight className="w-3 h-3" />
                 </button>
               )}
             </div>
@@ -668,9 +721,7 @@ const Dashboard = ({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-theme-primary truncate">
-                          {inv.customerName || 'Walk-in Customer'}
-                        </p>
+                        <p className="text-sm font-bold text-theme-primary truncate">{inv.customerName || 'Walk-in Customer'}</p>
                         <p className="text-[10px] text-theme-muted font-semibold mt-0.5">
                           {formatShortDate(inv.createdAt)} • {inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`}
                         </p>
@@ -691,14 +742,14 @@ const Dashboard = ({
           {/* ===== MOBILE TOP CUSTOMERS ===== */}
           {topCustomers.length > 0 && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-premium p-4">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xs font-extrabold text-theme-primary">Top Customers</h3>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {topCustomers.slice(0, 5).map((c, i) => (
                   <div key={c.name} className="flex items-center justify-between p-2 bg-theme-surface rounded-xl">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-5 h-5 rounded-full bg-theme-accent/10 text-theme-accent text-[8px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
+                      <span className={`w-5 h-5 rounded-full text-[8px] font-black flex items-center justify-center shrink-0 ${i === 0 ? 'bg-amber-500/20 text-amber-500' : 'bg-theme-accent/10 text-theme-accent'}`}>{i + 1}</span>
                       <span className="text-[10px] font-bold text-theme-primary truncate">{c.name}</span>
                     </div>
                     <span className="text-[10px] font-black text-theme-primary tabular-nums">{formatCurrency(c.total)}</span>
@@ -711,7 +762,7 @@ const Dashboard = ({
           {/* ===== MOBILE DUE OVERVIEW ===== */}
           {dueNext7Days.length > 0 && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-premium p-4">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xs font-extrabold text-theme-primary">Due in Next 7 Days</h3>
                 <span className="text-[9px] font-bold text-amber-500">{dueNext7Days.length} bills</span>
               </div>
@@ -731,7 +782,7 @@ const Dashboard = ({
 
           {/* ===== MOBILE CUSTOMER INSIGHTS ===== */}
           <div className="card-premium p-4">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-extrabold text-theme-primary">Customer Insights</h3>
               <button onClick={() => setCurrentTab('customers')} className="text-[9px] font-bold text-theme-accent flex items-center gap-0.5">
                 View <ChevronRight className="w-3 h-3" />
@@ -776,50 +827,63 @@ const Dashboard = ({
             </div>
           </motion.div>
 
+          {/* ===== MOBILE ACTIVITY FEED ===== */}
+          <div className="card-premium p-4">
+            <h3 className="text-xs font-extrabold text-theme-primary mb-2">Recent Activity</h3>
+            <div className="-mx-4">
+              <ActivityFeed activities={activities} maxItems={4} />
+            </div>
+          </div>
+
           {/* ===== MOBILE WORKSPACE INFO ===== */}
           <div className="card-premium p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-extrabold text-theme-primary">Workspace</h3>
               <span className="badge-premium text-[8px]">{enabledModulesCount} modules</span>
             </div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[9px] text-theme-muted font-semibold">Name</span>
-              <span className="text-[9px] font-bold text-theme-primary">{workspaceName}</span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-2 bg-theme-surface rounded-lg">
+                <span className="text-[9px] text-theme-muted font-semibold">Name</span>
+                <span className="text-[9px] font-bold text-theme-primary">{workspaceName}</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-theme-surface rounded-lg">
+                <span className="text-[9px] text-theme-muted font-semibold">Type</span>
+                <span className="text-[9px] font-bold text-theme-primary capitalize">{workspaceType}</span>
+              </div>
+              <button onClick={() => setCurrentTab('settings')} className="w-full flex items-center justify-between p-2.5 rounded-xl bg-theme-surface hover:bg-theme-accent/5 transition-colors">
+                <span className="text-[9px] font-bold text-theme-primary">Switch Workspace</span>
+                <ChevronRight className="w-3.5 h-3.5 text-theme-muted" />
+              </button>
             </div>
-            <div className="divider-premium" />
-            <div className="flex items-center justify-between mt-2 mb-2">
-              <span className="text-[9px] text-theme-muted font-semibold">Type</span>
-              <span className="text-[9px] font-bold text-theme-primary capitalize">{workspaceType}</span>
-            </div>
-            <div className="divider-premium" />
-            <button onClick={() => setCurrentTab('settings')} className="w-full flex items-center justify-between mt-2 p-2.5 rounded-xl bg-theme-surface">
-              <span className="text-[9px] font-bold text-theme-primary">Switch Workspace</span>
-              <ChevronRight className="w-3.5 h-3.5 text-theme-muted" />
-            </button>
           </div>
 
           {/* ===== MOBILE SYNC STATUS ===== */}
           <div className="card-premium flex items-center justify-between p-3">
             <div className="flex items-center gap-2">
-              <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${syncStatus === 'Synced' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
-                {syncStatus === 'Synced' ? <ShieldCheck className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
+              <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${syncStatus === 'Synced' ? 'bg-emerald-500/10 text-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}`}>
+                {syncStatus === 'Synced' ? <ShieldCheck className="w-3 h-3" /> : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <AlertTriangle className="w-3 h-3" />}
               </div>
               <div>
-                <span className={`text-[9px] font-bold ${syncStatus === 'Synced' ? 'text-emerald-500' : 'text-red-500'}`}>
-                  {syncStatus === 'Synced' ? 'Connected' : 'Disconnected'}
+                <span className={`text-[9px] font-bold ${syncStatus === 'Synced' ? 'text-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500' : 'text-red-500'}`}>
+                  {syncStatus === 'Synced' ? 'Connected' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'Syncing' : 'Disconnected'}
                 </span>
                 <p className="text-[8px] text-theme-muted font-medium">Synced just now</p>
               </div>
             </div>
-            <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
-              {syncStatus === 'Synced' ? 'Healthy' : 'Pending'}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                {syncStatus === 'Synced' ? 'Healthy' : 'Pending'}
+              </span>
+              {installPromptEvent && !isAppInstalled && (
+                <button onClick={onInstallApp} className="px-2 py-1 bg-[image:var(--accent-gradient)] text-white text-[7px] font-bold rounded-lg">Install</button>
+              )}
+            </div>
           </div>
         </div>
 
         {/* ===== DESKTOP VIEW (>= 1024px) ===== */}
-        <div className="hidden lg:block w-full space-y-5">
-          <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-5">
+        <div className="hidden lg:block w-full max-w-screen-2xl mx-auto px-5 py-4">
+          <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-4">
 
             {/* Banners Row */}
             {pendingPaymentsCount > 0 && (
@@ -855,40 +919,12 @@ const Dashboard = ({
                     <p className="text-sm font-bold text-theme-primary">{revenueStatus.lockStatus === 'locked' ? 'Platform Locked' : revenueStatus.lockStatus === 'grace' ? 'Grace Period Active' : 'Payment Due Soon'}</p>
                     <p className="text-xs text-theme-muted font-semibold mt-0.5">{revenueStatus.message || 'Please update your subscription'}</p>
                   </div>
-                  <button onClick={() => setCurrentTab('subscription')} className="px-3 py-1.5 bg-theme-accent text-white text-xs font-bold rounded-lg shrink-0">Renew</button>
+                  {revenueStatus.lockStatus !== 'locked' && (
+                    <button onClick={() => setCurrentTab('subscription')} className="px-3 py-1.5 bg-theme-accent text-white text-xs font-bold rounded-lg shrink-0">Renew</button>
+                  )}
                 </div>
               </motion.div>
             )}
-
-            {/* ===== WELCOME AREA ===== */}
-            <motion.div variants={itemVariants} className="glass p-5 rounded-2xl">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1">
-                    <h1 className="text-2xl font-black text-theme-primary tracking-tight">
-                      <span>{greeting.icon}</span> {greeting.text}, {businessSettings?.ownerName?.split(' ')[0] || 'there'}!
-                    </h1>
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      {syncStatus === 'Synced' ? 'Live' : syncStatus}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <p className="text-xs text-theme-muted font-medium">
-                      {businessSettings?.businessName || 'Your Business'} • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-                    </p>
-                    <span className="text-theme-border-soft">|</span>
-                    <p className="text-xs text-theme-muted font-medium">Here's what's happening today.</p>
-                  </div>
-                </div>
-                <button onClick={() => {
-                  onQuickBillOpen();
-                  window.dispatchEvent(new Event('trigger-confetti'));
-                }} className="px-4 py-2 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-xl shadow-sm hover:shadow-premium-hover transition-all active:scale-95 flex items-center gap-1.5 shrink-0">
-                  <Plus className="w-4 h-4" /> Create Bill
-                </button>
-              </div>
-            </motion.div>
 
             {/* ===== PREMIUM HERO SECTION ===== */}
             <motion.div variants={itemVariants} className="bg-[image:var(--accent-gradient)] rounded-2xl p-6 shadow-premium relative overflow-hidden">
@@ -902,8 +938,8 @@ const Dashboard = ({
                         {greeting.text}, {businessSettings?.ownerName?.split(' ')[0] || 'there'}!
                       </h1>
                       <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/15 backdrop-blur-sm text-white border border-white/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        {syncStatus === 'Synced' ? 'Live' : syncStatus}
+                        <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-400 animate-pulse' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-400 animate-pulse' : 'bg-amber-400'}`} />
+                        {syncStatus === 'Synced' ? 'Live' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'Syncing' : syncStatus}
                       </div>
                     </div>
                     <div className="flex items-center gap-4 mt-1">
@@ -912,10 +948,10 @@ const Dashboard = ({
                         {workspaceName} • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                       </p>
                       <span className="text-white/30">|</span>
-                      <p className="text-xs text-white/70 font-medium">{workspaceType.charAt(0).toUpperCase() + workspaceType.slice(1)} Workspace</p>
+                      <p className="text-xs text-white/70 font-medium capitalize">{workspaceType} Workspace</p>
                     </div>
                   </div>
-                  <button onClick={() => { onQuickBillOpen(); window.dispatchEvent(new Event('trigger-confetti')); }} 
+                  <button onClick={() => { onQuickBillOpen(); window.dispatchEvent(new Event('trigger-confetti')); }}
                     className="flex items-center gap-2 px-5 py-2.5 bg-white text-theme-primary text-xs font-black rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95 shrink-0">
                     <Plus className="w-4 h-4" /> Create Bill
                   </button>
@@ -942,7 +978,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== QUICK STATS ROW ===== */}
-            <motion.div variants={itemVariants} className="stats-grid">
+            <motion.div variants={itemVariants} className="grid grid-cols-4 gap-4">
               {(() => {
                 const today = new Date().toDateString();
                 const billsToday = invoices.filter(i => new Date(i.createdAt).toDateString() === today).length;
@@ -1069,28 +1105,45 @@ const Dashboard = ({
               <div className="col-span-8 card-premium p-5">
                 <div className="section-header">
                   <div>
-                    <h3 className="section-header-title">Collection Summary</h3>
+                    <h3 className="section-header-title">Collection Center</h3>
                     <p className="section-header-subtitle">Track your collection progress against targets.</p>
                   </div>
-                  <span className="text-2xl font-black text-theme-primary tabular-nums">{collectionRate}%</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-theme-muted font-semibold">Target</span>
+                    <span className="text-2xl font-black text-theme-primary tabular-nums">{formatCurrency(totalRevenue)}</span>
+                  </div>
                 </div>
-                <div className="mt-6 space-y-5">
+                <div className="mt-5 space-y-5">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-theme-muted font-semibold">Collected</p>
                       <p className="text-lg font-black text-theme-primary tabular-nums">{formatCurrency(totalCollected)}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-theme-muted font-semibold">Target</p>
-                      <p className="text-lg font-black text-theme-primary tabular-nums">{formatCurrency(totalRevenue)}</p>
+                    <div className="flex items-center gap-3">
+                      <span className={`flex items-center gap-1 text-xs font-bold ${collectionRate >= 70 ? 'text-emerald-500' : collectionRate >= 40 ? 'text-amber-500' : 'text-red-500'}`}>
+                        <Target className="w-3.5 h-3.5" /> {collectionRate}%
+                      </span>
+                      <span className="text-xs text-theme-muted font-medium">{totalDue > 0 ? `${formatCurrency(totalDue)} remaining` : 'All collected'}</span>
                     </div>
                   </div>
                   <div className="w-full h-3 bg-theme-surface rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full transition-all duration-1000 ${collectionRate >= 70 ? 'bg-emerald-500' : collectionRate >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${collectionRate}%` }} />
+                    <div className={`h-full rounded-full transition-all duration-1000 relative ${collectionRate >= 70 ? 'bg-emerald-500' : collectionRate >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${collectionRate}%` }}>
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md border-2 border-current" />
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-theme-muted font-medium">
-                    <span>Collection Rate: {collectionRate}%</span>
-                    <span>{totalRevenue > 0 ? totalCollected.toLocaleString() : 0} / {totalRevenue.toLocaleString()}</span>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="p-2.5 rounded-xl bg-theme-surface">
+                      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Collected</p>
+                      <p className="text-sm font-black text-emerald-500 tabular-nums">{formatCurrency(totalCollected)}</p>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-theme-surface">
+                      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Pending</p>
+                      <p className="text-sm font-black text-amber-500 tabular-nums">{formatCurrency(totalDue)}</p>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-theme-surface">
+                      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Overdue</p>
+                      <p className="text-sm font-black text-red-500 tabular-nums">{totalOverdue} bills</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1098,7 +1151,7 @@ const Dashboard = ({
 
             {/* ===== ROW 2: CHARTS ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
-              {/* Traffic / Revenue Trend */}
+              {/* Revenue Trend */}
               <div className="col-span-6 card-premium p-5">
                 <div className="section-header">
                   <div>
@@ -1132,7 +1185,7 @@ const Dashboard = ({
                 </div>
               </div>
 
-              {/* Collection Trend */}
+              {/* Collection Trend + Payment Breakdown */}
               <div className="col-span-3 card-premium p-5 flex flex-col">
                 <div className="section-header">
                   <h3 className="section-header-title">Collection Trend</h3>
@@ -1159,7 +1212,7 @@ const Dashboard = ({
                 </div>
               </div>
 
-              {/* Sessions By Device / Payment Breakdown */}
+              {/* Payment Breakdown Pie */}
               <div className="col-span-3 card-premium p-5 flex flex-col">
                 <h3 className="section-header-title mb-6">Payment Breakdown</h3>
                 <div className="flex-1 flex flex-col items-center justify-center">
@@ -1232,7 +1285,7 @@ const Dashboard = ({
               </div>
               <div className="col-span-5 card-premium p-5 flex flex-col">
                 <div className="section-header">
-                  <h3 className="section-header-title">Workspace Info</h3>
+                  <h3 className="section-header-title">Workspace Overview</h3>
                 </div>
                 <div className="flex-1 space-y-4 mt-6">
                   <div className="flex items-center justify-between">
@@ -1324,11 +1377,11 @@ const Dashboard = ({
               <div className="col-span-8 card-premium p-5">
                 <div className="section-header">
                   <div>
-                    <h3 className="section-header-title">Recent Invoices</h3>
+                    <h3 className="section-header-title">Recent {invoiceLabel}</h3>
                     <p className="section-header-subtitle">Most recent invoices generated.</p>
                   </div>
                 </div>
-                <div className="space-y-5">
+                <div className="space-y-3 mt-6">
                   {recentInvoices.length === 0 ? (
                     <p className="text-sm text-theme-muted font-medium p-4 bg-theme-surface rounded-xl">No recent invoices.</p>
                   ) : (
@@ -1364,7 +1417,6 @@ const Dashboard = ({
                   </button>
                 </div>
                 <p className="section-header-subtitle mb-6">Metrics generating the highest engagement.</p>
-
                 <div className="space-y-4 flex-1">
                   <div className="stat-premium !p-4">
                     <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1.5">Collection Rate</p>
@@ -1452,12 +1504,12 @@ const Dashboard = ({
               </motion.div>
             )}
 
-            {/* ===== ROW 4: ACTIVITY FEED + QUICK ACTIONS ===== */}
+            {/* ===== ROW 4: ACTIVITY FEED + QUICK ACTIONS + SYNC STATUS ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
               <div className="col-span-7">
                 <ActivityFeed activities={activities} maxItems={6} />
               </div>
-              <div className="col-span-5">
+              <div className="col-span-5 flex flex-col gap-4">
                 <QuickActions
                   actions={[
                     { id: 'new-bill', label: 'New Bill', icon: Plus, color: 'bg-theme-accent', action: 'onQuickBillOpen' },
@@ -1470,10 +1522,39 @@ const Dashboard = ({
                   }}
                   setCurrentTab={setCurrentTab}
                 />
+
+                {/* Sync Status Indicator */}
+                <div className="card-premium flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${syncStatus === 'Synced' ? 'bg-emerald-500/10 text-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}`}>
+                      {syncStatus === 'Synced' ? <ShieldCheck className="w-4 h-4" /> : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-pulse' : 'bg-red-500'}`} />
+                        <span className="text-xs font-bold text-theme-primary">{syncStatus === 'Synced' ? 'Connected' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'Syncing' : syncStatus === 'Offline' ? 'Disconnected' : 'Warning'}</span>
+                      </div>
+                      <p className="text-[10px] text-theme-muted font-medium mt-0.5">Last sync: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 px-2.5 py-1 bg-theme-surface rounded-lg">
+                      <span className="text-[9px] text-theme-muted font-semibold">Data Health</span>
+                      <span className={`text-[9px] font-bold ${syncStatus === 'Synced' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                        {syncStatus === 'Synced' ? 'Good' : 'Pending'}
+                      </span>
+                    </div>
+                    {installPromptEvent && !isAppInstalled && (
+                      <button onClick={onInstallApp} className="px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-[9px] font-bold rounded-lg shadow-sm hover:shadow-premium-hover transition-all active:scale-95">
+                        Install App
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </motion.div>
 
-            {/* Install prompt */}
+            {/* Install prompt standalone */}
             {installPromptEvent && !isAppInstalled && (
               <motion.div variants={itemVariants}>
                 <button onClick={onInstallApp} className="w-full py-2.5 bg-[image:var(--accent-gradient)] text-white text-[10px] font-bold rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95">
@@ -1481,36 +1562,6 @@ const Dashboard = ({
                 </button>
               </motion.div>
             )}
-
-            {/* Sync Status Indicator */}
-            <motion.div variants={itemVariants} className="card-premium flex items-center justify-between p-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${syncStatus === 'Synced' ? 'bg-emerald-500/10 text-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}`}>
-                  {syncStatus === 'Synced' ? <ShieldCheck className="w-4 h-4" /> : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-pulse' : 'bg-red-500'}`} />
-                    <span className="text-xs font-bold text-theme-primary">{syncStatus === 'Synced' ? 'Connected' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'Syncing' : syncStatus === 'Offline' ? 'Disconnected' : 'Warning'}</span>
-                  </div>
-                  <p className="text-[10px] text-theme-muted font-medium mt-0.5">Last sync: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 px-2.5 py-1 bg-theme-surface rounded-lg">
-                  <span className="text-[9px] text-theme-muted font-semibold">Data Health</span>
-                  <span className={`text-[9px] font-bold ${syncStatus === 'Synced' ? 'text-emerald-500' : 'text-amber-500'}`}>
-                    {syncStatus === 'Synced' ? 'Good' : 'Pending'}
-                  </span>
-                </div>
-                {installPromptEvent && !isAppInstalled && (
-                  <button onClick={onInstallApp} className="px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-[9px] font-bold rounded-lg shadow-sm hover:shadow-premium-hover transition-all active:scale-95">
-                    Install App
-                  </button>
-                )}
-              </div>
-            </motion.div>
-
           </motion.div>
         </div>
       </div>

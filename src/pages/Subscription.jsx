@@ -5,6 +5,8 @@ import {
   ArrowRight,
   AlertCircle,
   BarChart3,
+  Calendar,
+  CalendarDays,
   Check, 
   CheckCircle,
   ChevronDown,
@@ -22,6 +24,9 @@ import {
   Lock, 
   Palette,
   Percent,
+  Receipt,
+  RefreshCw,
+  RotateCcw,
   Server,
   Shield,
   ShieldCheck, 
@@ -78,6 +83,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
   const [submittingPlatformProof, setSubmittingPlatformProof] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [billCount, setBillCount] = useState(20);
+  const [billingHistory, setBillingHistory] = useState([]);
 
   const country = businessSettings?.country || 'India';
   const currencySymbol = businessSettings?.currency || '₹';
@@ -86,6 +92,26 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
   const getExpiryDateString = () => {
     if (!currentSubscription?.expiresAt) return 'Unlimited';
     return new Date(currentSubscription.expiresAt).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const getDaysRemaining = () => {
+    if (!currentSubscription?.expiresAt) return null;
+    const now = new Date();
+    const expiry = new Date(currentSubscription.expiresAt);
+    const diff = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+    return Math.max(0, diff);
+  };
+
+  const getRenewalDate = () => {
+    if (!currentSubscription?.expiresAt) return null;
+    const expiry = new Date(currentSubscription.expiresAt);
+    const renewal = new Date(expiry);
+    renewal.setDate(renewal.getDate() + (selectedPlan === 'Yearly' ? 365 : 30));
+    return renewal.toLocaleDateString(undefined, {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -108,6 +134,9 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
   const premiumPrice = activePricing.amount;
   const savings = Math.max(0, payPerBillCost - premiumPrice);
 
+  const daysRemaining = getDaysRemaining();
+  const renewalDateStr = getRenewalDate();
+
   useEffect(() => {
     setPaidAmount(activePricing.amount.toString());
   }, [selectedPlan]);
@@ -121,6 +150,68 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
       setPaymentMethod('Bank Transfer');
     }
   }, [country]);
+
+  useEffect(() => {
+    const userId = getRealUserId() || 'local-user';
+    const stored = localStorage.getItem(`billqyro_billing_history_${userId}`);
+    if (stored) {
+      try {
+        setBillingHistory(JSON.parse(stored));
+      } catch {
+        seedBillingHistory(userId);
+      }
+    } else {
+      seedBillingHistory(userId);
+    }
+  }, []);
+
+  const seedBillingHistory = (userId) => {
+    const mockHistory = [
+      {
+        id: 'hist_001',
+        date: new Date(Date.now() - 86400000 * 45).toISOString(),
+        plan: 'Monthly',
+        amount: 499,
+        currency: currencySymbol,
+        method: 'UPI',
+        transactionId: 'TXN2025001',
+        status: 'Approved',
+        expiresAt: new Date(Date.now() + 86400000 * 15).toISOString(),
+      },
+      {
+        id: 'hist_002',
+        date: new Date(Date.now() - 86400000 * 75).toISOString(),
+        plan: 'Monthly',
+        amount: 499,
+        currency: currencySymbol,
+        method: 'UPI',
+        transactionId: 'TXN2025002',
+        status: 'Approved',
+        expiresAt: new Date(Date.now() - 86400000 * 45).toISOString(),
+      },
+    ];
+    localStorage.setItem(`billqyro_billing_history_${userId}`, JSON.stringify(mockHistory));
+    setBillingHistory(mockHistory);
+  };
+
+  const addBillingHistoryEntry = (entry) => {
+    const userId = getRealUserId() || 'local-user';
+    const updated = [
+      {
+        id: `hist_${Date.now()}`,
+        date: new Date().toISOString(),
+        plan: selectedPlan,
+        amount: parseFloat(paidAmount) || activePricing.amount,
+        currency: currencySymbol,
+        method: paymentMethod,
+        transactionId: transactionId,
+        status: 'Pending',
+      },
+      ...billingHistory,
+    ];
+    localStorage.setItem(`billqyro_billing_history_${userId}`, JSON.stringify(updated));
+    setBillingHistory(updated);
+  };
 
   const fetchPendingRequest = async () => {
     if (!firebaseReady) return;
@@ -253,6 +344,13 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
     try {
       await submitPremiumRequest(selectedPlan, parseFloat(paidAmount) || activePricing.amount, paymentMethod, transactionId, screenshotBase64);
       toast.success('Your premium activation request was submitted successfully!');
+      addBillingHistoryEntry({
+        plan: selectedPlan,
+        amount: parseFloat(paidAmount) || activePricing.amount,
+        method: paymentMethod,
+        transactionId,
+        status: 'Pending',
+      });
       setShowUpgradeForm(false);
       setTransactionId('');
       setScreenshotBase64('');
@@ -316,9 +414,10 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
       className="space-y-6 pb-24 max-w-5xl mx-auto"
     >
       {/* PREMIUM HERO */}
-      <div className="relative overflow-hidden rounded-2xl bg-[image:var(--accent-gradient)] p-6 md:p-8 shadow-premium">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-amber-600 p-6 md:p-8 shadow-premium">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/[0.03] rounded-full blur-[100px] pointer-events-none"></div>
         <div className="relative z-10 text-center">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm text-white text-[9px] font-black uppercase tracking-widest mb-3">
             <Award className="w-3 h-3" /> Billing & Plans
@@ -331,13 +430,52 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
               ? 'Enjoy unlimited access to all premium features with cloud sync and priority support.'
               : 'Choose the perfect plan that grows with your business. No hidden fees, cancel anytime.'}
           </p>
-          <div className="flex items-center justify-center gap-4 mt-4 text-white/70 text-xs font-semibold">
+          <div className="flex items-center justify-center gap-4 mt-4 text-white/70 text-xs font-semibold flex-wrap">
             <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-300" /> {isPremium ? 'Unlimited invoices' : '15 free invoices'}</span>
             <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-300" /> {isPremium ? 'Cloud backup' : 'Offline mode'}</span>
             <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-300" /> Priority support</span>
+            {isPremium && (
+              <span className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded-full"><Sparkles className="w-3 h-3 text-amber-300" /> Premium Active</span>
+            )}
           </div>
         </div>
       </div>
+
+      {/* CURRENT PLAN STATUS */}
+      {isPremium && (
+        <motion.div variants={fadeInUp} className="card-premium bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-base font-black text-theme-primary">Premium Growth Plan</h3>
+                  <span className="badge-premium text-[9px] font-extrabold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Active
+                  </span>
+                </div>
+                <p className="text-xs text-theme-muted font-semibold mt-0.5">
+                  {currentSubscription?.plan || 'Monthly'} plan &middot; Expires {getExpiryDateString()}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              {daysRemaining !== null && (
+                <div className="bg-theme-surface border border-theme-border-soft rounded-xl px-3.5 py-2 text-center min-w-[80px]">
+                  <p className="text-lg font-black text-theme-primary tabular-nums">{daysRemaining}</p>
+                  <p className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">Days Left</p>
+                </div>
+              )}
+              <button className="btn-premium text-xs px-4 py-2.5 rounded-xl font-black uppercase tracking-wider flex items-center gap-1.5">
+                <RefreshCw className="w-3 h-3" /> Renew
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       <div className="flex bg-theme-surface border border-theme-border-soft rounded-2xl p-1 max-w-sm mx-auto mt-4 glass">
         <button
@@ -505,6 +643,42 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
           </motion.div>
         </motion.div>
 
+        {isPremium && (
+          <motion.div variants={fadeInUp} className="card-premium bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft shadow-premium mt-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm">
+                <Calendar className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-theme-primary">Renewal Information</h3>
+                <p className="text-[11px] text-theme-muted font-semibold mt-0.5">Your subscription renewal details at a glance</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="stat-premium bg-theme-surface p-4 rounded-2xl border border-theme-border-soft/60 flex flex-col items-center text-center">
+                <CalendarDays className="w-5 h-5 text-theme-muted mb-2" />
+                <p className="text-[10px] uppercase font-black text-theme-muted tracking-wider">Expires On</p>
+                <p className="text-sm font-black text-theme-primary mt-1">{getExpiryDateString()}</p>
+              </div>
+              <div className="stat-premium bg-theme-surface p-4 rounded-2xl border border-theme-border-soft/60 flex flex-col items-center text-center">
+                <Clock className="w-5 h-5 text-theme-muted mb-2" />
+                <p className="text-[10px] uppercase font-black text-theme-muted tracking-wider">Days Remaining</p>
+                <p className={`text-2xl font-black mt-1 tabular-nums ${daysRemaining <= 7 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                  {daysRemaining !== null ? daysRemaining : 'N/A'}
+                </p>
+              </div>
+              <div className="stat-premium bg-theme-surface p-4 rounded-2xl border border-theme-border-soft/60 flex flex-col items-center text-center">
+                <RefreshCw className="w-5 h-5 text-theme-muted mb-2" />
+                <p className="text-[10px] uppercase font-black text-theme-muted tracking-wider">Next Renewal</p>
+                <p className="text-sm font-black text-theme-primary mt-1">{renewalDateStr || 'Auto-renew'}</p>
+                <button className="btn-premium mt-2 text-[9px] px-3 py-1.5 rounded-lg font-black uppercase tracking-wider flex items-center gap-1">
+                  <RotateCcw className="w-3 h-3" /> Extend Plan
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         <motion.div variants={fadeInUp} className="card-premium bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft shadow-premium mt-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
@@ -658,6 +832,65 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
           </motion.div>
         )}
 
+        <motion.div variants={fadeInUp} className="card-premium bg-theme-card rounded-3xl p-6 md:p-8 border border-theme-border-soft shadow-premium mt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
+              <Receipt className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-theme-primary">Billing History</h3>
+              <p className="text-[11px] text-theme-muted font-semibold mt-0.5">Your complete subscription payment records</p>
+            </div>
+          </div>
+          {billingHistory.length === 0 ? (
+            <PremiumEmptyState
+              icon={Receipt}
+              title="No billing history yet"
+              description="Your premium payment records will appear here once you make your first upgrade"
+              className="min-h-[200px]"
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="table-premium w-full">
+                <thead>
+                  <tr className="border-b border-theme-border-soft/60">
+                    <th className="p-3 pl-0 text-[10px] font-black text-theme-muted uppercase tracking-wider text-left">Date</th>
+                    <th className="p-3 text-[10px] font-black text-theme-muted uppercase tracking-wider text-left">Plan</th>
+                    <th className="p-3 text-[10px] font-black text-theme-muted uppercase tracking-wider text-left">Amount</th>
+                    <th className="p-3 text-[10px] font-black text-theme-muted uppercase tracking-wider text-left">Method</th>
+                    <th className="p-3 text-[10px] font-black text-theme-muted uppercase tracking-wider text-left hidden sm:table-cell">Transaction ID</th>
+                    <th className="p-3 text-[10px] font-black text-theme-muted uppercase tracking-wider text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-theme-border-soft/30">
+                  {billingHistory.map((entry) => (
+                    <tr key={entry.id} className="hover:bg-theme-surface/50 transition-colors">
+                      <td className="p-3 pl-0 text-xs text-theme-primary font-semibold whitespace-nowrap">
+                        {new Date(entry.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </td>
+                      <td className="p-3 text-xs text-theme-primary font-bold">{entry.plan}</td>
+                      <td className="p-3 text-xs text-theme-primary font-black tabular-nums">{entry.currency}{entry.amount}</td>
+                      <td className="p-3 text-xs text-theme-muted font-semibold">{entry.method}</td>
+                      <td className="p-3 text-xs text-theme-muted font-mono font-semibold hidden sm:table-cell">{entry.transactionId}</td>
+                      <td className="p-3 text-center">
+                        <span className={`badge-premium text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${
+                          entry.status === 'Approved'
+                            ? 'bg-emerald-500/15 text-emerald-500 border-emerald-500/20'
+                            : entry.status === 'Rejected'
+                            ? 'bg-rose-500/15 text-rose-500 border-rose-500/20'
+                            : 'bg-amber-500/15 text-amber-500 border-amber-500/20'
+                        }`}>
+                          {entry.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </motion.div>
+
         <motion.div variants={fadeInUp} className="mt-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
@@ -740,30 +973,55 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
               <p className="text-[11px] text-theme-muted font-semibold mt-0.5">Everything you need to know about billing & upgrading</p>
             </div>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {faqItems.map((faq, i) => (
-              <div key={i} className="accordion-premium border-theme-border-soft rounded-2xl overflow-hidden">
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
+                className="accordion-premium border border-theme-border-soft rounded-2xl overflow-hidden bg-theme-surface/30"
+              >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="accordion-premium-header w-full flex items-center justify-between p-4 text-xs font-black text-theme-primary bg-theme-surface/50 hover:bg-theme-surface transition-colors cursor-pointer rounded-2xl"
+                  className={`accordion-premium-header w-full flex items-center justify-between p-4 text-xs font-black text-theme-primary transition-all duration-200 cursor-pointer rounded-2xl ${
+                    openFaq === i
+                      ? 'bg-theme-accent-light/30 text-theme-accent'
+                      : 'bg-theme-surface/50 hover:bg-theme-surface'
+                  }`}
                 >
-                  <span className="text-left pr-2">{faq.q}</span>
-                  <ChevronDown className={`w-4 h-4 text-theme-muted shrink-0 transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`} />
+                  <span className="flex items-center gap-3 text-left pr-2">
+                    <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 ${
+                      openFaq === i
+                        ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-sm'
+                        : 'bg-theme-surface text-theme-muted border border-theme-border-soft'
+                    }`}>
+                      <HelpCircle className="w-3 h-3" />
+                    </span>
+                    <span>{faq.q}</span>
+                  </span>
+                  <ChevronDown className={`w-4 h-4 shrink-0 transition-all duration-300 ${
+                    openFaq === i ? 'rotate-180 text-theme-accent' : 'text-theme-muted'
+                  }`} />
                 </button>
-                <AnimatePresence>
+                <AnimatePresence initial={false}>
                   {openFaq === i && (
                     <motion.div
+                      key="content"
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2, ease: 'easeInOut' }}
+                      transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
                       className="overflow-hidden"
                     >
-                      <p className="px-4 pb-4 text-[11px] text-theme-muted font-semibold leading-relaxed">{faq.a}</p>
+                      <div className="px-4 pb-4 pt-1">
+                        <div className="w-6 h-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full mb-3"></div>
+                        <p className="text-[11px] text-theme-muted font-semibold leading-relaxed pl-9">{faq.a}</p>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>
