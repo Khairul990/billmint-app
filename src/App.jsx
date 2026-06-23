@@ -1461,7 +1461,11 @@ function App() {
         );
       case 'subscription':
         return (
-          <PremiumPricing setCurrentTab={setCurrentTab} />
+          <Subscription
+            currentSubscription={subscription}
+            onUpgrade={handleSaveSubscription}
+            businessSettings={activeSettings}
+          />
         );
 
       case 'pdf-templates':

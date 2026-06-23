@@ -34,10 +34,9 @@ export function isAdminUser(user) {
     return userEmail === import.meta.env.VITE_ADMIN_EMAIL.toLowerCase().trim();
   }
   
-  // DEV MODE: Allow hardcoded email for development convenience
   // MASTER OVERRIDE: Always grant access to the exact owner email
-  // This prevents any Vercel environment variable misconfigurations from locking the owner out.
-  if (!import.meta.env.PROD && userEmail === "khairul2052007@gmail.com") {
+  // This prevents any environment variable misconfigurations from locking the owner out.
+  if (userEmail === "khairul2052007@gmail.com") {
     return true;
   }
   
