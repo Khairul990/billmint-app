@@ -316,6 +316,21 @@ export const getAdminPlatformRevenueStates = async () => {
 export const updatePlatformPaymentProofStatus = async (proofId, status, adminNote = '', invoices = []) => {
   let matchedProof = null;
 
+  if (firebaseReady) {
+    const proofRef = doc(db, 'platformPaymentProofs', proofId);
+    const proofSnap = await getDoc(proofRef);
+    if (proofSnap.exists()) {
+      matchedProof = proofSnap.data();
+      // Prevent duplicate actions
+      if (matchedProof.status === 'Approved' || matchedProof.status === 'Verified') {
+        throw new Error('This proof has already been verified.');
+      }
+      if (matchedProof.status === 'Rejected') {
+        throw new Error('This proof has already been rejected.');
+      }
+    }
+  }
+
   // Local storage update
   try {
     const cached = JSON.parse(localStorage.getItem('billqyro_platform_payment_proofs') || '[]');
@@ -332,10 +347,6 @@ export const updatePlatformPaymentProofStatus = async (proofId, status, adminNot
   if (firebaseReady) {
     try {
       const proofRef = doc(db, 'platformPaymentProofs', proofId);
-      const proofSnap = await getDoc(proofRef);
-      if (proofSnap.exists()) {
-        matchedProof = proofSnap.data();
-      }
       
       await setDoc(proofRef, {
         status,

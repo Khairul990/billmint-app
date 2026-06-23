@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, Check, Loader2, Landmark, Wallet, DollarSign } from 'lucide-react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { storage, db } from '../services/firebaseConfig';
+import { X, Upload, Check, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const PaymentModal = ({ invoice, onClose }) => {
@@ -38,40 +35,14 @@ const PaymentModal = ({ invoice, onClose }) => {
     setUploading(true);
     
     try {
-      // 1. Upload screenshot to Firebase Storage
-      let screenshotURL = '';
-      if (storage) {
-        const storageRef = ref(storage, `payment_proofs/${invoice.id}_${Date.now()}.jpg`);
-        await uploadBytes(storageRef, screenshot);
-        screenshotURL = await getDownloadURL(storageRef);
-      } else {
-        // Fallback for offline mode, although this modal is strictly for public online invoices.
-        screenshotURL = previewUrl; 
-      }
-      
-      // 2. Create payment proof record in Firestore
-      if (db) {
-        await addDoc(collection(db, 'payment_proofs'), {
-          invoiceId: invoice.id,
-          invoiceNumber: invoice.invoiceNumber,
-          ownerId: invoice.ownerId || invoice.userId,
-          customerName: invoice.customerName,
-          amount: dueAmount,
-          paymentMethod: paymentMethod,
-          screenshot: screenshotURL,
-          status: 'pending', // pending, approved, rejected
-          submittedAt: serverTimestamp(),
-        });
-      }
-      
+      // Delegate all Firestore/Storage writes to the parent via onClose
+      // This prevents duplicate submissions and ensures atomicity
       setSubmitted(true);
       toast.success('Payment proof submitted successfully!');
       
-      // Auto-close after 3 seconds
       setTimeout(() => {
-        onClose(screenshotURL, paymentMethod, dueAmount);
+        onClose(screenshot, paymentMethod, dueAmount);
       }, 3000);
-      
     } catch (error) {
       console.error('Error submitting payment proof:', error);
       toast.error('Failed to submit payment proof. Please try again.');

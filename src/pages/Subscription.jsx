@@ -158,41 +158,12 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
       try {
         setBillingHistory(JSON.parse(stored));
       } catch {
-        seedBillingHistory(userId);
+        setBillingHistory([]);
       }
     } else {
-      seedBillingHistory(userId);
+      setBillingHistory([]);
     }
-  }, []);
-
-  const seedBillingHistory = (userId) => {
-    const mockHistory = [
-      {
-        id: 'hist_001',
-        date: new Date(Date.now() - 86400000 * 45).toISOString(),
-        plan: 'Monthly',
-        amount: 499,
-        currency: currencySymbol,
-        method: 'UPI',
-        transactionId: 'TXN2025001',
-        status: 'Approved',
-        expiresAt: new Date(Date.now() + 86400000 * 15).toISOString(),
-      },
-      {
-        id: 'hist_002',
-        date: new Date(Date.now() - 86400000 * 75).toISOString(),
-        plan: 'Monthly',
-        amount: 499,
-        currency: currencySymbol,
-        method: 'UPI',
-        transactionId: 'TXN2025002',
-        status: 'Approved',
-        expiresAt: new Date(Date.now() - 86400000 * 45).toISOString(),
-      },
-    ];
-    localStorage.setItem(`billqyro_billing_history_${userId}`, JSON.stringify(mockHistory));
-    setBillingHistory(mockHistory);
-  };
+  }, [currentSubscription]);
 
   const addBillingHistoryEntry = (entry) => {
     const userId = getRealUserId() || 'local-user';
@@ -336,7 +307,13 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!transactionId.trim()) {
-      alert('Please specify your Transaction Reference ID.');
+      toast.error('Please specify your Transaction Reference ID.');
+      return;
+    }
+
+    // Prevent duplicate submission if already pending
+    if (pendingReq) {
+      toast.error('You already have a pending activation request.');
       return;
     }
 
@@ -357,7 +334,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
       fetchPendingRequest();
     } catch (err) {
       console.error(err);
-      alert(err.message || 'Failed to submit premium request. Please try again.');
+      toast.error(err.message || 'Failed to submit premium request. Please try again.');
     } finally {
       setLoading(false);
     }

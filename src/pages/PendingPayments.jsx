@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../services/firebaseConfig';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, runTransaction } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import { ArrowLeft, CheckCircle2, XCircle, Clock, Search, ReceiptText, ExternalLink, Image as ImageIcon, ShieldCheck } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -36,35 +36,54 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
   const handleApprove = async (payment) => {
     try {
       setProcessingId(payment.id);
-      
-      const proofRef = doc(db, 'payment_proofs', payment.id);
-      await updateDoc(proofRef, { 
-        status: 'approved',
-        updatedAt: new Date().toISOString()
-      });
 
-      if (payment.invoiceId) {
-        const publicInvRef = doc(db, 'public_invoices', payment.invoiceId);
-        const pInvDoc = await getDoc(publicInvRef);
-        if (pInvDoc.exists()) {
-           const pData = pInvDoc.data();
-           const grandTotal = pData.grandTotal || 0;
-           const currentPaid = parseFloat(pData.amountPaid) || 0;
-           const paymentAmount = parseFloat(payment.amount) || 0;
-           const newPaid = currentPaid + paymentAmount;
-           const newBalance = Math.max(0, grandTotal - newPaid);
-           let newStatus = pData.paymentStatus;
-           if (newBalance <= 0) newStatus = 'Paid';
-           else if (newPaid > 0) newStatus = 'Partially Paid';
-           
-           await updateDoc(publicInvRef, { 
-             paymentStatus: newStatus,
-             status: newStatus,
-             amountPaid: newPaid,
-             balanceDue: newBalance
-           });
+      const proofRef = doc(db, 'payment_proofs', payment.id);
+      
+      // Use transaction to prevent duplicate approvals and race conditions
+      await runTransaction(db, async (transaction) => {
+        const proofDoc = await transaction.get(proofRef);
+        if (!proofDoc.exists()) {
+          throw new Error('Payment proof not found.');
+        }
+        const proofData = proofDoc.data();
+        if (proofData.status === 'approved') {
+          throw new Error('This payment has already been approved.');
+        }
+        if (proofData.status === 'rejected') {
+          throw new Error('This payment has already been rejected.');
         }
 
+        transaction.update(proofRef, { 
+          status: 'approved',
+          updatedAt: new Date().toISOString()
+        });
+
+        if (payment.invoiceId) {
+          const publicInvRef = doc(db, 'public_invoices', payment.invoiceId);
+          const pInvDoc = await transaction.get(publicInvRef);
+          if (pInvDoc.exists()) {
+            const pData = pInvDoc.data();
+            const grandTotal = pData.grandTotal || 0;
+            const currentPaid = parseFloat(pData.amountPaid) || 0;
+            const paymentAmount = parseFloat(payment.amount) || 0;
+            const newPaid = currentPaid + paymentAmount;
+            const newBalance = Math.max(0, grandTotal - newPaid);
+            let newStatus = pData.paymentStatus;
+            if (newBalance <= 0) newStatus = 'Paid';
+            else if (newPaid > 0) newStatus = 'Partially Paid';
+            
+            transaction.update(publicInvRef, { 
+              paymentStatus: newStatus,
+              status: newStatus,
+              amountPaid: newPaid,
+              balanceDue: newBalance
+            });
+          }
+        }
+      });
+
+      // Update local invoice data after successful transaction
+      if (payment.invoiceId) {
         const localInvoices = await getInvoices();
         const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
         
@@ -76,22 +95,17 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
           const newBalance = Math.max(0, grandTotal - newPaidAmount);
           
           let newStatus = existingInvoice.status;
-          if (newBalance <= 0) {
-            newStatus = 'Paid';
-          } else if (newPaidAmount > 0) {
-            newStatus = 'Partially Paid';
-          }
+          if (newBalance <= 0) newStatus = 'Paid';
+          else if (newPaidAmount > 0) newStatus = 'Partially Paid';
 
-          const updatedInvoice = {
+          await saveInvoice({
             ...existingInvoice,
             status: newStatus,
             paymentStatus: newStatus,
             amountPaid: newPaidAmount,
             balanceDue: newBalance,
             paymentMethod: payment.paymentMethod || existingInvoice.paymentMethod || 'UPI'
-          };
-          
-          await saveInvoice(updatedInvoice);
+          });
           window.dispatchEvent(new Event('billqyro_sync'));
         }
       }
@@ -101,7 +115,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
       
     } catch (error) {
       console.error('Error approving payment:', error);
-      toast.error('Failed to approve payment. Please try again.');
+      toast.error(error.message || 'Failed to approve payment. Please try again.');
     } finally {
       setProcessingId(null);
     }
@@ -110,58 +124,74 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
   const handleReject = async (payment) => {
     try {
       setProcessingId(payment.id);
-      
+
       const proofRef = doc(db, 'payment_proofs', payment.id);
-      await updateDoc(proofRef, { 
-        status: 'rejected',
-        updatedAt: new Date().toISOString()
+
+      // Use transaction to prevent duplicate rejections and race conditions
+      await runTransaction(db, async (transaction) => {
+        const proofDoc = await transaction.get(proofRef);
+        if (!proofDoc.exists()) {
+          throw new Error('Payment proof not found.');
+        }
+        const proofData = proofDoc.data();
+        if (proofData.status === 'rejected') {
+          throw new Error('This payment has already been rejected.');
+        }
+        if (proofData.status === 'approved') {
+          throw new Error('This payment has already been approved and cannot be rejected.');
+        }
+
+        transaction.update(proofRef, { 
+          status: 'rejected',
+          updatedAt: new Date().toISOString()
+        });
+
+        if (payment.invoiceId) {
+          const publicInvRef = doc(db, 'public_invoices', payment.invoiceId);
+          const pInvDoc = await transaction.get(publicInvRef);
+          if (pInvDoc.exists()) {
+            const pData = pInvDoc.data();
+            const grandTotal = pData.grandTotal || 0;
+            const currentPaid = parseFloat(pData.amountPaid) || 0;
+            const paymentAmount = parseFloat(payment.amount) || 0;
+            const revertedPaid = Math.max(0, currentPaid - paymentAmount);
+            const revertedBalance = Math.max(0, grandTotal - revertedPaid);
+            let revertedStatus = pData.paymentStatus;
+            if (revertedBalance <= 0 && revertedPaid > 0) revertedStatus = 'Paid';
+            else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
+            else revertedStatus = 'Partially Paid';
+
+            transaction.update(publicInvRef, {
+              paymentStatus: revertedStatus,
+              status: revertedStatus,
+              amountPaid: revertedPaid,
+              balanceDue: revertedBalance
+            });
+          }
+        }
       });
 
-      if (payment.invoiceId) {
-        const publicInvRef = doc(db, 'public_invoices', payment.invoiceId);
-        const pInvDoc = await getDoc(publicInvRef);
-        if (pInvDoc.exists()) {
-          const pData = pInvDoc.data();
-          const grandTotal = pData.grandTotal || 0;
-          const currentPaid = parseFloat(pData.amountPaid) || 0;
-          const paymentAmount = parseFloat(payment.amount) || 0;
-          const revertedPaid = Math.max(0, currentPaid - paymentAmount);
-          const revertedBalance = Math.max(0, grandTotal - revertedPaid);
-          let revertedStatus = pData.paymentStatus;
-          if (revertedBalance <= 0 && revertedPaid > 0) revertedStatus = 'Paid';
-          else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
-          else revertedStatus = 'Partially Paid';
+      const localInvoices = await getInvoices();
+      const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
+      if (existingInvoice) {
+        const grandTotal = parseFloat(existingInvoice.grandTotal) || 0;
+        const currentPaid = parseFloat(existingInvoice.amountPaid) || 0;
+        const paymentAmount = parseFloat(payment.amount) || 0;
+        const revertedPaid = Math.max(0, currentPaid - paymentAmount);
+        const revertedBalance = Math.max(0, grandTotal - revertedPaid);
+        let revertedStatus = existingInvoice.status;
+        if (revertedBalance <= 0 && revertedPaid > 0) revertedStatus = 'Paid';
+        else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
+        else revertedStatus = 'Partially Paid';
 
-          await updateDoc(publicInvRef, {
-            paymentStatus: revertedStatus,
-            status: revertedStatus,
-            amountPaid: revertedPaid,
-            balanceDue: revertedBalance
-          });
-        }
-
-        const localInvoices = await getInvoices();
-        const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
-        if (existingInvoice) {
-          const grandTotal = parseFloat(existingInvoice.grandTotal) || 0;
-          const currentPaid = parseFloat(existingInvoice.amountPaid) || 0;
-          const paymentAmount = parseFloat(payment.amount) || 0;
-          const revertedPaid = Math.max(0, currentPaid - paymentAmount);
-          const revertedBalance = Math.max(0, grandTotal - revertedPaid);
-          let revertedStatus = existingInvoice.status;
-          if (revertedBalance <= 0 && revertedPaid > 0) revertedStatus = 'Paid';
-          else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
-          else revertedStatus = 'Partially Paid';
-
-          await saveInvoice({
-            ...existingInvoice,
-            status: revertedStatus,
-            paymentStatus: revertedStatus,
-            amountPaid: revertedPaid,
-            balanceDue: revertedBalance
-          });
-          window.dispatchEvent(new Event('billqyro_sync'));
-        }
+        await saveInvoice({
+          ...existingInvoice,
+          status: revertedStatus,
+          paymentStatus: revertedStatus,
+          amountPaid: revertedPaid,
+          balanceDue: revertedBalance
+        });
+        window.dispatchEvent(new Event('billqyro_sync'));
       }
 
       toast.success('Payment proof has been rejected and invoice status reverted.', { icon: '❌', duration: 4000 });
@@ -169,7 +199,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
       
     } catch (error) {
       console.error('Error rejecting payment:', error);
-      toast.error('Failed to reject payment.');
+      toast.error(error.message || 'Failed to reject payment.');
     } finally {
       setProcessingId(null);
     }

@@ -47,7 +47,7 @@ const PaymentProofCenter = () => {
       }
     } catch (e) {
       console.error(e);
-      toast.error('Error processing proof status.');
+      toast.error(e.message || 'Error processing proof status.');
     } finally {
       setProcessingId(null);
     }

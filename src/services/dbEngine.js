@@ -1,5 +1,5 @@
 import { db, firebaseReady, auth } from './firebaseConfig';
-import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where } from 'firebase/firestore';
 import { getAdminEmail } from '../utils/adminAccess';
 import { BillQyroDB } from './localDb';
 import { generateVerificationCode } from './verificationCodeService';
@@ -1080,6 +1080,17 @@ export const submitPremiumRequest = async (plan, paidAmount, paymentMethod, tran
   const authSession = getAuthSession();
   const userEmail = authSession?.email || '';
 
+  // Check for existing pending request to prevent duplicates
+  const q = query(
+    collection(db, 'premiumRequests'),
+    where('userId', '==', userId),
+    where('status', '==', 'Pending')
+  );
+  const existingSnap = await getDocs(q);
+  if (!existingSnap.empty) {
+    throw new Error('You already have a pending premium activation request. Please wait for it to be processed.');
+  }
+
   const requestId = 'req-' + Date.now();
   const payload = {
     requestId,
@@ -1153,6 +1164,15 @@ export const updatePremiumRequestStatus = async (requestId, status, targetUserId
   if (!firebaseReady) return false;
   try {
     const reqRef = doc(db, 'premiumRequests', requestId);
+    const reqSnap = await getDoc(reqRef);
+    if (!reqSnap.exists()) {
+      throw new Error('Premium request not found.');
+    }
+    const reqData = reqSnap.data();
+    if (reqData.status !== 'Pending') {
+      throw new Error(`This request has already been ${reqData.status.toLowerCase()}.`);
+    }
+
     await setDoc(reqRef, {
       status,
       rejectionReason,
@@ -1188,7 +1208,7 @@ export const updatePremiumRequestStatus = async (requestId, status, targetUserId
     return true;
   } catch (e) {
     console.error('Failed to updatePremiumRequestStatus:', e);
-    return false;
+    throw e;
   }
 };
 

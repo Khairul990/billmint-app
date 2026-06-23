@@ -24,8 +24,7 @@ import {
 import { downloadInvoicePDF } from '../utils/pdfUtils';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../utils/invoiceUtils';
-import PaymentModal from '../components/PaymentModal';
-import { doc, updateDoc, arrayUnion, collection, addDoc } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion, collection, addDoc, runTransaction } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
 import { sendPaymentReceiptEmail, verifyTransactionId } from '../services/cloudFunctions';
 
@@ -79,18 +78,15 @@ const PublicInvoice = ({ initialInvoice }) => {
     
     setIsSubmitting(true);
     try {
-      // 1. Convert to Base64 for MVP (in production use Firebase Storage)
+      if (!invoice.id) {
+        throw new Error("Missing invoice ID");
+      }
+
       const reader = new FileReader();
       reader.readAsDataURL(screenshotFile);
       await new Promise(resolve => reader.onload = resolve);
       const screenshotURL = reader.result;
 
-      // 2. Save proof to Firebase payment_proofs collection
-      if (!invoice.id) {
-        throw new Error("Missing invoice ID");
-      }
-
-      // Validate & sanitize all user input before submission
       const sanitizedPayerName = sanitizeInput(payerName);
       const sanitizedPayerPhone = sanitizeInput(payerPhone).slice(0, 20);
       const sanitizedTxnId = sanitizeInput(txnId).slice(0, 100);
@@ -98,39 +94,50 @@ const PublicInvoice = ({ initialInvoice }) => {
       const sanitizedMethod = ['UPI', 'bKash', 'Nagad', 'Rocket', 'Bank Transfer', 'Cash'].includes(payMethod) ? payMethod : 'Bank Transfer';
       const sanitizedAmount = Math.max(0, Math.min(parseFloat(payAmount) || 0, 999999999));
 
-      const proofData = {
-        invoiceId: invoice.id,
-        publicInvoiceId: invoice.id,
-        ownerId: invoice.ownerId || invoice.userId || 'unknown',
-        customerName: invoice.customerName || 'Unknown Customer',
-        payerName: sanitizedPayerName,
-        payerPhone: sanitizedPayerPhone,
-        amount: sanitizedAmount,
-        transactionId: sanitizedTxnId,
-        note: sanitizedNote,
-        screenshotUrl: screenshotURL,
-        paymentMethod: sanitizedMethod,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      await addDoc(collection(db, 'payment_proofs'), proofData);
-
-      // Also mark public invoice as pending verification
       const invoiceRef = doc(db, 'public_invoices', invoice.id);
-      await updateDoc(invoiceRef, {
-        paymentStatus: 'Pending Verification',
-        paymentProofs: arrayUnion({
+
+      // Atomic transaction to prevent duplicate submissions
+      await runTransaction(db, async (transaction) => {
+        const pInvDoc = await transaction.get(invoiceRef);
+        if (!pInvDoc.exists()) {
+          throw new Error('Invoice not found');
+        }
+
+        const pData = pInvDoc.data();
+        // Prevent duplicate submissions: reject if already paid or pending verification
+        if (pData.paymentStatus === 'Paid' || pData.paymentStatus === 'Pending Verification') {
+          throw new Error('This invoice has already been paid or has a pending verification.');
+        }
+
+        transaction.set(doc(collection(db, 'payment_proofs')), {
+          invoiceId: invoice.id,
+          publicInvoiceId: invoice.id,
+          ownerId: invoice.ownerId || 'unknown',
+          customerName: invoice.customerName || 'Unknown Customer',
+          payerName: sanitizedPayerName,
+          payerPhone: sanitizedPayerPhone,
+          amount: sanitizedAmount,
+          transactionId: sanitizedTxnId,
+          note: sanitizedNote,
           screenshotUrl: screenshotURL,
-          method: payMethod,
-          amount: payAmount,
-          txnId: txnId,
-          submittedAt: new Date().toISOString()
-        })
+          paymentMethod: sanitizedMethod,
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+
+        transaction.update(invoiceRef, {
+          paymentStatus: 'Pending Verification',
+          paymentProofs: arrayUnion({
+            screenshotUrl: screenshotURL,
+            method: payMethod,
+            amount: payAmount,
+            txnId: sanitizedTxnId,
+            submittedAt: new Date().toISOString()
+          })
+        });
       });
 
-      // --- Cloud Function Integrations ---
       if (txnId) {
         try {
           await verifyTransactionId(txnId, invoice.balanceDue !== undefined ? invoice.balanceDue : invoice.grandTotal);
@@ -146,16 +153,13 @@ const PublicInvoice = ({ initialInvoice }) => {
           console.warn('Email receipt notification unavailable:', e.message);
         }
       }
-      // -----------------------------------------
       
       toast.success('Payment proof submitted! The owner will verify shortly.');
       setShowPaymentModal(false);
-      
-      // Update local state
       setInvoice(prev => ({ ...prev, paymentStatus: 'Pending Verification' }));
     } catch (err) {
       console.error(err);
-      toast.error('Failed to submit proof.');
+      toast.error(err.message || 'Failed to submit proof.');
     } finally {
       setIsSubmitting(false);
     }
@@ -345,35 +349,7 @@ const PublicInvoice = ({ initialInvoice }) => {
     )
   )}`;
 
-  // Handle payment modal close and success
-  const handlePaymentSuccess = async (screenshotUrl, method, amount) => {
-    setShowPaymentModal(false);
-    
-    // Optimistically update local state to show 'Pending Verification'
-    const updatedInvoice = {
-      ...invoice,
-      paymentStatus: 'Pending Verification'
-    };
-    setInvoice(updatedInvoice);
-    
-    try {
-      // Update the public_invoice record with the new status and proof URL
-      if (db) {
-        const invoiceRef = doc(db, 'public_invoices', invoice.id);
-        await updateDoc(invoiceRef, {
-          paymentStatus: 'Pending Verification',
-          paymentProofs: arrayUnion({
-            screenshotUrl,
-            method,
-            amount,
-            submittedAt: new Date().toISOString()
-          })
-        });
-      }
-    } catch (err) {
-      console.error('Failed to update public invoice status:', err);
-    }
-  };
+
 
   const handleDownloadPDF = () => {
     downloadInvoicePDF(invoice, business, true)
