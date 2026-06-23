@@ -90,6 +90,7 @@ const Sidebar = ({
 
     { type: 'label', label: 'System' },
     { id: 'subscription', label: 'Subscription Plan', icon: Sparkles },
+    ...(localStorage.getItem('billqyro_demo_session_active') === 'true' ? [{ id: 'sandbox-admin', label: 'Sandbox Control Center', icon: ShieldCheck, module: 'sandbox' }] : []),
     { id: 'backup-restore', label: 'Backup & Restore', icon: Database },
     { id: 'help-center', label: 'Help Center', icon: HelpCircle },
   ];
@@ -101,6 +102,8 @@ const Sidebar = ({
       if (item.module && !enabledModules.includes(item.module)) {
         // Special case: if wsType is 'billing_only' and module is 'customers', we still show it because it's recommended
         if (wsType === 'billing_only' && item.module === 'customers') return true;
+        // Always show sandbox module
+        if (item.module === 'sandbox') return true;
         return false;
       }
       return true;

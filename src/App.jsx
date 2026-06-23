@@ -96,6 +96,7 @@ const Delivery = React.lazy(() => import('./pages/business/Delivery'));
 const AdminPanel = React.lazy(() => import('./pages/admin/AdminPanel'));
 const PremiumPricing = React.lazy(() => import('./pages/PremiumPricing'));
 const PaymentDueScreen = React.lazy(() => import('./pages/PaymentDueScreen'));
+const SandboxAdmin = React.lazy(() => import('./pages/admin/SandboxAdmin'));
 import QuickBillModal from './components/QuickBillModal';
 import AdminPINLogin from './pages/admin/AdminPINLogin';
 import Confetti from 'react-confetti';
@@ -1277,9 +1278,9 @@ function App() {
           <HelpCenter />
         );
       case 'system-health':
-        return (
-          <SystemHealth setCurrentTab={setCurrentTab} />
-        );
+        return <SystemHealth setCurrentTab={setCurrentTab} />;
+      case 'sandbox-admin':
+        return <SandboxAdmin setCurrentTab={setCurrentTab} />;
       case 'audit-logs':
         return (
           <AuditLogs setCurrentTab={setCurrentTab} />

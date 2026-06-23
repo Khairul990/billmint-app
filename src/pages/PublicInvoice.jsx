@@ -104,49 +104,95 @@ const PublicInvoice = ({ initialInvoice }) => {
       const sanitizedMethod = ['UPI', 'bKash', 'Nagad', 'Rocket', 'Bank Transfer', 'Cash'].includes(payMethod) ? payMethod : 'Bank Transfer';
       const sanitizedAmount = Math.max(0, Math.min(parseFloat(payAmount) || 0, 999999999));
 
-      const invoiceRef = doc(db, 'publicInvoices', invoice.publicToken || invoice.id);
+      const isSandbox = localStorage.getItem('billqyro_demo_session_active') === 'true';
 
-      // Atomic transaction to prevent duplicate submissions
-      await runTransaction(db, async (transaction) => {
-        const pInvDoc = await transaction.get(invoiceRef);
-        if (!pInvDoc.exists()) {
-          throw new Error('Invoice not found');
-        }
-
-        const pData = pInvDoc.data();
-        // Prevent duplicate submissions: reject if already paid or pending verification
-        if (pData.paymentStatus === 'Paid' || pData.paymentStatus === 'Pending Verification') {
+      if (isSandbox) {
+        // --- SANDBOX MODE LOCAL STORAGE OVERRIDE ---
+        let demos = JSON.parse(localStorage.getItem('billqyro_demo_invoices') || '[]');
+        const idx = demos.findIndex(d => d.id === invoice.id || d.publicToken === invoice.publicToken);
+        if (idx === -1) throw new Error('Invoice not found in Sandbox');
+        
+        if (demos[idx].paymentStatus === 'Paid' || demos[idx].paymentStatus === 'Pending Verification') {
           throw new Error('This invoice has already been paid or has a pending verification.');
         }
 
-        transaction.set(doc(collection(db, 'payment_proofs')), {
+        const proof = {
+          id: 'demo-proof-' + Date.now(),
           invoiceId: invoice.id,
           publicInvoiceId: invoice.id,
           ownerId: invoice.ownerId || 'unknown',
-          customerName: invoice.customerName || 'Unknown Customer',
+          customerName: invoice.customerName || 'Demo Customer',
           payerName: sanitizedPayerName,
           payerPhone: sanitizedPayerPhone,
           amount: sanitizedAmount,
           transactionId: sanitizedTxnId,
           note: sanitizedNote,
-          screenshotUrl: screenshotURL,
+          screenshotUrl: screenshotURL, // Base64
           paymentMethod: sanitizedMethod,
           status: 'pending',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        });
+          createdAt: new Date().toISOString()
+        };
 
-        transaction.update(invoiceRef, {
-          paymentStatus: 'Pending Verification',
-          paymentProofs: arrayUnion({
-            screenshotUrl: screenshotURL,
-            method: payMethod,
-            amount: payAmount,
-            txnId: sanitizedTxnId,
-            submittedAt: new Date().toISOString()
-          })
+        const existingProofs = JSON.parse(localStorage.getItem('billqyro_demo_payments') || '[]');
+        localStorage.setItem('billqyro_demo_payments', JSON.stringify([proof, ...existingProofs]));
+
+        demos[idx].paymentStatus = 'Pending Verification';
+        demos[idx].paymentProofs = demos[idx].paymentProofs || [];
+        demos[idx].paymentProofs.push({
+          screenshotUrl: screenshotURL,
+          method: payMethod,
+          amount: payAmount,
+          txnId: sanitizedTxnId,
+          submittedAt: new Date().toISOString()
         });
-      });
+        localStorage.setItem('billqyro_demo_invoices', JSON.stringify(demos));
+        setInvoice({ ...invoice, paymentStatus: 'Pending Verification' });
+      } else {
+        // --- PRODUCTION FIREBASE EXECUTION ---
+        const invoiceRef = doc(db, 'publicInvoices', invoice.publicToken || invoice.id);
+
+        // Atomic transaction to prevent duplicate submissions
+        await runTransaction(db, async (transaction) => {
+          const pInvDoc = await transaction.get(invoiceRef);
+          if (!pInvDoc.exists()) {
+            throw new Error('Invoice not found');
+          }
+
+          const pData = pInvDoc.data();
+          // Prevent duplicate submissions: reject if already paid or pending verification
+          if (pData.paymentStatus === 'Paid' || pData.paymentStatus === 'Pending Verification') {
+            throw new Error('This invoice has already been paid or has a pending verification.');
+          }
+
+          transaction.set(doc(collection(db, 'payment_proofs')), {
+            invoiceId: invoice.id,
+            publicInvoiceId: invoice.id,
+            ownerId: invoice.ownerId || 'unknown',
+            customerName: invoice.customerName || 'Unknown Customer',
+            payerName: sanitizedPayerName,
+            payerPhone: sanitizedPayerPhone,
+            amount: sanitizedAmount,
+            transactionId: sanitizedTxnId,
+            note: sanitizedNote,
+            screenshotUrl: screenshotURL,
+            paymentMethod: sanitizedMethod,
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          });
+
+          transaction.update(invoiceRef, {
+            paymentStatus: 'Pending Verification',
+            paymentProofs: arrayUnion({
+              screenshotUrl: screenshotURL,
+              method: payMethod,
+              amount: payAmount,
+              txnId: sanitizedTxnId,
+              submittedAt: new Date().toISOString()
+            })
+          });
+        });
+      }
 
       if (txnId) {
         try {

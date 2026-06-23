@@ -217,14 +217,25 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                     setCurrentTab={setCurrentTab}
                   />
                   {localStorage.getItem('billqyro_demo_session_active') === 'true' ? (
-                    <div className="relative group ml-2">
+                    <div className="relative group ml-2 flex items-center gap-2">
                       <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors text-amber-500 bg-amber-500/10 border border-amber-500/20">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> 
                         LOCAL SANDBOX
                       </span>
+                      {userRole === 'admin' && (
+                        <button 
+                          onClick={() => {
+                            localStorage.setItem('billqyro_demo_session_active', 'false');
+                            window.location.reload();
+                          }}
+                          className="text-[9px] font-bold text-theme-muted hover:text-theme-primary underline uppercase tracking-wider"
+                        >
+                          Exit Sandbox
+                        </button>
+                      )}
                     </div>
                   ) : (
-                    <div className="relative group ml-2">
+                    <div className="relative group ml-2 flex items-center gap-2">
                       <span className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
                         syncStatus === 'Synced' ? 'text-emerald-500 bg-emerald-500/10 border border-emerald-500/20' : 
                         syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500 bg-blue-500/10 border border-blue-500/20 animate-pulse' : 
@@ -249,6 +260,17 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                             Retry Sync
                           </button>
                         </div>
+                      )}
+                      {userRole === 'admin' && (
+                        <button 
+                          onClick={() => {
+                            localStorage.setItem('billqyro_demo_session_active', 'true');
+                            window.location.reload();
+                          }}
+                          className="text-[9px] font-bold text-theme-muted hover:text-theme-primary underline uppercase tracking-wider hidden group-hover:block ml-1"
+                        >
+                          Enter Sandbox
+                        </button>
                       )}
                     </div>
                   )}

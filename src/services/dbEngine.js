@@ -1071,27 +1071,12 @@ export const registerOrUpdateUserList = async (activeSettings) => {
 };
 
 export const submitPremiumRequest = async (plan, paidAmount, paymentMethod, transactionId, screenshotBase64 = '') => {
-  if (!firebaseReady) {
-    throw new Error('You must be connected to the internet to submit a premium activation request.');
-  }
-  const userId = getRealUserId();
-  if (!userId) throw new Error('User session not found.');
-
-  const authSession = getAuthSession();
+  const isSandbox = localStorage.getItem('billqyro_demo_session_active') === 'true';
+  const userId = getRealUserId() || 'local-user';
+  const authSession = getAuthSession() || { email: 'sandbox@test.com' };
   const userEmail = authSession?.email || '';
-
-  // Check for existing pending request to prevent duplicates
-  const q = query(
-    collection(db, 'premiumRequests'),
-    where('userId', '==', userId),
-    where('status', '==', 'Pending')
-  );
-  const existingSnap = await getDocs(q);
-  if (!existingSnap.empty) {
-    throw new Error('You already have a pending premium activation request. Please wait for it to be processed.');
-  }
-
   const requestId = 'req-' + Date.now();
+
   const payload = {
     requestId,
     userId,
@@ -1105,6 +1090,30 @@ export const submitPremiumRequest = async (plan, paidAmount, paymentMethod, tran
     createdAt: Date.now(),
     updatedAt: Date.now()
   };
+
+  if (isSandbox) {
+    const existing = JSON.parse(localStorage.getItem('billqyro_sandbox_premium_requests') || '[]');
+    if (existing.some(r => r.status === 'Pending')) {
+      throw new Error('You already have a pending premium activation request in Sandbox. Please approve it from the Sandbox Control Center.');
+    }
+    localStorage.setItem('billqyro_sandbox_premium_requests', JSON.stringify([payload, ...existing]));
+    return payload;
+  }
+
+  if (!firebaseReady) {
+    throw new Error('You must be connected to the internet to submit a premium activation request.');
+  }
+
+  // Check for existing pending request to prevent duplicates
+  const q = query(
+    collection(db, 'premiumRequests'),
+    where('userId', '==', userId),
+    where('status', '==', 'Pending')
+  );
+  const existingSnap = await getDocs(q);
+  if (!existingSnap.empty) {
+    throw new Error('You already have a pending premium activation request. Please wait for it to be processed.');
+  }
 
   await setDoc(doc(db, 'premiumRequests', requestId), payload);
   return payload;
