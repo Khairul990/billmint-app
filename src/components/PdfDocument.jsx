@@ -16,6 +16,7 @@ Font.register({
 const styles = StyleSheet.create({
   page: {
     padding: 36,
+    paddingBottom: 80,
     fontFamily: 'Roboto',
     fontSize: 9.5,
     color: '#334155',
@@ -24,6 +25,7 @@ const styles = StyleSheet.create({
   },
   pageA5: {
     padding: 24,
+    paddingBottom: 60,
     fontFamily: 'Roboto',
     fontSize: 8,
     color: '#334155',
@@ -440,7 +442,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
           </View>
           
           {(invoice.items || []).map((item, idx) => (
-            <View key={idx} style={[styles.tableRow, templateId === 'minimal' ? { borderBottomColor: '#ccc' } : {}]}>
+            <View key={idx} style={[styles.tableRow, templateId === 'minimal' ? { borderBottomColor: '#ccc' } : {}]} wrap={false}>
               <View style={styles.colDesc}>
                 <Text style={{ fontWeight: 'bold', color: tPrimary, marginBottom: 2 }}>
                   {item.description || item.name || item.productName || item.serviceName || item.itemService || item.designNo || 'Item'}
@@ -515,7 +517,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
         </View>
 
         {/* Thanks Message */}
-        <View style={styles.thanksSection}>
+        <View style={styles.thanksSection} wrap={false}>
           <Text style={styles.thanksText}>
             Thank you for your business, {invoice.customerName || 'valued customer'}!
           </Text>
@@ -532,7 +534,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
 
         {/* Payment / QR Section */}
         {paymentPrefs?.paymentQrEnabled && paymentPrefs?.showQrInPreview && qrCodeBase64 && (
-          <View style={styles.paymentSection}>
+          <View style={styles.paymentSection} wrap={false}>
             <Image src={qrCodeBase64} style={useA5 ? { ...styles.qrCode, width: 70, height: 70 } : styles.qrCode} />
             <View style={styles.paymentDetails}>
               <Text style={[styles.sectionTitle, { color: tAccent }]}>Scan to View Live Invoice</Text>
@@ -547,7 +549,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
         )}
 
         {/* Footer */}
-        <View style={styles.footer}>
+        <View style={styles.footer} fixed>
           {businessPrefs.businessName && (
             <Text style={styles.businessFooterName}>{businessPrefs.businessName}</Text>
           )}

@@ -180,13 +180,15 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                 >
                   <Eye className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={() => onEdit(invoice)}
-                  title="Edit Invoice"
-                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light rounded-xl transition-all cursor-pointer"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
+                {invoice.paymentStatus !== 'Paid' && (
+                  <button
+                    onClick={() => onEdit(invoice)}
+                    title="Edit Invoice"
+                    className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light rounded-xl transition-all cursor-pointer"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
                 <button
                   onClick={() => onDownload(invoice)}
                   title="Download PDF"
@@ -365,13 +367,15 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
               </button>
             )}
 
-            <button
-              onClick={() => onDelete(invoice.id)}
-              title={isDeleted ? "Permanently Delete" : "Move to Trash"}
-              className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-danger dark:hover:text-theme-danger hover:bg-theme-danger/5 dark:hover:bg-rose-950/30 rounded-xl transition-all cursor-pointer"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {invoice.paymentStatus !== 'Paid' && (
+              <button
+                onClick={() => onDelete(invoice.id)}
+                title={isDeleted ? "Permanently Delete" : "Move to Trash"}
+                className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-danger dark:hover:text-theme-danger hover:bg-theme-danger/5 dark:hover:bg-rose-950/30 rounded-xl transition-all cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
             
             {!isDeleted && invoice.syncStatus === 'failed' && (
               <button

@@ -35,6 +35,7 @@ import { ensureInvoicePublicToken, saveInvoice, syncFromFirestore } from '../ser
 import { db, firebaseReady } from '../services/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import PullToRefresh from '../components/PullToRefresh';
+import { addNotification } from '../services/notificationsService';
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
@@ -99,6 +100,12 @@ const Invoices = ({
                 // Compare paymentProofs or status to detect changes
                 const localProofsStr = JSON.stringify(inv.paymentProofs || []);
                 const pubProofsStr = JSON.stringify(pubData.paymentProofs || []);
+                
+                // Check if new proof was added
+                if (pubData.paymentProofs && pubData.paymentProofs.length > (inv.paymentProofs || []).length) {
+                  addNotification('New Payment Proof', `A new payment proof was submitted for Invoice ${inv.invoiceNumber}.`, 'success');
+                }
+
                 if (localProofsStr !== pubProofsStr || inv.paymentStatus !== pubData.paymentStatus) {
                   updatedInvoices[i] = {
                     ...inv,
@@ -193,7 +200,9 @@ const Invoices = ({
       amount: proof.amount,
       method: proof.method,
       transactionId: proof.transactionId || 'N/A',
-      verified: true
+      verified: true,
+      reviewer: businessSettings?.businessName ? `Admin (${businessSettings.businessName})` : 'System Admin',
+      verifiedAt: new Date().toISOString()
     };
 
     // 3. Update the matching proof status to Approved

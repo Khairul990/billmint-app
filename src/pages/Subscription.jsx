@@ -50,6 +50,7 @@ import {
   getGlobalRevenueSettings,
   getAuthSession
 } from '../services/dbEngine';
+import { addNotification } from '../services/notificationsService';
 import { db, firebaseReady } from '../services/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
@@ -67,6 +68,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const [pendingReq, setPendingReq] = useState(null);
+  const [rejectedReq, setRejectedReq] = useState(null);
   const [checkingPending, setCheckingPending] = useState(false);
 
   const [activeRevenueTab, setActiveRevenueTab] = useState('premium');
@@ -120,7 +122,10 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
 
   const getPricing = (plan) => {
     if (country === 'India') {
-      return plan === 'Yearly' ? { amount: 4999, label: '₹4,999 / year' } : { amount: 499, label: '₹499 / month' };
+      return plan === 'Lifetime' ? { amount: globalRevenueSettings?.priceLifetime || 14999, label: `₹${globalRevenueSettings?.priceLifetime || 14999} / lifetime` }
+        : plan === 'Yearly' ? { amount: globalRevenueSettings?.priceYearly || 4999, label: `₹${globalRevenueSettings?.priceYearly || 4999} / year` } 
+        : plan === 'Quarterly' ? { amount: globalRevenueSettings?.priceQuarterly || 1299, label: `₹${globalRevenueSettings?.priceQuarterly || 1299} / quarter` }
+        : { amount: globalRevenueSettings?.priceMonthly || 499, label: `₹${globalRevenueSettings?.priceMonthly || 499} / month` };
     } else if (country === 'Bangladesh') {
       return plan === 'Yearly' ? { amount: 6000, label: '৳6,000 / year' } : { amount: 600, label: '৳600 / month' };
     } else {
@@ -193,15 +198,15 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
     try {
       const q = query(
         collection(db, 'premiumRequests'),
-        where('userId', '==', userId),
-        where('status', '==', 'Pending')
+        where('userId', '==', userId)
       );
       const snap = await getDocs(q);
-      if (!snap.empty) {
-        setPendingReq(snap.docs[0].data());
-      } else {
-        setPendingReq(null);
-      }
+      const docs = snap.docs.map(d => d.data());
+      const pending = docs.find(d => d.status === 'Pending');
+      const rejected = docs.find(d => d.status === 'Rejected');
+      
+      setPendingReq(pending || null);
+      setRejectedReq(rejected || null);
     } catch (e) {
       console.error('Failed to fetch pending requests:', e);
     } finally {
@@ -321,6 +326,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
     try {
       await submitPremiumRequest(selectedPlan, parseFloat(paidAmount) || activePricing.amount, paymentMethod, transactionId, screenshotBase64);
       toast.success('Your premium activation request was submitted successfully!');
+      addNotification('Premium Request', `Your request for ${selectedPlan} plan has been submitted and is pending verification.`, 'info');
       addBillingHistoryEntry({
         plan: selectedPlan,
         amount: parseFloat(paidAmount) || activePricing.amount,
@@ -369,6 +375,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
       );
 
       toast.success('Platform payment proof submitted successfully!');
+      addNotification('Platform Proof', 'Your payment proof has been submitted to the platform admin.', 'info');
       setPlatformTxId('');
       setPlatformScreenshot(null);
       setPlatformScreenshotBase64('');
@@ -493,6 +500,27 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
             <p className="text-[11px] text-theme-muted font-semibold leading-relaxed mt-1">
               Your transfer of <strong className="text-theme-accent">{pendingReq.plan} ({pendingReq.paidAmount} {country === 'India' ? 'INR' : country === 'Bangladesh' ? 'BDT' : 'USD'})</strong> with Transaction ID <strong className="font-mono text-theme-primary">{pendingReq.transactionId}</strong> is currently being verified. Your workspace will automatically unlock upon administrator approval.
             </p>
+          </div>
+        </motion.div>
+      )}
+
+      {rejectedReq && !pendingReq && activeRevenueTab === 'premium' && (
+        <motion.div
+          variants={fadeInUp}
+          initial="hidden"
+          animate="visible"
+          className="p-5 bg-rose-500/5 border border-rose-500/30 rounded-3xl flex gap-3.5 shadow-sm mb-4"
+        >
+          <div className="p-2.5 bg-theme-card rounded-xl text-rose-500 shadow-sm h-fit shrink-0">
+            <AlertCircle className="w-5.5 h-5.5" />
+          </div>
+          <div>
+            <span className="text-[9px] font-black uppercase text-rose-500 tracking-wider badge-premium">Activation Rejected</span>
+            <h4 className="text-xs font-black text-theme-primary mt-0.5">Your Upgrade Request Was Declined</h4>
+            <p className="text-[11px] text-theme-muted font-semibold leading-relaxed mt-1">
+              Reason: <strong className="text-rose-500">{rejectedReq.rejectionReason || 'Invalid payment details provided.'}</strong>
+            </p>
+            <button onClick={() => setRejectedReq(null)} className="mt-2 text-[10px] font-bold text-theme-primary underline underline-offset-2">Dismiss</button>
           </div>
         </motion.div>
       )}
@@ -1244,13 +1272,13 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                       <div className="space-y-1">
                         <div>
                           <span className="text-[9px] text-theme-muted uppercase font-black tracking-wide block">UPI Address</span>
-                          <span className="font-mono text-theme-accent font-extrabold select-all break-all">billqyro@okaxis</span>
+                          <span className="font-mono text-theme-accent font-extrabold select-all break-all">{globalRevenueSettings?.upiId || 'billqyro@okaxis'}</span>
                         </div>
                         <div className="pt-1.5 border-t border-theme-border-soft/40">
                           <span className="text-[9px] text-theme-muted uppercase font-black tracking-wide block">Direct Bank Transfer</span>
-                          <span className="block text-theme-primary font-bold">HDFC Bank | A/C: 50200012345678</span>
-                          <span className="block font-mono text-[10px]">IFSC: HDFC0000123</span>
-                          <span className="block text-[9.5px]">Name: BillQyro Invoicing SaaS</span>
+                          <span className="block text-theme-primary font-bold">{globalRevenueSettings?.bankName || 'HDFC Bank'} | A/C: {globalRevenueSettings?.bankAccountNumber || '50200012345678'}</span>
+                          <span className="block font-mono text-[10px]">IFSC: {globalRevenueSettings?.bankIfsc || 'HDFC0000123'}</span>
+                          <span className="block text-[9.5px]">Name: {globalRevenueSettings?.bankAccountName || 'BillQyro Invoicing SaaS'}</span>
                         </div>
                       </div>
                     </div>
@@ -1305,7 +1333,9 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                     className="w-full bg-theme-surface text-theme-primary border border-theme-border-soft rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:border-theme-accent cursor-pointer"
                   >
                     <option value="Monthly">Monthly growth plan</option>
+                    <option value="Quarterly">Quarterly business plan</option>
                     <option value="Yearly">Yearly corporate plan</option>
+                    <option value="Lifetime">Lifetime access</option>
                   </select>
                 </div>
 

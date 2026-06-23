@@ -38,10 +38,20 @@ const PublicInvoice = ({ initialInvoice }) => {
   const [invoice, setInvoice] = useState(initialInvoice);
   const [copiedText, setCopiedText] = useState('');
   
-  // Sync state if initialInvoice resolves later (async)
+  // Attach real-time listener to keep invoice up-to-date (cache-busting)
   useEffect(() => {
-
     setInvoice(initialInvoice);
+    if (initialInvoice && initialInvoice.publicToken) {
+      import('firebase/firestore').then(({ doc, onSnapshot }) => {
+        const docRef = doc(db, 'publicInvoices', initialInvoice.publicToken);
+        const unsubscribe = onSnapshot(docRef, (snap) => {
+          if (snap.exists()) {
+            setInvoice(prev => ({ ...prev, ...snap.data() }));
+          }
+        });
+        return () => unsubscribe();
+      }).catch(err => console.warn('Failed to attach realtime listener', err));
+    }
   }, [initialInvoice]);
   
   // "I Have Paid" Form states
@@ -94,7 +104,7 @@ const PublicInvoice = ({ initialInvoice }) => {
       const sanitizedMethod = ['UPI', 'bKash', 'Nagad', 'Rocket', 'Bank Transfer', 'Cash'].includes(payMethod) ? payMethod : 'Bank Transfer';
       const sanitizedAmount = Math.max(0, Math.min(parseFloat(payAmount) || 0, 999999999));
 
-      const invoiceRef = doc(db, 'public_invoices', invoice.id);
+      const invoiceRef = doc(db, 'publicInvoices', invoice.publicToken || invoice.id);
 
       // Atomic transaction to prevent duplicate submissions
       await runTransaction(db, async (transaction) => {
@@ -688,13 +698,24 @@ const PublicInvoice = ({ initialInvoice }) => {
               </div>
               {invoice.paymentHistory?.length > 0 && (
                 <div className="space-y-1 md:space-y-1.5">
-                  <p className="text-[8px] md:text-[9px] text-theme-muted font-black uppercase tracking-wider">Payment History</p>
-                  {invoice.paymentHistory.map((ph, i) => (
-                    <div key={i} className="flex items-center justify-between p-1.5 md:p-2 bg-theme-surface rounded-xl border border-theme-border-soft text-[10px] md:text-xs">
-                      <span className="text-theme-muted font-semibold">{ph.method || 'Transfer'}</span>
-                      <span className="text-theme-primary font-extrabold">{formatVal(ph.amount)}</span>
-                    </div>
-                  ))}
+                  <p className="text-[8px] md:text-[9px] text-theme-muted font-black uppercase tracking-wider mb-2">Payment Timeline</p>
+                  <div className="relative border-l border-theme-border-soft ml-2 pl-3 space-y-3 mt-2">
+                    {invoice.paymentHistory.map((ph, i) => (
+                      <div key={i} className="relative">
+                        <div className="absolute -left-[17px] top-1.5 w-2 h-2 rounded-full bg-emerald-500 border-2 border-theme-surface shadow-[0_0_0_2px_rgba(16,185,129,0.2)]" />
+                        <div className="flex flex-col gap-0.5 bg-theme-surface rounded-xl p-2 md:p-2.5 border border-theme-border-soft">
+                          <div className="flex items-center justify-between text-[10px] md:text-xs">
+                            <span className="text-theme-primary font-bold">{ph.date || 'Completed'}</span>
+                            <span className="text-emerald-600 font-extrabold">{formatVal(ph.amount)}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-[8px] md:text-[9px]">
+                            <span className="text-theme-muted font-semibold">{ph.method || 'Transfer'} {ph.transactionId && ph.transactionId !== 'N/A' && `• Txn: ${ph.transactionId}`}</span>
+                            {ph.reviewer && <span className="text-theme-muted/60 italic border-l border-theme-border-soft pl-1.5 ml-1.5">Verified by {ph.reviewer}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
               {liveLinkPrefs.showContactButton && (business.phone || business.email) && (

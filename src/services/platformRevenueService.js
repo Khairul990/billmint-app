@@ -10,7 +10,17 @@ const DEFAULT_GLOBAL_SETTINGS = {
   monthlyGraceLimit: 5,
   maxPendingDue: 100,
   maxUnpaidBillCount: 20,
-  lockBehavior: 'bill_creation'
+  lockBehavior: 'bill_creation',
+  priceMonthly: 499,
+  priceQuarterly: 1299,
+  priceYearly: 4999,
+  priceLifetime: 14999,
+  bankAccountName: 'BillQyro Technologies',
+  bankAccountNumber: '1234567890',
+  bankName: 'HDFC Bank',
+  bankIfsc: 'HDFC0001234',
+  upiId: 'billqyro@upi',
+  qrImageBase64: ''
 };
 
 const DEFAULT_USER_STATE = {
@@ -220,6 +230,24 @@ export const saveUserRevenueState = async (userId, state) => {
 
 // --- PAYMENT PROOFS FLOW ---
 export const submitPlatformPaymentProof = async (userId, userEmail, amount, paymentMethod, transactionId, screenshotBase64 = '', note = '') => {
+  // Prevent duplicate submissions
+  if (firebaseReady) {
+    try {
+      const q = query(collection(db, 'platformPaymentProofs'), where('userId', '==', userId), where('status', '==', 'Pending'));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        throw new Error('You already have a pending payment proof submitted. Please wait for verification.');
+      }
+    } catch (e) {
+      console.warn('Failed to check existing proofs', e);
+    }
+  } else {
+    const cached = JSON.parse(localStorage.getItem('billqyro_platform_payment_proofs') || '[]');
+    if (cached.some(p => p.userId === userId && p.status === 'Pending')) {
+      throw new Error('You already have a pending payment proof submitted. Please wait for verification.');
+    }
+  }
+
   const proofId = 'proof-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
   const payload = {
     id: proofId,

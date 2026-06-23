@@ -1,15 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Search, Loader2 } from 'lucide-react';
+import { Crown, Search, Loader2, Save } from 'lucide-react';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 import { toast } from 'react-hot-toast';
+import { getGlobalRevenueSettings, saveGlobalRevenueSettings } from '../../services/platformRevenueService';
 
 const PremiumControlCenter = () => {
   const [targetUserId, setTargetUserId] = useState('');
   const [targetUserEmail, setTargetUserEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
+
+  const [globalSettings, setGlobalSettings] = useState(null);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      setSettingsLoading(true);
+      try {
+        const settings = await getGlobalRevenueSettings();
+        setGlobalSettings(settings);
+      } catch (err) {
+        toast.error('Failed to load global revenue settings');
+      } finally {
+        setSettingsLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleLookupUser = async () => {
     if (!targetUserId.trim()) return;
@@ -64,6 +84,26 @@ const PremiumControlCenter = () => {
     }
   };
 
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const success = await saveGlobalRevenueSettings(globalSettings);
+      if (success) {
+        toast.success('Global pricing & payment settings updated!');
+      } else {
+        toast.error('Failed to update global settings.');
+      }
+    } catch (e) {
+      toast.error('Error saving global settings');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const handleSettingChange = (field, value) => {
+    setGlobalSettings(prev => ({ ...prev, [field]: value }));
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex items-center justify-between">
@@ -71,7 +111,7 @@ const PremiumControlCenter = () => {
           <h2 className="text-2xl font-bold text-white flex items-center">
             <Crown className="w-6 h-6 mr-3 text-amber-500" /> Premium Control Center
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Manage user subscriptions, feature access, and templates.</p>
+          <p className="text-slate-400 text-sm mt-1">Manage user subscriptions, global pricing, and payment settings.</p>
         </div>
       </div>
 
@@ -140,6 +180,114 @@ const PremiumControlCenter = () => {
           </button>
         </div>
       </div>
+
+      {!settingsLoading && globalSettings && (
+        <>
+          <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
+            <h3 className="text-white font-bold mb-4">Global Plan Pricing</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-slate-400 text-xs font-bold mb-1 block">Monthly Price</label>
+                <input
+                  type="number"
+                  value={globalSettings.priceMonthly || ''}
+                  onChange={(e) => handleSettingChange('priceMonthly', parseFloat(e.target.value))}
+                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label className="text-slate-400 text-xs font-bold mb-1 block">Quarterly Price</label>
+                <input
+                  type="number"
+                  value={globalSettings.priceQuarterly || ''}
+                  onChange={(e) => handleSettingChange('priceQuarterly', parseFloat(e.target.value))}
+                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label className="text-slate-400 text-xs font-bold mb-1 block">Yearly Price</label>
+                <input
+                  type="number"
+                  value={globalSettings.priceYearly || ''}
+                  onChange={(e) => handleSettingChange('priceYearly', parseFloat(e.target.value))}
+                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label className="text-slate-400 text-xs font-bold mb-1 block">Lifetime Price</label>
+                <input
+                  type="number"
+                  value={globalSettings.priceLifetime || ''}
+                  onChange={(e) => handleSettingChange('priceLifetime', parseFloat(e.target.value))}
+                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
+            <h3 className="text-white font-bold mb-4">Global Payment Settings</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-slate-400 text-xs font-bold mb-1 block">Bank Account Name</label>
+                <input
+                  type="text"
+                  value={globalSettings.bankAccountName || ''}
+                  onChange={(e) => handleSettingChange('bankAccountName', e.target.value)}
+                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label className="text-slate-400 text-xs font-bold mb-1 block">Bank Account Number</label>
+                <input
+                  type="text"
+                  value={globalSettings.bankAccountNumber || ''}
+                  onChange={(e) => handleSettingChange('bankAccountNumber', e.target.value)}
+                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label className="text-slate-400 text-xs font-bold mb-1 block">Bank Name</label>
+                <input
+                  type="text"
+                  value={globalSettings.bankName || ''}
+                  onChange={(e) => handleSettingChange('bankName', e.target.value)}
+                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label className="text-slate-400 text-xs font-bold mb-1 block">Bank IFSC Code</label>
+                <input
+                  type="text"
+                  value={globalSettings.bankIfsc || ''}
+                  onChange={(e) => handleSettingChange('bankIfsc', e.target.value)}
+                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label className="text-slate-400 text-xs font-bold mb-1 block">UPI ID</label>
+                <input
+                  type="text"
+                  value={globalSettings.upiId || ''}
+                  onChange={(e) => handleSettingChange('upiId', e.target.value)}
+                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
+                />
+              </div>
+            </div>
+            
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleSaveSettings}
+                disabled={savingSettings}
+                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 disabled:opacity-50"
+              >
+                {savingSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Save Settings
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </motion.div>
   );
 };

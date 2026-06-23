@@ -440,10 +440,49 @@ const Dashboard = ({
     visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] } }
   };
 
+  const getDaysRemaining = () => {
+    if (subscription?.status !== 'premium' || !subscription?.expiresAt) return null;
+    const now = new Date();
+    const expiry = new Date(subscription.expiresAt);
+    const diff = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+    return diff;
+  };
+  const expiryDays = getDaysRemaining();
+
   return (
     <AnimatedPage>
       <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
         <div className="min-h-screen bg-theme-surface/50">
+          {expiryDays !== null && expiryDays <= 30 && (
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+              <div className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${
+                expiryDays <= 3 ? 'bg-theme-danger/10 border-theme-danger/30 text-theme-danger' :
+                expiryDays <= 7 ? 'bg-theme-warning/10 border-theme-warning/30 text-theme-warning' :
+                'bg-theme-accent/10 border-theme-accent/30 text-theme-accent'
+              }`}>
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 shrink-0" />
+                  <div>
+                    <h4 className="text-sm font-bold">
+                      {expiryDays <= 0 ? 'Your Premium Subscription has expired' : `Your Premium Subscription expires in ${expiryDays} days`}
+                    </h4>
+                    <p className="text-xs opacity-90 mt-0.5">
+                      {expiryDays <= 0 
+                        ? 'Please renew your subscription to restore full access.'
+                        : 'Renew now to ensure uninterrupted access to premium features.'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setCurrentTab('subscription')}
+                  className="px-4 py-2 bg-theme-card text-theme-primary text-xs font-bold rounded-xl border border-theme-border-soft hover:bg-theme-surface transition-colors whitespace-nowrap shrink-0 shadow-sm"
+                >
+                  Renew Now
+                </button>
+              </div>
+            </div>
+          )}
+
         {/* ===== MOBILE VIEW (< 1024px) ===== */}
         <div className="lg:hidden px-3 sm:px-4 max-w-2xl mx-auto space-y-4 pb-6 pt-3">
           {pendingPaymentsCount > 0 && (

@@ -10,6 +10,7 @@ import { flushSyncQueue } from '../services/syncEngine';
 import { motion } from 'framer-motion';
 import AnimatedBorderTrail from './AnimatedBorderTrail';
 import { AnimatedThemeToggler } from './AnimatedThemeToggler';
+import { getNotifications, markNotificationAsRead, clearAllNotifications } from '../services/notificationsService';
 
 const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncSource, syncStatus }) => {
   const [themeColor, setThemeColor] = useState(() => {
@@ -23,8 +24,16 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const searchInputRef = React.useRef(null);
+
+  useEffect(() => {
+    setNotifications(getNotifications());
+    const handleNotifUpdate = () => setNotifications(getNotifications());
+    window.addEventListener('billqyro_notifications_updated', handleNotifUpdate);
+    return () => window.removeEventListener('billqyro_notifications_updated', handleNotifUpdate);
+  }, []);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -291,36 +300,33 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                     <div className="absolute top-14 right-0 w-80 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
                       <div className="p-4 border-b border-theme-border-soft flex justify-between items-center bg-theme-surface/50">
                         <h3 className="text-sm font-bold text-theme-primary">Notifications</h3>
-                        <span className="text-[10px] font-bold text-theme-accent bg-theme-accent-light px-2 py-0.5 rounded-full">3 New</span>
+                        {notifications.filter(n => !n.read).length > 0 && (
+                          <div className="flex gap-2 items-center">
+                            <button onClick={clearAllNotifications} className="text-[10px] font-bold text-theme-muted hover:text-theme-primary underline">Clear All</button>
+                            <span className="text-[10px] font-bold text-theme-accent bg-theme-accent-light px-2 py-0.5 rounded-full">{notifications.filter(n => !n.read).length} New</span>
+                          </div>
+                        )}
                       </div>
                       <div className="max-h-80 overflow-y-auto no-scrollbar p-2 space-y-1">
-                        <div className="p-3 hover:bg-theme-surface rounded-xl transition-colors cursor-pointer flex gap-3">
-                          <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                            <ShieldCheck className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-theme-primary">Cloud Sync Complete</p>
-                            <p className="text-[10px] text-theme-muted mt-0.5">All your data is securely backed up.</p>
-                          </div>
-                        </div>
-                        <div className="p-3 hover:bg-theme-surface rounded-xl transition-colors cursor-pointer flex gap-3">
-                          <div className="w-8 h-8 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
-                            <ReceiptText className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-theme-primary">New Invoice Created</p>
-                            <p className="text-[10px] text-theme-muted mt-0.5">INV-2026-001 was generated successfully.</p>
-                          </div>
-                        </div>
-                        <div className="p-3 hover:bg-theme-surface rounded-xl transition-colors cursor-pointer flex gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                            <Activity className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-theme-primary">Subscription Updated</p>
-                            <p className="text-[10px] text-theme-muted mt-0.5">Your premium features are now active.</p>
-                          </div>
-                        </div>
+                        {notifications.length === 0 ? (
+                          <p className="text-[10px] text-theme-muted text-center py-4 font-semibold">No new notifications</p>
+                        ) : (
+                          notifications.map((notif) => (
+                            <div 
+                              key={notif.id} 
+                              onClick={() => markNotificationAsRead(notif.id)}
+                              className={`p-3 hover:bg-theme-surface rounded-xl transition-colors cursor-pointer flex gap-3 ${notif.read ? 'opacity-60' : ''}`}
+                            >
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'success' ? 'bg-emerald-500/10 text-emerald-500' : notif.type === 'error' ? 'bg-rose-500/10 text-rose-500' : 'bg-theme-accent/10 text-theme-accent'}`}>
+                                <Bell className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <p className="text-xs font-bold text-theme-primary">{notif.title}</p>
+                                <p className="text-[10px] text-theme-muted mt-0.5">{notif.message}</p>
+                              </div>
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
                   </>
@@ -542,12 +548,33 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 {isNotificationMenuOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsNotificationMenuOpen(false)} />
-                    <div className="absolute top-12 right-0 w-72 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden">
-                      <div className="p-3 border-b border-theme-border-soft">
+                    <div className="absolute top-12 right-0 w-72 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
+                      <div className="p-3 border-b border-theme-border-soft flex justify-between items-center">
                         <p className="text-xs font-bold text-theme-primary">Notifications</p>
+                        {notifications.filter(n => !n.read).length > 0 && (
+                          <button onClick={clearAllNotifications} className="text-[9px] font-bold text-theme-muted underline">Clear All</button>
+                        )}
                       </div>
-                      <div className="p-2">
-                        <p className="text-[10px] text-theme-muted text-center py-4 font-semibold">No new notifications</p>
+                      <div className="max-h-64 overflow-y-auto no-scrollbar p-2 space-y-1">
+                        {notifications.length === 0 ? (
+                          <p className="text-[10px] text-theme-muted text-center py-4 font-semibold">No new notifications</p>
+                        ) : (
+                          notifications.map((notif) => (
+                            <div 
+                              key={notif.id} 
+                              onClick={() => markNotificationAsRead(notif.id)}
+                              className={`p-2 hover:bg-theme-surface rounded-xl transition-colors cursor-pointer flex gap-2 ${notif.read ? 'opacity-60' : ''}`}
+                            >
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'success' ? 'bg-emerald-500/10 text-emerald-500' : notif.type === 'error' ? 'bg-rose-500/10 text-rose-500' : 'bg-theme-accent/10 text-theme-accent'}`}>
+                                <Bell className="w-3 h-3" />
+                              </div>
+                              <div>
+                                <p className="text-[10px] font-bold text-theme-primary leading-tight">{notif.title}</p>
+                                <p className="text-[9px] text-theme-muted mt-0.5 leading-tight">{notif.message}</p>
+                              </div>
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
                   </>
