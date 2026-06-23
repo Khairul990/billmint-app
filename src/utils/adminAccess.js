@@ -29,15 +29,15 @@ export function isAdminUser(user) {
   // PRODUCTION RECOMMENDATION: Use Firebase Custom Auth Claims.
   // e.g. return user.getIdTokenResult().then(idTokenResult => !!idTokenResult.claims.admin);
   
-  // PRODUCTION MODE CHECK: If VITE_ADMIN_EMAIL is set via env, use it only
-  if (import.meta.env.PROD && import.meta.env.VITE_ADMIN_EMAIL) {
-    return userEmail === import.meta.env.VITE_ADMIN_EMAIL.toLowerCase().trim();
-  }
-  
   // MASTER OVERRIDE: Always grant access to the exact owner email
   // This prevents any environment variable misconfigurations from locking the owner out.
   if (userEmail === "khairul2052007@gmail.com") {
     return true;
+  }
+
+  // PRODUCTION MODE CHECK: If VITE_ADMIN_EMAIL is set via env, use it only
+  if (import.meta.env.PROD && import.meta.env.VITE_ADMIN_EMAIL) {
+    return userEmail === import.meta.env.VITE_ADMIN_EMAIL.toLowerCase().trim();
   }
   
   const adminEmail = getAdminEmail();
