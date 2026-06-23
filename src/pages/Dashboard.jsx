@@ -287,7 +287,7 @@ const Dashboard = ({
   )?.type || 'retail';
   const enabledModulesCount = businessSettings?.businessModules?.filter(m => m.enabled)?.length || 0;
 
-  const getRevenueTrend = () => {
+  function getRevenueTrend() {
     const daily = {};
     const now = new Date();
     for (let i = 6; i >= 0; i--) {
@@ -311,7 +311,7 @@ const Dashboard = ({
     return Object.values(daily);
   };
 
-  const getPaymentBreakdown = () => {
+  function getPaymentBreakdown() {
     let paid = 0, partial = 0, unpaid = 0;
     invoices.forEach(inv => {
       const s = (inv.paymentStatus || '').toLowerCase();
@@ -327,7 +327,7 @@ const Dashboard = ({
     ];
   };
 
-  const getTopCustomers = () => {
+  function getTopCustomers() {
     const salesByCustomer = {};
     invoices.forEach(inv => {
       const name = inv.customerName || 'Walk-in';
@@ -339,7 +339,7 @@ const Dashboard = ({
       .sort((a, b) => b.total - a.total);
   };
 
-  const getDueInNext7Days = () => {
+  function getDueInNext7Days() {
     const now = new Date();
     const sevenDays = new Date(now);
     sevenDays.setDate(sevenDays.getDate() + 7);
@@ -352,7 +352,7 @@ const Dashboard = ({
     }).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
   };
 
-  const getBusiestDay = () => {
+  function getBusiestDay() {
     const dayCount = { Sunday: 0, Monday: 0, Tuesday: 0, Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0 };
     invoices.forEach(inv => {
       if (inv.createdAt) {
