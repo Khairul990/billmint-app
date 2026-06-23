@@ -32,9 +32,9 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
   );
 
   // 2. Calculate Metrics
-  const totalBilled = customerInvoices.reduce((acc, inv) => acc + (parseFloat(inv.total) || 0), 0);
+  const totalBilled = customerInvoices.reduce((acc, inv) => acc + (parseFloat(inv.grandTotal || inv.total) || 0), 0);
   const totalPaid = customerInvoices.reduce((acc, inv) => {
-    const paid = inv.status === 'Paid' ? (parseFloat(inv.total) || 0) : (parseFloat(inv.amountPaid) || 0);
+    const paid = inv.paymentStatus === 'Paid' ? (parseFloat(inv.grandTotal || inv.total) || 0) : (parseFloat(inv.amountPaid) || 0);
     return acc + paid;
   }, 0);
   const totalDue = Math.max(0, totalBilled - totalPaid);
@@ -60,7 +60,7 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
     setIsSaving(true);
     try {
       const newPaid = (parseFloat(inv.amountPaid) || 0) + parseFloat(paymentAmount);
-      const grandTotal = parseFloat(inv.total || inv.grandTotal);
+      const grandTotal = parseFloat(inv.grandTotal || inv.total);
       
       let newStatus = 'Partial';
       if (newPaid >= grandTotal) {
@@ -248,7 +248,7 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
                               </span>
                             </div>
                             <span className="text-sm font-black text-theme-primary">
-                              {formatCurrency(inv.total)}
+                              {formatCurrency(inv.grandTotal || inv.total)}
                             </span>
                           </div>
                           

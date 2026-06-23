@@ -1051,7 +1051,7 @@ const PublicInvoice = ({ initialInvoice }) => {
 
         {/* ===== STICKY PAY BUTTON (Mobile Only) ===== */}
         {invoice.paymentStatus !== 'Paid' && invoice.paymentStatus !== 'Pending Verification' && (
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-theme-card/95 backdrop-blur-xl border-t border-theme-border-soft px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(0,0,0,0.08)] safe-area-bottom">
+          <div className="lg:hidden no-print fixed bottom-0 left-0 right-0 z-50 bg-theme-card/95 backdrop-blur-xl border-t border-theme-border-soft px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(0,0,0,0.08)] safe-area-bottom">
             <div className="flex items-center gap-3">
               <div className="flex-1">
                 <p className="text-[8px] text-theme-muted font-bold uppercase tracking-wider">Amount Due</p>
@@ -1110,6 +1110,16 @@ const PublicInvoice = ({ initialInvoice }) => {
       </footer>
 
     </div>
+
+      <style dangerouslySetInnerHTML={{__html: `
+        @media print {
+          body { background: white !important; color: black !important; }
+          .no-print { display: none !important; }
+          .bg-theme-card, .card-premium { background: white !important; border: 1px solid #ddd !important; box-shadow: none !important; }
+          table { width: 100% !important; border-collapse: collapse; }
+          th, td { border: 1px solid #ddd; padding: 6px !important; color: black !important; }
+        }
+      `}} />
     </motion.div>
   );
 };

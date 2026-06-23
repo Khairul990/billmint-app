@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedPage from '../components/AnimatedPage';
 import InvoiceCard from '../components/InvoiceCard';
@@ -19,7 +19,8 @@ import {
   Check,
   Share2,
   ShieldCheck,
-  Link
+  Link,
+  AlertTriangle
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -72,6 +73,7 @@ const Invoices = ({
   const [viewingInvoice, setViewingInvoice] = useState(null);
   const [generatingLink, setGeneratingLink] = useState(false);
   const [linkCache, setLinkCache] = useState({});
+  const [paidDeleteTarget, setPaidDeleteTarget] = useState(null);
   const currencySymbol = businessSettings?.currency || '₹';
 
   useEffect(() => {
@@ -125,7 +127,7 @@ const Invoices = ({
       const delay = setTimeout(sweepAndSync, 1000);
       return () => clearTimeout(delay);
     }
-  }, [firebaseReady]);
+  }, [firebaseReady, invoices]);
 
   // On-demand real-time public proof syncer when viewing an invoice
   useEffect(() => {
@@ -166,16 +168,19 @@ const Invoices = ({
       };
       fetchLatestFromPublic();
     }
-  }, [viewingInvoice?.id, firebaseReady]);
+  }, [viewingInvoice?.id, firebaseReady, invoices]);
 
   const handleApproveProof = async (proof) => {
     if (!window.confirm(`Are you sure you want to APPROVE this payment proof of ${currencySymbol}${proof.amount}?`)) return;
 
+    // 0. Fetch the latest invoice snapshot to prevent stale overwrite
+    const freshInvoice = invoices.find(inv => inv.id === viewingInvoice.id) || viewingInvoice;
+
     // 1. Calculate new figures
-    const totalPaid = (viewingInvoice.amountPaid || 0) + proof.amount;
-    const balanceDue = Math.max(0, viewingInvoice.grandTotal - totalPaid);
+    const totalPaid = (freshInvoice.amountPaid || 0) + proof.amount;
+    const balanceDue = Math.max(0, freshInvoice.grandTotal - totalPaid);
     
-    let newStatus = viewingInvoice.paymentStatus;
+    let newStatus = freshInvoice.paymentStatus;
     if (balanceDue <= 0) {
       newStatus = 'Paid';
     } else if (totalPaid > 0) {
@@ -192,7 +197,7 @@ const Invoices = ({
     };
 
     // 3. Update the matching proof status to Approved
-    const updatedProofs = (viewingInvoice.paymentProofs || []).map(p => {
+    const updatedProofs = (freshInvoice.paymentProofs || []).map(p => {
       if (p.id === proof.id) {
         return { ...p, status: 'Approved' };
       }
@@ -200,11 +205,11 @@ const Invoices = ({
     });
 
     const updatedInvoice = {
-      ...viewingInvoice,
+      ...freshInvoice,
       amountPaid: totalPaid,
       balanceDue,
       paymentStatus: newStatus,
-      paymentHistory: [...(viewingInvoice.paymentHistory || []), historyItem],
+      paymentHistory: [...(freshInvoice.paymentHistory || []), historyItem],
       paymentProofs: updatedProofs
     };
 
@@ -253,7 +258,7 @@ const Invoices = ({
   };
 
   // --- FILTER LOGIC ---
-  const filteredInvoices = invoices.filter((inv) => {
+  const filteredInvoices = useMemo(() => invoices.filter((inv) => {
     // 1. Filter by viewMode (Trash vs Active)
     const isDeleted = inv.isDeleted === true;
     if (viewMode === 'active' && isDeleted) return false;
@@ -272,7 +277,7 @@ const Invoices = ({
     const matchStatus = statusFilter === 'All' || inv.paymentStatus === statusFilter;
 
     return matchSearch && matchStatus;
-  });
+  }), [invoices, searchQuery, statusFilter, viewMode]);
 
   const handlePrint = () => {
     window.print();
@@ -399,7 +404,11 @@ const Invoices = ({
                 }}
                 onDelete={(id) => {
                   if (viewMode === 'active') {
-                    onDeleteInvoice(id, false);
+                    if (invoice.paymentStatus === 'Paid') {
+                      setPaidDeleteTarget(invoice);
+                    } else {
+                      onDeleteInvoice(id, false);
+                    }
                   } else {
                     const confirmText = window.prompt('Type DELETE to permanently delete this invoice:');
                     if (confirmText === 'DELETE') {
@@ -441,6 +450,48 @@ const Invoices = ({
             </div>
           )}
       </div>
+
+      {/* Paid Invoice Delete Confirmation */}
+      {paidDeleteTarget && createPortal(
+        <div className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPaidDeleteTarget(null)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-theme-surface border border-theme-border-soft rounded-2xl shadow-2xl w-full max-w-sm p-6"
+          >
+            <div className="flex items-center gap-3 text-rose-500 mb-4">
+              <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-black text-theme-primary leading-tight">Delete Paid Invoice?</h3>
+            </div>
+
+            <p className="text-sm font-bold text-theme-muted mb-6">
+              This invoice contains completed payment records. Moving it to trash is recommended.
+            </p>
+
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  onDeleteInvoice(paidDeleteTarget.id, false);
+                  setPaidDeleteTarget(null);
+                }}
+                className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition-colors"
+              >
+                Move To Trash
+              </button>
+              <button
+                onClick={() => setPaidDeleteTarget(null)}
+                className="w-full py-3 bg-transparent hover:bg-theme-border-soft text-theme-muted hover:text-theme-primary text-sm font-bold rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </motion.div>
+        </div>,
+        document.body
+      )}
 
       {/* Floating Create Invoice button for mobile */}
       <motion.button

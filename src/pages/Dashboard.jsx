@@ -106,8 +106,15 @@ const Dashboard = ({
 
   const getTotalDue = () => {
     return invoices
-      .filter(inv => inv.paymentStatus === 'Unpaid' || inv.paymentStatus === 'Partial' || inv.paymentStatus === 'unpaid' || inv.paymentStatus === 'partial')
-      .reduce((sum, inv) => sum + (inv.balanceDue || inv.dueAmount || inv.grandTotal || inv.total || 0), 0);
+      .filter(inv => {
+        const s = (inv.paymentStatus || '').toLowerCase();
+        return s === 'unpaid' || s === 'partial' || s === 'partially paid';
+      })
+      .reduce((sum, inv) => {
+        const total = inv.grandTotal || inv.total || 0;
+        const paid = inv.paymentStatus?.toLowerCase() === 'paid' ? total : (parseFloat(inv.amountPaid) || 0);
+        return sum + (inv.balanceDue || inv.dueAmount || Math.max(0, total - paid));
+      }, 0);
   };
 
   const getInvoiceLabel = () => {
@@ -194,41 +201,84 @@ const Dashboard = ({
     }
   };
 
-  const todayEarnings = getTodaysSales();
-  const totalDue = getTotalDue();
-  const pendingBillsCount = invoices.filter(inv => inv.paymentStatus === 'Unpaid' || inv.paymentStatus === 'Partial' || inv.paymentStatus === 'unpaid' || inv.paymentStatus === 'partial' || inv.paymentStatus === 'Pending').length;
-  const recentInvoices = getRecentInvoices();
-  const recentPayments = getRecentPayments();
-  const pendingCollection = getPendingCollection();
-  const totalOverdue = getOverdueCount(pendingCollection);
-  const totalUpcoming = getUpcomingCount(pendingCollection);
-  const activities = getActivities();
-  const totalCustomers = customers.length;
-  const invoiceLabel = getInvoiceLabel();
-  const paidCount = invoices.filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid').length;
-  const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
-  const totalCollected = invoices
-    .filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid' || inv.paymentStatus === 'Partial' || inv.paymentStatus === 'partial' || inv.paymentStatus === 'Partially Paid')
-    .reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
-
-  const healthScore = Math.min(100, Math.round(
-    (invoices.length > 0 ? Math.min(paidCount / invoices.length, 1) * 40 : 0) +
-    (totalRevenue > 0 ? Math.min(totalCollected / totalRevenue, 1) * 30 : 0) +
-    (totalCustomers > 0 ? Math.min(totalCustomers / 10, 1) * 30 : 0)
-  ));
-  const collectionRate = totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0;
-  const newCustomersThisMonth = (() => {
+  const newCustomersThisMonth = useMemo(() => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     return customers.filter(c => c.createdAt && new Date(c.createdAt) >= startOfMonth).length;
-  })();
-  const activeCustomers = customers.filter(c => {
+  }, [customers]);
+  const activeCustomers = useMemo(() => customers.filter(c => {
     if (!c.updatedAt && !c.createdAt) return false;
     const lastActive = new Date(c.updatedAt || c.createdAt);
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     return lastActive >= thirtyDaysAgo;
-  }).length;
+  }).length, [customers]);
+  const totalCustomers = customers.length;
+  const invoiceLabel = getInvoiceLabel();
+
+  const invoiceDerived = useMemo(() => {
+    const todayEarnings = getTodaysSales();
+    const totalDue = getTotalDue();
+    const pendingBillsCount = invoices.filter(inv => {
+      const s = (inv.paymentStatus || '').toLowerCase();
+      return s === 'unpaid' || s === 'partial' || s === 'partially paid' || s === 'pending';
+    }).length;
+    const recentInvoices = getRecentInvoices();
+    const recentPayments = getRecentPayments();
+    const pendingCollection = getPendingCollection();
+    const totalOverdue = getOverdueCount(pendingCollection);
+    const totalUpcoming = getUpcomingCount(pendingCollection);
+    const activities = getActivities();
+    const paidCount = invoices.filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid').length;
+    const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
+    const totalCollected = invoices
+      .reduce((sum, inv) => {
+        const s = (inv.paymentStatus || '').toLowerCase();
+        if (s === 'paid') return sum + (inv.grandTotal || inv.total || 0);
+        if (s === 'partial' || s === 'partially paid') return sum + (parseFloat(inv.amountPaid) || 0);
+        return sum;
+      }, 0);
+    const healthScore = Math.min(100, Math.round(
+      (invoices.length > 0 ? Math.min(paidCount / invoices.length, 1) * 40 : 0) +
+      (totalRevenue > 0 ? Math.min(totalCollected / totalRevenue, 1) * 30 : 0) +
+      (totalCustomers > 0 ? Math.min(totalCustomers / 10, 1) * 30 : 0)
+    ));
+    const collectionRate = totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0;
+    const revenueTrend = getRevenueTrend();
+    const paymentBreakdown = getPaymentBreakdown();
+    const billsHealth = invoices.length > 0 ? Math.min(100, Math.round((paidCount / invoices.length) * 100)) : 0;
+    const paymentHealth = collectionRate;
+    const customerHealth = totalCustomers > 0 ? Math.min(100, Math.round((newCustomersThisMonth / Math.max(totalCustomers, 1)) * 200)) : 0;
+    const activityHealth = Math.min(100, activities.length * 10);
+    const dueHealth = pendingCollection.length > 0 ? Math.min(100, Math.max(0, 100 - Math.round((totalOverdue / pendingCollection.length) * 100))) : 100;
+    const overallHealth = Math.round((billsHealth + paymentHealth + customerHealth + activityHealth + dueHealth) / 5);
+    const topCustomers = getTopCustomers();
+    const dueNext7Days = getDueInNext7Days();
+    const busiestDay = getBusiestDay();
+    const avgInvoiceValue = totalRevenue > 0 ? totalRevenue / invoices.length : 0;
+    const collectionTrendData = revenueTrend.map(d => ({
+      ...d,
+      collectionRate: d.revenue > 0 ? Math.round((d.collection / d.revenue) * 100) : 0,
+    }));
+    return {
+      todayEarnings, totalDue, pendingBillsCount,
+      recentInvoices, recentPayments, pendingCollection,
+      totalOverdue, totalUpcoming, activities,
+      paidCount, totalRevenue, totalCollected,
+      healthScore, collectionRate, revenueTrend, paymentBreakdown,
+      billsHealth, paymentHealth, customerHealth, activityHealth, dueHealth, overallHealth,
+      topCustomers, dueNext7Days, busiestDay, avgInvoiceValue, collectionTrendData
+    };
+  }, [invoices, invoiceLabel, totalCustomers, newCustomersThisMonth]);
+  const {
+    todayEarnings, totalDue, pendingBillsCount,
+    recentInvoices, recentPayments, pendingCollection,
+    totalOverdue, totalUpcoming, activities,
+    paidCount, totalRevenue, totalCollected,
+    healthScore, collectionRate, revenueTrend, paymentBreakdown,
+    billsHealth, paymentHealth, customerHealth, activityHealth, dueHealth, overallHealth,
+    topCustomers, dueNext7Days, busiestDay, avgInvoiceValue, collectionTrendData
+  } = invoiceDerived;
   const workspaceName = businessSettings?.businessWorkspaces?.find(
     ws => ws.id === businessSettings.activeWorkspaceId
   )?.name || businessSettings?.businessName || 'Default';
@@ -238,93 +288,88 @@ const Dashboard = ({
   const enabledModulesCount = businessSettings?.businessModules?.filter(m => m.enabled)?.length || 0;
 
   const getRevenueTrend = () => {
-    const days = [];
+    const daily = {};
+    const now = new Date();
     for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toDateString();
-      const dayInv = invoices.filter(inv => {
-        const invDate = new Date(inv.createdAt);
-        return invDate.toDateString() === dateStr;
-      });
-      days.push({
-        day: date.toLocaleDateString('en-US', { weekday: 'short' }),
-        revenue: dayInv.reduce((s, inv) => s + (inv.grandTotal || inv.total || 0), 0),
-        collection: dayInv.filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid').reduce((s, inv) => s + (inv.grandTotal || inv.total || 0), 0),
-      });
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      daily[key] = { day: key, revenue: 0, collection: 0 };
     }
-    return days;
+    invoices.forEach(inv => {
+      const d = new Date(inv.createdAt);
+      const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      if (daily[key]) {
+        daily[key].revenue += inv.grandTotal || inv.total || 0;
+        if (inv.paymentStatus?.toLowerCase() === 'paid') {
+          daily[key].collection += inv.grandTotal || inv.total || 0;
+        } else {
+          daily[key].collection += parseFloat(inv.amountPaid) || 0;
+        }
+      }
+    });
+    return Object.values(daily);
   };
 
   const getPaymentBreakdown = () => {
-    const paid = invoices.filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid').length;
-    const unpaid = invoices.filter(inv => inv.paymentStatus === 'Unpaid' || inv.paymentStatus === 'unpaid').length;
-    const partial = invoices.filter(inv => inv.paymentStatus === 'Partial' || inv.paymentStatus === 'partial' || inv.paymentStatus === 'Partially Paid').length;
+    let paid = 0, partial = 0, unpaid = 0;
+    invoices.forEach(inv => {
+      const s = (inv.paymentStatus || '').toLowerCase();
+      const total = inv.grandTotal || inv.total || 0;
+      if (s === 'paid') paid += total;
+      else if (s === 'partial' || s === 'partially paid') partial += parseFloat(inv.amountPaid) || 0;
+      else unpaid += total;
+    });
     return [
       { name: 'Paid', value: paid, color: '#10B981' },
-      { name: 'Unpaid', value: unpaid, color: '#EF4444' },
       { name: 'Partial', value: partial, color: '#F59E0B' },
+      { name: 'Unpaid', value: unpaid, color: '#EF4444' },
     ];
   };
 
-  const revenueTrend = getRevenueTrend();
-  const paymentBreakdown = getPaymentBreakdown();
-
-  const billsHealth = invoices.length > 0 ? Math.min(100, Math.round((paidCount / invoices.length) * 100)) : 0;
-  const paymentHealth = collectionRate;
-  const customerHealth = totalCustomers > 0 ? Math.min(100, Math.round((newCustomersThisMonth / Math.max(totalCustomers, 1)) * 200)) : 0;
-  const activityHealth = Math.min(100, activities.length * 10);
-  const dueHealth = pendingCollection.length > 0 ? Math.min(100, Math.max(0, 100 - Math.round((totalOverdue / pendingCollection.length) * 100))) : 100;
-  const overallHealth = Math.round((billsHealth + paymentHealth + customerHealth + activityHealth + dueHealth) / 5);
-
   const getTopCustomers = () => {
-    const customerTotals = {};
+    const salesByCustomer = {};
     invoices.forEach(inv => {
       const name = inv.customerName || 'Walk-in';
-      customerTotals[name] = (customerTotals[name] || 0) + (inv.grandTotal || inv.total || 0);
+      if (!salesByCustomer[name]) salesByCustomer[name] = 0;
+      salesByCustomer[name] += inv.grandTotal || inv.total || 0;
     });
-    return Object.entries(customerTotals)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 5)
-      .map(([name, total]) => ({ name, total }));
+    return Object.entries(salesByCustomer)
+      .map(([name, total]) => ({ name, total }))
+      .sort((a, b) => b.total - a.total);
   };
 
   const getDueInNext7Days = () => {
     const now = new Date();
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    return invoices
-      .filter(inv => {
-        if (inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid') return false;
-        if (!inv.dueDate) return false;
-        const due = new Date(inv.dueDate);
-        return due >= now && due <= nextWeek;
-      })
-      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+    const sevenDays = new Date(now);
+    sevenDays.setDate(sevenDays.getDate() + 7);
+    return invoices.filter(inv => {
+      const s = (inv.paymentStatus || '').toLowerCase();
+      if (s === 'paid') return false;
+      if (!inv.dueDate) return false;
+      const due = new Date(inv.dueDate);
+      return due >= now && due <= sevenDays;
+    }).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
   };
 
   const getBusiestDay = () => {
-    const dayCounts = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
+    const dayCount = { Sunday: 0, Monday: 0, Tuesday: 0, Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0 };
     invoices.forEach(inv => {
-      const day = new Date(inv.createdAt).toLocaleDateString('en-US', { weekday: 'short' });
-      if (dayCounts[day] !== undefined) dayCounts[day]++;
+      if (inv.createdAt) {
+        const day = new Date(inv.createdAt).toLocaleDateString('en-US', { weekday: 'long' });
+        if (dayCount[day] !== undefined) dayCount[day]++;
+      }
     });
-    return Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+    const maxDay = Object.entries(dayCount).reduce((a, b) => a[1] > b[1] ? a : b, ['N/A', 0]);
+    return maxDay[1] > 0 ? maxDay[0] : 'N/A';
   };
-
-  const topCustomers = getTopCustomers();
-  const dueNext7Days = getDueInNext7Days();
-  const busiestDay = getBusiestDay();
-  const avgInvoiceValue = totalRevenue > 0 ? totalRevenue / invoices.length : 0;
-  const collectionTrendData = revenueTrend.map(d => ({
-    ...d,
-    pending: Math.max(0, d.revenue - d.collection)
-  }));
 
   const statusBadge = (status) => {
     const s = (status || '').toLowerCase();
     if (s === 'paid') return { label: 'Paid', classes: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
     if (s === 'partial' || s === 'partially paid') return { label: 'Partial', classes: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
+    if (s === 'pending' || s === 'pending verification') return { label: 'Pending', classes: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
+    if (s === 'overdue') return { label: 'Overdue', classes: 'bg-red-500/10 text-red-500 border-red-500/20' };
     return { label: 'Due', classes: 'bg-red-500/10 text-red-500 border-red-500/20' };
   };
 
@@ -363,22 +408,22 @@ const Dashboard = ({
 
   const KpiCard = ({ title, value, icon: Icon, trend, trendUp = true }) => (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-theme-card border border-theme-border-soft rounded-xl p-3.5 shadow-sm hover:shadow-premium-hover transition-all duration-300 relative overflow-hidden group"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] } }}
+      className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-premium-sm hover:shadow-premium-hover transition-all duration-200 hover:-translate-y-0.5 relative overflow-hidden group"
     >
       <div className="flex items-start justify-between mb-2">
-        <div className="p-2 rounded-lg bg-theme-accent/10 text-theme-accent group-hover:scale-110 transition-transform shrink-0">
+        <div className="p-2 rounded-lg bg-theme-accent/10 text-theme-accent group-hover:scale-105 transition-transform shrink-0">
           {Icon && <Icon className="w-3.5 h-3.5" />}
         </div>
         {trend && (
-          <span className={`flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded ${trendUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+          <span className={`flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full ${trendUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
             <TrendingUp className={`w-2.5 h-2.5 ${!trendUp ? 'rotate-180' : ''}`} /> {trend}
           </span>
         )}
       </div>
-      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-0.5">{title}</p>
-      <p className="text-lg font-black text-theme-primary tracking-tight tabular-nums"><AnimatedNumber value={value} /></p>
+      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-1">{title}</p>
+      <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums"><AnimatedNumber value={value} /></p>
     </motion.div>
   );
 
@@ -386,13 +431,13 @@ const Dashboard = ({
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.04 }
+      transition: { staggerChildren: 0.05 }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 12 },
-    visible: { opacity: 1, y: 0 }
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] } }
   };
 
   return (
@@ -400,7 +445,7 @@ const Dashboard = ({
       <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
         <div className="min-h-screen bg-theme-surface/50">
         {/* ===== MOBILE VIEW (< 1024px) ===== */}
-        <div className="lg:hidden px-3 sm:px-4 max-w-2xl mx-auto space-y-3 pb-4 pt-2">
+        <div className="lg:hidden px-3 sm:px-4 max-w-2xl mx-auto space-y-4 pb-6 pt-3">
           {pendingPaymentsCount > 0 && (
             <motion.button
               initial={{ opacity: 0, y: -10 }}
@@ -727,7 +772,7 @@ const Dashboard = ({
                         </p>
                       </div>
                       <div className="text-right ml-2">
-                        <p className="text-sm font-black text-theme-primary">{formatCurrency(inv.total || 0)}</p>
+                        <p className="text-sm font-black text-theme-primary">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
                         <span className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full mt-0.5 ${statusBadge(inv.paymentStatus).classes}`}>
                           {statusBadge(inv.paymentStatus).label}
                         </span>
@@ -882,8 +927,8 @@ const Dashboard = ({
         </div>
 
         {/* ===== DESKTOP VIEW (>= 1024px) ===== */}
-        <div className="hidden lg:block w-full max-w-screen-2xl mx-auto px-5 py-4">
-          <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-4">
+        <div className="hidden lg:block w-full max-w-screen-2xl mx-auto px-6 py-5">
+          <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-5">
 
             {/* Banners Row */}
             {pendingPaymentsCount > 0 && (
@@ -956,7 +1001,7 @@ const Dashboard = ({
                     <Plus className="w-4 h-4" /> Create Bill
                   </button>
                 </div>
-                <div className="grid grid-cols-4 gap-4 mt-5">
+                <div className="grid grid-cols-4 gap-5 mt-5">
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5">
                     <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Today's Earnings</p>
                     <p className="text-xl font-black text-white mt-0.5 tabular-nums">{formatCurrency(todayEarnings)}</p>
@@ -978,7 +1023,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== QUICK STATS ROW ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-4 gap-4">
+            <motion.div variants={itemVariants} className="grid grid-cols-4 gap-5">
               {(() => {
                 const today = new Date().toDateString();
                 const billsToday = invoices.filter(i => new Date(i.createdAt).toDateString() === today).length;
@@ -1033,7 +1078,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== ROW 1: KPI CARDS ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-4 gap-4">
+            <motion.div variants={itemVariants} className="grid grid-cols-4 gap-5">
               {isInitialLoad ? (
                 <KPISkeleton count={4} />
               ) : (
@@ -1075,7 +1120,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== BUSINESS HEALTH + COLLECTION SUMMARY ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-5">
               <div className="col-span-4 card-premium p-5 flex flex-col">
                 <div className="section-header">
                   <h3 className="section-header-title">Business Health</h3>
@@ -1150,7 +1195,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== ROW 2: CHARTS ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-5">
               {/* Revenue Trend */}
               <div className="col-span-6 card-premium p-5">
                 <div className="section-header">
@@ -1254,7 +1299,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== CUSTOMER INSIGHTS + WORKSPACE INFO ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-5">
               <div className="col-span-7 card-premium p-5">
                 <div className="section-header">
                   <div>
@@ -1312,7 +1357,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== TOP CUSTOMERS + BUSINESS INSIGHTS ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-5">
               <div className="col-span-6 card-premium p-5">
                 <div className="section-header">
                   <div>
@@ -1346,7 +1391,7 @@ const Dashboard = ({
                   <h3 className="section-header-title">Business Insights</h3>
                 </div>
                 <p className="section-header-subtitle mb-6">Key metrics driving your business.</p>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-5">
                   <div className="stat-premium !p-4">
                     <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Busiest Day</p>
                     <p className="text-2xl font-black text-theme-primary tabular-nums">{busiestDay !== 'N/A' ? busiestDay : '-'}</p>
@@ -1372,7 +1417,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== ROW 3: BOTTOM AREA ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-5">
               {/* Recent Bills List */}
               <div className="col-span-8 card-premium p-5">
                 <div className="section-header">
@@ -1505,7 +1550,7 @@ const Dashboard = ({
             )}
 
             {/* ===== ROW 4: ACTIVITY FEED + QUICK ACTIONS + SYNC STATUS ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-4">
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-5">
               <div className="col-span-7">
                 <ActivityFeed activities={activities} maxItems={6} />
               </div>

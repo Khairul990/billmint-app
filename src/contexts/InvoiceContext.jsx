@@ -207,6 +207,23 @@ const invoiceReducer = (state, action) => {
       };
     }
     
+    case 'ADD_STATUS_AUDIT': {
+      const auditEntry = {
+        action: "payment_status_changed",
+        oldStatus: action.payload.oldStatus,
+        newStatus: action.payload.newStatus,
+        timestamp: new Date().toISOString()
+      };
+      const existingAudit = state.settings.auditHistory || [];
+      return {
+        ...state,
+        settings: {
+          ...state.settings,
+          auditHistory: [...existingAudit, auditEntry]
+        }
+      };
+    }
+
     case 'ADD_PAYMENT_PROOF': {
       return {
         ...state,

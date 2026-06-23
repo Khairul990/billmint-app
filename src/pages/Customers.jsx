@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import AnimatedPage from '../components/AnimatedPage';
 import {
@@ -94,7 +94,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
   };
 
   // Filter CRM Registry
-  const filteredCustomers = customers.filter(c => {
+  const filteredCustomers = useMemo(() => customers.filter(c => {
     const q = searchQuery.toLowerCase();
     return (
       c.name.toLowerCase().includes(q) ||
@@ -102,12 +102,12 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
       (c.email && c.email.toLowerCase().includes(q)) ||
       (c.address && c.address.toLowerCase().includes(q))
     );
-  });
+  }), [customers, searchQuery]);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     await syncFromFirestore();
     window.dispatchEvent(new Event('billqyro_sync'));
-  };
+  }, []);
 
   return (
     <AnimatedPage>

@@ -20,17 +20,18 @@ html {
 
 /* Global Theme Transition */
 body, body *, ::before, ::after {
-  transition: background-color 200ms ease-in-out, 
-              border-color 200ms ease-in-out, 
-              color 200ms ease-in-out, 
-              box-shadow 200ms ease-in-out,
-              fill 200ms ease-in-out,
-              stroke 200ms ease-in-out;
+  transition: background-color 250ms cubic-bezier(0.25, 0.1, 0.25, 1), 
+              border-color 250ms cubic-bezier(0.25, 0.1, 0.25, 1), 
+              color 250ms cubic-bezier(0.25, 0.1, 0.25, 1), 
+              box-shadow 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+              fill 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+              stroke 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 /* Override for elements that define their own transitions (e.g. Tailwind transition-all) so hover states aren't sluggish */
 .transition, .transition-all, .transition-colors, .transition-opacity, .transition-shadow, .transition-transform {
   transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .tabular-nums {
@@ -559,15 +560,16 @@ body, body *, ::before, ::after {
 
 /* Custom Scrollbar for better UI experience */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--app-bg);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border-strong);
   border-radius: 10px;
+  transition: background var(--transition-base) ease;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent);

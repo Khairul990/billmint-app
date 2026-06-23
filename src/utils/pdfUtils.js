@@ -2,6 +2,8 @@ import React from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { PDFInvoice } from '../components/PDFInvoice';
 
+let isDownloadingPDF = false;
+
 /**
  * Generates and downloads a high-quality vector PDF of the invoice using @react-pdf/renderer
  * @param {Object} invoice - Invoice data object
@@ -10,6 +12,8 @@ import { PDFInvoice } from '../components/PDFInvoice';
  * @returns {Promise<boolean>} Success indicator
  */
 export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) => {
+  if (isDownloadingPDF) return false;
+  isDownloadingPDF = true;
   try {
     const doc = React.createElement(PDFInvoice, { invoice, businessSettings, isPremium });
     const blob = await pdf(doc).toBlob();
@@ -29,6 +33,8 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
   } catch (error) {
     console.error('Vector PDF generation failed:', error);
     return false;
+  } finally {
+    isDownloadingPDF = false;
   }
 };
 

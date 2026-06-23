@@ -2,20 +2,20 @@ import { motion } from 'framer-motion';
 
 // Page transition variants
 export const pageVariants = {
-  initial: { opacity: 0, y: 12 },
+  initial: { opacity: 0, y: 10 },
   animate: { 
     opacity: 1, 
     y: 0,
     transition: { 
-      duration: 0.25, 
+      duration: 0.3, 
       ease: [0.25, 0.1, 0.25, 1],
       when: 'beforeChildren',
-      staggerChildren: 0.05
+      staggerChildren: 0.04
     }
   },
   exit: { 
     opacity: 0, 
-    y: -8,
+    y: -6,
     transition: { 
       duration: 0.15,
       ease: [0.25, 0.1, 0.25, 1]
@@ -26,7 +26,7 @@ export const pageVariants = {
 export const pageTransition = {
   type: 'tween',
   ease: [0.25, 0.1, 0.25, 1],
-  duration: 0.25,
+  duration: 0.3,
 };
 
 // Stagger container for lists
@@ -35,14 +35,14 @@ export const staggerContainer = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.05,
+      staggerChildren: 0.04,
+      delayChildren: 0.04,
     }
   }
 };
 
 export const staggerItem = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0, y: 12 },
   visible: { 
     opacity: 1, 
     y: 0,
@@ -54,16 +54,16 @@ export const staggerItem = {
 };
 
 export const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: { 
     opacity: 1, 
     y: 0,
-    transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }
+    transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
   }
 };
 
 export const fadeInDown = {
-  hidden: { opacity: 0, y: -12 },
+  hidden: { opacity: 0, y: -10 },
   visible: { 
     opacity: 1, 
     y: 0,
@@ -118,12 +118,12 @@ export const slideInLeft = {
 // Modal animation
 export const modalOverlayVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.15 } },
-  exit: { opacity: 0, transition: { duration: 0.1 } }
+  visible: { opacity: 1, transition: { duration: 0.2 } },
+  exit: { opacity: 0, transition: { duration: 0.15 } }
 };
 
 export const modalContentVariants = {
-  hidden: { opacity: 0, scale: 0.95, y: 20 },
+  hidden: { opacity: 0, scale: 0.96, y: 16 },
   visible: { 
     opacity: 1, 
     scale: 1, 
@@ -132,8 +132,8 @@ export const modalContentVariants = {
   },
   exit: { 
     opacity: 0, 
-    scale: 0.95, 
-    y: 10,
+    scale: 0.96, 
+    y: 8,
     transition: { duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }
   }
 };
@@ -151,8 +151,8 @@ export const sheetContentVariants = {
     y: 0,
     transition: { 
       type: 'spring', 
-      damping: 30, 
-      stiffness: 300,
+      damping: 28, 
+      stiffness: 280,
       mass: 0.8
     }
   },
@@ -199,8 +199,8 @@ export const notificationVariants = {
     scale: 1,
     transition: { 
       type: 'spring', 
-      damping: 25, 
-      stiffness: 300
+      damping: 26, 
+      stiffness: 280
     }
   },
   exit: { 
@@ -218,11 +218,11 @@ export const notificationVariants = {
 export const cardHover = {
   rest: { scale: 1, y: 0 },
   hover: { 
-    scale: 1.01, 
-    y: -2,
+    scale: 1.005, 
+    y: -1,
     transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
   },
-  tap: { scale: 0.99 }
+  tap: { scale: 0.985 }
 };
 
 // Count up animation helper
@@ -250,14 +250,14 @@ export const gridStagger = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.03,
-      delayChildren: 0.05,
+      staggerChildren: 0.035,
+      delayChildren: 0.04,
     }
   }
 };
 
 export const gridItem = {
-  hidden: { opacity: 0, y: 20, scale: 0.98 },
+  hidden: { opacity: 0, y: 16, scale: 0.98 },
   visible: {
     opacity: 1,
     y: 0,
@@ -273,7 +273,7 @@ export const gridItem = {
 export const scaleOnHover = {
   rest: { scale: 1 },
   hover: {
-    scale: 1.03,
+    scale: 1.02,
     transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
   },
   tap: { scale: 0.97 }
@@ -287,14 +287,14 @@ export const buttonTap = {
     transition: { duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }
   },
   tap: {
-    scale: 0.95,
+    scale: 0.96,
     transition: { duration: 0.1, ease: [0.25, 0.1, 0.25, 1] }
   }
 };
 
 // Individual list item animation with slide + fade
 export const listItem = {
-  hidden: { opacity: 0, x: -12 },
+  hidden: { opacity: 0, x: -10 },
   visible: {
     opacity: 1,
     x: 0,
@@ -305,8 +305,8 @@ export const listItem = {
   },
   exit: {
     opacity: 0,
-    x: 12,
-    transition: { duration: 0.15 }
+    x: 10,
+    transition: { duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }
   }
 };
 

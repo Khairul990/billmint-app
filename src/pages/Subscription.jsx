@@ -469,7 +469,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                   <p className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">Days Left</p>
                 </div>
               )}
-              <button className="btn-premium text-xs px-4 py-2.5 rounded-xl font-black uppercase tracking-wider flex items-center gap-1.5">
+              <button onClick={() => { if (pendingReq) { toast('You already have a pending upgrade request.'); return; } setShowUpgradeForm(true); }} className="btn-premium text-xs px-4 py-2.5 rounded-xl font-black uppercase tracking-wider flex items-center gap-1.5">
                 <RefreshCw className="w-3 h-3" /> Renew
               </button>
             </div>
@@ -671,7 +671,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                 <RefreshCw className="w-5 h-5 text-theme-muted mb-2" />
                 <p className="text-[10px] uppercase font-black text-theme-muted tracking-wider">Next Renewal</p>
                 <p className="text-sm font-black text-theme-primary mt-1">{renewalDateStr || 'Auto-renew'}</p>
-                <button className="btn-premium mt-2 text-[9px] px-3 py-1.5 rounded-lg font-black uppercase tracking-wider flex items-center gap-1">
+                <button onClick={() => { if (pendingReq) { toast('You already have a pending upgrade request.'); return; } setShowUpgradeForm(true); }} className="btn-premium mt-2 text-[9px] px-3 py-1.5 rounded-lg font-black uppercase tracking-wider flex items-center gap-1">
                   <RotateCcw className="w-3 h-3" /> Extend Plan
                 </button>
               </div>

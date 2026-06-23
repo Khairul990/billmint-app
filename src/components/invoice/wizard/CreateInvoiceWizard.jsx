@@ -46,18 +46,6 @@ const CreateInvoiceWizard = ({ onSaveInvoice, onDownloadPDF, setCurrentTab, cust
     initNumber();
   }, [state.invoiceNumber, state.generatingNumber, dispatch]);
 
-  // Auto-save Draft every 60 seconds if we have at least one item or a customer
-  useEffect(() => {
-    const autoSaveInterval = setInterval(() => {
-      const hasContent = state.customer.name || state.items.some(i => i.description || i.designNo || i.rate > 0);
-      if (hasContent && onSaveInvoice) {
-        handleSave('Draft', true); // Silent auto-save
-      }
-    }, 60000);
-
-    return () => clearInterval(autoSaveInterval);
-  }, [state, onSaveInvoice]);
-
   const handleSave = (statusOverride, isSilent = false) => {
     // Basic validation before saving
     if (!state.customer.name && statusOverride !== 'Draft') {

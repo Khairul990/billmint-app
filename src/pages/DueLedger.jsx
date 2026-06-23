@@ -14,10 +14,13 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
 
   const dueBills = useMemo(() => {
     return invoices
-      .filter(inv => inv.status === 'unpaid' || inv.status === 'partial')
+      .filter(inv => {
+        const s = (inv.paymentStatus || '').toLowerCase();
+        return s === 'unpaid' || s === 'partial' || s === 'partially paid';
+      })
       .map(inv => ({
         ...inv,
-        dueAmount: inv.dueAmount || (inv.total || 0) - (inv.amountPaid || 0),
+        dueAmount: inv.dueAmount || (inv.grandTotal || inv.total || 0) - (inv.amountPaid || 0),
         dueDate: new Date(inv.dueDate || inv.createdAt)
       }))
       .sort((a, b) => a.dueDate - b.dueDate);
@@ -314,7 +317,16 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
         <button className="btn-premium text-[10px] !min-h-[36px] !px-4 flex items-center gap-1.5 bg-emerald-500 text-white">
           <CheckCircle2 className="w-3.5 h-3.5" /> Mark Paid
         </button>
-        <button className="btn-premium text-[10px] !min-h-[36px] !px-4 flex items-center gap-1.5 bg-theme-card border border-theme-border-soft text-theme-primary">
+        <button onClick={() => {
+          const csvRows = ['Customer,Invoice No,Due Date,Amount,Status'];
+          dueBills.forEach(b => {
+            csvRows.push(`"${b.customerName || 'Walk-in'}","${b.invoiceNumber || ''}","${new Date(b.dueDate).toLocaleDateString()}","${formatCurrency(b.dueAmount)}","${b.paymentStatus || 'Unpaid'}"`);
+          });
+          const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = 'DueList.csv'; a.click();
+          URL.revokeObjectURL(url);
+        }} className="btn-premium text-[10px] !min-h-[36px] !px-4 flex items-center gap-1.5 bg-theme-card border border-theme-border-soft text-theme-primary">
           <Download className="w-3.5 h-3.5" /> Export Due List
         </button>
       </motion.div>
@@ -415,6 +427,16 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
         invoices={invoices}
         currencySymbol={currencySymbol}
       />
+
+      <style dangerouslySetInnerHTML={{__html: `
+        @media print {
+          body { background: white !important; color: black !important; }
+          .no-print { display: none !important; }
+          .bg-theme-card { background: white !important; border: 1px solid #ddd !important; box-shadow: none !important; }
+          table { width: 100% !important; border-collapse: collapse; }
+          th, td { border: 1px solid #ddd; padding: 6px !important; color: black !important; font-size: 10px !important; }
+        }
+      `}} />
     </motion.div>
   );
 };

@@ -50,9 +50,9 @@ const ActivityFeed = ({ activities = [], maxItems = 10 }) => {
             <motion.div
               key={activity.id || idx}
               variants={staggerItem}
-              className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-theme-surface transition-colors group"
+              className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-theme-surface transition-all duration-200 group"
             >
-              <div className={`w-9 h-9 rounded-xl ${config.bg} ${config.color} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+              <div className={`w-9 h-9 rounded-xl ${config.bg} ${config.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200`}>
                 <Icon className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">

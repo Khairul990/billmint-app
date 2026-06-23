@@ -776,6 +776,9 @@ function App() {
       payload.orderStatus = payload.settings.orderStatus || payload.orderStatus || 'Pending';
       payload.paymentMethod = payload.settings.paymentMethod || payload.paymentMethod || 'Cash';
       payload.paymentNote = payload.settings.paymentNote || payload.paymentNote || '';
+      if (payload.settings.auditHistory) {
+        payload.auditHistory = payload.settings.auditHistory;
+      }
       delete payload.settings;
     }
 

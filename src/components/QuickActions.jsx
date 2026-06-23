@@ -36,12 +36,12 @@ const QuickActions = ({ actions = defaultActions, onAction, setCurrentTab }) => 
             <motion.button
               key={action.id}
               variants={staggerItem}
-              whileHover={{ y: -2 }}
+              whileHover={{ y: -1, scale: 1.01 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleClick(action)}
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-theme-surface hover:bg-theme-accent-light transition-all group border border-theme-border-soft"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-theme-surface hover:bg-theme-accent/10 transition-all duration-200 group border border-theme-border-soft hover:border-theme-accent/20"
             >
-              <div className={`w-10 h-10 rounded-xl ${action.color} text-white flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow`}>
+              <div className={`w-10 h-10 rounded-xl ${action.color} text-white flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-200`}>
                 <Icon className="w-5 h-5" />
               </div>
               <span className="text-2xs font-bold text-theme-primary text-center">{action.label}</span>

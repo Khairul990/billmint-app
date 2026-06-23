@@ -20,15 +20,14 @@ const StatCard = ({ title, value, icon: Icon, trend, trendUp = true, accentColor
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="stat-premium group cursor-pointer hover:shadow-premium-xl"
+      className="stat-premium group cursor-pointer"
       onClick={onClick}
-      whileHover={{ scale: 1.01, y: -2 }}
+      whileHover={{ scale: 1.005, y: -1 }}
       whileTap={{ scale: 0.99 }}
       transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-      style={{ transition: 'box-shadow 0.25s ease' }}
     >
       <div className="flex items-start justify-between mb-3">
-        <div className="icon-premium shrink-0 group-hover:scale-110 transition-transform duration-300">
+        <div className="icon-premium shrink-0 group-hover:scale-105 transition-transform duration-200">
           {Icon && <Icon className="w-4 h-4" />}
         </div>
         {trend && (
@@ -45,7 +44,7 @@ const StatCard = ({ title, value, icon: Icon, trend, trendUp = true, accentColor
       <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">{title}</p>
       <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums">{value}</p>
       {subtitle && (
-        <p className="text-2xs text-theme-muted font-medium mt-1">{subtitle}</p>
+        <p className="text-2xs text-theme-muted font-medium mt-1.5">{subtitle}</p>
       )}
     </motion.div>
   );

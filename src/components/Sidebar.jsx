@@ -113,12 +113,12 @@ const Sidebar = ({
       style={{
         width: isCollapsed ? 72 : 240,
         minWidth: isCollapsed ? 72 : 240,
-        transition: isMounted ? 'width 180ms cubic-bezier(0.4,0,0.2,1), min-width 180ms cubic-bezier(0.4,0,0.2,1)' : 'none',
+        transition: isMounted ? 'width 200ms cubic-bezier(0.25,0.1,0.25,1), min-width 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none',
       }}
     >
       {/* Brand Header */}
       <div className="shrink-0 border-b border-theme-accent/50 flex items-center justify-between overflow-hidden"
-        style={{ padding: isCollapsed ? '16px 12px' : '20px 20px', transition: isMounted ? 'padding 180ms ease' : 'none' }}
+        style={{ padding: isCollapsed ? '16px 12px' : '20px 20px', transition: isMounted ? 'padding 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none' }}
       >
         {isCollapsed ? (
           <div className="w-full flex justify-center">
@@ -135,7 +135,7 @@ const Sidebar = ({
         <div className={`flex items-center rounded-xl overflow-hidden ${
           isCollapsed ? 'justify-center p-1' : 'gap-2.5 p-1 min-w-0 flex-1'
         }`}
-          style={{ transition: isMounted ? 'all 180ms ease' : 'none' }}
+          style={{ transition: isMounted ? 'all 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none' }}
         >
           {businessSettings?.logoUrl ? (
             <img
@@ -174,7 +174,7 @@ const Sidebar = ({
 
       {/* Nav Menu */}
       <nav className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar"
-        style={{ padding: isCollapsed ? '8px 8px' : '8px 12px', transition: isMounted ? 'padding 180ms ease' : 'none' }}
+        style={{ padding: isCollapsed ? '8px 8px' : '8px 12px', transition: isMounted ? 'padding 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none' }}
       >
         <div className="space-y-0.5">
           {menuItems.map((item, idx) => {
@@ -197,7 +197,7 @@ const Sidebar = ({
                     triggerLightHaptic();
                     setCurrentTab(item.id);
                   }}
-                  className={`relative w-full flex items-center rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer overflow-hidden ${
+                  className={`relative w-full flex items-center rounded-xl text-sm font-semibold transition-all duration-200 ease-[cubic-bezier(0.25,0.1,0.25,1)] cursor-pointer overflow-hidden ${
                     isCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3.5 py-2.5'
                   } ${
                     isActive
@@ -233,7 +233,7 @@ const Sidebar = ({
                   {/* Label - only show when expanded */}
                   {!isCollapsed && (
                     <span className="relative z-10 truncate whitespace-nowrap text-[13px]"
-                      style={{ opacity: isCollapsed ? 0 : 1, transition: 'opacity 200ms ease' }}
+                      style={{ opacity: isCollapsed ? 0 : 1, transition: 'opacity 200ms cubic-bezier(0.25,0.1,0.25,1)' }}
                     >
                       {item.label}
                     </span>
@@ -264,7 +264,7 @@ const Sidebar = ({
 
       {/* Sidebar Footer */}
       <div className="shrink-0 border-t border-theme-accent/50 bg-theme-sidebar/50"
-        style={{ padding: isCollapsed ? '12px 8px' : '16px 12px', transition: isMounted ? 'padding 180ms ease' : 'none' }}
+        style={{ padding: isCollapsed ? '12px 8px' : '16px 12px', transition: isMounted ? 'padding 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none' }}
       >
         <button
           onClick={() => setCurrentTab('subscription')}

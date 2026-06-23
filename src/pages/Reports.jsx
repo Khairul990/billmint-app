@@ -77,7 +77,7 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
 
       return true;
     }).map(inv => {
-      const grandTotal = parseFloat(inv.total || inv.grandTotal) || 0;
+      const grandTotal = parseFloat(inv.grandTotal || inv.total) || 0;
       let paid = 0;
       if (inv.paymentStatus === 'Paid') paid = grandTotal;
       else paid = parseFloat(inv.amountPaid) || 0;
@@ -657,7 +657,7 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
           .bg-theme-card, .bg-theme-surface { background: transparent !important; border: none !important; box-shadow: none !important; }
           table { width: 100% !important; border: 1px solid #ddd; }
           th, td { border: 1px solid #eee; padding: 8px !important; color: black !important; }
-          span { color: black !important; background: transparent !important; border: none !important; }
+          .print-container span:not(.badge-premium):not(.badge):not([class*="badge"]) { color: black !important; background: transparent !important; border: none !important; }
         }
       `}} />
     </motion.div>

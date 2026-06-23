@@ -10,7 +10,7 @@ const PaymentProofCenter = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Pending');
   const [selectedProof, setSelectedProof] = useState(null);
-  const [adminNote, setAdminNote] = useState('');
+  const [adminNotes, setAdminNotes] = useState({});
   const [processingId, setProcessingId] = useState(null);
 
   const fetchProofs = async () => {
@@ -29,14 +29,18 @@ const PaymentProofCenter = () => {
     fetchProofs();
   }, []);
 
+  const getAdminNote = (proofId) => adminNotes[proofId] || '';
+  const setAdminNoteFor = (proofId, value) => setAdminNotes(prev => ({ ...prev, [proofId]: value }));
+
   const handleAction = async (proof, status) => {
     setProcessingId(proof.id);
     try {
-      const success = await updatePlatformPaymentProofStatus(proof.id, status, adminNote, []);
+      const note = getAdminNote(proof.id);
+      const success = await updatePlatformPaymentProofStatus(proof.id, status, note, []);
       if (success) {
         toast.success(`Payment proof successfully ${status.toLowerCase()}!`);
         setSelectedProof(null);
-        setAdminNote('');
+        setAdminNotes(prev => { const n = { ...prev }; delete n[proof.id]; return n; });
         fetchProofs();
       } else {
         toast.error('Failed to update payment proof status.');
@@ -214,8 +218,8 @@ const PaymentProofCenter = () => {
                       <input 
                         type="text" 
                         placeholder="Add admin review comments or note..."
-                        value={adminNote}
-                        onChange={(e) => setAdminNote(e.target.value)}
+                        value={getAdminNote(proof.id)}
+                        onChange={(e) => setAdminNoteFor(proof.id, e.target.value)}
                         className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-purple-500 transition-all placeholder-slate-600 font-semibold"
                       />
                     </div>

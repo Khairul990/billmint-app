@@ -1,8 +1,8 @@
 import React from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { Loader2, Cloud, CloudOff, FileText, Eye, ArrowLeft } from 'lucide-react';
+import { Loader2, Cloud, CloudOff, FileText, Eye, ArrowLeft, Save } from 'lucide-react';
 
-const StudioHeader = ({ showPreviewModal, setShowPreviewModal, lastSaved, saveStatus, isSaving, onDownloadPDF, onBack }) => {
+const StudioHeader = ({ showPreviewModal, setShowPreviewModal, lastSaved, saveStatus, isSaving, onSaveDraft, onDownloadPDF, onBack }) => {
   const { state, dispatch } = useInvoice();
 
   return (
@@ -52,6 +52,19 @@ const StudioHeader = ({ showPreviewModal, setShowPreviewModal, lastSaved, saveSt
 
       {/* Right: Actions */}
       <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+
+        {/* Save Draft Button */}
+        <button
+          onClick={onSaveDraft}
+          disabled={isSaving || saveStatus === 'saved'}
+          className="flex items-center justify-center gap-1.5 px-4 py-2 bg-theme-accent hover:bg-theme-accent/90 text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition-all shadow-sm disabled:opacity-50"
+        >
+          {isSaving ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /> Saving Draft</>
+          ) : (
+            <><Save className="w-4 h-4" /> Save Draft</>
+          )}
+        </button>
 
         {/* Preview Button */}
         <button

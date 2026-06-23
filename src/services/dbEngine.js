@@ -1727,6 +1727,30 @@ export const saveInvoice = async (invoice) => {
       activeSettings.nextInvoiceNumber = nextNum + 1;
     }
     saveSettings(activeSettings); // Save the updated sequence counter
+  } else {
+    // Check manually entered invoice number for duplicates
+    const duplicate = invoices.some(inv => inv.invoiceNumber === invoice.invoiceNumber && inv.id !== invoice.id);
+    if (duplicate) {
+      const isEstimate = invoice.billType === 'Estimate';
+      const prefix = isEstimate 
+        ? (activeSettings.estimatePrefix || 'EST-') 
+        : (activeSettings.invoicePrefix || 'INV-');
+      let nextNum = isEstimate 
+        ? (activeSettings.nextEstimateNumber || 1) 
+        : (activeSettings.nextInvoiceNumber || 1);
+      let uniqueStr = `${prefix}${String(nextNum).padStart(4, '0')}`;
+      while (invoices.some(inv => inv.invoiceNumber === uniqueStr)) {
+        nextNum++;
+        uniqueStr = `${prefix}${String(nextNum).padStart(4, '0')}`;
+      }
+      invoice.invoiceNumber = uniqueStr;
+      if (isEstimate) {
+        activeSettings.nextEstimateNumber = nextNum + 1;
+      } else {
+        activeSettings.nextInvoiceNumber = nextNum + 1;
+      }
+      saveSettings(activeSettings);
+    }
   }
 
   if (!invoice.businessSnapshot) {

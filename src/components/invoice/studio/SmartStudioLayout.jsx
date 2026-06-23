@@ -14,7 +14,8 @@ import LiveInvoicePreview from '../LiveInvoicePreview';
 import { ensureInvoicePublicToken } from '../../../services/dbEngine';
 
 const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, onBack }) => {
-  const { state, dispatch, businessSettings } = useInvoice();
+  const { state, dispatch, businessSettings, editingInvoice } = useInvoice();
+  const isPaidLocked = editingInvoice && (editingInvoice.paymentStatus === 'Paid');
   const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.businessType || 'retail';
   const customerLabel = getCustomerLabelByType(wsType);
   
@@ -26,6 +27,8 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
   const [showExitPrompt, setShowExitPrompt] = useState(false);
   const [savedInvoiceResult, setSavedInvoiceResult] = useState(null);
   const [publicToken, setPublicToken] = useState(null);
+  const [isOpeningLink, setIsOpeningLink] = useState(false);
+  const [isSharingWhatsApp, setIsSharingWhatsApp] = useState(false);
   
   const onSaveInvoiceRef = React.useRef(onSaveInvoice);
   useEffect(() => {
@@ -38,11 +41,23 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
     const currentSnapshot = JSON.stringify(state);
     if (savedSnapshotRef.current !== currentSnapshot) {
       const hasContent = state.customer.name || state.items.some(i => i.description || i.qty > 0);
-      if (hasContent) {
+      if (hasContent && !isPaidLocked) {
         setSaveStatus('unsaved');
       }
     }
-  }, [state]);
+  }, [state, isPaidLocked]);
+
+  // beforeunload protection
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (saveStatus === 'unsaved') {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [saveStatus]);
 
   const validateBeforeSave = () => {
     if (!state.customer.name) {
@@ -67,8 +82,10 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
   };
 
   const executeSave = async () => {
+    if (isSaving) return null;
     if (!validateBeforeSave()) return null;
     setIsSaving(true);
+    setSaveStatus('saving');
     try {
       const payload = { ...state, paymentStatus: state.settings.paymentStatus };
       const savedInvoice = await onSaveInvoiceRef.current(payload, state.saveCustomer && !state.customer.id, true);
@@ -89,6 +106,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
       return { invoice: savedInvoice, token };
     } catch (err) {
       console.error(err);
+      setSaveStatus('unsaved');
       toast.error('Failed to save invoice.');
       return null;
     } finally {
@@ -104,10 +122,60 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
   };
 
   const handleDownloadPDF = async () => {
+    if (saveStatus === 'unsaved') {
+      setShowPDFConfirm(true);
+      return;
+    }
     if (!validateBeforeSave()) return;
     const result = await executeSave();
     if (result?.invoice && onDownloadPDF) {
       onDownloadPDF(result.invoice);
+    }
+  };
+
+  const [showPDFConfirm, setShowPDFConfirm] = useState(false);
+  const handleSaveAndPDF = async () => {
+    setShowPDFConfirm(false);
+    if (!validateBeforeSave()) return;
+    const result = await executeSave();
+    if (result?.invoice && onDownloadPDF) {
+      onDownloadPDF(result.invoice);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (isSaving) return null;
+    if (isPaidLocked) {
+      toast.error('Cannot save draft on a paid invoice.');
+      return null;
+    }
+    setIsSaving(true);
+    setSaveStatus('saving');
+    try {
+      const payload = { ...state, paymentStatus: 'Draft' };
+      const savedInvoice = await onSaveInvoiceRef.current(payload, state.saveCustomer && !state.customer.id, true);
+
+      let token = null;
+      try {
+        token = await ensureInvoicePublicToken(savedInvoice);
+      } catch (e) {
+        console.error('[SmartStudio] Token gen failed (non-blocking):', e);
+      }
+
+      setSaveStatus('saved');
+      setLastSaved(new Date());
+      savedSnapshotRef.current = JSON.stringify(state);
+      setSavedInvoiceResult(savedInvoice);
+      setPublicToken(token);
+      toast.success('Draft saved');
+      return savedInvoice;
+    } catch (err) {
+      console.error(err);
+      setSaveStatus('unsaved');
+      toast.error('Failed to save draft.');
+      return null;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -134,11 +202,15 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
   const liveLink = publicToken ? `${window.location.origin}/invoice/${publicToken}` : null;
 
   const handleOpenLiveLink = () => {
-    if (liveLink) window.open(liveLink, '_blank');
+    if (isOpeningLink || !liveLink) return;
+    setIsOpeningLink(true);
+    window.open(liveLink, '_blank');
+    setTimeout(() => setIsOpeningLink(false), 500);
   };
 
   const handleShareWhatsApp = () => {
-    if (!liveLink) return;
+    if (isSharingWhatsApp || !liveLink) return;
+    setIsSharingWhatsApp(true);
     const msg = encodeURIComponent(
       `Hi ${savedInvoiceResult?.customer?.name || ''},\n\nYour invoice ${savedInvoiceResult?.invoiceNumber || ''} is ready.\n\nAmount: ₹${state.totals.grandTotal.toLocaleString()}\n\nView & Pay: ${liveLink}`
     );
@@ -149,6 +221,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
     } else {
       window.open(`https://wa.me/?text=${msg}`, '_blank');
     }
+    setTimeout(() => setIsSharingWhatsApp(false), 500);
   };
 
   return (
@@ -159,9 +232,20 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         lastSaved={lastSaved}
         saveStatus={saveStatus}
         isSaving={isSaving}
+        onSaveDraft={handleSaveDraft}
         onDownloadPDF={handleDownloadPDF}
         onBack={handleBackClick}
       />
+
+      {isPaidLocked && (
+        <div className="mx-4 lg:mx-6 xl:mx-8 mt-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+          <div>
+            <p className="text-sm font-black text-amber-800">This invoice is marked as Paid.</p>
+            <p className="text-xs font-bold text-amber-600 mt-0.5">Financial data is locked. You can still view and download the PDF.</p>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 p-4 lg:p-6 xl:p-8 w-full animate-in fade-in duration-300 pb-24">
 
@@ -204,7 +288,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         </div>
 
         {/* Active Step Content */}
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 w-full">
+        <div className={`animate-in fade-in slide-in-from-bottom-4 duration-300 w-full ${isPaidLocked ? 'pointer-events-none opacity-75 select-none' : ''}`}>
           {currentStep === 1 && (
             <div className="flex flex-col gap-6 w-full">
               <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-6 shadow-sm w-full">
@@ -212,12 +296,14 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
                 <SmartCustomerSelect customers={customers} />
               </div>
 
-              <button
-                onClick={() => setCurrentStep(2)}
-                className="flex items-center justify-center gap-2 w-full py-4 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-2xl font-black shadow-premium transition-all active:scale-[0.98]"
-              >
-                Continue to Items <ArrowRight className="w-5 h-5" />
-              </button>
+              {!isPaidLocked && (
+                <button
+                  onClick={() => setCurrentStep(2)}
+                  className="flex items-center justify-center gap-2 w-full py-4 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-2xl font-black shadow-premium transition-all active:scale-[0.98]"
+                >
+                  Continue to Items <ArrowRight className="w-5 h-5" />
+                </button>
+              )}
             </div>
           )}
 
@@ -225,20 +311,22 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
             <div className="flex flex-col gap-6 w-full">
               <SmartBillItemsList products={products} />
 
-              <div className="flex gap-4 mt-4 w-full">
-                <button
-                  onClick={() => setCurrentStep(1)}
-                  className="py-4 px-6 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98]"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setCurrentStep(3)}
-                  className="flex-1 flex items-center justify-center gap-2 py-4 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-2xl font-black shadow-premium transition-all active:scale-[0.98]"
-                >
-                  Continue to Payment <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
+              {!isPaidLocked && (
+                <div className="flex gap-4 mt-4 w-full">
+                  <button
+                    onClick={() => setCurrentStep(1)}
+                    className="py-4 px-6 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98]"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setCurrentStep(3)}
+                    className="flex-1 flex items-center justify-center gap-2 py-4 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-2xl font-black shadow-premium transition-all active:scale-[0.98]"
+                  >
+                    Continue to Payment <ArrowRight className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -249,20 +337,22 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
                 <CompactPaymentSection />
               </div>
 
-              <div className="flex gap-4 mt-4 w-full">
-                <button
-                  onClick={() => setCurrentStep(2)}
-                  className="py-4 px-6 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98]"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setCurrentStep(4)}
-                  className="flex-1 flex items-center justify-center gap-2 py-4 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-2xl font-black shadow-premium transition-all active:scale-[0.98]"
-                >
-                  Review & Save <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
+              {!isPaidLocked && (
+                <div className="flex gap-4 mt-4 w-full">
+                  <button
+                    onClick={() => setCurrentStep(2)}
+                    className="py-4 px-6 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98]"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setCurrentStep(4)}
+                    className="flex-1 flex items-center justify-center gap-2 py-4 bg-theme-accent hover:bg-theme-accent/90 text-white rounded-2xl font-black shadow-premium transition-all active:scale-[0.98]"
+                  >
+                    Review & Save <ArrowRight className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -280,11 +370,13 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
 
               <button
                 onClick={handleSaveInvoice}
-                disabled={isSaving}
+                disabled={isSaving || isPaidLocked}
                 className="w-full py-5 bg-gradient-to-r from-theme-accent to-indigo-500 text-white rounded-2xl font-black text-base shadow-premium hover:shadow-xl hover:shadow-theme-accent/30 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
               >
                 {isSaving ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> Saving Invoice...</>
+                ) : isPaidLocked ? (
+                  <><AlertTriangle className="w-5 h-5" /> Paid Invoice - View Only</>
                 ) : (
                   <><Check className="w-5 h-5" /> Save Invoice</>
                 )}
@@ -293,7 +385,8 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
               <div className="flex gap-4 w-full">
                 <button
                   onClick={() => setCurrentStep(3)}
-                  className="flex-1 py-4 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                  disabled={isPaidLocked}
+                  className="flex-1 py-4 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <ArrowLeft className="w-5 h-5" /> Back
                 </button>
@@ -335,17 +428,17 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleOpenLiveLink}
-                disabled={!liveLink}
+                disabled={!liveLink || isOpeningLink}
                 className="w-full py-3.5 bg-[image:var(--accent-gradient)] text-white rounded-2xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 shadow-md"
               >
-                <ExternalLink className="w-4 h-4" /> Open Live Link
+                {isOpeningLink ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />} Open Live Link
               </button>
               <button
                 onClick={handleShareWhatsApp}
-                disabled={!liveLink}
+                disabled={!liveLink || isSharingWhatsApp}
                 className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
               >
-                <MessageCircle className="w-4 h-4" /> Share WhatsApp
+                {isSharingWhatsApp ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />} Share WhatsApp
               </button>
               <button
                 onClick={() => {
@@ -390,6 +483,43 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Save Before PDF Prompt */}
+      {showPDFConfirm && (
+        <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-theme-surface border border-theme-border-soft rounded-2xl shadow-2xl w-full max-w-sm p-6"
+          >
+            <div className="flex items-center gap-3 text-amber-500 mb-4">
+              <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-black text-theme-primary leading-tight">Unsaved Changes</h3>
+            </div>
+
+            <p className="text-sm font-bold text-theme-muted mb-6">
+              Save changes before generating PDF?
+            </p>
+
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleSaveAndPDF}
+                className="w-full py-3 bg-theme-accent hover:bg-theme-accent/90 text-white text-sm font-bold rounded-xl transition-colors"
+              >
+                Save & Generate
+              </button>
+              <button
+                onClick={() => setShowPDFConfirm(false)}
+                className="w-full py-3 bg-transparent hover:bg-theme-border-soft text-theme-muted hover:text-theme-primary text-sm font-bold rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </motion.div>
         </div>
       )}
 
