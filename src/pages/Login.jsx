@@ -27,7 +27,7 @@ import {
 import { ShimmerButton } from '../components/magicui/shimmer-button';
 
 import { auth, firebaseReady, db } from '../services/firebaseConfig';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 import Logo from '../components/Logo';
@@ -1065,9 +1065,25 @@ function LoginPanel({ onLoginSuccess }) {
               Remember me
             </label>
             {isLoginMode && (
-              <a className="font-bold text-theme-accent hover:text-theme-accent" href="#">
+              <button
+                type="button"
+                onClick={async () => {
+                  const email = prompt('Enter your email address to reset your password:');
+                  if (email && email.includes('@')) {
+                    try {
+                      await sendPasswordResetEmail(auth, email);
+                      toast.success('Password reset email sent! Check your inbox.');
+                    } catch (err) {
+                      toast.error(err.message || 'Failed to send reset email.');
+                    }
+                  } else if (email) {
+                    toast.error('Please enter a valid email address.');
+                  }
+                }}
+                className="font-bold text-theme-accent hover:text-theme-accent"
+              >
                 Forgot password?
-              </a>
+              </button>
             )}
           </motion.div>
 

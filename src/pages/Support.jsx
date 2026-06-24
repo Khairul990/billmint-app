@@ -202,7 +202,7 @@ export default function Support({ onBack }) {
                 <span className="text-theme-accent font-bold text-sm">support@billqyro.com &rarr;</span>
               </a>
 
-              <a href="#" className="bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium hover:shadow-premium-hover transition-all duration-300 block group">
+              <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium hover:shadow-premium-hover transition-all duration-300 block group">
                 <div className="w-12 h-12 bg-theme-success/10 text-theme-success rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <MessageCircle className="w-6 h-6" />
                 </div>

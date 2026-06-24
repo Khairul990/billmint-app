@@ -13,7 +13,6 @@ import {
   User,
   Check,
   CheckCircle2,
-  Percent,
   QrCode,
   Palette,
   LayoutTemplate,
@@ -29,9 +28,7 @@ import {
   BarChart3,
   Users,
   CircleDollarSign,
-  Clock,
   HardDrive,
-  Megaphone,
   Lock,
   Trash2,
   CloudLightning,
@@ -204,19 +201,54 @@ const getThemePreviewColors = (preset) => {
   return themes[preset] || themes.blue;
 };
 
-const SETTINGS_CATEGORIES = [
-  { id: 'business', label: 'Business', icon: Building2, description: 'Company profile, logo, contact info' },
-  { id: 'workspace', label: 'Workspace', icon: Globe, description: 'Regional, language, app install' },
-  { id: 'themes', label: 'Themes', icon: Palette, description: 'Brand colors, dark mode, presets' },
-  { id: 'billing', label: 'Billing', icon: FileText, description: 'Payments, invoices, live links' },
-  { id: 'templates', label: 'Templates', icon: LayoutTemplate, description: 'Invoice layouts, PDF fields' },
-  { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Email, WhatsApp, reminders' },
-  { id: 'security', label: 'Security', icon: Shield, description: 'API keys, account security, session' },
-  { id: 'backup', label: 'Backup', icon: Database, description: 'Export, restore, storage, reset' },
-  { id: 'subscription', label: 'Subscription', icon: CreditCard, description: 'Plan details, billing cycle' },
-  { id: 'integrations', label: 'Integrations', icon: Puzzle, description: 'AI, Twilio, third-party services' },
-  { id: 'advanced', label: 'Advanced', icon: Settings2, description: 'Team, UX, danger zone tools' }
+const SETTINGS_GROUPS = [
+  {
+    group: 'General',
+    items: [
+      { id: 'business', label: 'Business Profile', icon: Building2, description: 'Company name, logo, owner, contact info' },
+      { id: 'workspace', label: 'Workspace', icon: Globe, description: 'Country, language, currency, app install' },
+      { id: 'team', label: 'Team & Access', icon: Users, description: 'Invite cashiers, manage permissions' }
+    ]
+  },
+  {
+    group: 'Billing',
+    items: [
+      { id: 'payment', label: 'Payment Settings', icon: QrCode, description: 'UPI, bKash, Nagad, bank details, QR codes' },
+      { id: 'collection', label: 'Collection Settings', icon: CircleDollarSign, description: 'Invoice prefs, live links, payment proof' },
+      { id: 'subscription', label: 'Subscription', icon: CreditCard, description: 'Plan, billing history, upgrade' }
+    ]
+  },
+  {
+    group: 'Design',
+    items: [
+      { id: 'themes', label: 'Themes', icon: Palette, description: 'Brand colors, dark mode, presets' },
+      { id: 'templates', label: 'PDF Templates', icon: LayoutTemplate, description: 'Invoice layouts, PDF fields' },
+      { id: 'live-links', label: 'Live Link Templates', icon: Link, description: 'Customer portal appearance' }
+    ]
+  },
+  {
+    group: 'Communication',
+    items: [
+      { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Email, WhatsApp, reminders, alerts' },
+      { id: 'integrations', label: 'Integrations', icon: Puzzle, description: 'AI, Twilio, third-party services' }
+    ]
+  },
+  {
+    group: 'Security',
+    items: [
+      { id: 'security', label: 'Security', icon: Shield, description: 'API keys, session, database provider' },
+      { id: 'backup', label: 'Backup & Restore', icon: Database, description: 'Export, restore, storage, reset' }
+    ]
+  },
+  {
+    group: 'System',
+    items: [
+      { id: 'advanced', label: 'Advanced', icon: Settings2, description: 'Team, UX, danger zone tools' }
+    ]
+  }
 ];
+
+const ALL_CATEGORY_IDS = ['business', 'workspace', 'team', 'payment', 'collection', 'subscription', 'themes', 'templates', 'live-links', 'notifications', 'integrations', 'security', 'backup', 'advanced'];
 
 const ToggleSwitch = ({ enabled, onChange, label, description }) => (
   <div className="flex items-start justify-between p-4 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-2xl gap-3">
@@ -524,7 +556,8 @@ const Settings = ({
   useEffect(() => {
     if (!searchQuery.trim()) return;
     const q = searchQuery.toLowerCase();
-    const match = SETTINGS_CATEGORIES.find(cat =>
+    const allCats = SETTINGS_GROUPS.flatMap(g => g.items);
+    const match = allCats.find(cat =>
       cat.label.toLowerCase().includes(q) ||
       cat.id.includes(q) ||
       cat.description.toLowerCase().includes(q)
@@ -691,12 +724,12 @@ const Settings = ({
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const parsedData = JSON.parse(event.target.result);
+      const parsedData = JSON.parse(event.target.result);
         if (onImportBackup) {
           onImportBackup(parsedData);
-          alert('Database successfully restored from backup!');
+          toast.success('Database successfully restored from backup!');
         } else {
-          alert('Import feature not properly wired in the system.');
+          toast.error('Import feature not properly wired in the system.');
         }
       } catch (error) {
         alert('Failed to import backup: ' + error.message);
@@ -708,7 +741,7 @@ const Settings = ({
   const handleResetData = () => {
     if (confirm('CAUTION: This will wipe out all invoices, customers, and catalog items, replacing them with default demo assets. Proceed?')) {
       onResetDemo();
-      alert('Database successfully reset to demo data!');
+      toast.success('Database successfully reset to demo data!');
     }
   };
 
@@ -769,7 +802,7 @@ const Settings = ({
       if (type === 'Customers') clearCustomers();
       if (type === 'Products') clearProducts();
       if (type === 'Expenses') clearExpenses();
-      alert(type + ' have been completely wiped.');
+      toast.success(type + ' have been completely wiped.');
       window.location.reload();
     }
   };
@@ -789,7 +822,7 @@ const Settings = ({
 
   const handleForceSync = () => {
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
-    alert('Forced local data to sync with Cloud (if configured).');
+    toast.success('Forced local data to sync with Cloud (if configured).');
   };
 
   // Firebase status
@@ -824,15 +857,22 @@ const Settings = ({
     'not-configured': ServerOff,
   }[firebaseStatus];
 
-  const filteredCategories = SETTINGS_CATEGORIES.filter(cat => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      cat.label.toLowerCase().includes(q) ||
-      cat.id.includes(q) ||
-      cat.description.toLowerCase().includes(q)
-    );
-  });
+  const isSearching = searchQuery.trim().length > 0;
+  const filteredGroups = SETTINGS_GROUPS.map(group => ({
+    ...group,
+    items: group.items.filter(cat => {
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        cat.label.toLowerCase().includes(q) ||
+        cat.id.includes(q) ||
+        cat.description.toLowerCase().includes(q)
+      );
+    })
+  })).filter(group => group.items.length > 0);
+  const effectiveActiveCategory = isSearching ? (
+    filteredGroups.flatMap(g => g.items).find(cat => cat.id === activeCategory) ? activeCategory : (filteredGroups.flatMap(g => g.items)[0]?.id || 'business')
+  ) : activeCategory;
 
   return (
     <motion.div
@@ -916,30 +956,37 @@ const Settings = ({
 
         {/* Sidebar Navigation */}
         <div className="lg:w-56 shrink-0">
-          <div className="lg:sticky lg:top-4 space-y-1 bg-theme-surface dark:bg-theme-card/60 p-2 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft">
-            {filteredCategories.map((cat) => {
-              const Icon = cat.icon;
-              const isSelected = activeCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-left group ' + (
-                    isSelected
-                      ? 'bg-[image:var(--accent-gradient)] text-white shadow-md shadow-theme-accent/20'
-                      : 'text-theme-muted hover:text-theme-primary hover:bg-theme-card dark:hover:bg-theme-surface/60'
-                  )}
-                >
-                  <Icon className={'w-4 h-4 shrink-0 ' + (isSelected ? 'text-white' : 'text-theme-muted group-hover:text-theme-accent')} />
-                  <div className="min-w-0">
-                    <span className={'text-[11px] font-bold block leading-tight ' + (isSelected ? 'text-white' : '')}>{cat.label}</span>
-                    {isSelected && (
-                      <span className="text-[8px] text-white/70 font-medium block truncate">{cat.description}</span>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+          <div className="lg:sticky lg:top-4 space-y-3 bg-theme-surface dark:bg-theme-card/60 p-2 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft">
+            {filteredGroups.map((group) => (
+              <div key={group.group}>
+                <div className="px-3 py-1">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-theme-muted/60">{group.group}</span>
+                </div>
+                {group.items.map((cat) => {
+                  const Icon = cat.icon;
+                  const isSelected = effectiveActiveCategory === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-left group ' + (
+                        isSelected
+                          ? 'bg-[image:var(--accent-gradient)] text-white shadow-md shadow-theme-accent/20'
+                          : 'text-theme-muted hover:text-theme-primary hover:bg-theme-card dark:hover:bg-theme-surface/60'
+                      )}
+                    >
+                      <Icon className={'w-4 h-4 shrink-0 ' + (isSelected ? 'text-white' : 'text-theme-muted group-hover:text-theme-accent')} />
+                      <div className="min-w-0">
+                        <span className={'text-[11px] font-bold block leading-tight ' + (isSelected ? 'text-white' : '')}>{cat.label}</span>
+                        {isSelected && (
+                          <span className="text-[8px] text-white/70 font-medium block truncate">{cat.description}</span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
 
@@ -1562,80 +1609,81 @@ const Settings = ({
               </div>
             </div>
           )}
-          {/* ============ BILLING ============ */}
-          {activeCategory === 'billing' && (
-            <>
-              {/* Payment Settings */}
-              <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-                <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><QrCode className="w-5 h-5" /></div>
-                    <div>
-                      <h2 className="section-header-title">Payment Settings</h2>
-                      <p className="section-header-subtitle">Set up digital payment integration via UPI, bKash, Nagad, or custom QR codes.</p>
-                    </div>
+          {/* ============ PAYMENT SETTINGS ============ */}
+          {activeCategory === 'payment' && (
+            <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+              <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><QrCode className="w-5 h-5" /></div>
+                  <div>
+                    <h2 className="section-header-title">Payment Settings</h2>
+                    <p className="section-header-subtitle">Set up digital payment integration via UPI, bKash, Nagad, or custom QR codes.</p>
                   </div>
                 </div>
-
-                <ToggleSwitch enabled={paymentQrEnabled} onChange={setPaymentQrEnabled} label="Enable Automated Scan-to-Pay QR Code" description="Embed automated scanning codes on bills and invoice pages" />
-
-                {paymentQrEnabled && (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div>
-                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Primary Payment Method</label>
-                        <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold">
-                          {country === 'India' && <option value="UPI">UPI (India)</option>}
-                          {country === 'Bangladesh' && (<><option value="bKash">bKash (Bangladesh)</option><option value="Nagad">Nagad (Bangladesh)</option><option value="Rocket">Rocket (Bangladesh)</option></>)}
-                          <option value="Manual">Manual QR / Custom Bank Details</option>
-                        </select>
-                      </div>
-                      {country === 'India' && (
-                        <div>
-                          <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">UPI ID</label>
-                          <input type="text" value={upiId} onChange={(e) => setUpiId(e.target.value)} placeholder="e.g. business@okaxis" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
-                        </div>
-                      )}
-                      {country === 'Bangladesh' && paymentMethod === 'bKash' && (
-                        <div>
-                          <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">bKash Wallet Number</label>
-                          <input type="text" value={bkashNumber} onChange={(e) => setBkashNumber(e.target.value)} placeholder="e.g. 017XXXXXXXX" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
-                        </div>
-                      )}
-                      {country === 'Bangladesh' && paymentMethod === 'Nagad' && (
-                        <div>
-                          <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Nagad Account Number</label>
-                          <input type="text" value={nagadNumber} onChange={(e) => setNagadNumber(e.target.value)} placeholder="e.g. 019XXXXXXXX" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
-                        </div>
-                      )}
-                      {country === 'Bangladesh' && paymentMethod === 'Rocket' && (
-                        <div>
-                          <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Rocket Account Number</label>
-                          <input type="text" value={rocketNumber} onChange={(e) => setRocketNumber(e.target.value)} placeholder="e.g. 018XXXXXXXX" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
-                        </div>
-                      )}
-                      {country === 'Other' && (
-                        <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Manual / Bank Details / QR Link</label>
-                          <input type="text" value={customPaymentLink} onChange={(e) => setCustomPaymentLink(e.target.value)} placeholder="e.g. Bank name: X, A/C: Y, IFSC: Z" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium" />
-                        </div>
-                      )}
-                      <div>
-                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Payee / Account Name</label>
-                        <input type="text" value={payeeName} onChange={(e) => setPayeeName(e.target.value)} placeholder="e.g. BillQyro store" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">QR Payment Footnote</label>
-                        <input type="text" value={paymentNote} onChange={(e) => setPaymentNote(e.target.value)} placeholder="e.g. Please scan to pay." className="w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium" />
-                      </div>
-                    </div>
-                    <ToggleSwitch enabled={showQrInPdf} onChange={setShowQrInPdf} label="Show QR in PDF Invoice" description="Render QR code on generated PDF documents" />
-                    <ToggleSwitch enabled={showQrInPreview} onChange={setShowQrInPreview} label="Show QR on Local Preview" description="Render QR code on invoice previews inside dashboard" />
-                  </>
-                )}
               </div>
 
-              {/* Invoice Preferences */}
+              <ToggleSwitch enabled={paymentQrEnabled} onChange={setPaymentQrEnabled} label="Enable Automated Scan-to-Pay QR Code" description="Embed automated scanning codes on bills and invoice pages" />
+
+              {paymentQrEnabled && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div>
+                      <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Primary Payment Method</label>
+                      <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold">
+                        {country === 'India' && <option value="UPI">UPI (India)</option>}
+                        {country === 'Bangladesh' && (<><option value="bKash">bKash (Bangladesh)</option><option value="Nagad">Nagad (Bangladesh)</option><option value="Rocket">Rocket (Bangladesh)</option></>)}
+                        <option value="Manual">Manual QR / Custom Bank Details</option>
+                      </select>
+                    </div>
+                    {country === 'India' && (
+                      <div>
+                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">UPI ID</label>
+                        <input type="text" value={upiId} onChange={(e) => setUpiId(e.target.value)} placeholder="e.g. business@okaxis" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
+                      </div>
+                    )}
+                    {country === 'Bangladesh' && paymentMethod === 'bKash' && (
+                      <div>
+                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">bKash Wallet Number</label>
+                        <input type="text" value={bkashNumber} onChange={(e) => setBkashNumber(e.target.value)} placeholder="e.g. 017XXXXXXXX" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
+                      </div>
+                    )}
+                    {country === 'Bangladesh' && paymentMethod === 'Nagad' && (
+                      <div>
+                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Nagad Account Number</label>
+                        <input type="text" value={nagadNumber} onChange={(e) => setNagadNumber(e.target.value)} placeholder="e.g. 019XXXXXXXX" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
+                      </div>
+                    )}
+                    {country === 'Bangladesh' && paymentMethod === 'Rocket' && (
+                      <div>
+                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Rocket Account Number</label>
+                        <input type="text" value={rocketNumber} onChange={(e) => setRocketNumber(e.target.value)} placeholder="e.g. 018XXXXXXXX" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
+                      </div>
+                    )}
+                    {country === 'Other' && (
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Manual / Bank Details / QR Link</label>
+                        <input type="text" value={customPaymentLink} onChange={(e) => setCustomPaymentLink(e.target.value)} placeholder="e.g. Bank name: X, A/C: Y, IFSC: Z" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium" />
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Payee / Account Name</label>
+                      <input type="text" value={payeeName} onChange={(e) => setPayeeName(e.target.value)} placeholder="e.g. BillQyro store" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">QR Payment Footnote</label>
+                      <input type="text" value={paymentNote} onChange={(e) => setPaymentNote(e.target.value)} placeholder="e.g. Please scan to pay." className="w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium" />
+                    </div>
+                  </div>
+                  <ToggleSwitch enabled={showQrInPdf} onChange={setShowQrInPdf} label="Show QR in PDF Invoice" description="Render QR code on generated PDF documents" />
+                  <ToggleSwitch enabled={showQrInPreview} onChange={setShowQrInPreview} label="Show QR on Local Preview" description="Render QR code on invoice previews inside dashboard" />
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ============ COLLECTION SETTINGS ============ */}
+          {activeCategory === 'collection' && (
+            <>
               <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
                 <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
                   <div className="flex items-center gap-3">
@@ -2096,30 +2144,65 @@ const Settings = ({
             </div>
           )}
 
+          {/* ============ TEAM ============ */}
+          {activeCategory === 'team' && (
+            <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+              <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Users className="w-5 h-5" /></div>
+                  <div>
+                    <h2 className="section-header-title">Team & Access</h2>
+                    <p className="section-header-subtitle">Invite cashiers with limited bill-creation access.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col items-center justify-center py-10 space-y-5">
+                <div className="w-16 h-16 rounded-2xl bg-theme-accent-light dark:bg-theme-accent-light/20 text-theme-accent flex items-center justify-center"><Users className="w-8 h-8" /></div>
+                <div className="text-center max-w-sm">
+                  <h3 className="text-sm font-extrabold text-theme-primary">No Team Members Yet</h3>
+                  <p className="text-xs text-theme-muted font-medium mt-1.5 leading-relaxed">Invite cashiers to help manage billing without accessing your dashboard or expenses.</p>
+                </div>
+                <button className="btn-premium bg-[image:var(--accent-gradient)] text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md cursor-pointer hover:opacity-90 transition-opacity" onClick={() => alert("Firebase Auth modification required.")}>+ Invite Cashier</button>
+              </div>
+            </div>
+          )}
+
+          {/* ============ LIVE LINK TEMPLATES ============ */}
+          {activeCategory === 'live-links' && (
+            <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+              <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Link className="w-5 h-5" /></div>
+                  <div>
+                    <h2 className="section-header-title">Live Link Templates</h2>
+                    <p className="section-header-subtitle">Configure how your customer invoice portal looks.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl p-6 text-center space-y-4">
+                <Link className="w-12 h-12 text-theme-accent mx-auto" />
+                <h3 className="text-sm font-extrabold text-theme-primary">Open Live Link Template Studio</h3>
+                <p className="text-xs text-theme-muted font-medium max-w-md mx-auto">Design and customize the customer-facing invoice portal with themes, CTAs, and layout options.</p>
+                <button onClick={() => { if (typeof setCurrentTab === 'function') setCurrentTab('live-link-templates'); else window.open('/live-link-templates', '_self'); }} className="btn-premium bg-[image:var(--accent-gradient)] text-white font-bold text-xs px-6 py-3 rounded-xl shadow-md hover:opacity-90 transition-all">
+                  Open Template Studio
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { state: enableLiveLink, setter: setEnableLiveLink, label: 'Enable Secure Live Link', desc: 'Generate unique public URL endpoints' },
+                  { state: showPaymentQrOnLink, setter: setShowPaymentQrOnLink, label: 'Show Payment QR Code', desc: 'Display scan-to-pay QR on public pages' },
+                  { state: allowPdfDownload, setter: setAllowPdfDownload, label: 'Allow Customer PDF Download', desc: 'Let clients print/download invoice PDFs' },
+                  { state: allowPaymentProofSubmit, setter: setAllowPaymentProofSubmit, label: 'Allow Payment Proof Submission', desc: 'Enable "I Have Paid" flow' }
+                ].map((item, idx) => (
+                  <ToggleSwitch key={idx} enabled={item.state} onChange={item.setter} label={item.label} description={item.desc} />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* ============ ADVANCED ============ */}
           {activeCategory === 'advanced' && (
             <>
-              {/* Team Management */}
-              <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-                <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Users className="w-5 h-5" /></div>
-                    <div>
-                      <h2 className="section-header-title">Team Management</h2>
-                      <p className="section-header-subtitle">Invite cashiers with limited bill-creation access.</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center justify-center py-10 space-y-5">
-                  <div className="w-16 h-16 rounded-2xl bg-theme-accent-light dark:bg-theme-accent-light/20 text-theme-accent flex items-center justify-center"><Users className="w-8 h-8" /></div>
-                  <div className="text-center max-w-sm">
-                    <h3 className="text-sm font-extrabold text-theme-primary">No Team Members Yet</h3>
-                    <p className="text-xs text-theme-muted font-medium mt-1.5 leading-relaxed">Invite cashiers to help manage billing without accessing your dashboard or expenses.</p>
-                  </div>
-                  <button className="btn-premium bg-[image:var(--accent-gradient)] text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md cursor-pointer hover:opacity-90 transition-opacity" onClick={() => alert("Firebase Auth modification required.")}>+ Invite Cashier</button>
-                </div>
-              </div>
-
               {/* Premium UX */}
               <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
                 <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">

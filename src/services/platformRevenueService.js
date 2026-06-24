@@ -120,7 +120,7 @@ export const calculateUserRevenueState = (userId, invoices, globalSettings, subs
       platformPaidAmount = parseFloat(existing.platformPaidAmount) || 0;
       lastPlatformPaymentDate = existing.lastPlatformPaymentDate || null;
     }
-  } catch (e) {}
+  } catch (e) { console.warn('Error reading cached user revenue state', e); }
 
   if (paidAmountOverride !== null) {
     platformPaidAmount = paidAmountOverride;
@@ -370,7 +370,7 @@ export const updatePlatformPaymentProofStatus = async (proofId, status, adminNot
       matchedProof = cached[idx];
       localStorage.setItem('billqyro_platform_payment_proofs', JSON.stringify(cached));
     }
-  } catch (e) {}
+  } catch (e) { console.warn('Error updating cached payment proof status', e); }
 
   if (firebaseReady) {
     try {
@@ -400,7 +400,7 @@ export const updatePlatformPaymentProofStatus = async (proofId, status, adminNot
       if (stateStr) {
         currentPaid = parseFloat(JSON.parse(stateStr).platformPaidAmount) || 0;
       }
-    } catch (e) {}
+    } catch (e) { console.warn('Error reading cached user revenue state', e); }
 
     if (firebaseReady) {
       try {
@@ -409,7 +409,7 @@ export const updatePlatformPaymentProofStatus = async (proofId, status, adminNot
         if (userSnap.exists()) {
           currentPaid = parseFloat(userSnap.data().platformPaidAmount) || 0;
         }
-      } catch (e) {}
+      } catch (e) { console.warn('Error reading Firestore platform revenue', e); }
     }
 
     const newPaidAmount = currentPaid + amount;

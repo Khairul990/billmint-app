@@ -310,11 +310,11 @@ const PremiumPricing = ({ setCurrentTab }) => {
         <div className="text-center space-y-2 pb-4">
           <p className="text-xs text-slate-600">All prices are in Indian Rupees (₹). Taxes may apply based on your location.</p>
           <div className="flex items-center justify-center gap-4 text-[10px] text-slate-700">
-            <a href="#" className="hover:text-slate-500 transition-colors">Terms of Service</a>
+            <a href="/terms" className="hover:text-slate-500 transition-colors">Terms of Service</a>
             <span>·</span>
-            <a href="#" className="hover:text-slate-500 transition-colors">Privacy Policy</a>
+            <a href="/privacy" className="hover:text-slate-500 transition-colors">Privacy Policy</a>
             <span>·</span>
-            <a href="#" className="hover:text-slate-500 transition-colors">Refund Policy</a>
+            <a href="/refund" className="hover:text-slate-500 transition-colors">Refund Policy</a>
           </div>
         </div>
       </div>

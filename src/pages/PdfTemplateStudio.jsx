@@ -27,6 +27,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { saveSettings } from '../services/dbEngine';
 import { BUSINESS_PRESETS } from '../config/businessPresets';
+import InvoicePreview from '../components/InvoicePreview';
 
 const templates = [
   { id: 'classic', name: 'Classic (Default)', type: 'FREE', desc: 'Clean, professional layout for general business.', color: 'bg-theme-app' },
@@ -555,79 +556,77 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
         )}
       </div>
 
-      {/* Preview Modal */}
+      {/* Live Invoice Preview Modal */}
       {previewTemplate && (() => {
         const tpl = templates.find(t => t.id === previewTemplate);
         if (!tpl) return null;
-        const tags = templateTags[tpl.id] || [];
-        const features = templateFeatures[tpl.id] || [];
+
+        const demoInvoice = {
+          invoiceNumber: 'INV-2024-001',
+          date: '15/06/2024',
+          dueDate: '30/06/2024',
+          customerName: 'Arman Khan',
+          customerAddress: '123, Education Street, New Delhi - 110001',
+          customerPhone: '+91 98765 43210',
+          customerEmail: 'arman.khan@email.com',
+          paymentStatus: 'Pending',
+          orderStatus: 'Pending',
+          notes: 'Thank you for your continued trust in our coaching center. Please ensure payment is made before the due date to avoid late fees.',
+          items: [
+            { description: 'Tuition Fee - Mathematics', qty: 1, rate: 2000, amount: 2000 },
+            { description: 'Lab Fee', qty: 1, rate: 500, amount: 500 },
+            { description: 'Library Fee', qty: 1, rate: 300, amount: 300 },
+            { description: 'Activity Fee', qty: 1, rate: 200, amount: 200 },
+          ],
+          subtotal: 3000,
+          discountAmount: 0,
+          taxPercentage: 0,
+          taxAmount: 0,
+          grandTotal: 3000,
+          balanceDue: 3000,
+          businessSnapshot: {
+            businessName: "Arman Khan's Coaching Center",
+            ownerName: 'Arman Khan',
+            phone: '+91 98765 43210',
+            email: 'arman.khan@coaching.com',
+            address: '456, Knowledge Park, New Delhi - 110002',
+            gstNumber: '',
+            currency: '₹',
+            taxLabel: 'GST',
+          },
+          paymentSettingsSnapshot: {
+            paymentQrEnabled: false,
+            showQrInPreview: false,
+          },
+          regionalSettingsSnapshot: {
+            country: 'India',
+            currency: '₹',
+            currencyCode: 'INR',
+            language: 'English',
+            taxLabel: 'GST',
+            dateFormat: 'DD/MM/YYYY',
+            numberFormat: 'Indian',
+          },
+        };
+
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setPreviewTemplate(null)}>
-            <div className="bg-theme-card rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-theme-border-soft" onClick={e => e.stopPropagation()}>
-              <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
-                <h3 className="font-extrabold text-theme-primary text-sm">{tpl.name}</h3>
-                <div className="flex items-center gap-2">
-                  {/* Preview Size Toggle */}
-                  <div className="flex bg-theme-surface rounded-lg p-0.5">
-                    <button
-                      onClick={() => setPreviewSize('A4')}
-                      className={`px-2 py-1 rounded-md text-[8px] font-bold transition-all ${previewSize === 'A4' ? 'bg-theme-accent text-white' : 'text-theme-muted'}`}
-                    >
-                      <Maximize className="w-3 h-3 inline" />
-                    </button>
-                    <button
-                      onClick={() => setPreviewSize('A5')}
-                      className={`px-2 py-1 rounded-md text-[8px] font-bold transition-all ${previewSize === 'A5' ? 'bg-theme-accent text-white' : 'text-theme-muted'}`}
-                    >
-                      <Minimize className="w-3 h-3 inline" />
-                    </button>
-                  </div>
-                  <button onClick={() => setPreviewTemplate(null)} className="p-1 rounded-lg hover:bg-theme-app text-theme-muted">
-                    <X className="w-5 h-5" />
-                  </button>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 md:p-4" onClick={() => setPreviewTemplate(null)}>
+            <div className="bg-theme-card rounded-3xl w-full max-w-5xl max-h-[95vh] overflow-y-auto shadow-2xl border border-theme-border-soft" onClick={e => e.stopPropagation()}>
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-theme-border-soft sticky top-0 bg-theme-card z-10 rounded-t-3xl">
+                <div className="flex items-center gap-3">
+                  <h3 className="font-extrabold text-theme-primary text-sm">{tpl.name} Preview</h3>
+                  <span className="text-[9px] font-bold bg-theme-accent/10 text-theme-accent px-2 py-0.5 rounded-full border border-theme-accent/20">Live Preview</span>
                 </div>
+                <button onClick={() => setPreviewTemplate(null)} className="p-2 rounded-xl hover:bg-theme-app text-theme-muted hover:text-theme-primary transition-all">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <div className={`w-full bg-gradient-to-br ${previewGradients[tpl.id] || 'from-gray-400 to-gray-600'} flex items-center justify-center p-6 relative ${previewSize === 'A5' ? 'h-40' : 'h-56'}`}>
-                <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3 shadow-xl border border-white/20">
-                    <FileText className="w-8 h-8 text-white" />
-                  </div>
-                  <span className="text-white font-black text-lg tracking-wider text-center drop-shadow-lg">{tpl.name}</span>
-                  <span className="text-white/60 text-[9px] font-bold mt-1 uppercase tracking-widest">PDF Template {previewSize}</span>
+              {/* Invoice Preview */}
+              <div className="p-2 md:p-4 lg:p-6">
+                <div className="transform scale-[0.85] md:scale-[0.9] lg:scale-100 origin-top">
+                  <InvoicePreview invoice={demoInvoice} businessSettings={businessSettings} />
                 </div>
-                {enableWatermark && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span className="text-white/15 text-[40px] font-black uppercase tracking-[0.4em] -rotate-30 select-none">DRAFT</span>
-                  </div>
-                )}
-              </div>
-              <div className="p-4 space-y-3">
-                <p className="text-xs text-theme-muted font-semibold">{tpl.desc}</p>
-                <div className="flex flex-wrap gap-2">
-                  {tags.map(tag => (
-                    <span key={tag} className="text-[9px] font-bold bg-theme-app px-2 py-1 rounded-full text-theme-muted border border-theme-border-soft flex items-center gap-1">
-                      <Tag className="w-2.5 h-2.5" /> {tag}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {features.map(feat => (
-                    <span key={feat} className="text-[9px] font-bold bg-theme-accent/10 text-theme-accent px-2 py-1 rounded-full border border-theme-accent/20 flex items-center gap-1">
-                      <Layers className="w-2.5 h-2.5" /> {feat}
-                    </span>
-                  ))}
-                </div>
-                {signaturePlacement !== 'none' && (
-                  <div className="flex items-center gap-2 text-[9px] font-bold text-theme-muted bg-theme-app p-2 rounded-lg">
-                    <Pen className="w-3 h-3 text-theme-accent" /> Signature: {signaturePlacement}
-                  </div>
-                )}
-                {qrPlacement !== 'none' && (
-                  <div className="flex items-center gap-2 text-[9px] font-bold text-theme-muted bg-theme-app p-2 rounded-lg">
-                    <QrCode className="w-3 h-3 text-theme-accent" /> QR Code: {qrPlacement}
-                  </div>
-                )}
               </div>
             </div>
           </div>
