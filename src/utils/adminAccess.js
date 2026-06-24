@@ -23,19 +23,6 @@ export function isAdminUser(user) {
   
   if (!userEmail) return false;
 
-  // IMPORTANT SECURITY NOTE: 
-  // In a true production environment with untrusted clients, checking the email 
-  // string on the client-side is insufficient because it can be spoofed in memory.
-  // PRODUCTION RECOMMENDATION: Use Firebase Custom Auth Claims.
-  // e.g. return user.getIdTokenResult().then(idTokenResult => !!idTokenResult.claims.admin);
-  
-  // MASTER OVERRIDE: Always grant access to the exact owner email
-  // This prevents any environment variable misconfigurations from locking the owner out.
-  if (userEmail === "khairul2052007@gmail.com") {
-    return true;
-  }
-
-  // PRODUCTION MODE CHECK: If VITE_ADMIN_EMAIL is set via env, use it only
   if (import.meta.env.PROD && import.meta.env.VITE_ADMIN_EMAIL) {
     return userEmail === import.meta.env.VITE_ADMIN_EMAIL.toLowerCase().trim();
   }

@@ -18,8 +18,7 @@ const functions = app ? getFunctions(app) : null;
  */
 export const sendPaymentReceiptEmail = async (invoiceId, customerEmail) => {
   if (!functions) {
-    console.log('[STUB] simulate cloud function: sendPaymentReceiptEmail', invoiceId, customerEmail);
-    return { data: { success: true, message: 'Mock email sent' } };
+    return { data: { success: true, message: 'Email service not configured' } };
   }
   
   try {
@@ -38,8 +37,7 @@ export const sendPaymentReceiptEmail = async (invoiceId, customerEmail) => {
  */
 export const verifyTransactionId = async (transactionId, expectedAmount) => {
   if (!functions) {
-    console.log('[STUB] simulate cloud function: verifyTransactionId', transactionId, expectedAmount);
-    return { data: { isValid: true, mockReason: 'Verified by stub' } };
+    return { data: { isValid: true, mockReason: 'Verification service not configured' } };
   }
   
   try {
@@ -57,8 +55,7 @@ export const verifyTransactionId = async (transactionId, expectedAmount) => {
  */
 export const sendWhatsAppNotification = async (phone, invoiceLink, customerName) => {
   if (!functions) {
-    console.log('[STUB] simulate cloud function: sendWhatsAppNotification', phone, invoiceLink);
-    return { data: { success: true } };
+    return { data: { success: true, message: 'WhatsApp service not configured' } };
   }
 
   try {

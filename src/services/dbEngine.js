@@ -2,7 +2,6 @@ import { db, firebaseReady, auth } from './firebaseConfig';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where } from 'firebase/firestore';
 import { getAdminEmail } from '../utils/adminAccess';
 import { BillQyroDB } from './localDb';
-import { generateVerificationCode } from './verificationCodeService';
 import {
   getUserRevenueState,
   saveUserRevenueState,
@@ -436,7 +435,7 @@ const DEFAULT_SETTINGS = {
   gstNumber: '',
   currency: '₹',
   defaultTax: 18,
-  adminPasscode: '1118', // Customizable administrative passcode
+  adminPasscode: '', // Must be set via admin settings
   adminEmail: getAdminEmail(), // Admin Email for auto-unlock
   defaultBillingTemplate: '',
   pdfVisibleFields: {
@@ -789,7 +788,7 @@ export const resetToDemoData = () => {
     numberFormat: 'Indian',
     language: 'English',
     defaultTax: 18,
-    adminPasscode: '1118',
+    adminPasscode: '',
     adminEmail: getAdminEmail(),
     paymentQrEnabled: true,
     paymentMethod: 'UPI',
@@ -2440,7 +2439,6 @@ export const syncFromFirestore = async (force = false) => {
   // Throttle sync to prevent repeated dashboard refreshes and infinite loops
   const now = Date.now();
   if (!force && now - lastSyncTime < 15000) {
-    console.log('Sync throttled to prevent repeated calls');
     return;
   }
   lastSyncTime = now;

@@ -11,8 +11,6 @@ import { toast } from 'react-hot-toast';
 const getOrders = async () => { try { const d = localStorage.getItem('billqyro_orders'); return d ? JSON.parse(d) : []; } catch { return []; } };
 const saveOrder = async (order) => { const orders = await getOrders(); const idx = orders.findIndex(o => o.id === order.id); if (idx >= 0) orders[idx] = order; else orders.push(order); localStorage.setItem('billqyro_orders', JSON.stringify(orders)); window.dispatchEvent(new Event('billqyro_sync')); };
 const deleteOrder = async (id) => { const orders = await getOrders(); localStorage.setItem('billqyro_orders', JSON.stringify(orders.filter(o => o.id !== id))); };
-const syncFromFirestore = async () => {};
-
 const ORDER_STATUSES = ['All', 'Pending', 'In Progress', 'Completed', 'Delivered', 'Cancelled'];
 
 const STATUS_STYLES = {

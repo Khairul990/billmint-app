@@ -1,9 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedPage from '../components/AnimatedPage';
-import { Search, X, Clock, ChevronRight, Play, CheckCircle2, Languages } from 'lucide-react';
-import * as Icons from 'lucide-react';
-import { guides, categories, faqs } from '../data/guides';
+import { Search, ChevronRight, Languages } from 'lucide-react';
+import { guides, categories, faqs as faqsData } from '../data/guides';
 
 // FAQ Accordion Component
 const FAQAccordion = ({ language }) => {
@@ -11,7 +10,7 @@ const FAQAccordion = ({ language }) => {
   
   return (
     <div className="space-y-3">
-      {faqs.map((faq, index) => (
+      {faqsData.map((faq, index) => (
         <div key={index} className="bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl overflow-hidden shadow-sm hover:border-theme-border-strong transition-colors">
           <button
             onClick={() => setOpenIndex(openIndex === index ? null : index)}

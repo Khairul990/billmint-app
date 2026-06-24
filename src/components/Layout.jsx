@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
-import { ReceiptText, LogOut, ShieldCheck, Sun, Moon, User, Search, Bell, Settings as SettingsIcon, HelpCircle, Activity, Briefcase, Sparkles } from 'lucide-react';
+import { Search, Bell } from 'lucide-react';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import Logo from './Logo';
 import { getSettings, saveSettings } from '../services/dbEngine';
 import { updateFaviconForTheme } from '../utils/themeIcon';
 import { flushSyncQueue } from '../services/syncEngine';
-import { motion } from 'framer-motion';
 import AnimatedBorderTrail from './AnimatedBorderTrail';
 import { AnimatedThemeToggler } from './AnimatedThemeToggler';
 import { getNotifications, markNotificationAsRead, clearAllNotifications } from '../services/notificationsService';

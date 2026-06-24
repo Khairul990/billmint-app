@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 
 // Page transition variants
 export const pageVariants = {

@@ -161,6 +161,52 @@ service cloud.firestore {
     }
 
     // -------------------------------------------------------------------------
+    // Revenue & Billing Admin
+    // -------------------------------------------------------------------------
+
+    match /adminRevenueSettings/{configId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    match /platformRevenue/{revenueId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    match /platformPaymentProofs/{proofId} {
+      allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    match /adminSettings/{configId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    match /appChangelogs/{logId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // -------------------------------------------------------------------------
+    // Telemetry & Monitoring
+    // -------------------------------------------------------------------------
+
+    match /control_website_events/{eventId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /control_website_errors/{errorId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /control_website_health/{healthId} {
+      allow read, write: if isAdmin();
+    }
+
+    // -------------------------------------------------------------------------
     // Rate Limiting & Security Notes
     // -------------------------------------------------------------------------
     // NOTE: Firestore native rules do NOT support rate limiting.

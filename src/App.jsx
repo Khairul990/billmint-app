@@ -1175,7 +1175,6 @@ function App() {
     downloadInvoicePDF(invoice, settings, isPremium)
       .then((ok) => {
         if (ok) {
-          console.log(`Successfully generated vector PDF for ${invoice.invoiceNumber}`);
           sendEmpireEvent({
             eventType: "pdf_downloaded",
             message: "Invoice PDF generated",

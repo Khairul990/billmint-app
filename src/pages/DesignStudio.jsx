@@ -239,7 +239,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="p-4 md:p-8 w-full space-y-6"
+      className="p-4 md:p-8 w-full space-y-6 pb-24"
     >
       {/* Page Header */}
       <div className="glass rounded-2xl p-6 md:p-8">

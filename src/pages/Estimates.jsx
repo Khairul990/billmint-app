@@ -25,7 +25,7 @@ import {
   generateEmailShareLink, 
   generateInvoiceShareText 
 } from '../utils/shareUtils';
-import { ensureInvoicePublicToken, syncFromFirestore } from '../services/dbEngine';
+import { ensureInvoicePublicToken } from '../services/dbEngine';
 import PullToRefresh from '../components/PullToRefresh';
 
 // Premium WhatsApp Icon SVG Component

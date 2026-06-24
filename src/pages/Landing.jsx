@@ -546,7 +546,7 @@ const Landing = ({ onLoginClick }) => {
                   <input type="text" placeholder="Your name" className="w-full px-4 py-2.5 rounded-xl bg-theme-surface border border-theme-border-soft text-sm text-theme-primary placeholder-theme-muted/50 font-medium focus:outline-none focus:border-theme-accent/50 transition-colors" />
                   <input type="email" placeholder="Your email" className="w-full px-4 py-2.5 rounded-xl bg-theme-surface border border-theme-border-soft text-sm text-theme-primary placeholder-theme-muted/50 font-medium focus:outline-none focus:border-theme-accent/50 transition-colors" />
                   <textarea rows={3} placeholder="Your message" className="w-full px-4 py-2.5 rounded-xl bg-theme-surface border border-theme-border-soft text-sm text-theme-primary placeholder-theme-muted/50 font-medium focus:outline-none focus:border-theme-accent/50 transition-colors resize-none"></textarea>
-                  <button className="btn-premium w-full py-3 text-sm justify-center">Send Message</button>
+                  <button onClick={() => window.open('https://billqyro.com/contact', '_blank')} className="btn-premium w-full py-3 text-sm justify-center">Send Message</button>
                 </div>
               </div>
             </div>
@@ -563,19 +563,19 @@ const Landing = ({ onLoginClick }) => {
             <div>
               <h3 className="text-base font-black text-theme-primary mb-4">Company</h3>
               <div className="space-y-2 text-sm text-theme-muted font-medium">
-                <button className="block hover:text-theme-accent transition-colors">About Us</button>
-                <button className="block hover:text-theme-accent transition-colors">Blog</button>
-                <button className="block hover:text-theme-accent transition-colors">Careers</button>
-                <button className="block hover:text-theme-accent transition-colors">Press Kit</button>
+                <button onClick={() => window.open('https://billqyro.com/about', '_blank')} className="block hover:text-theme-accent transition-colors">About Us</button>
+                <button onClick={() => window.open('https://billqyro.com/blog', '_blank')} className="block hover:text-theme-accent transition-colors">Blog</button>
+                <button onClick={() => window.open('https://billqyro.com/careers', '_blank')} className="block hover:text-theme-accent transition-colors">Careers</button>
+                <button onClick={() => window.open('https://billqyro.com/press', '_blank')} className="block hover:text-theme-accent transition-colors">Press Kit</button>
               </div>
             </div>
             <div>
               <h3 className="text-base font-black text-theme-primary mb-4">Support</h3>
               <div className="space-y-2 text-sm text-theme-muted font-medium">
-                <button className="block hover:text-theme-accent transition-colors">Help Center</button>
-                <button className="block hover:text-theme-accent transition-colors">Documentation</button>
-                <button className="block hover:text-theme-accent transition-colors">API Reference</button>
-                <button className="block hover:text-theme-accent transition-colors">Status Page</button>
+                <button onClick={() => window.open('https://billqyro.com/help', '_blank')} className="block hover:text-theme-accent transition-colors">Help Center</button>
+                <button onClick={() => window.open('https://billqyro.com/docs', '_blank')} className="block hover:text-theme-accent transition-colors">Documentation</button>
+                <button onClick={() => window.open('https://billqyro.com/api', '_blank')} className="block hover:text-theme-accent transition-colors">API Reference</button>
+                <button onClick={() => window.open('https://billqyro.com/status', '_blank')} className="block hover:text-theme-accent transition-colors">Status Page</button>
               </div>
             </div>
           </div>

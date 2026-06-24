@@ -46,7 +46,7 @@ const BottomSheet = ({ isOpen, onClose, title, children }) => {
                   <h3 className="text-lg font-black text-theme-primary tracking-tight">{title}</h3>
                   <button
                     onClick={onClose}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-theme-surface text-theme-muted hover:bg-theme-accent-light hover:text-theme-accent transition-all duration-200"
+                    className="w-11 h-11 flex items-center justify-center rounded-full bg-theme-surface text-theme-muted hover:bg-theme-accent-light hover:text-theme-accent transition-all duration-200"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -54,7 +54,7 @@ const BottomSheet = ({ isOpen, onClose, title, children }) => {
               </div>
 
               {/* Content Area */}
-              <div className="flex-1 overflow-y-auto px-6 pb-8 custom-scrollbar scroll-smooth">
+              <div className="flex-1 overflow-y-auto px-6 pb-[max(2rem,env(safe-area-inset-bottom))] custom-scrollbar scroll-smooth">
                 {children}
               </div>
             </div>

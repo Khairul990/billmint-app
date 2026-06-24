@@ -811,7 +811,6 @@ function LoginPanel({ onLoginSuccess }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!isLoginMode) console.log('Signup clicked');
     setIsSigningIn(true);
     setError('');
     

@@ -104,6 +104,21 @@ const Dashboard = ({
       .reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
   };
 
+  const getTodaysCollections = () => {
+    const today = new Date();
+    return invoices
+      .filter(inv => {
+        const invDate = new Date(inv.createdAt);
+        return invDate.toDateString() === today.toDateString();
+      })
+      .reduce((sum, inv) => {
+        const s = (inv.paymentStatus || '').toLowerCase();
+        if (s === 'paid') return sum + (inv.grandTotal || inv.total || 0);
+        if (s === 'partial' || s === 'partially paid') return sum + (parseFloat(inv.amountPaid) || 0);
+        return sum;
+      }, 0);
+  };
+
   const getTotalDue = () => {
     return invoices
       .filter(inv => {
@@ -112,8 +127,8 @@ const Dashboard = ({
       })
       .reduce((sum, inv) => {
         const total = inv.grandTotal || inv.total || 0;
-        const paid = inv.paymentStatus?.toLowerCase() === 'paid' ? total : (parseFloat(inv.amountPaid) || 0);
-        return sum + (inv.balanceDue || inv.dueAmount || Math.max(0, total - paid));
+        const paid = parseFloat(inv.amountPaid) || 0;
+        return sum + Math.max(0, total - paid);
       }, 0);
   };
 
@@ -141,14 +156,20 @@ const Dashboard = ({
 
   const getRecentPayments = () => {
     return [...invoices]
-      .filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid' || inv.paymentStatus === 'Partial' || inv.paymentStatus === 'partial' || inv.paymentStatus === 'Partially Paid')
+      .filter(inv => {
+        const s = (inv.paymentStatus || '').toLowerCase();
+        return s === 'paid' || s === 'partial' || s === 'partially paid';
+      })
       .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
       .slice(0, 5);
   };
 
   const getPendingCollection = () => {
     return [...invoices]
-      .filter(inv => inv.paymentStatus === 'Unpaid' || inv.paymentStatus === 'unpaid' || inv.paymentStatus === 'Partial' || inv.paymentStatus === 'partial' || inv.paymentStatus === 'Partially Paid' || inv.paymentStatus === 'Pending')
+      .filter(inv => {
+        const s = (inv.paymentStatus || '').toLowerCase();
+        return s === 'unpaid' || s === 'partial' || s === 'partially paid' || s === 'pending';
+      })
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   };
 
@@ -229,7 +250,7 @@ const Dashboard = ({
     const totalOverdue = getOverdueCount(pendingCollection);
     const totalUpcoming = getUpcomingCount(pendingCollection);
     const activities = getActivities();
-    const paidCount = invoices.filter(inv => inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid').length;
+    const paidCount = invoices.filter(inv => (inv.paymentStatus || '').toLowerCase() === 'paid').length;
     const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
     const totalCollected = invoices
       .reduce((sum, inv) => {
@@ -570,7 +591,7 @@ const Dashboard = ({
                 {workspaceName} • {workspaceType.charAt(0).toUpperCase() + workspaceType.slice(1)}
               </p>
               <div className="mt-3">
-                <p className="text-[9px] font-bold text-white/60 uppercase tracking-wider">Today's Collection</p>
+                <p className="text-[9px] font-bold text-white/60 uppercase tracking-wider">Today's Billings</p>
                 <p className="text-3xl font-black tracking-tight tabular-nums mt-0.5">{formatCurrency(todayEarnings)}</p>
               </div>
               <div className="grid grid-cols-3 gap-2 mt-3">
@@ -1042,7 +1063,7 @@ const Dashboard = ({
                 </div>
                 <div className="grid grid-cols-4 gap-5 mt-5">
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5">
-                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Today's Earnings</p>
+                    <p className="text-[8px] font-bold text-white/60 uppercase tracking-wider">Today's Billings</p>
                     <p className="text-xl font-black text-white mt-0.5 tabular-nums">{formatCurrency(todayEarnings)}</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5">
@@ -1124,7 +1145,7 @@ const Dashboard = ({
                 <>
                   <StatCard
                     title="Total Revenue"
-                    value={formatCurrency(todayEarnings + totalRevenue)}
+                    value={formatCurrency(totalRevenue)}
                     icon={DollarSign}
                     trend="+8.6%"
                     trendUp={true}

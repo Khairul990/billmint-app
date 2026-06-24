@@ -32,8 +32,6 @@ import {
   generateInvoiceShareText 
 } from '../utils/shareUtils';
 import { ensureInvoicePublicToken, saveInvoice, syncFromFirestore } from '../services/dbEngine';
-import { db, firebaseReady } from '../services/firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
 import PullToRefresh from '../components/PullToRefresh';
 import { addNotification } from '../services/notificationsService';
 

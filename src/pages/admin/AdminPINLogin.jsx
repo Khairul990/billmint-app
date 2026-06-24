@@ -9,18 +9,44 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
   const [attempts, setAttempts] = useState(0);
 
   const MAX_ATTEMPTS = 5;
-  const CORRECT_PIN = import.meta.env.VITE_ADMIN_PIN || '1234';
+  const CORRECT_PIN = import.meta.env.VITE_ADMIN_PIN;
+  const [locked, setLocked] = useState(() => {
+    return localStorage.getItem('billqyro_admin_locked') === 'true';
+  });
+  const [lockoutTimer, setLockoutTimer] = useState(0);
 
   useEffect(() => {
-    if (pin.length === 4) {
+    if (locked && lockoutTimer > 0) {
+      const interval = setInterval(() => {
+        setLockoutTimer(prev => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setLocked(false);
+            localStorage.removeItem('billqyro_admin_locked');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [locked, lockoutTimer]);
+
+  useEffect(() => {
+    if (pin.length === 4 && !locked) {
       handleVerify();
     }
   }, [pin]);
 
   const handleVerify = () => {
+    if (!CORRECT_PIN) {
+      toast.error('Admin PIN not configured. Set VITE_ADMIN_PIN in environment.', { duration: 5000 });
+      return;
+    }
     if (pin === CORRECT_PIN) {
-      toast.success('Admin access granted', { icon: '🔓' });
+      toast.success('Admin access granted');
       setError(false);
+      setAttempts(0);
       localStorage.setItem('billqyro_admin_unlocked', 'true');
       onPinSuccess();
     } else {
@@ -29,7 +55,6 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
       setError(true);
       setPin('');
       
-      // Log attempt to security center (fake log for now, could be real DB later)
       const logs = JSON.parse(localStorage.getItem('billqyro_admin_security_logs') || '[]');
       logs.unshift({
         type: 'FAILED_PIN',
@@ -39,7 +64,10 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
       localStorage.setItem('billqyro_admin_security_logs', JSON.stringify(logs));
 
       if (newAttempts >= MAX_ATTEMPTS) {
-        toast.error('Too many failed attempts. Access blocked.', { duration: 5000 });
+        localStorage.setItem('billqyro_admin_locked', 'true');
+        setLocked(true);
+        setLockoutTimer(300);
+        toast.error('Too many failed attempts. Access blocked for 5 minutes.', { duration: 5000 });
         onCancel();
       } else {
         toast.error('Incorrect Admin PIN', { duration: 2000 });
@@ -58,6 +86,22 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
     setPin(prev => prev.slice(0, -1));
     setError(false);
   };
+
+  if (locked) {
+    return (
+      <div className="min-h-screen bg-[#020817] flex items-center justify-center p-4 relative overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-[#0f172a]/80 backdrop-blur-xl border border-slate-800 p-8 rounded-3xl w-full max-w-sm shadow-2xl text-center"
+        >
+          <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-white mb-2">Access Blocked</h2>
+          <p className="text-slate-400 mb-4">Too many failed attempts. Try again in {Math.floor(lockoutTimer / 60)}:{String(lockoutTimer % 60).padStart(2, '0')}</p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#020817] flex items-center justify-center p-4 relative overflow-hidden">

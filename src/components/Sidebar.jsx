@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, FileText } from 'lucide-react';
 import { logout } from '../services/dbEngine';
-import { triggerLightHaptic } from '../utils/feedback';
 import { t } from '../utils/i18n';
 import { getCustomerLabelByType, getInvoiceLabelByType } from '../config/businessPresets';
 import Logo from './Logo';
