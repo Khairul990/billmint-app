@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Subscription from './Subscription';
 import PdfTemplateStudio from './PdfTemplateStudio';
 import LiveLinkTemplateStudio from './LiveLinkTemplateStudio';
@@ -286,7 +286,8 @@ const Settings = ({
   customers = [],
   installPromptEvent = null,
   isAppInstalled = false,
-  onInstallApp
+  onInstallApp,
+  subscription = null
 }) => {
   const [activeCategory, setActiveCategory] = useState('business');
   const [showResetModal, setShowResetModal] = useState(false);
@@ -1367,7 +1368,15 @@ const Settings = ({
           {/* ============ THEMES ============ */}
           {effectiveActiveCategory === 'themes' && (
              <div className="animate-fadeIn">
-               <DesignStudio />
+               <DesignStudio 
+                 businessSettings={settings}
+                 setCurrentTab={(tab) => {
+                   if (tab === 'pdf-templates') setActiveCategory('templates');
+                   else if (tab === 'live-link-templates') setActiveCategory('live-links');
+                   else if (tab === 'settings') setActiveCategory('business');
+                   else setActiveCategory(tab);
+                 }}
+               />
              </div>
           )}
           {effectiveActiveCategory === 'templates' && (
@@ -1379,10 +1388,14 @@ const Settings = ({
                    onSaveSettings(newSettings);
                  }} 
                  subscription={subscription}
-                 setCurrentTab={() => {}}
+                 setCurrentTab={(tab) => {
+                   if (tab === 'subscription') setActiveCategory('subscription');
+                   else setActiveCategory(tab);
+                 }}
                />
              </div>
           )}
+
           {/* ============ NOTIFICATIONS ============ */}
           {effectiveActiveCategory === 'notifications' && (
             <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
@@ -1708,10 +1721,15 @@ const Settings = ({
           {effectiveActiveCategory === 'live-links' && (
              <div className="animate-fadeIn -mt-4 -mx-4 md:-mx-8">
                <LiveLinkTemplateStudio 
-                 settings={settings}
-                 onSaveSettings={onSaveSettings}
+                 businessSettings={settings}
+                 setSettings={(newSettings) => {
+                   onSaveSettings(newSettings);
+                 }}
                  subscription={subscription}
-                 setCurrentTab={() => {}}
+                 setCurrentTab={(tab) => {
+                   if (tab === 'subscription') setActiveCategory('subscription');
+                   else setActiveCategory(tab);
+                 }}
                />
              </div>
           )}

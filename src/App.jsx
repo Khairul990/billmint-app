@@ -1589,6 +1589,7 @@ function App() {
             installPromptEvent={installPromptEvent}
             isAppInstalled={isAppInstalled}
             onInstallApp={handleInstallApp}
+            subscription={subscription}
           />
         );
       }
