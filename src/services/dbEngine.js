@@ -2,6 +2,7 @@ import { db, firebaseReady, auth } from './firebaseConfig';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where } from 'firebase/firestore';
 import { getAdminEmail } from '../utils/adminAccess';
 import { BillQyroDB } from './localDb';
+import { generateVerificationCode } from './verificationCodeService';
 import {
   getUserRevenueState,
   saveUserRevenueState,

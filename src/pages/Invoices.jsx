@@ -34,6 +34,8 @@ import {
 import { ensureInvoicePublicToken, saveInvoice, syncFromFirestore } from '../services/dbEngine';
 import PullToRefresh from '../components/PullToRefresh';
 import { addNotification } from '../services/notificationsService';
+import { doc, getDoc } from 'firebase/firestore';
+import { db, firebaseReady } from '../services/firebaseConfig';
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
