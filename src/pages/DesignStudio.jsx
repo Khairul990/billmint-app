@@ -878,6 +878,80 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
                        </div>
                     </LazyPreview>
                   </div>
+                  <button onClick={() => handleNavigation('live-link-templates')} className="w-full mt-3 btn-premium text-[10px] py-2">
+                    <Eye className="w-3 h-3" /> Customize Link
+                  </button>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Branding Tab */}
+      {activeSubTab === 'branding' && (
+        <motion.div
+          key="branding"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-5"
+        >
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">Brand Identity</h2>
+              <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Manage your business look and feel</p>
+            </div>
+            <button onClick={() => handleNavigation('settings')} className="btn-premium text-[10px] px-4 py-2">
+              <Building2 className="w-3.5 h-3.5" />
+              Brand Settings
+            </button>
+          </div>
+          <div className="card-premium p-6 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-md">
+                <PaintBucket className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-theme-primary">Brand Color Palette</h3>
+                <p className="text-[10px] font-semibold text-theme-muted">Your available brand colors for templates and invoices</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {BRAND_COLORS.map((c) => (
+                <div key={c.hex} className="flex items-center gap-2 bg-theme-app rounded-xl px-3 py-2 border border-theme-border-soft">
+                  <div className="w-6 h-6 rounded-lg shadow-sm" style={{ backgroundColor: c.hex }} />
+                  <span className="text-[10px] font-bold text-theme-primary">{c.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="card-premium p-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-theme-accent/20 flex items-center justify-center">
+                <CheckCircle2 className="w-6 h-6 text-theme-accent" />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-theme-primary">Business Profile</h3>
+                <p className="text-[10px] font-semibold text-theme-muted">Logo, contact info, social links and more</p>
+              </div>
+            </div>
+            <button onClick={() => handleNavigation('settings')} className="btn-premium text-[10px] px-4 py-2">
+              Configure
+            </button>
+          </div>
+          <div className="card-premium p-6">
+            <h3 className="text-sm font-extrabold text-theme-primary mb-4">Brand Preview</h3>
+            <div className="aspect-video bg-theme-surface rounded-xl border border-theme-border-soft flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-[image:var(--accent-gradient)] flex items-center justify-center shadow-md mb-3">
+                  <Building2 className="w-8 h-8 text-white" />
+                </div>
+                <p className="text-sm font-bold text-theme-primary">{businessSettings?.businessName || 'Your Brand'}</p>
+                <p className="text-[10px] text-theme-muted font-medium mt-1">Your brand preview will appear here</p>
+              </div>
+            </div>
+          </div>
         </motion.div>
       )}
 
