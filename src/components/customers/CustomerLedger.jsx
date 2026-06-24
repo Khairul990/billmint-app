@@ -132,7 +132,7 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
             </button>
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-2xl border border-white/30 shadow-inner">
-                {customer.name.substring(0, 2).toUpperCase()}
+                {customer.name ? customer.name.substring(0, 2).toUpperCase() : '??'}
               </div>
               <div className="flex-1">
                 <h2 className="text-2xl font-black tracking-tight">{customer.name}</h2>

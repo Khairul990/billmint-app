@@ -23,7 +23,7 @@ const ICON_MAP = {
 };
 
 const CategoryHints = ({ wsType }) => {
-  const exp = getCategoryExperience(wsType);
+  const exp = getCategoryExperience(wsType) || {};
   const IconComp = ICON_MAP[exp.icon] || Briefcase;
 
   return (
@@ -43,6 +43,7 @@ const CategoryHints = ({ wsType }) => {
         </div>
       </div>
 
+      {exp.labels && (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {Object.entries(exp.labels).map(([key, label]) => (
           <div key={key} className="flex items-center justify-between p-2.5 rounded-2xl bg-theme-app dark:bg-theme-app/40 border border-theme-border-soft">
@@ -51,7 +52,9 @@ const CategoryHints = ({ wsType }) => {
           </div>
         ))}
       </div>
+      )}
 
+      {exp.dashboardHints && (
       <div className="space-y-2">
         <h4 className="text-xs font-extrabold text-theme-primary flex items-center gap-1.5">
           <Lightbulb className="w-3.5 h-3.5 text-accent" />
@@ -66,7 +69,9 @@ const CategoryHints = ({ wsType }) => {
           ))}
         </ul>
       </div>
+      )}
 
+      {exp.quickTips && (
       <div className="space-y-2">
         <h4 className="text-xs font-extrabold text-theme-primary flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-accent" />
@@ -78,6 +83,7 @@ const CategoryHints = ({ wsType }) => {
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 };

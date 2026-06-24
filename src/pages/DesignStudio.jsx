@@ -308,8 +308,8 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
           </div>
           <div className="space-y-2">
             {(() => {
-              const raw = localStorage.getItem('billqyro_design_activity');
-              const activities = raw ? JSON.parse(raw) : [];
+              let activities = [];
+              try { const raw = localStorage.getItem('billqyro_design_activity'); activities = raw ? JSON.parse(raw) : []; } catch (e) { activities = []; }
               const defaults = [
                 { action: 'Template updated', detail: 'PDF Classic layout', time: Date.now() - 86400000 * 2 },
                 { action: 'Brand color changed', detail: 'Obsidian Gold applied', time: Date.now() - 86400000 * 4 },

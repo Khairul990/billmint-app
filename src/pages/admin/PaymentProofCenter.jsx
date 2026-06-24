@@ -61,9 +61,9 @@ const PaymentProofCenter = () => {
   const filteredProofs = proofs.filter(p => {
     const term = searchTerm.toLowerCase();
     const matchesSearch = 
-      (p.userEmail?.toLowerCase().includes(term) || '') ||
-      (p.transactionId?.toLowerCase().includes(term) || '') ||
-      (p.note?.toLowerCase().includes(term) || '');
+      ((p.userEmail || '').toLowerCase().includes(term)) ||
+      ((p.transactionId || '').toLowerCase().includes(term)) ||
+      ((p.note || '').toLowerCase().includes(term));
     
     if (statusFilter === 'all') return matchesSearch;
     if (statusFilter === 'Verified') return (p.status === 'Approved' || p.status === 'Verified') && matchesSearch;

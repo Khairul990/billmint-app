@@ -69,7 +69,7 @@ const Clients = () => {
 
   const filtered = items.filter(i => {
     const q = search.toLowerCase();
-    return i.name.toLowerCase().includes(q) || (i.company || '').toLowerCase().includes(q) || (i.phone || '').includes(q) || (i.email || '').toLowerCase().includes(q);
+    return (i.name || '').toLowerCase().includes(q) || (i.company || '').toLowerCase().includes(q) || (i.phone || '').includes(q) || (i.email || '').toLowerCase().includes(q);
   });
 
   const stats = [

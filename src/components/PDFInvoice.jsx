@@ -422,7 +422,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
           <Text style={styles.compactColAmt}>Amount</Text>
         </View>
 
-        {invoice.items.map((item, idx) => (
+        {(invoice.items || []).map((item, idx) => (
           <View key={idx} style={styles.tableRow}>
             <Text style={styles.compactColSN}>{idx + 1}</Text>
             {invoice.billType === 'grocery' ? (
@@ -651,7 +651,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
           <Text style={styles.colAmt}>Amount</Text>
         </View>
 
-        {invoice.items.map((item, idx) => (
+        {(invoice.items || []).map((item, idx) => (
           <View key={idx} style={styles.tableRow}>
             <Text style={styles.colSN}>{idx + 1}</Text>
             {invoice.billType === 'grocery' ? (

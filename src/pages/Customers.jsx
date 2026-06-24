@@ -97,7 +97,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
   const filteredCustomers = useMemo(() => customers.filter(c => {
     const q = searchQuery.toLowerCase();
     return (
-      c.name.toLowerCase().includes(q) ||
+      (c.name || '').toLowerCase().includes(q) ||
       (c.phone && c.phone.toLowerCase().includes(q)) ||
       (c.email && c.email.toLowerCase().includes(q)) ||
       (c.address && c.address.toLowerCase().includes(q))
@@ -162,7 +162,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
             {/* Header with avatar and name */}
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 md:h-10 md:w-10 items-center justify-center rounded-full bg-theme-accent text-white font-bold text-lg md:text-base">
-                {cust.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                {(cust.name || '').split(' ').map(n => n[0]).join('').toUpperCase()}
               </div>
               <h3 className="text-base font-extrabold text-theme-primary dark:text-theme-primary">{cust.name}</h3>
             </div>

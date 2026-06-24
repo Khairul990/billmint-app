@@ -63,7 +63,7 @@ const Projects = () => {
 
   const filtered = items.filter(i => {
     const q = search.toLowerCase();
-    return i.name.toLowerCase().includes(q) || (i.client || '').toLowerCase().includes(q) || (i.status || '').toLowerCase().includes(q);
+    return (i.name || '').toLowerCase().includes(q) || (i.client || '').toLowerCase().includes(q) || (i.status || '').toLowerCase().includes(q);
   });
 
   const activeCount = items.filter(i => i.status === 'Active' || i.status === 'In Progress').length;

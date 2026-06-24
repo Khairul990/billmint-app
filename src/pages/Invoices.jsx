@@ -136,36 +136,41 @@ const Invoices = ({
 
   // On-demand real-time public proof syncer when viewing an invoice
   useEffect(() => {
+    let cancelled = false;
+
     if (viewingInvoice && viewingInvoice.publicToken && firebaseReady) {
       const fetchLatestFromPublic = async () => {
         try {
           const docRef = doc(db, 'publicInvoices', viewingInvoice.publicToken);
           const snap = await getDoc(docRef);
-          if (snap.exists()) {
-            const pubData = snap.data();
-            const localProofsStr = JSON.stringify(viewingInvoice.paymentProofs || []);
-            const pubProofsStr = JSON.stringify(pubData.paymentProofs || []);
-            if (localProofsStr !== pubProofsStr || viewingInvoice.paymentStatus !== pubData.paymentStatus) {
-              const updated = {
-                ...viewingInvoice,
-                paymentStatus: pubData.paymentStatus,
-                paymentProofs: pubData.paymentProofs || [],
-                paymentHistory: pubData.paymentHistory || [],
-                amountPaid: pubData.amountPaid || viewingInvoice.amountPaid,
-                balanceDue: pubData.balanceDue !== undefined ? pubData.balanceDue : viewingInvoice.balanceDue
-              };
-              
-              // Save to Firestore collections (both private and public)
-              await saveInvoice(updated);
-              
-              // Update state locally
-              const updatedInvoices = invoices.map(inv => inv.id === viewingInvoice.id ? updated : inv);
-              localStorage.setItem('billqyro_invoices', JSON.stringify(updatedInvoices));
-              setViewingInvoice(updated);
-              
-              // Sync components
-              window.dispatchEvent(new CustomEvent('billqyro_sync'));
-            }
+          if (cancelled || !snap.exists()) return;
+          const pubData = snap.data();
+          const localProofsStr = JSON.stringify(viewingInvoice.paymentProofs || []);
+          const pubProofsStr = JSON.stringify(pubData.paymentProofs || []);
+          if (localProofsStr !== pubProofsStr || viewingInvoice.paymentStatus !== pubData.paymentStatus) {
+            const updated = {
+              ...viewingInvoice,
+              paymentStatus: pubData.paymentStatus,
+              paymentProofs: pubData.paymentProofs || [],
+              paymentHistory: pubData.paymentHistory || [],
+              amountPaid: pubData.amountPaid || viewingInvoice.amountPaid,
+              balanceDue: pubData.balanceDue !== undefined ? pubData.balanceDue : viewingInvoice.balanceDue
+            };
+
+            if (cancelled) return;
+
+            // Save to Firestore collections (both private and public)
+            await saveInvoice(updated);
+
+            if (cancelled) return;
+
+            // Update state locally
+            const updatedInvoices = invoices.map(inv => inv.id === viewingInvoice.id ? updated : inv);
+            localStorage.setItem('billqyro_invoices', JSON.stringify(updatedInvoices));
+            setViewingInvoice(updated);
+
+            // Sync components
+            window.dispatchEvent(new CustomEvent('billqyro_sync'));
           }
         } catch (err) {
           console.warn('Failed to sync viewingInvoice with public doc:', err);
@@ -173,6 +178,8 @@ const Invoices = ({
       };
       fetchLatestFromPublic();
     }
+
+    return () => { cancelled = true; };
   }, [viewingInvoice?.id, firebaseReady, invoices]);
 
   const handleApproveProof = async (proof) => {

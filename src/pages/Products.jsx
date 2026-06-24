@@ -124,7 +124,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
   const filteredProducts = products.filter(p => {
     const q = searchQuery.toLowerCase();
     return (
-      p.name.toLowerCase().includes(q) ||
+      (p.name || '').toLowerCase().includes(q) ||
       (p.description && p.description.toLowerCase().includes(q))
     );
   });

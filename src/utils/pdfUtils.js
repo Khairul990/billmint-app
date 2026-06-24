@@ -13,6 +13,7 @@ let isDownloadingPDF = false;
  */
 export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) => {
   if (isDownloadingPDF) return false;
+  if (!invoice) return false;
   isDownloadingPDF = true;
   try {
     const doc = React.createElement(PDFInvoice, { invoice, businessSettings, isPremium });

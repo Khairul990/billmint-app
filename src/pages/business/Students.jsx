@@ -49,7 +49,7 @@ const Students = () => {
 
   const filtered = items.filter(i => {
     const q = search.toLowerCase();
-    return i.name.toLowerCase().includes(q) || (i.phone || '').includes(q) || (i.email || '').toLowerCase().includes(q) || (i.course || '').toLowerCase().includes(q) || (i.batch || '').toLowerCase().includes(q);
+    return (i.name || '').toLowerCase().includes(q) || (i.phone || '').includes(q) || (i.email || '').toLowerCase().includes(q) || (i.course || '').toLowerCase().includes(q) || (i.batch || '').toLowerCase().includes(q);
   });
 
   const stats = [

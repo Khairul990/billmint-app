@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWorkspace, setCurrentTab, mobile }) => {
   const [open, setOpen] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
-  const activeWorkspace = businessWorkspaces.find(ws => ws.id === activeWorkspaceId) || {};
+  const activeWorkspace = (businessWorkspaces || []).find(ws => ws.id === activeWorkspaceId) || {};
 
   const handleSelect = (id) => {
     setIsSwitching(true);
@@ -40,7 +40,7 @@ const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWor
             <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
             <div className="origin-top-left absolute left-0 mt-1.5 w-48 rounded-xl shadow-lg bg-theme-card border border-theme-accent/30 focus:outline-none z-50 overflow-hidden">
               <div className="py-1">
-                {businessWorkspaces.map(ws => (
+                {(businessWorkspaces || []).map(ws => (
                   <button
                     key={ws.id}
                     onClick={() => handleSelect(ws.id)}

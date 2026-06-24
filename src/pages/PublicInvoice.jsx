@@ -40,18 +40,25 @@ const PublicInvoice = ({ initialInvoice }) => {
   
   // Attach real-time listener to keep invoice up-to-date (cache-busting)
   useEffect(() => {
+    let unsubscribe = null;
+    let mounted = true;
+
     setInvoice(initialInvoice);
     if (initialInvoice && initialInvoice.publicToken) {
       import('firebase/firestore').then(({ doc, onSnapshot }) => {
         const docRef = doc(db, 'publicInvoices', initialInvoice.publicToken);
-        const unsubscribe = onSnapshot(docRef, (snap) => {
-          if (snap.exists()) {
+        unsubscribe = onSnapshot(docRef, (snap) => {
+          if (snap.exists() && mounted) {
             setInvoice(prev => ({ ...prev, ...snap.data() }));
           }
         });
-        return () => unsubscribe();
       }).catch(err => console.warn('Failed to attach realtime listener', err));
     }
+
+    return () => {
+      mounted = false;
+      if (unsubscribe) unsubscribe();
+    };
   }, [initialInvoice]);
   
   // "I Have Paid" Form states
@@ -645,7 +652,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-theme-border-soft/50">
-                      {invoice.items.map((item, idx) => (
+                      {(invoice.items || []).map((item, idx) => (
                         <tr key={idx} className="hover:bg-theme-app/50">
                           <td className="py-2 md:py-2.5 px-2 md:px-3 text-center text-theme-muted font-bold">{idx + 1}</td>
                           {invoice.billType === 'grocery' ? (

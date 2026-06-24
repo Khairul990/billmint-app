@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
-import { Search, Bell } from 'lucide-react';
+import { Search, Bell, Settings as SettingsIcon, Sparkles, ShieldCheck, User, Briefcase, Activity, HelpCircle, LogOut } from 'lucide-react';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import Logo from './Logo';
 import { getSettings, saveSettings } from '../services/dbEngine';

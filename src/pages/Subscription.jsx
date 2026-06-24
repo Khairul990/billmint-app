@@ -1139,7 +1139,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                   <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider mb-2">Note / Comments (Optional)</label>
                   <input
                     type="text"
-                    placeholder="e.g. Cleared my ₹{revenueState.platformPendingAmount} due"
+                    placeholder={`e.g. Cleared my ₹${revenueState.platformPendingAmount} due`}
                     value={platformNote}
                     onChange={(e) => setPlatformNote(e.target.value)}
                     className="w-full bg-theme-surface border border-theme-border-soft text-theme-primary px-4 py-3 rounded-xl focus:outline-none focus:border-theme-accent text-sm font-semibold transition-all"
