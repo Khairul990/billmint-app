@@ -558,7 +558,7 @@ const PublicInvoice = ({ initialInvoice }) => {
         </div>
       </header>
 
-      <div className="max-w-5xl w-full flex flex-col lg:flex-row gap-4 md:gap-5 items-start">
+      <div className="max-w-5xl w-full flex flex-col gap-4 md:gap-5 items-center">
 
         {/* ===== LEFT: INVOICE DISPLAY CARD ===== */}
         <div className="w-full lg:flex-1 space-y-3 md:space-y-4">
@@ -733,7 +733,7 @@ const PublicInvoice = ({ initialInvoice }) => {
 
         {/* ===== RIGHT: PAYMENT / STATUS SIDEBAR ===== */}
         {invoice.paymentStatus === 'Paid' ? (
-          <div className="w-full lg:w-[340px] shrink-0 space-y-3 md:space-y-4">
+          <div className="w-full max-w-2xl shrink-0 space-y-3 md:space-y-4 mt-4">
             <div className="card-premium overflow-hidden border border-emerald-500/25 shadow-lg p-4 md:p-5 space-y-3 md:space-y-4 relative">
               <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/8 rounded-full blur-3xl pointer-events-none"></div>
               <div className="flex items-center gap-3">
@@ -791,7 +791,7 @@ const PublicInvoice = ({ initialInvoice }) => {
             </div>
           </div>
         ) : (
-          <div className="w-full lg:w-[340px] shrink-0 space-y-3 md:space-y-4">
+          <div className="w-full max-w-2xl shrink-0 space-y-3 md:space-y-4 mt-4">
 
             {/* Amount Due Card with Premium Gradient */}
             <div className={`card-premium-elevated rounded-2xl p-5 md:p-6 text-white shadow-xl relative overflow-hidden ${invoice.paymentStatus === 'Unpaid' || invoice.paymentStatus === 'Pending' || invoice.paymentStatus === 'Overdue' ? 'animate-gradient-shift bg-gradient-to-br from-theme-accent via-theme-accent-dark to-purple-700' : 'bg-gradient-to-br from-theme-accent to-theme-accent-dark'}`}>

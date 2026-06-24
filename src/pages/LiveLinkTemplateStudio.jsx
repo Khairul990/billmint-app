@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import LazyPreview from '../components/LazyPreview';
+import PublicInvoice from './PublicInvoice';
+
 import { motion } from 'framer-motion';
 import { 
   Palette, 
@@ -179,6 +182,67 @@ const conversionLayouts = [
   { id: 'bold', name: 'Bold', icon: Sparkles, desc: 'High-contrast bold style' }
 ];
 
+
+const demoInvoice = {
+    id: 'demo-123',
+    invoiceNumber: 'INV-1001',
+    date: '01/01/2024',
+    dueDate: '15/01/2024',
+    customerName: 'Arman Khan',
+    customerAddress: '123, Education Street, New Delhi - 110001',
+    customerPhone: '+91 98765 43210',
+    customerEmail: 'arman.khan@email.com',
+    paymentStatus: 'Pending',
+    orderStatus: 'Pending',
+    notes: 'Thank you for your continued trust in our coaching center.',
+    items: [
+        { description: 'Physics Monthly Fee', qty: 1, rate: 2500, amount: 2500 },
+        { description: 'Science Kit', qty: 1, rate: 1500, amount: 1500 },
+        { description: 'Registration', qty: 1, rate: 1000, amount: 1000 },
+    ],
+    subtotal: 5000,
+    discountAmount: 0,
+    taxPercentage: 0,
+    taxAmount: 0,
+    grandTotal: 5000,
+    amountPaid: 2500,
+    balanceDue: 2500,
+    businessSnapshot: {
+        businessName: "Teacher Tuition Center",
+        ownerName: 'Admin',
+        phone: '+91 98765 43210',
+        email: 'admin@tuition.com',
+        address: '456, Knowledge Park, New Delhi - 110002',
+        gstNumber: '',
+        currency: '₹',
+        taxLabel: 'GST',
+    },
+    paymentSettingsSnapshot: {
+        paymentQrEnabled: true,
+        showQrInPreview: true,
+        customerLiveLinkSettings: {
+           enableLiveInvoiceLink: true,
+           showPaymentQr: true,
+           allowCustomerPdfDownload: true,
+           allowPaymentProofSubmit: true,
+           showPaidDueAmount: true,
+           showContactButton: true,
+           requireTransactionId: true,
+           requirePaymentScreenshot: false,
+           selectedLiveLinkTemplate: 'classic',
+        }
+    },
+    regionalSettingsSnapshot: {
+        country: 'India',
+        currency: '₹',
+        currencyCode: 'INR',
+        language: 'English',
+        taxLabel: 'GST',
+        dateFormat: 'DD/MM/YYYY',
+        numberFormat: 'Indian',
+    },
+};
+
 const loadRatings = () => {
   try { return JSON.parse(localStorage.getItem('ll_template_ratings') || '{}'); } catch { return {}; }
 };
@@ -242,134 +306,15 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
 
   // Preview renderer
   const renderPreview = (tplId) => {
-    switch (tplId) {
-      case 'classic':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-theme-card dark:bg-slate-800 h-full w-full border border-gray-200">
-            <div className="h-4 w-1/3 bg-gray-300"></div>
-            <div className="h-2 w-1/4 bg-gray-200 mt-2"></div>
-            <div className="mt-auto h-8 w-full bg-blue-500 rounded text-[6px] text-white flex items-center justify-center font-bold">Pay Now</div>
-          </div>
-        );
-      case 'modern':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-gray-100 h-full w-full">
-              <div className="bg-theme-card p-2 rounded shadow-sm flex flex-col gap-1 h-full">
-              <div className="h-3 w-1/3 bg-indigo-500 rounded"></div>
-              <div className="h-2 w-1/2 bg-gray-200 rounded mt-2"></div>
-              <div className="mt-auto h-8 w-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded text-[6px] text-white flex items-center justify-center font-bold">Pay Now</div>
-            </div>
-          </div>
-        );
-      case 'mobile':
-        return (
-          <div className="flex flex-col gap-1 px-4 py-2 bg-black h-full w-full rounded-[2rem] border-4 border-gray-800">
-            <div className="h-3 w-1/2 bg-gray-400 mx-auto rounded mt-2"></div>
-            <div className="h-10 w-full bg-gray-800 rounded mt-4"></div>
-            <div className="mt-auto h-10 w-full bg-emerald-500 rounded-full text-[6px] text-white flex items-center justify-center font-bold">Pay Now</div>
-          </div>
-        );
-      case 'retail':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-amber-50 h-full w-full border-dashed border-2 border-amber-200">
-            <div className="h-3 w-full bg-amber-800 text-center"></div>
-            <div className="h-1 border-b-2 border-dashed border-amber-300 my-1"></div>
-            <div className="h-2 w-full bg-amber-100"></div>
-            <div className="h-2 w-full bg-amber-100"></div>
-            <div className="mt-auto h-8 w-full bg-amber-800 text-[6px] text-white flex items-center justify-center font-bold">Checkout</div>
-          </div>
-        );
-      case 'corporate':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-theme-card h-full w-full border border-theme-border-strong">
-            <div className="h-4 w-1/3 bg-emerald-500"></div>
-            <div className="h-1 border-b border-theme-border-strong w-full my-1"></div>
-            <div className="h-10 w-full bg-theme-surface"></div>
-            <div className="mt-auto h-8 w-full bg-theme-card text-[6px] text-theme-primary flex items-center justify-center font-bold">Secure Payment</div>
-          </div>
-        );
-      case 'boutique':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-rose-50 h-full w-full border border-rose-200">
-            <div className="h-4 w-1/2 bg-rose-400 mx-auto rounded-full"></div>
-            <div className="h-10 w-full bg-theme-card border border-rose-100 rounded mt-2"></div>
-            <div className="mt-auto h-8 w-full bg-rose-500 rounded text-[6px] text-white flex items-center justify-center font-bold">Complete Order</div>
-          </div>
-        );
-      case 'clinic':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-blue-50 h-full w-full border-t-8 border-blue-500">
-            <div className="h-4 w-1/4 bg-blue-600 rounded"></div>
-            <div className="h-8 w-full bg-theme-card rounded shadow-sm mt-2"></div>
-            <div className="h-4 w-full bg-red-100 mt-1"></div>
-            <div className="mt-auto h-8 w-full bg-blue-600 rounded text-[6px] text-white flex items-center justify-center font-bold">Pay Bill</div>
-          </div>
-        );
-      case 'repair':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-zinc-800 h-full w-full border-l-4 border-yellow-500">
-            <div className="h-4 w-1/3 bg-zinc-300"></div>
-            <div className="h-8 w-full bg-zinc-700 mt-2"></div>
-            <div className="h-2 w-1/2 bg-yellow-500 mt-1"></div>
-            <div className="mt-auto h-8 w-full bg-yellow-500 text-[6px] text-zinc-900 flex items-center justify-center font-bold uppercase tracking-widest">Pay Invoice</div>
-          </div>
-        );
-      case 'executive':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-slate-900 h-full w-full border border-slate-700">
-            <div className="h-4 w-1/2 bg-slate-600 mx-auto"></div>
-            <div className="h-1 border-b border-slate-700 w-full my-1"></div>
-            <div className="h-8 w-full bg-slate-800 rounded"></div>
-            <div className="mt-auto h-8 w-full bg-gradient-to-r from-amber-500 to-orange-500 rounded text-[6px] text-white flex items-center justify-center font-bold">Executive Pay</div>
-          </div>
-        );
-      case 'saas':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-violet-50 h-full w-full border border-violet-200">
-            <div className="h-3 w-1/3 bg-violet-500 rounded"></div>
-            <div className="h-4 w-full bg-white rounded mt-1 border border-violet-100"></div>
-            <div className="h-4 w-full bg-white rounded border border-violet-100"></div>
-            <div className="mt-auto h-8 w-full bg-violet-600 rounded text-[6px] text-white flex items-center justify-center font-bold">Subscribe Now</div>
-          </div>
-        );
-      case 'teacher':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-sky-50 h-full w-full border-t-8 border-sky-400">
-            <div className="h-3 w-1/3 bg-sky-500 rounded"></div>
-            <div className="h-6 w-full bg-white rounded mt-1"></div>
-            <div className="mt-auto h-8 w-full bg-sky-500 rounded text-[6px] text-white flex items-center justify-center font-bold">Pay Fee</div>
-          </div>
-        );
-      case 'medical':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-teal-50 h-full w-full border border-teal-200">
-            <div className="h-4 w-1/4 bg-teal-600 rounded"></div>
-            <div className="h-6 w-full bg-white rounded mt-1 border border-teal-100"></div>
-            <div className="h-3 w-full bg-red-100 mt-1"></div>
-            <div className="mt-auto h-8 w-full bg-teal-600 rounded text-[6px] text-white flex items-center justify-center font-bold">Pay Medical Bill</div>
-          </div>
-        );
-      case 'tailor':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-rose-50 h-full w-full border border-rose-200">
-            <div className="h-4 w-1/2 bg-rose-400 mx-auto rounded-full"></div>
-            <div className="h-6 w-full bg-white rounded mt-1 border border-rose-100"></div>
-            <div className="h-2 w-2/3 bg-rose-200 mx-auto mt-1"></div>
-            <div className="mt-auto h-8 w-full bg-rose-500 rounded text-[6px] text-white flex items-center justify-center font-bold">Order Now</div>
-          </div>
-        );
-      case 'embroidery':
-        return (
-          <div className="flex flex-col gap-1 p-2 bg-purple-50 h-full w-full border border-purple-200">
-            <div className="h-4 w-1/3 bg-purple-500 mx-auto rounded"></div>
-            <div className="h-6 w-full bg-white rounded mt-1 border border-purple-100"></div>
-            <div className="h-2 w-1/2 bg-purple-300 mx-auto mt-1"></div>
-            <div className="mt-auto h-8 w-full bg-purple-600 rounded text-[6px] text-white flex items-center justify-center font-bold">View Design</div>
-          </div>
-        );
-      default:
-        return <div className="bg-gray-100 h-full w-full"></div>;
-    }
+    const mock = JSON.parse(JSON.stringify(demoInvoice));
+    mock.paymentSettingsSnapshot.customerLiveLinkSettings.selectedLiveLinkTemplate = tplId;
+    return (
+       <LazyPreview fallback={<div className="h-full w-full bg-theme-app animate-pulse flex items-center justify-center text-xs font-bold text-theme-muted">Loading preview...</div>}>
+           <div className="w-[800px] h-full transform origin-top-left scale-[0.35] lg:scale-[0.4] pointer-events-none">
+                <PublicInvoice initialInvoice={mock} />
+           </div>
+       </LazyPreview>
+    );
   };
 
   return (

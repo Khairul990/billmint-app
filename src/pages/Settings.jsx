@@ -1,4 +1,10 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
+import Subscription from './Subscription';
+import PdfTemplateStudio from './PdfTemplateStudio';
+import LiveLinkTemplateStudio from './LiveLinkTemplateStudio';
+import DesignStudio from './DesignStudio';
+import BackupRestore from './BackupRestore';
+
 import { motion } from 'framer-motion';
 import { pageVariants } from '../utils/animations';
 import { CardSkeleton } from '../components/PremiumSkeleton';
@@ -58,6 +64,8 @@ import {
 
 import {
   exportBackup,
+  exportBackupZip,
+  unzipBackup,
   getAuthSession,
   clearInvoices,
   clearCustomers,
@@ -717,25 +725,30 @@ const Settings = ({
     }
   };
 
-  const handleImport = (e) => {
+  const handleImport = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-      const parsedData = JSON.parse(event.target.result);
-        if (onImportBackup) {
-          onImportBackup(parsedData);
-          toast.success('Database successfully restored from backup!');
-        } else {
-          toast.error('Import feature not properly wired in the system.');
-        }
-      } catch (error) {
-        alert('Failed to import backup: ' + error.message);
+    
+    try {
+      let parsedData;
+      if (file.name.toLowerCase().endsWith('.zip')) {
+        parsedData = await unzipBackup(file);
+      } else {
+        // Read JSON directly
+        const text = await file.text();
+        parsedData = JSON.parse(text);
       }
-    };
-    reader.readAsText(file);
+      
+      if (onImportBackup) {
+        await onImportBackup(parsedData);
+        toast.success('Database successfully restored from backup!');
+        setTimeout(() => window.location.reload(), 1500); // Reload to reflect fresh data safely
+      } else {
+        toast.error('Import feature not properly wired in the system.');
+      }
+    } catch (error) {
+      toast.error('Failed to import backup: ' + error.message);
+    }
   };
 
   const handleResetData = () => {
@@ -994,7 +1007,7 @@ const Settings = ({
         <div className="flex-1 min-w-0 space-y-6">
 
           {/* ============ BUSINESS ============ */}
-          {activeCategory === 'business' && (
+          {effectiveActiveCategory === 'business' && (
             <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
               <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
                 <div className="flex items-center gap-3">
@@ -1154,7 +1167,7 @@ const Settings = ({
             </div>
           )}
           {/* ============ WORKSPACE ============ */}
-          {activeCategory === 'workspace' && (
+          {effectiveActiveCategory === 'workspace' && (
             <>
               {/* Regional Settings */}
               <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
@@ -1352,472 +1365,26 @@ const Settings = ({
             </>
           )}
           {/* ============ THEMES ============ */}
-          {activeCategory === 'themes' && (
-            <div className="space-y-6 animate-fadeIn">
-              <div className="card-premium p-6">
-                <div className="section-header">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0">
-                      <Palette className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h2 className="section-header-title">Brand Theme Studio</h2>
-                      <p className="section-header-subtitle">Personalize your workspace and invoice output with curated color presets, light/dark mode, and interface language.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="card-premium p-5 space-y-4">
-                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                  <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
-                    <input type="text" value={themeSearch} onChange={(e) => setThemeSearch(e.target.value)} placeholder="Search themes..." className="input-premium w-full pl-10 pr-4 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary" />
-                    {themeSearch && <button onClick={() => setThemeSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary"><X className="w-3.5 h-3.5" /></button>}
-                  </div>
-                  <span className="text-[10px] font-bold text-theme-muted whitespace-nowrap">{ALL_THEMES.filter(t => (themeCategory === 'All' || t.category === themeCategory) && t.name.toLowerCase().includes(themeSearch.toLowerCase())).length} themes</span>
-                </div>
-                <div className="flex gap-2 overflow-x-auto hide-scrollbar">
-                  {THEME_CATEGORIES.map(cat => (
-                    <button key={cat} onClick={() => setThemeCategory(cat)} className={'px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all chip-premium ' + (themeCategory === cat ? 'bg-theme-accent text-white shadow-md shadow-theme-accent/30' : 'bg-theme-app dark:bg-theme-surface text-theme-muted hover:text-theme-primary border border-theme-border-soft')}>{cat}</button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="card-premium p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">All Themes</h3>
-                  <span className="badge-premium text-[9px] font-black text-theme-muted bg-theme-card px-3 py-1 rounded-full border border-theme-border-soft">{ALL_THEMES.length} Available</span>
-                </div>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                  {ALL_THEMES.filter(t => (themeCategory === 'All' || t.category === themeCategory) && t.name.toLowerCase().includes(themeSearch.toLowerCase())).map((theme) => {
-                    const isDefault = themeColor === theme.id;
-                    const isFav = favoriteThemes.includes(theme.id);
-                    return (
-                      <motion.div key={theme.id} layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                        className={'card-premium rounded-2xl overflow-hidden border-2 transition-all duration-300 relative group ' + (isDefault ? 'border-theme-accent shadow-md shadow-theme-accent/20' : 'border-theme-border-soft hover:border-theme-accent/40')}>
-                        <div className="h-10 w-full" style={{ background: theme.gradient }} />
-                        <button onClick={(e) => { e.stopPropagation(); setFavoriteThemes(prev => prev.includes(theme.id) ? prev.filter(id => id !== theme.id) : [...prev, theme.id]); }} className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-black/40 z-10">
-                          <Star className={'w-3 h-3 ' + (isFav ? 'text-amber-400 fill-amber-400' : 'text-white/70')} />
-                        </button>
-                        <div className="absolute top-1 left-1 flex gap-1">
-                          {isDefault && <span className="bg-theme-accent text-white text-[7px] font-black px-1.5 py-0.5 rounded-full shadow-sm badge-premium">Default</span>}
-                        </div>
-                        <div className="p-2.5">
-                          <p className="text-[10px] font-extrabold text-theme-primary truncate">{theme.name}</p>
-                          <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">{theme.category}</span>
-                        </div>
-                        <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-2xl">
-                          <button onClick={() => { setThemeColor(theme.id); document.documentElement.setAttribute('data-theme', theme.id); import('../utils/themeIcon').then(m => m.updateFaviconForTheme(theme.id)); toast.success('Previewing ' + theme.name); }} className="px-2.5 py-1.5 bg-white/90 text-gray-900 text-[9px] font-black rounded-lg hover:bg-white transition-all">Preview</button>
-                          <button onClick={() => { setThemeColor(theme.id); document.documentElement.setAttribute('data-theme', theme.id); import('../utils/themeIcon').then(m => m.updateFaviconForTheme(theme.id)); toast.success(theme.name + ' applied!'); }} className="px-2.5 py-1.5 bg-theme-accent text-white text-[9px] font-black rounded-lg hover:opacity-90 transition-all btn-premium">Apply</button>
-                          <button onClick={(e) => { e.stopPropagation(); setFavoriteThemes(prev => prev.includes(theme.id) ? prev.filter(id => id !== theme.id) : [...prev, theme.id]); }} className={'px-2.5 py-1.5 rounded-lg text-[9px] font-black transition-all ' + (isFav ? 'bg-amber-400/90 text-white' : 'bg-white/90 text-gray-900 hover:bg-white')}><Star className={'w-3 h-3 ' + (isFav ? 'fill-white' : '')} /></button>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="card-premium p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-theme-accent/20 flex items-center justify-center"><Star className="w-5 h-5 text-theme-accent" /></div>
-                  <div>
-                    <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Default Theme</h3>
-                    <p className="text-[10px] text-theme-muted font-semibold">Current: {ALL_THEMES.find(t => t.id === themeColor)?.name || themeColor}</p>
-                  </div>
-                </div>
-                <button onClick={() => { setThemeColor(themeColor); document.documentElement.setAttribute('data-theme', themeColor); import('../utils/themeIcon').then(m => m.updateFaviconForTheme(themeColor)); toast.success('"' + (ALL_THEMES.find(t => t.id === themeColor)?.name || themeColor) + '" set as default!'); }} className="btn-premium text-[10px] px-4 py-2 bg-theme-accent text-white"><Check className="w-3.5 h-3.5" /> Set as Default</button>
-              </div>
-
-              <div className="divider-premium h-px bg-gradient-to-r from-transparent via-theme-border-soft to-transparent my-2" />
-
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                <div className="lg:col-span-5 space-y-5">
-                  <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xs font-black uppercase text-theme-primary tracking-wider">Dark Mode</h3>
-                      <p className="text-[10px] text-theme-muted font-medium">Use a dark aesthetic across your dashboard.</p>
-                    </div>
-                    <button type="button" onClick={() => { setDarkMode(!darkMode); if (!darkMode) { document.documentElement.classList.add('dark'); } else { document.documentElement.classList.remove('dark'); } }} className={'relative w-12 h-6 rounded-full transition-all duration-500 ease-in-out shadow-inner flex items-center p-1 focus:outline-none ' + (darkMode ? 'bg-[image:var(--accent-gradient)] shadow-md shadow-theme-accent/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5')}>
-                      <span className={'w-4 h-4 bg-white rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ' + (darkMode ? 'translate-x-6' : 'translate-x-0')} />
-                    </button>
-                  </div>
-
-                  <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xs font-black uppercase text-theme-primary tracking-wider">Language</h3>
-                      <p className="text-[10px] text-theme-muted font-medium">App interface language</p>
-                    </div>
-                    <select value={language} onChange={(e) => setLanguage(e.target.value)} className="bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-lg px-3 py-1.5 text-xs font-bold text-theme-primary outline-none focus:ring-2 focus:ring-theme-accent/20 cursor-pointer">
-                      <option value="en">English</option>
-                      <option value="bn">Bengali (বাংলা)</option>
-                      <option value="hi">Hindi (हिंदी)</option>
-                    </select>
-                  </div>
-
-                  <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium space-y-5">
-                    <h3 className="text-xs font-black uppercase text-theme-muted tracking-wider">Select Brand Color</h3>
-                    <div className="space-y-3">
-                      {[
-                        { id: 'obsidian-gold', name: 'Obsidian Gold', desc: 'Ultra Premium Executive', colors: ['#B8860B', '#1F2937', '#FFF9EC', '#1A1A1A', '#6B5B3E'] },
-                        { id: 'arctic-teal', name: 'Arctic Teal', desc: 'Clean Premium Business', colors: ['#009E7F', '#0F766E', '#F4FFFD', '#10201D', '#4B6F68'] },
-                        { id: 'sapphire-noir', name: 'Sapphire Noir', desc: 'Financial Corporate', colors: ['#2563EB', '#1E3A8A', '#F7FAFF', '#0F172A', '#4B5D7A'] },
-                        { id: 'rose-platinum', name: 'Rose Platinum', desc: 'Luxury Elegant', colors: ['#C75C75', '#8B3A4A', '#FFF7FA', '#2A1118', '#7A4B58'] },
-                        { id: 'carbon-violet', name: 'Carbon Violet', desc: 'Modern Tech Startup', colors: ['#7C3AFF', '#4C1D95', '#FAF7FF', '#1E1238', '#67548A'] },
-                        { id: 'graphite-copper', name: 'Graphite Copper', desc: 'Industrial Luxury', colors: ['#B76535', '#4B2A1A', '#FFF8F2', '#24130C', '#7A5642'] },
-                        { id: 'arctic-diamond', name: 'Arctic Diamond', desc: 'Luxury White & Ice Blue', colors: ['#60A5FA', '#CBD5E1', '#F3F7FC', '#0F172A', '#64748B'] },
-                        { id: 'emerald-royal', name: 'Emerald Royal', desc: 'Emerald & Gold Finance', colors: ['#10B981', '#D4AF37', '#F0FDF4', '#052E16', '#4B635A'] },
-                        { id: 'midnight-ruby', name: 'Midnight Ruby', desc: 'Ruby Red Luxury', colors: ['#C0392B', '#7F1D1D', '#FFF1F2', '#2B0D0D', '#7C4A4A'] },
-                        { id: 'titanium-blue', name: 'Titanium Blue', desc: 'Modern SaaS Stripe Style', colors: ['#2563EB', '#94A3B8', '#F8FAFC', '#0F172A', '#64748B'] }
-                      ].map((preset) => {
-                        const isSelected = themeColor === preset.id;
-                        const lightColors = getThemePreviewColors(preset.id, 'light');
-                        const darkColors = getThemePreviewColors(preset.id, 'dark');
-                        return (
-                          <button key={preset.id} type="button" title={preset.name + ': ' + preset.desc} onClick={() => { setThemeColor(preset.id); document.documentElement.setAttribute('data-theme', preset.id); import('../utils/themeIcon').then(m => m.updateFaviconForTheme(preset.id)); }}
-                            className={'tooltip-premium w-full text-left rounded-2xl border transition-all duration-300 relative overflow-hidden cursor-pointer flex flex-col ' + (isSelected ? 'border-theme-accent bg-theme-accent/[0.03] shadow-premium ring-1 ring-theme-accent' : 'border-theme-border-soft/60 dark:border-theme-border-soft hover:border-theme-border-strong bg-theme-app/50 dark:bg-theme-surface hover:shadow-md')}>
-                            <div className="flex w-full h-1.5 opacity-90">{preset.colors.map((c, i) => (<div key={i} className="flex-1 h-full" style={{ backgroundColor: c }}></div>))}</div>
-                            <div className="p-4 w-full space-y-3">
-                              <div className="flex justify-between items-center w-full">
-                                <span className="text-xs font-extrabold text-theme-primary">{preset.name}</span>
-                                {isSelected && <span className="w-4 h-4 rounded-full bg-theme-accent text-white flex items-center justify-center text-[8px] font-bold shadow-sm">✓</span>}
-                              </div>
-                              <p className="text-[10px] text-theme-muted font-semibold leading-relaxed">{preset.desc}</p>
-                              <div className="mt-3 flex rounded-xl overflow-hidden border border-theme-border-soft shadow-inner">
-                                <div className="flex-1 p-2 flex gap-1.5" style={{ backgroundColor: lightColors.background }}>
-                                  <div className="w-5 rounded shadow-sm p-1 space-y-1" style={{ backgroundColor: lightColors.sidebar }}>
-                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: lightColors.accent }}></div>
-                                    <div className="w-full h-0.5 rounded-full opacity-30" style={{ backgroundColor: lightColors.text }}></div>
-                                  </div>
-                                  <div className="flex-1 space-y-1">
-                                    <div className="w-full h-5 rounded shadow-sm p-1 flex items-end justify-center gap-0.5" style={{ backgroundColor: lightColors.card }}>
-                                      <div className="w-1 h-2 rounded-t-sm" style={{ backgroundColor: lightColors.btnFrom }}></div>
-                                      <div className="w-1 h-3 rounded-t-sm" style={{ backgroundColor: lightColors.btnTo }}></div>
-                                      <div className="w-1 h-2 rounded-t-sm" style={{ backgroundColor: lightColors.btnFrom }}></div>
-                                    </div>
-                                    <div className="w-full h-2 rounded shadow-sm" style={{ background: 'linear-gradient(90deg, ' + lightColors.btnFrom + ', ' + lightColors.btnTo + ')' }}></div>
-                                  </div>
-                                </div>
-                                <div className="flex-1 p-2 flex gap-1.5 border-l border-white/10" style={{ backgroundColor: darkColors.background }}>
-                                  <div className="w-5 rounded shadow-sm p-1 space-y-1" style={{ backgroundColor: darkColors.sidebar }}>
-                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: darkColors.accent }}></div>
-                                    <div className="w-full h-0.5 rounded-full opacity-30" style={{ backgroundColor: darkColors.text }}></div>
-                                  </div>
-                                  <div className="flex-1 space-y-1">
-                                    <div className="w-full h-5 rounded shadow-sm p-1 flex items-end justify-center gap-0.5" style={{ backgroundColor: darkColors.card }}>
-                                      <div className="w-1 h-2 rounded-t-sm" style={{ backgroundColor: darkColors.btnFrom }}></div>
-                                      <div className="w-1 h-3 rounded-t-sm" style={{ backgroundColor: darkColors.btnTo }}></div>
-                                      <div className="w-1 h-2 rounded-t-sm" style={{ backgroundColor: darkColors.btnFrom }}></div>
-                                    </div>
-                                    <div className="w-full h-2 rounded shadow-sm" style={{ background: 'linear-gradient(90deg, ' + darkColors.btnFrom + ', ' + darkColors.btnTo + ')' }}></div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="space-y-2 pt-2 border-t border-theme-border-soft/80">
-                      <button type="button" onClick={() => { document.documentElement.setAttribute('data-theme', themeColor); import('../utils/themeIcon').then(m => m.updateFaviconForTheme(themeColor)); toast.success('Previewing ' + themeColor + ' theme!'); }} className="btn-premium-outline w-full py-3 bg-theme-surface hover:bg-theme-border-soft/75 dark:bg-theme-card dark:hover:bg-theme-surface/80 text-theme-primary font-black text-xs rounded-xl shadow-sm transition-all active:scale-[0.98] cursor-pointer uppercase tracking-wider">Test UI Live Now</button>
-                      <button type="button" onClick={() => handleSave(null)} disabled={isSaving} className="btn-premium w-full py-3 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 font-black text-xs rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed uppercase tracking-wider">{isSaving ? (<span className="inline-flex items-center gap-2"><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving...</span>) : 'Save Theme'}</button>
-                      <button type="button" onClick={() => { setThemeColor('blue'); setDarkMode(false); const payload = { ...settings, themeColor: 'blue', darkMode: false, themePreset: 'blue', themeUpdatedAt: new Date().toISOString() }; onSaveSettings(payload); document.documentElement.setAttribute('data-theme', 'light'); import('../utils/themeIcon').then(m => m.updateFaviconForTheme('light')); document.documentElement.classList.remove('dark'); toast.success('Reset to BillQyro Classic default theme!'); }} className="w-full py-2 bg-transparent text-theme-muted hover:text-theme-danger text-[10px] font-bold text-center transition-all cursor-pointer block uppercase tracking-wider">Reset to BillQyro Classic</button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="divider-premium h-px bg-gradient-to-r from-transparent via-theme-border-soft to-transparent my-4 lg:hidden" />
-
-                <div className="lg:col-span-7 space-y-6">
-                  <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium space-y-6">
-                    <div>
-                      <h3 className="text-xs font-black uppercase text-theme-muted tracking-wider">Theme Studio Live Mocks</h3>
-                      <p className="text-[9px] text-theme-muted font-semibold leading-relaxed mt-0.5">Real-time visualization of presets applied to core panels</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      {(() => { const colors = getThemePreviewColors(themeColor); return (
-                        <div className="border border-theme-border-soft/60 rounded-2xl p-4 space-y-3 relative overflow-hidden flex flex-col justify-between" style={{ backgroundColor: colors.background }}>
-                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/40 px-1.5 py-0.5 rounded border border-theme-border-soft/10">PC Workspace</span>
-                          <div className="space-y-2">
-                            <span className="text-[8px] font-black uppercase text-theme-muted tracking-wider block">Desktop Dashboard</span>
-                            <div className="flex gap-2">
-                              <div className="w-14 rounded p-1.5 space-y-1" style={{ backgroundColor: colors.sidebar }}>
-                                <div className="w-8 h-1 rounded-sm bg-theme-card/40"></div>
-                                <div className="w-10 h-0.5 rounded-sm bg-theme-card/20"></div>
-                                <div className="w-10 h-0.5 rounded-sm bg-theme-card/20"></div>
-                              </div>
-                              <div className="flex-1 space-y-2">
-                                <div className="rounded p-2 text-white text-[6px] space-y-1 relative" style={{ background: 'linear-gradient(135deg, ' + colors.btnFrom + ', ' + colors.btnTo + ')' }}>
-                                  <span className="font-extrabold block">Welcome to BillQyro</span>
-                                  <div className="w-12 h-1 bg-theme-card/30 rounded-sm"></div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-1">
-                                  <div className="rounded p-1 border" style={{ backgroundColor: colors.card, borderColor: colors.border }}><span className="text-[5px] text-theme-muted block leading-none">Collection</span><span className="text-[6px] font-extrabold" style={{ color: colors.text }}>$1,200</span></div>
-                                  <div className="rounded p-1 border" style={{ backgroundColor: colors.card, borderColor: colors.border }}><span className="text-[5px] text-theme-muted block leading-none">Dues</span><span className="text-[6px] font-extrabold" style={{ color: colors.text }}>$450</span></div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="w-full h-5 rounded-lg flex items-center justify-center text-[7px] font-black uppercase tracking-wider text-white shadow-sm" style={{ background: 'linear-gradient(90deg, ' + colors.btnFrom + ', ' + colors.btnTo + ')' }}>Create Invoice</div>
-                        </div>
-                      );})()}
-                      {(() => { const colors = getThemePreviewColors(themeColor); return (
-                        <div className="border border-theme-border-soft/60 rounded-2xl p-4 flex flex-col justify-between items-center relative overflow-hidden bg-theme-app min-h-[145px]">
-                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/10 px-1.5 py-0.5 rounded border border-theme-border-soft/20">Smartphone UI</span>
-                          <div className="w-3/4 flex-1 border border-white/10 bg-theme-card rounded-t-xl overflow-hidden flex flex-col justify-between" style={{ backgroundColor: colors.background }}>
-                            <div className="p-1 flex justify-between items-center border-b" style={{ borderColor: colors.border }}><span className="text-[5px] font-bold" style={{ color: colors.text }}>BillQyro</span><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors.accent }}></span></div>
-                            <div className="p-2 space-y-1.5">
-                              <div className="rounded p-1.5 border space-y-1" style={{ backgroundColor: colors.card, borderColor: colors.border }}><div className="w-10 h-0.5 bg-theme-border-strong rounded-sm"></div><div className="w-14 h-1 rounded-sm" style={{ backgroundColor: colors.accent }}></div></div>
-                            </div>
-                            <div className="flex justify-center -mb-2"><span className="px-2 py-0.5 rounded-full text-[4.5px] font-black text-white shadow-sm flex items-center gap-0.5" style={{ background: 'linear-gradient(90deg, ' + colors.btnFrom + ', ' + colors.btnTo + ')' }}>⚡ Quick Bill</span></div>
-                            <div className="h-4 border-t flex justify-around items-center" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
-                              <span className="w-1 h-1 rounded-full bg-slate-400"></span>
-                              <span className="w-1 h-1 rounded-full bg-slate-400"></span>
-                              <span className="w-2.5 h-1 rounded-sm" style={{ backgroundColor: colors.accent }}></span>
-                              <span className="w-1 h-1 rounded-full bg-slate-400"></span>
-                            </div>
-                          </div>
-                        </div>
-                      );})()}
-                      {(() => { const colors = getThemePreviewColors(themeColor); return (
-                        <div className="border border-theme-border-soft/60 rounded-2xl p-4 bg-theme-surface dark:bg-theme-card flex flex-col justify-between items-center relative overflow-hidden min-h-[145px]">
-                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/40 px-1.5 py-0.5 rounded border border-theme-border-soft/10">Printable PDF</span>
-                          <div className="w-[85%] flex-1 bg-theme-card border border-theme-border-soft shadow-sm p-2 flex flex-col justify-between">
-                            <div className="flex justify-between items-start pb-1.5 border-b border-theme-border-soft">
-                              <div className="space-y-0.5"><span className="text-[6px] font-extrabold block" style={{ color: colors.headerColor }}>BillQyro Store</span><div className="w-10 h-0.5 bg-theme-border-strong rounded-sm"></div></div>
-                              <span className="text-[6px] font-black tracking-wide" style={{ color: colors.headerColor }}>INVOICE</span>
-                            </div>
-                            <div className="my-1.5 space-y-0.5"><div className="h-1 rounded-sm w-full" style={{ backgroundColor: colors.tableHeaderBg }}></div><div className="h-0.5 bg-theme-surface w-full"></div><div className="h-0.5 bg-theme-surface w-full"></div></div>
-                            <div className="flex justify-between items-center p-1 rounded-sm" style={{ backgroundColor: colors.totalBg }}><span className="text-[5px] font-black" style={{ color: colors.headerColor }}>GRAND TOTAL</span><span className="text-[5.5px] font-black" style={{ color: colors.headerColor }}>$1,650.00</span></div>
-                          </div>
-                        </div>
-                      );})()}
-                      {(() => { const colors = getThemePreviewColors(themeColor); return (
-                        <div className="border border-theme-border-soft/60 rounded-2xl p-4 bg-theme-card dark:bg-theme-card flex flex-col justify-between items-center relative overflow-hidden min-h-[145px]">
-                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-surface/80 px-1.5 py-0.5 rounded border border-theme-border-soft/10">QR Pay Card</span>
-                          <div className="w-[85%] border border-theme-border-soft rounded-xl p-2.5 flex flex-col items-center justify-between text-center gap-1.5 shadow-sm bg-theme-app/20">
-                            <span className="text-[6px] font-bold text-theme-muted uppercase tracking-widest block leading-none">Scan to Pay</span>
-                            <div className="p-1 rounded border-2 border-dashed flex items-center justify-center" style={{ borderColor: colors.accent }}><div className="w-10 h-10 bg-theme-border-soft dark:bg-theme-card flex items-center justify-center text-[5px] text-theme-muted">QR Code</div></div>
-                            <div className="space-y-0.5"><span className="text-[5.5px] text-theme-muted block font-semibold leading-none">BillQyro Payment</span><span className="text-[7px] font-black block leading-tight" style={{ color: colors.headerColor }}>$1,650.00 Due</span></div>
-                          </div>
-                        </div>
-                      );})()}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {effectiveActiveCategory === 'themes' && (
+             <div className="animate-fadeIn">
+               <DesignStudio />
+             </div>
           )}
-          {/* ============ PAYMENT SETTINGS ============ */}
-          {activeCategory === 'payment' && (
-            <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-              <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><QrCode className="w-5 h-5" /></div>
-                  <div>
-                    <h2 className="section-header-title">Payment Settings</h2>
-                    <p className="section-header-subtitle">Set up digital payment integration via UPI, bKash, Nagad, or custom QR codes.</p>
-                  </div>
-                </div>
-              </div>
-
-              <ToggleSwitch enabled={paymentQrEnabled} onChange={setPaymentQrEnabled} label="Enable Automated Scan-to-Pay QR Code" description="Embed automated scanning codes on bills and invoice pages" />
-
-              {paymentQrEnabled && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div>
-                      <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Primary Payment Method</label>
-                      <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold">
-                        {country === 'India' && <option value="UPI">UPI (India)</option>}
-                        {country === 'Bangladesh' && (<><option value="bKash">bKash (Bangladesh)</option><option value="Nagad">Nagad (Bangladesh)</option><option value="Rocket">Rocket (Bangladesh)</option></>)}
-                        <option value="Manual">Manual QR / Custom Bank Details</option>
-                      </select>
-                    </div>
-                    {country === 'India' && (
-                      <div>
-                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">UPI ID</label>
-                        <input type="text" value={upiId} onChange={(e) => setUpiId(e.target.value)} placeholder="e.g. business@okaxis" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
-                      </div>
-                    )}
-                    {country === 'Bangladesh' && paymentMethod === 'bKash' && (
-                      <div>
-                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">bKash Wallet Number</label>
-                        <input type="text" value={bkashNumber} onChange={(e) => setBkashNumber(e.target.value)} placeholder="e.g. 017XXXXXXXX" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
-                      </div>
-                    )}
-                    {country === 'Bangladesh' && paymentMethod === 'Nagad' && (
-                      <div>
-                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Nagad Account Number</label>
-                        <input type="text" value={nagadNumber} onChange={(e) => setNagadNumber(e.target.value)} placeholder="e.g. 019XXXXXXXX" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
-                      </div>
-                    )}
-                    {country === 'Bangladesh' && paymentMethod === 'Rocket' && (
-                      <div>
-                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Rocket Account Number</label>
-                        <input type="text" value={rocketNumber} onChange={(e) => setRocketNumber(e.target.value)} placeholder="e.g. 018XXXXXXXX" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
-                      </div>
-                    )}
-                    {country === 'Other' && (
-                      <div className="md:col-span-2">
-                        <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Manual / Bank Details / QR Link</label>
-                        <input type="text" value={customPaymentLink} onChange={(e) => setCustomPaymentLink(e.target.value)} placeholder="e.g. Bank name: X, A/C: Y, IFSC: Z" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium" />
-                      </div>
-                    )}
-                    <div>
-                      <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Payee / Account Name</label>
-                      <input type="text" value={payeeName} onChange={(e) => setPayeeName(e.target.value)} placeholder="e.g. BillQyro store" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">QR Payment Footnote</label>
-                      <input type="text" value={paymentNote} onChange={(e) => setPaymentNote(e.target.value)} placeholder="e.g. Please scan to pay." className="w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium" />
-                    </div>
-                  </div>
-                  <ToggleSwitch enabled={showQrInPdf} onChange={setShowQrInPdf} label="Show QR in PDF Invoice" description="Render QR code on generated PDF documents" />
-                  <ToggleSwitch enabled={showQrInPreview} onChange={setShowQrInPreview} label="Show QR on Local Preview" description="Render QR code on invoice previews inside dashboard" />
-                </>
-              )}
-            </div>
+          {effectiveActiveCategory === 'templates' && (
+             <div className="animate-fadeIn -mt-4 -mx-4 md:-mx-8">
+               <PdfTemplateStudio 
+                 businessSettings={settings} 
+                 setSettings={(newSettings) => {
+                   setSettings(newSettings);
+                   onSaveSettings(newSettings);
+                 }} 
+                 subscription={subscription}
+                 setCurrentTab={() => {}}
+               />
+             </div>
           )}
-
-          {/* ============ COLLECTION SETTINGS ============ */}
-          {activeCategory === 'collection' && (
-            <>
-              <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-                <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><FileText className="w-5 h-5" /></div>
-                    <div>
-                      <h2 className="section-header-title">Invoice Preferences</h2>
-                      <p className="section-header-subtitle">Control invoice layout, numbering, default tax rates, brand colors, and document notes.</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Invoice Layout Template</label>
-                    <select value={invoiceTemplate} onChange={(e) => setInvoiceTemplate(e.target.value)} className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold">
-                      <option value="modern">Modern A4 Template</option>
-                      <option value="classic">Classic A5 Template</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Default Form Field Layout</label>
-                    <select value={defaultBillingTemplate} onChange={(e) => setDefaultBillingTemplate(e.target.value)} className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold">
-                      <option value="embroidery">Embroidery / Fashion</option>
-                      <option value="grocery">Grocery / Kirana Shop</option>
-                      <option value="repair">Mobile Repair / Service</option>
-                      <option value="retail">Retail Shopping Store</option>
-                      <option value="custom">Standard Flexible Bill</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Invoice Number Prefix</label>
-                    <input type="text" value={invoicePrefix} onChange={(e) => setInvoicePrefix(e.target.value)} placeholder="e.g. INV-" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Tax ID / GST Number</label>
-                    <input type="text" value={gstNumber} onChange={(e) => setGstNumber(e.target.value)} placeholder="e.g. 29AAAAA0000A1Z5" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold uppercase" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-2 uppercase tracking-wide flex items-center gap-2"><Palette className="w-3.5 h-3.5" /> Corporate Brand Color</label>
-                    <div className="flex flex-wrap gap-3">
-                      {[{ name: 'Teal', hex: '#14b8a6' }, { name: 'Indigo', hex: '#6366f1' }, { name: 'Rose', hex: '#f43f5e' }, { name: 'Blue', hex: '#3b82f6' }, { name: 'Emerald', hex: '#10b981' }, { name: 'Amber', hex: '#f59e0b' }, { name: 'Slate', hex: '#475569' }].map((color) => (
-                        <button key={color.hex} type="button" onClick={() => setBrandColor(color.hex)} style={{ backgroundColor: color.hex }} title={color.name} className={'w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer tooltip-premium ' + (brandColor === color.hex ? 'ring-4 ring-offset-2 scale-110' : 'hover:scale-105')}>
-                          {brandColor === color.hex && <CheckCircle2 className="w-5 h-5 text-white" />}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Default Invoice Notes</label>
-                    <textarea value={defaultNotes} onChange={(e) => setDefaultNotes(e.target.value)} placeholder="Thank you for your business!" rows="2" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium resize-none text-xs" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Terms & Conditions</label>
-                    <textarea value={terms} onChange={(e) => setTerms(e.target.value)} placeholder="1. Payment is expected within due date." rows="2" className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium resize-none text-xs" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">PDF Footer Note</label>
-                    <input type="text" value={pdfFooter} onChange={(e) => setPdfFooter(e.target.value)} placeholder="e.g. Computer generated invoice." className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-medium" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Customer Live Link Settings */}
-              <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-                <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Link className="w-5 h-5" /></div>
-                    <div>
-                      <h2 className="section-header-title">Customer Live Link Settings</h2>
-                      <p className="section-header-subtitle">Define customer-facing invoice portal features.</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { state: enableLiveLink, setter: setEnableLiveLink, label: 'Enable Secure Live Link', desc: 'Generate unique public URL endpoints' },
-                    { state: showPaymentQrOnLink, setter: setShowPaymentQrOnLink, label: 'Show Payment QR Code', desc: 'Display scan-to-pay QR on public pages' },
-                    { state: allowPdfDownload, setter: setAllowPdfDownload, label: 'Allow Customer PDF Download', desc: 'Let clients print/download invoice PDFs' },
-                    { state: allowPaymentProofSubmit, setter: setAllowPaymentProofSubmit, label: 'Allow Payment Proof Submission', desc: 'Enable "I Have Paid" flow' },
-                    { state: showPaidDueAmount, setter: setShowPaidDueAmount, label: 'Show Paid & Due Amounts', desc: 'Display collected vs balance due' },
-                    { state: showContactButton, setter: setShowContactButton, label: 'Show Contact Support Button', desc: 'Embed email/phone links for customers' },
-                    { state: requireTransactionId, setter: setRequireTransactionId, label: 'Require Transaction Reference ID', desc: 'Make Transaction ID mandatory' },
-                    { state: requirePaymentScreenshot, setter: setRequirePaymentScreenshot, label: 'Require Payment Screenshot', desc: 'Make file upload mandatory for proof' }
-                  ].map((item, idx) => (
-                    <ToggleSwitch key={idx} enabled={item.state} onChange={item.setter} label={item.label} description={item.desc} />
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-          {/* ============ TEMPLATES ============ */}
-          {activeCategory === 'templates' && (
-            <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-              <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><LayoutTemplate className="w-5 h-5" /></div>
-                  <div>
-                    <h2 className="section-header-title">Invoice Templates</h2>
-                    <p className="section-header-subtitle">Configure invoice layouts, PDF visible fields, and document structure.</p>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Primary Invoice Layout</label>
-                  <select value={invoiceTemplate} onChange={(e) => setInvoiceTemplate(e.target.value)} className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold">
-                    <option value="modern">Modern A4 Template</option>
-                    <option value="classic">Classic A5 Template</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-theme-muted dark:text-theme-muted mb-1.5 uppercase tracking-wide">Default Field Layout</label>
-                  <select value={defaultBillingTemplate} onChange={(e) => setDefaultBillingTemplate(e.target.value)} className="input-premium w-full px-4 py-3 bg-theme-app dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary font-bold">
-                    <option value="embroidery">Embroidery / Fashion</option>
-                    <option value="grocery">Grocery / Kirana</option>
-                    <option value="repair">Repair / Service</option>
-                    <option value="retail">Retail Store</option>
-                    <option value="custom">Standard Flex Bill</option>
-                  </select>
-                </div>
-              </div>
-              <div className="divider-premium h-px bg-gradient-to-r from-transparent via-theme-border-soft to-transparent" />
-              <div className="flex items-center justify-between p-4 bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl">
-                <div>
-                  <span className="text-xs font-bold text-theme-primary block">PDF Visible Fields</span>
-                  <span className="text-[9px] text-theme-muted font-semibold mt-0.5 block">Customize which fields appear on PDF invoices per template type.</span>
-                </div>
-                <span className="badge-premium text-[9px] font-black text-theme-accent bg-theme-accent-light px-3 py-1.5 rounded-full border border-theme-accent/30">{defaultBillingTemplate} template active</span>
-              </div>
-            </div>
-          )}
-
           {/* ============ NOTIFICATIONS ============ */}
-          {activeCategory === 'notifications' && (
+          {effectiveActiveCategory === 'notifications' && (
             <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
               <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
                 <div className="flex items-center gap-3">
@@ -1840,7 +1407,7 @@ const Settings = ({
           )}
 
           {/* ============ SECURITY ============ */}
-          {activeCategory === 'security' && (
+          {effectiveActiveCategory === 'security' && (
             <div className="space-y-6 animate-fadeIn">
               <div className="card-premium p-6 md:p-8 space-y-6">
                 <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
@@ -1906,7 +1473,7 @@ const Settings = ({
             </div>
           )}
           {/* ============ BACKUP ============ */}
-          {activeCategory === 'backup' && (
+          {effectiveActiveCategory === 'backup' && (
             <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
               <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
                 <div className="flex items-center gap-3">
@@ -1936,13 +1503,20 @@ const Settings = ({
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button onClick={handleExport} className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-success/30 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left col-span-1">
-                      <Database className="text-theme-success" size={24} />
-                      <div>
-                        <div className="font-semibold text-theme-text dark:text-theme-dark-text">Download Full Backup</div>
-                        <div className="text-xs text-theme-text-soft">Save complete JSON backup of workspace</div>
-                      </div>
-                    </button>
+                    <div className="col-span-1 space-y-2">
+                      <button onClick={() => handleExport('json')} className="btn-premium-outline w-full flex items-center gap-3 p-3 rounded-xl border border-theme-success/30 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left">
+                        <Database className="text-theme-success" size={20} />
+                        <div>
+                          <div className="font-semibold text-sm text-theme-text dark:text-theme-dark-text">Download JSON Backup</div>
+                        </div>
+                      </button>
+                      <button onClick={() => handleExport('zip')} className="btn-premium-outline w-full flex items-center gap-3 p-3 rounded-xl border border-theme-accent/30 bg-theme-accent/5 hover:bg-theme-accent/10 transition-colors text-left">
+                        <Database className="text-theme-accent" size={20} />
+                        <div>
+                          <div className="font-semibold text-sm text-theme-text dark:text-theme-dark-text">Download ZIP Archive</div>
+                        </div>
+                      </button>
+                    </div>
 
                     <label className="btn-premium-outline flex items-center gap-3 p-4 rounded-xl border border-theme-accent/20 bg-theme-accent/5 hover:bg-theme-accent/10 transition-colors text-left cursor-pointer col-span-1">
                       <Upload className="text-theme-accent" size={24} />
@@ -2025,54 +1599,17 @@ const Settings = ({
           )}
 
           {/* ============ SUBSCRIPTION ============ */}
-          {activeCategory === 'subscription' && (
-            <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-              <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><CreditCard className="w-5 h-5" /></div>
-                  <div>
-                    <h2 className="section-header-title">Subscription & Billing</h2>
-                    <p className="section-header-subtitle">Manage your plan, view usage limits, and upgrade for premium features.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6 bg-gradient-to-br from-theme-accent/5 to-theme-accent/10 border border-theme-accent/20 rounded-3xl text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-tr from-theme-accent to-theme-accent-dark rounded-2xl flex items-center justify-center mx-auto shadow-md">
-                  <Zap className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-lg font-extrabold text-theme-primary dark:text-theme-primary">Free Plan Active</h3>
-                <p className="text-xs text-theme-muted max-w-md mx-auto leading-relaxed font-semibold">
-                  You are currently on the Free Starter plan. Upgrade to Premium for unlimited invoices, premium templates, live invoice links, and priority support.
-                </p>
-                <div className="inline-flex items-center gap-2 text-[10px] text-theme-muted font-semibold bg-theme-app dark:bg-theme-surface px-4 py-2 rounded-full border border-theme-border-soft">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-theme-success" />
-                  {invoices.length} invoices created this month
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { icon: FileText, label: 'Invoice Limit', value: '15 / month', desc: 'Free plan limit' },
-                  { icon: Users, label: 'Customers', value: customers.length, desc: 'Total customers' },
-                  { icon: CircleDollarSign, label: 'Revenue Tracked', value: '₹' + totalRevenue.toLocaleString(), desc: 'All time total' }
-                ].map((stat, i) => (
-                  <div key={i} className="bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl p-4 text-center">
-                    <stat.icon className="w-5 h-5 text-theme-accent mx-auto mb-2" />
-                    <p className="text-xs font-bold text-theme-muted uppercase tracking-wider">{stat.label}</p>
-                    <p className="text-lg font-extrabold text-theme-primary mt-1">{stat.value}</p>
-                    <p className="text-[9px] text-theme-muted font-medium mt-1">{stat.desc}</p>
-                  </div>
-                ))}
-              </div>
-
-              <button onClick={() => window.open('/premium-pricing', '_self')} className="btn-premium w-full py-4 bg-[image:var(--accent-gradient)] text-white font-black text-sm rounded-xl shadow-glow hover:opacity-90 transition-all">
-                <Zap className="w-4 h-4" /> Upgrade to Premium — Unlock Everything
-              </button>
-            </div>
+          {effectiveActiveCategory === 'subscription' && (
+             <div className="animate-fadeIn">
+               <Subscription 
+                 currentSubscription={subscription} 
+                 onUpgrade={handleSaveSubscription} 
+                 businessSettings={settings} 
+               />
+             </div>
           )}
           {/* ============ INTEGRATIONS ============ */}
-          {activeCategory === 'integrations' && (
+          {effectiveActiveCategory === 'integrations' && (
             <div className="space-y-6 animate-fadeIn">
               <div className="card-premium p-6 md:p-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent-light blur-3xl opacity-30 rounded-full pointer-events-none"></div>
@@ -2145,7 +1682,7 @@ const Settings = ({
           )}
 
           {/* ============ TEAM ============ */}
-          {activeCategory === 'team' && (
+          {effectiveActiveCategory === 'team' && (
             <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
               <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
                 <div className="flex items-center gap-3">
@@ -2168,40 +1705,17 @@ const Settings = ({
           )}
 
           {/* ============ LIVE LINK TEMPLATES ============ */}
-          {activeCategory === 'live-links' && (
-            <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-              <div className="section-header border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Link className="w-5 h-5" /></div>
-                  <div>
-                    <h2 className="section-header-title">Live Link Templates</h2>
-                    <p className="section-header-subtitle">Configure how your customer invoice portal looks.</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-theme-app dark:bg-theme-surface border border-theme-border-soft rounded-2xl p-6 text-center space-y-4">
-                <Link className="w-12 h-12 text-theme-accent mx-auto" />
-                <h3 className="text-sm font-extrabold text-theme-primary">Open Live Link Template Studio</h3>
-                <p className="text-xs text-theme-muted font-medium max-w-md mx-auto">Design and customize the customer-facing invoice portal with themes, CTAs, and layout options.</p>
-                <button onClick={() => { if (typeof setCurrentTab === 'function') setCurrentTab('live-link-templates'); else window.open('/live-link-templates', '_self'); }} className="btn-premium bg-[image:var(--accent-gradient)] text-white font-bold text-xs px-6 py-3 rounded-xl shadow-md hover:opacity-90 transition-all">
-                  Open Template Studio
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  { state: enableLiveLink, setter: setEnableLiveLink, label: 'Enable Secure Live Link', desc: 'Generate unique public URL endpoints' },
-                  { state: showPaymentQrOnLink, setter: setShowPaymentQrOnLink, label: 'Show Payment QR Code', desc: 'Display scan-to-pay QR on public pages' },
-                  { state: allowPdfDownload, setter: setAllowPdfDownload, label: 'Allow Customer PDF Download', desc: 'Let clients print/download invoice PDFs' },
-                  { state: allowPaymentProofSubmit, setter: setAllowPaymentProofSubmit, label: 'Allow Payment Proof Submission', desc: 'Enable "I Have Paid" flow' }
-                ].map((item, idx) => (
-                  <ToggleSwitch key={idx} enabled={item.state} onChange={item.setter} label={item.label} description={item.desc} />
-                ))}
-              </div>
-            </div>
+          {effectiveActiveCategory === 'live-links' && (
+             <div className="animate-fadeIn -mt-4 -mx-4 md:-mx-8">
+               <LiveLinkTemplateStudio 
+                 settings={settings}
+                 onSaveSettings={onSaveSettings}
+                 subscription={subscription}
+                 setCurrentTab={() => {}}
+               />
+             </div>
           )}
-
-          {/* ============ ADVANCED ============ */}
-          {activeCategory === 'advanced' && (
+          {effectiveActiveCategory === 'advanced' && (
             <>
               {/* Premium UX */}
               <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">

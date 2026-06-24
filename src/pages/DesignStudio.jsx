@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import LazyPreview from '../components/LazyPreview';
+import PublicInvoice from './PublicInvoice';
+import InvoicePreview from '../components/InvoicePreview';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Palette,
@@ -192,6 +196,67 @@ const TEMPLATE_COMPARISON_FEATURES = [
   { feature: 'Print Ready', pdf: true, link: false },
   { feature: 'Shareable URL', pdf: false, link: true }
 ];
+
+
+const demoInvoice = {
+    id: 'demo-123',
+    invoiceNumber: 'INV-1001',
+    date: '01/01/2024',
+    dueDate: '15/01/2024',
+    customerName: 'Arman Khan',
+    customerAddress: '123, Education Street, New Delhi - 110001',
+    customerPhone: '+91 98765 43210',
+    customerEmail: 'arman.khan@email.com',
+    paymentStatus: 'Pending',
+    orderStatus: 'Pending',
+    notes: 'Thank you for your continued trust in our coaching center.',
+    items: [
+        { description: 'Physics Monthly Fee', qty: 1, rate: 2500, amount: 2500 },
+        { description: 'Science Kit', qty: 1, rate: 1500, amount: 1500 },
+        { description: 'Registration', qty: 1, rate: 1000, amount: 1000 },
+    ],
+    subtotal: 5000,
+    discountAmount: 0,
+    taxPercentage: 0,
+    taxAmount: 0,
+    grandTotal: 5000,
+    amountPaid: 2500,
+    balanceDue: 2500,
+    businessSnapshot: {
+        businessName: "Teacher Tuition Center",
+        ownerName: 'Admin',
+        phone: '+91 98765 43210',
+        email: 'admin@tuition.com',
+        address: '456, Knowledge Park, New Delhi - 110002',
+        gstNumber: '',
+        currency: '₹',
+        taxLabel: 'GST',
+    },
+    paymentSettingsSnapshot: {
+        paymentQrEnabled: true,
+        showQrInPreview: true,
+        customerLiveLinkSettings: {
+           enableLiveInvoiceLink: true,
+           showPaymentQr: true,
+           allowCustomerPdfDownload: true,
+           allowPaymentProofSubmit: true,
+           showPaidDueAmount: true,
+           showContactButton: true,
+           requireTransactionId: true,
+           requirePaymentScreenshot: false,
+           selectedLiveLinkTemplate: 'classic',
+        }
+    },
+    regionalSettingsSnapshot: {
+        country: 'India',
+        currency: '₹',
+        currencyCode: 'INR',
+        language: 'English',
+        taxLabel: 'GST',
+        dateFormat: 'DD/MM/YYYY',
+        numberFormat: 'Indian',
+    },
+};
 
 const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
   const [activeSubTab, setActiveSubTab] = useState('overview');
@@ -680,17 +745,12 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
                       <p className="text-[10px] font-semibold text-theme-muted mt-0.5">{tpl.desc}</p>
                     </div>
                   </div>
-                  <div className="aspect-[4/3] bg-theme-surface rounded-xl border border-theme-border-soft p-3 flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-20 bg-theme-muted/20 rounded"></div>
-                      <div className="h-4 w-16 bg-theme-muted/20 rounded ml-auto"></div>
-                    </div>
-                    <div className="flex-1 bg-theme-muted/10 rounded"></div>
-                    <div className="flex gap-2">
-                      <div className="h-4 w-12 bg-theme-muted/20 rounded"></div>
-                      <div className="h-4 w-12 bg-theme-muted/20 rounded"></div>
-                      <div className="h-4 w-16 bg-theme-muted/20 rounded ml-auto"></div>
-                    </div>
+                  <div className="aspect-[4/3] bg-theme-surface rounded-xl border border-theme-border-soft overflow-hidden relative">
+                    <LazyPreview fallback={<div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-theme-muted animate-pulse">Loading...</div>}>
+                       <div className="w-[800px] h-[1000px] transform origin-top-left scale-[0.35] pointer-events-none absolute top-0 left-0">
+                          <InvoicePreview invoice={demoInvoice} businessSettings={{...businessSettings, selectedPdfTemplate: tpl.id.replace('pdf-', '')}} />
+                       </div>
+                    </LazyPreview>
                   </div>
                   <button onClick={() => handleNavigation('pdf-templates')} className="w-full mt-3 btn-premium text-[10px] py-2">
                     <Eye className="w-3 h-3" /> Customize Template
@@ -802,90 +862,22 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
                       <p className="text-[10px] font-semibold text-theme-muted mt-0.5">{tpl.desc}</p>
                     </div>
                   </div>
-                  <div className="aspect-[3/4] bg-theme-surface rounded-xl border border-theme-border-soft p-3 flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-theme-accent/20"></div>
-                      <div className="h-3 w-24 bg-theme-muted/20 rounded"></div>
-                    </div>
-                    <div className="flex-1 bg-gradient-to-br from-theme-accent/20 to-theme-accent/10 rounded-xl flex items-center justify-center">
-                      <Globe className="w-8 h-8 text-theme-muted/30" />
-                    </div>
-                    <div className="h-6 w-full bg-theme-accent/20 rounded-lg"></div>
+                  <div className="aspect-[3/4] bg-theme-surface rounded-xl border border-theme-border-soft overflow-hidden relative">
+                    <LazyPreview fallback={<div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-theme-muted animate-pulse">Loading...</div>}>
+                       <div className="w-[800px] h-full transform origin-top-left scale-[0.35] pointer-events-none absolute top-0 left-0 bg-white">
+                          <PublicInvoice initialInvoice={{
+                            ...demoInvoice,
+                            paymentSettingsSnapshot: {
+                              ...demoInvoice.paymentSettingsSnapshot,
+                              customerLiveLinkSettings: {
+                                ...demoInvoice.paymentSettingsSnapshot.customerLiveLinkSettings,
+                                selectedLiveLinkTemplate: tpl.id.replace('link-', '')
+                              }
+                            }
+                          }} />
+                       </div>
+                    </LazyPreview>
                   </div>
-                  <button onClick={() => handleNavigation('live-link-templates')} className="w-full mt-3 btn-premium text-[10px] py-2">
-                    <Eye className="w-3 h-3" /> Customize Link
-                  </button>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
-      )}
-
-      {/* Branding Tab */}
-      {activeSubTab === 'branding' && (
-        <motion.div
-          key="branding"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className="space-y-5"
-        >
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">Brand Identity</h2>
-              <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Manage your business look and feel</p>
-            </div>
-            <button onClick={() => handleNavigation('settings')} className="btn-premium text-[10px] px-4 py-2">
-              <Building2 className="w-3.5 h-3.5" />
-              Brand Settings
-            </button>
-          </div>
-          <div className="card-premium p-6 space-y-5">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-md">
-                <PaintBucket className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-sm font-extrabold text-theme-primary">Brand Color Palette</h3>
-                <p className="text-[10px] font-semibold text-theme-muted">Your available brand colors for templates and invoices</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              {BRAND_COLORS.map((c) => (
-                <div key={c.hex} className="flex items-center gap-2 bg-theme-app rounded-xl px-3 py-2 border border-theme-border-soft">
-                  <div className="w-6 h-6 rounded-lg shadow-sm" style={{ backgroundColor: c.hex }} />
-                  <span className="text-[10px] font-bold text-theme-primary">{c.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="card-premium p-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-theme-accent/20 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-theme-accent" />
-              </div>
-              <div>
-                <h3 className="text-sm font-extrabold text-theme-primary">Business Profile</h3>
-                <p className="text-[10px] font-semibold text-theme-muted">Logo, contact info, social links and more</p>
-              </div>
-            </div>
-            <button onClick={() => handleNavigation('settings')} className="btn-premium text-[10px] px-4 py-2">
-              Configure
-            </button>
-          </div>
-          <div className="card-premium p-6">
-            <h3 className="text-sm font-extrabold text-theme-primary mb-4">Brand Preview</h3>
-            <div className="aspect-video bg-theme-surface rounded-xl border border-theme-border-soft flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-[image:var(--accent-gradient)] flex items-center justify-center shadow-md mb-3">
-                  <Building2 className="w-8 h-8 text-white" />
-                </div>
-                <p className="text-sm font-bold text-theme-primary">{businessSettings?.businessName || 'Your Brand'}</p>
-                <p className="text-[10px] text-theme-muted font-medium mt-1">Your brand preview will appear here</p>
-              </div>
-            </div>
-          </div>
         </motion.div>
       )}
 

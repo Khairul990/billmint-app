@@ -71,12 +71,6 @@ const Sidebar = ({
     { id: 'reports', label: 'Reports', icon: PieChart, module: 'reports' },
     { id: 'expenses', label: t('expenses'), icon: TrendingDown, module: 'expenses' },
 
-    { type: 'label', label: 'Design Studio' },
-    { id: 'design-studio', label: 'Design Studio Hub', icon: Palette },
-    { id: 'marketplace', label: 'Template Marketplace', icon: Store },
-    { id: 'pdf-templates', label: 'PDF Templates', icon: FileText },
-    { id: 'live-link-templates', label: 'Live Link Studio', icon: Smartphone },
-
     { type: 'label', label: 'Operations' },
     { id: 'products', label: t('products'), icon: Layers, module: 'products' },
     { id: 'orders', label: 'Orders', icon: ShoppingBag, module: 'orders' },
@@ -89,9 +83,8 @@ const Sidebar = ({
     { id: 'projects', label: 'Projects', icon: Briefcase, module: 'projects' },
 
     { type: 'label', label: 'System' },
-    { id: 'subscription', label: 'Subscription Plan', icon: Sparkles },
+    { id: 'settings', label: 'Settings Studio', icon: SettingsIcon },
     ...(localStorage.getItem('billqyro_demo_session_active') === 'true' ? [{ id: 'sandbox-admin', label: 'Sandbox Control Center', icon: ShieldCheck, module: 'sandbox' }] : []),
-    { id: 'backup-restore', label: 'Backup & Restore', icon: Database },
     { id: 'help-center', label: 'Help Center', icon: HelpCircle },
   ];
 
@@ -270,7 +263,7 @@ const Sidebar = ({
         style={{ padding: isCollapsed ? '12px 8px' : '16px 12px', transition: isMounted ? 'padding 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none' }}
       >
         <button
-          onClick={() => setCurrentTab('subscription')}
+          onClick={() => setCurrentTab('settings')}
           className={`w-full group relative overflow-hidden rounded-xl border-2 border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-orange-600/10 hover:from-amber-500/20 hover:to-orange-600/20 hover:border-amber-500/40 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300 ${
             isCollapsed ? 'p-2 flex items-center justify-center' : 'p-3.5 text-left flex flex-col items-start gap-1'
           }`}

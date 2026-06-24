@@ -28,6 +28,8 @@ import { toast } from 'react-hot-toast';
 import { saveSettings } from '../services/dbEngine';
 import { BUSINESS_PRESETS } from '../config/businessPresets';
 import InvoicePreview from '../components/InvoicePreview';
+import LazyPreview from '../components/LazyPreview';
+
 
 const templates = [
   { id: 'classic', name: 'Classic (Default)', type: 'FREE', desc: 'Clean, professional layout for general business.', color: 'bg-theme-app' },
@@ -479,19 +481,16 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                 )}
 
                 {/* Mockup Preview Area */}
-                <div className={`h-40 w-full bg-gradient-to-br ${previewGradients[tpl.id] || 'from-gray-400 to-gray-600'} flex flex-col items-center justify-center p-4 relative overflow-hidden`}>
-                  <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-                  <div className="relative z-10 flex flex-col items-center">
-                    <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-2 shadow-lg border border-white/20">
-                      <FileText className="w-6 h-6 text-white" />
+                <div className={`h-40 w-full bg-gradient-to-br ${previewGradients[tpl.id] || 'from-gray-400 to-gray-600'} flex items-center justify-center relative overflow-hidden`}>
+                  <LazyPreview fallback={<div className="text-white/60 text-[10px] font-bold uppercase tracking-widest animate-pulse">Loading {tpl.name}...</div>}>
+                    <div className="w-[800px] h-[1000px] transform origin-top-left scale-[0.35] lg:scale-[0.4] pointer-events-none mt-20 ml-20 bg-white shadow-xl">
+                      <InvoicePreview invoice={demoInvoice} businessSettings={{...businessSettings, selectedPdfTemplate: tpl.id}} />
                     </div>
-                    <span className="text-white font-black text-xs tracking-wider text-center drop-shadow-lg">{tpl.name}</span>
-                    <span className="text-white/60 text-[8px] font-bold mt-1 uppercase tracking-widest">Template</span>
-                  </div>
+                  </LazyPreview>
                   
                   {enableWatermark && tpl.type === 'PRO' && (
                     <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-                      <span className="text-white/20 text-[32px] font-black uppercase tracking-[0.3em] -rotate-30 select-none">Watermark</span>
+                      <span className="text-black/10 text-[32px] font-black uppercase tracking-[0.3em] -rotate-30 select-none">Watermark</span>
                     </div>
                   )}
                   
@@ -561,55 +560,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
         const tpl = templates.find(t => t.id === previewTemplate);
         if (!tpl) return null;
 
-        const demoInvoice = {
-          invoiceNumber: 'INV-2024-001',
-          date: '15/06/2024',
-          dueDate: '30/06/2024',
-          customerName: 'Arman Khan',
-          customerAddress: '123, Education Street, New Delhi - 110001',
-          customerPhone: '+91 98765 43210',
-          customerEmail: 'arman.khan@email.com',
-          paymentStatus: 'Pending',
-          orderStatus: 'Pending',
-          notes: 'Thank you for your continued trust in our coaching center. Please ensure payment is made before the due date to avoid late fees.',
-          items: [
-            { description: 'Tuition Fee - Mathematics', qty: 1, rate: 2000, amount: 2000 },
-            { description: 'Lab Fee', qty: 1, rate: 500, amount: 500 },
-            { description: 'Library Fee', qty: 1, rate: 300, amount: 300 },
-            { description: 'Activity Fee', qty: 1, rate: 200, amount: 200 },
-          ],
-          subtotal: 3000,
-          discountAmount: 0,
-          taxPercentage: 0,
-          taxAmount: 0,
-          grandTotal: 3000,
-          balanceDue: 3000,
-          businessSnapshot: {
-            businessName: "Arman Khan's Coaching Center",
-            ownerName: 'Arman Khan',
-            phone: '+91 98765 43210',
-            email: 'arman.khan@coaching.com',
-            address: '456, Knowledge Park, New Delhi - 110002',
-            gstNumber: '',
-            currency: '₹',
-            taxLabel: 'GST',
-          },
-          paymentSettingsSnapshot: {
-            paymentQrEnabled: false,
-            showQrInPreview: false,
-          },
-          regionalSettingsSnapshot: {
-            country: 'India',
-            currency: '₹',
-            currencyCode: 'INR',
-            language: 'English',
-            taxLabel: 'GST',
-            dateFormat: 'DD/MM/YYYY',
-            numberFormat: 'Indian',
-          },
-        };
-
-        return (
+                return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 md:p-4" onClick={() => setPreviewTemplate(null)}>
             <div className="bg-theme-card rounded-3xl w-full max-w-5xl max-h-[95vh] overflow-y-auto shadow-2xl border border-theme-border-soft" onClick={e => e.stopPropagation()}>
               {/* Header */}

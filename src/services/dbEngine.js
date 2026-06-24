@@ -1,4 +1,5 @@
 import { db, firebaseReady, auth } from './firebaseConfig';
+import JSZip from 'jszip';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where } from 'firebase/firestore';
 import { getAdminEmail } from '../utils/adminAccess';
 import { BillQyroDB } from './localDb';
@@ -2288,6 +2289,41 @@ export const exportBackup = async () => {
   };
 };
 
+export const exportBackupZip = async () => {
+  const backupData = await exportBackup();
+  const zip = new JSZip();
+  
+  // Add core database JSON
+  zip.file("database.json", JSON.stringify(backupData, null, 2));
+  
+  // Create folders for potential future attachments/receipts
+  zip.folder("attachments");
+  zip.folder("receipts");
+  
+  // Generate the zip blob
+  const zipBlob = await zip.generateAsync({
+    type: "blob",
+    compression: "DEFLATE",
+    compressionOptions: {
+      level: 6
+    }
+  });
+  
+  return zipBlob;
+};
+
+
+export const unzipBackup = async (fileBlob) => {
+  const zip = new JSZip();
+  const unzipped = await zip.loadAsync(fileBlob);
+  const dbFile = unzipped.file("database.json");
+  if (!dbFile) {
+    throw new Error('Invalid backup zip: missing database.json');
+  }
+  const dbString = await dbFile.async("string");
+  return JSON.parse(dbString);
+};
+
 export const importRestore = async (backupData) => {
   if (!backupData || typeof backupData !== 'object') {
     throw new Error('Invalid backup file structure.');
@@ -2486,8 +2522,11 @@ export const syncFromFirestore = async (force = false) => {
     await BillQyroDB.clear('expenses');
 
     // 4. Apply Settings
+    let activeWorkspaceId = 'default';
     if (settingsDoc.exists()) {
-      localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settingsDoc.data()));
+      const settingsData = settingsDoc.data();
+      activeWorkspaceId = settingsData.activeWorkspaceId || 'default';
+      localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settingsData));
     }
 
     // 5. Apply Customers
@@ -2499,7 +2538,8 @@ export const syncFromFirestore = async (force = false) => {
     });
     if (customers.length > 0) {
       for(const c of customers) await BillQyroDB.put('customers', c);
-      updateLocalCache(KEYS.CUSTOMERS, customers);
+      const activeCustomers = customers.filter(c => !c.workspaceId || c.workspaceId === 'default' || c.workspaceId === activeWorkspaceId);
+      updateLocalCache(KEYS.CUSTOMERS, activeCustomers);
     }
 
     // 6. Apply Invoices — coerce numeric fields to prevent string-concatenation bugs
@@ -2515,7 +2555,8 @@ export const syncFromFirestore = async (force = false) => {
     const invoices = Array.from(invoicesMap.values());
     if (invoices.length > 0) {
       for(const i of invoices) await BillQyroDB.put('invoices', i);
-      updateLocalCache(KEYS.INVOICES, invoices);
+      const activeInvoices = invoices.filter(i => !i.workspaceId || i.workspaceId === 'default' || i.workspaceId === activeWorkspaceId);
+      updateLocalCache(KEYS.INVOICES, activeInvoices);
     }
 
     // 7. Apply Products
@@ -2527,7 +2568,8 @@ export const syncFromFirestore = async (force = false) => {
     });
     if (products.length > 0) {
       for(const p of products) await BillQyroDB.put('products', p);
-      updateLocalCache(KEYS.PRODUCTS, products);
+      const activeProducts = products.filter(p => !p.workspaceId || p.workspaceId === 'default' || p.workspaceId === activeWorkspaceId);
+      updateLocalCache(KEYS.PRODUCTS, activeProducts);
     }
 
     // 8. Apply Expenses
@@ -2539,7 +2581,8 @@ export const syncFromFirestore = async (force = false) => {
     });
     if (expenses.length > 0) {
       for(const e of expenses) await BillQyroDB.put('expenses', e);
-      updateLocalCache(KEYS.EXPENSES, expenses);
+      const activeExpenses = expenses.filter(e => !e.workspaceId || e.workspaceId === 'default' || e.workspaceId === activeWorkspaceId);
+      updateLocalCache(KEYS.EXPENSES, activeExpenses);
     }
 
     // 9. Apply Subscription
@@ -2739,37 +2782,18 @@ export const pushDataUpdate = (collectionName, userId, docId, data) => {
     source: 'localUserAction'
   };
 
+  enqueueSync(collectionName, userId, docId, payload);
+  
   const key = `${collectionName}_${docId}`;
   
   if (debounceTimers[key]) {
     clearTimeout(debounceTimers[key]);
   }
   
-  window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Saving...' }));
-
   // [COST AWARENESS] Debounce actual firestore push by 1000ms.
-  // Multiple rapid changes to the same document within 1s become ONE write.
-  // Estimated Write Source: 1 write per doc per 1000ms of continuous edits.
-  debounceTimers[key] = setTimeout(async () => {
-    if (!firebaseReady || !navigator.onLine) {
-      enqueueSync(collectionName, userId, docId, payload);
-      return;
-    }
-
-    try {
-      let docRef;
-      if (collectionName === 'settings' || collectionName === 'subscription') {
-        docRef = doc(db, collectionName, userId);
-      } else {
-        docRef = doc(db, collectionName, userId, 'items', docId);
-      }
-      
-      await setDoc(docRef, payload, { merge: true });
-      window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Synced' }));
-    } catch (e) {
-      console.error(`[SYNC ENGINE] Failed to push update to ${collectionName}:`, e);
-      enqueueSync(collectionName, userId, docId, payload);
-    }
+  // We already enqueued it securely locally, so data is safe if page closes.
+  debounceTimers[key] = setTimeout(() => {
+    flushSyncQueue();
     delete debounceTimers[key];
   }, 1000);
 
