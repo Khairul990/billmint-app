@@ -1216,7 +1216,8 @@ function App() {
 
   // --- TAB ROUTER SWITCHBOARD ---
   const renderTabContent = () => {
-    const isProfileIncomplete = activeSettings && !activeSettings.profileSetupCompleted && !activeSettings.businessName;
+    // Use setupCompleted flag instead of profileSetupCompleted to check if onboarding is done
+    const isProfileIncomplete = activeSettings && !activeSettings.setupCompleted && !activeSettings.businessName;
     const activeTab = isProfileIncomplete ? 'onboarding' : currentTab;
     const isMaintenanceMode = (globalMaintenanceMode || activeSettings?.maintenanceMode) && !isAdminUser(getAuthSession());
 
