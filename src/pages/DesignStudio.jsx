@@ -199,8 +199,8 @@ const TEMPLATE_COMPARISON_FEATURES = [
 ];
 
 // Removed hardcoded demoInvoice
-const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
-  const [activeSubTab, setActiveSubTab] = useState('overview');
+const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initialTab = 'overview' }) => {
+  const [activeSubTab, setActiveSubTab] = useState(initialTab);
   const [templateCategory, setTemplateCategory] = useState('All');
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState('All');
@@ -422,7 +422,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Theme Preview</h3>
-              <button onClick={() => handleNavigation('settings')} className="text-[9px] font-bold text-theme-accent hover:underline transition-all">View All Themes</button>
+              <button onClick={() => handleNavigation('themes')} className="text-[9px] font-bold text-theme-accent hover:underline transition-all">View All Themes</button>
             </div>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
               {THEME_PREVIEWS.map((theme) => (
@@ -430,7 +430,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
                   key={theme.id}
                   whileHover={{ scale: 1.06, y: -3 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => handleNavigation('settings')}
+                  onClick={() => handleNavigation('themes')}
                   className="card-premium p-3 flex flex-col items-center gap-2 cursor-pointer group"
                 >
                   <div className={`w-full h-10 rounded-xl bg-gradient-to-br ${theme.gradient} shadow-md group-hover:shadow-lg transition-all duration-300`} />
@@ -542,10 +542,14 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
                 whileHover={{ scale: 1.05, y: -3 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => {
-                  toggleFavorite(theme.id);
-                  logActivity('Theme favorited', theme.name);
+                  document.documentElement.setAttribute('data-theme', theme.id);
+                  import('../utils/themeIcon').then(m => m.updateFaviconForTheme(theme.id)).catch(() => {});
+                  if (setSettings) {
+                    setSettings({ ...businessSettings, themeColor: theme.id });
+                  }
+                  logActivity('Theme applied', theme.name);
                 }}
-                className="card-premium p-4 flex flex-col items-center gap-2 cursor-pointer group relative"
+                className={`card-premium p-4 flex flex-col items-center gap-2 cursor-pointer group relative transition-all duration-300 ${businessSettings?.themeColor === theme.id ? 'ring-2 ring-theme-accent shadow-lg shadow-theme-accent/20 scale-[1.02]' : ''}`}
               >
                 <div className="w-full h-16 rounded-xl shadow-md" style={{ background: theme.gradient }} />
                 <span className="text-[9px] font-bold text-theme-primary text-center leading-tight mt-1">{theme.name}</span>

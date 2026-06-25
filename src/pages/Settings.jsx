@@ -1383,7 +1383,11 @@ const Settings = ({
           {effectiveActiveCategory === 'themes' && (
              <div className="animate-fadeIn">
                <DesignStudio 
+                 initialTab="themes"
                  businessSettings={settings}
+                 setSettings={(newSettings) => {
+                   onSaveSettings(newSettings);
+                 }}
                  setCurrentTab={(tab) => {
                    if (tab === 'pdf-templates') setActiveCategory('templates');
                    else if (tab === 'live-link-templates') setActiveCategory('live-links');
