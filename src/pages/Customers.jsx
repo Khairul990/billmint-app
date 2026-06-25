@@ -27,7 +27,7 @@ import CustomerLedger from '../components/customers/CustomerLedger';
  * @param {Function} onSaveCustomer - saves or edits customer in state/storage
  * @param {Function} onDeleteCustomer - deletes customer
  */
-const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCustomer, businessSettings, onCreateBill }) => {
+const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCustomer, businessSettings, onCreateBill, setCurrentTab }) => {
   const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.type || 'retail';
   const customerLabel = getCustomerLabelByType(wsType);
   const [searchQuery, setSearchQuery] = useState('');
@@ -116,9 +116,19 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
         
         {/* Header Panel */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">{customerLabel} Directory</h2>
-            <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">CRM {customerLabel.toUpperCase()} DATABASE</p>
+          <div className="flex items-center gap-3">
+            {setCurrentTab && (
+              <button
+                onClick={() => setCurrentTab('dashboard')}
+                className="p-2 rounded-xl bg-theme-surface hover:bg-theme-border-soft transition-colors text-theme-primary"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+            )}
+            <div>
+              <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">{customerLabel} Directory</h2>
+              <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">CRM {customerLabel.toUpperCase()} DATABASE</p>
+            </div>
           </div>
 
           <button

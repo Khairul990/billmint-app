@@ -493,6 +493,7 @@ function App() {
         setExpenses(await getExpenses() || []);
         const latestSettings = getSettings();
         if (latestSettings) setSettings(latestSettings);
+        setSubscription(getSubscriptionStatus());
       } catch (err) {
         console.error("Error reloading data on sync:", err);
       }
@@ -1390,6 +1391,7 @@ function App() {
             onSaveCustomer={handleSaveCustomer}
             onDeleteCustomer={handleDeleteCustomer}
             businessSettings={activeSettings}
+            setCurrentTab={setCurrentTab}
             onCreateBill={(cust) => {
               setEditingInvoice({ customerName: cust.name });
               setCurrentTab('create-invoice');
@@ -1403,6 +1405,7 @@ function App() {
             onSaveProduct={handleSaveProduct}
             onDeleteProduct={handleDeleteProduct}
             businessSettings={activeSettings}
+            setCurrentTab={setCurrentTab}
           />
         );
       case 'expenses':
@@ -1412,6 +1415,7 @@ function App() {
             onSaveExpense={handleSaveExpense}
             onDeleteExpense={handleDeleteExpense}
             businessSettings={activeSettings}
+            setCurrentTab={setCurrentTab}
           />
         );
       case 'appointments':
@@ -1590,6 +1594,7 @@ function App() {
             isAppInstalled={isAppInstalled}
             onInstallApp={handleInstallApp}
             subscription={subscription}
+            setCurrentTab={setCurrentTab}
           />
         );
       }

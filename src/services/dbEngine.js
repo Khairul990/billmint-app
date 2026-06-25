@@ -2505,6 +2505,15 @@ export const syncFromFirestore = async (force = false) => {
       await syncOfflineTransactions();
     }
 
+    // After attempting flush, check if queue is empty.
+    // If not empty, it means some local changes couldn't sync. We MUST NOT overwrite local DB with old cloud data.
+    const queue = await BillQyroDB.getAll('syncQueue');
+    const pendingItems = queue.filter(tx => tx.userId === userId || !tx.userId);
+    if (pendingItems.length > 0) {
+      console.warn('Pending items in sync queue. Skipping cloud overwrite to protect local data.');
+      return;
+    }
+
     // 2. Fetch all cloud data first (from SERVER explicitly) to prevent stale cache serving
     const settingsDoc = await getDocFromServer(doc(db, 'settings', userId));
     const customersSnap = await getDocsFromServer(collection(db, 'customers', userId, 'items'));

@@ -27,7 +27,7 @@ const CATEGORIES = [
   { name: 'Other', color: 'bg-theme-surface dark:bg-theme-card text-theme-primary dark:text-theme-muted', border: 'border-theme-border-soft' }
 ];
 
-const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSettings }) => {
+const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSettings, setCurrentTab }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Supplies');
@@ -86,9 +86,19 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
       >
       {/* 1. HEADER ROW */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">Expense Tracker</h2>
-          <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">MANAGE OPERATING COSTS</p>
+        <div className="flex items-center gap-3">
+          {setCurrentTab && (
+            <button
+              onClick={() => setCurrentTab('dashboard')}
+              className="p-2 rounded-xl bg-theme-surface hover:bg-theme-border-soft transition-colors text-theme-primary"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+          )}
+          <div>
+            <h2 className="text-xl font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">Expense Tracker</h2>
+            <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">MANAGE OPERATING COSTS</p>
+          </div>
         </div>
 
         <button
