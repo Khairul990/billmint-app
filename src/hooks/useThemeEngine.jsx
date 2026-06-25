@@ -41,7 +41,7 @@ export const useThemeEngine = (businessSettings) => {
     const root = document.documentElement;
 
     // Default built-in theme
-    const validThemes = ['obsidian-gold', 'arctic-teal', 'sapphire-noir', 'rose-platinum', 'carbon-violet', 'graphite-copper', 'arctic-diamond', 'emerald-royal', 'midnight-ruby', 'titanium-blue', 'pink', 'indigo', 'emerald', 'rose', 'midnight', 'champagne', 'ruby', 'ocean-blue', 'sunset-orange', 'forest-green'];
+    const validThemes = ['obsidian-gold', 'arctic-teal', 'sapphire-noir', 'rose-platinum', 'carbon-violet', 'graphite-copper', 'arctic-diamond', 'emerald-royal', 'midnight-ruby', 'titanium-blue', 'pink', 'indigo', 'emerald', 'rose', 'midnight', 'champagne', 'ruby', 'ocean-blue', 'sunset-orange', 'forest-green', 'golden-luxury', 'purple-haze', 'crimson-red', 'silver-elite', 'cyber-blue', 'deep-bluish-green', 'deep-blue-premium', 'crimson-business', 'luxury-brown', 'noir-black', 'crimson-gold', 'royal-black', 'luxury-cream'];
     let themeName = businessSettings?.themeColor;
     
     if (!themeName || !validThemes.includes(themeName)) {
