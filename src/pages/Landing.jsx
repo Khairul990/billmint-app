@@ -15,7 +15,10 @@ const Landing = ({ onLoginClick }) => {
 
   const scrollTo = (id) => {
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (el) {
+      const y = window.pageYOffset + el.getBoundingClientRect().top - 84;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
     setMobileMenuOpen(false);
   };
 

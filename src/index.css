@@ -619,9 +619,12 @@ button.icon-only {
 }
 
 body {
-  /* Prevent horizontal scroll */
+  /* Prevent horizontal scroll while allowing normal vertical scrolling */
   overflow-x: hidden;
-  overscroll-behavior-y: none;
+  overflow-y: auto;
+  overscroll-behavior: auto;
+  touch-action: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* No desktop squeeze */

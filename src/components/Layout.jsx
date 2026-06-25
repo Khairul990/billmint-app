@@ -154,7 +154,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   };
 
   return (
-    <div className="h-[100dvh] bg-theme-app flex flex-col lg:flex-row w-full font-sans antialiased text-theme-primary transition-colors duration-300 overflow-hidden">
+    <div className="min-h-screen bg-theme-app flex flex-col lg:flex-row w-full font-sans antialiased text-theme-primary transition-colors duration-300">
       <Sidebar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}

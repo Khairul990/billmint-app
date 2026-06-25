@@ -274,9 +274,12 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
   });
 
   useEffect(() => {
-    if (settings && settings.customerLiveLinkSettings && settings.customerLiveLinkSettings.selectedLiveLinkTemplate) {
-      setSelectedTemplate(settings.customerLiveLinkSettings.selectedLiveLinkTemplate);
-    }
+    const settingsLL = settings?.customerLiveLinkSettings;
+    if (!settingsLL) return;
+    if (settingsLL.selectedLiveLinkTemplate) setSelectedTemplate(settingsLL.selectedLiveLinkTemplate);
+    if (settingsLL.themePreset) setSelectedTheme(settingsLL.themePreset);
+    if (settingsLL.ctaPreset) setSelectedCta(settingsLL.ctaPreset);
+    if (settingsLL.conversionLayout) setSelectedConversion(settingsLL.conversionLayout);
   }, [settings]);
 
   const handleApplyTemplate = async (template) => {

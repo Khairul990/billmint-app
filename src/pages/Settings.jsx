@@ -678,6 +678,7 @@ const Settings = ({
       enableSounds,
 
       customerLiveLinkSettings: {
+        ...settings?.customerLiveLinkSettings,
         enableLiveInvoiceLink: enableLiveLink,
         showPaymentQr: showPaymentQrOnLink,
         allowCustomerPdfDownload: allowPdfDownload,
@@ -685,7 +686,11 @@ const Settings = ({
         showPaidDueAmount: showPaidDueAmount,
         showContactButton: showContactButton,
         requireTransactionId,
-        requirePaymentScreenshot
+        requirePaymentScreenshot,
+        selectedLiveLinkTemplate: settings?.customerLiveLinkSettings?.selectedLiveLinkTemplate || 'classic',
+        themePreset: settings?.customerLiveLinkSettings?.themePreset || themeColor,
+        ctaPreset: settings?.customerLiveLinkSettings?.ctaPreset || 'payNow',
+        conversionLayout: settings?.customerLiveLinkSettings?.conversionLayout || 'modern'
       },
 
       notifications: {
