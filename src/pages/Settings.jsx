@@ -288,6 +288,7 @@ const Settings = ({
   isAppInstalled = false,
   onInstallApp,
   subscription = null,
+  onUpgrade,
   setCurrentTab
 }) => {
   const [activeCategory, setActiveCategory] = useState('business');
@@ -1629,7 +1630,7 @@ const Settings = ({
              <div className="animate-fadeIn">
                <Subscription 
                  currentSubscription={subscription} 
-                 onUpgrade={handleSaveSubscription} 
+                 onUpgrade={onUpgrade} 
                  businessSettings={settings} 
                />
              </div>
