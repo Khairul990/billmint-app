@@ -231,3 +231,72 @@ export const generateSmartDemoData = (personaName) => {
 
   return { products, customers, invoices, payments };
 };
+
+export const getDemoInvoice = (category) => {
+  const config = getPersonaConfig(category || 'Retail');
+  const items = config.productTemplates.slice(0, 3).map(pt => ({
+    description: pt.name,
+    qty: 1,
+    rate: pt.price,
+    amount: pt.price
+  }));
+  const subtotal = items.reduce((acc, i) => acc + i.amount, 0);
+  const titleCategory = category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Retail';
+
+  return {
+    id: 'demo-123',
+    invoiceNumber: 'INV-1001',
+    date: '01/01/2024',
+    dueDate: '15/01/2024',
+    customerName: getRandomName(config.customerPrefix),
+    customerAddress: '123, Demo Street, City',
+    customerPhone: '+91 98765 43210',
+    customerEmail: 'customer@demo.local',
+    paymentStatus: 'Pending',
+    orderStatus: 'Pending',
+    billType: category || 'retail',
+    notes: 'Thank you for your business.',
+    items: items,
+    subtotal: subtotal,
+    discountAmount: 0,
+    taxPercentage: 0,
+    taxAmount: 0,
+    grandTotal: subtotal,
+    amountPaid: subtotal / 2,
+    balanceDue: subtotal / 2,
+    businessSnapshot: {
+        businessName: `${titleCategory} Demo Business`,
+        ownerName: 'Admin',
+        phone: '+91 98765 43210',
+        email: 'admin@demo.local',
+        address: '456, Business Park, City',
+        gstNumber: '',
+        currency: '₹',
+        taxLabel: 'GST',
+    },
+    paymentSettingsSnapshot: {
+        paymentQrEnabled: true,
+        showQrInPreview: true,
+        customerLiveLinkSettings: {
+           enableLiveInvoiceLink: true,
+           showPaymentQr: true,
+           allowCustomerPdfDownload: true,
+           allowPaymentProofSubmit: true,
+           showPaidDueAmount: true,
+           showContactButton: true,
+           requireTransactionId: true,
+           requirePaymentScreenshot: false,
+           selectedLiveLinkTemplate: 'classic',
+        }
+    },
+    regionalSettingsSnapshot: {
+        country: 'India',
+        currency: '₹',
+        currencyCode: 'INR',
+        language: 'English',
+        taxLabel: 'GST',
+        dateFormat: 'DD/MM/YYYY',
+        numberFormat: 'Indian',
+    },
+  };
+};

@@ -29,6 +29,7 @@ import { saveSettings } from '../services/dbEngine';
 import { BUSINESS_PRESETS } from '../config/businessPresets';
 import InvoicePreview from '../components/InvoicePreview';
 import LazyPreview from '../components/LazyPreview';
+import { getDemoInvoice } from '../utils/demoDataGenerator';
 
 
 const templates = [
@@ -484,7 +485,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                 <div className={`h-40 w-full bg-gradient-to-br ${previewGradients[tpl.id] || 'from-gray-400 to-gray-600'} flex items-center justify-center relative overflow-hidden`}>
                   <LazyPreview fallback={<div className="text-white/60 text-[10px] font-bold uppercase tracking-widest animate-pulse">Loading {tpl.name}...</div>}>
                     <div className="w-[800px] h-[1000px] transform origin-top-left scale-[0.35] lg:scale-[0.4] pointer-events-none mt-20 ml-20 bg-white shadow-xl">
-                      <InvoicePreview invoice={demoInvoice} businessSettings={{...businessSettings, selectedPdfTemplate: tpl.id}} />
+                      <InvoicePreview invoice={getDemoInvoice(businessSettings?.businessCategory)} businessSettings={{...businessSettings, selectedPdfTemplate: tpl.id}} />
                     </div>
                   </LazyPreview>
                   
@@ -576,7 +577,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
               {/* Invoice Preview */}
               <div className="p-2 md:p-4 lg:p-6">
                 <div className="transform scale-[0.85] md:scale-[0.9] lg:scale-100 origin-top">
-                  <InvoicePreview invoice={demoInvoice} businessSettings={businessSettings} />
+                  <InvoicePreview invoice={getDemoInvoice(businessSettings?.businessCategory)} businessSettings={businessSettings} />
                 </div>
               </div>
             </div>

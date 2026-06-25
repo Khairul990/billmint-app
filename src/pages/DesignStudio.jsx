@@ -37,6 +37,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
+import { getDemoInvoice } from '../utils/demoDataGenerator';
 
 const STUDIO_SECTIONS = [
   {
@@ -197,67 +198,7 @@ const TEMPLATE_COMPARISON_FEATURES = [
   { feature: 'Shareable URL', pdf: false, link: true }
 ];
 
-
-const demoInvoice = {
-    id: 'demo-123',
-    invoiceNumber: 'INV-1001',
-    date: '01/01/2024',
-    dueDate: '15/01/2024',
-    customerName: 'Arman Khan',
-    customerAddress: '123, Education Street, New Delhi - 110001',
-    customerPhone: '+91 98765 43210',
-    customerEmail: 'arman.khan@email.com',
-    paymentStatus: 'Pending',
-    orderStatus: 'Pending',
-    notes: 'Thank you for your continued trust in our coaching center.',
-    items: [
-        { description: 'Physics Monthly Fee', qty: 1, rate: 2500, amount: 2500 },
-        { description: 'Science Kit', qty: 1, rate: 1500, amount: 1500 },
-        { description: 'Registration', qty: 1, rate: 1000, amount: 1000 },
-    ],
-    subtotal: 5000,
-    discountAmount: 0,
-    taxPercentage: 0,
-    taxAmount: 0,
-    grandTotal: 5000,
-    amountPaid: 2500,
-    balanceDue: 2500,
-    businessSnapshot: {
-        businessName: "Teacher Tuition Center",
-        ownerName: 'Admin',
-        phone: '+91 98765 43210',
-        email: 'admin@tuition.com',
-        address: '456, Knowledge Park, New Delhi - 110002',
-        gstNumber: '',
-        currency: '₹',
-        taxLabel: 'GST',
-    },
-    paymentSettingsSnapshot: {
-        paymentQrEnabled: true,
-        showQrInPreview: true,
-        customerLiveLinkSettings: {
-           enableLiveInvoiceLink: true,
-           showPaymentQr: true,
-           allowCustomerPdfDownload: true,
-           allowPaymentProofSubmit: true,
-           showPaidDueAmount: true,
-           showContactButton: true,
-           requireTransactionId: true,
-           requirePaymentScreenshot: false,
-           selectedLiveLinkTemplate: 'classic',
-        }
-    },
-    regionalSettingsSnapshot: {
-        country: 'India',
-        currency: '₹',
-        currencyCode: 'INR',
-        language: 'English',
-        taxLabel: 'GST',
-        dateFormat: 'DD/MM/YYYY',
-        numberFormat: 'Indian',
-    },
-};
-
+// Removed hardcoded demoInvoice
 const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
   const [activeSubTab, setActiveSubTab] = useState('overview');
   const [templateCategory, setTemplateCategory] = useState('All');
@@ -745,10 +686,10 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
                       <p className="text-[10px] font-semibold text-theme-muted mt-0.5">{tpl.desc}</p>
                     </div>
                   </div>
-                  <div className="aspect-[4/3] bg-theme-surface rounded-xl border border-theme-border-soft overflow-hidden relative">
+                   <div className="aspect-[4/3] bg-theme-surface rounded-xl border border-theme-border-soft overflow-hidden relative">
                     <LazyPreview fallback={<div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-theme-muted animate-pulse">Loading...</div>}>
                        <div className="w-[800px] h-[1000px] transform origin-top-left scale-[0.35] pointer-events-none absolute top-0 left-0">
-                          <InvoicePreview invoice={demoInvoice} businessSettings={{...businessSettings, selectedPdfTemplate: tpl.id.replace('pdf-', '')}} />
+                          <InvoicePreview invoice={getDemoInvoice(businessSettings?.businessCategory)} businessSettings={{...businessSettings, selectedPdfTemplate: tpl.id.replace('pdf-', '')}} />
                        </div>
                     </LazyPreview>
                   </div>
@@ -864,13 +805,13 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {} }) => {
                   </div>
                   <div className="aspect-[3/4] bg-theme-surface rounded-xl border border-theme-border-soft overflow-hidden relative">
                     <LazyPreview fallback={<div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-theme-muted animate-pulse">Loading...</div>}>
-                       <div className="w-[800px] h-full transform origin-top-left scale-[0.35] pointer-events-none absolute top-0 left-0 bg-white">
+                        <div className="w-[800px] h-full transform origin-top-left scale-[0.35] pointer-events-none absolute top-0 left-0 bg-white">
                           <PublicInvoice initialInvoice={{
-                            ...demoInvoice,
+                            ...getDemoInvoice(businessSettings?.businessCategory),
                             paymentSettingsSnapshot: {
-                              ...demoInvoice.paymentSettingsSnapshot,
+                              ...getDemoInvoice(businessSettings?.businessCategory).paymentSettingsSnapshot,
                               customerLiveLinkSettings: {
-                                ...demoInvoice.paymentSettingsSnapshot.customerLiveLinkSettings,
+                                ...getDemoInvoice(businessSettings?.businessCategory).paymentSettingsSnapshot.customerLiveLinkSettings,
                                 selectedLiveLinkTemplate: tpl.id.replace('link-', '')
                               }
                             }

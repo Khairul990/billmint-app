@@ -44,6 +44,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { BUSINESS_PRESETS } from '../config/businessPresets';
+import { getDemoInvoice } from '../utils/demoDataGenerator';
 
 const liveLinkTemplates = [
   { id: 'classic', name: 'Clean Classic', type: 'free', icon: LayoutTemplate, desc: 'Simple, timeless layout.' },
@@ -182,66 +183,7 @@ const conversionLayouts = [
   { id: 'bold', name: 'Bold', icon: Sparkles, desc: 'High-contrast bold style' }
 ];
 
-
-const demoInvoice = {
-    id: 'demo-123',
-    invoiceNumber: 'INV-1001',
-    date: '01/01/2024',
-    dueDate: '15/01/2024',
-    customerName: 'Arman Khan',
-    customerAddress: '123, Education Street, New Delhi - 110001',
-    customerPhone: '+91 98765 43210',
-    customerEmail: 'arman.khan@email.com',
-    paymentStatus: 'Pending',
-    orderStatus: 'Pending',
-    notes: 'Thank you for your continued trust in our coaching center.',
-    items: [
-        { description: 'Physics Monthly Fee', qty: 1, rate: 2500, amount: 2500 },
-        { description: 'Science Kit', qty: 1, rate: 1500, amount: 1500 },
-        { description: 'Registration', qty: 1, rate: 1000, amount: 1000 },
-    ],
-    subtotal: 5000,
-    discountAmount: 0,
-    taxPercentage: 0,
-    taxAmount: 0,
-    grandTotal: 5000,
-    amountPaid: 2500,
-    balanceDue: 2500,
-    businessSnapshot: {
-        businessName: "Teacher Tuition Center",
-        ownerName: 'Admin',
-        phone: '+91 98765 43210',
-        email: 'admin@tuition.com',
-        address: '456, Knowledge Park, New Delhi - 110002',
-        gstNumber: '',
-        currency: '₹',
-        taxLabel: 'GST',
-    },
-    paymentSettingsSnapshot: {
-        paymentQrEnabled: true,
-        showQrInPreview: true,
-        customerLiveLinkSettings: {
-           enableLiveInvoiceLink: true,
-           showPaymentQr: true,
-           allowCustomerPdfDownload: true,
-           allowPaymentProofSubmit: true,
-           showPaidDueAmount: true,
-           showContactButton: true,
-           requireTransactionId: true,
-           requirePaymentScreenshot: false,
-           selectedLiveLinkTemplate: 'classic',
-        }
-    },
-    regionalSettingsSnapshot: {
-        country: 'India',
-        currency: '₹',
-        currencyCode: 'INR',
-        language: 'English',
-        taxLabel: 'GST',
-        dateFormat: 'DD/MM/YYYY',
-        numberFormat: 'Indian',
-    },
-};
+// Removed hardcoded demoInvoice
 
 const loadRatings = () => {
   try { return JSON.parse(localStorage.getItem('ll_template_ratings') || '{}'); } catch { return {}; }
@@ -309,7 +251,7 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
 
   // Preview renderer
   const renderPreview = (tplId) => {
-    const mock = JSON.parse(JSON.stringify(demoInvoice));
+    const mock = JSON.parse(JSON.stringify(getDemoInvoice(settings?.businessCategory)));
     mock.paymentSettingsSnapshot.customerLiveLinkSettings.selectedLiveLinkTemplate = tplId;
     return (
        <LazyPreview fallback={<div className="h-full w-full bg-theme-app animate-pulse flex items-center justify-center text-xs font-bold text-theme-muted">Loading preview...</div>}>
