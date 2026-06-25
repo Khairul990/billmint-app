@@ -1379,6 +1379,175 @@ const Settings = ({
               </div>
             </>
           )}
+
+          {/* ============ PAYMENT ============ */}
+          {effectiveActiveCategory === 'payment' && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="card-premium p-6 md:p-8 space-y-6">
+                <div className="section-header border-b border-theme-border-soft pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0">
+                      <QrCode className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="section-header-title">Payment Methods</h2>
+                      <p className="section-header-subtitle">Configure how customers pay you</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <ToggleSwitch
+                    enabled={paymentQrEnabled}
+                    onChange={setPaymentQrEnabled}
+                    label="Enable Digital Payments / QR Codes"
+                    description="Show payment details on invoices and live links"
+                  />
+
+                  {paymentQrEnabled && (
+                    <div className="bg-theme-app/50 p-6 rounded-2xl border border-theme-border-soft space-y-5">
+                      <div>
+                        <label className="block text-xs font-bold text-theme-muted mb-2 uppercase tracking-wide">Primary Payment Method</label>
+                        <select
+                          value={paymentMethod}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          className="input-premium w-full px-4 py-3 bg-theme-card border border-theme-border-soft rounded-xl text-theme-primary font-bold focus:ring-2 focus:ring-theme-accent/20"
+                        >
+                          <option value="UPI">UPI (India)</option>
+                          <option value="bKash">bKash (Bangladesh)</option>
+                          <option value="Nagad">Nagad (Bangladesh)</option>
+                          <option value="Bank">Bank Transfer</option>
+                          <option value="Manual">Custom Payment Link</option>
+                        </select>
+                      </div>
+
+                      {paymentMethod === 'UPI' && (
+                        <div>
+                          <label className="block text-xs font-bold text-theme-muted mb-2">UPI ID</label>
+                          <input
+                            type="text"
+                            value={upiId}
+                            onChange={(e) => setUpiId(e.target.value)}
+                            placeholder="e.g. 9876543210@ybl"
+                            className="input-premium w-full px-4 py-3 bg-theme-card border border-theme-border-soft rounded-xl"
+                          />
+                        </div>
+                      )}
+
+                      {paymentMethod === 'bKash' && (
+                        <div>
+                          <label className="block text-xs font-bold text-theme-muted mb-2">bKash Number</label>
+                          <input
+                            type="text"
+                            value={bkashNumber}
+                            onChange={(e) => setBkashNumber(e.target.value)}
+                            placeholder="e.g. 01700000000"
+                            className="input-premium w-full px-4 py-3 bg-theme-card border border-theme-border-soft rounded-xl"
+                          />
+                        </div>
+                      )}
+
+                      {paymentMethod === 'Nagad' && (
+                        <div>
+                          <label className="block text-xs font-bold text-theme-muted mb-2">Nagad Number</label>
+                          <input
+                            type="text"
+                            value={nagadNumber}
+                            onChange={(e) => setNagadNumber(e.target.value)}
+                            placeholder="e.g. 01700000000"
+                            className="input-premium w-full px-4 py-3 bg-theme-card border border-theme-border-soft rounded-xl"
+                          />
+                        </div>
+                      )}
+
+                      {paymentMethod === 'Manual' && (
+                        <div>
+                          <label className="block text-xs font-bold text-theme-muted mb-2">Custom Payment Link</label>
+                          <input
+                            type="url"
+                            value={customPaymentLink}
+                            onChange={(e) => setCustomPaymentLink(e.target.value)}
+                            placeholder="https://paypal.me/..."
+                            className="input-premium w-full px-4 py-3 bg-theme-card border border-theme-border-soft rounded-xl"
+                          />
+                        </div>
+                      )}
+                      
+                      <div>
+                        <label className="block text-xs font-bold text-theme-muted mb-2">Payment Note / Instructions</label>
+                        <input
+                          type="text"
+                          value={paymentNote}
+                          onChange={(e) => setPaymentNote(e.target.value)}
+                          placeholder="e.g. Please use invoice number as reference"
+                          className="input-premium w-full px-4 py-3 bg-theme-card border border-theme-border-soft rounded-xl"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ============ COLLECTION ============ */}
+          {effectiveActiveCategory === 'collection' && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="card-premium p-6 md:p-8 space-y-6">
+                <div className="section-header border-b border-theme-border-soft pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0">
+                      <CircleDollarSign className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="section-header-title">Collection Preferences</h2>
+                      <p className="section-header-subtitle">Manage how you collect money and payment proofs</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <ToggleSwitch
+                    enabled={enableLiveLink}
+                    onChange={setEnableLiveLink}
+                    label="Enable Live Links"
+                    description="Allow customers to view their invoices securely online"
+                  />
+                  <ToggleSwitch
+                    enabled={showPaymentQrOnLink}
+                    onChange={setShowPaymentQrOnLink}
+                    label="Show Payment QR on Live Link"
+                    description="Display the QR code on the web version of invoices"
+                  />
+                  <ToggleSwitch
+                    enabled={allowPaymentProofSubmit}
+                    onChange={setAllowPaymentProofSubmit}
+                    label="Allow Payment Proof Submission"
+                    description="Let customers upload screenshots of their payments"
+                  />
+                  <ToggleSwitch
+                    enabled={requirePaymentScreenshot}
+                    onChange={setRequirePaymentScreenshot}
+                    label="Require Screenshot for Proof"
+                    description="Force customers to attach a screenshot when reporting payment"
+                  />
+                  <ToggleSwitch
+                    enabled={showPaidDueAmount}
+                    onChange={setShowPaidDueAmount}
+                    label="Show Paid & Due Amounts"
+                    description="Clearly display the remaining balance on invoices"
+                  />
+                  <ToggleSwitch
+                    enabled={allowPdfDownload}
+                    onChange={setAllowPdfDownload}
+                    label="Allow PDF Downloads"
+                    description="Let customers download a PDF copy from the live link"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ============ THEMES ============ */}
           {effectiveActiveCategory === 'themes' && (
              <div className="animate-fadeIn">
