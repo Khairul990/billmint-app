@@ -991,47 +991,34 @@ const Settings = ({
         </div>
       </div>
 
-      {/* Main Layout: Sidebar + Content */}
-      <div className="flex gap-6 flex-col lg:flex-row">
-
-        {/* Sidebar Navigation */}
-        <div className="lg:w-56 shrink-0">
-          <div className="lg:sticky lg:top-4 space-y-3 bg-theme-surface dark:bg-theme-card/60 p-2 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft">
-            {filteredGroups.map((group) => (
-              <div key={group.group}>
-                <div className="px-3 py-1">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-theme-muted/60">{group.group}</span>
-                </div>
-                {group.items.map((cat) => {
-                  const Icon = cat.icon;
-                  const isSelected = effectiveActiveCategory === cat.id;
-                  return (
-                    <button
-                      key={cat.id}
-                      onClick={() => setActiveCategory(cat.id)}
-                      className={'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-left group ' + (
-                        isSelected
-                          ? 'bg-[image:var(--accent-gradient)] text-white shadow-md shadow-theme-accent/20'
-                          : 'text-theme-muted hover:text-theme-primary hover:bg-theme-card dark:hover:bg-theme-surface/60'
-                      )}
-                    >
-                      <Icon className={'w-4 h-4 shrink-0 ' + (isSelected ? 'text-white' : 'text-theme-muted group-hover:text-theme-accent')} />
-                      <div className="min-w-0">
-                        <span className={'text-[11px] font-bold block leading-tight ' + (isSelected ? 'text-white' : '')}>{cat.label}</span>
-                        {isSelected && (
-                          <span className="text-[8px] text-white/70 font-medium block truncate">{cat.description}</span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
+      {/* Horizontal Pill Navigation */}
+      <div className="mb-8">
+        <div className="glass rounded-2xl p-1.5 border border-theme-border-soft overflow-x-auto hide-scrollbar">
+          <div className="flex gap-2 min-w-max pb-1">
+            {filteredGroups.flatMap(g => g.items).map((cat) => {
+              const Icon = cat.icon;
+              const isSelected = effectiveActiveCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-300 whitespace-nowrap ${
+                    isSelected
+                      ? 'bg-theme-accent text-white shadow-md shadow-theme-accent/30 scale-105'
+                      : 'text-theme-muted hover:text-theme-primary hover:bg-theme-card/80 border border-transparent hover:border-theme-border-soft'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
         </div>
+      </div>
 
-        {/* Content Area */}
-        <div className="flex-1 min-w-0 space-y-6">
+      {/* Content Area */}
+      <div className="w-full space-y-6">
 
           {/* ============ BUSINESS ============ */}
           {effectiveActiveCategory === 'business' && (
@@ -1802,7 +1789,6 @@ const Settings = ({
           )}
 
         </div>{/* END content area */}
-      </div>{/* END sidebar+content layout */}
       {/* Reset All Data Modal */}
       {showResetModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
