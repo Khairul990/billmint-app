@@ -1216,25 +1216,9 @@ function App() {
 
   // --- TAB ROUTER SWITCHBOARD ---
   const renderTabContent = () => {
-    // Use setupCompleted flag instead of profileSetupCompleted to check if onboarding is done
-    const isProfileIncomplete = activeSettings && !activeSettings.setupCompleted && !activeSettings.businessName;
-    const activeTab = isProfileIncomplete ? 'onboarding' : currentTab;
     const isMaintenanceMode = (globalMaintenanceMode || activeSettings?.maintenanceMode) && !isAdminUser(getAuthSession());
 
-    if (activeTab === 'onboarding') {
-      return (
-        <OnboardingWizard
-          businessSettings={activeSettings}
-          onSaveSettings={(newSettings) => {
-            saveSettings(newSettings);
-            setSettings(newSettings);
-            setCurrentTab('dashboard');
-          }}
-          setCurrentTab={setCurrentTab}
-        />
-      );
-    }
-    switch (activeTab) {
+    switch (currentTab) {
       case 'landing':
         setCurrentTab('dashboard');
         return null;
@@ -1809,12 +1793,16 @@ function App() {
               userName={settings?.businessName || ''} 
               onComplete={() => setShowWelcomeAnimation(false)} 
             />
-            {currentTab === 'onboarding' ? (
+            {(currentTab === 'onboarding' || (activeSettings && !activeSettings.setupCompleted && !activeSettings.businessName)) ? (
               <OnboardingWizard 
                 onComplete={() => setCurrentTab('dashboard')} 
-                businessSettings={settings} 
-                onSaveSettings={handleSaveSettings}
-                invoices={invoices}
+                businessSettings={activeSettings} 
+                onSaveSettings={(newSettings) => {
+                  saveSettings(newSettings);
+                  setSettings(newSettings);
+                  setCurrentTab('dashboard');
+                }}
+                setCurrentTab={setCurrentTab}
               />
             ) : (
               <Layout
