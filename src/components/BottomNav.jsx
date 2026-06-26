@@ -10,13 +10,23 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
 
   const getCustomerLabel = () => getCustomerLabelByType(wsType);
 
-  const tabs = [
+  let tabs = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
     { id: 'due', label: 'Due', icon: CreditCard, badge: pendingPaymentsCount },
     { id: 'create', isAction: true },
     { id: 'customers', label: getCustomerLabel(), icon: Users },
     { id: 'more', label: 'More', icon: MoreHorizontal },
   ];
+
+  if (wsType === 'cybercafe' || wsType === 'cyber_cafe') {
+    tabs = [
+      { id: 'cyber-dashboard', label: 'Home', icon: LayoutDashboard },
+      { id: 'customer-register', label: 'Register', icon: Users },
+      { id: 'create', isAction: true },
+      { id: 'portal-hub', label: 'Portals', icon: CreditCard },
+      { id: 'more', label: 'More', icon: MoreHorizontal },
+    ];
+  }
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-theme-border-soft safe-area-bottom backdrop-blur-2xl"
@@ -43,8 +53,9 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
           const Icon = tab.icon;
           const isActive = 
             currentTab === tab.id || 
+            (tab.id === 'cyber-dashboard' && currentTab === 'dashboard') ||
             (tab.id === 'due' && ['due-ledger', 'pending-payments'].includes(currentTab)) ||
-            (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings', 'help-center', 'estimates', 'pdf-templates', 'live-link-templates', 'marketplace', 'backup-restore', 'invoices', 'reports'].includes(currentTab));
+            (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings', 'help-center', 'estimates', 'pdf-templates', 'live-link-templates', 'marketplace', 'backup-restore', 'invoices', 'reports', 'quick-tools', 'cash-management'].includes(currentTab));
           
           return (
             <button

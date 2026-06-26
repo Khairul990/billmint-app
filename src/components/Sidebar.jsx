@@ -88,7 +88,7 @@ const Sidebar = ({
     { id: 'help-center', label: 'Help Center', icon: HelpCircle },
   ];
 
-  if (wsType === 'cyber_cafe') {
+  if (wsType === 'cybercafe' || wsType === 'cyber_cafe') {
     menuItems = [
       { id: 'cyber-dashboard', label: 'Cyber Dashboard', icon: LayoutDashboard },
       { type: 'label', label: 'Services' },
