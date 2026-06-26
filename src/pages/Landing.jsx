@@ -8,10 +8,17 @@ import Login from './Login';
 const Landing = ({ onLoginSuccess }) => {
   const [faqOpen, setFaqOpen] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('billqyro_theme_color') || 'pink';
     // Handled by ThemeContext
+    
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollTo = (id) => {
@@ -57,10 +64,16 @@ const Landing = ({ onLoginSuccess }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-theme-app text-theme-primary font-sans selection:bg-theme-accent selection:text-white flex flex-col">
+    <div className="min-h-screen bg-theme-app text-theme-primary font-sans selection:bg-theme-accent selection:text-white flex flex-col relative">
+      {/* ===== ANIMATED BACKGROUND BLOBS ===== */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-40 -right-40 w-96 h-96 bg-theme-accent/20 rounded-full blur-[100px]" />
+        <motion.div animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.4, 0.2] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }} className="absolute top-[40%] -left-40 w-[500px] h-[500px] bg-theme-accent/10 rounded-full blur-[120px]" />
+      </div>
+
       {/* ===== PREMIUM GLASS NAVBAR ===== */}
-      <nav className="glass border-b border-theme-border-soft/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-theme-card/80 backdrop-blur-xl border-b border-theme-border-soft shadow-lg py-1' : 'bg-transparent border-b border-theme-border-soft/50 py-2'}`}>
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Logo type="horizontal" forceWhiteText={false} />
 
           {/* Desktop Nav */}
@@ -174,9 +187,9 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== LOGIN SECTION ===== */}
-      <section id="login" className="border-t border-theme-border-soft bg-theme-surface">
+      <motion.section id="login" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="border-t border-theme-border-soft bg-theme-surface/50 relative z-10">
         <Login onLoginSuccess={onLoginSuccess} />
-      </section>
+      </motion.section>
 
       {/* ===== FEATURES ===== */}
       <motion.section id="features" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
