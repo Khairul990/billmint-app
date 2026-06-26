@@ -454,7 +454,7 @@ const SettingsStudioV2 = ({
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="max-w-full mx-auto p-6 space-y-6">
         <div className="flex items-center gap-4 mb-8">
           <div className="skeleton-block w-8 h-8 rounded-xl" />
           <div className="flex-1 space-y-2"><div className="skeleton-line w-48 h-5" /><div className="skeleton-line w-64 h-3" /></div>
@@ -847,7 +847,7 @@ const SettingsStudioV2 = ({
     <motion.div variants={pageVariants} initial="initial" animate="animate" className="min-h-screen pb-32 font-sans">
       {/* Premium Header */}
       <div className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-[var(--app-bg)]/80 border-b border-gray-200 dark:border-white/10">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
+        <div className="max-w-full mx-auto px-4 md:px-6 py-3">
           <div className="flex items-center justify-between gap-4">
             {/* Left: Back + Title */}
             <div className="flex items-center gap-3 min-w-0">
@@ -930,7 +930,7 @@ const SettingsStudioV2 = ({
       </div>
 
       {/* Quick Actions Bar */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
+      <div className="max-w-full mx-auto px-4 md:px-6 py-3">
         <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
           {[
             { id: 'business', label: 'Business', icon: Building2 },
@@ -950,7 +950,7 @@ const SettingsStudioV2 = ({
       </div>
 
       {/* Main Content + Navigation */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
+      <div className="max-w-full mx-auto px-4 md:px-6">
         <div className="flex gap-6">
           {/* Navigation Sidebar */}
           {showNav && (
@@ -1005,7 +1005,7 @@ const SettingsStudioV2 = ({
             initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
             className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 border-t border-gray-200 dark:border-white/10 shadow-2xl"
           >
-            <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
+            <div className="max-w-full mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-500/10 flex items-center justify-center">
                   <AlertTriangle className="w-4 h-4 text-yellow-600" />
