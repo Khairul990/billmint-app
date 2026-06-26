@@ -20,7 +20,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
 
   if (wsType === 'cybercafe' || wsType === 'cyber_cafe') {
     tabs = [
-      { id: 'cyber-dashboard', label: 'Home', icon: LayoutDashboard },
+      { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
       { id: 'customer-register', label: 'Register', icon: Users },
       { id: 'create', isAction: true },
       { id: 'portal-hub', label: 'Portals', icon: CreditCard },
@@ -53,7 +53,6 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
           const Icon = tab.icon;
           const isActive = 
             currentTab === tab.id || 
-            (tab.id === 'cyber-dashboard' && currentTab === 'dashboard') ||
             (tab.id === 'due' && ['due-ledger', 'pending-payments'].includes(currentTab)) ||
             (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings', 'help-center', 'estimates', 'pdf-templates', 'live-link-templates', 'marketplace', 'backup-restore', 'invoices', 'reports', 'quick-tools', 'cash-management'].includes(currentTab));
           

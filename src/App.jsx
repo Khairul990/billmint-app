@@ -1258,14 +1258,6 @@ function App() {
       case 'cash-management':
         return <CashManagement />;
       case 'dashboard':
-        {
-          const activeWsId = activeSettings?.activeWorkspaceId;
-          const activeWorkspace = activeSettings?.businessWorkspaces?.find(ws => ws.id === activeWsId) || {};
-          const wsType = activeWorkspace.type || activeSettings?.businessType;
-          if (wsType === 'cybercafe' || wsType === 'cyber_cafe') {
-            return <CyberDashboard setCurrentTab={setCurrentTab} />;
-          }
-        }
         return (
           <Dashboard
             invoices={activeInvoices}

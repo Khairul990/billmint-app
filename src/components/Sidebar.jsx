@@ -90,7 +90,7 @@ const Sidebar = ({
 
   if (wsType === 'cybercafe' || wsType === 'cyber_cafe') {
     menuItems = [
-      { id: 'cyber-dashboard', label: 'Cyber Dashboard', icon: LayoutDashboard },
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { type: 'label', label: 'Services' },
       { id: 'portal-hub', label: 'Portal Hub', icon: Globe },
       { id: 'quick-tools', label: 'Quick Tools', icon: Sparkles },
