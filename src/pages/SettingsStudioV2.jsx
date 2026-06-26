@@ -952,7 +952,7 @@ const SettingsStudioV2 = ({
 
           {/* Content Area */}
           <div className={'flex-1 min-w-0 ' + (showPreview ? 'lg:mr-80' : '')}>
-            <div className="space-y-6 max-w-5xl mx-auto">
+            <div className="space-y-6 w-full">
               <AnimatePresence mode="wait">
                 <motion.div key={activeSection} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }}>
                   {renderContent()}
