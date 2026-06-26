@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import AdminLayout from './AdminLayout';
 import AdminDashboard from './AdminDashboard';
 import UserManager from './UserManager';
+import WorkspaceAdmin from './WorkspaceAdmin';
 import PaymentProofCenter from './PaymentProofCenter';
 import GlobalSettings from './GlobalSettings';
 import OwnerTestLab from './OwnerTestLab';
@@ -29,6 +30,7 @@ const AdminPanel = ({ currentTab, setCurrentTab }) => {
       <AdminLayout setCurrentTab={setCurrentTab} activeAdminTab={activeAdminTab} setActiveAdminTab={setActiveAdminTab}>
         {activeAdminTab === 'dashboard' && <AdminDashboard />}
         {activeAdminTab === 'users' && <UserManager />}
+        {activeAdminTab === 'workspaces' && <WorkspaceAdmin />}
         {activeAdminTab === 'premium' && <PremiumControlCenter />}
         {activeAdminTab === 'payments' && <PaymentProofCenter />}
         {activeAdminTab === 'settings' && <GlobalSettings />}

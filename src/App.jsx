@@ -100,6 +100,11 @@ const ServiceJobs = React.lazy(() => import('./pages/business/ServiceJobs'));
 const Projects = React.lazy(() => import('./pages/business/Projects'));
 const Delivery = React.lazy(() => import('./pages/business/Delivery'));
 const AdminPanel = React.lazy(() => import('./pages/admin/AdminPanel'));
+const CyberDashboard = React.lazy(() => import('./pages/cybercafe/CyberDashboard'));
+const PortalHub = React.lazy(() => import('./pages/cybercafe/PortalHub'));
+const QuickToolsCenter = React.lazy(() => import('./pages/cybercafe/QuickToolsCenter'));
+const CustomerRegister = React.lazy(() => import('./pages/cybercafe/CustomerRegister'));
+const CashManagement = React.lazy(() => import('./pages/cybercafe/CashManagement'));
 const PremiumPricing = React.lazy(() => import('./pages/PremiumPricing'));
 const PaymentDueScreen = React.lazy(() => import('./pages/PaymentDueScreen'));
 const SandboxAdmin = React.lazy(() => import('./pages/admin/SandboxAdmin'));
@@ -1242,6 +1247,16 @@ function App() {
       case 'landing':
         setCurrentTab('dashboard');
         return null;
+      case 'cyber-dashboard':
+        return <CyberDashboard setCurrentTab={setCurrentTab} />;
+      case 'portal-hub':
+        return <PortalHub />;
+      case 'quick-tools':
+        return <QuickToolsCenter />;
+      case 'customer-register':
+        return <CustomerRegister />;
+      case 'cash-management':
+        return <CashManagement />;
       case 'dashboard':
         return (
           <Dashboard

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAuthSession } from '../../services/dbEngine';
 import { auth } from '../../services/firebaseConfig';
-import { Lock, ShieldAlert, ArrowLeft, Activity, Users, Settings as SettingsIcon, CreditCard, ShieldCheck, Menu, X, User, Crown, ToggleRight, Database, ListPlus, MessageSquare, Megaphone } from 'lucide-react';
+import { Lock, ShieldAlert, ArrowLeft, Activity, Users, Settings as SettingsIcon, CreditCard, ShieldCheck, Menu, X, User, Crown, ToggleRight, Database, ListPlus, MessageSquare, Megaphone, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTab }) => {
@@ -13,6 +13,7 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
   const adminMenu = [
     { id: 'dashboard', label: 'Dashboard', icon: <Activity className="w-5 h-5" /> },
     { id: 'users', label: 'User Manager', icon: <Users className="w-5 h-5" /> },
+    { id: 'workspaces', label: 'Workspace Admin', icon: <Building2 className="w-5 h-5" /> },
     { id: 'premium', label: 'Premium Control', icon: <Crown className="w-5 h-5" /> },
     { id: 'payments', label: 'Payment Proofs', icon: <CreditCard className="w-5 h-5" /> },
     { id: 'settings', label: 'Global Settings', icon: <SettingsIcon className="w-5 h-5" /> },

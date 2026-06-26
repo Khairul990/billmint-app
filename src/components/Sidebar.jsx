@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, FileText } from 'lucide-react';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, FileText, Globe } from 'lucide-react';
 import { logout } from '../services/dbEngine';
 import { t } from '../utils/i18n';
 import { triggerLightHaptic } from '../utils/feedback';
@@ -87,6 +87,22 @@ const Sidebar = ({
     ...(localStorage.getItem('billqyro_demo_session_active') === 'true' ? [{ id: 'sandbox-admin', label: 'Sandbox Control Center', icon: ShieldCheck, module: 'sandbox' }] : []),
     { id: 'help-center', label: 'Help Center', icon: HelpCircle },
   ];
+
+  if (wsType === 'cyber_cafe') {
+    menuItems = [
+      { id: 'cyber-dashboard', label: 'Cyber Dashboard', icon: LayoutDashboard },
+      { type: 'label', label: 'Services' },
+      { id: 'portal-hub', label: 'Portal Hub', icon: Globe },
+      { id: 'quick-tools', label: 'Quick Tools', icon: Sparkles },
+      { type: 'label', label: 'Management' },
+      { id: 'customer-register', label: 'Customer Register', icon: Users },
+      { id: 'cash-management', label: 'Cash Management', icon: Briefcase },
+      { type: 'label', label: 'System' },
+      { id: 'settings', label: 'Settings Studio', icon: SettingsIcon },
+      ...(localStorage.getItem('billqyro_demo_session_active') === 'true' ? [{ id: 'sandbox-admin', label: 'Sandbox Control Center', icon: ShieldCheck, module: 'sandbox' }] : []),
+      { id: 'help-center', label: 'Help Center', icon: HelpCircle },
+    ];
+  }
 
   // Filter items based on enabledModules (if any)
   if (enabledModules.length) {

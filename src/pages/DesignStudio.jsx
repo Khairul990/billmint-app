@@ -107,6 +107,7 @@ const SUB_TABS = [
 ];
 
 const BUSINESS_CATEGORIES = [
+  { id: 'cyber_cafe', name: 'Cyber Cafe / CSC', icon: Store, desc: 'Digital service centers and portals', color: 'from-blue-500 to-indigo-600' },
   { id: 'retail', name: 'General Store / Retail', icon: Store, desc: 'Minimarts, groceries, and general shops', color: 'from-emerald-500 to-teal-600' },
   { id: 'embroidery', name: 'Embroidery Studio', icon: Scissors, desc: 'Stitching, design numbers, work types', color: 'from-pink-500 to-rose-600' },
   { id: 'repair', name: 'Service & Repair', icon: Wrench, desc: 'Workshops, mechanics, appliance repair', color: 'from-orange-500 to-amber-600' },
