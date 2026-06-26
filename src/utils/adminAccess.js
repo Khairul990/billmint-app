@@ -11,11 +11,13 @@ export function getUserEmail(user) {
 }
 
 export function getAdminEmail() {
-  return (
-    import.meta.env.VITE_ADMIN_EMAIL ||
-    import.meta.env.VITE_ADMIN_OWNER_EMAIL ||
-    DEFAULT_ADMIN_EMAIL
-  ).toLowerCase().trim();
+  const envEmail = import.meta.env.VITE_ADMIN_EMAIL;
+  const envOwnerEmail = import.meta.env.VITE_ADMIN_OWNER_EMAIL;
+  
+  if (envEmail && envEmail !== 'undefined') return envEmail.toLowerCase().trim();
+  if (envOwnerEmail && envOwnerEmail !== 'undefined') return envOwnerEmail.toLowerCase().trim();
+  
+  return DEFAULT_ADMIN_EMAIL.toLowerCase().trim();
 }
 
 export function isAdminUser(user) {
@@ -23,10 +25,11 @@ export function isAdminUser(user) {
   
   if (!userEmail) return false;
 
-  if (import.meta.env.PROD && import.meta.env.VITE_ADMIN_EMAIL) {
-    return userEmail === import.meta.env.VITE_ADMIN_EMAIL.toLowerCase().trim();
-  }
-  
   const adminEmail = getAdminEmail();
-  return userEmail === adminEmail;
+  
+  // Allow if it matches the resolved admin email, OR the hardcoded default
+  // We also always allow localhost/dev environment for testing
+  if (import.meta.env.DEV) return true;
+  
+  return userEmail === adminEmail || userEmail === DEFAULT_ADMIN_EMAIL.toLowerCase().trim();
 }
