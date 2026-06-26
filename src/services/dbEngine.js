@@ -34,6 +34,49 @@ import {
   getAdminAllChangelogs
 } from './platformAdminService';
 
+// --- VERSION TRACKING FOR CONFLICT RESOLUTION ---
+const getNextVersion = (record) => {
+  return (record.__version || 0) + 1;
+};
+
+export const getDeviceId = () => {
+  let id = localStorage.getItem('billqyro_device_id');
+  if (!id) {
+    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('billqyro_device_id', id);
+  }
+  return id;
+};
+
+const stampRecord = (record, userId) => {
+  const now = new Date().toISOString();
+  return {
+    ...record,
+    __version: getNextVersion(record),
+    updatedAt: now,
+    updatedByDeviceId: getDeviceId(),
+    source: 'localUserAction',
+    userId: userId || record.userId || getRealUserId() || 'local-user',
+  };
+};
+
+// Check if a cloud record is strictly newer than a local record (uses version + timestamp)
+export const cloudWins = (localRecord, cloudRecord) => {
+  if (!localRecord) return true;
+  if (!cloudRecord) return false;
+  
+  // Version-based resolution (primary)
+  const localVer = localRecord.__version || 0;
+  const cloudVer = cloudRecord.__version || 0;
+  if (cloudVer > localVer) return true;
+  if (cloudVer < localVer) return false;
+  
+  // Timestamp-based fallback (same version)
+  const localTime = new Date(localRecord.updatedAt || localRecord.createdAt || 0).getTime();
+  const cloudTime = new Date(cloudRecord.updatedAt || cloudRecord.createdAt || 0).getTime();
+  return cloudTime > localTime;
+};
+
 // --- OFFLINE SYNC QUEUE ENGINE & MIGRATOR ---
 export const migrateLocalStorageToIndexedDB = async () => {
   try {
@@ -99,18 +142,19 @@ export const queueSyncTransaction = async (action, storeName, docId, data) => {
   const tx = {
     id: transactionId,
     userId,
-    action, // 'save' or 'delete'
-    collectionName: storeName, // Protected queue field
-    storeName, // Legacy
-    recordId: docId, // Protected queue field
-    docId, // Legacy
+    action,
+    collectionName: storeName,
+    storeName,
+    recordId: docId,
+    docId,
     data,
-    deviceId, // Protected queue field
-    status: 'pending', // Protected queue field
+    dataVersion: data?.__version || 0,
+    deviceId,
+    status: 'pending',
     createdAt: Date.now(),
-    updatedAt: Date.now(), // Protected queue field
-    retries: 0, // Protected queue field
-    retryCount: 0, // Legacy
+    updatedAt: Date.now(),
+    retries: 0,
+    retryCount: 0,
     lastRetryAt: 0
   };
   await BillQyroDB.put('syncQueue', tx);
@@ -194,13 +238,34 @@ export const syncOfflineTransactions = async () => {
       try {
         let syncSuccess = false;
         if (tx.action === 'save') {
-          // Direct Firestore write, bypassing pushDataUpdate debounce for queue reliability
+          // Check cloud version before overwriting - never overwrite newer data
           let docRef;
           if (tx.storeName === 'settings' || tx.storeName === 'subscription') {
             docRef = doc(db, tx.storeName, tx.userId);
           } else {
             docRef = doc(db, tx.storeName, tx.userId, 'items', tx.docId);
           }
+          
+          // Fetch current cloud data to check version
+          try {
+            const cloudSnap = await getDoc(docRef);
+            if (cloudSnap.exists()) {
+              const cloudData = cloudSnap.data();
+              const cloudVersion = cloudData.__version || 0;
+              const localVersion = tx.data?.__version || 0;
+              // Skip if cloud has higher version (newer data already synced)
+              if (cloudVersion > localVersion) {
+                console.warn(`[SYNC QUEUE] Skipping TX ${tx.id}: cloud version ${cloudVersion} > local ${localVersion}`);
+                syncSuccess = true; // Consider it "synced" since cloud is ahead
+                await BillQyroDB.delete('syncQueue', tx.id);
+                continue;
+              }
+            }
+          } catch (e) {
+            // If fetch fails (e.g. permission), just try writing
+            console.warn('[SYNC QUEUE] Could not check cloud version, proceeding with write:', e);
+          }
+          
           await setDoc(docRef, tx.data, { merge: true });
           syncSuccess = true;
 
@@ -1344,21 +1409,24 @@ export const saveExpense = async (expense) => {
   if (expense.id) {
     const index = expenses.findIndex(e => e.id === expense.id);
     if (index !== -1) {
-      expenses[index] = expense;
+      const existing = expenses[index];
+      // Preserve version from existing record if not provided
+      expense.__version = Math.max(expense.__version || 0, existing.__version || 0);
+      expenses[index] = stampRecord(expense, expense.userId);
     } else {
-      expenses.push(expense);
+      expenses.push(stampRecord(expense, expense.userId));
     }
   } else {
     expense.id = 'exp-' + Date.now();
-    expenses.push(expense);
+    expenses.push(stampRecord(expense, expense.userId));
   }
   // Sync / queue + syncStatus tracking
   let firebaseStatus = 'pending';
-  expense.syncStatus = 'pending';
   updateLocalCache(KEYS.EXPENSES, expenses);
-  await BillQyroDB.put('expenses', expense);
+  const stamped = expenses.find(e => e.id === expense.id);
+  await BillQyroDB.put('expenses', stamped);
 
-  await queueSyncTransaction('save', 'expenses', expense.id, expense);
+  await queueSyncTransaction('save', 'expenses', expense.id, stamped);
   window.dispatchEvent(new CustomEvent('billqyro_sync'));
 
   if (firebaseReady) {
@@ -1463,24 +1531,26 @@ export const saveCustomer = async (customer) => {
   if (customer.id) {
     const index = customers.findIndex(c => c.id === customer.id);
     if (index !== -1) {
-      customers[index] = customer;
-      logAudit('customer_updated', 'customer', customer.id, null, customer);
+      const existing = customers[index];
+      customer.__version = Math.max(customer.__version || 0, existing.__version || 0);
+      customers[index] = stampRecord(customer, customer.userId);
+      logAudit('customer_updated', 'customer', customer.id, null, customers[index]);
     } else {
-      customers.push(customer);
+      customers.push(stampRecord(customer, customer.userId));
       logAudit('customer_created', 'customer', customer.id, null, customer);
     }
   } else {
     customer.id = 'c-' + Date.now();
-    customers.push(customer);
+    customers.push(stampRecord(customer, customer.userId));
     logAudit('customer_created', 'customer', customer.id, null, customer);
   }
   // Sync / queue + syncStatus tracking
   let firebaseStatus = 'pending';
-  customer.syncStatus = 'pending';
+  const stamped = customers.find(c => c.id === customer.id);
   updateLocalCache(KEYS.CUSTOMERS, customers);
-  await BillQyroDB.put('customers', customer);
+  await BillQyroDB.put('customers', stamped);
 
-  await queueSyncTransaction('save', 'customers', customer.id, customer);
+  await queueSyncTransaction('save', 'customers', customer.id, stamped);
   window.dispatchEvent(new CustomEvent('billqyro_sync'));
 
   if (firebaseReady) {
@@ -1587,24 +1657,26 @@ export const saveProduct = async (product) => {
   if (product.id) {
     const index = products.findIndex(p => p.id === product.id);
     if (index !== -1) {
-      products[index] = product;
-      logAudit('product_updated', 'product', product.id, null, product);
+      const existing = products[index];
+      product.__version = Math.max(product.__version || 0, existing.__version || 0);
+      products[index] = stampRecord(product, product.userId);
+      logAudit('product_updated', 'product', product.id, null, products[index]);
     } else {
-      products.push(product);
+      products.push(stampRecord(product, product.userId));
       logAudit('product_created', 'product', product.id, null, product);
     }
   } else {
     product.id = 'p-' + Date.now();
-    products.push(product);
+    products.push(stampRecord(product, product.userId));
     logAudit('product_created', 'product', product.id, null, product);
   }
   // Sync / queue + syncStatus tracking
   let firebaseStatus = 'pending';
-  product.syncStatus = 'pending';
+  const stamped = products.find(p => p.id === product.id);
   updateLocalCache(KEYS.PRODUCTS, products);
-  await BillQyroDB.put('products', product);
+  await BillQyroDB.put('products', stamped);
 
-  await queueSyncTransaction('save', 'products', product.id, product);
+  await queueSyncTransaction('save', 'products', product.id, stamped);
   window.dispatchEvent(new CustomEvent('billqyro_sync'));
 
   if (firebaseReady) {
@@ -1856,21 +1928,17 @@ export const saveInvoice = async (invoice) => {
   if (invoice.id && invoice.id.startsWith('inv-')) {
     const index = invoices.findIndex(inv => inv.id === invoice.id);
     if (index !== -1) {
-      invoice.updatedAt = timestamp;
-      invoices[index] = invoice;
-      logAudit('invoice_updated', 'invoice', invoice.id, invoices[index], invoice);
+      const existing = invoices[index];
+      invoice.__version = Math.max(invoice.__version || 0, existing.__version || 0);
+      invoices[index] = stampRecord(invoice, invoice.userId);
+      logAudit('invoice_updated', 'invoice', invoice.id, existing, invoices[index]);
     } else {
-      invoice.createdAt = timestamp;
-      invoice.updatedAt = timestamp;
-      invoices.push(invoice);
+      invoices.push(stampRecord({ ...invoice, createdAt: timestamp }, invoice.userId));
       logAudit('invoice_created', 'invoice', invoice.id, null, invoice);
     }
   } else {
-    // Also if it's a temp ID like Date.now().toString(), override it
     invoice.id = 'inv-' + Date.now();
-    invoice.createdAt = timestamp;
-    invoice.updatedAt = timestamp;
-    invoices.push(invoice);
+    invoices.push(stampRecord({ ...invoice, createdAt: timestamp }, invoice.userId));
     logAudit('invoice_created', 'invoice', invoice.id, null, invoice);
   }
 
@@ -1984,8 +2052,20 @@ const syncLocalInvoice = async (cloudData) => {
   const invoices = await getInvoices();
   const localIdx = invoices.findIndex(inv => inv.id === cloudData.id);
   if (localIdx !== -1) {
-    invoices[localIdx] = cloudData;
+    const local = invoices[localIdx];
+    // Only overwrite if cloud is newer
+    if (cloudWins(local, cloudData)) {
+      invoices[localIdx] = { ...cloudData, syncStatus: 'synced' };
+      updateLocalCache(KEYS.INVOICES, invoices);
+      await BillQyroDB.put('invoices', invoices[localIdx]);
+      window.dispatchEvent(new CustomEvent('billqyro_sync'));
+    }
+  } else {
+    // New record from cloud
+    const stamped = { ...cloudData, syncStatus: 'synced' };
+    invoices.push(stamped);
     updateLocalCache(KEYS.INVOICES, invoices);
+    await BillQyroDB.put('invoices', stamped);
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
   }
 };
@@ -2687,33 +2767,7 @@ export {
   createChangelog,
   getAdminAllChangelogs
 };
-
 // --- MERGED FROM SYNCENGINE ---
-
-
-
-
-
-export const getDeviceId = () => {
-  let id = localStorage.getItem('billqyro_device_id');
-  if (!id) {
-    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('billqyro_device_id', id);
-  }
-  return id;
-};
-
-// Check if a cloud record is strictly newer than a local record
-export const cloudWins = (localRecord, cloudRecord) => {
-  if (!localRecord) return true;
-  if (!cloudRecord) return false;
-  
-  const localTime = new Date(localRecord.updatedAt || localRecord.createdAt || 0).getTime();
-  const cloudTime = new Date(cloudRecord.updatedAt || cloudRecord.createdAt || 0).getTime();
-  
-  // If cloud is strictly newer, cloud wins. If equal, local might be the originator.
-  return cloudTime > localTime;
-};
 
 // --- Sync Queue & Offline Support ---
 export const enqueueSync = (collectionName, userId, docId, data) => {

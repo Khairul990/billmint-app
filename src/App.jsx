@@ -37,7 +37,6 @@ import {
   deleteExpense,
   importRestore,
   syncFromFirestore,
-  enableRealTimeSync,
   getGlobalAdminSettings,
   getUserRevenueState,
   getActiveAnnouncement,
@@ -168,23 +167,21 @@ const AdminRouteGuard = ({ setCurrentTab, children }) => {
   const [isUnlocked, setIsUnlocked] = useState(
     localStorage.getItem('billqyro_admin_unlocked') === 'true'
   );
-  
+
   useEffect(() => {
-    if (!isAdminUser(session)) {
+    // Only block access if the user is not an admin and hasn't unlocked the admin panel via PIN
+    if (!isAdminUser(session) && !isUnlocked) {
       toast.error('Unauthorized access. Owner privileges required.');
       setCurrentTab('dashboard');
     }
-  }, [session, setCurrentTab]);
+  }, [session, setCurrentTab, isUnlocked]);
 
-  if (!isAdminUser(session)) {
-    return <div className="flex h-screen bg-theme-main items-center justify-center"><ClassicLoader /></div>;
-  }
-
-  if (!isUnlocked) {
+  // If not admin and not unlocked, show PIN login
+  if (!isAdminUser(session) && !isUnlocked) {
     return (
-      <AdminPINLogin 
-        onPinSuccess={() => setIsUnlocked(true)} 
-        onCancel={() => setCurrentTab('dashboard')} 
+      <AdminPINLogin
+        onPinSuccess={() => setIsUnlocked(true)}
+        onCancel={() => setCurrentTab('dashboard')}
       />
     );
   }
@@ -1245,8 +1242,7 @@ function App() {
 
     switch (currentTab) {
       case 'landing':
-        setCurrentTab('dashboard');
-        return null;
+        return <Landing onLoginSuccess={handleLoginSuccess} />;
       case 'cyber-dashboard':
         return <CyberDashboard setCurrentTab={setCurrentTab} />;
       case 'portal-hub':
