@@ -345,9 +345,6 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
 
           if (!qrText) return null;
 
-          const encodedQrText = encodeURIComponent(qrText);
-          const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodedQrText}`;
-
           return (
             <div className="mt-8 p-6 md:p-8 rounded-3xl bg-gradient-to-br from-theme-surface to-theme-card text-white shadow-xl relative overflow-hidden border border-theme-border-strong/50 dark:border-theme-border-soft/80">
               {/* Subtle background glow */}
@@ -356,16 +353,8 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
 
               <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
                 {/* QR Code Frame */}
-                <div className="p-3 bg-theme-card dark:bg-theme-card rounded-2xl shadow-lg border border-white/10 shrink-0">
-                  <img 
-                    src={qrCodeUrl} 
-                    alt={`${paymentMethod} QR Code`} 
-                    className="w-32 h-32 object-contain rounded-lg"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "https://placehold.co/150x150?text=QR+Code";
-                    }}
-                  />
+                <div className="p-3 bg-theme-card dark:bg-theme-card rounded-2xl shadow-lg border border-white/10 shrink-0 bg-white">
+                  <DynamicQRCode value={qrText} size={128} />
                 </div>
 
                 {/* Info details */}

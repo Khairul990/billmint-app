@@ -53,6 +53,7 @@ import {
 import { addNotification } from '../services/notificationsService';
 import { db, firebaseReady } from '../services/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import DynamicQRCode from '../components/DynamicQRCode';
 import { toast } from 'react-hot-toast';
 import { pageVariants, staggerContainer, staggerItem, fadeInUp } from '../utils/animations';
 import PremiumEmptyState from '../components/PremiumEmptyState';
@@ -1227,11 +1228,17 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
       <AnimatePresence>
         {showUpgradeForm && activeRevenueTab === 'premium' && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.98, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98, y: 20 }}
-            className="card-premium bg-theme-card border border-theme-border-soft rounded-3xl p-6 md:p-8 shadow-premium max-w-2xl mx-auto space-y-6 mt-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="card-premium bg-theme-card border border-theme-border-soft rounded-3xl p-6 md:p-8 shadow-premium w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar"
+            >
             <div className="flex justify-between items-center border-b border-theme-border-soft pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-theme-accent-light text-theme-accent flex items-center justify-center">
@@ -1263,11 +1270,9 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
                     <div className="space-y-3">
                       <div>
                         <span className="font-bold text-[8.5px] uppercase tracking-wider block text-theme-muted">Scan UPI QR Code</span>
-                        <img
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent('upi://pay?pa=billqyro@okaxis&pn=BillQyro%20SaaS&am=' + activePricing.amount + '&cu=INR&tn=SaaS%20Upgrade')}`}
-                          alt="Admin UPI QR"
-                          className="w-28 h-28 object-contain rounded-xl border border-theme-border-soft mt-1 shadow-sm bg-theme-card p-1"
-                        />
+                        <div className="mt-1">
+                          <DynamicQRCode value={'upi://pay?pa=billqyro@okaxis&pn=BillQyro%20SaaS&am=' + activePricing.amount + '&cu=INR&tn=SaaS%20Upgrade'} size={112} />
+                        </div>
                       </div>
                       <div className="space-y-1">
                         <div>
@@ -1436,6 +1441,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
               </form>
 
             </div>
+          </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

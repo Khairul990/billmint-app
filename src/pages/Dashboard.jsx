@@ -475,7 +475,7 @@ const Dashboard = ({
       <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
         <div className="min-h-screen bg-theme-surface/50">
           {expiryDays !== null && expiryDays <= 30 && (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 mt-4">
               <div className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${
                 expiryDays <= 3 ? 'bg-theme-danger/10 border-theme-danger/30 text-theme-danger' :
                 expiryDays <= 7 ? 'bg-theme-warning/10 border-theme-warning/30 text-theme-warning' :
@@ -987,7 +987,7 @@ const Dashboard = ({
         </div>
 
         {/* ===== DESKTOP VIEW (>= 1024px) ===== */}
-        <div className="hidden lg:block w-full max-w-screen-2xl mx-auto px-6 py-5">
+        <div className="hidden lg:block w-full max-w-full mx-auto px-6 py-5">
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-5">
 
             {/* Banners Row */}

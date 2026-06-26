@@ -38,29 +38,25 @@ const DEFAULT_USER_STATE = {
 
 // --- GLOBAL SETTINGS ---
 export const getGlobalRevenueSettings = async () => {
-  if (firebaseReady) {
-    try {
-      const docPromise = getDoc(doc(db, 'adminRevenueSettings', 'global'));
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000));
-      const docSnap = await Promise.race([docPromise, timeoutPromise]);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        localStorage.setItem('billqyro_global_revenue_settings', JSON.stringify(data));
-        return data;
-      }
-    } catch (e) {
-      console.warn('Error reading global revenue settings from Firestore, using local cache', e);
-    }
-  }
-
+  let cachedData = null;
   try {
     const cached = localStorage.getItem('billqyro_global_revenue_settings');
     if (cached) {
-      return JSON.parse(cached);
+      cachedData = JSON.parse(cached);
     }
   } catch (e) {}
 
-  return DEFAULT_GLOBAL_SETTINGS;
+  // Fetch from Firebase in background to update cache for next time
+  if (firebaseReady) {
+    getDoc(doc(db, 'adminRevenueSettings', 'global')).then(docSnap => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        localStorage.setItem('billqyro_global_revenue_settings', JSON.stringify(data));
+      }
+    }).catch(e => console.warn('Background global settings fetch failed', e));
+  }
+
+  return cachedData || DEFAULT_GLOBAL_SETTINGS;
 };
 
 export const saveGlobalRevenueSettings = async (settings) => {

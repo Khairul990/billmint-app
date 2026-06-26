@@ -22,6 +22,7 @@ import {
   Banknote
 } from 'lucide-react';
 import { downloadInvoicePDF } from '../utils/pdfUtils';
+import DynamicQRCode from '../components/DynamicQRCode';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { doc, updateDoc, arrayUnion, collection, addDoc, runTransaction } from 'firebase/firestore';
@@ -127,7 +128,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           id: 'demo-proof-' + Date.now(),
           invoiceId: invoice.id,
           publicInvoiceId: invoice.id,
-          ownerId: invoice.ownerId || 'unknown',
+          ownerId: invoice.userId || invoice.createdByUid || invoice.ownerId || 'unknown',
           customerName: invoice.customerName || 'Demo Customer',
           payerName: sanitizedPayerName,
           payerPhone: sanitizedPayerPhone,
@@ -174,7 +175,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           transaction.set(doc(collection(db, 'payment_proofs')), {
             invoiceId: invoice.id,
             publicInvoiceId: invoice.id,
-            ownerId: invoice.ownerId || 'unknown',
+            ownerId: invoice.userId || invoice.createdByUid || invoice.ownerId || 'unknown',
             customerName: invoice.customerName || 'Unknown Customer',
             payerName: sanitizedPayerName,
             payerPhone: sanitizedPayerPhone,
@@ -403,16 +404,12 @@ const PublicInvoice = ({ initialInvoice }) => {
   const verifStr = invoice.verificationCode ? ` [Code: ${invoice.verificationCode}]` : '';
   const txnNote = `Invoice ${invoice.invoiceNumber}${verifStr}`;
   const upiLink = `upi://pay?pa=${paymentPrefs.upiId}&pn=${encodeURIComponent(paymentPrefs.payeeName || business.businessName)}&am=${dueAmount}&cu=INR&tn=${encodeURIComponent(txnNote)}`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-    paymentPrefs.paymentMethod === 'UPI' ? upiLink : (
-      paymentPrefs.paymentMethod === 'bKash' ? `bKash: ${paymentPrefs.bkashNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}${invoice.verificationCode ? `, Code: ${invoice.verificationCode}` : ''}` : (
-        paymentPrefs.paymentMethod === 'Nagad' ? `Nagad: ${paymentPrefs.nagadNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}${invoice.verificationCode ? `, Code: ${invoice.verificationCode}` : ''}` :
-        paymentPrefs.customPaymentLink || 'Manual QR'
-      )
+  const qrText = paymentPrefs.paymentMethod === 'UPI' ? upiLink : (
+    paymentPrefs.paymentMethod === 'bKash' ? `bKash: ${paymentPrefs.bkashNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}${invoice.verificationCode ? `, Code: ${invoice.verificationCode}` : ''}` : (
+      paymentPrefs.paymentMethod === 'Nagad' ? `Nagad: ${paymentPrefs.nagadNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}${invoice.verificationCode ? `, Code: ${invoice.verificationCode}` : ''}` :
+      paymentPrefs.customPaymentLink || 'Manual QR'
     )
-  )}`;
-
-
+  );
 
   const handleDownloadPDF = () => {
     downloadInvoicePDF(invoice, business, true)
@@ -860,10 +857,10 @@ const PublicInvoice = ({ initialInvoice }) => {
                     </div>
                   </div>
 
-                  {liveLinkPrefs.showPaymentQr && paymentPrefs.paymentQrEnabled && (
-                    <div className="qr-premium mx-auto relative overflow-hidden">
+                  {liveLinkPrefs.showPaymentQr && paymentPrefs.paymentQrEnabled && qrText && (
+                    <div className="qr-premium mx-auto relative overflow-hidden flex flex-col items-center">
                       <div className="qr-scan-line"></div>
-                      <img src={qrCodeUrl} alt="Scan to Pay QR" className="w-full h-auto object-contain rounded-lg" />
+                      <DynamicQRCode value={qrText} size={200} />
                       <p className="text-[9px] text-theme-muted font-bold uppercase text-center mt-2">Scan to Pay</p>
                       <p className="text-[7px] text-theme-muted/60 text-center">Use any UPI / banking app</p>
                     </div>
