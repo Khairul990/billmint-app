@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, RefreshCw, Trash2, Database, Play, Bell } from 'lucide-react';
+import { ShieldCheck, RefreshCw, Trash2, Database, Play, Bell, Wrench } from 'lucide-react';
 import { generateDemoWorkspace, resetSandboxData } from '../../services/demoGenerator';
 import { toast } from 'react-hot-toast';
 import { addNotification } from '../../services/notificationsService';
@@ -98,6 +98,4 @@ const SandboxAdmin = ({ setCurrentTab }) => {
   );
 };
 
-// Quick fix for missing Wrench icon in imports above
-import { Wrench } from 'lucide-react';
-export default SandboxAdmin;
+// Quick fix for missing Wrench icon in imports aboveexport default SandboxAdmin;
