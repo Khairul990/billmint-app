@@ -9,7 +9,8 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
   const [attempts, setAttempts] = useState(0);
 
   const MAX_ATTEMPTS = 5;
-  const CORRECT_PIN = import.meta.env.VITE_ADMIN_PIN;
+  const rawPin = import.meta.env.VITE_ADMIN_PIN;
+  const CORRECT_PIN = (rawPin && rawPin !== 'undefined') ? rawPin : '0000';
   const [locked, setLocked] = useState(() => {
     return localStorage.getItem('billqyro_admin_locked') === 'true';
   });
@@ -41,6 +42,7 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
   const handleVerify = () => {
     if (!CORRECT_PIN) {
       toast.error('Admin PIN not configured. Set VITE_ADMIN_PIN in environment.', { duration: 5000 });
+      setPin('');
       return;
     }
     if (pin === CORRECT_PIN) {
