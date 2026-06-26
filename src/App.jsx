@@ -649,15 +649,14 @@ function App() {
               if (adminGlobal.defaultTheme) {
                 localStorage.setItem('billqyro_admin_default_theme', adminGlobal.defaultTheme);
                 if (!synced?.settings?.themeColor && !synced?.settings?.brandColor) {
-                  document.documentElement.setAttribute('data-theme', adminGlobal.defaultTheme);
+                  // Handled by ThemeContext
                   import('./utils/themeIcon').then(m => m.updateFaviconForTheme(adminGlobal.defaultTheme));
                 }
               }
               if (adminGlobal.defaultMode) {
                 localStorage.setItem('billqyro_admin_default_mode', adminGlobal.defaultMode);
                 if (!synced?.settings?.displayMode) {
-                  if (adminGlobal.defaultMode === 'dark') document.documentElement.classList.add('dark');
-                  else document.documentElement.classList.remove('dark');
+                  // Handled by ThemeContext
                 }
               }
             }

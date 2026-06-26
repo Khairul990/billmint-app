@@ -192,9 +192,9 @@ const BusinessProfileTab = (props) => {
                       setDarkMode(!darkMode);
                       // Instantly toggle the class so the preview is accurate
                       if (!darkMode) {
-                        document.documentElement.classList.add('dark');
+                        // Handled by ThemeContext
                       } else {
-                        document.documentElement.classList.remove('dark');
+                        // Handled by ThemeContext
                       }
                     }}
                     className={`relative w-12 h-6 rounded-full transition-all duration-500 ease-in-out shadow-inner flex items-center p-1 focus:outline-none ${darkMode ? 'bg-[image:var(--accent-gradient)] shadow-md shadow-theme-accent/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5'}`}
@@ -230,7 +230,7 @@ const BusinessProfileTab = (props) => {
                             type="button"
                             onClick={() => {
                               setThemeColor(preset.id);
-                              document.documentElement.setAttribute('data-theme', preset.id);
+                              // Handled by ThemeContext
                               import('../utils/themeIcon').then(m => m.updateFaviconForTheme(preset.id));
                             }}
                             className={`w-full text-left rounded-2xl border transition-all duration-300 relative overflow-hidden cursor-pointer flex flex-col ${
@@ -298,7 +298,7 @@ const BusinessProfileTab = (props) => {
                     <button
                       type="button"
                       onClick={() => {
-                        document.documentElement.setAttribute('data-theme', themeColor);
+                        // Handled by ThemeContext
                         import('../utils/themeIcon').then(m => m.updateFaviconForTheme(themeColor));
                         toast.success(`Previewing ${themeColor} theme!`);
                       }}
@@ -326,9 +326,9 @@ const BusinessProfileTab = (props) => {
                           themeUpdatedAt: new Date().toISOString()
                         };
                         onSaveSettings(payload);
-                        document.documentElement.setAttribute('data-theme', 'light');
+                        // Handled by ThemeContext
                         import('../utils/themeIcon').then(m => m.updateFaviconForTheme('light'));
-                        document.documentElement.classList.remove('dark');
+                        // Handled by ThemeContext
                         toast.success('Reset to BillQyro Classic default theme!');
                       }}
                       className="w-full py-2 bg-transparent text-theme-muted hover:text-theme-danger text-[10px] font-bold text-center transition-all cursor-pointer block uppercase tracking-wider"

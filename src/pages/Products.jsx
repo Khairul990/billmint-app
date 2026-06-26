@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import AnimatedPage from '../components/AnimatedPage';
 import { 
   Layers, 
@@ -121,13 +121,13 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
   };
 
   // Filter Catalog
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = useMemo(() => products.filter(p => {
     const q = searchQuery.toLowerCase();
     return (
       (p.name || '').toLowerCase().includes(q) ||
       (p.description && p.description.toLowerCase().includes(q))
     );
-  });
+  }), [products, searchQuery]);
 
   const handleRefresh = async () => {
     await syncFromFirestore();

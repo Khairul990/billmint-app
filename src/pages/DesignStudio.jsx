@@ -553,7 +553,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
                 whileHover={{ scale: 1.05, y: -3 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => {
-                  document.documentElement.setAttribute('data-theme', theme.id);
+                  // Handled by ThemeContext
                   import('../utils/themeIcon').then(m => m.updateFaviconForTheme(theme.id)).catch(() => {});
                   if (setSettings) {
                     setSettings({ ...businessSettings, themeColor: theme.id });

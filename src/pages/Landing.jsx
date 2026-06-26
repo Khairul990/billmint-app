@@ -10,7 +10,7 @@ const Landing = ({ onLoginClick }) => {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('billqyro_theme_color') || 'pink';
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    // Handled by ThemeContext
   }, []);
 
   const scrollTo = (id) => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedPage from '../components/AnimatedPage';
 import { 
@@ -37,13 +37,19 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
   const currencySymbol = businessSettings?.currency || '₹';
 
   // --- STATS ---
-  const totalExpenses = expenses.reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+  const { totalExpenses, categoryTotals } = useMemo(() => {
+    let total = 0;
+    const catTotals = {};
+    expenses.forEach(exp => {
+      const amt = parseFloat(exp.amount || 0);
+      total += amt;
+      const cat = exp.category || 'Other';
+      catTotals[cat] = (catTotals[cat] || 0) + amt;
+    });
+    return { totalExpenses: total, categoryTotals: catTotals };
+  }, [expenses]);
 
-  const getCategoryTotal = (catName) => {
-    return expenses
-      .filter(exp => exp.category === catName)
-      .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
-  };
+  const getCategoryTotal = (catName) => categoryTotals[catName] || 0;
 
   const handleAddExpense = (e) => {
     e.preventDefault();

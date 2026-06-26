@@ -124,7 +124,9 @@ service cloud.firestore {
     }
     
     match /payment_proofs/{proofId} {
-      allow create: if isAuth() && request.resource.data.ownerId == request.auth.uid;
+      // Allow unauthenticated customers to submit payment proofs (status must be pending)
+      allow create: if (isAuth() && request.resource.data.ownerId == request.auth.uid) || 
+                       (!isAuth() && request.resource.data.status == 'pending' && request.resource.data.publicInvoiceId != null);
       allow read: if isAuth() && (resource.data.ownerId == request.auth.uid || isAdmin());
       allow update, delete: if isAdmin();
     }

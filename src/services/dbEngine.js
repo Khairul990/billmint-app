@@ -1191,8 +1191,16 @@ export const updatePremiumRequestStatus = async (requestId, status, targetUserId
 
     if (status === 'Approved') {
       const activatedAt = Date.now();
-      const durationMs = plan === 'Yearly' ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
-      const expiresAt = activatedAt + durationMs;
+      let durationMs = 30 * 24 * 60 * 60 * 1000;
+      if (plan === 'Lifetime') {
+        durationMs = 100 * 365 * 24 * 60 * 60 * 1000; // 100 years approx for lifetime
+      } else if (plan === 'Yearly') {
+        durationMs = 365 * 24 * 60 * 60 * 1000;
+      } else if (plan === 'Quarterly') {
+        durationMs = 90 * 24 * 60 * 60 * 1000;
+      }
+      
+      const expiresAt = plan === 'Lifetime' ? null : (activatedAt + durationMs);
 
       const sub = {
         status: 'premium',
@@ -1324,8 +1332,7 @@ export const getExpenses = async (includeDeleted = false) => {
       return filtered.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
     }
   } catch(e) {}
-  const localData = JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [];
-  return includeDeleted ? localData : localData.filter(e => !e.isDeleted);
+  return [];
 };
 
 export const saveExpense = async (expense) => {
@@ -1439,8 +1446,7 @@ export const getCustomers = async (includeDeleted = false) => {
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch(e) {}
-  const localData = JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [];
-  return includeDeleted ? localData : localData.filter(c => !c.isDeleted);
+  return [];
 };
 
 export const saveCustomer = async (customer) => {
@@ -1564,8 +1570,7 @@ export const getProducts = async (includeDeleted = false) => {
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch(e) {}
-  const localData = JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [];
-  return includeDeleted ? localData : localData.filter(p => !p.isDeleted);
+  return [];
 };
 
 export const saveProduct = async (product) => {
@@ -1689,8 +1694,7 @@ export const getInvoices = async (includeDeleted = false) => {
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch(e) {}
-  const localData = JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
-  return includeDeleted ? localData : localData.filter(inv => !inv.isDeleted);
+  return [];
 };
 
 export const generateSecureToken = () => {
@@ -2822,19 +2826,14 @@ export const startRealTimeSync = (userId) => {
   // [COST AWARENESS] Stopped onSnapshot for high volume collections (invoices, customers).
   // They only sync on explicit actions (create/update/delete) or app boot.
   // This massively reduces document reads during normal operation.
-  const syncCollection = (collectionName, storageKey) => {
-    if (['invoices', 'customers', 'products', 'expenses'].includes(collectionName)) {
-      return; // Do NOT attach onSnapshot to save free-tier limits
-    }
-
+  const syncCollection = (collectionName) => {
     const colRef = collection(db, collectionName, userId, 'items');
     const unsub = onSnapshot(colRef, async (snapshot) => {
-      const localItemsStr = localStorage.getItem(storageKey);
-      let localItems = localItemsStr ? JSON.parse(localItemsStr) : [];
       let changed = false;
-
-      snapshot.forEach(docSnap => {
-        const cloudData = docSnap.data();
+      const promises = [];
+      
+      snapshot.docChanges().forEach(change => {
+        const cloudData = change.doc.data();
         
         // Loop Prevention
         if (cloudData.updatedByDeviceId === deviceId && cloudData.source === 'localUserAction') {
@@ -2843,33 +2842,31 @@ export const startRealTimeSync = (userId) => {
         }
 
         cloudData.syncStatus = 'synced';
-        const localIdx = localItems.findIndex(i => i.id === cloudData.id);
-
-        if (localIdx === -1) {
-          localItems.push(cloudData);
-          changed = true;
-        } else {
-          if (cloudWins(localItems[localIdx], cloudData)) {
-            localItems[localIdx] = cloudData;
-            changed = true;
-          }
+        
+        if (change.type === 'added' || change.type === 'modified') {
+           promises.push(BillQyroDB.put(collectionName, cloudData));
+           changed = true;
+        }
+        if (change.type === 'removed') {
+           promises.push(BillQyroDB.delete(collectionName, cloudData.id));
+           changed = true;
         }
       });
 
       if (changed) {
-        localStorage.setItem(storageKey, JSON.stringify(localItems));
-        await BillQyroDB.clear(collectionName);
-        for (const item of localItems) {
-          await BillQyroDB.put(collectionName, item);
-        }
+        await Promise.all(promises);
         window.dispatchEvent(new CustomEvent('billqyro:data-updated', { detail: { collectionName } }));
+        // Also legacy fallback
+        window.dispatchEvent(new CustomEvent('billqyro_sync'));
       }
     });
     syncEngineUnsubscribes.push(unsub);
   };
 
-  // syncCollection('invoices', KEYS.INVOICES); // Disabled for free-tier optimization
-  // syncCollection('customers', KEYS.CUSTOMERS); // Disabled for free-tier optimization
+  syncCollection('invoices');
+  syncCollection('customers');
+  syncCollection('products');
+  syncCollection('expenses');
   
   // Process any offline queue on start
   flushSyncQueue();

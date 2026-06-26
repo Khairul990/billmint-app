@@ -1,100 +1,48 @@
 const fs = require('fs');
-let code = fs.readFileSync('src/utils/storage.js', 'utf8');
+const path = require('path');
 
-const regex = /export const syncFromFirestore = async \(\) => \{[\s\S]*?export const getStorageUsage = \(\) => \{/m;
-const replacement = `export const syncFromFirestore = async () => {
-  if (!firebaseReady) {
-    console.log("Firebase not enabled, skipping Firestore sync.");
-    return null;
+const filePath = path.join(__dirname, 'src', 'services', 'dbEngine.js');
+let code = fs.readFileSync(filePath, 'utf8');
+
+// Update updateLocalCache
+code = code.replace(
+  /export const updateLocalCache = \(key, items\) => \{[\s\S]*?localStorage\.setItem\(targetKey, JSON\.stringify\(sorted\)\);\n\};/g,
+  `export const updateLocalCache = (key, items) => {
+  let targetKey = key;
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    if (key.includes('invoices')) targetKey = 'billqyro_demo_invoices';
+    else if (key.includes('customers')) targetKey = 'billqyro_demo_customers';
+    else if (key.includes('products')) targetKey = 'billqyro_demo_products';
+    else if (key.includes('expenses')) targetKey = 'billqyro_demo_expenses';
+    else if (key.includes('settings')) targetKey = 'billqyro_demo_settings';
+  } else {
+    // Enforce Phase 2 Architecture: localStorage is ONLY for Settings
+    if (key !== KEYS.SETTINGS && !key.includes('settings') && !key.includes('platform')) {
+      return;
+    }
   }
-  try {
-    const userId = getFirebaseUserId();
-    console.log(\`Syncing data from Firestore for user: \${userId}\`);
 
-    // Sync settings
-    const settingsDoc = await getDoc(doc(db, 'settings', userId));
-    if (settingsDoc.exists()) {
-      localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settingsDoc.data()));
-    }
+  const sorted = [...items].sort((a,b) => {
+    const da = a.createdAt ? new Date(a.createdAt) : 0;
+    const db = b.createdAt ? new Date(b.createdAt) : 0;
+    return db - da;
+  });
+  localStorage.setItem(targetKey, JSON.stringify(sorted));
+};`
+);
 
-    // Sync customers
-    const customersSnap = await getDocs(collection(db, 'customers', userId, 'items'));
-    const customers = [];
-    customersSnap.forEach(docSnap => {
-      customers.push(docSnap.data());
-    });
-    if (customers.length > 0) {
-      for(const c of customers) await BillQyroDB.put('customers', c);
-      updateLocalCache(KEYS.CUSTOMERS, customers);
-    }
+// Fix Getters: Remove localStorage fallback at the end of try-catch blocks
+const models = ['INVOICES', 'CUSTOMERS', 'PRODUCTS', 'EXPENSES'];
 
-    // Sync invoices
-    const invoicesMap = new Map();
-    
-    try {
-      const snap1 = await getDocs(collection(db, 'invoices', userId, 'items'));
-      snap1.forEach(docSnap => invoicesMap.set(docSnap.id, docSnap.data()));
-    } catch(e) { /* ignore */ }
-    
-    try {
-      const snap2 = await getDocs(collection(db, 'invoice', userId, 'items'));
-      snap2.forEach(docSnap => invoicesMap.set(docSnap.id, docSnap.data()));
-    } catch(e) { /* ignore */ }
-    
-    try {
-      const snap3 = await getDocs(collection(db, 'users', userId, 'invoices'));
-      snap3.forEach(docSnap => invoicesMap.set(docSnap.id, docSnap.data()));
-    } catch(e) { /* ignore */ }
+models.forEach(model => {
+  const localVar = `const localData = JSON.parse(localStorage.getItem(KEYS.${model})) || [];`;
+  const returnLine = `return includeDeleted ? localData : localData.filter(`;
+  
+  // Regex to match the catch block and the localData fallback
+  const regex = new RegExp(`\\} catch\\(e\\) \\{\\}\\s*const localData = JSON\\.parse\\(localStorage\\.getItem\\(KEYS\\.${model}\\)\\) \\|\\| \\[\\];\\s*return includeDeleted \\? localData : localData\\.filter\\([\\s\\S]*?\\);`, 'g');
+  
+  code = code.replace(regex, `} catch(e) {}\n  return [];`);
+});
 
-    const invoices = Array.from(invoicesMap.values());
-    if (invoices.length > 0) {
-      for(const i of invoices) await BillQyroDB.put('invoices', i);
-      updateLocalCache(KEYS.INVOICES, invoices);
-    }
-
-    // Sync products
-    const productsSnap = await getDocs(collection(db, 'products', userId, 'items'));
-    const products = [];
-    productsSnap.forEach(docSnap => {
-      products.push(docSnap.data());
-    });
-    if (products.length > 0) {
-      for(const p of products) await BillQyroDB.put('products', p);
-      updateLocalCache(KEYS.PRODUCTS, products);
-    }
-
-    // Sync expenses
-    const expensesSnap = await getDocs(collection(db, 'expenses', userId, 'items'));
-    const expenses = [];
-    expensesSnap.forEach(docSnap => {
-      expenses.push(docSnap.data());
-    });
-    if (expenses.length > 0) {
-      for(const e of expenses) await BillQyroDB.put('expenses', e);
-      updateLocalCache(KEYS.EXPENSES, expenses);
-    }
-
-    // Sync subscription
-    const subDoc = await getDoc(doc(db, 'subscription', userId));
-    if (subDoc.exists()) {
-      localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(subDoc.data()));
-    }
-
-    return {
-      settings: JSON.parse(localStorage.getItem(KEYS.SETTINGS)),
-      customers: JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [],
-      products: JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [],
-      invoices: JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [],
-      expenses: JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [],
-      subscription: JSON.parse(localStorage.getItem(KEYS.SUBSCRIPTION))
-    };
-  } catch (error) {
-    console.error("Error syncing from Firestore:", error);
-    throw error;
-  }
-};
-
-export const getStorageUsage = () => {`;
-
-code = code.replace(regex, replacement);
-fs.writeFileSync('src/utils/storage.js', code);
+fs.writeFileSync(filePath, code);
+console.log('Successfully refactored dbEngine.js to deprecate localStorage for data models.');

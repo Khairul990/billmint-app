@@ -5,21 +5,15 @@ import { Search, Bell, Settings as SettingsIcon, Sparkles, ShieldCheck, User, Br
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import Logo from './Logo';
 import { getSettings, saveSettings } from '../services/dbEngine';
-import { updateFaviconForTheme } from '../utils/themeIcon';
 import { flushSyncQueue } from '../services/syncEngine';
 import AnimatedBorderTrail from './AnimatedBorderTrail';
 import { AnimatedThemeToggler } from './AnimatedThemeToggler';
 import { getNotifications, markNotificationAsRead, clearAllNotifications } from '../services/notificationsService';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncSource, syncStatus }) => {
-  const [themeColor, setThemeColor] = useState(() => {
-    const preset = businessSettings?.themeColor || businessSettings?.themePreset || localStorage.getItem('billqyro_theme_color') || 'light';
-    return preset === 'dark' ? 'light' : preset;
-  });
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const isDark = businessSettings?.darkMode ?? (businessSettings?.themePreset === 'dark') ?? (localStorage.getItem('billqyro_dark_mode') === 'true');
-    return isDark;
-  });
+  const { themeState } = useTheme();
+  const isDarkMode = themeState.darkMode;
 
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
@@ -61,45 +55,18 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  useEffect(() => {
-    if (businessSettings?.themeColor || businessSettings?.themePreset) {
-      const preset = businessSettings.themeColor || businessSettings.themePreset;
-      setThemeColor(preset === 'dark' ? 'light' : preset);
-    }
-    if (businessSettings?.darkMode !== undefined) {
-      setIsDarkMode(businessSettings.darkMode);
-    } else if (businessSettings?.themePreset === 'dark') {
-      setIsDarkMode(true);
-    }
-  }, [businessSettings?.themeColor, businessSettings?.darkMode, businessSettings?.themePreset]);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', themeColor);
-    updateFaviconForTheme(themeColor);
-    localStorage.setItem('billqyro_theme_color', themeColor);
-  }, [themeColor]);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('billqyro_dark_mode', isDarkMode);
-  }, [isDarkMode]);
-
   const toggleTheme = () => {
-    setIsDarkMode(prev => {
-      const newDarkMode = !prev;
-      const currentSettings = getSettings() || {};
-      currentSettings.darkMode = newDarkMode;
-      if (currentSettings.themePreset === 'dark') {
-        currentSettings.themePreset = 'light';
-      }
-      saveSettings(currentSettings);
-      window.dispatchEvent(new CustomEvent('billqyro_sync'));
-      return newDarkMode;
-    });
+    const newDarkMode = !isDarkMode;
+    const currentSettings = getSettings() || {};
+    currentSettings.darkMode = newDarkMode;
+    if (currentSettings.themePreset === 'dark') {
+      currentSettings.themePreset = 'light';
+    }
+    saveSettings(currentSettings);
+    
+    // Broadcast setting update for ThemeContext
+    window.dispatchEvent(new CustomEvent('billqyro:settings-updated', { detail: currentSettings }));
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
   };
 
   const getPageTitle = (tab) => {

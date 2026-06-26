@@ -131,83 +131,14 @@ const SettingsStudioV2 = ({
   const [lastSaved, setLastSaved] = useState(null);
   const isInitialized = useRef(false);
 
-  // Business states
-  const [businessName, setBusinessName] = useState('');
-  const [logoUrl, setLogoUrl] = useState('');
-  const [ownerName, setOwnerName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
-  const [gstNumber, setGstNumber] = useState('');
-  const [geminiApiKey, setGeminiApiKey] = useState('');
-  const [twilioAccountSid, setTwilioAccountSid] = useState('');
-  const [twilioAuthToken, setTwilioAuthToken] = useState('');
 
-  // Regional states
-  const [country, setCountry] = useState('India');
-  const [language, setLanguage] = useState('English');
-  const [currency, setCurrency] = useState('\u20B9');
-  const [currencyCode, setCurrencyCode] = useState('INR');
-  const [taxLabel, setTaxLabel] = useState('GST');
-  const [vatTax, setVatTax] = useState('');
-  const [dateFormat, setDateFormat] = useState('DD/MM/YYYY');
-  const [numberFormat, setNumberFormat] = useState('Indian');
-
-  // Payment states
-  const [upiId, setUpiId] = useState('');
-  const [bkashNumber, setBkashNumber] = useState('');
-  const [nagadNumber, setNagadNumber] = useState('');
-  const [rocketNumber, setRocketNumber] = useState('');
-  const [payeeName, setPayeeName] = useState('');
-  const [paymentNote, setPaymentNote] = useState('');
-  const [paymentQrEnabled, setPaymentQrEnabled] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('UPI');
-  const [customPaymentLink, setCustomPaymentLink] = useState('');
-  const [showQrInPdf, setShowQrInPdf] = useState(true);
-  const [showQrInPreview, setShowQrInPreview] = useState(true);
-
-  // Invoice states
-  const [invoicePrefix, setInvoicePrefix] = useState('INV-');
-  const [defaultTax, setDefaultTax] = useState(18);
-  const [defaultNotes, setDefaultNotes] = useState('');
-  const [terms, setTerms] = useState('');
-  const [pdfFooter, setPdfFooter] = useState('');
-  const [brandColor, setBrandColor] = useState('#14b8a6');
-  const [invoiceTemplate, setInvoiceTemplate] = useState('modern');
-  const [defaultBillingTemplate, setDefaultBillingTemplate] = useState('custom');
-
-  // Theme states
-  const [themePreset, setThemePreset] = useState('light');
-  const [themeId, setThemeId] = useState('obsidian-gold');
-  const [darkMode, setDarkMode] = useState(false);
-  const [cornerRadius, setCornerRadius] = useState(12);
-  const [shadowIntensity, setShadowIntensity] = useState(50);
-  const [animationSpeed, setAnimationSpeed] = useState(1);
-  const [fontDensity, setFontDensity] = useState('normal');
-
-  // Live Link states
-  const [enableLiveLink, setEnableLiveLink] = useState(true);
-  const [showPaymentQrOnLink, setShowPaymentQrOnLink] = useState(true);
-  const [allowPdfDownload, setAllowPdfDownload] = useState(true);
-  const [allowPaymentProofSubmit, setAllowPaymentProofSubmit] = useState(true);
-  const [showPaidDueAmount, setShowPaidDueAmount] = useState(true);
-  const [showContactButton, setShowContactButton] = useState(true);
-  const [requireTransactionId, setRequireTransactionId] = useState(true);
-  const [requirePaymentScreenshot, setRequirePaymentScreenshot] = useState(false);
-
-  // Notification states
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [whatsappNotifications, setWhatsappNotifications] = useState(true);
-  const [dueDateReminders, setDueDateReminders] = useState(true);
-  const [paymentConfirmation, setPaymentConfirmation] = useState(true);
-  const [marketingEmails, setMarketingEmails] = useState(false);
-  const [securityAlerts, setSecurityAlerts] = useState(true);
-
-  const [isDragging, setIsDragging] = useState(false);
-  const [dbProvider, setDbProvider] = useState(() => localStorage.getItem('billmint_db_provider') || 'firebase');
-
+  const [formData, setFormData] = useState({});
+  const updateField = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setIsDirty(true);
+  };
   const session = getAuthSession();
+
   const loggedInEmail = session?.userEmail || 'unknown';
   const isOnline = navigator.onLine;
   const firebaseStatus = firebaseReady && isOnline ? 'connected' : firebaseReady && !isOnline ? 'offline' : 'not-configured';
@@ -322,10 +253,10 @@ const SettingsStudioV2 = ({
   }, [darkMode]);
 
   const handleToggleDark = useCallback(() => {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
-    setThemePreset(newMode ? 'dark' : 'light');
-    applyTheme(themeId, null, newMode);
+    const newMode = !formData.darkMode;
+    updateField('darkMode', newMode);
+    updateField('themePreset', newMode ? 'dark' : 'light');
+    applyTheme(formData.themeId, null, newMode);
   }, [darkMode, themeId]);
 
   // Search
@@ -357,14 +288,14 @@ const SettingsStudioV2 = ({
   // Save
   const handleSave = (e) => {
     if (e) e.preventDefault();
-    if (!businessName) { toast.error('Please specify a Business Name.'); return; }
+    if (!formData.businessName) { toast.error('Please specify a Business Name.'); return; }
     setIsSaving(true);
     setSaveState('saving');
 
-    if (paymentQrEnabled) {
-      if (paymentMethod === 'UPI' && !upiId.trim()) { toast.error('Please specify your UPI ID.'); setIsSaving(false); setSaveState('idle'); return; }
-      if (paymentMethod === 'bKash' && !bkashNumber.trim()) { toast.error('Please specify your bKash Number.'); setIsSaving(false); setSaveState('idle'); return; }
-      if (paymentMethod === 'Nagad' && !nagadNumber.trim()) { toast.error('Please specify your Nagad Number.'); setIsSaving(false); setSaveState('idle'); return; }
+    if (formData.paymentQrEnabled) {
+      if (formData.paymentMethod === 'UPI' && !formData.upiId.trim()) { toast.error('Please specify your UPI ID.'); setIsSaving(false); setSaveState('idle'); return; }
+      if (formData.paymentMethod === 'bKash' && !formData.bkashNumber.trim()) { toast.error('Please specify your bKash Number.'); setIsSaving(false); setSaveState('idle'); return; }
+      if (formData.paymentMethod === 'Nagad' && !formData.nagadNumber.trim()) { toast.error('Please specify your Nagad Number.'); setIsSaving(false); setSaveState('idle'); return; }
     }
 
     setTimeout(() => {

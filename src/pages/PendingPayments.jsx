@@ -59,25 +59,30 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
         });
 
         if (payment.invoiceId) {
-          const publicInvRef = doc(db, 'public_invoices', payment.invoiceId);
-          const pInvDoc = await transaction.get(publicInvRef);
-          if (pInvDoc.exists()) {
-            const pData = pInvDoc.data();
-            const grandTotal = pData.grandTotal || 0;
-            const currentPaid = parseFloat(pData.amountPaid) || 0;
-            const paymentAmount = parseFloat(payment.amount) || 0;
-            const newPaid = currentPaid + paymentAmount;
-            const newBalance = Math.max(0, grandTotal - newPaid);
-            let newStatus = pData.paymentStatus;
-            if (newBalance <= 0) newStatus = 'Paid';
-            else if (newPaid > 0) newStatus = 'Partially Paid';
-            
-            transaction.update(publicInvRef, { 
-              paymentStatus: newStatus,
-              status: newStatus,
-              amountPaid: newPaid,
-              balanceDue: newBalance
-            });
+          const localInvoices = await getInvoices();
+          const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
+          
+          if (existingInvoice && existingInvoice.publicToken) {
+            const publicInvRef = doc(db, 'publicInvoices', existingInvoice.publicToken);
+            const pInvDoc = await transaction.get(publicInvRef);
+            if (pInvDoc.exists()) {
+              const pData = pInvDoc.data();
+              const grandTotal = pData.grandTotal || 0;
+              const currentPaid = parseFloat(pData.amountPaid) || 0;
+              const paymentAmount = parseFloat(payment.amount) || 0;
+              const newPaid = currentPaid + paymentAmount;
+              const newBalance = Math.max(0, grandTotal - newPaid);
+              let newStatus = pData.paymentStatus;
+              if (newBalance <= 0) newStatus = 'Paid';
+              else if (newPaid > 0) newStatus = 'Partially Paid';
+              
+              transaction.update(publicInvRef, { 
+                paymentStatus: newStatus,
+                status: newStatus,
+                amountPaid: newPaid,
+                balanceDue: newBalance
+              });
+            }
           }
         }
       });
@@ -147,26 +152,31 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
         });
 
         if (payment.invoiceId) {
-          const publicInvRef = doc(db, 'public_invoices', payment.invoiceId);
-          const pInvDoc = await transaction.get(publicInvRef);
-          if (pInvDoc.exists()) {
-            const pData = pInvDoc.data();
-            const grandTotal = pData.grandTotal || 0;
-            const currentPaid = parseFloat(pData.amountPaid) || 0;
-            const paymentAmount = parseFloat(payment.amount) || 0;
-            const revertedPaid = Math.max(0, currentPaid - paymentAmount);
-            const revertedBalance = Math.max(0, grandTotal - revertedPaid);
-            let revertedStatus = pData.paymentStatus;
-            if (revertedBalance <= 0 && revertedPaid > 0) revertedStatus = 'Paid';
-            else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
-            else revertedStatus = 'Partially Paid';
-
-            transaction.update(publicInvRef, {
-              paymentStatus: revertedStatus,
-              status: revertedStatus,
-              amountPaid: revertedPaid,
-              balanceDue: revertedBalance
-            });
+          const localInvoices = await getInvoices();
+          const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
+          
+          if (existingInvoice && existingInvoice.publicToken) {
+            const publicInvRef = doc(db, 'publicInvoices', existingInvoice.publicToken);
+            const pInvDoc = await transaction.get(publicInvRef);
+            if (pInvDoc.exists()) {
+              const pData = pInvDoc.data();
+              const grandTotal = pData.grandTotal || 0;
+              const currentPaid = parseFloat(pData.amountPaid) || 0;
+              const paymentAmount = parseFloat(payment.amount) || 0;
+              const revertedPaid = Math.max(0, currentPaid - paymentAmount);
+              const revertedBalance = Math.max(0, grandTotal - revertedPaid);
+              let revertedStatus = pData.paymentStatus;
+              if (revertedBalance <= 0 && revertedPaid > 0) revertedStatus = 'Paid';
+              else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
+              else revertedStatus = 'Partially Paid';
+  
+              transaction.update(publicInvRef, {
+                paymentStatus: revertedStatus,
+                status: revertedStatus,
+                amountPaid: revertedPaid,
+                balanceDue: revertedBalance
+              });
+            }
           }
         }
       });
