@@ -117,7 +117,7 @@ const Landing = ({ onLoginSuccess }) => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-theme-accent opacity-[0.03] dark:opacity-[0.05] blur-[120px] rounded-full pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-6 py-16 lg:py-28 flex flex-col lg:flex-row items-center gap-12 relative z-10">
           <div className="flex-1 text-center lg:text-left space-y-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-theme-surface border border-theme-border-soft shadow-sm">
+            <motion.div initial={{ rotate: -10 }} animate={{ rotate: 0 }} transition={{ duration: 0.8, ease: "easeOut" }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-theme-surface border border-theme-border-soft shadow-sm">
               <span className="w-2 h-2 rounded-full bg-theme-accent animate-pulse"></span>
               <span className="badge-premium text-[10px] tracking-wide">The future of billing is here</span>
             </motion.div>
@@ -195,7 +195,7 @@ const Landing = ({ onLoginSuccess }) => {
       <motion.section id="features" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Powerful Features</span>
+            <motion.span animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Powerful Features</motion.span>
             <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Everything you need to run your billing.</h2>
             <p className="text-theme-muted font-medium max-w-2xl mx-auto">Powerful features wrapped in an elegant interface, designed specifically for modern teams and growing businesses.</p>
           </div>
@@ -215,7 +215,7 @@ const Landing = ({ onLoginSuccess }) => {
       <motion.section id="screenshots" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Dashboard Preview</span>
+            <motion.span animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Dashboard Preview</motion.span>
             <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">See BillQyro in <span className="text-gradient-premium">action.</span></h2>
             <p className="text-theme-muted font-medium max-w-2xl mx-auto">A clean, powerful dashboard that puts you in control of your entire billing workflow.</p>
           </div>
@@ -281,7 +281,7 @@ const Landing = ({ onLoginSuccess }) => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="flex-1">
-              <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Live Invoice Link</span>
+              <motion.span animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Live Invoice Link</motion.span>
               <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Share invoices with a <span className="text-gradient-premium">secure link.</span></h2>
               <p className="text-theme-muted font-medium text-base leading-relaxed mb-8 max-w-xl">Customers can view their invoice online, scan QR codes to pay, and submit payment proof \u2014 all without creating an account.</p>
               <div className="space-y-4">
@@ -356,7 +356,7 @@ const Landing = ({ onLoginSuccess }) => {
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="flex-1 order-1 lg:order-2">
-              <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Premium PDF</span>
+              <motion.span animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Premium PDF</motion.span>
               <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Professional <span className="text-gradient-premium">A4/A5 PDF</span> invoices.</h2>
               <p className="text-theme-muted font-medium text-base leading-relaxed mb-8 max-w-xl">Generate beautiful PDF invoices with your logo, business details, QR code, and category-specific layouts. Ready to print or share.</p>
               <div className="space-y-4">
@@ -378,7 +378,7 @@ const Landing = ({ onLoginSuccess }) => {
       <motion.section id="templates" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Category Templates</span>
+            <motion.span animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Category Templates</motion.span>
             <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Templates for every <span className="text-gradient-premium">business type.</span></h2>
             <p className="text-theme-muted font-medium max-w-2xl mx-auto">Pre-built templates with custom fields tailored for each industry.</p>
           </div>
@@ -418,7 +418,7 @@ const Landing = ({ onLoginSuccess }) => {
       <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Testimonials</span>
+            <motion.span animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Testimonials</motion.span>
             <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Trusted by <span className="text-gradient-premium">business owners</span></h2>
             <p className="text-theme-muted font-medium max-w-2xl mx-auto">See what our customers say about their BillQyro experience.</p>
           </div>
@@ -452,7 +452,7 @@ const Landing = ({ onLoginSuccess }) => {
       <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Why Choose BillQyro</span>
+            <motion.span animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Why Choose BillQyro</motion.span>
             <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Built for <span className="text-gradient-premium">growing businesses</span></h2>
             <p className="text-theme-muted font-medium max-w-2xl mx-auto">Everything you need to run your billing operations smoothly.</p>
           </div>
@@ -481,13 +481,13 @@ const Landing = ({ onLoginSuccess }) => {
       <motion.section id="pricing" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Simple Pricing</span>
+            <motion.span animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Simple Pricing</motion.span>
             <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Transparent plans for <span className="text-gradient-premium">every business.</span></h2>
             <p className="text-theme-muted font-medium max-w-2xl mx-auto">Start free, upgrade when you need more. No hidden fees.</p>
           </div>
           <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
             {pricingPlans.map((plan, idx) => (
-              <motion.div key={idx} variants={staggerItem} className={`relative p-6 sm:p-8 rounded-3xl border-2 transition-all duration-300 ${
+              <motion.div key={idx} variants={staggerItem} whileHover={{ scale: 1.04, y: -5 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className={`relative p-6 sm:p-8 rounded-3xl border-2 transition-all duration-300 ${
                 plan.popular ? 'border-theme-accent bg-theme-accent/5 shadow-xl shadow-theme-accent/10 scale-[1.02] md:scale-105' : 'card-premium hover:border-theme-accent/30'
               }`}>
                 {plan.popular && (
