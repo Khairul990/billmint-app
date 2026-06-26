@@ -90,6 +90,7 @@ export const useThemeEngine = (businessSettings) => {
       
       root.setAttribute('data-theme', themeName);
       updateFaviconForTheme(themeName);
+      localStorage.setItem('billqyro_admin_default_theme', themeName);
     }
   }, [businessSettings?.themeColor, businessSettings?.brandColor, businessSettings?.themeType, businessSettings?.plan]);
 };

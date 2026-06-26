@@ -4,6 +4,7 @@ import PdfTemplateStudio from './PdfTemplateStudio';
 import LiveLinkTemplateStudio from './LiveLinkTemplateStudio';
 import DesignStudio from './DesignStudio';
 import BackupRestore from './BackupRestore';
+import TemplateMarketplace from './TemplateMarketplace';
 
 import { motion } from 'framer-motion';
 import { pageVariants } from '../utils/animations';
@@ -210,51 +211,40 @@ const getThemePreviewColors = (preset) => {
 };
 
 const SETTINGS_GROUPS = [
-  {
-    group: 'General',
-    items: [
-      { id: 'business', label: 'Business Profile', icon: Building2, description: 'Company name, logo, owner, contact info' },
-      { id: 'workspace', label: 'Workspace', icon: Globe, description: 'Country, language, currency, app install' },
-      { id: 'team', label: 'Team & Access', icon: Users, description: 'Invite cashiers, manage permissions' }
-    ]
-  },
-  {
-    group: 'Billing',
-    items: [
-      { id: 'payment', label: 'Payment Settings', icon: QrCode, description: 'UPI, bKash, Nagad, bank details, QR codes' },
-      { id: 'collection', label: 'Collection Settings', icon: CircleDollarSign, description: 'Invoice prefs, live links, payment proof' },
-      { id: 'subscription', label: 'Subscription', icon: CreditCard, description: 'Plan, billing history, upgrade' }
-    ]
-  },
-  {
-    group: 'Design',
-    items: [
-      { id: 'themes', label: 'Themes', icon: Palette, description: 'Brand colors, dark mode, presets' },
-      { id: 'templates', label: 'PDF Templates', icon: LayoutTemplate, description: 'Invoice layouts, PDF fields' },
-      { id: 'live-links', label: 'Live Link Templates', icon: Link, description: 'Customer portal appearance' }
-    ]
-  },
-  {
-    group: 'Communication',
-    items: [
-      { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Email, WhatsApp, reminders, alerts' },
-      { id: 'integrations', label: 'Integrations', icon: Puzzle, description: 'AI, Twilio, third-party services' }
-    ]
-  },
-  {
-    group: 'Security',
-    items: [
-      { id: 'security', label: 'Security', icon: Shield, description: 'API keys, session, database provider' },
-      { id: 'backup', label: 'Backup & Restore', icon: Database, description: 'Export, restore, storage, reset' }
-    ]
-  },
-  {
-    group: 'System',
-    items: [
-      { id: 'advanced', label: 'Advanced', icon: Settings2, description: 'Team, UX, danger zone tools' }
-    ]
-  }
-];
+    {
+      group: 'Configuration',
+      items: [
+        { id: 'general', label: 'General', icon: Settings2, description: 'Basic settings' },
+        { id: 'business', label: 'Business Profile', icon: Building2, description: 'Company details' },
+        { id: 'workspace', label: 'Workspace', icon: Globe, description: 'Regional settings' }
+      ]
+    },
+    {
+      group: 'Studios',
+      items: [
+        { id: 'appearance', label: 'Appearance', icon: Palette, description: 'Themes and colors' },
+        { id: 'pdf-studio', label: 'PDF Studio', icon: LayoutTemplate, description: 'Invoice PDF layouts' },
+        { id: 'livelink-studio', label: 'Live Link Studio', icon: Link, description: 'Customer portal' },
+        { id: 'template-studio', label: 'Template Studio', icon: ImageIcon, description: 'Template marketplace' }
+      ]
+    },
+    {
+      group: 'Billing & Alerts',
+      items: [
+        { id: 'payment', label: 'Payments', icon: QrCode, description: 'Payment methods' },
+        { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Reminders and alerts' },
+        { id: 'subscription', label: 'Subscription', icon: CreditCard, description: 'Plan and billing' }
+      ]
+    },
+    {
+      group: 'System',
+      items: [
+        { id: 'security', label: 'Security', icon: Shield, description: 'Access control' },
+        { id: 'backup', label: 'Backup & Restore', icon: Database, description: 'Data management' },
+        { id: 'advanced', label: 'Advanced', icon: Settings2, description: 'Danger zone' }
+      ]
+    }
+  ];
 
 const ALL_CATEGORY_IDS = ['business', 'workspace', 'team', 'payment', 'collection', 'subscription', 'themes', 'templates', 'live-links', 'notifications', 'integrations', 'security', 'backup', 'advanced'];
 
@@ -992,48 +982,145 @@ const Settings = ({
         </div>
       </div>
 
-      {/* Horizontal Pill Navigation */}
-      <div className="mb-8">
-        <div className="glass rounded-2xl p-1.5 border border-theme-border-soft overflow-x-auto hide-scrollbar">
-          <div className="flex gap-2 min-w-max pb-1">
-            {filteredGroups.flatMap(g => g.items).map((cat) => {
-              const Icon = cat.icon;
-              const isSelected = effectiveActiveCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    if (['themes', 'templates', 'live-links', 'subscription'].includes(cat.id)) {
-                      if (setCurrentTab) {
-                        const tabMap = {
-                          'themes': 'design-studio',
-                          'templates': 'pdf-templates',
-                          'live-links': 'live-link-templates',
-                          'subscription': 'subscription'
-                        };
-                        setCurrentTab(tabMap[cat.id]);
-                      }
-                    } else {
-                      setActiveCategory(cat.id);
-                    }
-                  }}
-                  className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-300 whitespace-nowrap ${
-                    isSelected
-                      ? 'bg-theme-accent text-white shadow-md shadow-theme-accent/30 scale-105'
-                      : 'text-theme-muted hover:text-theme-primary hover:bg-theme-card/80 border border-transparent hover:border-theme-border-soft'
-                  }`}
-                >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  {cat.label}
-                </button>
-              );
-            })}
+      
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Navigation Sidebar */}
+          <div className="w-full lg:w-72 shrink-0">
+            <div className="glass rounded-3xl p-4 border border-theme-border-soft shadow-sm sticky top-24 space-y-6">
+              {filteredGroups.map((group, idx) => (
+                <div key={idx} className="space-y-1">
+                  <h4 className="text-[9px] font-black uppercase tracking-widest text-theme-muted px-3 mb-2">{group.group}</h4>
+                  {group.items.map((cat) => {
+                    const Icon = cat.icon;
+                    const isSelected = effectiveActiveCategory === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => setActiveCategory(cat.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 ${
+                          isSelected
+                            ? 'bg-[image:var(--accent-gradient)] text-white shadow-md'
+                            : 'text-theme-muted hover:text-theme-primary hover:bg-theme-surface border border-transparent hover:border-theme-border-soft'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 shrink-0" />
+                        {cat.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Content Area */}
-      <div className="w-full space-y-6">
+          {/* Right Content Area */}
+          <div className="flex-1 min-w-0 space-y-6 overflow-hidden">
+            {/* ============ GENERAL ============ */}
+            {effectiveActiveCategory === 'general' && (
+              <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+                <div className="section-header border-b border-theme-border-soft pb-4">
+                  <h2 className="section-header-title">General Settings</h2>
+                  <p className="section-header-subtitle">Basic configuration for your BillQyro experience.</p>
+                </div>
+                <div className="bg-theme-app border border-theme-border-soft rounded-2xl p-6">
+                  <p className="text-sm text-theme-muted">Welcome to your Control Center. Use the sidebar to navigate all settings without leaving this page.</p>
+                </div>
+              </div>
+            )}
+  
+            {effectiveActiveCategory === 'security' && (
+              <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+                 <div className="section-header border-b border-theme-border-soft pb-4">
+                    <h2 className="section-header-title">Security</h2>
+                    <p className="section-header-subtitle">Manage your account security and authentication.</p>
+                 </div>
+                 <div className="bg-theme-app border border-theme-border-soft rounded-2xl p-6">
+                   <p className="text-xs text-theme-muted">Your account is secured by Google Firebase Auth. Password management is handled by your Google account.</p>
+                 </div>
+              </div>
+            )}
+    
+            {effectiveActiveCategory === 'notifications' && (
+              <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+                 <div className="section-header border-b border-theme-border-soft pb-4">
+                    <h2 className="section-header-title">Notifications</h2>
+                    <p className="section-header-subtitle">Manage how you receive alerts and reminders.</p>
+                 </div>
+                 <div className="space-y-4">
+                    <p className="text-xs text-theme-muted">Notification settings are synced with your preferences automatically.</p>
+                 </div>
+              </div>
+            )}
+    
+            {effectiveActiveCategory === 'appearance' && (
+              <div className="animate-fadeIn"><DesignStudio setCurrentTab={(tab) => {
+  const map = {
+    'themes': 'appearance',
+    'pdf-templates': 'pdf-studio',
+    'live-link-templates': 'livelink-studio',
+    'marketplace': 'template-studio',
+    'settings': 'general',
+    'dashboard': 'dashboard'
+  };
+  if (tab === 'dashboard') {
+    if (setCurrentTab) setCurrentTab('dashboard');
+  } else {
+    setActiveCategory(map[tab] || 'general');
+  }
+}} businessSettings={settings} setSettings={onSave} /></div>
+            )}
+            {effectiveActiveCategory === 'pdf-studio' && (
+              <div className="animate-fadeIn"><PdfTemplateStudio setCurrentTab={(tab) => {
+  const map = {
+    'themes': 'appearance',
+    'pdf-templates': 'pdf-studio',
+    'live-link-templates': 'livelink-studio',
+    'marketplace': 'template-studio',
+    'settings': 'general',
+    'dashboard': 'dashboard'
+  };
+  if (tab === 'dashboard') {
+    if (setCurrentTab) setCurrentTab('dashboard');
+  } else {
+    setActiveCategory(map[tab] || 'general');
+  }
+}} businessSettings={settings} setSettings={onSave} /></div>
+            )}
+            {effectiveActiveCategory === 'livelink-studio' && (
+              <div className="animate-fadeIn"><LiveLinkTemplateStudio setCurrentTab={(tab) => {
+  const map = {
+    'themes': 'appearance',
+    'pdf-templates': 'pdf-studio',
+    'live-link-templates': 'livelink-studio',
+    'marketplace': 'template-studio',
+    'settings': 'general',
+    'dashboard': 'dashboard'
+  };
+  if (tab === 'dashboard') {
+    if (setCurrentTab) setCurrentTab('dashboard');
+  } else {
+    setActiveCategory(map[tab] || 'general');
+  }
+}} businessSettings={settings} setSettings={onSave} /></div>
+            )}
+            {effectiveActiveCategory === 'template-studio' && (
+              <div className="animate-fadeIn"><TemplateMarketplace setCurrentTab={(tab) => {
+  const map = {
+    'themes': 'appearance',
+    'pdf-templates': 'pdf-studio',
+    'live-link-templates': 'livelink-studio',
+    'marketplace': 'template-studio',
+    'settings': 'general',
+    'dashboard': 'dashboard'
+  };
+  if (tab === 'dashboard') {
+    if (setCurrentTab) setCurrentTab('dashboard');
+  } else {
+    setActiveCategory(map[tab] || 'general');
+  }
+}} businessSettings={settings} setSettings={onSave} /></div>
+            )}
+    
 
           {/* ============ BUSINESS ============ */}
           {effectiveActiveCategory === 'business' && (
@@ -1930,6 +2017,7 @@ const Settings = ({
           )}
 
         </div>{/* END content area */}
+      </div>{/* END flex layout */}
       {/* Reset All Data Modal */}
       {showResetModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
