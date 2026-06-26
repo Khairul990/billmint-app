@@ -58,14 +58,6 @@ export default defineConfig(({ mode }) => ({
     },
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'firebase-vendor': ['firebase/app', 'firebase/firestore', 'firebase/auth'],
-          'ui-vendor': ['lucide-react', 'framer-motion', 'react-hot-toast'],
-          'chart-vendor': ['recharts'],
-          'pdf-vendor': ['@react-pdf/renderer'],
-          'dnd-vendor': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities']
-        },
         inlineDynamicImports: false,
         hoistTransitiveImports: true
       }
