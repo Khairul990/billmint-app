@@ -1694,7 +1694,7 @@ export const getInvoices = async (includeDeleted = false) => {
   return includeDeleted ? localData : localData.filter(inv => !inv.isDeleted);
 };
 
-const generateSecureToken = () => {
+export const generateSecureToken = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let token = '';
   for (let i = 0; i < 16; i++) {
@@ -2048,42 +2048,12 @@ export const ensureInvoicePublicToken = async (invoice) => {
   const invoiceId = invoice.id || invoice._id;
   if (!invoiceId) return null;
 
-  // Fast path: token already exists and is valid — return immediately
   if (invoice.publicToken && invoice.publicToken !== 'undefined' && invoice.publicToken !== 'null' && invoice.publicToken !== '') {
     return invoice.publicToken;
   }
 
-  let token = invoice.publicToken;
-  if (!token || token === 'undefined' || token === 'null' || token === '') {
-    token = generateSecureToken();
-  }
-
-  // Save back to local storage invoices list
-  const invoices = await getInvoices();
-  const idx = invoices.findIndex(inv => inv.id === invoiceId);
-  if (idx !== -1) {
-    invoices[idx] = { ...invoices[idx], publicToken: token };
-    updateLocalCache(KEYS.INVOICES, invoices);
-  }
-
-  // Parallel Firestore writes
-  if (firebaseReady) {
-    try {
-      const publicPayload = { ...invoice, publicToken: token };
-      const userId = getRealUserId();
-      const writes = [firestoreSave('publicInvoices', token, publicPayload)];
-      if (userId && invoiceId) {
-        writes.push(setDoc(doc(db, 'invoices', userId, 'items', invoiceId), publicPayload));
-      }
-      Promise.all(writes).catch(err => console.error('[ERROR] Failed to sync publicToken to Firestore async:', err));
-    } catch (e) {
-      console.error('[ERROR] Failed to sync publicToken to Firestore in ensureInvoicePublicToken:', e);
-    }
-  }
-
-  window.dispatchEvent(new CustomEvent('billqyro_sync'));
-
-  return token;
+  // Legacy fallback
+  throw new Error("This invoice is missing a Live Link. Please open it, edit, and save it once to generate a permanent link.");
 };
 
 export const saveInvoicePublicly = async (invoice) => {
@@ -2909,4 +2879,79 @@ export const startRealTimeSync = (userId) => {
 export const stopRealTimeSync = () => {
   syncEngineUnsubscribes.forEach(unsub => unsub());
   syncEngineUnsubscribes = [];
+};
+
+export const resetInvoiceLiveLink = async (invoiceId) => {
+  const invoices = await getInvoices();
+  const idx = invoices.findIndex(inv => inv.id === invoiceId);
+  if (idx === -1) throw new Error("Invoice not found.");
+  
+  const invoice = invoices[idx];
+  const oldToken = invoice.publicToken;
+  const newToken = generateSecureToken();
+  
+  // Invalidate old token on server if possible
+  if (firebaseReady && oldToken) {
+    firestoreDelete('publicInvoices', oldToken).catch(e => console.error(e));
+    // also legacy
+    firestoreDelete('public_invoices', oldToken).catch(e => console.error(e));
+  }
+  
+  invoice.publicToken = newToken;
+  invoice.syncStatus = 'pending';
+  invoice.updatedAt = new Date().toISOString();
+  
+  invoices[idx] = invoice;
+  updateLocalCache(KEYS.INVOICES, invoices);
+  await BillQyroDB.put('invoices', invoice);
+  
+  // Audit log
+  logAudit('reset_live_link', 'invoice', invoice.id, { oldToken }, { newToken });
+  
+  // Save new to firestore via queue
+  await queueSyncTransaction('save', 'invoices', invoice.id, invoice);
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  
+  if (firebaseReady && navigator.onLine) {
+    syncOfflineTransactions().catch(e => console.error(e));
+  }
+  
+  return invoice;
+};
+
+export const getStudentInvoices = async (studentId, studentEmail) => {
+  if (!firebaseReady) return [];
+  try {
+    const q = query(
+      collection(db, 'publicInvoices'),
+      where('customerId', '==', studentId),
+      where('customerEmail', '==', studentEmail)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => doc.data());
+  } catch (err) {
+    console.error("Failed to fetch student invoices:", err);
+    return [];
+  }
+};
+
+export const getStudentProfile = async (studentId, studentEmail) => {
+  if (!firebaseReady) return null;
+  try {
+    const invoices = await getStudentInvoices(studentId, studentEmail);
+    if (invoices.length > 0) {
+      const inv = invoices[0];
+      return {
+        id: inv.customerId,
+        name: inv.customerName,
+        email: inv.customerEmail,
+        phone: inv.customerPhone,
+        address: inv.customerAddress
+      };
+    }
+    return null;
+  } catch (err) {
+    console.error("Failed to fetch student profile:", err);
+    return null;
+  }
 };

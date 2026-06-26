@@ -64,7 +64,7 @@ const CreateInvoice = React.lazy(() => import('./pages/CreateInvoice'));
 const HelpCenter = React.lazy(() => import('./pages/HelpCenter'));
 const Customers = React.lazy(() => import('./pages/Customers'));
 const Products = React.lazy(() => import('./pages/Products'));
-const Settings = React.lazy(() => import('./pages/Settings'));
+const Settings = React.lazy(() => import('./pages/SettingsStudioV2'));
 const Expenses = React.lazy(() => import('./pages/Expenses'));
 const Subscription = React.lazy(() => import('./pages/Subscription'));
 const MoreMenu = React.lazy(() => import('./pages/MoreMenu'));
@@ -98,6 +98,7 @@ const AdminPanel = React.lazy(() => import('./pages/admin/AdminPanel'));
 const PremiumPricing = React.lazy(() => import('./pages/PremiumPricing'));
 const PaymentDueScreen = React.lazy(() => import('./pages/PaymentDueScreen'));
 const SandboxAdmin = React.lazy(() => import('./pages/admin/SandboxAdmin'));
+const StudentPortal = React.lazy(() => import('./pages/StudentPortal'));
 import QuickBillModal from './components/QuickBillModal';
 import AdminPINLogin from './pages/admin/AdminPINLogin';
 import Confetti from 'react-confetti';
@@ -328,6 +329,17 @@ function App() {
           setLoadingPublicInvoice(false);
         });
       });
+    }
+  }, []);
+
+  // Boot Interceptor for Student Portal
+  const [studentPortalId, setStudentPortalId] = useState(null);
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    const studentMatch = path.match(/^\/student\/([a-zA-Z0-9_-]+)/);
+    if (studentMatch) {
+      setStudentPortalId(studentMatch[1]);
     }
   }, []);
 
@@ -1613,6 +1625,18 @@ function App() {
         </div>
       }>
         <PublicInvoice initialInvoice={publicInvoice} />
+      </React.Suspense>
+    );
+  }
+
+  if (studentPortalId) {
+    return (
+      <React.Suspense fallback={
+        <div className="flex h-screen items-center justify-center">
+          <ClassicLoader />
+        </div>
+      }>
+        <StudentPortal studentId={studentPortalId} />
       </React.Suspense>
     );
   }

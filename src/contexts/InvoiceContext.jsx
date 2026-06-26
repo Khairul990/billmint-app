@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { calculateTotals, generateNextInvoiceNumber } from '../utils/invoiceUtils';
 import { invoiceTemplates } from '../config/invoiceTemplates';
+import { generateSecureToken } from '../services/dbEngine';
 
 const InvoiceContext = createContext(null);
 
@@ -281,6 +282,7 @@ export const InvoiceProvider = ({ children, editingInvoice, invoices, businessSe
         type: 'INIT_INVOICE',
         payload: {
           id: editingInvoice.id,
+          publicToken: editingInvoice.publicToken || editingInvoice.id, // Fallback for very old invoices (though dbEngine handles it)
           invoiceNumber: editingInvoice.invoiceNumber,
           date: editingInvoice.date,
           dueDate: editingInvoice.dueDate,
@@ -327,6 +329,7 @@ export const InvoiceProvider = ({ children, editingInvoice, invoices, businessSe
         type: 'INIT_INVOICE',
         payload: {
           id: 'inv-' + Date.now(),
+          publicToken: generateSecureToken(),
           invoiceNumber: generateNextInvoiceNumber(invoices),
           date: today,
           dueDate: due,

@@ -52,8 +52,9 @@ export function generateInvoiceShareText(invoice, currencySymbol = '₹', busine
   const balanceDue = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), activeSymbol, activeNumberFormat);
   const paymentStatus = invoice.paymentStatus || 'Pending';
   
-  // Construct the secure live link automatically
-  const liveLink = invoice.publicToken ? `${window.location.origin}/invoice/${invoice.publicToken}` : '';
+  // Construct the secure live link using Student Portal Architecture
+  const customerId = invoice.customerId || invoice.customer?.id;
+  const liveLink = customerId ? `${window.location.origin}/student/${customerId}` : '';
 
   let message = `Your invoice is ready.
 Invoice No: ${invoiceNo}

@@ -9,7 +9,7 @@ import {
   generateEmailShareLink,
   generateInvoiceShareText
 } from '../utils/shareUtils';
-import { ensureInvoicePublicToken } from '../services/dbEngine';
+import { ensureInvoicePublicToken, resetInvoiceLiveLink } from '../services/dbEngine';
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
@@ -227,17 +227,17 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                         <button
                           onClick={async () => {
                             try {
-                              const token = await ensureInvoicePublicToken(invoice);
-                              if (!token) {
-                                toast.error('Could not create live link. Please try again.');
+                              const customerId = invoice.customerId || invoice.customer?.id;
+                              if (!customerId) {
+                                toast.error('Please assign a customer to share the Student Portal.');
                                 return;
                               }
-                              const updatedInvoice = { ...invoice, publicToken: token };
+                              const updatedInvoice = { ...invoice };
                               const link = generateWhatsAppShareLink(updatedInvoice, currencySymbol, businessSettings);
                               window.open(link, '_blank');
                               setShowShareMenu(false);
                             } catch (err) {
-                              toast.error('Could not create live link. Please try again.');
+                              toast.error(err.message || 'Could not create live link. Please try again.');
                             }
                           }}
                           className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/20 hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
@@ -250,12 +250,12 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                           <button
                             onClick={async () => {
                               try {
-                                const token = await ensureInvoicePublicToken(invoice);
-                                if (!token) {
-                                  toast.error('Could not create live link. Please try again.');
+                                const customerId = invoice.customerId || invoice.customer?.id;
+                                if (!customerId) {
+                                  toast.error('Please assign a customer to share the Student Portal.');
                                   return;
                                 }
-                                const updatedInvoice = { ...invoice, publicToken: token };
+                                const updatedInvoice = { ...invoice };
                                 const link = generateWhatsAppReminderLink(updatedInvoice, currencySymbol, businessSettings);
                                 window.open(link, '_blank');
                                 setShowShareMenu(false);
@@ -273,17 +273,17 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                         <button
                           onClick={async () => {
                             try {
-                              const token = await ensureInvoicePublicToken(invoice);
-                              if (!token) {
-                                toast.error('Could not create live link. Please try again.');
+                              const customerId = invoice.customerId || invoice.customer?.id;
+                              if (!customerId) {
+                                toast.error('Please assign a customer to share the Student Portal.');
                                 return;
                               }
-                              const updatedInvoice = { ...invoice, publicToken: token };
+                              const updatedInvoice = { ...invoice };
                               const { mailto } = generateEmailShareLink(updatedInvoice, currencySymbol, businessSettings);
                               window.open(mailto, '_blank');
                               setShowShareMenu(false);
                             } catch (err) {
-                              toast.error('Could not create live link. Please try again.');
+                              toast.error(err.message || 'Could not create live link. Please try again.');
                             }
                           }}
                           className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-sky-950/20 hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
@@ -300,17 +300,17 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                               return;
                             }
                             try {
-                              const token = await ensureInvoicePublicToken(invoice);
-                              if (!token) {
-                                toast.error('Could not create live link. Please try again.');
+                              const customerId = invoice.customerId || invoice.customer?.id;
+                              if (!customerId) {
+                                toast.error('Please assign a customer to share the Student Portal.');
                                 return;
                               }
-                              const liveLink = `${window.location.origin}/invoice/${token}`;
+                              const liveLink = `${window.location.origin}/student/${customerId}`;
                               await navigator.clipboard.writeText(liveLink);
                               toast.success('Live Invoice Link copied to clipboard!');
                               setShowShareMenu(false);
                             } catch (err) {
-                              toast.error('Could not create live link. Please try again.');
+                              toast.error(err.message || 'Could not create live link. Please try again.');
                             }
                           }}
                           className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-theme-accent-light hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
@@ -322,18 +322,18 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                         <button
                           onClick={async () => {
                             try {
-                              const token = await ensureInvoicePublicToken(invoice);
-                              if (!token) {
-                                toast.error('Could not create live link. Please try again.');
+                              const customerId = invoice.customerId || invoice.customer?.id;
+                              if (!customerId) {
+                                toast.error('Please assign a customer to share the Student Portal.');
                                 return;
                               }
-                              const updatedInvoice = { ...invoice, publicToken: token };
+                              const updatedInvoice = { ...invoice };
                               const text = generateInvoiceShareText(updatedInvoice, currencySymbol, businessSettings);
                               await navigator.clipboard.writeText(text);
                               toast.success('Invoicing summary copied to clipboard!');
                               setShowShareMenu(false);
                             } catch (err) {
-                              toast.error('Could not create live link. Please try again.');
+                              toast.error(err.message || 'Could not create live link. Please try again.');
                             }
                           }}
                           className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-warning/5 dark:hover:bg-amber-950/20 hover:text-amber-700 dark:hover:text-amber-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"

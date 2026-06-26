@@ -87,7 +87,7 @@ const PreviewDownloadStep = ({ handleSave }) => {
       
       const liveLink = await generatePaymentLink(fullInvoiceObject);
       if (!liveLink) {
-        toast.error('Could not create live link. Please try again.');
+        toast.error('Could not create Student Portal link. Please try again.');
         setIsCopying(false);
         return;
       }
@@ -104,9 +104,9 @@ const PreviewDownloadStep = ({ handleSave }) => {
         document.execCommand('copy');
         document.body.removeChild(textArea);
       }
-      toast.success('Live invoice link copied!');
+      toast.success('Student Portal link copied!');
     } catch (err) {
-      toast.error('Could not create live link.');
+      toast.error(err.message || 'Could not create Student Portal link.');
       console.error(err);
     } finally {
       setIsCopying(false);
