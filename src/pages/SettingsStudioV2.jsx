@@ -929,56 +929,26 @@ const SettingsStudioV2 = ({
         </div>
       </div>
 
-      {/* Quick Actions Bar */}
+      {/* Horizontal Navigation Bar (Replaces Left Sidebar) */}
       <div className="max-w-full mx-auto px-4 md:px-6 py-3">
         <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
-          {[
-            { id: 'business', label: 'Business', icon: Building2 },
-            { id: 'theme-engine', label: 'Theme', icon: Palette },
-            { id: 'payment', label: 'Payment', icon: QrCode },
-            { id: 'notifications', label: 'Alerts', icon: Bell },
-            { id: 'security', label: 'Security', icon: Shield },
-            { id: 'backup', label: 'Backup', icon: Database }
-          ].map(({ id, label, icon: Icon }) => (
-            <button key={id} onClick={() => setActiveSection(id)}
-              className={'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap border transition-all ' + (activeSection === id ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-sm' : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10')}
-            >
-              <Icon className="w-3 h-3" /> {label}
-            </button>
-          ))}
+          {filteredNav.flatMap(group => group.items).map((item) => {
+            const Icon = item.icon;
+            const isSelected = activeSection === item.id;
+            return (
+              <button key={item.id} onClick={() => setActiveSection(item.id)}
+                className={'flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap border transition-all ' + (isSelected ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-sm' : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10')}
+              >
+                <Icon className="w-3.5 h-3.5" /> {item.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Main Content + Navigation */}
-      <div className="max-w-full mx-auto px-4 md:px-6">
+      {/* Main Content Area */}
+      <div className="max-w-full mx-auto px-4 md:px-6 mt-4">
         <div className="flex gap-6">
-          {/* Navigation Sidebar */}
-          {showNav && (
-            <div className="hidden lg:block w-56 shrink-0">
-              <div className="sticky top-28 space-y-6">
-                {filteredNav.map((group) => (
-                  <div key={group.group} className="space-y-0.5">
-                    <h4 className="text-[8px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-1.5">{group.group}</h4>
-                    {group.items.map((item) => {
-                      const Icon = item.icon;
-                      const isSelected = activeSection === item.id;
-                      return (
-                        <button key={item.id} onClick={() => setActiveSection(item.id)}
-                          className={'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] font-semibold transition-all text-left ' + (isSelected ? 'bg-[var(--accent)] text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5')}
-                        >
-                          <Icon className="w-3.5 h-3.5 shrink-0" />
-                          <div className="min-w-0">
-                            <span className="block truncate">{item.label}</span>
-                            {isSelected && <span className="text-[8px] opacity-70 truncate block">{item.description}</span>}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Content Area */}
           <div className={'flex-1 min-w-0 ' + (showPreview ? 'lg:mr-80' : '')}>
