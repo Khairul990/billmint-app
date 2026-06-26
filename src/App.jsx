@@ -50,6 +50,11 @@ import { triggerSuccessFeedback } from './utils/feedback';
 import { sendEmpireEvent, sendEmpireError, sendEmpireHealth } from './services/empireAgent';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from './services/firebaseConfig';
+import QuickBillModal from './components/QuickBillModal';
+import AdminPINLogin from './pages/admin/AdminPINLogin';
+import Confetti from 'react-confetti';
+import CommandPalette from './components/CommandPalette';
+import { pageVariants } from './utils/animations';
 
 const Landing = React.lazy(() => import('./pages/Landing'));
 const Login = React.lazy(() => import('./pages/Login'));
@@ -99,11 +104,6 @@ const PremiumPricing = React.lazy(() => import('./pages/PremiumPricing'));
 const PaymentDueScreen = React.lazy(() => import('./pages/PaymentDueScreen'));
 const SandboxAdmin = React.lazy(() => import('./pages/admin/SandboxAdmin'));
 const StudentPortal = React.lazy(() => import('./pages/StudentPortal'));
-import QuickBillModal from './components/QuickBillModal';
-import AdminPINLogin from './pages/admin/AdminPINLogin';
-import Confetti from 'react-confetti';
-import CommandPalette from './components/CommandPalette';
-import { pageVariants } from './utils/animations';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
