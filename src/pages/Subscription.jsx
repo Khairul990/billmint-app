@@ -59,7 +59,7 @@ import { toast } from 'react-hot-toast';
 import { pageVariants, staggerContainer, staggerItem, fadeInUp } from '../utils/animations';
 import PremiumEmptyState from '../components/PremiumEmptyState';
 
-const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
+const Subscription = ({ currentSubscription, onUpgrade, businessSettings, setCurrentTab }) => {
   const [showUpgradeForm, setShowUpgradeForm] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('Monthly');
   const [paidAmount, setPaidAmount] = useState('');
