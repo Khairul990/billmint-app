@@ -1162,9 +1162,9 @@ export default function Login({ onLoginSuccess }) {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="relative min-h-screen w-full bg-theme-app p-4 text-theme-primary sm:p-6 lg:p-8"
+      className="relative w-full py-12 p-4 text-theme-primary sm:p-6 lg:py-20 lg:px-8"
     >
-      <div className="card-premium relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface shadow-2xl shadow-theme-glow/10 lg:min-h-[680px]">
+      <div className="card-premium relative z-10 mx-auto flex max-w-6xl overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface shadow-2xl shadow-theme-glow/10 min-h-[600px] lg:min-h-[680px]">
         <div className="hidden lg:flex lg:w-full">
           <ShowcasePanel />
           <LoginPanel onLoginSuccess={onLoginSuccess} />
