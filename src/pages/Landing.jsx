@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { staggerContainer, staggerItem, fadeInUp } from '../utils/animations';
 import { ArrowRight, CheckCircle2, FileSpreadsheet, ShieldCheck, TrendingUp, Users, Sparkles, Download, Link2, Smartphone, Printer, CreditCard, Star, HelpCircle, ChevronDown, MessageCircle, Mail, MapPin, DollarSign, Clock, BarChart3, Globe, Zap } from 'lucide-react';
 import Logo from '../components/Logo';
+import Login from './Login';
 
-const Landing = ({ onLoginClick }) => {
+const Landing = ({ onLoginSuccess }) => {
   const [faqOpen, setFaqOpen] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -73,8 +74,8 @@ const Landing = ({ onLoginClick }) => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button onClick={onLoginClick} className="text-sm font-bold text-theme-muted hover:text-theme-primary transition-colors hidden sm:block">Log in</button>
-            <button onClick={onLoginClick} className="btn-premium px-6 py-2.5 text-sm">Get Started Free</button>
+            <button onClick={() => scrollTo('login')} className="text-sm font-bold text-theme-muted hover:text-theme-primary transition-colors hidden sm:block">Log in</button>
+            <button onClick={() => scrollTo('login')} className="btn-premium px-6 py-2.5 text-sm">Get Started Free</button>
 
             {/* Mobile hamburger */}
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-theme-primary">
@@ -115,7 +116,7 @@ const Landing = ({ onLoginClick }) => {
               Streamline your invoicing process, manage customers effortlessly, and get paid faster with BillQyro's premium SaaS platform.
             </motion.p>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-              <button onClick={onLoginClick} className="btn-premium w-full sm:w-auto px-8 py-4 text-base">
+              <button onClick={() => scrollTo('login')} className="btn-premium w-full sm:w-auto px-8 py-4 text-base">
                 Start Invoicing Now
                 <ArrowRight className="w-5 h-5" />
               </button>
@@ -171,6 +172,11 @@ const Landing = ({ onLoginClick }) => {
           </motion.div>
         </div>
       </motion.section>
+
+      {/* ===== LOGIN SECTION ===== */}
+      <section id="login" className="border-t border-theme-border-soft bg-theme-surface">
+        <Login onLoginSuccess={onLoginSuccess} />
+      </section>
 
       {/* ===== FEATURES ===== */}
       <motion.section id="features" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
@@ -484,7 +490,7 @@ const Landing = ({ onLoginClick }) => {
                     <li key={i} className="flex items-center gap-2 text-sm font-medium text-theme-muted"><CheckCircle2 className="w-4 h-4 text-theme-accent shrink-0" />{f}</li>
                   ))}
                 </ul>
-                <button onClick={onLoginClick} className={`w-full py-3.5 rounded-xl font-black text-sm transition-all active:scale-95 ${
+                <button onClick={() => scrollTo('login')} className={`w-full py-3.5 rounded-xl font-black text-sm transition-all active:scale-95 ${
                   plan.popular ? 'bg-[image:var(--accent-gradient)] text-white shadow-lg hover:opacity-90' : 'bg-theme-surface border border-theme-border-soft text-theme-primary hover:bg-theme-accent hover:text-white hover:border-theme-accent'
                 }`}>{plan.cta}</button>
               </motion.div>
@@ -523,7 +529,7 @@ const Landing = ({ onLoginClick }) => {
             <span className="badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Get Started</span>
             <h2 className="text-3xl md:text-5xl font-black text-theme-primary tracking-tight mb-4">Ready to simplify your billing?</h2>
             <p className="text-theme-muted font-medium text-base sm:text-lg max-w-2xl mx-auto mb-8">Join thousands of businesses using BillQyro to create, manage, and track invoices effortlessly.</p>
-            <button onClick={onLoginClick} className="btn-premium px-8 sm:px-12 py-4 sm:py-5 text-base sm:text-lg">
+            <button onClick={() => scrollTo('login')} className="btn-premium px-8 sm:px-12 py-4 sm:py-5 text-base sm:text-lg">
               Get Started Free
               <ArrowRight className="w-5 h-5" />
             </button>

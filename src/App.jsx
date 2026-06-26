@@ -1685,24 +1685,13 @@ function App() {
   }
 
   if (!isAuthenticated && (!isDemoSessionActive || !isDemoJourneyActive)) {
-    if (currentTab === 'landing') {
-      return (
-        <React.Suspense fallback={
-          <div className="flex h-screen items-center justify-center">
-            <ClassicLoader />
-          </div>
-        }>
-          <Landing onLoginClick={() => setCurrentTab('login')} />
-        </React.Suspense>
-      );
-    }
     return (
       <React.Suspense fallback={
         <div className="flex h-screen items-center justify-center">
           <ClassicLoader />
         </div>
       }>
-        <Login onLoginSuccess={handleLoginSuccess} />
+        <Landing onLoginSuccess={handleLoginSuccess} />
       </React.Suspense>
     );
   }
