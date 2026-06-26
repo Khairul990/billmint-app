@@ -155,6 +155,19 @@ export const BUSINESS_PRESETS = [
     quickActions: ['addInvoice', 'addCustomer', 'viewReports']
   },
   {
+    id: 'cybercafe',
+    label: 'Cyber Cafe / CSC',
+    shortDesc: 'For digital service centers',
+    iconName: 'Monitor',
+    recommendedModules: ['reports'],
+    optionalModules: [],
+    hiddenModules: ['billing', 'customers', 'products', 'dueLedger', 'expenses', 'patients', 'students', 'prescription', 'appointments', 'measurements', 'designBook', 'fees', 'attendance', 'orders', 'delivery', 'devices', 'serviceJobs', 'clients', 'projects', 'payments', 'paymentProofs'],
+    defaultCustomerLabel: 'Customers',
+    defaultInvoiceLabel: 'Bill',
+    dashboardKpis: [],
+    quickActions: []
+  },
+  {
     id: 'billing_only',
     label: 'Billing Only',
     shortDesc: 'Simple mode: Just create bills',

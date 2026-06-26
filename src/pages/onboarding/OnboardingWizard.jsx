@@ -3,13 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Store, CheckCircle2, ChevronRight, ChevronLeft, Building2, User, Paintbrush, Play,
   ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText,
-  CreditCard, ShieldCheck, Globe, Coffee, Settings, Info
+  CreditCard, ShieldCheck, Globe, Coffee, Settings, Info, Monitor
 } from 'lucide-react';
 import { BUSINESS_PRESETS, ALL_MODULES } from '../../config/businessPresets';
 import { getAuthSession } from '../../services/dbEngine';
 
 const iconMap = {
-  ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText, Store, Palette: Paintbrush, Coffee, Settings
+  ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText, Store, Palette: Paintbrush, Coffee, Settings, Monitor
 };
 
 const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab }) => {
