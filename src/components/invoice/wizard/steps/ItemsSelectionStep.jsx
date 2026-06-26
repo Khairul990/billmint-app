@@ -235,7 +235,7 @@ const ItemsSelectionStep = ({ products = [] }) => {
         const val = parseFloat(item[key]) || 0;
         evaluated = evaluated.replace(new RegExp(`\\b${key}\\b`, 'g'), val);
       });
-      // eslint-disable-next-line no-new-func
+       
       const result = new Function('return ' + evaluated)();
       return result || 0;
     } catch (e) {

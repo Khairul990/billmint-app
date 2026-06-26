@@ -1,8 +1,10 @@
 import React from 'react';
-import { Palette, CheckCircle2, Monitor, Laptop2, Sparkles } from 'lucide-react';
+import { Palette, CheckCircle2, Monitor, Laptop2, Sparkles, Smartphone } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { getThemePreviewColors } from '../../utils/themeUtils';
 
 const ThemeStudioTab = (props) => {
-  const { themeColor, setThemeColor, darkMode, setDarkMode, brandColor, setBrandColor, pdfVisibleFields, setPdfVisibleFields } = props;
+  const { themeColor, setThemeColor, darkMode, setDarkMode, brandColor, setBrandColor, pdfVisibleFields, setPdfVisibleFields, settings, onSaveSettings, handleSave, enableHaptics, setEnableHaptics, enableSounds, setEnableSounds } = props;
 
   return (
     <>

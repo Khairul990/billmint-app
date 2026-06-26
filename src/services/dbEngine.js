@@ -902,7 +902,7 @@ export const factoryResetAllData = async () => {
   
   if (firebaseReady) {
     try {
-      const auth = getAuth();
+      
       if (auth.currentUser) {
         await auth.signOut();
       }

@@ -53,7 +53,7 @@ export const analyzePaymentScreenshot = async (imageFile, expectedData) => {
     
     // Check if it's roughly a common aspect ratio instead of exact pixels
     const aspectRatio = dimensions.width / dimensions.height;
-    const isPortrait = dimensions.height > dimensions.width;
+    const _isPortrait = dimensions.height > dimensions.width;
     const isCommonSize = commonSizes.some(
       size => Math.abs((size.w / size.h) - aspectRatio) < 0.1 || Math.abs((size.h / size.w) - aspectRatio) < 0.1
     );
@@ -167,14 +167,10 @@ const fileToBase64 = (file) => {
   });
 };
 
-const checkEXIF = async (file) => {
-  try {
-    // Very simplified check: real screenshots usually don't have large APP1/EXIF headers.
-    // For full implementation, one would use exifr library.
-    return false;
-  } catch {
-    return false;
-  }
+const checkEXIF = async (_file) => {
+  // Very simplified check: real screenshots usually don't have large APP1/EXIF headers.
+  // For full implementation, one would use exifr library.
+  return false;
 };
 
 const extractTextFromImage = async (base64Image) => {
