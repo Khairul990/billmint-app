@@ -26,7 +26,7 @@ import {
   BookOpen, DollarSign, Percent, Printer, Share2, Send
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { exportBackup, getAuthSession, getStorageUsage, cleanTemporaryData, cleanDuplicateDrafts, clearCacheOnly, clearAllLocalData, emptyTrash, clearInvoices, clearCustomers, clearProducts, clearExpenses } from '../services/dbEngine';
+import { exportBackup, getAuthSession, getStorageUsage, cleanTemporaryData, cleanDuplicateDrafts, clearCacheOnly, clearAllLocalData, emptyTrash, clearInvoices, clearCustomers, clearProducts, clearExpenses, factoryResetAllData } from '../services/dbEngine';
 import { firebaseReady } from '../services/firebaseConfig';
 
 const compressImage = (file, maxWidth = 400) => {
@@ -757,7 +757,7 @@ const SettingsStudioV2 = ({
               <button onClick={() => { if (confirm('Clear cache?')) { clearCacheOnly(); toast.success('Cache cleared'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-yellow-500/30 bg-yellow-500/5 hover:bg-yellow-500/10 text-left">
                 <RotateCcw className="text-yellow-500" /><div><div className="font-semibold text-sm">Clear Cache</div><div className="text-xs text-gray-500">Reset temporary data</div></div>
               </button>
-              <button onClick={() => { if (confirm('Reset all data? This cannot be undone.')) { onResetDemo?.(); toast.success('Data reset'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-left">
+              <button onClick={() => { if (confirm('Reset all data? This cannot be undone.')) { factoryResetAllData(); toast.success('Data reset in progress...'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-left">
                 <Trash2 className="text-red-500" /><div><div className="font-semibold text-sm text-red-600">Reset All Data</div><div className="text-xs text-red-400">Wipe everything</div></div>
               </button>
             </div>
