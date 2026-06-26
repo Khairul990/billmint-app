@@ -1067,7 +1067,7 @@ const Settings = ({
   } else {
     setActiveCategory(map[tab] || 'general');
   }
-}} businessSettings={settings} setSettings={onSave} /></div>
+}} businessSettings={settings} setSettings={onSaveSettings} /></div>
             )}
             {effectiveActiveCategory === 'pdf-studio' && (
               <div className="animate-fadeIn"><PdfTemplateStudio setCurrentTab={(tab) => {
@@ -1084,7 +1084,7 @@ const Settings = ({
   } else {
     setActiveCategory(map[tab] || 'general');
   }
-}} businessSettings={settings} setSettings={onSave} /></div>
+}} businessSettings={settings} setSettings={onSaveSettings} /></div>
             )}
             {effectiveActiveCategory === 'livelink-studio' && (
               <div className="animate-fadeIn"><LiveLinkTemplateStudio setCurrentTab={(tab) => {
@@ -1101,7 +1101,7 @@ const Settings = ({
   } else {
     setActiveCategory(map[tab] || 'general');
   }
-}} businessSettings={settings} setSettings={onSave} /></div>
+}} businessSettings={settings} setSettings={onSaveSettings} /></div>
             )}
             {effectiveActiveCategory === 'template-studio' && (
               <div className="animate-fadeIn"><TemplateMarketplace setCurrentTab={(tab) => {
@@ -1118,7 +1118,7 @@ const Settings = ({
   } else {
     setActiveCategory(map[tab] || 'general');
   }
-}} businessSettings={settings} setSettings={onSave} /></div>
+}} businessSettings={settings} setSettings={onSaveSettings} /></div>
             )}
     
 
