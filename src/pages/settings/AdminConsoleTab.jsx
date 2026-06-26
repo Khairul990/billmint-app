@@ -342,7 +342,7 @@ const AdminConsoleTab = (props) => {
 
                     <div className="pt-2 flex justify-end">
                       <button
-                        onClick={handleSave}
+                        
                         className="px-6 py-2.5 bg-theme-accent hover:opacity-90 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1.5"
                       >
                         <Save className="w-4 h-4" />
@@ -369,7 +369,7 @@ const AdminConsoleTab = (props) => {
                           className="w-full text-xs p-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 resize-none h-20 text-theme-primary dark:text-theme-primary dark:text-theme-primary"
                         />
                       </div>
-                      <button onClick={handleSave} className="w-full py-2 bg-theme-accent-light hover:bg-theme-accent-light text-theme-accent font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-theme-accent-light dark:text-theme-accent">
+                      <button  className="w-full py-2 bg-theme-accent-light hover:bg-theme-accent-light text-theme-accent font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-theme-accent-light dark:text-theme-accent">
                         Publish Banner
                       </button>
                     </div>
@@ -383,14 +383,14 @@ const AdminConsoleTab = (props) => {
                         <div className="flex items-center justify-between p-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl">
                           <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-theme-primary">Maintenance Lockout</span>
                           <button
-                            onClick={() => setMaintenanceMode(!maintenanceMode)}
-                            className={`w-10 h-5 rounded-full relative transition-all duration-500 ease-in-out shadow-inner flex items-center p-0.5 focus:outline-none ${maintenanceMode ? 'bg-[image:var(--accent-gradient)] shadow-sm shadow-theme-accent/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5'}`}
+                            onClick={() => alert('Use global announcements for maintenance.')}
+                            className={`w-10 h-5 rounded-full relative transition-all duration-500 ease-in-out shadow-inner flex items-center p-0.5 focus:outline-none ${(globalSettings?.maintenanceMode) ? 'bg-[image:var(--accent-gradient)] shadow-sm shadow-theme-accent/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5'}`}
                           >
-                            <div className={`w-4 h-4 bg-white rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ${maintenanceMode ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                            <div className={`w-4 h-4 bg-white rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ${(globalSettings?.maintenanceMode) ? 'translate-x-5' : 'translate-x-0'}`}></div>
                           </button>
                         </div>
                       </div>
-                      <button onClick={handleSave} className="w-full py-2 bg-theme-danger/5 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-rose-950/20 dark:text-rose-450">
+                      <button  className="w-full py-2 bg-theme-danger/5 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl transition-all cursor-pointer dark:bg-rose-950/20 dark:text-rose-450">
                         Apply lockout state
                       </button>
                     </div>

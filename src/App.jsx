@@ -504,7 +504,16 @@ function App() {
         setProducts(await getProducts() || []);
         setExpenses(await getExpenses() || []);
         const latestSettings = getSettings();
-        if (latestSettings) setSettings(latestSettings);
+        if (latestSettings) {
+          if (isAdminUser(getAuthSession()) && latestSettings.maintenanceMode) {
+            const cleaned = { ...latestSettings };
+            delete cleaned.maintenanceMode;
+            setSettings(cleaned);
+            saveSettings(cleaned);
+          } else {
+            setSettings(latestSettings);
+          }
+        }
         setSubscription(getSubscriptionStatus());
       } catch (err) {
         console.error("Error reloading data on sync:", err);

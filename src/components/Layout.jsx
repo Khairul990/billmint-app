@@ -147,7 +147,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
           </div>
         )}
 
-        {businessSettings?.maintenanceMode && (
+        {businessSettings?.maintenanceMode && userRole !== 'admin' && userEmail !== 'khairul2052007@gmail.com' && (
           <div className="bg-rose-600 text-white font-black text-xs py-1.5 text-center uppercase tracking-widest z-50 relative shadow-md flex items-center justify-center gap-2">
             <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
             SYSTEM MAINTENANCE ACTIVE — Invoice creation, live links, and premium upgrades are temporarily disabled.
