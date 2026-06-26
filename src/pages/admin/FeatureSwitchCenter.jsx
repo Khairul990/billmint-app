@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ToggleRight, AlertTriangle } from 'lucide-react';
+import { ToggleRight, AlertTriangle, Users } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const FeatureSwitchCenter = () => {

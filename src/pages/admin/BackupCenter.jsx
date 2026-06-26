@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Database, Download, Upload } from 'lucide-react';
+import { Database, Download, Upload, Users } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const BackupCenter = () => {
