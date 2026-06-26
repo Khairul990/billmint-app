@@ -45,8 +45,6 @@ export const getThemePreviewColors = (preset, forceMode = null) => {
   };
 };
 
-export const ALL_THEMES = Object.keys(ALL_THEME_COLORS).map(id => ({ id, ...getThemeInfo(id) }));
-
 export const THEME_INFO = {
   'obsidian-gold': { name: 'Obsidian Gold', category: 'Premium', colors: ['#B8860B', '#1F2937', '#FFF9EC', '#1A1A1A', '#6B5B3E'] },
   'arctic-teal': { name: 'Arctic Teal', category: 'Business', colors: ['#009E7F', '#0F766E', '#F4FFFD', '#10201D', '#4B6F68'] },
@@ -78,3 +76,7 @@ export const THEME_INFO = {
 function getThemeInfo(id) {
   return THEME_INFO[id] || THEME_INFO['obsidian-gold'];
 }
+
+export const ALL_THEMES = Object.keys(ALL_THEME_COLORS).map(id => ({ id, ...getThemeInfo(id) }));
+
+// Removed THEME_INFO and getThemeInfo from here and moved above ALL_THEMES
