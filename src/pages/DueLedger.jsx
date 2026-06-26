@@ -237,7 +237,7 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="page-premium pb-24"
+      className="page-premium w-full max-w-full pb-24"
     >
       <div className="hero-premium">
         <h1 className="hero-premium-title">Due Ledger</h1>

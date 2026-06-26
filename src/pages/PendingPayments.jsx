@@ -211,7 +211,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
       initial="initial"
       animate="animate"
       exit="exit"
-      className="page-premium space-y-6 pb-24"
+      className="page-premium w-full max-w-full space-y-6 pb-24"
     >
       <div className="section-header flex-col md:flex-row gap-4">
         <div className="flex items-center gap-3">

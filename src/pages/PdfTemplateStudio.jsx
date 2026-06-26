@@ -22,7 +22,8 @@ import {
   Maximize,
   Minimize,
   Download,
-  Filter
+  Filter,
+  ArrowLeft
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { saveSettings } from '../services/dbEngine';
@@ -225,6 +226,16 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
 
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-6 pb-24">
+      {/* Back to Settings Button */}
+      {setCurrentTab && (
+        <button
+          onClick={() => setCurrentTab('settings')}
+          className="btn-premium flex items-center gap-2 px-4 py-2 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-xl font-bold text-xs mb-4 shadow-sm w-fit transition-all active:scale-95"
+        >
+          <ArrowLeft className="w-4 h-4 text-theme-muted" /> Back to Settings Studio
+        </button>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 section-header">
         <div>

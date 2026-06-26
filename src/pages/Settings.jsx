@@ -1002,7 +1002,21 @@ const Settings = ({
               return (
                 <button
                   key={cat.id}
-                  onClick={() => setActiveCategory(cat.id)}
+                  onClick={() => {
+                    if (['themes', 'templates', 'live-links', 'subscription'].includes(cat.id)) {
+                      if (setCurrentTab) {
+                        const tabMap = {
+                          'themes': 'design-studio',
+                          'templates': 'pdf-templates',
+                          'live-links': 'live-link-templates',
+                          'subscription': 'subscription'
+                        };
+                        setCurrentTab(tabMap[cat.id]);
+                      }
+                    } else {
+                      setActiveCategory(cat.id);
+                    }
+                  }}
                   className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-300 whitespace-nowrap ${
                     isSelected
                       ? 'bg-theme-accent text-white shadow-md shadow-theme-accent/30 scale-105'
@@ -1548,40 +1562,8 @@ const Settings = ({
             </div>
           )}
 
-          {/* ============ THEMES ============ */}
-          {effectiveActiveCategory === 'themes' && (
-             <div className="animate-fadeIn">
-               <DesignStudio 
-                 initialTab="themes"
-                 businessSettings={settings}
-                 setSettings={(newSettings) => {
-                   onSaveSettings(newSettings);
-                 }}
-                 setCurrentTab={(tab) => {
-                   if (tab === 'pdf-templates') setActiveCategory('templates');
-                   else if (tab === 'live-link-templates') setActiveCategory('live-links');
-                   else if (tab === 'settings') setActiveCategory('business');
-                   else setActiveCategory(tab);
-                 }}
-               />
-             </div>
-          )}
-          {effectiveActiveCategory === 'templates' && (
-             <div className="animate-fadeIn -mt-4 -mx-4 md:-mx-8">
-               <PdfTemplateStudio 
-                 businessSettings={settings} 
-                 setSettings={(newSettings) => {
-                   setSettings(newSettings);
-                   onSaveSettings(newSettings);
-                 }} 
-                 subscription={subscription}
-                 setCurrentTab={(tab) => {
-                   if (tab === 'subscription') setActiveCategory('subscription');
-                   else setActiveCategory(tab);
-                 }}
-               />
-             </div>
-          )}
+          {/* ============ THEMES & TEMPLATES (NAVIGATES OUT) ============ */}
+          {/* Note: themes, templates, live-links, and subscription now navigate to full pages via pill buttons */}
 
           {/* ============ NOTIFICATIONS ============ */}
           {effectiveActiveCategory === 'notifications' && (
@@ -1904,22 +1886,7 @@ const Settings = ({
             </div>
           )}
 
-          {/* ============ LIVE LINK TEMPLATES ============ */}
-          {effectiveActiveCategory === 'live-links' && (
-             <div className="animate-fadeIn -mt-4 -mx-4 md:-mx-8">
-               <LiveLinkTemplateStudio 
-                 businessSettings={settings}
-                 setSettings={(newSettings) => {
-                   onSaveSettings(newSettings);
-                 }}
-                 subscription={subscription}
-                 setCurrentTab={(tab) => {
-                   if (tab === 'subscription') setActiveCategory('subscription');
-                   else setActiveCategory(tab);
-                 }}
-               />
-             </div>
-          )}
+          {/* ============ LIVE LINK TEMPLATES (NAVIGATES OUT) ============ */}
           {effectiveActiveCategory === 'advanced' && (
             <>
               {/* Premium UX */}

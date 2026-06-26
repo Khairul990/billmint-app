@@ -37,7 +37,8 @@ import {
   Upload,
   Users,
   XCircle,
-  Zap
+  Zap,
+  ArrowLeft
 } from 'lucide-react';
 import ShineBorder from '../components/ShineBorder';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -398,6 +399,16 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings }) => {
       exit="exit"
       className="space-y-6 pb-24 max-w-5xl mx-auto"
     >
+      {/* Back to Settings Button */}
+      {setCurrentTab && (
+        <button
+          onClick={() => setCurrentTab('settings')}
+          className="btn-premium flex items-center gap-2 px-4 py-2 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-xl font-bold text-xs mb-4 shadow-sm w-fit transition-all active:scale-95"
+        >
+          <ArrowLeft className="w-4 h-4 text-theme-muted" /> Back to Settings Studio
+        </button>
+      )}
+
       {/* PREMIUM HERO */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-amber-600 p-6 md:p-8 shadow-premium">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>

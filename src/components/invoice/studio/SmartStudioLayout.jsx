@@ -412,7 +412,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
             exit={{ opacity: 0, y: 100 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-theme-card border border-theme-border-soft rounded-t-3xl shadow-2xl w-full max-w-lg p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+            className="bg-theme-card border border-theme-border-soft rounded-t-3xl shadow-2xl w-full max-w-lg p-5 pb-[max(3rem,env(safe-area-inset-bottom))] max-h-[90vh] overflow-y-auto"
           >
             <div className="w-12 h-1.5 bg-theme-border-soft rounded-full mx-auto mb-4"></div>
             <div className="text-center mb-5">

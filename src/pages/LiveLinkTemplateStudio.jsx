@@ -40,7 +40,8 @@ import {
   RotateCcw,
   Maximize,
   Minimize,
-  RefreshCw
+  RefreshCw,
+  ArrowLeft
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { BUSINESS_PRESETS } from '../config/businessPresets';
@@ -264,6 +265,16 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
 
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" className="p-4 md:p-8 w-full space-y-6">
+      {/* Back to Settings Button */}
+      {setCurrentTab && (
+        <button
+          onClick={() => setCurrentTab('settings')}
+          className="btn-premium flex items-center gap-2 px-4 py-2 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-xl font-bold text-xs mb-4 shadow-sm w-fit transition-all active:scale-95"
+        >
+          <ArrowLeft className="w-4 h-4 text-theme-muted" /> Back to Settings Studio
+        </button>
+      )}
+
       <div className="flex items-center gap-3 border-b border-theme-border-soft dark:border-theme-border-soft/80 pb-6 mb-6 section-header">
         <div className="w-12 h-12 rounded-2xl bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-950/30 dark:text-fuchsia-400 flex items-center justify-center shadow-sm">
           <Smartphone className="w-6 h-6" />
