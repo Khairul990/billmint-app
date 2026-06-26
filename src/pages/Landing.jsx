@@ -144,7 +144,7 @@ const Landing = ({ onLoginSuccess }) => {
             </motion.div>
           </div>
 
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4, duration: 0.8 }} className="flex-1 w-full relative">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0, y: [0, -10, 0] }} transition={{ opacity: {delay: 0.4, duration: 0.8}, x: {delay: 0.4, duration: 0.8}, y: {duration: 6, repeat: Infinity, ease: "easeInOut"} }} className="flex-1 w-full relative">
             <div className="card-premium rounded-3xl overflow-hidden border border-theme-border-soft shadow-2xl bg-theme-card">
               <div className="aspect-video bg-theme-surface w-full p-2 flex flex-col">
                 <div className="flex gap-1.5 p-2">
@@ -201,7 +201,7 @@ const Landing = ({ onLoginSuccess }) => {
           </div>
           <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {features.map((feature, idx) => (
-              <motion.div key={idx} variants={staggerItem} className="card-premium p-6 sm:p-8 rounded-3xl hover:border-theme-accent/30 transition-all duration-300 group hover:shadow-lg hover:shadow-theme-accent/5">
+              <motion.div key={idx} variants={staggerItem} whileHover={{ y: -8, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-premium p-6 sm:p-8 rounded-3xl hover:border-theme-accent/30 transition-all duration-300 group hover:shadow-2xl hover:shadow-theme-accent/10">
                 <div className="w-12 h-12 rounded-2xl bg-theme-card border border-theme-border-soft flex items-center justify-center mb-5 group-hover:scale-110 transition-transform group-hover:bg-theme-accent/10 group-hover:border-theme-accent/30"><feature.icon className="w-6 h-6 text-theme-accent" /></div>
                 <h3 className="text-lg font-bold text-theme-primary mb-2">{feature.title}</h3>
                 <p className="text-sm text-theme-muted font-medium leading-relaxed">{feature.desc}</p>
@@ -384,7 +384,7 @@ const Landing = ({ onLoginSuccess }) => {
           </div>
           <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {templates.map((tpl, idx) => (
-              <motion.div key={idx} variants={staggerItem} className="card-premium p-5 sm:p-6 rounded-2xl hover:border-theme-accent/30 transition-all duration-300 group cursor-default">
+              <motion.div key={idx} variants={staggerItem} whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-premium p-5 sm:p-6 rounded-2xl hover:border-theme-accent/30 hover:shadow-2xl hover:shadow-theme-accent/10 transition-all duration-300 group cursor-default">
                 <div className="text-3xl mb-3">{tpl.icon}</div>
                 <h3 className="text-lg font-bold text-theme-primary mb-1">{tpl.name}</h3>
                 <p className="text-sm text-theme-muted font-medium">{tpl.desc}</p>

@@ -1164,7 +1164,7 @@ export default function Login({ onLoginSuccess }) {
       exit="exit"
       className="relative w-full py-12 p-4 text-theme-primary sm:p-6 lg:py-20 lg:px-8 z-10"
     >
-      <div className="card-premium relative z-10 mx-auto flex max-w-6xl overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface/60 backdrop-blur-3xl shadow-2xl shadow-theme-glow/10 min-h-[600px] lg:min-h-[680px]">
+      <motion.div initial={{ opacity: 0, scale: 0.95, y: 30 }} whileInView={{ opacity: 1, scale: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="card-premium relative z-10 mx-auto flex w-[98%] max-w-7xl overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface/60 backdrop-blur-3xl shadow-2xl shadow-theme-glow/10 min-h-[600px] lg:min-h-[680px]">
         <div className="hidden lg:flex lg:w-full">
           <ShowcasePanel />
           <LoginPanel onLoginSuccess={onLoginSuccess} />
@@ -1173,7 +1173,7 @@ export default function Login({ onLoginSuccess }) {
           <ShowcasePanel />
           <LoginPanel onLoginSuccess={onLoginSuccess} />
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
