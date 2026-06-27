@@ -1577,6 +1577,8 @@ function App() {
           />
         );
       case 'live-link-templates':
+      case 'billing-portal-settings':
+      case 'student-portal-settings':
         if (isMaintenanceMode || activeSettings?.disableLiveLinkCreation) {
           return (
             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">

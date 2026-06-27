@@ -82,6 +82,8 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       case 'pdf-templates':
         return 'PDF Templates';
       case 'live-link-templates':
+      case 'billing-portal-settings':
+      case 'student-portal-settings':
         return 'Live Link Studio';
       case 'marketplace':
         return 'Template Marketplace';
