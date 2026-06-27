@@ -34,6 +34,9 @@ export const BUSINESS_PRESETS = [
     hiddenModules: ['patients', 'students', 'prescription', 'appointments', 'measurements', 'designBook', 'fees', 'attendance', 'orders', 'delivery', 'devices', 'serviceJobs', 'clients', 'projects', 'payments'],
     defaultCustomerLabel: 'Customers',
     defaultInvoiceLabel: 'Invoice',
+    defaultProductLabel: 'Product',
+    defaultPortalLabel: 'Billing Portal',
+    defaultUnits: ['pcs', 'kg', 'gram', 'litre', 'ml', 'packet', 'box', 'dozen'],
     dashboardKpis: ['dailySales', 'totalInvoices', 'dueAmount', 'productsCount'],
     quickActions: ['addInvoice', 'addProduct', 'addCustomer']
   },
@@ -47,6 +50,9 @@ export const BUSINESS_PRESETS = [
     hiddenModules: ['patients', 'students', 'prescription', 'appointments', 'measurements', 'designBook', 'fees', 'attendance', 'orders', 'delivery', 'devices', 'serviceJobs', 'clients', 'projects', 'payments'],
     defaultCustomerLabel: 'Customers',
     defaultInvoiceLabel: 'Bill',
+    defaultProductLabel: 'Item',
+    defaultPortalLabel: 'Billing Portal',
+    defaultUnits: ['kg', 'gram', 'litre', 'ml', 'packet', 'pcs', 'dozen', 'box'],
     dashboardKpis: ['dailySales', 'totalInvoices', 'dueAmount', 'productsCount'],
     quickActions: ['addInvoice', 'addProduct', 'addCustomer']
   },
@@ -60,6 +66,9 @@ export const BUSINESS_PRESETS = [
     hiddenModules: ['patients', 'students', 'prescription', 'appointments', 'measurements', 'designBook', 'fees', 'attendance', 'clients', 'projects'],
     defaultCustomerLabel: 'Clients',
     defaultInvoiceLabel: 'Service Invoice',
+    defaultProductLabel: 'Service / Part',
+    defaultPortalLabel: 'Client Portal',
+    defaultUnits: ['hour', 'project', 'day', 'visit', 'service', 'piece'],
     dashboardKpis: ['activeJobs', 'completedJobs', 'dueAmount', 'dailySales'],
     quickActions: ['addJob', 'addInvoice', 'addClient']
   },
@@ -73,6 +82,9 @@ export const BUSINESS_PRESETS = [
     hiddenModules: ['products', 'students', 'measurements', 'designBook', 'fees', 'attendance', 'orders', 'delivery', 'devices', 'serviceJobs', 'clients', 'projects', 'paymentProofs'],
     defaultCustomerLabel: 'Patients',
     defaultInvoiceLabel: 'Bill',
+    defaultProductLabel: 'Treatment / Med',
+    defaultPortalLabel: 'Patient Portal',
+    defaultUnits: ['consultation', 'strip', 'bottle', 'injection', 'procedure', 'test'],
     dashboardKpis: ['appointmentsToday', 'patientsCount', 'dailyRevenue', 'dueAmount'],
     quickActions: ['addPatient', 'addAppointment', 'addBill']
   },
@@ -86,6 +98,9 @@ export const BUSINESS_PRESETS = [
     hiddenModules: ['products', 'patients', 'prescription', 'appointments', 'measurements', 'designBook', 'orders', 'delivery', 'devices', 'serviceJobs', 'clients', 'projects', 'customers', 'paymentProofs'],
     defaultCustomerLabel: 'Students',
     defaultInvoiceLabel: 'Fee Receipt',
+    defaultProductLabel: 'Class / Fee',
+    defaultPortalLabel: 'Student Portal',
+    defaultUnits: ['month', 'semester', 'class', 'course', 'year'],
     dashboardKpis: ['totalStudents', 'pendingFees', 'collectedFees', 'attendanceToday'],
     quickActions: ['addStudent', 'collectFee', 'markAttendance']
   },
@@ -99,6 +114,9 @@ export const BUSINESS_PRESETS = [
     hiddenModules: ['patients', 'students', 'prescription', 'appointments', 'designBook', 'fees', 'attendance', 'devices', 'serviceJobs', 'clients', 'projects'],
     defaultCustomerLabel: 'Clients',
     defaultInvoiceLabel: 'Invoice',
+    defaultProductLabel: 'Apparel / Stitch',
+    defaultPortalLabel: 'Client Portal',
+    defaultUnits: ['piece', 'pair', 'meter', 'suit'],
     dashboardKpis: ['pendingOrders', 'completedOrders', 'dueAmount', 'dailySales'],
     quickActions: ['addOrder', 'addMeasurement', 'addCustomer']
   },
@@ -112,6 +130,9 @@ export const BUSINESS_PRESETS = [
     hiddenModules: ['products', 'patients', 'students', 'prescription', 'appointments', 'measurements', 'fees', 'attendance', 'devices', 'serviceJobs', 'clients', 'projects'],
     defaultCustomerLabel: 'Clients',
     defaultInvoiceLabel: 'Invoice',
+    defaultProductLabel: 'Design / Item',
+    defaultPortalLabel: 'Client Portal',
+    defaultUnits: ['piece', 'design', 'meter', 'saree'],
     dashboardKpis: ['activeDesigns', 'pendingOrders', 'dueAmount', 'dailySales'],
     quickActions: ['addDesign', 'addOrder', 'addCustomer']
   },
@@ -125,6 +146,9 @@ export const BUSINESS_PRESETS = [
     hiddenModules: ['products', 'patients', 'students', 'prescription', 'appointments', 'measurements', 'designBook', 'fees', 'attendance', 'orders', 'delivery', 'devices', 'serviceJobs', 'customers', 'paymentProofs'],
     defaultCustomerLabel: 'Clients',
     defaultInvoiceLabel: 'Invoice',
+    defaultProductLabel: 'Service',
+    defaultPortalLabel: 'Client Portal',
+    defaultUnits: ['hour', 'project', 'milestone', 'day', 'retainer'],
     dashboardKpis: ['activeProjects', 'unpaidInvoices', 'totalRevenue', 'clientsCount'],
     quickActions: ['addProject', 'addInvoice', 'addClient']
   },
@@ -138,6 +162,9 @@ export const BUSINESS_PRESETS = [
     hiddenModules: ['patients', 'students', 'prescription', 'appointments', 'measurements', 'designBook', 'fees', 'attendance', 'orders', 'delivery', 'devices', 'serviceJobs', 'clients', 'projects'],
     defaultCustomerLabel: 'Customers',
     defaultInvoiceLabel: 'Receipt',
+    defaultProductLabel: 'Food Item',
+    defaultPortalLabel: 'Billing Portal',
+    defaultUnits: ['plate', 'portion', 'bowl', 'piece', 'glass', 'cup'],
     dashboardKpis: ['dailySales', 'totalOrders', 'topItems', 'expenses'],
     quickActions: ['addOrder', 'addExpense', 'viewReports']
   },
@@ -151,6 +178,9 @@ export const BUSINESS_PRESETS = [
     hiddenModules: ['patients', 'students', 'prescription', 'appointments', 'measurements', 'designBook', 'fees', 'attendance', 'devices', 'serviceJobs', 'clients', 'projects'],
     defaultCustomerLabel: 'Customers',
     defaultInvoiceLabel: 'Invoice',
+    defaultProductLabel: 'Product / Service',
+    defaultPortalLabel: 'Billing Portal',
+    defaultUnits: ['pcs', 'kg', 'gram', 'litre', 'ml', 'hour', 'project', 'box'],
     dashboardKpis: ['dailySales', 'totalInvoices', 'dueAmount', 'productsCount'],
     quickActions: ['addInvoice', 'addCustomer', 'viewReports']
   },
@@ -164,6 +194,9 @@ export const BUSINESS_PRESETS = [
     hiddenModules: ['billing', 'customers', 'products', 'dueLedger', 'expenses', 'patients', 'students', 'prescription', 'appointments', 'measurements', 'designBook', 'fees', 'attendance', 'orders', 'delivery', 'devices', 'serviceJobs', 'clients', 'projects', 'payments', 'paymentProofs'],
     defaultCustomerLabel: 'Customers',
     defaultInvoiceLabel: 'Bill',
+    defaultProductLabel: 'Service',
+    defaultPortalLabel: 'Billing Portal',
+    defaultUnits: ['hour', 'page', 'service', 'document'],
     dashboardKpis: [],
     quickActions: []
   },
@@ -177,6 +210,9 @@ export const BUSINESS_PRESETS = [
     hiddenModules: ['products', 'dueLedger', 'expenses', 'paymentProofs', 'patients', 'students', 'prescription', 'appointments', 'measurements', 'designBook', 'fees', 'attendance', 'orders', 'delivery', 'devices', 'serviceJobs', 'clients', 'projects', 'payments'],
     defaultCustomerLabel: 'Customers',
     defaultInvoiceLabel: 'Bill',
+    defaultProductLabel: 'Item',
+    defaultPortalLabel: 'Billing Portal',
+    defaultUnits: ['pcs', 'kg', 'gram', 'litre', 'ml', 'hour', 'project', 'box'],
     dashboardKpis: ['dailySales', 'totalInvoices', 'topCustomers'],
     quickActions: ['addInvoice']
   }
@@ -232,4 +268,49 @@ export const isEducationBusiness = (type) => {
          t.includes('school') ||
          t.includes('academy') ||
          t.includes('training center');
+};
+
+/**
+ * Returns the default product label for a given business type.
+ */
+export const getProductLabelByType = (type) => {
+  const preset = BUSINESS_PRESETS.find(p => p.id === type);
+  return preset?.defaultProductLabel || 'Product';
+};
+
+/**
+ * Returns the default portal label for a given business type.
+ */
+export const getPortalLabelByType = (type) => {
+  const preset = BUSINESS_PRESETS.find(p => p.id === type);
+  return preset?.defaultPortalLabel || 'Billing Portal';
+};
+
+/**
+ * Returns the default measurement units for a given business type.
+ */
+export const getUnitsByType = (type) => {
+  const preset = BUSINESS_PRESETS.find(p => p.id === type);
+  return preset?.defaultUnits || ['pcs', 'kg', 'gram', 'litre', 'hour'];
+};
+
+/**
+ * Returns the default category wording for a given business type.
+ */
+export const getCategoryWording = (billType) => {
+  switch (billType) {
+    case 'grocery': return { items: 'Items', qty: 'Qty', price: 'Unit Price', noteLabel: 'Product Notes & Terms' };
+    case 'repair': return { items: 'Services', qty: 'Unit', price: 'Labour + Parts', noteLabel: 'Repair Notes & Terms' };
+    case 'retail': return { items: 'Products', qty: 'Qty', price: 'Unit Price', noteLabel: 'Sales Notes & Terms' };
+    case 'custom': return { items: 'Services', qty: 'Qty', price: 'Rate', noteLabel: 'Notes & Terms' };
+    case 'doctor': return { items: 'Treatments', qty: 'Qty', price: 'Fee', noteLabel: 'Medical Notes' };
+    case 'tailor': return { items: 'Garments', qty: 'Qty', price: 'Stitching Charge', noteLabel: 'Tailoring Notes' };
+    case 'embroidery': return { items: 'Designs', qty: 'Qty', price: 'Embroidery Rate', noteLabel: 'Embroidery Notes' };
+    case 'teacher': return { items: 'Subjects', qty: 'Months', price: 'Fee', noteLabel: 'Tuition Notes' };
+    case 'service': return { items: 'Services', qty: 'Qty', price: 'Rate', noteLabel: 'Service Notes & Terms' };
+    case 'freelance': return { items: 'Services', qty: 'Hours/Qty', price: 'Rate', noteLabel: 'Project Notes & Terms' };
+    case 'restaurant': return { items: 'Food Item', qty: 'Qty', price: 'Price', noteLabel: 'Restaurant Notes' };
+    case 'cybercafe': return { items: 'Service/Doc', qty: 'Qty/Pages', price: 'Rate', noteLabel: 'Service Notes' };
+    default: return { items: 'Description', qty: 'Qty', price: 'Rate', noteLabel: 'Notes & Terms' };
+  }
 };

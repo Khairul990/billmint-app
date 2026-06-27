@@ -2,6 +2,7 @@ import React, { useRef, useState, useCallback, memo } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
 import { Plus, Copy, Trash2, GripVertical, FilePlus, ChevronDown } from 'lucide-react';
 import QuickProductBar from './QuickProductBar';
+import { getUnitsByType } from '../../../config/businessPresets';
 
 // Extracted pure function for row calculation
 const calculateRowAmount = (item) => {
@@ -22,7 +23,8 @@ const MemoizedBillRow = memo(({
   onKeyDown, 
   onCopyRow, 
   onDeleteRow, 
-  onToggleSelection 
+  onToggleSelection,
+  availableUnits
 }) => {
   return (
     <tr className={`grid-row group transition-all duration-200 border-b border-theme-border-soft ${isSelected ? 'bg-theme-accent/10 shadow-[inset_4px_0_0_var(--tw-colors-theme-accent)]' : 'hover:bg-theme-surface-hover'}`}>
@@ -78,12 +80,9 @@ const MemoizedBillRow = memo(({
             onKeyDown={(e) => onKeyDown(e, rowIndex, 3)}
             className="w-full h-full bg-transparent outline-none text-[11px] font-bold text-theme-muted py-2.5 pl-3 pr-5 cursor-pointer appearance-none"
           >
-            <option value="Piece">Piece</option>
-            <option value="Kg">Kg</option>
-            <option value="Meter">Meter</option>
-            <option value="Liter">Liter</option>
-            <option value="Box">Box</option>
-            <option value="Service">Service</option>
+            {availableUnits.map(u => (
+              <option key={u} value={u}>{u.charAt(0).toUpperCase() + u.slice(1)}</option>
+            ))}
           </select>
           <ChevronDown className="w-3 h-3 text-theme-muted absolute right-2 pointer-events-none" />
         </div>
@@ -153,7 +152,8 @@ const MemoizedMobileBillRow = memo(({
   item, 
   rowIndex, 
   onUpdateItem, 
-  onDeleteRow 
+  onDeleteRow,
+  availableUnits
 }) => {
   return (
     <div className="bg-theme-surface rounded-2xl p-4 mb-4 border border-theme-border-soft shadow-sm relative group overflow-hidden">
@@ -216,12 +216,9 @@ const MemoizedMobileBillRow = memo(({
                 onChange={(e) => onUpdateItem(rowIndex, 'unit', e.target.value)}
                 className="w-full bg-theme-app/50 border border-theme-border-soft rounded-lg px-2 py-1.5 outline-none text-[10px] font-bold text-theme-muted appearance-none"
               >
-                <option value="Piece">Piece</option>
-                <option value="Kg">Kg</option>
-                <option value="Meter">Meter</option>
-                <option value="Liter">Liter</option>
-                <option value="Box">Box</option>
-                <option value="Service">Service</option>
+                {availableUnits.map(u => (
+                  <option key={u} value={u}>{u.charAt(0).toUpperCase() + u.slice(1)}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -275,6 +272,9 @@ const ExcelBillTable = ({ products }) => {
   const { state, dispatch } = useInvoice();
   const tableRef = useRef(null);
   const [selectedRows, setSelectedRows] = useState(new Set());
+  
+  const wsType = state.businessSettings?.businessWorkspaces?.find(ws => ws.id === state.businessSettings.activeWorkspaceId)?.type || state.businessSettings?.type || 'retail';
+  const availableUnits = getUnitsByType(wsType);
 
   // Use useCallback to prevent recreating functions on every render
   const handleUpdateItem = useCallback((index, field, value) => {
@@ -458,6 +458,7 @@ const ExcelBillTable = ({ products }) => {
                     onCopyRow={handleCopyRow}
                     onDeleteRow={handleDeleteRow}
                     onToggleSelection={toggleRowSelection}
+                    availableUnits={availableUnits}
                   />
                 ))}
               </tbody>
@@ -482,6 +483,7 @@ const ExcelBillTable = ({ products }) => {
                   rowIndex={rowIndex}
                   onUpdateItem={handleUpdateItem}
                   onDeleteRow={handleDeleteRow}
+                  availableUnits={availableUnits}
                 />
               ))}
             </div>

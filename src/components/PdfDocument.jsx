@@ -290,19 +290,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const getCategoryWording = (billType) => {
-  switch (billType) {
-    case 'grocery': return { items: 'Items', qty: 'Qty', price: 'Unit Price', noteLabel: 'Product Notes & Terms' };
-    case 'repair': return { items: 'Services', qty: 'Unit', price: 'Labour + Parts', noteLabel: 'Repair Notes & Terms' };
-    case 'retail': return { items: 'Products', qty: 'Qty', price: 'Unit Price', noteLabel: 'Sales Notes & Terms' };
-    case 'custom': return { items: 'Services', qty: 'Qty', price: 'Rate', noteLabel: 'Notes & Terms' };
-    case 'doctor': return { items: 'Treatments', qty: 'Qty', price: 'Fee', noteLabel: 'Medical Notes' };
-    case 'tailor': return { items: 'Garments', qty: 'Qty', price: 'Stitching Charge', noteLabel: 'Tailoring Notes' };
-    case 'embroidery': return { items: 'Designs', qty: 'Qty', price: 'Embroidery Rate', noteLabel: 'Embroidery Notes' };
-    case 'teacher': return { items: 'Subjects', qty: 'Months', price: 'Fee', noteLabel: 'Tuition Notes' };
-    default: return { items: 'Description', qty: 'Qty', price: 'Rate', noteLabel: 'Notes & Terms' };
-  }
-};
+import { getCategoryWording } from '../config/businessPresets';
 
 const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' }) => {
   if (!invoice) return null;
@@ -451,7 +439,9 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
                 {item.size && <Text style={{ fontSize: 7.5, color: '#64748b' }}>Size: {item.size}</Text>}
                 {item.sizeVariant && <Text style={{ fontSize: 7.5, color: '#64748b' }}>Variant: {item.sizeVariant}</Text>}
               </View>
-              <Text style={[styles.tableCell, styles.colQty]}>{item.qty !== undefined ? item.qty : item.quantity}</Text>
+              <Text style={[styles.tableCell, styles.colQty]}>
+                {item.qty !== undefined ? item.qty : item.quantity} {item.unit ? item.unit.toUpperCase() : ''}
+              </Text>
               <Text style={[styles.tableCell, styles.colRate]}>{formatCurrency(item.rate !== undefined ? item.rate : item.price, currencySymbol, regionalPrefs.numberFormat)}</Text>
               <Text style={[styles.tableCell, styles.colAmt]}>{formatCurrency(item.amount !== undefined ? item.amount : item.total, currencySymbol, regionalPrefs.numberFormat)}</Text>
             </View>

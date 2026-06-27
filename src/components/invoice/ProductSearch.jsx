@@ -14,15 +14,20 @@ const ProductSearch = ({
   const wrapperRef = useRef(null);
 
   useEffect(() => {
+    // Filter out invalid products first
+    const validProducts = products.filter(p => p.name || p.productName);
+    
     if (value) {
       const lower = value.toLowerCase();
-      const matches = products.filter(p => 
-        p.name?.toLowerCase().includes(lower) || 
-        p.description?.toLowerCase().includes(lower)
-      );
+      const matches = validProducts.filter(p => {
+        const pName = (p.name || p.productName || '').toLowerCase();
+        const pDesc = (p.description || '').toLowerCase();
+        // Improve search accuracy (matches start of word or substring better)
+        return pName.includes(lower) || pDesc.includes(lower);
+      });
       setFiltered(matches);
     } else {
-      setFiltered(products.slice(0, 5)); // Show top 5 when empty
+      setFiltered(validProducts.slice(0, 5)); // Show top 5 when empty
     }
   }, [value, products]);
 
@@ -53,29 +58,36 @@ const ProductSearch = ({
         {/* We don't add an icon here to match other inputs, but we could add a subtle search icon */}
       </div>
 
-      {isOpen && filtered.length > 0 && (
+      {isOpen && (
         <div className="absolute z-[100] w-full mt-1 bg-theme-card border border-theme-border-soft rounded-xl shadow-xl max-h-60 overflow-y-auto overflow-x-hidden">
-          {filtered.map(product => (
-            <button
-              key={product.id}
-              type="button"
-              onClick={() => {
-                onSelectProduct(product);
-                setIsOpen(false);
-              }}
-              className="w-full text-left px-4 py-3 border-b border-theme-border-soft last:border-0 hover:bg-theme-surface transition-colors flex flex-col gap-1"
-            >
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-theme-primary text-sm">{product.name}</span>
-                <span className="font-mono text-xs text-theme-accent font-bold">
-                  {product.price > 0 ? `₹${product.price}` : ''}
-                </span>
-              </div>
-              {product.description && (
-                <span className="text-[10px] text-theme-muted line-clamp-1">{product.description}</span>
-              )}
-            </button>
-          ))}
+          {filtered.length > 0 ? (
+            filtered.map(product => (
+              <button
+                key={product.id || Math.random().toString()}
+                type="button"
+                onClick={() => {
+                  onSelectProduct(product);
+                  setIsOpen(false);
+                }}
+                className="w-full text-left px-4 py-3 border-b border-theme-border-soft last:border-0 hover:bg-theme-surface transition-colors flex flex-col gap-1"
+              >
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-theme-primary text-sm">{product.name || product.productName}</span>
+                  <span className="font-mono text-xs text-theme-accent font-bold">
+                    {(product.price > 0 || product.rate > 0) ? `₹${product.price || product.rate}` : ''}
+                  </span>
+                </div>
+                {product.description && (
+                  <span className="text-[10px] text-theme-muted line-clamp-1">{product.description}</span>
+                )}
+              </button>
+            ))
+          ) : (
+            <div className="px-4 py-4 text-center">
+              <span className="text-xs font-bold text-theme-muted">No products found</span>
+              {value && <span className="block text-[10px] text-theme-muted/70 mt-1">Press enter to add as new item</span>}
+            </div>
+          )}
         </div>
       )}
     </div>

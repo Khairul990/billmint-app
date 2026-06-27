@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 // Register Google Fonts to support regional currency symbols and scripts
@@ -457,9 +457,9 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
               </Text>
             )}
             {invoice.billType === 'retail' ? (
-              <Text style={{ width: '12%', textAlign: 'center' }}>{item.qty}</Text>
+              <Text style={{ width: '12%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
             ) : (
-              <Text style={styles.compactColQty}>{item.qty}</Text>
+              <Text style={styles.compactColQty}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
             )}
             {invoice.billType === 'retail' ? (
               <Text style={{ width: '12%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
@@ -658,40 +658,40 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
               <>
                 <Text style={{ width: '43%' }}>{item.description || 'Item'}</Text>
                 <Text style={{ width: '15%', textAlign: 'center' }}>{item.size || 'N/A'}</Text>
-                <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty}</Text>
+                <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '15%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
               </>
             ) : invoice.billType === 'service' ? (
               <>
                 <Text style={{ width: '25%' }}>{item.designNo || 'Service'}</Text>
                 <Text style={{ width: '30%' }}>{item.description || 'N/A'}</Text>
-                <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty}</Text>
+                <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '18%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
               </>
             ) : invoice.billType === 'tailor' ? (
               <>
                 <Text style={{ width: '40%' }}>{item.description || 'Work'}</Text>
-                <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty}</Text>
+                <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '10%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
               </>
             ) : invoice.billType === 'doctor' || invoice.billType === 'teacher' ? (
               <>
                 <Text style={{ width: '45%' }}>{item.description || 'Fee'}</Text>
-                <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty}</Text>
+                <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '10%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
               </>
             ) : invoice.billType === 'repair' ? (
               <>
                 <Text style={{ width: '15%' }}>{item.designNo || 'Repair'}</Text>
                 <Text style={{ width: '30%' }}>{item.description || 'N/A'}</Text>
-                <Text style={{ width: '8%', textAlign: 'center' }}>{item.qty}</Text>
+                <Text style={{ width: '8%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '10%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
               </>
             ) : invoice.billType === 'retail' ? (
               <>
                 <Text style={{ width: '28%' }}>{item.description || 'Product'}</Text>
                 <Text style={{ width: '10%', textAlign: 'center' }}>{item.size || 'N/A'}</Text>
-                <Text style={{ width: '8%', textAlign: 'center' }}>{item.qty}</Text>
+                <Text style={{ width: '8%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '10%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
                 <Text style={{ width: '8%', textAlign: 'right' }}>{item.discount || 0}</Text>
               </>
@@ -701,7 +701,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
                 <Text style={styles.colWorkType}>{item.workType || 'Standard'}</Text>
                 <Text style={styles.colDesc}>{item.description || 'Stitching Work'}</Text>
                 <Text style={styles.colSize}>{item.size || 'N/A'}</Text>
-                <Text style={styles.colQty}>{item.qty}</Text>
+                <Text style={styles.colQty}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={styles.colRate}>{parseFloat(item.rate).toFixed(2)}</Text>
               </>
             )}

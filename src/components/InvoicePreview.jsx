@@ -2,6 +2,7 @@ import React from 'react';
 import DynamicQRCode from './DynamicQRCode';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { ShieldCheck, Calendar, Hash, FileText } from 'lucide-react';
+import { getCategoryWording } from '../config/businessPresets';
 
 /**
  * High-fidelity Printable Invoice Letterhead Layout
@@ -76,6 +77,9 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
   };
 
   const currentStepIdx = getStepIndex(invoice.orderStatus);
+
+  const billType = invoice.billType || 'default';
+  const categoryWords = getCategoryWording(billType);
 
   return (
     <div 
@@ -231,9 +235,9 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="border-b border-theme-border-soft dark:border-theme-border-soft text-theme-muted dark:text-theme-muted font-bold uppercase tracking-wider">
-              <th className="pb-3 text-left">Item Description</th>
-              <th className="pb-3 text-center w-20">Qty</th>
-              <th className="pb-3 text-right w-32">Unit Price</th>
+              <th className="pb-3 text-left">{categoryWords.items}</th>
+              <th className="pb-3 text-center w-20">{categoryWords.qty}</th>
+              <th className="pb-3 text-right w-32">{categoryWords.price}</th>
               <th className="pb-3 text-right w-32">Total</th>
             </tr>
           </thead>
@@ -260,6 +264,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
                 </td>
                 <td className="py-4 text-center font-bold text-theme-muted dark:text-theme-muted">
                   {item.qty !== undefined ? item.qty : item.quantity}
+                  {item.unit && <span className="text-[10px] ml-1 uppercase">{item.unit}</span>}
                 </td>
                 <td className="py-4 text-right font-semibold text-theme-muted dark:text-theme-muted">
                   {formatCurrency(item.rate !== undefined ? item.rate : item.price, currencySymbol, regionalPrefs.numberFormat)}
@@ -286,7 +291,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
         <div className="flex-1 max-w-sm">
           {invoice.notes && (
             <>
-              <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block text-[10px] mb-1.5">Notes & Terms</span>
+              <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block text-[10px] mb-1.5">{categoryWords.noteLabel}</span>
               <p className="text-xs text-theme-muted dark:text-theme-muted font-medium leading-relaxed bg-theme-app dark:bg-theme-surface/50 dark:bg-theme-app/20 rounded-2xl p-4 border border-theme-border-soft dark:border-theme-border-soft/50 dark:border-theme-border-soft/40 italic">
                 "{invoice.notes}"
               </p>
