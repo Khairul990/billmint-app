@@ -1,17 +1,19 @@
 import { z } from 'zod';
 
 export const invoiceSchema = z.object({
-  id: z.string().min(1, 'Invoice ID is required'),
-  invoiceNumber: z.string().min(1, 'Invoice number is required'),
+  id: z.string().nullish(),
+  invoiceNumber: z.string().nullish(),
   date: z.string().min(1, 'Date is required'),
   customerName: z.string().min(1, 'Customer name is required'),
   items: z.array(z.object({
     id: z.string().optional(),
-    name: z.string().min(1, 'Item name is required'),
-    quantity: z.number().min(0.01, 'Quantity must be > 0'),
-    price: z.number().min(0, 'Price cannot be negative'),
-    total: z.number()
-  })).min(1, 'At least one item is required'),
+    name: z.string().optional(),
+    qty: z.number().or(z.string()).optional(),
+    rate: z.number().or(z.string()).optional(),
+    quantity: z.number().or(z.string()).optional(),
+    price: z.number().or(z.string()).optional(),
+    total: z.number().or(z.string()).optional()
+  }).passthrough()).optional(),
   subtotal: z.number().min(0),
   taxTotal: z.number().min(0).optional(),
   discountTotal: z.number().min(0).optional(),
@@ -22,7 +24,7 @@ export const invoiceSchema = z.object({
 }).passthrough();
 
 export const customerSchema = z.object({
-  id: z.string().min(1, 'Customer ID is required'),
+  id: z.string().nullish(),
   name: z.string().min(1, 'Customer name is required'),
   phone: z.string().optional(),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
@@ -30,7 +32,7 @@ export const customerSchema = z.object({
 }).passthrough();
 
 export const productSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().nullish(),
   name: z.string().min(1, 'Product name is required'),
   price: z.number().min(0, 'Price cannot be negative'),
   stockQty: z.number().min(0).optional(),
