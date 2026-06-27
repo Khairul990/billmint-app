@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { staggerContainer, staggerItem, fadeInUp } from '../utils/animations';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { staggerContainer, staggerItem, fadeInUp, buttonTap, cardHover, scaleOnHover } from '../utils/animations';
 import { ArrowRight, CheckCircle2, FileSpreadsheet, ShieldCheck, TrendingUp, Users, Sparkles, Download, Link2, Smartphone, Printer, CreditCard, Star, HelpCircle, ChevronDown, MessageCircle, Mail, MapPin, DollarSign, Clock, BarChart3, Globe, Zap } from 'lucide-react';
 import Logo from '../components/Logo';
 import Login from './Login';
@@ -129,13 +129,13 @@ const Landing = ({ onLoginSuccess }) => {
               Streamline your invoicing process, manage customers effortlessly, and get paid faster with BillQyro's premium SaaS platform.
             </motion.p>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-              <button onClick={() => scrollTo('login')} className="btn-premium w-full sm:w-auto px-8 py-4 text-base">
+              <motion.button variants={buttonTap} initial="rest" whileHover="hover" whileTap="tap" onClick={() => scrollTo('login')} className="btn-premium w-full sm:w-auto px-8 py-4 text-base">
                 Start Invoicing Now
                 <ArrowRight className="w-5 h-5" />
-              </button>
-              <button onClick={() => scrollTo('features')} className="btn-premium-outline w-full sm:w-auto px-8 py-4 text-base">
+              </motion.button>
+              <motion.button variants={buttonTap} initial="rest" whileHover="hover" whileTap="tap" onClick={() => scrollTo('features')} className="btn-premium-outline w-full sm:w-auto px-8 py-4 text-base">
                 Explore Features
-              </button>
+              </motion.button>
             </motion.div>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="pt-4 flex flex-wrap items-center gap-6 justify-center lg:justify-start text-theme-muted text-sm font-semibold">
               <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-theme-accent" /> No credit card required</div>
@@ -201,8 +201,8 @@ const Landing = ({ onLoginSuccess }) => {
           </div>
           <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {features.map((feature, idx) => (
-              <motion.div key={idx} variants={staggerItem} whileHover={{ y: -8, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-premium p-6 sm:p-8 rounded-3xl hover:border-theme-accent/30 transition-all duration-300 group hover:shadow-2xl hover:shadow-theme-accent/10">
-                <div className="w-12 h-12 rounded-2xl bg-theme-card border border-theme-border-soft flex items-center justify-center mb-5 group-hover:scale-110 transition-transform group-hover:bg-theme-accent/10 group-hover:border-theme-accent/30"><feature.icon className="w-6 h-6 text-theme-accent" /></div>
+              <motion.div key={idx} variants={staggerItem} whileHover="hover" whileTap="tap" className="card-premium p-6 sm:p-8 rounded-3xl hover:border-theme-accent/30 transition-all duration-300 group hover:shadow-2xl hover:shadow-theme-accent/10">
+                <motion.div variants={scaleOnHover} className="w-12 h-12 rounded-2xl bg-theme-card border border-theme-border-soft flex items-center justify-center mb-5 group-hover:bg-theme-accent/10 group-hover:border-theme-accent/30"><feature.icon className="w-6 h-6 text-theme-accent" /></motion.div>
                 <h3 className="text-lg font-bold text-theme-primary mb-2">{feature.title}</h3>
                 <p className="text-sm text-theme-muted font-medium leading-relaxed">{feature.desc}</p>
               </motion.div>
@@ -384,8 +384,8 @@ const Landing = ({ onLoginSuccess }) => {
           </div>
           <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {templates.map((tpl, idx) => (
-              <motion.div key={idx} variants={staggerItem} whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-premium p-5 sm:p-6 rounded-2xl hover:border-theme-accent/30 hover:shadow-2xl hover:shadow-theme-accent/10 transition-all duration-300 group cursor-default">
-                <div className="text-3xl mb-3">{tpl.icon}</div>
+              <motion.div key={idx} variants={staggerItem} whileHover="hover" whileTap="tap" className="card-premium p-5 sm:p-6 rounded-2xl hover:border-theme-accent/30 hover:shadow-2xl hover:shadow-theme-accent/10 transition-all duration-300 group cursor-default">
+                <motion.div variants={scaleOnHover} className="text-3xl mb-3">{tpl.icon}</motion.div>
                 <h3 className="text-lg font-bold text-theme-primary mb-1">{tpl.name}</h3>
                 <p className="text-sm text-theme-muted font-medium">{tpl.desc}</p>
               </motion.div>
@@ -487,8 +487,8 @@ const Landing = ({ onLoginSuccess }) => {
           </div>
           <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
             {pricingPlans.map((plan, idx) => (
-              <motion.div key={idx} variants={staggerItem} whileHover={{ scale: 1.04, y: -5 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className={`relative p-6 sm:p-8 rounded-3xl border-2 transition-all duration-300 ${
-                plan.popular ? 'border-theme-accent bg-theme-accent/5 shadow-xl shadow-theme-accent/10 scale-[1.02] md:scale-105' : 'card-premium hover:border-theme-accent/30'
+              <motion.div key={idx} variants={staggerItem} whileHover="hover" whileTap="tap" className={`relative p-6 sm:p-8 rounded-3xl border-2 transition-all duration-300 ${
+                plan.popular ? 'border-theme-accent bg-theme-accent/5 shadow-xl shadow-theme-accent/10 md:scale-105 z-10' : 'card-premium hover:border-theme-accent/30'
               }`}>
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[image:var(--accent-gradient)] text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">Most Popular</div>
@@ -503,9 +503,9 @@ const Landing = ({ onLoginSuccess }) => {
                     <li key={i} className="flex items-center gap-2 text-sm font-medium text-theme-muted"><CheckCircle2 className="w-4 h-4 text-theme-accent shrink-0" />{f}</li>
                   ))}
                 </ul>
-                <button onClick={() => scrollTo('login')} className={`w-full py-3.5 rounded-xl font-black text-sm transition-all active:scale-95 ${
+                <motion.button variants={buttonTap} initial="rest" whileHover="hover" whileTap="tap" onClick={() => scrollTo('login')} className={`w-full py-3.5 rounded-xl font-black text-sm transition-all ${
                   plan.popular ? 'bg-[image:var(--accent-gradient)] text-white shadow-lg hover:opacity-90' : 'bg-theme-surface border border-theme-border-soft text-theme-primary hover:bg-theme-accent hover:text-white hover:border-theme-accent'
-                }`}>{plan.cta}</button>
+                }`}>{plan.cta}</motion.button>
               </motion.div>
             ))}
           </motion.div>
