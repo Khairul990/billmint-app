@@ -1,19 +1,19 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import AnimatedPage from '../components/AnimatedPage';
 import {
-  Users,
   Plus,
   Search,
   Trash2,
   Edit2,
-  X,
   Save,
   Phone,
   Mail,
   UserPlus,
   MapPin,
   FileText,
+  Loader2,
 } from 'lucide-react';
 import BottomSheet from '../components/BottomSheet';
 import PullToRefresh from '../components/PullToRefresh';
@@ -106,19 +106,13 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
     );
   }), [customers, searchQuery]);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 20;
+  const ITEMS_PER_PAGE = 30;
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
+  const { displayCount, loadMoreRef } = useInfiniteScroll(filteredCustomers.length, ITEMS_PER_PAGE);
 
   const paginatedCustomers = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredCustomers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredCustomers, currentPage]);
-
-  const totalPages = Math.ceil(filteredCustomers.length / ITEMS_PER_PAGE);
+    return filteredCustomers.slice(0, displayCount);
+  }, [filteredCustomers, displayCount]);
 
   const handleRefresh = useCallback(async () => {
     await syncFromFirestore();
@@ -247,25 +241,9 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
           )}
         </div>
 
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-4 mt-8 pb-4">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              className="px-4 py-2 rounded-xl bg-theme-surface border border-theme-border-soft disabled:opacity-50 text-xs font-bold text-theme-primary transition-colors hover:bg-theme-border-soft"
-            >
-              Previous
-            </button>
-            <span className="text-xs font-semibold text-theme-muted">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              className="px-4 py-2 rounded-xl bg-theme-surface border border-theme-border-soft disabled:opacity-50 text-xs font-bold text-theme-primary transition-colors hover:bg-theme-border-soft"
-            >
-              Next
-            </button>
+        {displayCount < filteredCustomers.length && (
+          <div ref={loadMoreRef} className="flex justify-center items-center py-6 w-full text-theme-muted font-bold text-sm opacity-50">
+            <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading more...
           </div>
         )}
 

@@ -469,6 +469,16 @@ const Dashboard = ({
     <AnimatedPage>
       <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
         <div className="min-h-screen bg-theme-surface/50">
+          {(isInitialLoad || isLoading) ? (
+            <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+              <KPISkeleton count={4} />
+              <div className="grid lg:grid-cols-2 gap-6 mt-6">
+                <ChartSkeleton />
+                <ChartSkeleton />
+              </div>
+            </div>
+          ) : (
+            <>
           {expiryDays !== null && expiryDays <= 30 && (
             <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 mt-4">
               <div className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${
@@ -1137,7 +1147,7 @@ const Dashboard = ({
               {isInitialLoad ? (
                 <KPISkeleton count={4} />
               ) : (
-                <>
+                <div>
                   <StatCard
                     title="Total Revenue"
                     value={formatCurrency(totalRevenue)}
@@ -1170,7 +1180,8 @@ const Dashboard = ({
                     trendUp={true}
                     subtitle="Registered customers"
                   />
-                </>
+                </div>
+
               )}
             </motion.div>
 
@@ -1492,6 +1503,7 @@ const Dashboard = ({
                         onAction={onQuickBillOpen}
                         size="sm"
                       />
+
                     </div>
                   ) : (
                     recentInvoices.slice(0, 5).map(inv => (
@@ -1671,7 +1683,8 @@ const Dashboard = ({
                 </button>
               </motion.div>
             )}
-          </motion.div>
+
+          
         </div>
       </div>
 

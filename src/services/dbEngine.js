@@ -214,7 +214,43 @@ export const logAudit = async (action, entityType, entityId, before = null, afte
 let syncDebounceTimer = null;
 let isSyncing = false;
 
-export const syncOfflineTransactions = () => {
+// --- STALE DATA CLEANUP ---
+export const cleanupStaleData = async () => {
+  try {
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    
+    // Clean old deleted invoices (in trash for > 30 days)
+    const invoices = await BillQyroDB.getAll('invoices');
+    let deletedCount = 0;
+    for (const inv of invoices) {
+      if (inv.isDeleted && inv.deletedAt) {
+        const deletedTime = new Date(inv.deletedAt).getTime();
+        if (now - deletedTime > THIRTY_DAYS_MS) {
+          await BillQyroDB.delete('invoices', inv.id);
+          deletedCount++;
+        }
+      }
+    }
+
+    // Clean stale syncQueue items (stuck for > 7 days)
+    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+    const queue = await BillQyroDB.getAll('syncQueue');
+    for (const item of queue) {
+      if (now - item.timestamp > SEVEN_DAYS_MS) {
+        await BillQyroDB.delete('syncQueue', item.id);
+      }
+    }
+    
+    if (deletedCount > 0) {
+      console.log(`[DB Cleanup] Removed ${deletedCount} stale deleted invoices.`);
+    }
+  } catch (err) {
+    console.warn('[DB Cleanup] Error during cleanup:', err);
+  }
+};
+
+export const syncOfflineTransactions = async () => {
   return new Promise((resolve) => {
     if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
     
@@ -856,6 +892,7 @@ export const initializeStorage = () => {
 
   // Trigger IndexedDB offline-first synchronization and migrations asynchronously
   migrateLocalStorageToIndexedDB();
+  cleanupStaleData();
   syncOfflineTransactions();
 };
 

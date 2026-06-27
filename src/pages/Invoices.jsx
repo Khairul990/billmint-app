@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import AnimatedPage from '../components/AnimatedPage';
 import InvoiceCard from '../components/InvoiceCard';
 import InvoicePreview from '../components/InvoicePreview';
@@ -71,8 +72,8 @@ const Invoices = ({
   const [statusFilter, setStatusFilter] = useState('All');
   const [viewMode, setViewMode] = useState('active'); // 'active' or 'trash'
   
-  const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 20;
+  // Removed manual currentPage state
+  const ITEMS_PER_PAGE = 30; // Increased base load for infinite scroll
   // Modal Preview State
   const [viewingInvoice, setViewingInvoice] = useState(null);
   const [generatingLink, setGeneratingLink] = useState(false);
@@ -302,16 +303,11 @@ const Invoices = ({
     return result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }, [invoices, searchQuery, statusFilter, viewMode]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, statusFilter, viewMode]);
+  const { displayCount, loadMoreRef } = useInfiniteScroll(filteredInvoices.length, ITEMS_PER_PAGE);
 
   const paginatedInvoices = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredInvoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredInvoices, currentPage]);
-
-  const totalPages = Math.ceil(filteredInvoices.length / ITEMS_PER_PAGE);
+    return filteredInvoices.slice(0, displayCount);
+  }, [filteredInvoices, displayCount]);
 
   const handlePrint = () => {
     window.print();
@@ -474,26 +470,9 @@ const Invoices = ({
             onAction={() => setCurrentTab('create-invoice')}
           />
         )}
-
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-4 mt-8 pb-4">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              className="px-4 py-2 rounded-xl bg-theme-surface border border-theme-border-soft disabled:opacity-50 text-xs font-bold text-theme-primary transition-colors hover:bg-theme-border-soft"
-            >
-              Previous
-            </button>
-            <span className="text-xs font-semibold text-theme-muted">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              className="px-4 py-2 rounded-xl bg-theme-surface border border-theme-border-soft disabled:opacity-50 text-xs font-bold text-theme-primary transition-colors hover:bg-theme-border-soft"
-            >
-              Next
-            </button>
+        {displayCount < filteredInvoices.length && (
+          <div ref={loadMoreRef} className="flex justify-center items-center py-6 w-full text-theme-muted font-bold text-sm opacity-50">
+            <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading more invoices...
           </div>
         )}
       </div>

@@ -14,6 +14,7 @@ import { calculateTotals } from './utils/invoiceUtils';
 import { isEducationBusiness } from './config/businessPresets';
 
 import PostLoginWelcome from './components/PostLoginWelcome';
+import { invoiceSchema, customerSchema, validatePayload } from './utils/validation';
 import ClassicLoader from './components/ClassicLoader';
 import {
   getAuthSession,
@@ -833,6 +834,15 @@ function App() {
       delete payload.settings;
     }
 
+    // Advanced Payload Validation
+    const validationResult = validatePayload(invoiceSchema, payload);
+    if (!validationResult.success && !isDemoSessionActive) {
+      toast.error('Validation Error: Invalid invoice data.');
+      console.error('Invoice Validation Failed:', validationResult.errors);
+      return;
+    }
+    const validatedPayload = validationResult.success ? validationResult.data : payload;
+
     // Final Integrity Check
     if (payload.items && payload.items.length > 0) {
       const hasValidItems = payload.items.some(i => (parseFloat(i.qty) || 0) > 0 && (parseFloat(i.rate) || 0) > 0);
@@ -1054,16 +1064,25 @@ function App() {
 
   // Customers
   const handleSaveCustomer = async (payload) => {
+    // Validate Customer Payload
+    const validationResult = validatePayload(customerSchema, payload);
+    if (!validationResult.success) {
+      toast.error('Validation Error: Invalid customer data.');
+      console.error('Customer Validation Failed:', validationResult.errors);
+      return;
+    }
+    const validatedCust = validationResult.data;
+
     if (isDemoSessionActive) {
-      if (!payload.id) {
-        payload.id = 'demo-cust-' + Date.now();
+      if (!validatedCust.id) {
+        validatedCust.id = 'demo-cust-' + Date.now();
       }
-      saveDemoCustomer(payload);
+      saveDemoCustomer(validatedCust);
       toast.success('Saved to Demo Session');
       return;
     }
     try {
-      const { updatedCustomers, firebaseStatus } = await saveCustomer(payload);
+      const { updatedCustomers, firebaseStatus } = await saveCustomer(validatedCust);
       setCustomers(updatedCustomers);
       if (firebaseStatus === 'failed') {
         toast.success('Customer saved locally. Will sync with cloud when online.');

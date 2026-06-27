@@ -22,6 +22,8 @@ import CenteredModal from '../components/CenteredModal';
 import { toast } from 'react-hot-toast';
 import PullToRefresh from '../components/PullToRefresh';
 import { syncFromFirestore } from '../services/dbEngine';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
+import { Loader2 } from 'lucide-react';
 
 /**
  * Products and Services Catalog Page
@@ -129,6 +131,13 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
     );
   }), [products, searchQuery]);
 
+  const ITEMS_PER_PAGE = 30;
+  const { displayCount, loadMoreRef } = useInfiniteScroll(filteredProducts.length, ITEMS_PER_PAGE);
+
+  const paginatedProducts = useMemo(() => {
+    return filteredProducts.slice(0, displayCount);
+  }, [filteredProducts, displayCount]);
+
   const handleRefresh = async () => {
     await syncFromFirestore();
     window.dispatchEvent(new Event('billqyro_sync'));
@@ -183,7 +192,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
 
         {/* DYNAMIC LIST GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-          {filteredProducts.map((prod) => (
+          {paginatedProducts.map((prod) => (
             <div 
               key={prod.id}
               className="bg-theme-card dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-3xl p-5 shadow-premium hover:shadow-premium-hover transition-all duration-300 relative flex flex-col justify-between"
@@ -271,6 +280,12 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
             </div>
           )}
         </div>
+
+        {displayCount < filteredProducts.length && (
+          <div ref={loadMoreRef} className="flex justify-center items-center py-6 w-full text-theme-muted font-bold text-sm opacity-50">
+            <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading more products...
+          </div>
+        )}
 
         {/* DYNAMIC MODAL OVERLAY */}
         <CenteredModal 
