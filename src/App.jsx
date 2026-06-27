@@ -862,6 +862,7 @@ function App() {
 
     let productsUpdated = false;
     const currentProducts = [...products];
+    const updatedProductIds = new Set();
 
     // 1. If editing an existing invoice, reverse previous stock deduction
     const oldInvoice = payload.id ? invoices.find(inv => inv.id === payload.id) : null;
@@ -874,6 +875,7 @@ function App() {
         if (matchedProduct && matchedProduct.stockQty !== undefined) {
           const oldQty = parseFloat(oldItem.qty) || 1;
           matchedProduct.stockQty += oldQty;
+          updatedProductIds.add(matchedProduct.id);
           productsUpdated = true;
         }
       }
@@ -895,6 +897,7 @@ function App() {
         } else {
           matchedProduct.stockQty = currentStock - requestedQty;
         }
+        updatedProductIds.add(matchedProduct.id);
         productsUpdated = true;
       } else {
         unlinkedItems = true;
@@ -903,7 +906,9 @@ function App() {
 
     if (productsUpdated) {
       for (const p of currentProducts) {
-        await saveProduct(p);
+        if (updatedProductIds.has(p.id)) {
+          await saveProduct(p);
+        }
       }
       setProducts(currentProducts);
     }

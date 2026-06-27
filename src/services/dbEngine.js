@@ -1817,8 +1817,9 @@ export const saveInvoice = async (invoice) => {
       : (activeSettings.nextInvoiceNumber || 1);
     
     // Check for duplicates
+    const existingNumbers = new Set(invoices.map(inv => inv.invoiceNumber));
     let uniqueStr = `${prefix}${String(nextNum).padStart(4, '0')}`;
-    while (invoices.some(inv => inv.invoiceNumber === uniqueStr)) {
+    while (existingNumbers.has(uniqueStr)) {
       nextNum++;
       uniqueStr = `${prefix}${String(nextNum).padStart(4, '0')}`;
     }
@@ -1843,8 +1844,9 @@ export const saveInvoice = async (invoice) => {
       let nextNum = isEstimate 
         ? (activeSettings.nextEstimateNumber || 1) 
         : (activeSettings.nextInvoiceNumber || 1);
+      const existingNumbers = new Set(invoices.map(inv => inv.invoiceNumber));
       let uniqueStr = `${prefix}${String(nextNum).padStart(4, '0')}`;
-      while (invoices.some(inv => inv.invoiceNumber === uniqueStr)) {
+      while (existingNumbers.has(uniqueStr)) {
         nextNum++;
         uniqueStr = `${prefix}${String(nextNum).padStart(4, '0')}`;
       }
