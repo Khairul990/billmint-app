@@ -133,6 +133,22 @@ export const queueSyncTransaction = async (action, storeName, docId, data) => {
     return null;
   }
   const userId = getRealUserId();
+
+  // --- DUPLICATE SYNC QUEUE PREVENTION ---
+  // Remove any existing pending transactions for the same document to prevent duplicate uploads.
+  // Only the latest version of the data needs to be synced.
+  try {
+    const existingQueue = await BillQyroDB.getAll('syncQueue');
+    const duplicates = existingQueue.filter(tx =>
+      tx.storeName === storeName && tx.docId === docId && tx.userId === userId && tx.status === 'pending'
+    );
+    for (const dup of duplicates) {
+      await BillQyroDB.delete('syncQueue', dup.id);
+    }
+  } catch (e) {
+    console.warn('[SYNC QUEUE] Could not deduplicate queue:', e);
+  }
+
   const transactionId = 'tx-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
   let deviceId = 'Unknown Device';
   try {
@@ -1599,7 +1615,22 @@ export const saveCustomer = async (customer) => {
       logAudit('customer_created', 'customer', customer.id, null, customer);
     }
   } else {
-    customer.id = 'c-' + Date.now();
+    // --- DUPLICATE CUSTOMER PREVENTION (idempotent creation) ---
+    const custName = (customer.name || customer.customerName || '').trim().toLowerCase();
+    const custPhone = (customer.phone || customer.customerPhone || '').trim();
+    if (custName) {
+      const existingDupe = customers.find(c => {
+        const cName = (c.name || c.customerName || '').trim().toLowerCase();
+        const cPhone = (c.phone || c.customerPhone || '').trim();
+        return cName === custName && cPhone === custPhone;
+      });
+      if (existingDupe) {
+        // Return existing customer instead of creating a duplicate
+        console.warn('[DATA INTEGRITY] Duplicate customer prevented:', custName, custPhone);
+        return { updatedCustomers: customers, firebaseStatus: 'skipped_duplicate', existingId: existingDupe.id };
+      }
+    }
+    customer.id = 'c-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
     customers.push(stampRecord(customer, customer.userId));
     logAudit('customer_created', 'customer', customer.id, null, customer);
   }
@@ -1725,7 +1756,21 @@ export const saveProduct = async (product) => {
       logAudit('product_created', 'product', product.id, null, product);
     }
   } else {
-    product.id = 'p-' + Date.now();
+    // --- DUPLICATE PRODUCT PREVENTION (idempotent creation) ---
+    const prodName = (product.name || product.productName || '').trim().toLowerCase();
+    const prodPrice = parseFloat(product.price || product.rate || 0);
+    if (prodName) {
+      const existingDupe = products.find(p => {
+        const pName = (p.name || p.productName || '').trim().toLowerCase();
+        const pPrice = parseFloat(p.price || p.rate || 0);
+        return pName === prodName && pPrice === prodPrice;
+      });
+      if (existingDupe) {
+        console.warn('[DATA INTEGRITY] Duplicate product prevented:', prodName, prodPrice);
+        return { updatedProducts: products, firebaseStatus: 'skipped_duplicate', existingId: existingDupe.id };
+      }
+    }
+    product.id = 'p-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
     products.push(stampRecord(product, product.userId));
     logAudit('product_created', 'product', product.id, null, product);
   }
@@ -1998,7 +2043,7 @@ export const saveInvoice = async (invoice) => {
       logAudit('invoice_created', 'invoice', invoice.id, null, invoice);
     }
   } else {
-    invoice.id = 'inv-' + Date.now();
+    invoice.id = 'inv-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
     invoices.push(stampRecord({ ...invoice, createdAt: timestamp }, invoice.userId));
     logAudit('invoice_created', 'invoice', invoice.id, null, invoice);
   }
