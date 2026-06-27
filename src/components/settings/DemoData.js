@@ -30,10 +30,10 @@ export const DEMO_INVOICE = {
   dueDate: '15/07/2026',
   customer: DEMO_CUSTOMER,
   items: [
-    { description: 'Mathematics Tuition - Monthly Fee (June 2026)', quantity: 1, rate: 500, amount: 500 },
-    { description: 'Science Tuition - Monthly Fee (June 2026)', quantity: 1, rate: 500, amount: 500 },
-    { description: 'Study Materials & Practice Sheets', quantity: 1, rate: 200, amount: 200 },
-    { description: 'Lab Fee - Science Practicals', quantity: 1, rate: 150, amount: 150 }
+    { description: 'Mathematics Tuition - Monthly Fee (June 2026)', qty: 1, rate: 500, amount: 500 },
+    { description: 'Science Tuition - Monthly Fee (June 2026)', qty: 1, rate: 500, amount: 500 },
+    { description: 'Study Materials & Practice Sheets', qty: 1, rate: 200, amount: 200 },
+    { description: 'Lab Fee - Science Practicals', qty: 1, rate: 150, amount: 150 }
   ],
   subtotal: 1350,
   taxLabel: 'GST',

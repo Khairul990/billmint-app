@@ -17,7 +17,7 @@ const CardSkeleton = ({ lines = 3, className = '' }) => (
       </div>
     </div>
     {Array.from({ length: lines }).map((_, i) => (
-      <SkeletonLine key={i} width={`${Math.random() * 40 + 40}%`} className="mb-2" />
+      <SkeletonLine key={i} width={`${60 - i * 10}%`} className="mb-2" />
     ))}
   </div>
 );
@@ -25,7 +25,7 @@ const CardSkeleton = ({ lines = 3, className = '' }) => (
 const TableRowSkeleton = ({ cols = 4 }) => (
   <div className="flex items-center gap-4 py-3 px-4">
     {Array.from({ length: cols }).map((_, i) => (
-      <SkeletonLine key={i} width={`${Math.random() * 30 + 15}%`} />
+      <SkeletonLine key={i} width={`${35 - i * 5}%`} />
     ))}
   </div>
 );

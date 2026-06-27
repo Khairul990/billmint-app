@@ -1,5 +1,3 @@
-const DEFAULT_ADMIN_EMAIL = "khairul2052007@gmail.com";
-
 export function getUserEmail(user) {
   if (!user) return "";
   return (
@@ -17,7 +15,7 @@ export function getAdminEmail() {
   if (envEmail && envEmail !== 'undefined') return envEmail.toLowerCase().trim();
   if (envOwnerEmail && envOwnerEmail !== 'undefined') return envOwnerEmail.toLowerCase().trim();
   
-  return DEFAULT_ADMIN_EMAIL.toLowerCase().trim();
+  return null;
 }
 
 export function isAdminUser(user) {
@@ -27,9 +25,8 @@ export function isAdminUser(user) {
 
   const adminEmail = getAdminEmail();
   
-  // Allow if it matches the resolved admin email, OR the hardcoded default
-  // We also always allow localhost/dev environment for testing
   if (import.meta.env.DEV) return true;
+  if (!adminEmail) return false;
   
-  return userEmail === adminEmail || userEmail === DEFAULT_ADMIN_EMAIL.toLowerCase().trim();
+  return userEmail === adminEmail;
 }

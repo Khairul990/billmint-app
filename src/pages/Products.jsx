@@ -23,6 +23,7 @@ import { toast } from 'react-hot-toast';
 import PullToRefresh from '../components/PullToRefresh';
 import { syncFromFirestore } from '../services/dbEngine';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
+import { getUnitsByType } from '../config/businessPresets';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -42,11 +43,14 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
   // Form Fields
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
+  const [unit, setUnit] = useState('pcs');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [stockQty, setStockQty] = useState(0);
   const [lowStockThreshold, setLowStockThreshold] = useState(5);
 
+  const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.type || 'retail';
+  const availableUnits = useMemo(() => getUnitsByType(wsType), [wsType]);
   const currencySymbol = businessSettings?.currency || '₹';
 
   // --- ACTIONS ---
@@ -54,6 +58,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
     setEditingProduct(null);
     setName('');
     setPrice('');
+    setUnit('pcs');
     setDescription('');
     setCategory('');
     setStockQty(0);
@@ -65,6 +70,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
     setEditingProduct(prod);
     setName(prod.name);
     setPrice(prod.price !== undefined ? prod.price : (prod.rate !== undefined ? prod.rate : ''));
+    setUnit(prod.unit || 'pcs');
     setDescription(prod.description || '');
     setCategory(prod.category || '');
     setStockQty(prod.stockQty !== undefined ? prod.stockQty : 0);
@@ -72,7 +78,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
     setIsModalOpen(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (!name) {
       toast.error('Please specify an item name.');
@@ -89,6 +95,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
       name,
       price: parseFloat(price) || 0,
       rate: parseFloat(price) || 0,
+      unit,
       category,
       description,
       stockQty: parseInt(stockQty) || 0,
@@ -97,12 +104,11 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
     };
 
     try {
-      onSaveProduct(payload);
+      await onSaveProduct(payload);
+      setIsModalOpen(false);
     } catch (err) {
       toast.error('Failed to save product');
-      return;
     }
-    setIsModalOpen(false);
   };
 
   const handleDelete = (id) => {
@@ -270,6 +276,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                 <span className="text-[10px] text-theme-muted font-extrabold uppercase tracking-wider">M.R.P. Rate</span>
                 <span className="text-base font-black text-theme-accent">
                   {formatCurrency(prod.price, currencySymbol)}
+                  {prod.unit && <span className="text-[10px] text-theme-muted font-bold ml-1">/{prod.unit}</span>}
                 </span>
               </div>
             </div>
@@ -311,7 +318,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block mb-1 text-theme-muted">Unit Price ({currencySymbol})</label>
                 <input
@@ -324,6 +331,18 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
                   placeholder="e.g. 500"
                   className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
                 />
+              </div>
+              <div>
+                <label className="block mb-1 text-theme-muted">Unit</label>
+                <select
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
+                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
+                >
+                  {availableUnits.map(u => (
+                    <option key={u} value={u}>{u}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block mb-1 text-theme-muted">Category Tag</label>

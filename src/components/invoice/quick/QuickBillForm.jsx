@@ -59,7 +59,7 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
 
   const handleSave = (statusOverride) => {
     if (!state.customer.name) {
-      alert("Please add a customer name");
+      toast.error("Please add a customer name");
       return;
     }
 
@@ -71,7 +71,7 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
     }));
 
     if (cleanedItems.length === 0) {
-      alert("Please add at least one item");
+      toast.error("Please add at least one item");
       return;
     }
 

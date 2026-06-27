@@ -9,7 +9,6 @@ import { isEducationBusiness } from '../../config/businessPresets';
 const PREVIEW_TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'invoice', label: 'Invoice', icon: FileText },
-  { id: 'pdf', label: 'PDF', icon: FileText },
   { id: 'portal', label: 'Billing Portal', icon: Globe },
   { id: 'payment', label: 'Payment', icon: CreditCard },
   { id: 'student', label: 'Student Portal', icon: GraduationCap },

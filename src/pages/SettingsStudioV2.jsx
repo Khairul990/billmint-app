@@ -368,54 +368,106 @@ const SettingsStudioV2 = ({
       if (paymentMethod === 'Nagad' && !nagadNumber.trim()) { toast.error('Please specify your Nagad Number.'); setIsSaving(false); setSaveState('idle'); return; }
     }
 
-    setTimeout(() => {
-      try {
-        const payload = {
-          ...settings, businessName, logoUrl, ownerName, phone, whatsapp, email, address, gstNumber,
-          geminiApiKey, twilioAccountSid, twilioAuthToken, country, language, currency, currencyCode,
-          taxLabel, vatTax, dateFormat, numberFormat, invoicePrefix, defaultTax: parseFloat(defaultTax) || 0,
-          defaultNotes, terms, pdfFooter, upiId, paymentQrEnabled, paymentMethod, bkashNumber, nagadNumber,
-          rocketNumber, payeeName, paymentNote, showQrInPdf, showQrInPreview, customPaymentLink,
-          themeColor: themeId, themePreset, darkMode, brandColor, invoiceTemplate, defaultBillingTemplate,
-          enableHaptics: true, enableSounds: true, cornerRadius, shadowIntensity, animationSpeed, fontDensity,
-          customerLiveLinkSettings: {
-            ...settings?.customerLiveLinkSettings, enableLiveInvoiceLink: enableLiveLink,
-            showPaymentQr: showPaymentQrOnLink, allowCustomerPdfDownload: allowPdfDownload,
-            allowPaymentProofSubmit: allowPaymentProofSubmit, showPaidDueAmount: showPaidDueAmount,
-            showContactButton: showContactButton, requireTransactionId, requirePaymentScreenshot,
-            selectedLiveLinkTemplate: settings?.customerLiveLinkSettings?.selectedLiveLinkTemplate || 'classic',
-            themePreset: settings?.customerLiveLinkSettings?.themePreset || themeId,
-            ctaPreset: settings?.customerLiveLinkSettings?.ctaPreset || 'payNow',
-            conversionLayout: settings?.customerLiveLinkSettings?.conversionLayout || 'modern'
-          },
-          notifications: { email: emailNotifications, whatsapp: whatsappNotifications, dueDateReminders, paymentConfirmation, marketing: marketingEmails, securityAlerts }
-        };
-        onSaveSettings(payload);
-        setIsDirty(false);
-        setSaveState('saved');
-        setLastSaved(new Date());
-        toast.success('Settings saved successfully');
-        setTimeout(() => setSaveState('idle'), 2000);
-      } catch (err) {
-        setSaveState('error');
-        toast.error('Failed to save settings');
-      }
-      setIsSaving(false);
-    }, 600);
+    try {
+      const payload = {
+        ...settings, businessName, logoUrl, ownerName, phone, whatsapp, email, address, gstNumber,
+        geminiApiKey, twilioAccountSid, twilioAuthToken, country, language, currency, currencyCode,
+        taxLabel, vatTax, dateFormat, numberFormat, invoicePrefix, defaultTax: parseFloat(defaultTax) || 0,
+        defaultNotes, terms, pdfFooter, upiId, paymentQrEnabled, paymentMethod, bkashNumber, nagadNumber,
+        rocketNumber, payeeName, paymentNote, showQrInPdf, showQrInPreview, customPaymentLink,
+        themeColor: themeId, themePreset, darkMode, brandColor, invoiceTemplate, defaultBillingTemplate,
+        enableHaptics: true, enableSounds: true, cornerRadius, shadowIntensity, animationSpeed, fontDensity,
+        customerLiveLinkSettings: {
+          ...settings?.customerLiveLinkSettings, enableLiveInvoiceLink: enableLiveLink,
+          showPaymentQr: showPaymentQrOnLink, allowCustomerPdfDownload: allowPdfDownload,
+          allowPaymentProofSubmit: allowPaymentProofSubmit, showPaidDueAmount: showPaidDueAmount,
+          showContactButton: showContactButton, requireTransactionId, requirePaymentScreenshot,
+          selectedLiveLinkTemplate: settings?.customerLiveLinkSettings?.selectedLiveLinkTemplate || 'classic',
+          themePreset: settings?.customerLiveLinkSettings?.themePreset || themeId,
+          ctaPreset: settings?.customerLiveLinkSettings?.ctaPreset || 'payNow',
+          conversionLayout: settings?.customerLiveLinkSettings?.conversionLayout || 'modern'
+        },
+        notifications: { email: emailNotifications, whatsapp: whatsappNotifications, dueDateReminders, paymentConfirmation, marketing: marketingEmails, securityAlerts }
+      };
+      onSaveSettings(payload);
+      setIsDirty(false);
+      setSaveState('saved');
+      setLastSaved(new Date());
+      toast.success('Settings saved successfully');
+      setTimeout(() => setSaveState('idle'), 2000);
+    } catch (err) {
+      setSaveState('error');
+      toast.error('Failed to save settings');
+    }
+    setIsSaving(false);
+  };
+
+  const resetStateFromSettings = () => {
+    if (!settings || Object.keys(settings).length === 0) return;
+    setBusinessName(settings.businessName || '');
+    setLogoUrl(settings.logoUrl || '');
+    setOwnerName(settings.ownerName || '');
+    setPhone(settings.phone || '');
+    setWhatsapp(settings.whatsapp || '');
+    setEmail(settings.email || '');
+    setAddress(settings.address || '');
+    setGstNumber(settings.gstNumber || '');
+    setGeminiApiKey(settings.geminiApiKey || '');
+    setTwilioAccountSid(settings.twilioAccountSid || '');
+    setTwilioAuthToken(settings.twilioAuthToken || '');
+    setCountry(settings.country || 'India');
+    setLanguage(settings.language || 'English');
+    setCurrency(settings.currency || '\u20B9');
+    setCurrencyCode(settings.currencyCode || 'INR');
+    setTaxLabel(settings.taxLabel || 'GST');
+    setVatTax(settings.vatTax || '');
+    setDateFormat(settings.dateFormat || 'DD/MM/YYYY');
+    setNumberFormat(settings.numberFormat || 'Indian');
+    setInvoicePrefix(settings.invoicePrefix || 'INV-');
+    setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 18);
+    setDefaultNotes(settings.defaultNotes || '');
+    setTerms(settings.terms || '');
+    setPdfFooter(settings.pdfFooter || '');
+    setUpiId(settings.upiId || '');
+    setPaymentQrEnabled(settings.paymentQrEnabled || false);
+    setPaymentMethod(settings.paymentMethod || 'UPI');
+    setBkashNumber(settings.bkashNumber || '');
+    setNagadNumber(settings.nagadNumber || '');
+    setRocketNumber(settings.rocketNumber || '');
+    setPayeeName(settings.payeeName || '');
+    setPaymentNote(settings.paymentNote || '');
+    setShowQrInPdf(settings.showQrInPdf !== undefined ? settings.showQrInPdf : true);
+    setShowQrInPreview(settings.showQrInPreview !== undefined ? settings.showQrInPreview : true);
+    setCustomPaymentLink(settings.customPaymentLink || '');
+    setBrandColor(settings.brandColor || '#14b8a6');
+    setInvoiceTemplate(settings.invoiceTemplate || 'modern');
+    setDefaultBillingTemplate(settings.defaultBillingTemplate || 'custom');
+    setThemeId(settings.themeColor || 'obsidian-gold');
+    setDarkMode(settings.darkMode ?? false);
+    setThemePreset(settings.darkMode ? 'dark' : 'light');
+    if (settings.customerLiveLinkSettings) {
+      setEnableLiveLink(settings.customerLiveLinkSettings.enableLiveInvoiceLink !== undefined ? settings.customerLiveLinkSettings.enableLiveInvoiceLink : true);
+      setShowPaymentQrOnLink(settings.customerLiveLinkSettings.showPaymentQr !== undefined ? settings.customerLiveLinkSettings.showPaymentQr : true);
+      setAllowPdfDownload(settings.customerLiveLinkSettings.allowCustomerPdfDownload !== undefined ? settings.customerLiveLinkSettings.allowCustomerPdfDownload : true);
+      setAllowPaymentProofSubmit(settings.customerLiveLinkSettings.allowPaymentProofSubmit !== undefined ? settings.customerLiveLinkSettings.allowPaymentProofSubmit : true);
+      setShowPaidDueAmount(settings.customerLiveLinkSettings.showPaidDueAmount !== undefined ? settings.customerLiveLinkSettings.showPaidDueAmount : true);
+      setShowContactButton(settings.customerLiveLinkSettings.showContactButton !== undefined ? settings.customerLiveLinkSettings.showContactButton : true);
+      setRequireTransactionId(settings.customerLiveLinkSettings.requireTransactionId !== undefined ? settings.customerLiveLinkSettings.requireTransactionId : true);
+      setRequirePaymentScreenshot(settings.customerLiveLinkSettings.requirePaymentScreenshot !== undefined ? settings.customerLiveLinkSettings.requirePaymentScreenshot : false);
+    }
+    if (settings.notifications) {
+      setEmailNotifications(settings.notifications.email !== false);
+      setWhatsappNotifications(settings.notifications.whatsapp !== false);
+      setDueDateReminders(settings.notifications.dueDateReminders !== false);
+      setPaymentConfirmation(settings.notifications.paymentConfirmation !== false);
+      setMarketingEmails(settings.notifications.marketing || false);
+      setSecurityAlerts(settings.notifications.securityAlerts !== false);
+    }
   };
 
   const handleDiscard = () => {
-    if (settings && Object.keys(settings).length > 0) {
-      isInitialized.current = false;
-      setBusinessName(settings.businessName || '');
-      setLogoUrl(settings.logoUrl || '');
-      setOwnerName(settings.ownerName || '');
-      setPhone(settings.phone || '');
-      setWhatsapp(settings.whatsapp || '');
-      setEmail(settings.email || '');
-      setAddress(settings.address || '');
-      setGstNumber(settings.gstNumber || '');
-    }
+    resetStateFromSettings();
+    isInitialized.current = true;
     setIsDirty(false);
     toast('Changes discarded');
   };
@@ -671,8 +723,22 @@ const SettingsStudioV2 = ({
                 {paymentMethod === 'UPI' && <div><label className="block text-xs font-bold text-gray-500 mb-1.5">UPI ID</label><input type="text" value={upiId} onChange={(e) => setUpiId(e.target.value)} placeholder="example@ybl" className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>}
                 {paymentMethod === 'bKash' && <div><label className="block text-xs font-bold text-gray-500 mb-1.5">bKash Number</label><input type="text" value={bkashNumber} onChange={(e) => setBkashNumber(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>}
                 {paymentMethod === 'Nagad' && <div><label className="block text-xs font-bold text-gray-500 mb-1.5">Nagad Number</label><input type="text" value={nagadNumber} onChange={(e) => setNagadNumber(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>}
+                {paymentMethod === 'Rocket' && <div><label className="block text-xs font-bold text-gray-500 mb-1.5">Rocket Number</label><input type="text" value={rocketNumber} onChange={(e) => setRocketNumber(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>}
+                {paymentMethod === 'Manual' && <div><label className="block text-xs font-bold text-gray-500 mb-1.5">Custom Payment Link / Details</label><input type="text" value={customPaymentLink} onChange={(e) => setCustomPaymentLink(e.target.value)} placeholder="https:// or bank details" className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>}
                 <div><label className="block text-xs font-bold text-gray-500 mb-1.5">Payee Name</label><input type="text" value={payeeName} onChange={(e) => setPayeeName(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>
                 <div><label className="block text-xs font-bold text-gray-500 mb-1.5">Payment Note</label><input type="text" value={paymentNote} onChange={(e) => setPaymentNote(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>
+                <div className="flex items-center justify-between p-3 bg-white/50 border border-gray-200 rounded-xl">
+                  <span className="text-xs font-bold text-gray-700">Show QR on Invoice Preview</span>
+                  <button onClick={() => setShowQrInPreview(!showQrInPreview)} className={'relative w-10 h-5 rounded-full transition-all flex items-center p-0.5 ' + (showQrInPreview ? 'bg-[image:var(--accent-gradient)]' : 'bg-slate-300')}>
+                    <span className={'w-4 h-4 bg-white rounded-full shadow transition-transform ' + (showQrInPreview ? 'translate-x-5' : 'translate-x-0')} />
+                  </button>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-white/50 border border-gray-200 rounded-xl">
+                  <span className="text-xs font-bold text-gray-700">Show QR on PDF</span>
+                  <button onClick={() => setShowQrInPdf(!showQrInPdf)} className={'relative w-10 h-5 rounded-full transition-all flex items-center p-0.5 ' + (showQrInPdf ? 'bg-[image:var(--accent-gradient)]' : 'bg-slate-300')}>
+                    <span className={'w-4 h-4 bg-white rounded-full shadow transition-transform ' + (showQrInPdf ? 'translate-x-5' : 'translate-x-0')} />
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -1005,18 +1071,18 @@ const SettingsStudioV2 = ({
       </AnimatePresence>
 
       {/* Mobile Bottom Nav */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-white/10">
-        <div className="flex items-center justify-around px-2 py-1.5">
-          {NAV_GROUPS.slice(0, 5).map((group) => {
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-white/10 overflow-x-auto hide-scrollbar">
+        <div className="flex items-center justify-around px-2 py-1.5 min-w-max">
+          {NAV_GROUPS.map((group) => {
             const firstItem = group.items[0];
             const Icon = group.icon;
             const isActive = group.items.some(i => i.id === activeSection);
             return (
               <button key={group.group} onClick={() => setActiveSection(firstItem?.id || group.group)}
-                className={'flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-all ' + (isActive ? 'text-[var(--accent)]' : 'text-gray-400')}
+                className={'flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all ' + (isActive ? 'text-[var(--accent)]' : 'text-gray-400')}
               >
                 <Icon className="w-5 h-5" />
-                <span className="text-[7px] font-bold">{group.group}</span>
+                <span className="text-[7px] font-bold whitespace-nowrap">{group.group}</span>
               </button>
             );
           })}

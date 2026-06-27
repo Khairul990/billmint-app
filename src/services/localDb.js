@@ -5,14 +5,19 @@
 const DB_NAME = 'billqyro-db';
 const DB_VERSION = 3;
 
+let _dbInstance = null;
+let _dbOpenPromise = null;
+
 export class BillQyroDB {
   static open() {
-    return new Promise((resolve, reject) => {
+    if (_dbInstance) return Promise.resolve(_dbInstance);
+    if (_dbOpenPromise) return _dbOpenPromise;
+    _dbOpenPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
-        
+
         const addStoreIfMissing = (name) => {
           if (!db.objectStoreNames.contains(name)) {
             return db.createObjectStore(name, { keyPath: 'id' });
@@ -27,7 +32,7 @@ export class BillQyroDB {
             store.createIndex('workspaceId', 'workspaceId', { unique: false });
           }
         };
-        
+
         let store;
         store = addStoreIfMissing('invoices');
         if (store) addIndexes(store);
@@ -35,28 +40,35 @@ export class BillQyroDB {
           const txn = event.target.transaction;
           addIndexes(txn.objectStore('invoices'));
         }
-        
+
         store = addStoreIfMissing('customers');
         if (store) addIndexes(store);
         if (!store && db.objectStoreNames.contains('customers')) {
           const txn = event.target.transaction;
           addIndexes(txn.objectStore('customers'));
         }
-        
+
         store = addStoreIfMissing('expenses');
         if (store) addIndexes(store);
         if (!store && db.objectStoreNames.contains('expenses')) {
           const txn = event.target.transaction;
           addIndexes(txn.objectStore('expenses'));
         }
-        
+
         store = addStoreIfMissing('products');
         if (store) addIndexes(store);
         if (!store && db.objectStoreNames.contains('products')) {
           const txn = event.target.transaction;
           addIndexes(txn.objectStore('products'));
         }
-        
+
+        store = addStoreIfMissing('students');
+        if (store) addIndexes(store);
+        if (!store && db.objectStoreNames.contains('students')) {
+          const txn = event.target.transaction;
+          addIndexes(txn.objectStore('students'));
+        }
+
         if (!db.objectStoreNames.contains('syncQueue')) {
           store = db.createObjectStore('syncQueue', { keyPath: 'id' });
           addIndexes(store);
@@ -70,13 +82,18 @@ export class BillQyroDB {
       };
 
       request.onsuccess = (event) => {
-        resolve(event.target.result);
+        _dbInstance = event.target.result;
+        _dbInstance.onclose = () => { _dbInstance = null; _dbOpenPromise = null; };
+        _dbInstance.onversionchange = () => { _dbInstance.close(); _dbInstance = null; _dbOpenPromise = null; };
+        resolve(_dbInstance);
       };
 
       request.onerror = (event) => {
+        _dbOpenPromise = null;
         reject(event.target.error);
       };
     });
+    return _dbOpenPromise;
   }
 
   static async getAll(storeName) {
@@ -140,5 +157,13 @@ export class BillQyroDB {
       request.onsuccess = () => resolve(true);
       request.onerror = () => reject(request.error);
     });
+  }
+
+  static close() {
+    if (_dbInstance) {
+      _dbInstance.close();
+      _dbInstance = null;
+      _dbOpenPromise = null;
+    }
   }
 }

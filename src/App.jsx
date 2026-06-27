@@ -37,6 +37,9 @@ import {
   getExpenses,
   saveExpense,
   deleteExpense,
+  getStudents,
+  saveStudent,
+  deleteStudent,
   importRestore,
   syncFromFirestore,
   getGlobalAdminSettings,
@@ -397,6 +400,7 @@ function App() {
     return s;
   });
   const [expenses, setExpenses] = useState([]);
+  const [students, setStudents] = useState([]);
   const [subscription, setSubscription] = useState(() => getSubscriptionStatus());
   const [revenueStatus, setRevenueStatus] = useState({
     totalBillsCreated: 0,
@@ -442,12 +446,10 @@ function App() {
   const updateWorkspaceState = (newWorkspaces, newActiveId) => {
     setBusinessWorkspaces(newWorkspaces);
     setActiveWorkspaceId(newActiveId);
-    setSettings(prev => {
-      const updated = { ...prev, businessWorkspaces: newWorkspaces, activeWorkspaceId: newActiveId };
-      saveSettings(updated);
-      window.dispatchEvent(new CustomEvent('billqyro_sync'));
-      return updated;
-    });
+    const updated = { ...settings, businessWorkspaces: newWorkspaces, activeWorkspaceId: newActiveId };
+    setSettings(updated);
+    saveSettings(updated);
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
   };
 
   const setActiveWorkspace = (id) => {
@@ -514,6 +516,7 @@ function App() {
         setInvoices(await getInvoices() || []);
         setCustomers(await getCustomers() || []);
         setProducts(await getProducts() || []);
+        setStudents(await getStudents() || []);
         setExpenses(await getExpenses() || []);
       } catch (err) {
         console.error("Error loading local data:", err);
@@ -531,6 +534,7 @@ function App() {
         setInvoices(await getInvoices() || []);
         setCustomers(await getCustomers() || []);
         setProducts(await getProducts() || []);
+        setStudents(await getStudents() || []);
         setExpenses(await getExpenses() || []);
         const latestSettings = getSettings();
         if (latestSettings) {
@@ -559,6 +563,7 @@ function App() {
       if (col === 'invoices') setInvoices(await getInvoices() || []);
       if (col === 'customers') setCustomers(await getCustomers() || []);
       if (col === 'products') setProducts(await getProducts() || []);
+      if (col === 'students') setStudents(await getStudents() || []);
     };
     const handleSyncStatus = (e) => {
       if (e.detail) setSyncStatus(e.detail);
@@ -781,7 +786,7 @@ function App() {
     localStorage.removeItem('billqyro_admin_unlocked');
     setUserRole('user');
     setIsAuthenticated(false);
-    setCurrentTab('dashboard');
+    setCurrentTab('landing');
   };
 
   // --- DATA SYNCHRONIZERS ---
@@ -1165,6 +1170,43 @@ function App() {
     }
   };
 
+  // Students
+  const handleSaveStudent = async (payload) => {
+    if (isDemoSessionActive) {
+      if (!payload.id) payload.id = 'demo-stu-' + Date.now();
+      const list = JSON.parse(localStorage.getItem('billqyro_demo_students') || '[]');
+      const idx = list.findIndex(s => s.id === payload.id);
+      if (idx >= 0) list[idx] = payload; else list.push(payload);
+      localStorage.setItem('billqyro_demo_students', JSON.stringify(list));
+      toast.success('Saved to Demo Session');
+      return;
+    }
+    try {
+      const { updatedStudents, firebaseStatus } = await saveStudent(payload);
+      setStudents(updatedStudents);
+      if (firebaseStatus === 'failed') toast.success('Student saved locally. Will sync when online.');
+      else toast.success('Student saved successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to save student');
+    }
+  };
+
+  const handleDeleteStudent = async (id) => {
+    if (isDemoSessionActive) {
+      const list = JSON.parse(localStorage.getItem('billqyro_demo_students') || '[]').filter(s => s.id !== id);
+      localStorage.setItem('billqyro_demo_students', JSON.stringify(list));
+      toast.success('Deleted from Demo Session');
+      window.dispatchEvent(new Event('storage'));
+      return;
+    }
+    const { updatedStudents, firebaseStatus } = await deleteStudent(id);
+    setStudents(updatedStudents);
+    if (firebaseStatus === 'failed') {
+      toast.success('Student deleted locally. Will sync with cloud when online.', { id: 'delete-student-toast' });
+    }
+  };
+
   // Expenses
   const handleSaveExpense = async (payload) => {
     try {
@@ -1503,7 +1545,7 @@ function App() {
           setTimeout(() => setCurrentTab('customers'), 0);
           return <div className="min-h-screen flex items-center justify-center"><ClassicLoader /></div>;
         }
-        return <Students />;
+        return <Students students={students} onSaveStudent={handleSaveStudent} onDeleteStudent={handleDeleteStudent} />;
       case 'clients':
         return <Clients />;
       case 'measurements':

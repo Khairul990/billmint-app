@@ -226,18 +226,24 @@ const ItemsSelectionStep = ({ products = [] }) => {
     });
   };
 
+  const safeEval = (expr) => {
+    const cleaned = expr.replace(/[^0-9+\-*/.() ]/g, '');
+    if (cleaned !== expr.trim()) return NaN;
+    try {
+      return Function('"use strict"; return (' + cleaned + ')')();
+    } catch { return NaN; }
+  };
+
   const calculateFieldValue = (item, formula) => {
     if (!formula) return 0;
     try {
-      // Very simple formula evaluator
       let evaluated = formula;
       Object.keys(item).forEach(key => {
         const val = parseFloat(item[key]) || 0;
         evaluated = evaluated.replace(new RegExp(`\\b${key}\\b`, 'g'), val);
       });
-       
-      const result = new Function('return ' + evaluated)();
-      return result || 0;
+      const result = safeEval(evaluated);
+      return isNaN(result) ? 0 : result;
     } catch (e) {
       return 0;
     }

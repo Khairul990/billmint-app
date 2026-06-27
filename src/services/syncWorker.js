@@ -1,4 +1,4 @@
-import { db, firebaseReady } from './firebaseConfig';
+import { firebaseReady } from './firebaseConfig';
 import { BillQyroDB } from './localDb';
 import { syncOfflineTransactions } from './dbEngine';
 
@@ -10,7 +10,7 @@ export const startBackgroundSync = async () => {
 
   const queue = await BillQyroDB.getAll('syncQueue');
   if (queue.length > 0) {
-    const unsynced = queue.filter(tx => tx.syncStatus === 'pending');
+    const unsynced = queue.filter(tx => tx.status === 'pending' || !tx.status);
     if (unsynced.length === 0) {
       await BillQyroDB.clear('syncQueue');
     }

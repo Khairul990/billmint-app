@@ -35,18 +35,64 @@ const AnimatedNumber = ({ value }) => {
       return;
     }
     let startTime = null;
+    let rafId;
     const animate = (timestamp) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / 1200, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       setDisplayValue(prefix + Math.round(numericValue * eased).toLocaleString());
-      if (progress < 1) requestAnimationFrame(animate);
+      if (progress < 1) rafId = requestAnimationFrame(animate);
     };
-    requestAnimationFrame(animate);
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
   }, [numericValue]);
 
   return <>{displayValue ?? strValue}</>;
 };
+
+const MiniHealthCircle = ({ value, label }) => {
+  const size = 44;
+  const sw = 4;
+  const r = (size - sw) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c - (value / 100) * c;
+  const color = value >= 70 ? '#10B981' : value >= 40 ? '#F59E0B' : '#EF4444';
+  return (
+    <div className="flex flex-col items-center gap-1 group">
+      <div className="relative transition-transform duration-300 group-hover:scale-110" style={{ width: size, height: size }}>
+        <svg width={size} height={size} className="-rotate-90">
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--theme-border-soft)" strokeWidth={sw} />
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={offset} style={{ transition: 'stroke-dashoffset 1s ease' }} />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-[10px] font-black tabular-nums" style={{ color }}>{value}</span>
+        </div>
+      </div>
+      <span className="text-[7px] font-bold text-theme-muted uppercase tracking-wider text-center leading-tight">{label}</span>
+    </div>
+  );
+};
+
+const KpiCard = ({ title, value, icon: Icon, trend, trendUp = true }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] } }}
+    className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-premium-sm hover:shadow-premium-hover transition-all duration-200 hover:-translate-y-0.5 relative overflow-hidden group"
+  >
+    <div className="flex items-start justify-between mb-2">
+      <div className="p-2 rounded-lg bg-theme-accent/10 text-theme-accent group-hover:scale-105 transition-transform shrink-0">
+        {Icon && <Icon className="w-3.5 h-3.5" />}
+      </div>
+      {trend && (
+        <span className={`flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full ${trendUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+          <TrendingUp className={`w-2.5 h-2.5 ${!trendUp ? 'rotate-180' : ''}`} /> {trend}
+        </span>
+      )}
+    </div>
+    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-1">{title}</p>
+    <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums"><AnimatedNumber value={value} /></p>
+  </motion.div>
+);
 
 const Dashboard = ({
   invoices = [],
@@ -73,6 +119,7 @@ const Dashboard = ({
   const [showAddCustomerSheet, setShowAddCustomerSheet] = useState(false);
   const [activeAnnouncement, setActiveAnnouncement] = useState(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [lastSyncTime, setLastSyncTime] = useState(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsInitialLoad(false), 800);
@@ -209,9 +256,14 @@ const Dashboard = ({
     return activities.sort((a, b) => b.date - a.date).slice(0, 10);
   };
 
+  useEffect(() => {
+    setLastSyncTime(new Date());
+  }, []);
+
   const handleRefresh = async () => {
     try {
       await syncFromFirestore();
+      setLastSyncTime(new Date());
     } catch (e) {
       console.error('Dashboard refresh failed:', e);
     }
@@ -245,6 +297,10 @@ const Dashboard = ({
     const totalOverdue = getOverdueCount(pendingCollection);
     const totalUpcoming = getUpcomingCount(pendingCollection);
     const activities = getActivities();
+    const totalPaymentsCount = invoices.filter(inv => {
+      const s = (inv.paymentStatus || '').toLowerCase();
+      return s === 'paid' || s === 'partial' || s === 'partially paid';
+    }).length;
     const paidCount = invoices.filter(inv => (inv.paymentStatus || '').toLowerCase() === 'paid').length;
     const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
     const totalCollected = invoices
@@ -275,32 +331,71 @@ const Dashboard = ({
     const collectionTrendData = revenueTrend.map(d => ({
       ...d,
       collectionRate: d.revenue > 0 ? Math.round((d.collection / d.revenue) * 100) : 0,
+      pending: d.revenue - d.collection,
     }));
+    const now = new Date();
+    const sevenDaysAgo = new Date(now); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const fourteenDaysAgo = new Date(now); fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+    const thisWeekInvoices = invoices.filter(inv => inv.createdAt && new Date(inv.createdAt) >= sevenDaysAgo);
+    const lastWeekInvoices = invoices.filter(inv => inv.createdAt && new Date(inv.createdAt) >= fourteenDaysAgo && new Date(inv.createdAt) < sevenDaysAgo);
+    const invoiceCountGrowth = lastWeekInvoices.length > 0
+      ? `+${Math.round((thisWeekInvoices.length - lastWeekInvoices.length) / lastWeekInvoices.length * 100)}%`
+      : thisWeekInvoices.length > 0 ? '+100%' : '0';
+    const pendingDueTrend = totalDue > 0 && totalRevenue > 0
+      ? `${((totalDue / totalRevenue) * 100).toFixed(1)}%`
+      : '0';
+    const thisWeekNewCustomers = customers.filter(c => c.createdAt && new Date(c.createdAt) >= sevenDaysAgo).length;
+    const lastWeekNewCustomers = customers.filter(c => c.createdAt && new Date(c.createdAt) >= fourteenDaysAgo && new Date(c.createdAt) < sevenDaysAgo).length;
+    const thisWeekOverdue = thisWeekInvoices.filter(inv => inv.dueDate && new Date(inv.dueDate) < sevenDaysAgo).length;
+    const lastWeekOverdue = lastWeekInvoices.filter(inv => inv.dueDate && new Date(inv.dueDate) < fourteenDaysAgo).length;
+    const overdueChange = lastWeekOverdue > 0
+      ? `${Math.round((thisWeekOverdue - lastWeekOverdue) / lastWeekOverdue * 100)}%`
+      : thisWeekOverdue > 0 ? '+100%' : '0%';
+    const customerGrowth = lastWeekNewCustomers > 0
+      ? `+${Math.round((thisWeekNewCustomers - lastWeekNewCustomers) / lastWeekNewCustomers * 100)}`
+      : thisWeekNewCustomers > 0 ? `+${thisWeekNewCustomers}` : '0';
+    const revenueGrowth = revenueTrend.length >= 4
+      ? (() => {
+          const firstHalf = revenueTrend.slice(0, 3).reduce((s, d) => s + d.revenue, 0);
+          const secondHalf = revenueTrend.slice(-3).reduce((s, d) => s + d.revenue, 0);
+          if (firstHalf === 0) return secondHalf > 0 ? '+100' : '0';
+          return `${((secondHalf - firstHalf) / firstHalf * 100).toFixed(1)}`;
+        })()
+      : '0';
+    const collectionChange = collectionTrendData.length >= 4
+      ? (() => {
+          const firstHalf = collectionTrendData.slice(0, 3).reduce((s, d) => s + d.collectionRate, 0) / 3;
+          const secondHalf = collectionTrendData.slice(-3).reduce((s, d) => s + d.collectionRate, 0) / 3;
+          return (secondHalf - firstHalf).toFixed(1);
+        })()
+      : '0';
     return {
-      todayEarnings, totalDue, pendingBillsCount,
+      todayEarnings, totalDue, pendingBillsCount, totalPaymentsCount,
       recentInvoices, recentPayments, pendingCollection,
       totalOverdue, totalUpcoming, activities,
       paidCount, totalRevenue, totalCollected,
       healthScore, collectionRate, revenueTrend, paymentBreakdown,
       billsHealth, paymentHealth, customerHealth, activityHealth, dueHealth, overallHealth,
-      topCustomers, dueNext7Days, busiestDay, avgInvoiceValue, collectionTrendData
+      topCustomers, dueNext7Days, busiestDay, avgInvoiceValue, collectionTrendData,
+      revenueGrowth, collectionChange, invoiceCountGrowth, pendingDueTrend, customerGrowth, overdueChange
     };
   }, [invoices, invoiceLabel, totalCustomers, newCustomersThisMonth, calculatedTodaysSales, calculatedTotalDue]);
   const {
-    todayEarnings, totalDue, pendingBillsCount,
+    todayEarnings, totalDue, pendingBillsCount, totalPaymentsCount,
     recentInvoices, recentPayments, pendingCollection,
     totalOverdue, totalUpcoming, activities,
     paidCount, totalRevenue, totalCollected,
     healthScore, collectionRate, revenueTrend, paymentBreakdown,
     billsHealth, paymentHealth, customerHealth, activityHealth, dueHealth, overallHealth,
-    topCustomers, dueNext7Days, busiestDay, avgInvoiceValue, collectionTrendData
+    topCustomers, dueNext7Days, busiestDay, avgInvoiceValue, collectionTrendData,
+    revenueGrowth, collectionChange, invoiceCountGrowth, pendingDueTrend, customerGrowth, overdueChange
   } = invoiceDerived;
-  const workspaceName = businessSettings?.businessWorkspaces?.find(
-    ws => ws.id === businessSettings.activeWorkspaceId
-  )?.name || businessSettings?.businessName || 'Default';
-  const workspaceType = businessSettings?.businessWorkspaces?.find(
-    ws => ws.id === businessSettings.activeWorkspaceId
-  )?.type || 'retail';
+  const activeWorkspace = useMemo(() =>
+    businessSettings?.businessWorkspaces?.find(
+      ws => ws.id === businessSettings.activeWorkspaceId
+    ), [businessSettings]);
+  const workspaceName = activeWorkspace?.name || businessSettings?.businessName || 'Default';
+  const workspaceType = activeWorkspace?.type || 'retail';
   const enabledModulesCount = businessSettings?.businessModules?.filter(m => m.enabled)?.length || 0;
 
   function getRevenueTrend() {
@@ -398,50 +493,6 @@ const Dashboard = ({
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
-
-  const MiniHealthCircle = ({ value, label }) => {
-    const size = 44;
-    const sw = 4;
-    const r = (size - sw) / 2;
-    const c = 2 * Math.PI * r;
-    const offset = c - (value / 100) * c;
-    const color = value >= 70 ? '#10B981' : value >= 40 ? '#F59E0B' : '#EF4444';
-    return (
-      <div className="flex flex-col items-center gap-1 group">
-        <div className="relative transition-transform duration-300 group-hover:scale-110" style={{ width: size, height: size }}>
-          <svg width={size} height={size} className="-rotate-90">
-            <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--theme-border-soft)" strokeWidth={sw} />
-            <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={offset} style={{ transition: 'stroke-dashoffset 1s ease' }} />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[10px] font-black tabular-nums" style={{ color }}>{value}</span>
-          </div>
-        </div>
-        <span className="text-[6px] font-bold text-theme-muted uppercase tracking-wider text-center leading-tight">{label}</span>
-      </div>
-    );
-  };
-
-  const KpiCard = ({ title, value, icon: Icon, trend, trendUp = true }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] } }}
-      className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-premium-sm hover:shadow-premium-hover transition-all duration-200 hover:-translate-y-0.5 relative overflow-hidden group"
-    >
-      <div className="flex items-start justify-between mb-2">
-        <div className="p-2 rounded-lg bg-theme-accent/10 text-theme-accent group-hover:scale-105 transition-transform shrink-0">
-          {Icon && <Icon className="w-3.5 h-3.5" />}
-        </div>
-        {trend && (
-          <span className={`flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full ${trendUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
-            <TrendingUp className={`w-2.5 h-2.5 ${!trendUp ? 'rotate-180' : ''}`} /> {trend}
-          </span>
-        )}
-      </div>
-      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-1">{title}</p>
-      <p className="text-xl font-black text-theme-primary tracking-tight tabular-nums"><AnimatedNumber value={value} /></p>
-    </motion.div>
-  );
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -1152,23 +1203,23 @@ const Dashboard = ({
                     title="Total Revenue"
                     value={formatCurrency(totalRevenue)}
                     icon={DollarSign}
-                    trend="+8.6%"
-                    trendUp={true}
+                    trend={parseFloat(revenueGrowth) > 0 ? `+${revenueGrowth}%` : `${revenueGrowth}%`}
+                    trendUp={parseFloat(revenueGrowth) >= 0}
                     subtitle="Revenue across all invoices"
                   />
                   <StatCard
                     title="Total Invoices"
                     value={invoices.length}
                     icon={FileText}
-                    trend="+12.4%"
-                    trendUp={true}
+                    trend={invoiceCountGrowth}
+                    trendUp={!invoiceCountGrowth.startsWith('-')}
                     subtitle="Total invoices generated"
                   />
                   <StatCard
                     title="Pending Due"
                     value={formatCurrency(totalDue)}
                     icon={Clock}
-                    trend="7.1%"
+                    trend={pendingDueTrend}
                     trendUp={false}
                     subtitle="Outstanding collections"
                   />
@@ -1176,8 +1227,8 @@ const Dashboard = ({
                     title="Active Customers"
                     value={customers.length}
                     icon={Users}
-                    trend="+3"
-                    trendUp={true}
+                    trend={customerGrowth}
+                    trendUp={!customerGrowth.startsWith('-')}
                     subtitle="Registered customers"
                   />
                 </>
@@ -1330,7 +1381,7 @@ const Dashboard = ({
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={getPaymentBreakdown()}
+                          data={paymentBreakdown}
                           cx="50%"
                           cy="50%"
                           innerRadius={65}
@@ -1339,7 +1390,7 @@ const Dashboard = ({
                           dataKey="value"
                           stroke="none"
                         >
-                          {getPaymentBreakdown().map((entry, index) => (
+                          {paymentBreakdown.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
@@ -1352,7 +1403,7 @@ const Dashboard = ({
                     </div>
                   </div>
                   <div className="flex items-center justify-center gap-4 mt-6 w-full">
-                    {getPaymentBreakdown().map((entry, idx) => (
+                    {paymentBreakdown.map((entry, idx) => (
                       <div key={idx} className="flex items-center gap-1.5">
                         <span className="w-2.5 h-2.5 rounded-full" style={{ background: entry.color }} />
                         <span className="text-[10px] font-bold text-theme-primary">{entry.name}</span>
@@ -1541,17 +1592,17 @@ const Dashboard = ({
                   <div className="stat-premium !p-4">
                     <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1.5">Collection Rate</p>
                     <p className="text-2xl font-black text-theme-primary mb-1 tabular-nums">{totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0}%</p>
-                    <p className="text-2xs text-emerald-500 font-bold">+2.4% than last Week</p>
+                    <p className={`text-2xs font-bold ${parseFloat(collectionChange) >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>{parseFloat(collectionChange) >= 0 ? '+' : ''}{collectionChange}pp vs last Week</p>
                   </div>
                   <div className="stat-premium !p-4">
                     <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1.5">Overdue Bills</p>
                     <p className="text-2xl font-black text-theme-primary mb-1 tabular-nums">{totalOverdue}</p>
-                    <p className="text-2xs text-red-500 font-bold">-1.2% than last Week</p>
+                    <p className={`text-2xs font-bold ${overdueChange.startsWith('-') ? 'text-emerald-500' : 'text-red-500'}`}>{overdueChange} vs last Week</p>
                   </div>
                   <div className="stat-premium !p-4">
                     <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1.5">Total Outstanding</p>
                     <p className="text-2xl font-black text-theme-primary mb-1 tabular-nums">{formatCurrency(totalDue)}</p>
-                    <p className="text-2xs text-emerald-500 font-bold">+5.1% than last Week</p>
+                    <p className={`text-2xs font-bold ${parseFloat(pendingDueTrend) < 50 ? 'text-emerald-500' : 'text-amber-500'}`}>{pendingDueTrend} of total revenue</p>
                   </div>
                 </div>
               </div>
@@ -1564,7 +1615,7 @@ const Dashboard = ({
                   <h3 className="section-header-title">Recent Payments</h3>
                   <p className="section-header-subtitle">Latest payment transactions recorded.</p>
                 </div>
-                {recentPayments.length > 5 && (
+                {totalPaymentsCount > 5 && (
                   <button onClick={() => setCurrentTab('due-ledger')} className="btn-premium-ghost text-xs">
                     View All <ChevronRight className="w-3 h-3" />
                   </button>
@@ -1654,7 +1705,7 @@ const Dashboard = ({
                         <span className={`w-2 h-2 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-pulse' : 'bg-red-500'}`} />
                         <span className="text-xs font-bold text-theme-primary">{syncStatus === 'Synced' ? 'Connected' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'Syncing' : syncStatus === 'Offline' ? 'Disconnected' : 'Warning'}</span>
                       </div>
-                      <p className="text-[10px] text-theme-muted font-medium mt-0.5">Last sync: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                      <p className="text-[10px] text-theme-muted font-medium mt-0.5">Last sync: {lastSyncTime ? lastSyncTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '...'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">

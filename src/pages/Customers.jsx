@@ -21,6 +21,7 @@ import { syncFromFirestore } from '../services/dbEngine';
 import { getCustomerLabelByType } from '../config/businessPresets';
 import CustomerLedger from '../components/customers/CustomerLedger';
 import PremiumEmptyState from '../components/PremiumEmptyState';
+import { toast } from 'react-hot-toast';
 
 /**
  * Customers CRM and Registry Page
@@ -29,7 +30,7 @@ import PremiumEmptyState from '../components/PremiumEmptyState';
  * @param {Function} onDeleteCustomer - deletes customer
  */
 const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCustomer, businessSettings, onCreateBill, setCurrentTab }) => {
-  const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.type || 'retail';
+  const wsType = useMemo(() => businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.type || 'retail', [businessSettings]);
   const customerLabel = getCustomerLabelByType(wsType);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -90,9 +91,15 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
   };
 
   const handleDelete = (id) => {
-    if (confirm('Are you sure you want to delete this customer? This action is permanent.')) {
-      onDeleteCustomer(id);
-    }
+    toast((t) => (
+      <div>
+        <p className="font-bold mb-2">Delete this customer? This action is permanent.</p>
+        <div className="flex gap-2">
+          <button onClick={() => { onDeleteCustomer(id); toast.dismiss(t.id); }} className="bg-theme-danger text-white px-3 py-1 rounded-lg text-xs font-bold">Delete</button>
+          <button onClick={() => toast.dismiss(t.id)} className="bg-theme-surface px-3 py-1 rounded-lg text-xs font-bold">Cancel</button>
+        </div>
+      </div>
+    ), { duration: 8000 });
   };
 
   // Filter CRM Registry

@@ -61,9 +61,9 @@ const ProductSearch = ({
       {isOpen && (
         <div className="absolute z-[100] w-full mt-1 bg-theme-card border border-theme-border-soft rounded-xl shadow-xl max-h-60 overflow-y-auto overflow-x-hidden">
           {filtered.length > 0 ? (
-            filtered.map(product => (
+            filtered.map((product, idx) => (
               <button
-                key={product.id || Math.random().toString()}
+                key={product.id || product.productId || `prod-${idx}`}
                 type="button"
                 onClick={() => {
                   onSelectProduct(product);

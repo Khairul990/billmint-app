@@ -119,6 +119,14 @@ export const migrateLocalStorageToIndexedDB = async () => {
       await BillQyroDB.put('expenses', e);
     }
 
+    // Students
+    const localStudents = JSON.parse(localStorage.getItem(KEYS.STUDENTS)) || [];
+    for (const s of localStudents) {
+      if (!s.userId) s.userId = userId;
+      if (!s.workspaceId) s.workspaceId = workspaceId;
+      await BillQyroDB.put('students', s);
+    }
+
     localStorage.setItem('billqyro_indexeddb_migrated', 'true');
 
   } catch (error) {
@@ -251,9 +259,11 @@ export const cleanupStaleData = async () => {
 
     // Clean stale syncQueue items (stuck for > 7 days)
     const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+    const MAX_RETRIES = 10;
     const queue = await BillQyroDB.getAll('syncQueue');
     for (const item of queue) {
-      if (now - item.timestamp > SEVEN_DAYS_MS) {
+      const age = now - (item.createdAt || item.timestamp || 0);
+      if (age > SEVEN_DAYS_MS || (item.retryCount || 0) >= MAX_RETRIES) {
         await BillQyroDB.delete('syncQueue', item.id);
       }
     }
@@ -308,7 +318,13 @@ const _runSyncOfflineTransactions = async () => {
     // Sort by createdAt so we sync in order
     const sortedQueue = userQueue.sort((a, b) => a.createdAt - b.createdAt);
 
+    const MAX_RETRIES = 10;
     for (const tx of sortedQueue) {
+      if ((tx.retryCount || 0) >= MAX_RETRIES) {
+        console.warn(`[SYNC QUEUE] Dropping TX ${tx.id}: exceeded max retries (${MAX_RETRIES})`);
+        await BillQyroDB.delete('syncQueue', tx.id);
+        continue;
+      }
       try {
         let syncSuccess = false;
         if (tx.action === 'save') {
@@ -424,6 +440,7 @@ export const GLOBAL_KEYS = {
   PRODUCTS: 'billqyro_products',
   INVOICES: 'billqyro_invoices',
   EXPENSES: 'billqyro_expenses',
+  STUDENTS: 'billqyro_students',
   SUBSCRIPTION: 'billqyro_subscription',
 };
 
@@ -433,7 +450,7 @@ export const getScopedKey = (baseKey) => {
   if (!uid) return baseKey;
 
   // Add workspace isolation for data collections
-  if ([GLOBAL_KEYS.INVOICES, GLOBAL_KEYS.CUSTOMERS, GLOBAL_KEYS.PRODUCTS, GLOBAL_KEYS.EXPENSES].includes(baseKey)) {
+  if ([GLOBAL_KEYS.INVOICES, GLOBAL_KEYS.CUSTOMERS, GLOBAL_KEYS.PRODUCTS, GLOBAL_KEYS.EXPENSES, GLOBAL_KEYS.STUDENTS].includes(baseKey)) {
     const settingsStr = localStorage.getItem(`${GLOBAL_KEYS.SETTINGS}_${uid}`);
     if (settingsStr) {
       try {
@@ -456,6 +473,7 @@ export const KEYS = {
   get PRODUCTS() { return getScopedKey(GLOBAL_KEYS.PRODUCTS); },
   get INVOICES() { return getScopedKey(GLOBAL_KEYS.INVOICES); },
   get EXPENSES() { return getScopedKey(GLOBAL_KEYS.EXPENSES); },
+  get STUDENTS() { return getScopedKey(GLOBAL_KEYS.STUDENTS); },
   get SUBSCRIPTION() { return getScopedKey(GLOBAL_KEYS.SUBSCRIPTION); },
 };
 
@@ -902,6 +920,9 @@ export const initializeStorage = () => {
   if (!localStorage.getItem(KEYS.EXPENSES)) {
     localStorage.setItem(KEYS.EXPENSES, JSON.stringify([]));
   }
+  if (!localStorage.getItem(KEYS.STUDENTS)) {
+    localStorage.setItem(KEYS.STUDENTS, JSON.stringify([]));
+  }
   if (!localStorage.getItem(KEYS.SUBSCRIPTION)) {
     localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(DEFAULT_SUBSCRIPTION));
   }
@@ -979,14 +1000,12 @@ export const getAuthSession = () => {
   if (!session) return null;
   try {
     const data = JSON.parse(session);
-    // Expire session after 24 hours
     if (Date.now() - data.timestamp > 24 * 60 * 60 * 1000) {
-      logout();
+      localStorage.removeItem(KEYS.AUTH);
       return null;
     }
-    // Strict valid user check (no demo or missing uid/email)
     if (!data.uid || data.uid === 'demo-user' || !data.userEmail || data.userEmail === 'No email') {
-      logout();
+      localStorage.removeItem(KEYS.AUTH);
       return null;
     }
     return data;
@@ -1009,14 +1028,14 @@ export const logout = async () => {
   localStorage.removeItem('billqyro_last_route');
   
   // Aggressively clear ALL possible user/workspace scoped caches
+  const keysToRemove = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && (key.startsWith('billqyro_') || key.startsWith('billqyro_settings_') || key.startsWith('billqyro_invoices_') || key.startsWith('billqyro_customers_') || key.startsWith('billqyro_products_') || key.startsWith('billqyro_expenses_'))) {
-      if (key !== 'billqyro_admin_default_theme' && key !== 'billqyro_admin_default_mode') {
-         localStorage.removeItem(key);
-      }
+    if (key && key.startsWith('billqyro_') && key !== 'billqyro_admin_default_theme' && key !== 'billqyro_admin_default_mode') {
+      keysToRemove.push(key);
     }
   }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
   
   sessionStorage.clear();
   try {
@@ -1468,7 +1487,7 @@ export const getExpenses = async (includeDeleted = false) => {
         filtered = data.filter(e => !e.isDeleted);
       }
       if (userId) filtered = filtered.filter(e => e.userId === userId);
-      if (workspaceId) filtered = filtered.filter(e => e.workspaceId === undefined || e.workspaceId === 'default' || e.workspaceId === workspaceId);
+      if (workspaceId) filtered = filtered.filter(e => e.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
     }
   } catch(e) {}
@@ -1585,7 +1604,7 @@ export const getCustomers = async (includeDeleted = false) => {
         filtered = data.filter(c => !c.isDeleted);
       }
       if (userId) filtered = filtered.filter(c => c.userId === userId);
-      if (workspaceId) filtered = filtered.filter(c => c.workspaceId === undefined || c.workspaceId === 'default' || c.workspaceId === workspaceId);
+      if (workspaceId) filtered = filtered.filter(c => c.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch(e) {}
@@ -1726,7 +1745,7 @@ export const getProducts = async (includeDeleted = false) => {
         filtered = data.filter(p => !p.isDeleted);
       }
       if (userId) filtered = filtered.filter(p => p.userId === userId);
-      if (workspaceId) filtered = filtered.filter(p => p.workspaceId === undefined || p.workspaceId === 'default' || p.workspaceId === workspaceId);
+      if (workspaceId) filtered = filtered.filter(p => p.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch(e) {}
@@ -1848,6 +1867,112 @@ export const deleteProduct = async (id, permanent = false) => {
   return { updatedProducts: filtered.filter(p => !p.isDeleted), firebaseStatus };
 };
 
+// --- STUDENTS ---
+export const getStudents = async (includeDeleted = false) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    return JSON.parse(localStorage.getItem('billqyro_demo_students') || '[]');
+  }
+  initializeStorage();
+  const userId = getRealUserId();
+  if (!userId) return [];
+  const settings = getSettings();
+  const workspaceId = settings?.activeWorkspaceId;
+  try {
+    const data = await BillQyroDB.getAll('students');
+    if (data && data.length > 0) {
+      let filtered = data;
+      if (!includeDeleted) filtered = data.filter(s => !s.isDeleted);
+      if (userId) filtered = filtered.filter(s => s.userId === userId);
+      if (workspaceId) filtered = filtered.filter(s => s.workspaceId === workspaceId);
+      return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+    }
+  } catch(e) {}
+  return [];
+};
+
+export const saveStudent = async (student) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    console.warn('Blocked real data operation during Demo Mode: saveStudent');
+    return { updatedStudents: [], firebaseStatus: 'blocked' };
+  }
+  
+  student.userId = getRealUserId() || 'local-user';
+  const settings = getSettings();
+  student.workspaceId = settings?.activeWorkspaceId || 'default';
+  
+  const students = await getStudents();
+  if (student.id) {
+    const index = students.findIndex(s => s.id === student.id);
+    if (index !== -1) {
+      const existing = students[index];
+      student.__version = Math.max(student.__version || 0, existing.__version || 0);
+      students[index] = stampRecord(student, student.userId);
+      logAudit('student_updated', 'student', student.id, null, students[index]);
+    } else {
+      students.push(stampRecord(student, student.userId));
+      logAudit('student_created', 'student', student.id, null, student);
+    }
+  } else {
+    const stuName = (student.name || '').trim().toLowerCase();
+    if (stuName) {
+      const existingDupe = students.find(s => (s.name || '').trim().toLowerCase() === stuName);
+      if (existingDupe) {
+        console.warn('[DATA INTEGRITY] Duplicate student prevented:', stuName);
+        return { updatedStudents: students, firebaseStatus: 'skipped_duplicate', existingId: existingDupe.id };
+      }
+    }
+    student.id = 'stu-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    students.push(stampRecord(student, student.userId));
+    logAudit('student_created', 'student', student.id, null, student);
+  }
+  let firebaseStatus = 'pending';
+  const stamped = students.find(s => s.id === student.id);
+  updateLocalCache(KEYS.STUDENTS, students);
+  await BillQyroDB.put('students', stamped);
+  await queueSyncTransaction('save', 'students', student.id, stamped);
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+  if (firebaseReady) {
+    if (navigator.onLine) syncOfflineTransactions().catch(e => console.error(e));
+    else firebaseStatus = 'failed';
+  } else firebaseStatus = 'offline';
+  return { updatedStudents: students, firebaseStatus };
+};
+
+export const deleteStudent = async (id, permanent = false) => {
+  const students = await getStudents(true);
+  const idx = students.findIndex(s => s.id === id);
+  if (idx === -1) return { updatedStudents: students.filter(s => !s.isDeleted), firebaseStatus: 'failed' };
+  const studentToDelete = students[idx];
+  if (!permanent) {
+    students[idx].isDeleted = true;
+    students[idx].deletedAt = new Date().toISOString();
+    students[idx].syncStatus = 'pending';
+    const filtered = students.filter(s => !s.isDeleted);
+    updateLocalCache(KEYS.STUDENTS, students);
+    await BillQyroDB.put('students', students[idx]);
+    logAudit('student_deleted', 'student', id, studentToDelete, null);
+    let firebaseStatus = 'pending';
+    await queueSyncTransaction('save', 'students', id, students[idx]);
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+    if (firebaseReady) {
+      if (navigator.onLine) syncOfflineTransactions().catch(e => console.error(e));
+      else firebaseStatus = 'failed';
+    } else firebaseStatus = 'offline';
+    return { updatedStudents: filtered, firebaseStatus };
+  }
+  const filtered = students.filter(s => s.id !== id);
+  updateLocalCache(KEYS.STUDENTS, filtered);
+  await BillQyroDB.delete('students', id);
+  logAudit('student_permanently_deleted', 'student', id, studentToDelete, null);
+  let firebaseStatus = 'pending';
+  await queueSyncTransaction('delete', 'students', id, studentToDelete);
+  if (firebaseReady) {
+    if (navigator.onLine) syncOfflineTransactions().catch(e => console.error(e));
+    else firebaseStatus = 'failed';
+  } else firebaseStatus = 'offline';
+  return { updatedStudents: filtered.filter(s => !s.isDeleted), firebaseStatus };
+};
+
 // --- INVOICES ---
 export const getInvoices = async (includeDeleted = false) => {
   if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
@@ -1866,7 +1991,7 @@ export const getInvoices = async (includeDeleted = false) => {
         filtered = data.filter(inv => !inv.isDeleted);
       }
       if (userId) filtered = filtered.filter(inv => inv.userId === userId);
-      if (workspaceId) filtered = filtered.filter(inv => inv.workspaceId === undefined || inv.workspaceId === 'default' || inv.workspaceId === workspaceId);
+      if (workspaceId) filtered = filtered.filter(inv => inv.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch(e) {}
@@ -2424,6 +2549,7 @@ export const exportBackup = async () => {
   const customers = await getCustomers();
   const products = await getProducts();
   const expenses = await getExpenses();
+  const students = await getStudents();
   const settings = getSettings();
 
   localStorage.setItem('billqyro_last_backup_time', new Date().toISOString());
@@ -2437,13 +2563,15 @@ export const exportBackup = async () => {
       invoices: invoices.length,
       customers: customers.length,
       products: products.length,
-      expenses: expenses.length
+      expenses: expenses.length,
+      students: students.length
     },
     settings,
     customers,
     products,
     invoices,
     expenses,
+    students,
     subscription: getSubscriptionStatus(),
   };
 };
@@ -2488,7 +2616,7 @@ export const importRestore = async (backupData) => {
     throw new Error('Invalid backup file structure.');
   }
 
-  const requiredKeys = ['settings', 'customers', 'products', 'invoices', 'expenses', 'subscription'];
+  const requiredKeys = ['settings', 'customers', 'products', 'invoices', 'expenses', 'students', 'subscription'];
   for (const k of requiredKeys) {
     if (!Object.prototype.hasOwnProperty.call(backupData, k)) {
       throw new Error(`Missing database key: ${k}`);
@@ -2504,6 +2632,8 @@ export const importRestore = async (backupData) => {
   for (const i of backupData.invoices) await BillQyroDB.put('invoices', i);
   updateLocalCache(KEYS.EXPENSES, backupData.expenses);
   for (const e of backupData.expenses) await BillQyroDB.put('expenses', e);
+  updateLocalCache(KEYS.STUDENTS, backupData.students || []);
+  for (const s of (backupData.students || [])) await BillQyroDB.put('students', s);
   localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(backupData.subscription));
 
   // If Firebase is enabled, batch update Firestore as well
@@ -2516,6 +2646,7 @@ export const importRestore = async (backupData) => {
       firestoreSave('invoices', i.id, i);
     });
     backupData.expenses.forEach(e => firestoreSave('expenses', e.id, e));
+    (backupData.students || []).forEach(s => firestoreSave('students', s.id, s));
     firestoreSave('subscription', userId, backupData.subscription);
   }
 
@@ -2619,6 +2750,7 @@ export const enableRealTimeSync = () => {
   syncCollection('customers', KEYS.CUSTOMERS);
   syncCollection('products', KEYS.PRODUCTS);
   syncCollection('expenses', KEYS.EXPENSES);
+  syncCollection('students', KEYS.STUDENTS);
   syncDoc('settings', KEYS.SETTINGS);
   syncDoc('subscription', KEYS.SUBSCRIPTION);
 };
@@ -2679,6 +2811,7 @@ export const syncFromFirestore = async (force = false) => {
     const invoicesSnap = await getDocsFromServer(collection(db, 'invoices', userId, 'items'));
     const productsSnap = await getDocsFromServer(collection(db, 'products', userId, 'items'));
     const expensesSnap = await getDocsFromServer(collection(db, 'expenses', userId, 'items'));
+    const studentsSnap = await getDocsFromServer(collection(db, 'students', userId, 'items'));
     const subDoc = await getDocFromServer(doc(db, 'subscription', userId));
 
     // 3. Clear current scoped device cache before applying cloud data
@@ -2688,6 +2821,7 @@ export const syncFromFirestore = async (force = false) => {
     await BillQyroDB.clear('products');
     await BillQyroDB.clear('invoices');
     await BillQyroDB.clear('expenses');
+    await BillQyroDB.clear('students');
 
     // 4. Apply Settings
     let activeWorkspaceId = 'default';
@@ -2706,7 +2840,7 @@ export const syncFromFirestore = async (force = false) => {
     });
     if (customers.length > 0) {
       for(const c of customers) await BillQyroDB.put('customers', c);
-      const activeCustomers = customers.filter(c => !c.workspaceId || c.workspaceId === 'default' || c.workspaceId === activeWorkspaceId);
+      const activeCustomers = customers.filter(c => !c.workspaceId || c.workspaceId === activeWorkspaceId);
       updateLocalCache(KEYS.CUSTOMERS, activeCustomers);
     }
 
@@ -2723,7 +2857,7 @@ export const syncFromFirestore = async (force = false) => {
     const invoices = Array.from(invoicesMap.values());
     if (invoices.length > 0) {
       for(const i of invoices) await BillQyroDB.put('invoices', i);
-      const activeInvoices = invoices.filter(i => !i.workspaceId || i.workspaceId === 'default' || i.workspaceId === activeWorkspaceId);
+      const activeInvoices = invoices.filter(i => !i.workspaceId || i.workspaceId === activeWorkspaceId);
       updateLocalCache(KEYS.INVOICES, activeInvoices);
     }
 
@@ -2736,7 +2870,7 @@ export const syncFromFirestore = async (force = false) => {
     });
     if (products.length > 0) {
       for(const p of products) await BillQyroDB.put('products', p);
-      const activeProducts = products.filter(p => !p.workspaceId || p.workspaceId === 'default' || p.workspaceId === activeWorkspaceId);
+      const activeProducts = products.filter(p => !p.workspaceId || p.workspaceId === activeWorkspaceId);
       updateLocalCache(KEYS.PRODUCTS, activeProducts);
     }
 
@@ -2749,11 +2883,24 @@ export const syncFromFirestore = async (force = false) => {
     });
     if (expenses.length > 0) {
       for(const e of expenses) await BillQyroDB.put('expenses', e);
-      const activeExpenses = expenses.filter(e => !e.workspaceId || e.workspaceId === 'default' || e.workspaceId === activeWorkspaceId);
+      const activeExpenses = expenses.filter(e => !e.workspaceId || e.workspaceId === activeWorkspaceId);
       updateLocalCache(KEYS.EXPENSES, activeExpenses);
     }
 
-    // 9. Apply Subscription
+    // 9. Apply Students
+    const students = [];
+    studentsSnap.forEach(docSnap => {
+      const data = docSnap.data();
+      data.syncStatus = 'synced';
+      students.push(data);
+    });
+    if (students.length > 0) {
+      for(const s of students) await BillQyroDB.put('students', s);
+      const activeStudents = students.filter(s => !s.workspaceId || s.workspaceId === activeWorkspaceId);
+      updateLocalCache(KEYS.STUDENTS, activeStudents);
+    }
+
+    // 10. Apply Subscription
     if (subDoc.exists()) {
       localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(subDoc.data()));
     }
@@ -2768,6 +2915,7 @@ export const syncFromFirestore = async (force = false) => {
       products: JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [],
       invoices: JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [],
       expenses: JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [],
+      students: JSON.parse(localStorage.getItem(KEYS.STUDENTS)) || [],
       subscription: JSON.parse(localStorage.getItem(KEYS.SUBSCRIPTION))
     };
   } catch (error) {
@@ -2775,7 +2923,7 @@ export const syncFromFirestore = async (force = false) => {
     toast.error('Sync failed: ' + error.message);
     // Restore from backup
     try {
-      const backupKeys = ['settings', 'customers', 'products', 'invoices', 'expenses', 'subscription'].map(k => `billqyro_${k}_backup`);
+      const backupKeys = ['settings', 'customers', 'products', 'invoices', 'expenses', 'students', 'subscription'].map(k => `billqyro_${k}_backup`);
       backupKeys.forEach(k => {
         const backup = localStorage.getItem(k);
         if (backup) {

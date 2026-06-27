@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { GraduationCap, Plus, Search, Trash2, Edit2, Phone, Mail, BookOpen, Users } from 'lucide-react';
+import { GraduationCap, Plus, Search, Trash2, Edit2, Phone, Mail, BookOpen, Users, RefreshCw, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { pageVariants, staggerContainer, staggerItem } from '../../utils/animations';
 import { CardSkeleton } from '../../components/PremiumSkeleton';
 import BottomSheet from '../../components/BottomSheet';
 import PremiumEmptyState from '../../components/PremiumEmptyState';
+import PullToRefresh from '../../components/PullToRefresh';
 
-const LS_KEY = 'billqyro_students';
-
-const Students = () => {
+const Students = ({ students = [], onSaveStudent, onDeleteStudent }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -17,36 +16,57 @@ const Students = () => {
   const [editItem, setEditItem] = useState(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '', email: '', course: '', batch: '', enrollmentDate: '' });
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    try { setItems(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); } catch {}
+    setItems(students);
     setLoading(false);
-  }, []);
-
-  const persist = (data) => { localStorage.setItem(LS_KEY, JSON.stringify(data)); setItems(data); };
+  }, [students]);
 
   const openAdd = () => { setEditItem(null); setForm({ name: '', phone: '', email: '', course: '', batch: '', enrollmentDate: '' }); setModalOpen(true); };
 
   const openEdit = (item) => { setEditItem(item); setForm({ name: item.name, phone: item.phone || '', email: item.email || '', course: item.course || '', batch: item.batch || '', enrollmentDate: item.enrollmentDate || '' }); setModalOpen(true); };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (saving) return;
     if (!form.name.trim()) { toast.error('Enter student name'); return; }
     setSaving(true);
-    const now = Date.now();
-    let updated;
-    if (editItem) { updated = items.map(i => i.id === editItem.id ? { ...i, ...form, updatedAt: now } : i); toast.success('Student updated'); }
-    else { updated = [...items, { id: 'stu-' + now, ...form, createdAt: now, updatedAt: now }]; toast.success('Student added'); }
-    persist(updated);
+    const now = new Date().toISOString();
+    let payload;
+    if (editItem) {
+      payload = { ...editItem, ...form, updatedAt: now };
+    } else {
+      payload = { id: 'stu-' + Date.now(), ...form, createdAt: now, updatedAt: now };
+    }
+    await onSaveStudent(payload);
     setSaving(false);
     setModalOpen(false);
   };
 
-  const handleDelete = (id) => {
-    if (!confirm('Delete this student record?')) return;
-    persist(items.filter(i => i.id !== id));
-    toast.success('Student removed');
+  const handleDelete = useCallback((id) => {
+    const confirmToast = toast.custom((t) => (
+      <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-theme-surface border border-theme-border-soft shadow-xl rounded-2xl p-4`}>
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-full bg-theme-danger/10 flex items-center justify-center shrink-0"><AlertTriangle className="w-5 h-5 text-theme-danger" /></div>
+          <div className="flex-1">
+            <p className="text-sm font-extrabold text-theme-primary">Delete Student</p>
+            <p className="text-xs font-semibold text-theme-muted mt-1">This action cannot be undone.</p>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => { toast.dismiss(t.id); }} className="flex-1 py-2 rounded-xl bg-theme-border-soft text-xs font-bold text-theme-primary">Cancel</button>
+              <button onClick={async () => { toast.dismiss(t.id); await onDeleteStudent(id); }} className="flex-1 py-2 rounded-xl bg-theme-danger text-white text-xs font-bold">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    ), { duration: Infinity });
+  }, [onDeleteStudent]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    window.dispatchEvent(new CustomEvent('billqyro:sync-requested'));
+    await new Promise(r => setTimeout(r, 800));
+    setRefreshing(false);
   };
 
   const filtered = useMemo(() => items.filter(i => {
@@ -77,6 +97,12 @@ const Students = () => {
   if (loading) return <div className="space-y-6 pb-24"><CardSkeleton lines={4} /><CardSkeleton lines={4} /><CardSkeleton lines={4} /></div>;
 
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
+      {refreshing && (
+        <div className="flex items-center justify-center py-3">
+          <RefreshCw className="w-5 h-5 text-theme-accent animate-spin" />
+        </div>
+      )}
     <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-6 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -188,6 +214,7 @@ const Students = () => {
         </form>
       </BottomSheet>
     </motion.div>
+    </PullToRefresh>
   );
 };
 
