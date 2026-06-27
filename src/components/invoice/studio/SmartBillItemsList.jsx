@@ -73,7 +73,7 @@ const SmartBillItemsList = ({ products = [] }) => {
     let newItems = [...state.items];
     
     const productToAdd = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      id: crypto.randomUUID(),
       itemService: pName,
       description: '',
       qty: 1,

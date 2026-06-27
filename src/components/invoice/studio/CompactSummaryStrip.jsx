@@ -82,7 +82,7 @@ const CompactSummaryStrip = () => {
             <div className="relative flex items-center border border-theme-border-soft rounded-xl bg-theme-app focus-within:border-theme-accent transition-colors p-2.5">
               <input
                 type="number"
-                value={state.totals.taxPercentage || ''}
+                value={state.totals.taxPercentage ?? ''}
                 onChange={(e) => dispatch({ type: 'UPDATE_TOTALS', payload: { taxPercentage: parseFloat(e.target.value) || 0 } })}
                 placeholder="0"
                 className="w-full bg-transparent outline-none text-sm font-black text-theme-primary tabular-nums"

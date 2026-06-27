@@ -83,6 +83,7 @@ const PublicInvoice = ({ initialInvoice }) => {
         return;
       }
       setScreenshotFile(file);
+      if (screenshot) URL.revokeObjectURL(screenshot);
       setScreenshot(URL.createObjectURL(file));
     }
   };
@@ -103,7 +104,10 @@ const PublicInvoice = ({ initialInvoice }) => {
 
       const reader = new FileReader();
       reader.readAsDataURL(screenshotFile);
-      await new Promise(resolve => reader.onload = resolve);
+      await new Promise((resolve, reject) => {
+        reader.onload = resolve;
+        reader.onerror = () => reject(new Error('Failed to read screenshot file'));
+      });
       const screenshotURL = reader.result;
 
       const sanitizedPayerName = sanitizeInput(payerName);

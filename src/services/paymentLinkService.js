@@ -34,7 +34,7 @@ export const getPublicInvoice = async (invoiceId) => {
     throw new Error('Firebase Database not initialized.');
   }
 
-  const invoiceRef = doc(db, 'public_invoices', invoiceId);
+  const invoiceRef = doc(db, 'publicInvoices', invoiceId);
   const invoiceDoc = await getDoc(invoiceRef);
   
   if (!invoiceDoc.exists()) {

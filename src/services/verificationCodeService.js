@@ -25,7 +25,7 @@ export const generateVerificationCode = (invoiceNumber) => {
  */
 export const saveVerificationCode = async (invoiceId, code) => {
   try {
-    const invoiceRef = doc(db, 'public_invoices', invoiceId);
+    const invoiceRef = doc(db, 'publicInvoices', invoiceId);
     await updateDoc(invoiceRef, {
       verificationCode: code,
       codeGeneratedAt: new Date().toISOString(),

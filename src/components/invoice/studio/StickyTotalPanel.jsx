@@ -3,7 +3,6 @@ import { useInvoice } from '../../../contexts/InvoiceContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings2, Calculator, ChevronUp, ChevronDown, FileText, Link, Loader2 } from 'lucide-react';
 import SmartPaymentSection from './SmartPaymentSection';
-import { ShimmerButton } from '../../magicui/shimmer-button';
 
 const StickyTotalPanel = ({ onFinalize, isSaving }) => {
   const { state, dispatch } = useInvoice();
@@ -46,7 +45,7 @@ const StickyTotalPanel = ({ onFinalize, isSaving }) => {
                   <div className="relative">
                     <input 
                       type="number" 
-                      value={state.totals.taxPercentage} 
+                      value={state.totals.taxPercentage ?? ''} 
                       onChange={(e) => dispatch({ type: 'UPDATE_TOTALS', payload: { taxPercentage: parseFloat(e.target.value) || 0 } })}
                       className="w-12 bg-theme-app border border-theme-border-soft rounded px-1.5 py-0.5 text-xs text-center font-bold focus:border-theme-accent outline-none transition-colors"
                     />

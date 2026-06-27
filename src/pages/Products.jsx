@@ -96,7 +96,12 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
       updatedAt: new Date().toISOString()
     };
 
-    onSaveProduct(payload);
+    try {
+      onSaveProduct(payload);
+    } catch (err) {
+      toast.error('Failed to save product');
+      return;
+    }
     setIsModalOpen(false);
   };
 

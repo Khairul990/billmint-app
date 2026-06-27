@@ -12,7 +12,7 @@ export const calculateItemTotal = (qty, rate, discount = 0) => {
   const price = parseFloat(rate) || 0;
   const disc = parseFloat(discount) || 0;
   
-  return roundTo2((quantity * price) - disc);
+  return Math.max(0, roundTo2((quantity * price) - disc));
 };
 
 export const calculateInvoiceTotals = (items, taxPercentage, globalDiscount = 0) => {

@@ -1518,7 +1518,7 @@ const Dashboard = ({
                         </div>
                         <div className="flex items-center gap-6">
                           <div className="w-32 h-2 bg-theme-surface rounded-full overflow-hidden hidden sm:block">
-                            <div className={`h-full ${inv.paymentStatus?.toLowerCase() === 'paid' ? 'bg-emerald-500' : 'bg-theme-accent'}`} style={{ width: `${Math.random() * 40 + 60}%` }} />
+                            <div className={`h-full ${inv.paymentStatus?.toLowerCase() === 'paid' ? 'bg-emerald-500' : 'bg-theme-accent'}`} style={{ width: inv.paymentStatus?.toLowerCase() === 'paid' ? '100%' : inv.amountPaid && inv.grandTotal ? `${Math.min(100, Math.round((inv.amountPaid / inv.grandTotal) * 100))}%` : '65%' }} />
                           </div>
                           <p className="text-sm font-black text-theme-primary w-20 text-right tabular-nums">{formatCurrency(inv.grandTotal || 0)}</p>
                         </div>

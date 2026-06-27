@@ -58,8 +58,10 @@ export const generateNextInvoiceNumber = (invoices = []) => {
 
   let maxNum = 1000;
   invoices.forEach(inv => {
-    const numPart = inv.invoiceNumber ? inv.invoiceNumber.replace('INV-', '') : '';
-    const parsed = parseInt(numPart, 10);
+    if (!inv.invoiceNumber) return;
+    const parts = inv.invoiceNumber.split('-');
+    const lastPart = parts[parts.length - 1];
+    const parsed = parseInt(lastPart, 10);
     if (!isNaN(parsed) && parsed > maxNum) {
       maxNum = parsed;
     }

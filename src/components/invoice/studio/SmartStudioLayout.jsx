@@ -15,7 +15,7 @@ import { ensureInvoicePublicToken } from '../../../services/dbEngine';
 
 const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, onBack }) => {
   const { state, dispatch, businessSettings, editingInvoice } = useInvoice();
-  const isPaidLocked = editingInvoice && (editingInvoice.paymentStatus === 'Paid');
+  const isPaidLocked = editingInvoice && ((editingInvoice.settings?.paymentStatus || editingInvoice.paymentStatus) === 'Paid');
   const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.businessType || 'retail';
   const customerLabel = getCustomerLabelByType(wsType);
   
@@ -93,7 +93,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
     setSaveStatus('saved');
     
     // Generate optimistic ID if new
-    const optimisticId = state.id || `temp_inv_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    const optimisticId = state.id || `temp_inv_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
     const payload = { ...state, paymentStatus: state.settings.paymentStatus, id: optimisticId };
     
     // Update local state immediately
@@ -502,7 +502,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-theme-border-soft/20 flex justify-center">
-              <div className="w-full max-w-[800px] bg-white shadow-lg border border-theme-border-soft origin-top transform sm:scale-100 scale-95 transition-transform">
+               <div className="w-full max-w-[800px] bg-white shadow-lg border border-theme-border-soft origin-top transition-transform">
                 <LiveInvoicePreview />
               </div>
             </div>

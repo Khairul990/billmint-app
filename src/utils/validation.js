@@ -18,7 +18,7 @@ export const invoiceSchema = z.object({
   taxTotal: z.number().min(0).optional(),
   discountTotal: z.number().min(0).optional(),
   grandTotal: z.number().min(0),
-  paymentStatus: z.enum(['Paid', 'Partially Paid', 'Unpaid', 'Pending']).optional().default('Unpaid'),
+  paymentStatus: z.enum(['Paid', 'Partially Paid', 'Unpaid', 'Pending', 'Pending Verification']).optional().default('Unpaid'),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional()
 }).passthrough();
