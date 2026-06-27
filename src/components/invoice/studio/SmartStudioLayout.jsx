@@ -427,16 +427,16 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
         </div>
       </div>
 
-      {/* Success Sheet - Bottom Sheet Style */}
+      {/* Success Modal */}
       {savedInvoiceResult && (
-        <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-end justify-center" onClick={handleCloseSuccess}>
+        <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={handleCloseSuccess}>
           <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 100 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-theme-card border border-theme-border-soft rounded-t-3xl shadow-2xl w-full max-w-lg p-5 pb-[max(3rem,env(safe-area-inset-bottom))] max-h-[90vh] overflow-y-auto"
+            className="bg-theme-card border border-theme-border-soft rounded-3xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto"
           >
             <div className="w-12 h-1.5 bg-theme-border-soft rounded-full mx-auto mb-4"></div>
             <div className="text-center mb-5">
