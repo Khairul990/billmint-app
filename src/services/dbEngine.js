@@ -2849,9 +2849,10 @@ export const flushSyncQueue = async () => {
     window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Syncing...' }));
     await syncOfflineTransactions();
     
-    // Check if the queue was fully cleared
+    // Check if the queue was fully cleared for this user
+    const userId = getRealUserId();
     const queue = await BillQyroDB.getAll('syncQueue');
-    const pendingItems = queue.filter(tx => tx.syncStatus === 'pending' || !tx.syncStatus);
+    const pendingItems = queue.filter(tx => (tx.userId === userId || !tx.userId) && (tx.status === 'pending' || !tx.status));
     
     if (pendingItems.length === 0) {
       window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Synced' }));
