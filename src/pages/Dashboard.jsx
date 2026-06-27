@@ -1147,7 +1147,7 @@ const Dashboard = ({
               {isInitialLoad ? (
                 <KPISkeleton count={4} />
               ) : (
-                <div>
+                <>
                   <StatCard
                     title="Total Revenue"
                     value={formatCurrency(totalRevenue)}
@@ -1180,8 +1180,7 @@ const Dashboard = ({
                     trendUp={true}
                     subtitle="Registered customers"
                   />
-                </div>
-
+                </>
               )}
             </motion.div>
 
