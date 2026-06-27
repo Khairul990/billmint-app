@@ -10,6 +10,7 @@ import {
   generateInvoiceShareText
 } from '../utils/shareUtils';
 import { ensureInvoicePublicToken, resetInvoiceLiveLink } from '../services/dbEngine';
+import { isEducationCategory } from '../utils/categoryChecks';
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
@@ -229,7 +230,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                             try {
                               const customerId = invoice.customerId || invoice.customer?.id;
                               if (!customerId) {
-                                toast.error('Please assign a customer to share the Student Portal.');
+                                toast.error('Please assign a customer to share the Portal.');
                                 return;
                               }
                               const updatedInvoice = { ...invoice };
@@ -252,7 +253,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                               try {
                                 const customerId = invoice.customerId || invoice.customer?.id;
                                 if (!customerId) {
-                                  toast.error('Please assign a customer to share the Student Portal.');
+                                  toast.error('Please assign a customer to share the Portal.');
                                   return;
                                 }
                                 const updatedInvoice = { ...invoice };
@@ -275,7 +276,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                             try {
                               const customerId = invoice.customerId || invoice.customer?.id;
                               if (!customerId) {
-                                toast.error('Please assign a customer to share the Student Portal.');
+                                toast.error('Please assign a customer to share the Portal.');
                                 return;
                               }
                               const updatedInvoice = { ...invoice };
@@ -302,10 +303,12 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                             try {
                               const customerId = invoice.customerId || invoice.customer?.id;
                               if (!customerId) {
-                                toast.error('Please assign a customer to share the Student Portal.');
+                                toast.error('Please assign a customer to share the Portal.');
                                 return;
                               }
-                              const liveLink = `${window.location.origin}/student/${customerId}`;
+                              const isEdu = isEducationCategory(businessSettings?.businessCategory);
+                              const portalPath = isEdu ? '/student-portal' : '/portal';
+                              const liveLink = `${window.location.origin}${portalPath}/${customerId}`;
                               await navigator.clipboard.writeText(liveLink);
                               toast.success('Live Invoice Link copied to clipboard!');
                               setShowShareMenu(false);
@@ -324,7 +327,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                             try {
                               const customerId = invoice.customerId || invoice.customer?.id;
                               if (!customerId) {
-                                toast.error('Please assign a customer to share the Student Portal.');
+                                toast.error('Please assign a customer to share the Portal.');
                                 return;
                               }
                               const updatedInvoice = { ...invoice };
@@ -399,4 +402,10 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
   );
 };
 
-export default InvoiceCard;
+export default React.memo(InvoiceCard, (prevProps, nextProps) => {
+  return (
+    prevProps.invoice?.updatedAt === nextProps.invoice?.updatedAt &&
+    prevProps.invoice?.paymentStatus === nextProps.invoice?.paymentStatus &&
+    prevProps.isDeleted === nextProps.isDeleted
+  );
+});

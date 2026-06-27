@@ -89,6 +89,7 @@ const PublicInvoice = ({ initialInvoice }) => {
 
   const handleSubmitProof = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!screenshotFile) {
       toast.error('Please upload a screenshot proof.');
       return;

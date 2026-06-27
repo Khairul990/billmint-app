@@ -219,3 +219,17 @@ export const getInvoiceLabelByType = (type) => {
   if (t.includes('service') || t.includes('repair')) return 'Repair Tickets';
   return 'Bills';
 };
+
+/**
+ * Returns true if the business type is an education-related business.
+ */
+export const isEducationBusiness = (type) => {
+  if (!type) return false;
+  const t = type.toLowerCase();
+  return t.includes('teacher') || 
+         t.includes('tuition') || 
+         t.includes('coaching') || 
+         t.includes('school') ||
+         t.includes('academy') ||
+         t.includes('training center');
+};

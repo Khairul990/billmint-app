@@ -36,6 +36,7 @@ import PullToRefresh from '../components/PullToRefresh';
 import { addNotification } from '../services/notificationsService';
 import { doc, getDoc } from 'firebase/firestore';
 import { db, firebaseReady } from '../services/firebaseConfig';
+import PremiumEmptyState from '../components/PremiumEmptyState';
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
@@ -70,6 +71,8 @@ const Invoices = ({
   const [statusFilter, setStatusFilter] = useState('All');
   const [viewMode, setViewMode] = useState('active'); // 'active' or 'trash'
   
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
   // Modal Preview State
   const [viewingInvoice, setViewingInvoice] = useState(null);
   const [generatingLink, setGeneratingLink] = useState(false);
@@ -274,26 +277,41 @@ const Invoices = ({
   };
 
   // --- FILTER LOGIC ---
-  const filteredInvoices = useMemo(() => invoices.filter((inv) => {
-    // 1. Filter by viewMode (Trash vs Active)
-    const isDeleted = inv.isDeleted === true;
-    if (viewMode === 'active' && isDeleted) return false;
-    if (viewMode === 'trash' && !isDeleted) return false;
+  const filteredInvoices = useMemo(() => {
+    const result = invoices.filter((inv) => {
+      // 1. Filter by viewMode (Trash vs Active)
+      const isDeleted = inv.isDeleted === true;
+      if (viewMode === 'active' && isDeleted) return false;
+      if (viewMode === 'trash' && !isDeleted) return false;
 
-    // 2. Filter by Search Query
-    const q = searchQuery.toLowerCase();
-    const matchSearch = (
-      (inv.invoiceNumber || '').toLowerCase().includes(q) ||
-      (inv.customerName || '').toLowerCase().includes(q) ||
-      (inv.paymentStatus || '').toLowerCase().includes(q) ||
-      (inv.date || '').includes(q)
-    );
+      // 2. Filter by Search Query
+      const q = searchQuery.toLowerCase();
+      const matchSearch = (
+        (inv.invoiceNumber || '').toLowerCase().includes(q) ||
+        (inv.customerName || '').toLowerCase().includes(q) ||
+        (inv.paymentStatus || '').toLowerCase().includes(q) ||
+        (inv.date || '').includes(q)
+      );
 
-    // 3. Filter by Status
-    const matchStatus = statusFilter === 'All' || inv.paymentStatus === statusFilter;
+      // 3. Filter by Status
+      const matchStatus = statusFilter === 'All' || inv.paymentStatus === statusFilter;
 
-    return matchSearch && matchStatus;
-  }), [invoices, searchQuery, statusFilter, viewMode]);
+      return matchSearch && matchStatus;
+    });
+
+    return result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }, [invoices, searchQuery, statusFilter, viewMode]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, viewMode]);
+
+  const paginatedInvoices = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredInvoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredInvoices, currentPage]);
+
+  const totalPages = Math.ceil(filteredInvoices.length / ITEMS_PER_PAGE);
 
   const handlePrint = () => {
     window.print();
@@ -407,7 +425,7 @@ const Invoices = ({
 
       {/* INVOICE GRID LIST */}
       <div className="space-y-4">
-        {filteredInvoices.map((invoice) => (
+        {paginatedInvoices.map((invoice) => (
           <motion.div key={invoice.id} variants={itemVariants}>
               <InvoiceCard
                 invoice={invoice}
@@ -448,23 +466,36 @@ const Invoices = ({
         ))}
 
         {filteredInvoices.length === 0 && (
-            <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-10 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium relative overflow-hidden">
-              <div className="relative z-10 flex flex-col items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
-                  <FileText className="w-8 h-8" />
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-theme-primary">No bills yet</h4>
-                  <p className="text-xs text-theme-muted font-semibold mt-1">
-                    Create your first bill to see records here
-                  </p>
-                </div>
-                <button onClick={() => { onEditInvoice(null); setCurrentTab('create-invoice'); }} className="px-5 py-2.5 bg-theme-accent text-white text-xs font-bold rounded-xl transition-colors">
-                  Create Bill
-                </button>
-              </div>
-            </div>
-          )}
+          <PremiumEmptyState 
+            icon={Search}
+            title={searchQuery ? 'No Invoices Found' : 'No Invoices Yet'}
+            description={searchQuery ? 'Try adjusting your search or filters.' : 'Create your first invoice to get started.'}
+            actionLabel={!searchQuery ? 'Create Invoice' : null}
+            onAction={() => setCurrentTab('create-invoice')}
+          />
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-8 pb-4">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              className="px-4 py-2 rounded-xl bg-theme-surface border border-theme-border-soft disabled:opacity-50 text-xs font-bold text-theme-primary transition-colors hover:bg-theme-border-soft"
+            >
+              Previous
+            </button>
+            <span className="text-xs font-semibold text-theme-muted">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              className="px-4 py-2 rounded-xl bg-theme-surface border border-theme-border-soft disabled:opacity-50 text-xs font-bold text-theme-primary transition-colors hover:bg-theme-border-soft"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Paid Invoice Delete Confirmation */}

@@ -20,6 +20,7 @@ import PullToRefresh from '../components/PullToRefresh';
 import { syncFromFirestore } from '../services/dbEngine';
 import { getCustomerLabelByType } from '../config/businessPresets';
 import CustomerLedger from '../components/customers/CustomerLedger';
+import PremiumEmptyState from '../components/PremiumEmptyState';
 
 /**
  * Customers CRM and Registry Page
@@ -65,6 +66,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (isSaving) return;
     if (!name) {
       alert('Please specify a client name.');
       return;
@@ -103,6 +105,20 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
       (c.address && c.address.toLowerCase().includes(q))
     );
   }), [customers, searchQuery]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const paginatedCustomers = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredCustomers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredCustomers, currentPage]);
+
+  const totalPages = Math.ceil(filteredCustomers.length / ITEMS_PER_PAGE);
 
   const handleRefresh = useCallback(async () => {
     await syncFromFirestore();
@@ -167,7 +183,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
 
         {/* DYNAMIC LIST GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-        {filteredCustomers.map((cust) => (
+        {paginatedCustomers.map((cust) => (
           <div key={cust.id} className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium hover:shadow-premium-hover transition-all">
             {/* Header with avatar and name */}
             <div className="flex items-center gap-3">
@@ -219,15 +235,39 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
       
 
           {filteredCustomers.length === 0 && (
-            <div className="md:col-span-2 lg:col-span-3 bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
-              <Users className="w-12 h-12 text-theme-primary mx-auto mb-3 animate-pulse" />
-              <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">No {customerLabel.toLowerCase()} added</h4>
-              <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
-                No {customerLabel.toLowerCase()} found. Create invoices to register {customerLabel.toLowerCase()} automatically or add them here!
-              </p>
+            <div className="md:col-span-2 lg:col-span-3">
+              <PremiumEmptyState 
+                type="CUSTOMERS" 
+                title={`No ${customerLabel} Found`}
+                description={`Create invoices to register ${customerLabel.toLowerCase()} automatically or add them here!`}
+                actionLabel={`Add ${customerLabel}`}
+                onAction={openAddModal}
+              />
             </div>
           )}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-8 pb-4">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              className="px-4 py-2 rounded-xl bg-theme-surface border border-theme-border-soft disabled:opacity-50 text-xs font-bold text-theme-primary transition-colors hover:bg-theme-border-soft"
+            >
+              Previous
+            </button>
+            <span className="text-xs font-semibold text-theme-muted">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              className="px-4 py-2 rounded-xl bg-theme-surface border border-theme-border-soft disabled:opacity-50 text-xs font-bold text-theme-primary transition-colors hover:bg-theme-border-soft"
+            >
+              Next
+            </button>
+          </div>
+        )}
 
         {/* DYNAMIC MODAL OVERLAY */}
         <BottomSheet 

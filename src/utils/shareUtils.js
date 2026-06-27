@@ -3,6 +3,7 @@
  */
 
 import { formatCurrency } from './invoiceUtils';
+import { isEducationCategory } from './categoryChecks';
 
 /**
  * Cleans a phone number for the WhatsApp API deep links.
@@ -52,9 +53,11 @@ export function generateInvoiceShareText(invoice, currencySymbol = '₹', busine
   const balanceDue = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), activeSymbol, activeNumberFormat);
   const paymentStatus = invoice.paymentStatus || 'Pending';
   
-  // Construct the secure live link using Student Portal Architecture
+  // Construct the secure live link using Portal Architecture
   const customerId = invoice.customerId || invoice.customer?.id;
-  const liveLink = customerId ? `${window.location.origin}/student/${customerId}` : '';
+  const isEdu = isEducationCategory(businessPrefs?.businessCategory) || isEducationCategory(businessPrefs?.defaultBillingTemplate);
+  const portalPath = isEdu ? '/student-portal' : '/billing';
+  const liveLink = customerId ? `${window.location.origin}${portalPath}/${customerId}` : '';
 
   let message = `Your invoice is ready.
 Invoice No: ${invoiceNo}

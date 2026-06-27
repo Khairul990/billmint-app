@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { pageVariants, staggerContainer, staggerItem } from '../../utils/animations';
 import { CardSkeleton } from '../../components/PremiumSkeleton';
 import BottomSheet from '../../components/BottomSheet';
+import PremiumEmptyState from '../../components/PremiumEmptyState';
 
 const LS_KEY = 'billqyro_students';
 
@@ -30,6 +31,7 @@ const Students = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
+    if (saving) return;
     if (!form.name.trim()) { toast.error('Enter student name'); return; }
     setSaving(true);
     const now = Date.now();
@@ -47,10 +49,24 @@ const Students = () => {
     toast.success('Student removed');
   };
 
-  const filtered = items.filter(i => {
+  const filtered = useMemo(() => items.filter(i => {
     const q = search.toLowerCase();
     return (i.name || '').toLowerCase().includes(q) || (i.phone || '').includes(q) || (i.email || '').toLowerCase().includes(q) || (i.course || '').toLowerCase().includes(q) || (i.batch || '').toLowerCase().includes(q);
-  });
+  }), [items, search]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  const paginated = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filtered, currentPage]);
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
 
   const stats = [
     { label: 'Total Students', value: items.length, icon: GraduationCap, color: 'text-indigo-500' },
@@ -88,17 +104,18 @@ const Students = () => {
       </div>
 
       {filtered.length === 0 ? (
-        <motion.div variants={staggerItem} initial="hidden" animate="visible" className="flex flex-col items-center justify-center p-12 bg-theme-card rounded-3xl border border-theme-border-soft border-dashed text-center">
-          <div className="w-20 h-20 bg-theme-accent/10 text-theme-accent rounded-full flex items-center justify-center mb-6">
-            <GraduationCap className="w-10 h-10" />
-          </div>
-          <h3 className="text-xl font-bold text-theme-primary mb-2">{search ? 'No results found' : 'No students yet'}</h3>
-          <p className="text-sm font-semibold text-theme-muted max-w-sm mb-6">{search ? 'Try a different search term' : 'Enroll your first student to build the directory.'}</p>
-          {!search && <button onClick={openAdd} className="btn-premium flex items-center gap-2 py-2.5 px-5 bg-[image:var(--accent-gradient)] text-white font-bold text-xs rounded-xl hover:opacity-90 transition-all shadow-md"><Plus className="w-4 h-4" /> Add Student</button>}
-        </motion.div>
+        <div className="w-full">
+          <PremiumEmptyState
+            icon={GraduationCap}
+            title={search ? 'No results found' : 'No students yet'}
+            description={search ? 'Try a different search term' : 'Enroll your first student to build the directory.'}
+            actionLabel={search ? null : 'Add Student'}
+            onAction={search ? null : openAdd}
+          />
+        </div>
       ) : (
         <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map(item => (
+          {paginated.map(item => (
             <motion.div key={item.id} variants={staggerItem} className="card-premium p-5 relative group">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -123,6 +140,28 @@ const Students = () => {
             </motion.div>
           ))}
         </motion.div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 mt-8 pb-4">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            className="px-4 py-2 rounded-xl bg-theme-surface border border-theme-border-soft disabled:opacity-50 text-xs font-bold text-theme-primary transition-colors hover:bg-theme-border-soft"
+          >
+            Previous
+          </button>
+          <span className="text-xs font-semibold text-theme-muted">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            className="px-4 py-2 rounded-xl bg-theme-surface border border-theme-border-soft disabled:opacity-50 text-xs font-bold text-theme-primary transition-colors hover:bg-theme-border-soft"
+          >
+            Next
+          </button>
+        </div>
       )}
 
       <button onClick={openAdd} className="fixed bottom-20 right-4 md:hidden flex items-center justify-center w-12 h-12 bg-[image:var(--accent-gradient)] text-white rounded-full shadow-lg hover:scale-105 transition-transform">

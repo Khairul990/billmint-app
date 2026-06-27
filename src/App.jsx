@@ -11,6 +11,7 @@ import {
 } from './utils/demoDataManager';
 import Layout from './components/Layout';
 import { calculateTotals } from './utils/invoiceUtils';
+import { isEducationBusiness } from './config/businessPresets';
 
 import PostLoginWelcome from './components/PostLoginWelcome';
 import ClassicLoader from './components/ClassicLoader';
@@ -108,6 +109,7 @@ const PremiumPricing = React.lazy(() => import('./pages/PremiumPricing'));
 const PaymentDueScreen = React.lazy(() => import('./pages/PaymentDueScreen'));
 const SandboxAdmin = React.lazy(() => import('./pages/admin/SandboxAdmin'));
 const StudentPortal = React.lazy(() => import('./pages/StudentPortal'));
+const BillingPortal = React.lazy(() => import('./pages/BillingPortal'));
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -334,14 +336,38 @@ function App() {
     }
   }, []);
 
-  // Boot Interceptor for Student Portal
-  const [studentPortalId, setStudentPortalId] = useState(null);
+  // Boot Interceptor for Portals
+  const [portalId, setPortalId] = useState(null);
+  const [eduPortalId, setEduPortalId] = useState(null);
 
   useEffect(() => {
     const path = window.location.pathname;
-    const studentMatch = path.match(/^\/student\/([a-zA-Z0-9_-]+)/);
-    if (studentMatch) {
-      setStudentPortalId(studentMatch[1]);
+    
+    // Strict redirect for Business workspaces trying to access student paths
+    if (path === '/student' || path === '/students' || path.startsWith('/student/')) {
+       const id = path.split('/')[2];
+       if (id) {
+         window.history.replaceState({}, '', `/billing/${id}`);
+       } else {
+         window.history.replaceState({}, '', '/billing');
+       }
+    }
+    
+    const newPath = window.location.pathname;
+
+    const studentMatchLegacy = newPath.match(/^\/student\/([a-zA-Z0-9_-]+)/);
+    const portalMatch = newPath.match(/^\/portal\/([a-zA-Z0-9_-]+)/);
+    const billingMatch = newPath.match(/^\/billing\/([a-zA-Z0-9_-]+)/);
+    const eduPortalMatch = newPath.match(/^\/student-portal\/([a-zA-Z0-9_-]+)/);
+    
+    if (eduPortalMatch) {
+      setEduPortalId(eduPortalMatch[1]);
+    } else if (portalMatch) {
+      setPortalId(portalMatch[1]);
+    } else if (billingMatch) {
+      setPortalId(billingMatch[1]);
+    } else if (studentMatchLegacy) {
+      setPortalId(studentMatchLegacy[1]);
     }
   }, []);
 
@@ -1441,6 +1467,12 @@ function App() {
       case 'patients':
         return <Patients />;
       case 'students':
+        if (activeSettings && !isEducationBusiness(activeSettings.defaultBillingTemplate)) {
+          // If a Business workspace attempts to open /students, automatically redirect
+          // We don't render Students, we redirect to customers
+          setTimeout(() => setCurrentTab('customers'), 0);
+          return <div className="min-h-screen flex items-center justify-center"><ClassicLoader /></div>;
+        }
         return <Students />;
       case 'clients':
         return <Clients />;
@@ -1648,14 +1680,26 @@ function App() {
     );
   }
 
-  if (studentPortalId) {
+  if (portalId) {
     return (
       <React.Suspense fallback={
         <div className="flex h-screen items-center justify-center">
           <ClassicLoader />
         </div>
       }>
-        <StudentPortal studentId={studentPortalId} />
+        <BillingPortal customerId={portalId} />
+      </React.Suspense>
+    );
+  }
+
+  if (eduPortalId) {
+    return (
+      <React.Suspense fallback={
+        <div className="flex h-screen items-center justify-center">
+          <ClassicLoader />
+        </div>
+      }>
+        <StudentPortal studentId={eduPortalId} />
       </React.Suspense>
     );
   }

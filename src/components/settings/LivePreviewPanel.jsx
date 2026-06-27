@@ -4,6 +4,7 @@ import { Eye, FileText, LayoutDashboard, Globe, CreditCard, GraduationCap, Users
 import InvoicePreview from '../InvoicePreview';
 import { DEMO_INVOICE, DEMO_BUSINESS } from './DemoData';
 import { getThemePreviewColors } from '../../utils/themeUtils';
+import { isEducationBusiness } from '../../config/businessPresets';
 
 const PREVIEW_TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -198,6 +199,14 @@ const LivePreviewPanel = ({ themeId, darkMode, brandColor, settings = {} }) => {
     return getThemePreviewColors(effectiveTheme, darkMode ? 'dark' : 'light');
   }, [themeId, darkMode, brandColor]);
 
+  const isEdu = isEducationBusiness(settings?.defaultBillingTemplate);
+  const visibleTabs = PREVIEW_TABS.filter(tab => {
+    if (tab.id === 'student') return isEdu;
+    if (tab.id === 'customer') return !isEdu;
+    if (tab.id === 'portal') return true; // Keep billing portal available
+    return true;
+  });
+
   const renderPreview = () => {
     switch (activePreview) {
       case 'dashboard': return <MiniDashboardPreview colors={colors} />;
@@ -244,7 +253,7 @@ const LivePreviewPanel = ({ themeId, darkMode, brandColor, settings = {} }) => {
 
       {/* Preview Tabs */}
       <div className="flex overflow-x-auto hide-scrollbar gap-0.5 px-2 py-1.5 border-b" style={{ borderColor: colors.border, backgroundColor: colors.card }}>
-        {PREVIEW_TABS.map((tab) => {
+        {visibleTabs.map((tab) => {
           const TabIcon = tab.icon;
           const isActive = activePreview === tab.id;
           return (

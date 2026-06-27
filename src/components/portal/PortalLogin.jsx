@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Mail, Key, GraduationCap } from 'lucide-react';
+import { Lock, Mail, Key, Shield } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import ClassicLoader from '../ClassicLoader';
 
-export default function StudentLogin({ studentId, onLoginSuccess }) {
+export default function PortalLogin({ customerId, onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -51,17 +51,17 @@ export default function StudentLogin({ studentId, onLoginSuccess }) {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md bg-theme-card border border-theme-border-soft rounded-3xl p-8 shadow-2xl relative overflow-hidden"
       >
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-500"></div>
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-theme-accent via-theme-accent-light to-theme-accent"></div>
         
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center">
-            <GraduationCap className="w-8 h-8" />
+          <div className="w-16 h-16 bg-theme-accent/10 text-theme-accent rounded-full flex items-center justify-center">
+            <Shield className="w-8 h-8" />
           </div>
         </div>
         
-        <h2 className="text-2xl font-black text-center text-theme-primary mb-2">Student Portal Access</h2>
+        <h2 className="text-2xl font-black text-center text-theme-primary mb-2">Secure Portal Access</h2>
         <p className="text-center text-theme-muted mb-8 text-sm">
-          Student ID: <span className="font-mono font-bold">{studentId}</span>
+          Portal ID: <span className="font-mono font-bold">{customerId}</span>
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -73,8 +73,8 @@ export default function StudentLogin({ studentId, onLoginSuccess }) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-theme-main border border-theme-border-soft text-theme-primary rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-blue-500 transition-colors"
-                placeholder="student@example.com"
+                className="w-full bg-theme-main border border-theme-border-soft text-theme-primary rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-theme-accent transition-colors"
+                placeholder="customer@example.com"
                 required
               />
             </div>
@@ -88,7 +88,7 @@ export default function StudentLogin({ studentId, onLoginSuccess }) {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-theme-main border border-theme-border-soft text-theme-primary rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full bg-theme-main border border-theme-border-soft text-theme-primary rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-theme-accent transition-colors"
                 placeholder="••••••••"
                 required
               />
@@ -98,16 +98,16 @@ export default function StudentLogin({ studentId, onLoginSuccess }) {
           <button 
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl py-3 mt-4 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full bg-theme-accent hover:bg-theme-accent-light text-white font-bold rounded-xl py-3 mt-4 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            {loading ? <ClassicLoader /> : (isLogin ? <><Lock className="w-4 h-4" /> Secure Login</> : <><GraduationCap className="w-4 h-4" /> Create & Claim Portal</>)}
+            {loading ? <ClassicLoader /> : (isLogin ? <><Lock className="w-4 h-4" /> Secure Login</> : <><Shield className="w-4 h-4" /> Create & Claim Portal</>)}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <button 
             onClick={() => setIsLogin(!isLogin)}
-            className="text-blue-500 text-sm font-bold hover:underline"
+            className="text-theme-accent text-sm font-bold hover:underline"
           >
             {isLogin ? "First time here? Claim your portal." : "Already have an account? Login here."}
           </button>

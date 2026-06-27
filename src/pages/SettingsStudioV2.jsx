@@ -11,6 +11,7 @@ import TemplateMarketplace from './TemplateMarketplace';
 import BackupRestore from './BackupRestore';
 import { applyTheme } from '../hooks/useThemeEngine';
 import { getThemePreviewColors, ALL_THEMES, THEME_INFO } from '../utils/themeUtils';
+import { getCustomerLabelByType, isEducationBusiness } from '../config/businessPresets';
 
 import {
   Building2, MapPin, FileText, Save, Image as ImageIcon, Phone, Mail,
@@ -63,7 +64,7 @@ const NAV_GROUPS = [
     items: [
       { id: 'invoice-templates', label: 'Invoice Templates', icon: LayoutTemplate, description: 'PDF invoice layouts' },
       { id: 'pdf-templates', label: 'PDF Templates', icon: Printer, description: 'Print-ready templates' },
-      { id: 'billing-portal', label: 'Billing Portal', icon: Globe, description: 'Customer payment portal' }
+      { id: 'billing-portal', dynamicLabel: (isEdu) => isEdu ? 'Student Portal' : 'Billing Portal', icon: Globe, dynamicDesc: (isEdu) => isEdu ? 'Student fee portal' : 'Customer payment portal' }
     ]
   },
   {
@@ -786,12 +787,13 @@ const SettingsStudioV2 = ({
         );
 
       case 'billing-portal':
+        const isEdu = isEducationBusiness(settings.defaultBillingTemplate);
         return (
           <div className="animate-fadeIn">
             <div className="flex items-center justify-between mb-4">
               <div className="section-header">
-                <h2 className="section-header-title">Billing Portal</h2>
-                <p className="section-header-subtitle">Customer-facing payment portal configuration</p>
+                <h2 className="section-header-title">{isEdu ? 'Student Portal' : 'Billing Portal'}</h2>
+                <p className="section-header-subtitle">{isEdu ? 'Student-facing fee portal configuration' : 'Customer-facing payment portal configuration'}</p>
               </div>
             </div>
             <LiveLinkTemplateStudio setCurrentTab={(tab) => {
@@ -933,13 +935,15 @@ const SettingsStudioV2 = ({
       <div className="max-w-full mx-auto px-4 md:px-6 py-3">
         <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
           {filteredNav.flatMap(group => group.items).map((item) => {
+            const isEdu = isEducationBusiness(settings.defaultBillingTemplate);
+            const label = item.dynamicLabel ? item.dynamicLabel(isEdu) : item.label;
             const Icon = item.icon;
             const isSelected = activeSection === item.id;
             return (
               <button key={item.id} onClick={() => setActiveSection(item.id)}
                 className={'flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap border transition-all ' + (isSelected ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-sm' : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10')}
               >
-                <Icon className="w-3.5 h-3.5" /> {item.label}
+                <Icon className="w-3.5 h-3.5" /> {label}
               </button>
             );
           })}

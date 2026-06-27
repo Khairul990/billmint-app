@@ -20,6 +20,7 @@ import StatCard from '../components/StatCard';
 import { KPISkeleton, ChartSkeleton } from '../components/PremiumSkeleton';
 import ActivityFeed from '../components/ActivityFeed';
 import QuickActions from '../components/QuickActions';
+import PremiumEmptyState from '../components/PremiumEmptyState';
 
 const AnimatedNumber = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(null);
@@ -94,32 +95,26 @@ const Dashboard = ({
     loadAnnouncement();
   }, []);
 
-  const getTodaysSales = () => {
-    const today = new Date();
+  const calculatedTodaysSales = useMemo(() => {
+    const today = new Date().toDateString();
     return invoices
-      .filter(inv => {
-        const invDate = new Date(inv.createdAt);
-        return invDate.toDateString() === today.toDateString();
-      })
+      .filter(inv => new Date(inv.createdAt).toDateString() === today)
       .reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
-  };
+  }, [invoices]);
 
-  const getTodaysCollections = () => {
-    const today = new Date();
+  const calculatedTodaysCollections = useMemo(() => {
+    const today = new Date().toDateString();
     return invoices
-      .filter(inv => {
-        const invDate = new Date(inv.createdAt);
-        return invDate.toDateString() === today.toDateString();
-      })
+      .filter(inv => new Date(inv.createdAt).toDateString() === today)
       .reduce((sum, inv) => {
         const s = (inv.paymentStatus || '').toLowerCase();
         if (s === 'paid') return sum + (inv.grandTotal || inv.total || 0);
         if (s === 'partial' || s === 'partially paid') return sum + (parseFloat(inv.amountPaid) || 0);
         return sum;
       }, 0);
-  };
+  }, [invoices]);
 
-  const getTotalDue = () => {
+  const calculatedTotalDue = useMemo(() => {
     return invoices
       .filter(inv => {
         const s = (inv.paymentStatus || '').toLowerCase();
@@ -130,7 +125,7 @@ const Dashboard = ({
         const paid = parseFloat(inv.amountPaid) || 0;
         return sum + Math.max(0, total - paid);
       }, 0);
-  };
+  }, [invoices]);
 
   const getInvoiceLabel = () => {
     const wsType = businessSettings?.businessWorkspaces?.find(
@@ -238,8 +233,8 @@ const Dashboard = ({
   const invoiceLabel = getInvoiceLabel();
 
   const invoiceDerived = useMemo(() => {
-    const todayEarnings = getTodaysSales();
-    const totalDue = getTotalDue();
+    const todayEarnings = calculatedTodaysSales;
+    const totalDue = calculatedTotalDue;
     const pendingBillsCount = invoices.filter(inv => {
       const s = (inv.paymentStatus || '').toLowerCase();
       return s === 'unpaid' || s === 'partial' || s === 'partially paid' || s === 'pending';
@@ -290,7 +285,7 @@ const Dashboard = ({
       billsHealth, paymentHealth, customerHealth, activityHealth, dueHealth, overallHealth,
       topCustomers, dueNext7Days, busiestDay, avgInvoiceValue, collectionTrendData
     };
-  }, [invoices, invoiceLabel, totalCustomers, newCustomersThisMonth]);
+  }, [invoices, invoiceLabel, totalCustomers, newCustomersThisMonth, calculatedTodaysSales, calculatedTotalDue]);
   const {
     todayEarnings, totalDue, pendingBillsCount,
     recentInvoices, recentPayments, pendingCollection,
@@ -1488,7 +1483,16 @@ const Dashboard = ({
                 </div>
                 <div className="space-y-3 mt-6">
                   {recentInvoices.length === 0 ? (
-                    <p className="text-sm text-theme-muted font-medium p-4 bg-theme-surface rounded-xl">No recent invoices.</p>
+                    <div className="w-full">
+                      <PremiumEmptyState
+                        type="DASHBOARD"
+                        title="No Recent Invoices"
+                        description="Your most recent business transactions will appear here."
+                        actionLabel="Create Invoice"
+                        onAction={onQuickBillOpen}
+                        size="sm"
+                      />
+                    </div>
                   ) : (
                     recentInvoices.slice(0, 5).map(inv => (
                       <div key={inv.id} className="flex items-center justify-between group cursor-pointer p-3 rounded-xl hover:bg-theme-surface transition-colors" onClick={() => { onViewInvoice(inv); setCurrentTab('invoices'); }}>

@@ -7,6 +7,7 @@ import { triggerLightHaptic } from '../utils/feedback';
 import { getCustomerLabelByType, getInvoiceLabelByType } from '../config/businessPresets';
 import Logo from './Logo';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
+import { isEducationBusiness } from '../config/businessPresets';
 
 /**
  * Premium Collapsible Desktop Sidebar Navigation
@@ -81,6 +82,9 @@ const Sidebar = ({
     { id: 'devices', label: 'Device Management', icon: Wrench, module: 'devices' },
     { id: 'serviceJobs', label: 'Service Jobs', icon: Wrench, module: 'serviceJobs' },
     { id: 'projects', label: 'Projects', icon: Briefcase, module: 'projects' },
+
+    { type: 'label', label: 'Portals' },
+    { id: isEducationBusiness(wsType) ? 'student-portal-settings' : 'billing-portal-settings', label: isEducationBusiness(wsType) ? 'Student Portal' : 'Billing Portal', icon: Globe },
 
     { type: 'label', label: 'System' },
     { id: 'settings', label: 'Settings Studio', icon: SettingsIcon },
