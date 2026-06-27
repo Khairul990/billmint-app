@@ -171,19 +171,19 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   <span className="text-[10px] uppercase font-bold tracking-widest text-theme-muted bg-theme-app px-2.5 py-0.5 rounded-full border border-theme-border-soft backdrop-blur-md">
                     Active Workspace
                   </span>
-                  <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-theme-accent bg-theme-accent-light border border-theme-accent/15 px-2 py-0.5 rounded-full">
-                    <ShieldCheck className="w-3 h-3" /> Secure
-                  </span>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center gap-2">
                   <WorkspaceSwitcher
                     businessWorkspaces={businessWorkspaces}
                     activeWorkspaceId={activeWorkspaceId}
                     setActiveWorkspace={setActiveWorkspace}
                     setCurrentTab={setCurrentTab}
                   />
+                  <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-theme-accent bg-theme-accent-light border border-theme-accent/15 px-2 py-0.5 rounded-full">
+                    <ShieldCheck className="w-3 h-3" /> Secure
+                  </span>
                   {localStorage.getItem('billqyro_demo_session_active') === 'true' ? (
-                    <div className="relative group ml-2 flex items-center gap-2">
+                    <div className="relative group flex items-center gap-2">
                       <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors text-amber-500 bg-amber-500/10 border border-amber-500/20">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> 
                         LOCAL SANDBOX
@@ -201,7 +201,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                       )}
                     </div>
                   ) : (
-                    <div className="relative group ml-2 flex items-center gap-2">
+                    <div className="relative group flex items-center gap-2">
                       <span className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
                         syncStatus === 'Synced' ? 'text-emerald-500 bg-emerald-500/10 border border-emerald-500/20' : 
                         syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500 bg-blue-500/10 border border-blue-500/20 animate-pulse' : 
