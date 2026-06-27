@@ -1683,10 +1683,11 @@ const Dashboard = ({
                 </button>
               </motion.div>
             )}
-
-          
+          </motion.div>
         </div>
-      </div>
+        </>
+      )}
+    </div>
 
       <AddCustomerSheet
         isOpen={showAddCustomerSheet}
