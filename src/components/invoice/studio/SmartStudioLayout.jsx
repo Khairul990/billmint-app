@@ -380,21 +380,27 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
                 <div className="w-16 h-16 bg-theme-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <CheckCircle2 className="w-8 h-8 text-theme-accent" />
                 </div>
-                <h2 className="text-lg font-black text-theme-primary">Ready to Save</h2>
-                <p className="text-sm font-bold text-theme-muted mt-1">Review your invoice details below</p>
+                <h2 className="text-lg font-black text-theme-primary">
+                  {savedInvoiceResult || saveStatus === 'saved' ? 'Invoice Saved' : 'Ready to Save'}
+                </h2>
+                <p className="text-sm font-bold text-theme-muted mt-1">
+                  {savedInvoiceResult || saveStatus === 'saved' ? 'Your invoice was saved successfully' : 'Review your invoice details below'}
+                </p>
               </div>
 
               <CompactSummaryStrip />
 
               <button
                 onClick={handleSaveInvoice}
-                disabled={isSaving || isPaidLocked}
+                disabled={isSaving || isPaidLocked || savedInvoiceResult}
                 className="w-full py-5 bg-gradient-to-r from-theme-accent to-indigo-500 text-white rounded-2xl font-black text-base shadow-premium hover:shadow-xl hover:shadow-theme-accent/30 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
               >
                 {isSaving ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> Saving Invoice...</>
                 ) : isPaidLocked ? (
                   <><AlertTriangle className="w-5 h-5" /> Paid Invoice - View Only</>
+                ) : savedInvoiceResult || saveStatus === 'saved' ? (
+                  <><Check className="w-5 h-5" /> Saved Successfully</>
                 ) : (
                   <><Check className="w-5 h-5" /> Save Invoice</>
                 )}
