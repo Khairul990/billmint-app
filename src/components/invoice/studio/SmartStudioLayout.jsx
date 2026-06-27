@@ -13,7 +13,7 @@ import CompactPaymentSection from './CompactPaymentSection';
 import LiveInvoicePreview from '../LiveInvoicePreview';
 import { ensureInvoicePublicToken } from '../../../services/dbEngine';
 
-const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, onBack }) => {
+const SmartStudioLayout = ({ customers, products, invoices = [], onSaveInvoice, onDownloadPDF, onBack }) => {
   const { state, dispatch, businessSettings, editingInvoice } = useInvoice();
   const isPaidLocked = editingInvoice && ((editingInvoice.settings?.paymentStatus || editingInvoice.paymentStatus) === 'Paid');
   const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.businessType || 'retail';
@@ -327,7 +327,7 @@ const SmartStudioLayout = ({ customers, products, onSaveInvoice, onDownloadPDF, 
 
           {currentStep === 2 && (
             <div className="flex flex-col gap-6 w-full">
-              <SmartBillItemsList products={products} />
+              <SmartBillItemsList products={products} invoices={invoices} wsType={wsType} />
 
               {!isPaidLocked && (
                 <div className="flex gap-4 mt-4 w-full">

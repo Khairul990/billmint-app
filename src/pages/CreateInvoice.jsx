@@ -21,6 +21,7 @@ const CreateInvoice = ({
       <SmartStudioLayout 
         customers={customers}
         products={products}
+        invoices={invoices}
         onSaveInvoice={onSaveInvoice}
         onDownloadPDF={onDownloadPDF}
         onBack={onBack}

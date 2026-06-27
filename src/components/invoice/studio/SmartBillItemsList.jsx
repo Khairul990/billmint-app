@@ -1,6 +1,8 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { Plus, Trash2, AlertTriangle, ArrowUp, X, Settings2, Copy } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, ArrowUp, X, Settings2, Copy, Package } from 'lucide-react';
+import { getProductLabelByType } from '../../../config/businessPresets';
+import PremiumEmptyState from '../../../components/PremiumEmptyState';
 
 const calculateRowAmount = (item) => {
   const q = parseFloat(item.qty) || 0;
@@ -9,13 +11,15 @@ const calculateRowAmount = (item) => {
   return Math.max(0, (q * r) - d);
 };
 
-const SmartBillItemsList = ({ products = [] }) => {
+const SmartBillItemsList = ({ products = [], invoices = [], wsType }) => {
   const { state, dispatch } = useInvoice();
   
   // Custom columns state
   const [columns, setColumns] = useState({ col1: 'Description', col2: 'Qty', col3: 'Rate' });
   const [showColModal, setShowColModal] = useState(false);
   const [tempCols, setTempCols] = useState({ col1: '', col2: '', col3: '' });
+
+  const productLabel = getProductLabelByType(wsType);
 
   // Update columns based on template selection
   useEffect(() => {
@@ -34,19 +38,35 @@ const SmartBillItemsList = ({ products = [] }) => {
     setColumns({ col1, col2, col3 });
   }, [state.selectedTemplate]);
 
-  // Common quick add items
-  const mostUsed = [
-    { name: 'Shirt Stitching', rate: 450, unit: 'Piece' },
-    { name: 'Pant Stitching', rate: 500, unit: 'Piece' },
-    { name: 'Embroidery Design', rate: 800, unit: 'Design' }
-  ];
+  // Compute Most Used from real invoice item history
+  const mostUsed = useMemo(() => {
+    if (!invoices || invoices.length === 0) return [];
+    const usageMap = {};
+    invoices.forEach(inv => {
+      (inv.items || []).forEach(item => {
+        const name = item.itemService || item.name || item.productName || item.description;
+        if (!name || !name.trim()) return;
+        const key = name.trim().toLowerCase();
+        if (!usageMap[key]) usageMap[key] = { name: name.trim(), rate: item.rate || item.price || 0, unit: item.unit || 'Piece', count: 0 };
+        usageMap[key].count++;
+      });
+    });
+    return Object.values(usageMap).sort((a, b) => b.count - a.count).slice(0, 5);
+  }, [invoices]);
 
-  const recentUsed = [
-    { name: 'Logo Stitch', rate: 250, unit: 'Piece' },
-    { name: 'Alteration', rate: 100, unit: 'Piece' },
-    { name: 'Doctor Visit', rate: 500, unit: 'Service' },
-    { name: 'Tuition Fee', rate: 1000, unit: 'Service' }
-  ];
+  // Compute Recent from products array, sorted by creation date
+  const recentProducts = useMemo(() => {
+    if (!products || products.length === 0) return [];
+    return [...products].sort((a, b) => {
+      const aTime = new Date(a.createdAt || a.updatedAt || 0).getTime();
+      const bTime = new Date(b.createdAt || b.updatedAt || 0).getTime();
+      return bTime - aTime;
+    }).slice(0, 5).map(p => ({
+      name: p.name || p.productName || p.itemService || '',
+      rate: p.rate || p.price || 0,
+      unit: p.unit || 'Piece'
+    }));
+  }, [products]);
 
   const handleUpdateItem = useCallback((index, field, value) => {
     dispatch({ type: 'UPDATE_ITEM_FIELD', payload: { index, field, value } });
@@ -112,43 +132,58 @@ const SmartBillItemsList = ({ products = [] }) => {
       <div className="bg-theme-surface border border-theme-border-soft rounded-2xl p-4 shadow-sm">
         <h3 className="text-xs font-black uppercase text-theme-muted mb-3 tracking-wider">Quick Add Items</h3>
         
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted min-w-[70px] flex items-center gap-1.5">
-              <AlertTriangle className="w-3 h-3 text-amber-500" /> Most Used:
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {mostUsed.map((p, idx) => (
-                <button
-                  key={`most-${idx}`}
-                  onClick={() => handleQuickAdd(p)}
-                  className="px-3 py-1.5 bg-theme-app/50 border border-theme-border-soft hover:bg-theme-surface hover:border-theme-accent/50 hover:shadow-sm rounded-xl text-left transition-all relative overflow-hidden group"
-                >
-                  <span className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors">{p.name}</span>
-                  <span className="ml-2 text-[10px] font-bold text-theme-muted">₹{p.rate}</span>
-                </button>
-              ))}
-            </div>
+        {mostUsed.length === 0 && recentProducts.length === 0 ? (
+          <PremiumEmptyState
+            icon={Package}
+            title={`No ${productLabel.toLowerCase()}s yet`}
+            description={`Add your first ${productLabel.toLowerCase()} to see it here for quick billing.`}
+            actionLabel={`Create ${productLabel}`}
+            onAction={() => window.dispatchEvent(new CustomEvent('navigate_tab', { detail: 'products' }))}
+            size="sm"
+          />
+        ) : (
+          <div className="flex flex-col gap-3">
+            {mostUsed.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted min-w-[70px] flex items-center gap-1.5">
+                  <AlertTriangle className="w-3 h-3 text-amber-500" /> Most Used:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {mostUsed.map((p, idx) => (
+                    <button
+                      key={`most-${idx}`}
+                      onClick={() => handleQuickAdd(p)}
+                      className="px-3 py-1.5 bg-theme-app/50 border border-theme-border-soft hover:bg-theme-surface hover:border-theme-accent/50 hover:shadow-sm rounded-xl text-left transition-all relative overflow-hidden group"
+                    >
+                      <span className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors">{p.name}</span>
+                      <span className="ml-2 text-[10px] font-bold text-theme-muted">₹{p.rate}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {recentProducts.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted min-w-[70px] flex items-center gap-1.5">
+                  <ArrowUp className="w-3 h-3 text-emerald-500" /> Recent:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {recentProducts.map((p, idx) => (
+                    <button
+                      key={`recent-${idx}`}
+                      onClick={() => handleQuickAdd(p)}
+                      className="px-3 py-1.5 bg-theme-app/50 border border-theme-border-soft hover:bg-theme-surface hover:border-theme-accent/50 hover:shadow-sm rounded-xl text-left transition-all relative overflow-hidden group"
+                    >
+                      <span className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors">{p.name}</span>
+                      <span className="ml-2 text-[10px] font-bold text-theme-muted">₹{p.rate}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-          
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted min-w-[70px] flex items-center gap-1.5">
-              <ArrowUp className="w-3 h-3 text-emerald-500" /> Recent:
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {recentUsed.map((p, idx) => (
-                <button
-                  key={`recent-${idx}`}
-                  onClick={() => handleQuickAdd(p)}
-                  className="px-3 py-1.5 bg-theme-app/50 border border-theme-border-soft hover:bg-theme-surface hover:border-theme-accent/50 hover:shadow-sm rounded-xl text-left transition-all relative overflow-hidden group"
-                >
-                  <span className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors">{p.name}</span>
-                  <span className="ml-2 text-[10px] font-bold text-theme-muted">₹{p.rate}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Items Table Section */}
