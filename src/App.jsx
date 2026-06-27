@@ -905,16 +905,80 @@ function App() {
     }
 
     if (productsUpdated) {
+      const savePromises = [];
       for (const p of currentProducts) {
         if (updatedProductIds.has(p.id)) {
-          await saveProduct(p);
+          savePromises.push(saveProduct(p));
         }
       }
+      Promise.all(savePromises).catch(e => console.error("Error saving products:", e));
       setProducts(currentProducts);
     }
 
-    const { updatedInvoices, firebaseStatus } = await saveInvoice(payload);
-    setInvoices(updatedInvoices);
+    // Fire and forget saveInvoice for Layer 2 persistence
+    saveInvoice(payload).then(({ updatedInvoices, firebaseStatus }) => {
+      setInvoices(updatedInvoices);
+
+      if (!isSilent) {
+        if (firebaseStatus === 'failed') {
+          toast.success('Invoice created successfully. (Saved locally. Firebase sync pending.)');
+        } else {
+          toast.success('Invoice created successfully');
+        }
+        
+        sendEmpireEvent({
+          eventType: "invoice_created",
+          message: "Invoice created in BillQyro",
+          page: "create-invoice",
+          metadata: { feature: "invoice", action: "created", privateDataIncluded: false }
+        });
+
+        // Trigger haptic & audio feedback
+        triggerSuccessFeedback();
+
+        if (unlinkedItems) {
+          toast.custom(
+            (t) => (
+              <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-theme-warning/5 dark:bg-amber-950/40 shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-amber-500/30`}>
+                <div className="flex-1 w-0 p-4">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 pt-0.5">
+                      <span className="text-xl">⚠️</span>
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                        Some bill items are not linked to products, so inventory stock was not updated.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex border-l border-amber-500/20">
+                  <button
+                    onClick={() => {
+                      toast.dismiss(t.id);
+                      setCurrentTab('products');
+                    }}
+                    className="w-full border border-transparent rounded-none rounded-r-xl p-4 flex items-center justify-center text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-theme-warning/10 focus:outline-none transition-colors"
+                  >
+                    Link Products
+                  </button>
+                </div>
+              </div>
+            ),
+            { duration: 6000 }
+          );
+        } else if (productsUpdated) {
+          toast.success('Inventory stock updated successfully.', { duration: 4000 });
+        }
+
+        if (lowStockWarning) {
+          toast.error('Low stock or insufficient stock for some products.', { duration: 4000 });
+        }
+
+        setEditingInvoice(null);
+        setCurrentTab('invoices');
+      }
+    }).catch(e => console.error("Error saving invoice locally:", e));
 
     if (saveCustomerAsNew && payload.customerName && !isSilent) {
       const newCustomer = {
@@ -924,69 +988,11 @@ function App() {
         email: payload.customerEmail || '',
         address: payload.customerAddress || ''
       };
-      const { updatedCustomers } = await saveCustomer(newCustomer);
-      setCustomers(updatedCustomers);
+      saveCustomer(newCustomer).then(({ updatedCustomers }) => {
+        setCustomers(updatedCustomers);
+      }).catch(e => console.error("Error saving customer:", e));
     }
 
-    if (!isSilent) {
-      if (firebaseStatus === 'failed') {
-        toast.success('Invoice created successfully. (Saved locally. Firebase sync pending.)');
-      } else {
-        toast.success('Invoice created successfully');
-      }
-      
-      sendEmpireEvent({
-        eventType: "invoice_created",
-        message: "Invoice created in BillQyro",
-        page: "create-invoice",
-        metadata: { feature: "invoice", action: "created", privateDataIncluded: false }
-      });
-
-      // Trigger haptic & audio feedback
-      triggerSuccessFeedback();
-
-      if (unlinkedItems) {
-        toast.custom(
-          (t) => (
-            <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-theme-warning/5 dark:bg-amber-950/40 shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-amber-500/30`}>
-              <div className="flex-1 w-0 p-4">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 pt-0.5">
-                    <span className="text-xl">⚠️</span>
-                  </div>
-                  <div className="ml-3 flex-1">
-                    <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
-                      Some bill items are not linked to products, so inventory stock was not updated.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex border-l border-amber-500/20">
-                <button
-                  onClick={() => {
-                    toast.dismiss(t.id);
-                    setCurrentTab('products');
-                  }}
-                  className="w-full border border-transparent rounded-none rounded-r-xl p-4 flex items-center justify-center text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-theme-warning/10 focus:outline-none transition-colors"
-                >
-                  Link Products
-                </button>
-              </div>
-            </div>
-          ),
-          { duration: 6000 }
-        );
-      } else if (productsUpdated) {
-        toast.success('Inventory stock updated successfully.', { duration: 4000 });
-      }
-
-      if (lowStockWarning) {
-        toast.error('Low stock or insufficient stock for some products.', { duration: 4000 });
-      }
-
-      setEditingInvoice(null);
-      setCurrentTab('invoices');
-    }
     return payload;
   };
 

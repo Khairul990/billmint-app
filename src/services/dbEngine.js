@@ -211,7 +211,29 @@ export const logAudit = async (action, entityType, entityId, before = null, afte
   }
 };
 
-export const syncOfflineTransactions = async () => {
+let syncDebounceTimer = null;
+let isSyncing = false;
+
+export const syncOfflineTransactions = () => {
+  return new Promise((resolve) => {
+    if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+    
+    syncDebounceTimer = setTimeout(async () => {
+      if (isSyncing) return resolve(null);
+      isSyncing = true;
+      try {
+        await _runSyncOfflineTransactions();
+      } catch (e) {
+        console.error('Background sync failed:', e);
+      } finally {
+        isSyncing = false;
+        resolve(true);
+      }
+    }, 300); // 300ms batch window
+  });
+};
+
+const _runSyncOfflineTransactions = async () => {
   if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
     console.warn('Blocked real data operation during Demo Mode: syncOfflineTransactions');
     return null;
