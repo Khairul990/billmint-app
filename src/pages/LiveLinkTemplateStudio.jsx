@@ -49,6 +49,7 @@ import { getDemoInvoice } from '../utils/demoDataGenerator';
 
 const liveLinkTemplates = [
   { id: 'classic', name: 'Clean Classic', type: 'free', icon: LayoutTemplate, desc: 'Simple, timeless layout.' },
+  { id: 'cartoon', name: 'Cartoon Premium', type: 'free', icon: LayoutTemplate, desc: 'Premium modern layout with custom branding.' },
   { id: 'modern', name: 'Modern Card', type: 'free', icon: LayoutTemplate, desc: 'Card-based modern layout.' },
   { id: 'mobile', name: 'Mobile First', type: 'free', icon: Smartphone, desc: 'Optimized for mobile displays.' },
   { id: 'retail', name: 'Retail Checkout', type: 'free', icon: ShoppingBag, desc: 'POS checkout receipt style.' },
@@ -80,6 +81,7 @@ const staggerItem = {
 
 const templateCategory = {
   classic: 'Classic',
+  cartoon: 'Modern',
   modern: 'Modern',
   mobile: 'Mobile-first',
   retail: 'Mobile-first',
@@ -97,6 +99,7 @@ const templateCategory = {
 
 const templateDevices = {
   classic: ['Desktop', 'Tablet', 'Mobile'],
+  cartoon: ['Desktop', 'Tablet', 'Mobile'],
   modern: ['Desktop', 'Tablet', 'Mobile'],
   mobile: ['Mobile'],
   retail: ['Desktop', 'Mobile'],
@@ -114,6 +117,7 @@ const templateDevices = {
 
 const templateFeatures = {
   classic: ['QR Code', 'Payment Links'],
+  cartoon: ['QR Code', 'Payment Links', 'Branded'],
   modern: ['QR Code', 'Payment Links', 'Branded'],
   mobile: ['QR Code', 'Mobile Optimized'],
   retail: ['QR Code', 'Checkout'],
@@ -131,6 +135,7 @@ const templateFeatures = {
 
 const featureBadgeMapping = {
   classic: ['QR', 'Payment'],
+  cartoon: ['QR', 'Payment', 'Branded'],
   modern: ['QR', 'Payment', 'Branded'],
   mobile: ['QR', 'WhatsApp', 'Share'],
   retail: ['QR', 'Payment', 'Share'],
@@ -148,6 +153,7 @@ const featureBadgeMapping = {
 
 const templateTheme = {
   classic: 'Light',
+  cartoon: 'Light',
   modern: 'Dark',
   mobile: 'Both',
   retail: 'Light',

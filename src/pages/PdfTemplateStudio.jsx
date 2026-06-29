@@ -35,6 +35,7 @@ import { getDemoInvoice } from '../utils/demoDataGenerator';
 
 const templates = [
   { id: 'classic', name: 'Classic (Default)', type: 'FREE', desc: 'Clean, professional layout for general business.', color: 'bg-theme-app' },
+  { id: 'cartoon', name: 'Cartoon Premium', type: 'FREE', desc: 'Premium modern layout with custom branding colors.', color: 'bg-blue-500' },
   { id: 'modern', name: 'Modern Dark', type: 'FREE', desc: 'Bold dark headers with crisp spacing.', color: 'bg-indigo-950' },
   { id: 'minimal', name: 'Minimalist B&W', type: 'FREE', desc: 'Ultra-clean black and white design.', color: 'bg-white' },
   { id: 'retail', name: 'Retail Shop', type: 'FREE', desc: 'Item-focused layout perfect for stores.', color: 'bg-yellow-50' },
@@ -66,6 +67,7 @@ const staggerItem = {
 
 const templateTags = {
   classic: ['A4', 'Classic'],
+  cartoon: ['A4', 'Premium'],
   modern: ['A4', 'Modern'],
   minimal: ['Letter', 'Minimal'],
   retail: ['A5', 'Compact'],
@@ -83,6 +85,7 @@ const templateTags = {
 
 const templateFeatures = {
   classic: ['Logo Ready'],
+  cartoon: ['Rounded UI', 'Modern Colors'],
   modern: ['Dark Mode'],
   minimal: ['B&W Print'],
   retail: ['Item Grid', 'Barcode'],
@@ -100,6 +103,7 @@ const templateFeatures = {
 
 const templateCategory = {
   classic: 'Classic',
+  cartoon: 'Modern',
   modern: 'Modern',
   minimal: 'Classic',
   retail: 'Business',
@@ -117,6 +121,7 @@ const templateCategory = {
 
 const previewGradients = {
   classic: 'from-blue-400 to-blue-600',
+  cartoon: 'from-blue-500 to-indigo-500',
   modern: 'from-indigo-800 to-purple-900',
   minimal: 'from-gray-100 to-gray-300',
   retail: 'from-yellow-300 to-amber-500',
@@ -134,6 +139,7 @@ const previewGradients = {
 
 const templateStyles = {
   classic: 'Classic',
+  cartoon: 'Premium',
   modern: 'Modern',
   minimal: 'Minimal',
   retail: 'Business',
