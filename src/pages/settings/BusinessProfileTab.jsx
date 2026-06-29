@@ -814,6 +814,7 @@ const BusinessProfileTab = (props) => {
                 >
                   <option value="modern">Modern A4 Template Layout</option>
                   <option value="classic">Classic A5 Template Layout</option>
+                  <option value="cartoon">Cartoon Premium Template Layout</option>
                 </select>
               </div>
 

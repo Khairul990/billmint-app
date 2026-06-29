@@ -44,6 +44,7 @@ const LiveInvoicePreview = () => {
           >
             <option value="classic">Classic</option>
             <option value="modern">Modern</option>
+            <option value="cartoon">Cartoon</option>
             <option value="professional">Professional</option>
             <option value="gold">Gold</option>
             <option value="doctor">Doctor</option>

@@ -390,6 +390,14 @@ const PublicInvoice = ({ initialInvoice }) => {
           tableHeader: "bg-theme-app text-yellow-500 border-b-2 border-yellow-500",
           totalsBox: "bg-theme-card border border-theme-border-soft rounded-lg p-4 shadow-sm"
         };
+      case 'cartoon':
+        return {
+          container: "bg-[#ffffff] text-[#1a1f36] rounded-lg border-0 shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6 md:p-10 space-y-6 relative overflow-hidden font-sans",
+          header: "bg-[#4a6cf7] -mx-6 md:-mx-10 -mt-6 md:-mt-10 mb-6 p-6 md:p-8 text-white rounded-t-lg flex-row sm:items-center",
+          addressBox: "bg-transparent border-0 p-0",
+          tableHeader: "bg-[#f5f7fa] text-[#697386] rounded-md",
+          totalsBox: "bg-[#ffffff] border border-[#e3e8ee] rounded-xl p-4 shadow-sm"
+        };
       case 'classic':
       default:
         return {
