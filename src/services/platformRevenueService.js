@@ -44,7 +44,7 @@ export const getGlobalRevenueSettings = async () => {
     if (cached) {
       cachedData = JSON.parse(cached);
     }
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in platformRevenueService.js:', e); }
 
   // Fetch from Firebase in background to update cache for next time
   if (firebaseReady) {
@@ -265,7 +265,7 @@ export const submitPlatformPaymentProof = async (userId, userEmail, amount, paym
     const cached = JSON.parse(localStorage.getItem('billqyro_platform_payment_proofs') || '[]');
     cached.push(payload);
     localStorage.setItem('billqyro_platform_payment_proofs', JSON.stringify(cached));
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in platformRevenueService.js:', e); }
 
   if (firebaseReady) {
     try {

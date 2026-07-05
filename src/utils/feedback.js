@@ -67,13 +67,13 @@ export const triggerLightHaptic = () => {
   try {
     const settings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
     if (settings.enableHaptics === false) enableHaptics = false;
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in feedback.js:', e); }
 
   if (enableHaptics) {
     try {
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(10); // Very subtle tap
       }
-    } catch (err) {}
+    } catch (err) { console.warn('Ignored error in feedback.js:', err); }
   }
 };

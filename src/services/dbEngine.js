@@ -161,7 +161,7 @@ export const queueSyncTransaction = async (action, storeName, docId, data) => {
   let deviceId = 'Unknown Device';
   try {
     deviceId = localStorage.getItem('billqyro_device_id') || 'Unknown Device';
-  } catch(e){}
+  } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
 
   const tx = {
     id: transactionId,
@@ -209,7 +209,7 @@ export const logAudit = async (action, entityType, entityId, before = null, afte
     let deviceInfo = 'Unknown Device';
     try {
       deviceInfo = navigator.userAgent;
-    } catch(e){}
+    } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
 
     const auditEntry = {
       id: 'aud-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
@@ -458,7 +458,7 @@ export const getScopedKey = (baseKey) => {
         if (settings.activeWorkspaceId) {
           return `${baseKey}_${uid}_${settings.activeWorkspaceId}`;
         }
-      } catch (e) {}
+      } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
     }
   }
 
@@ -1056,7 +1056,7 @@ export const factoryResetAllData = async () => {
   sessionStorage.clear();
   try {
     indexedDB.deleteDatabase('billqyro-db');
-  } catch(e) {}
+  } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   
   if (firebaseReady) {
     try {
@@ -1064,7 +1064,7 @@ export const factoryResetAllData = async () => {
       if (auth.currentUser) {
         await auth.signOut();
       }
-    } catch(e) {}
+    } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   }
   
   window.location.href = '/';
@@ -1426,7 +1426,7 @@ export const getSettings = () => {
          } else {
            settings.email = '';
          }
-      } catch (e) {}
+      } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
     } else {
       settings.email = '';
     }
@@ -1490,7 +1490,7 @@ export const getExpenses = async (includeDeleted = false) => {
       if (workspaceId) filtered = filtered.filter(e => e.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
     }
-  } catch(e) {}
+  } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   return [];
 };
 
@@ -1607,7 +1607,7 @@ export const getCustomers = async (includeDeleted = false) => {
       if (workspaceId) filtered = filtered.filter(c => c.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
-  } catch(e) {}
+  } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   return [];
 };
 
@@ -1748,7 +1748,7 @@ export const getProducts = async (includeDeleted = false) => {
       if (workspaceId) filtered = filtered.filter(p => p.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
-  } catch(e) {}
+  } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   return [];
 };
 
@@ -1886,7 +1886,7 @@ export const getStudents = async (includeDeleted = false) => {
       if (workspaceId) filtered = filtered.filter(s => s.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
-  } catch(e) {}
+  } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   return [];
 };
 
@@ -1994,7 +1994,7 @@ export const getInvoices = async (includeDeleted = false) => {
       if (workspaceId) filtered = filtered.filter(inv => inv.workspaceId === workspaceId);
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
-  } catch(e) {}
+  } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   return [];
 };
 
@@ -2965,7 +2965,7 @@ export const cleanTemporaryData = async () => {
       await BillQyroDB.delete('syncQueue', tx.id);
       count++;
     }
-  } catch(e){}
+  } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   return count;
 };
 

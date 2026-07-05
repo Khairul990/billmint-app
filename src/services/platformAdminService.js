@@ -22,7 +22,7 @@ export const submitSupportTicket = async (userId, userEmail, userPhone, issueTyp
     const cached = JSON.parse(localStorage.getItem('billqyro_platform_support_tickets') || '[]');
     cached.push(payload);
     localStorage.setItem('billqyro_platform_support_tickets', JSON.stringify(cached));
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in platformAdminService.js:', e); }
 
   if (firebaseReady) {
     try {
@@ -70,7 +70,7 @@ export const updateSupportTicketStatus = async (ticketId, status, adminNote = ''
       cached[idx].updatedAt = new Date().toISOString();
       localStorage.setItem('billqyro_platform_support_tickets', JSON.stringify(cached));
     }
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in platformAdminService.js:', e); }
 
   if (firebaseReady) {
     try {
@@ -111,7 +111,7 @@ export const submitFeatureRequest = async (userId, userEmail, title, description
     const cached = JSON.parse(localStorage.getItem('billqyro_platform_feature_requests') || '[]');
     cached.push(payload);
     localStorage.setItem('billqyro_platform_feature_requests', JSON.stringify(cached));
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in platformAdminService.js:', e); }
 
   if (firebaseReady) {
     try {
@@ -159,7 +159,7 @@ export const updateFeatureRequestStatus = async (requestId, status, adminNote = 
       cached[idx].updatedAt = new Date().toISOString();
       localStorage.setItem('billqyro_platform_feature_requests', JSON.stringify(cached));
     }
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in platformAdminService.js:', e); }
 
   if (firebaseReady) {
     try {
@@ -197,7 +197,7 @@ export const createAnnouncement = async (title, message, type = 'info', active =
     const cached = JSON.parse(localStorage.getItem('billqyro_platform_announcements') || '[]');
     cached.push(payload);
     localStorage.setItem('billqyro_platform_announcements', JSON.stringify(cached));
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in platformAdminService.js:', e); }
 
   if (firebaseReady) {
     try {
@@ -250,7 +250,7 @@ export const toggleAnnouncementActive = async (announcementId, active) => {
       cached[idx].active = active;
       localStorage.setItem('billqyro_platform_announcements', JSON.stringify(cached));
     }
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in platformAdminService.js:', e); }
 
   if (firebaseReady) {
     try {
@@ -283,7 +283,7 @@ export const createChangelog = async (version, date, title, notes, type = 'new')
     const cached = JSON.parse(localStorage.getItem('billqyro_platform_changelogs') || '[]');
     cached.push(payload);
     localStorage.setItem('billqyro_platform_changelogs', JSON.stringify(cached));
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in platformAdminService.js:', e); }
 
   if (firebaseReady) {
     try {

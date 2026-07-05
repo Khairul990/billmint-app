@@ -65,7 +65,7 @@ const SystemHealth = ({ setCurrentTab }) => {
               count += itemsCount;
               summary.push(`${col}: ${itemsCount}`);
             }
-          } catch(e) {}
+          } catch (e) { console.warn('Ignored error in SystemHealth.jsx:', e); }
         }
       });
       return { hasLegacy: count > 0, summary: summary.join(', ') };
