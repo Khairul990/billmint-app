@@ -1,10 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Palette, CheckCircle2, Monitor, Laptop2, Sparkles, Smartphone } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getThemePreviewColors } from '../../utils/themeUtils';
+import { applyTheme } from '../../hooks/useThemeEngine';
 
 const ThemeStudioTab = (props) => {
   const { themeColor, setThemeColor, darkMode, setDarkMode, settings, onSaveSettings, handleSave, enableHaptics, setEnableHaptics, enableSounds, setEnableSounds } = props;
+
+  useEffect(() => {
+    // Revert preview on unmount if not saved
+    return () => {
+      if (settings) {
+        const savedTheme = settings.themeColor || 'obsidian-gold';
+        const savedDark = settings.darkMode || false;
+        const savedBrand = settings.brandColor || null;
+        applyTheme(savedTheme, savedBrand, savedDark, false);
+      }
+    };
+  }, [settings]);
 
   return (
     <>
@@ -34,13 +47,9 @@ const ThemeStudioTab = (props) => {
                   <button
                     type="button"
                     onClick={() => {
-                      setDarkMode(!darkMode);
-                      // Instantly toggle the class so the preview is accurate
-                      if (!darkMode) {
-                        // Handled by ThemeContext
-                      } else {
-                        // Handled by ThemeContext
-                      }
+                      const newDarkMode = !darkMode;
+                      setDarkMode(newDarkMode);
+                      applyTheme(themeColor, settings?.brandColor || null, newDarkMode, false);
                     }}
                     className={`relative w-12 h-6 rounded-full transition-all duration-500 ease-in-out shadow-inner flex items-center p-1 focus:outline-none ${darkMode ? 'bg-[image:var(--accent-gradient)] shadow-md shadow-theme-accent/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5'}`}
                   >
@@ -80,7 +89,7 @@ const ThemeStudioTab = (props) => {
                             type="button"
                             onClick={() => {
                               setThemeColor(preset.id);
-                              // Handled by ThemeContext
+                              applyTheme(preset.id, settings?.brandColor || null, darkMode, false);
                               import('../utils/themeIcon').then(m => m.updateFaviconForTheme(preset.id));
                             }}
                             className={`w-full text-left rounded-2xl border transition-all duration-300 relative overflow-hidden cursor-pointer flex flex-col ${
@@ -148,7 +157,7 @@ const ThemeStudioTab = (props) => {
                     <button
                       type="button"
                       onClick={() => {
-                        // Handled by ThemeContext
+                        applyTheme(themeColor, settings?.brandColor || null, darkMode, false);
                         import('../utils/themeIcon').then(m => m.updateFaviconForTheme(themeColor));
                         toast.success(`Previewing ${themeColor} theme!`);
                       }}

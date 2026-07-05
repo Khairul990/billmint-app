@@ -26,7 +26,8 @@ import DynamicQRCode from '../components/DynamicQRCode';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { doc, updateDoc, arrayUnion, collection, addDoc, runTransaction } from 'firebase/firestore';
-import { db } from '../services/firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../services/firebaseConfig';
 import { sendPaymentReceiptEmail, verifyTransactionId } from '../services/cloudFunctions';
 
 // Sanitize string input to prevent XSS in payment proofs
@@ -102,14 +103,6 @@ const PublicInvoice = ({ initialInvoice }) => {
         throw new Error("Missing invoice ID");
       }
 
-      const reader = new FileReader();
-      reader.readAsDataURL(screenshotFile);
-      await new Promise((resolve, reject) => {
-        reader.onload = resolve;
-        reader.onerror = () => reject(new Error('Failed to read screenshot file'));
-      });
-      const screenshotURL = reader.result;
-
       const sanitizedPayerName = sanitizeInput(payerName);
       const sanitizedPayerPhone = sanitizeInput(payerPhone).slice(0, 20);
       const sanitizedTxnId = sanitizeInput(txnId).slice(0, 100);
@@ -117,9 +110,19 @@ const PublicInvoice = ({ initialInvoice }) => {
       const sanitizedMethod = ['UPI', 'bKash', 'Nagad', 'Rocket', 'Bank Transfer', 'Cash'].includes(payMethod) ? payMethod : 'Bank Transfer';
       const sanitizedAmount = Math.max(0, Math.min(parseFloat(payAmount) || 0, 999999999));
 
+      let screenshotURL = '';
       const isSandbox = localStorage.getItem('billqyro_demo_session_active') === 'true';
 
       if (isSandbox) {
+        // Prepare base64 for sandbox ONLY
+        const reader = new FileReader();
+        reader.readAsDataURL(screenshotFile);
+        await new Promise((resolve, reject) => {
+          reader.onload = resolve;
+          reader.onerror = () => reject(new Error('Failed to read screenshot file'));
+        });
+        screenshotURL = reader.result;
+        
         // --- SANDBOX MODE LOCAL STORAGE OVERRIDE ---
         let demos = JSON.parse(localStorage.getItem('billqyro_demo_invoices') || '[]');
         const idx = demos.findIndex(d => d.id === invoice.id || d.publicToken === invoice.publicToken);
@@ -140,7 +143,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           amount: sanitizedAmount,
           transactionId: sanitizedTxnId,
           note: sanitizedNote,
-          screenshotUrl: screenshotURL, // Base64
+          screenshotUrl: screenshotURL, // Base64 for sandbox
           paymentMethod: sanitizedMethod,
           status: 'pending',
           createdAt: new Date().toISOString()
@@ -162,7 +165,32 @@ const PublicInvoice = ({ initialInvoice }) => {
         setInvoice({ ...invoice, paymentStatus: 'Pending Verification' });
       } else {
         // --- PRODUCTION FIREBASE EXECUTION ---
-        const invoiceRef = doc(db, 'publicInvoices', invoice.publicToken || invoice.id);
+        
+        // Prevent upload abuse by checking local status BEFORE uploading
+        if (invoice.paymentStatus === 'Paid' || invoice.paymentStatus === 'Pending Verification') {
+          toast.error('This invoice has already been paid or has a pending verification.');
+          setIsSubmitting(false);
+          return;
+        }
+
+        toast.loading('Uploading payment proof...', { id: 'uploadToast' });
+        
+        let uploadedUrl = '';
+        const docId = invoice.publicToken || invoice.id;
+        try {
+          const timestamp = Date.now();
+          const safeFilename = screenshotFile.name.replace(/[^a-zA-Z0-9.]/g, '_');
+          // Use docId to match the firestore document for server-side rule verification
+          const storageRef = ref(storage, `paymentProofs/${docId}/${timestamp}_${safeFilename}`);
+          
+          const uploadResult = await uploadBytes(storageRef, screenshotFile);
+          uploadedUrl = await getDownloadURL(uploadResult.ref);
+        } catch (uploadErr) {
+          toast.dismiss('uploadToast');
+          throw new Error('Failed to upload image to secure storage: ' + uploadErr.message);
+        }
+
+        const invoiceRef = doc(db, 'publicInvoices', docId);
 
         // Atomic transaction to prevent duplicate submissions
         await runTransaction(db, async (transaction) => {
@@ -187,7 +215,7 @@ const PublicInvoice = ({ initialInvoice }) => {
             amount: sanitizedAmount,
             transactionId: sanitizedTxnId,
             note: sanitizedNote,
-            screenshotUrl: screenshotURL,
+            screenshotUrl: uploadedUrl,
             paymentMethod: sanitizedMethod,
             status: 'pending',
             createdAt: new Date().toISOString(),
@@ -197,7 +225,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           transaction.update(invoiceRef, {
             paymentStatus: 'Pending Verification',
             paymentProofs: arrayUnion({
-              screenshotUrl: screenshotURL,
+              screenshotUrl: uploadedUrl,
               method: payMethod,
               amount: payAmount,
               txnId: sanitizedTxnId,
@@ -223,12 +251,12 @@ const PublicInvoice = ({ initialInvoice }) => {
         }
       }
       
-      toast.success('Payment proof submitted! The owner will verify shortly.');
+      toast.success('Payment proof submitted! The owner will verify shortly.', { id: 'uploadToast' });
       setShowPaymentModal(false);
       setInvoice(prev => ({ ...prev, paymentStatus: 'Pending Verification' }));
     } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Failed to submit proof.');
+      toast.error(err.message || 'Failed to submit proof.', { id: 'uploadToast' });
     } finally {
       setIsSubmitting(false);
     }

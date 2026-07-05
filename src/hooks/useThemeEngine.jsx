@@ -17,7 +17,7 @@ const shadeColor = (color, percent) => {
   return '#' + toHex(R) + toHex(G) + toHex(B);
 };
 
-export const applyTheme = (themeId, brandColor = null, darkMode = false) => {
+export const applyTheme = (themeId, brandColor = null, darkMode = false, persist = true) => {
   const root = document.documentElement;
 
   if (darkMode) {
@@ -52,8 +52,11 @@ export const applyTheme = (themeId, brandColor = null, darkMode = false) => {
   }
 
   updateFaviconForTheme(themeId);
-  localStorage.setItem('billqyro_theme_color', themeId);
-  localStorage.setItem('billqyro_dark_mode', String(darkMode));
+  
+  if (persist) {
+    localStorage.setItem('billqyro_theme_color', themeId);
+    localStorage.setItem('billqyro_dark_mode', String(darkMode));
+  }
 };
 
 export const useThemeEngine = (businessSettings) => {

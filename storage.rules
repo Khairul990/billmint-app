@@ -3,11 +3,14 @@ service firebase.storage {
   match /b/{bucket}/o {
     
     // Payment Proofs Uploaded by Customers via Live Links
-    match /payment_proofs/{fileName} {
+    match /paymentProofs/{invoiceId}/{fileName} {
+      // Anyone can upload a proof, but only if they are uploading to a valid invoice ID
+      // and the image must be under 10MB
+      allow write: if request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*')
+                   && firestore.exists(/databases/(default)/documents/publicInvoices/$(invoiceId));
+      // Only authenticated users (admins/business owners) can read the proofs
       allow read: if request.auth != null;
-      allow write: if request.auth != null
-                   && request.resource.size < 5 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
     }
 
     // Business Logos Uploaded by Users
