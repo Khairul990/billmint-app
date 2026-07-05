@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 24,
     borderBottomWidth: 1,
+    borderStyle: 'solid',
     borderBottomColor: '#e2e8f0',
     paddingBottom: 16,
   },
@@ -140,6 +141,7 @@ const styles = StyleSheet.create({
   tableHeaderRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
+    borderStyle: 'solid',
     borderBottomColor: '#cbd5e1',
     paddingBottom: 6,
     marginBottom: 6,
@@ -154,6 +156,7 @@ const styles = StyleSheet.create({
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
+    borderStyle: 'solid',
     borderBottomColor: '#f1f5f9',
     paddingVertical: 8,
   },
@@ -169,6 +172,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 1,
+    borderStyle: 'solid',
     borderTopColor: '#e2e8f0',
     paddingTop: 16,
     marginTop: 8,
@@ -195,6 +199,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 1,
+    borderStyle: 'solid',
     borderTopColor: '#e2e8f0',
     paddingTop: 6,
     marginTop: 3,
@@ -217,6 +222,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
+    borderStyle: 'solid',
     borderColor: '#e2e8f0',
   },
   qrCode: {
@@ -240,6 +246,7 @@ const styles = StyleSheet.create({
     right: 36,
     textAlign: 'center',
     borderTopWidth: 1,
+    borderStyle: 'solid',
     borderTopColor: '#e2e8f0',
     paddingTop: 12,
   },
@@ -261,6 +268,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
     borderRadius: 8,
     borderWidth: 1,
+    borderStyle: 'solid',
     borderColor: '#f1f5f9',
     textAlign: 'center',
   },
@@ -274,6 +282,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 1,
+    borderStyle: 'solid',
     borderTopColor: '#fee2e2',
     paddingTop: 5,
     marginTop: 3,
@@ -405,6 +414,15 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
           <View style={styles.crmSection}>
             <Text style={[styles.sectionTitle, { color: tAccent }]}>Bill To</Text>
             <Text style={[styles.customerName, { color: tPrimary }]}>{invoice.customerName}</Text>
+            
+            {templateId === 'doctor' && (
+              <View style={{ marginTop: 6, marginBottom: 4, paddingLeft: 6, borderLeftWidth: 2, borderStyle: 'solid', borderLeftColor: tAccent }}>
+                <Text style={{ fontSize: 8, fontWeight: 'bold', color: tPrimary, marginBottom: 2 }}>Patient Details</Text>
+                <Text style={styles.metaText}>Name: {invoice.customerName}</Text>
+                {invoice.orderNotes && <Text style={styles.metaText}>Diagnosis/Ref: {invoice.orderNotes}</Text>}
+              </View>
+            )}
+
             <Text style={styles.metaText}>{invoice.customerAddress || 'No address provided'}</Text>
             <Text style={styles.metaText}>Phone: {invoice.customerPhone || 'N/A'}</Text>
             <Text style={styles.metaText}>Email: {invoice.customerEmail || 'N/A'}</Text>
@@ -507,7 +525,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
         </View>
 
         {/* Thanks Message */}
-        <View style={styles.thanksSection} wrap={false}>
+        <View style={[styles.thanksSection, templateId === 'minimal' ? { backgroundColor: 'transparent', borderColor: '#000000' } : {}]} wrap={false}>
           <Text style={styles.thanksText}>
             Thank you for your business, {invoice.customerName || 'valued customer'}!
           </Text>
@@ -515,7 +533,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
 
         {/* Doctor Disclaimer */}
         {templateId === 'doctor' && (
-          <View style={{ marginTop: 16, padding: 8, borderLeftWidth: 3, borderLeftColor: tAccent, backgroundColor: tBg }}>
+          <View style={{ marginTop: 16, padding: 8, borderLeftWidth: 3, borderStyle: 'solid', borderLeftColor: tAccent, backgroundColor: tBg }}>
             <Text style={{ fontSize: 7.5, color: tPrimary, fontStyle: 'italic', lineHeight: 1.5 }}>
               Disclaimer: This document is for billing purposes only and does not constitute medical advice or a formal prescription unless explicitly signed by a registered practitioner.
             </Text>
@@ -524,7 +542,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
 
         {/* Payment / QR Section */}
         {paymentPrefs?.paymentQrEnabled && paymentPrefs?.showQrInPreview && qrCodeBase64 && (
-          <View style={styles.paymentSection} wrap={false}>
+          <View style={[styles.paymentSection, templateId === 'minimal' ? { backgroundColor: 'transparent', borderColor: '#000000' } : {}]} wrap={false}>
             <Image src={qrCodeBase64} style={useA5 ? { ...styles.qrCode, width: 70, height: 70 } : styles.qrCode} />
             <View style={styles.paymentDetails}>
               <Text style={[styles.sectionTitle, { color: tAccent }]}>Scan to View Live Invoice</Text>

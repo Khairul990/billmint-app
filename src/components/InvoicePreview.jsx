@@ -12,6 +12,8 @@ import { getCategoryWording } from '../config/businessPresets';
 const InvoicePreview = ({ invoice, businessSettings }) => {
   if (!invoice) return null;
 
+  const templateId = businessSettings?.selectedPdfTemplate || 'classic';
+
   // Destructure Snapshots with Fallbacks
   const regionalPrefs = invoice.regionalSettingsSnapshot || {
     country: businessSettings?.country || 'India',
@@ -84,7 +86,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
   return (
     <div 
       id="invoice-preview-capture" 
-      className="bg-theme-card dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-3xl p-6 md:p-10 shadow-premium max-w-4xl mx-auto text-theme-primary dark:text-theme-primary transition-all duration-300"
+      className={`bg-theme-card dark:bg-theme-card border ${templateId === 'minimal' ? 'border-black rounded-none shadow-none' : 'border-theme-border-soft dark:border-theme-border-soft rounded-3xl shadow-premium'} p-6 md:p-10 max-w-4xl mx-auto text-theme-primary dark:text-theme-primary transition-all duration-300 relative overflow-hidden`}
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
       {/* 0. ORDER TRACKING TIMELINE STEPPER */}
@@ -154,7 +156,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       )}
 
       {/* 1. BRAND HEADER & METADATA GRID */}
-      <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-b border-theme-border-soft dark:border-theme-border-soft pb-8">
+      <div className={`flex flex-col md:flex-row justify-between items-start gap-6 border-b pb-8 ${templateId === 'modern' ? 'bg-slate-900 text-slate-200 -mx-6 -mt-6 md:-mx-10 md:-mt-10 p-6 md:p-10 rounded-t-3xl border-slate-800' : templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
         {/* Left Side: Business logo & details */}
         <div>
           <div className="flex items-center gap-3">
@@ -162,15 +164,15 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
               <img
                 src={businessPrefs.logoUrl}
                 alt="Business Logo"
-                className="w-12 h-12 rounded-xl object-cover shadow-sm bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft"
+                className={`w-12 h-12 object-cover shadow-sm bg-theme-app dark:bg-theme-surface border ${templateId === 'minimal' ? 'rounded-none border-black' : 'rounded-xl border-theme-border-soft dark:border-theme-border-soft'}`}
               />
             ) : (
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-theme-accent to-theme-accent-dark flex items-center justify-center text-white font-extrabold text-lg">
+              <div className={`w-12 h-12 bg-gradient-to-tr from-theme-accent to-theme-accent-dark flex items-center justify-center text-white font-extrabold text-lg ${templateId === 'minimal' ? 'rounded-none' : 'rounded-xl'}`}>
                 {businessPrefs?.businessName?.charAt(0) || 'B'}
               </div>
             )}
             <div>
-              <h3 className="font-extrabold text-xl text-theme-primary dark:text-theme-primary dark:text-theme-primary tracking-tight">{businessPrefs?.businessName || 'BillQyro Client'}</h3>
+              <h3 className={`font-extrabold text-xl tracking-tight ${templateId === 'modern' ? 'text-white' : 'text-theme-primary dark:text-theme-primary'}`}>{businessPrefs?.businessName || 'BillQyro Client'}</h3>
               {businessPrefs?.gstNumber && (
                 <p className="text-xs text-theme-muted dark:text-theme-muted font-semibold uppercase tracking-wider mt-0.5">{regionalPrefs.taxLabel || 'GST'}: {businessPrefs.gstNumber}</p>
               )}
@@ -210,10 +212,20 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       </div>
 
       {/* 2. CLIENT CRM GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-8 border-b border-theme-border-soft dark:border-theme-border-soft text-xs">
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 py-8 border-b text-xs ${templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
         <div>
           <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block mb-2">Billed To</span>
           <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary dark:text-theme-primary">{invoice.customerName}</h4>
+          
+          {templateId === 'doctor' && (
+            <div className="mt-3 p-3 bg-teal-50 dark:bg-teal-900/20 border-l-2 border-teal-500 rounded-r-md mb-2">
+              <p className="font-bold text-teal-800 dark:text-teal-300 mb-1 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5"/> Patient Details</p>
+              <div className="space-y-0.5 text-[10px] text-teal-700 dark:text-teal-400 font-medium">
+                <p>Name: {invoice.customerName}</p>
+                {invoice.orderNotes && <p>Diagnosis/Ref: {invoice.orderNotes}</p>}
+              </div>
+            </div>
+          )}
           <div className="text-theme-muted dark:text-theme-muted space-y-1 mt-2 max-w-xs leading-relaxed font-medium">
             <p>{invoice.customerAddress || 'No address provided'}</p>
             <p>Phone: {invoice.customerPhone || 'N/A'}</p>
@@ -446,7 +458,12 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       )}
 
       {/* 5. BRAND FOOTER SIGNATURE */}
-      <div className="flex justify-center items-center gap-1.5 border-t border-theme-border-soft dark:border-theme-border-soft/80 dark:border-theme-border-soft/80 pt-8 mt-8 text-[10px] text-theme-muted dark:text-theme-muted font-bold uppercase tracking-wider">
+      {templateId === 'doctor' && (
+        <div className="mt-8 p-4 bg-emerald-50 dark:bg-emerald-950/20 border-l-4 border-emerald-500 rounded text-[9px] text-emerald-800 dark:text-emerald-300 font-medium italic">
+          Disclaimer: This document is for billing purposes only and does not constitute medical advice or a formal prescription unless explicitly signed by a registered practitioner.
+        </div>
+      )}
+      <div className={`flex justify-center items-center gap-1.5 border-t pt-8 mt-8 text-[10px] text-theme-muted dark:text-theme-muted font-bold uppercase tracking-wider ${templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft/80'}`}>
         <ShieldCheck className="w-4 h-4 text-theme-accent dark:text-theme-accent" />
         <span>Generated Securely via BillQyro Invoicing SaaS</span>
       </div>
