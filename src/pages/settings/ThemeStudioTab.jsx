@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import { getThemePreviewColors } from '../../utils/themeUtils';
 
 const ThemeStudioTab = (props) => {
-  const { themeColor, setThemeColor, darkMode, setDarkMode, brandColor, setBrandColor, pdfVisibleFields, setPdfVisibleFields, settings, onSaveSettings, handleSave, enableHaptics, setEnableHaptics, enableSounds, setEnableSounds } = props;
+  const { themeColor, setThemeColor, darkMode, setDarkMode, settings, onSaveSettings, handleSave, enableHaptics, setEnableHaptics, enableSounds, setEnableSounds } = props;
 
   return (
     <>

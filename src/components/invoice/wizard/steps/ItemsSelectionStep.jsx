@@ -125,12 +125,12 @@ const SortableItem = ({ id, item, index, handleItemChange, removeItemRow, templa
                       value={item[field.id] || ''}
                       onChange={(val) => handleItemChange(index, field.id, val)}
                       onSelectProduct={(p) => {
-                        handleItemChange(index, field.id, p.name);
-                        if (p.price) {
-                          // Try to set rate/price if field exists
+                        const updates = { [field.id]: p.name || p.productName };
+                        if (p.price || p.rate) {
                           const rateField = templateFields.find(f => ['rate', 'mrp', 'price'].includes(f.id));
-                          if (rateField) handleItemChange(index, rateField.id, p.price);
+                          if (rateField) updates[rateField.id] = p.price || p.rate;
                         }
+                        handleItemChange(index, updates);
                       }}
                       products={products}
                       placeholder={field.labelEn || "Search product..."}
@@ -249,12 +249,19 @@ const ItemsSelectionStep = ({ products = [] }) => {
     }
   };
 
-  const handleItemChange = (index, field, value) => {
+  const handleItemChange = (index, fieldOrUpdates, optionalValue) => {
     const newItems = [...items];
-    const isNumField = templateFields.find(f => f.id === field)?.type === 'number';
-    const val = isNumField ? (value === '' ? '' : (parseFloat(value) || 0)) : value;
     
-    newItems[index][field] = val;
+    if (typeof fieldOrUpdates === 'string') {
+        const field = fieldOrUpdates;
+        const isNumField = templateFields.find(f => f.id === field)?.type === 'number';
+        newItems[index][field] = isNumField ? (optionalValue === '' ? '' : (parseFloat(optionalValue) || 0)) : optionalValue;
+    } else {
+        Object.entries(fieldOrUpdates).forEach(([field, val]) => {
+            const isNumField = templateFields.find(f => f.id === field)?.type === 'number';
+            newItems[index][field] = isNumField ? (val === '' ? '' : (parseFloat(val) || 0)) : val;
+        });
+    }
 
     // Auto-calculate formula fields
     const calcField = templateFields.find(f => f.type === 'calculated');
@@ -266,9 +273,17 @@ const ItemsSelectionStep = ({ products = [] }) => {
   };
 
   const handleAddItem = () => {
+    const generateId = () => {
+      try {
+        return crypto.randomUUID();
+      } catch (e) {
+        return `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      }
+    };
+
     const newItem = { 
         ...currentTemplate.defaultItem, 
-        id: `item-${Date.now()}-${items.length}`,
+        id: generateId(),
         sn: items.length + 1
     };
     dispatch({ type: 'SET_ITEMS', payload: [...items, newItem] });

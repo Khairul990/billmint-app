@@ -33,12 +33,19 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
   };
 
   // Items
-  const handleItemChange = (index, field, value) => {
+  const handleItemChange = (index, fieldOrUpdates, optionalValue) => {
     const newItems = [...state.items];
-    const isNumField = ['rate', 'price', 'mrp', 'qty', 'amount'].includes(field);
-    const val = isNumField ? (value === '' ? '' : (parseFloat(value) || 0)) : value;
     
-    newItems[index][field] = val;
+    if (typeof fieldOrUpdates === 'string') {
+        const field = fieldOrUpdates;
+        const isNumField = ['rate', 'price', 'mrp', 'qty', 'amount'].includes(field);
+        newItems[index][field] = isNumField ? (optionalValue === '' ? '' : (parseFloat(optionalValue) || 0)) : optionalValue;
+    } else {
+        Object.entries(fieldOrUpdates).forEach(([field, val]) => {
+            const isNumField = ['rate', 'price', 'mrp', 'qty', 'amount'].includes(field);
+            newItems[index][field] = isNumField ? (val === '' ? '' : (parseFloat(val) || 0)) : val;
+        });
+    }
 
     // Auto calculate amount
     const qty = parseFloat(newItems[index].qty) || 1;
@@ -49,7 +56,14 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
   };
 
   const handleAddItem = () => {
-    dispatch({ type: 'SET_ITEMS', payload: [...state.items, { id: `item-${Date.now()}`, item: '', rate: 0, qty: 1, amount: 0 }] });
+    const generateId = () => {
+      try {
+        return crypto.randomUUID();
+      } catch (e) {
+        return `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      }
+    };
+    dispatch({ type: 'SET_ITEMS', payload: [...state.items, { id: generateId(), item: '', rate: 0, qty: 1, amount: 0 }] });
   };
 
   const removeItem = (index) => {
@@ -146,8 +160,9 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
                     value={item.item || ''}
                     onChange={(val) => handleItemChange(index, 'item', val)}
                     onSelectProduct={(p) => {
-                      handleItemChange(index, 'item', p.name);
-                      if (p.price) handleItemChange(index, 'rate', p.price);
+                      const updates = { item: p.name || p.productName };
+                      if (p.price || p.rate) updates.rate = p.price || p.rate;
+                      handleItemChange(index, updates);
                     }}
                     products={products}
                     placeholder="Search or enter item name..."

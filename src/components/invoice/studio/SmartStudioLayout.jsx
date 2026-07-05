@@ -243,7 +243,7 @@ const SmartStudioLayout = ({ customers, products, invoices = [], onSaveInvoice, 
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-theme-app relative overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-theme-app relative overflow-x-clip">
       <StudioHeader
         showPreviewModal={showPreviewModal}
         setShowPreviewModal={setShowPreviewModal}

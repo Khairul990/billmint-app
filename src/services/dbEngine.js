@@ -80,57 +80,62 @@ export const cloudWins = (localRecord, cloudRecord) => {
 // --- OFFLINE SYNC QUEUE ENGINE & MIGRATOR ---
 export const migrateLocalStorageToIndexedDB = async () => {
   try {
-    const isMigrated = localStorage.getItem('billqyro_indexeddb_migrated') === 'true';
-    if (isMigrated) return;
+    const migrationFlag = localStorage.getItem('billqyro_indexeddb_migrated');
+    
+    // If it's fully migrated with the new timestamp format (numeric string), we are good
+    if (migrationFlag && migrationFlag !== 'true' && !isNaN(Number(migrationFlag))) {
+      return;
+    }
 
     const userId = getRealUserId() || 'local-user';
     const localSettings = JSON.parse(localStorage.getItem(KEYS.SETTINGS) || '{}');
     const workspaceId = localSettings?.activeWorkspaceId || 'default';
 
-    // Invoices
-    const localInvoices = JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
-    for (const inv of localInvoices) {
-      if (!inv.userId) inv.userId = userId;
-      if (!inv.workspaceId) inv.workspaceId = workspaceId;
-      await BillQyroDB.put('invoices', inv);
-    }
+    const migrateCollection = async (localKey, storeName) => {
+      const itemsStr = localStorage.getItem(localKey);
+      if (!itemsStr) return; // Nothing to migrate or cleanup
 
-    // Customers
-    const localCustomers = JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [];
-    for (const c of localCustomers) {
-      if (!c.userId) c.userId = userId;
-      if (!c.workspaceId) c.workspaceId = workspaceId;
-      await BillQyroDB.put('customers', c);
-    }
+      // Only perform the DB push if it's NOT an already completed old migration
+      if (migrationFlag !== 'true') {
+        const items = JSON.parse(itemsStr) || [];
+        for (const item of items) {
+          if (!item.userId) item.userId = userId;
+          if (!item.workspaceId) item.workspaceId = workspaceId;
+          
+          try {
+            const existing = await BillQyroDB.get(storeName, item.id);
+            if (existing) {
+              const existingTime = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
+              const itemTime = new Date(item.updatedAt || item.createdAt || 0).getTime();
+              const existingVer = existing.__version || 0;
+              const itemVer = item.__version || 0;
 
-    // Products
-    const localProducts = JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [];
-    for (const p of localProducts) {
-      if (!p.userId) p.userId = userId;
-      if (!p.workspaceId) p.workspaceId = workspaceId;
-      await BillQyroDB.put('products', p);
-    }
+              if (existingVer > itemVer) continue;
+              if (existingVer === itemVer && existingTime >= itemTime) continue;
+            }
+            await BillQyroDB.put(storeName, item);
+          } catch (e) {
+            console.warn(`Ignored error in dbEngine.js during migration item ${item.id}:`, e);
+          }
+        }
+      }
+      
+      // Verified Cleanup: Backup and remove old LocalStorage data
+      localStorage.setItem(`${localKey}_backup`, itemsStr);
+      localStorage.removeItem(localKey);
+    };
 
-    // Expenses
-    const localExpenses = JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [];
-    for (const e of localExpenses) {
-      if (!e.userId) e.userId = userId;
-      if (!e.workspaceId) e.workspaceId = workspaceId;
-      await BillQyroDB.put('expenses', e);
-    }
+    await migrateCollection(KEYS.INVOICES, 'invoices');
+    await migrateCollection(KEYS.CUSTOMERS, 'customers');
+    await migrateCollection(KEYS.PRODUCTS, 'products');
+    await migrateCollection(KEYS.EXPENSES, 'expenses');
+    await migrateCollection(KEYS.STUDENTS, 'students');
 
-    // Students
-    const localStudents = JSON.parse(localStorage.getItem(KEYS.STUDENTS)) || [];
-    for (const s of localStudents) {
-      if (!s.userId) s.userId = userId;
-      if (!s.workspaceId) s.workspaceId = workspaceId;
-      await BillQyroDB.put('students', s);
-    }
-
-    localStorage.setItem('billqyro_indexeddb_migrated', 'true');
+    localStorage.setItem('billqyro_indexeddb_migrated', Date.now().toString());
 
   } catch (error) {
     console.error('[MIGRATION] LocalStorage to IndexedDB migration failed:', error);
+    toast.error("কিছু পুরনো ডেটা সিঙ্ক করা যায়নি, সাপোর্টে যোগাযোগ করুন।", { duration: 5000 });
   }
 };
 
