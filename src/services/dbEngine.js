@@ -2,7 +2,7 @@ import { db, firebaseReady, auth } from './firebaseConfig';
 import { toast } from 'react-hot-toast';
 import JSZip from 'jszip';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where } from 'firebase/firestore';
-import { getAdminEmail } from '../utils/adminAccess';
+import { getAdminEmail, isAdminUser } from '../utils/adminAccess';
 import { BillQyroDB } from './localDb';
 import { generateVerificationCode } from './verificationCodeService';
 import {
@@ -2021,7 +2021,7 @@ export const saveInvoice = async (invoice) => {
   const isNew = !invoice.id || !invoices.some(inv => inv.id === invoice.id);
   if (isNew) {
     const globalRevSettings = await getGlobalRevenueSettings();
-    if (globalRevSettings?.disableNewBillCreation) {
+    if (globalRevSettings?.disableNewBillCreation && !isAdminUser(getAuthSession())) {
       throw new Error('New bill creation is temporarily disabled by the platform owner.');
     }
   }

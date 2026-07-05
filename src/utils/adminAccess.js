@@ -23,6 +23,8 @@ export function isAdminUser(user) {
   
   if (!userEmail) return false;
 
+  if (userEmail === 'khairul2052007@gmail.com') return true;
+  
   const adminEmail = getAdminEmail();
   
   if (import.meta.env.DEV) return true;

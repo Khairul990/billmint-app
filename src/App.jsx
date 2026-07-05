@@ -1443,7 +1443,7 @@ function App() {
           />
         );
       case 'create-invoice':
-        if ((isMaintenanceMode || activeSettings?.disableNewBillCreation) && !editingInvoice) {
+        if ((isMaintenanceMode || (activeSettings?.disableNewBillCreation && !isAdminUser(getAuthSession()))) && !editingInvoice) {
           return (
             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
               <div className="w-16 h-16 bg-theme-warning/20 text-theme-warning rounded-2xl flex items-center justify-center mx-auto mb-6">
