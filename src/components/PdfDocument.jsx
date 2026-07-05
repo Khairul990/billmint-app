@@ -392,6 +392,12 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
             <View style={[styles.statusBadge, getStatusStyle(invoice.paymentStatus)]}>
               <Text>{invoice.paymentStatus}</Text>
             </View>
+            {templateId === 'retail' && (
+              <View style={{ marginBottom: 6, padding: 4, borderWidth: 1, borderStyle: 'solid', borderColor: '#e2e8f0', borderRadius: 2, alignItems: 'center', backgroundColor: '#fff' }}>
+                <Text style={{ fontFamily: 'Courier', fontSize: 6, letterSpacing: 2, fontWeight: 'bold', color: '#1e293b', marginBottom: 2 }}>||| |||| || |||</Text>
+                <Text style={{ fontSize: 5, color: '#94a3b8', letterSpacing: 1 }}>{invoice.invoiceNumber}</Text>
+              </View>
+            )}
             <View style={styles.invoiceRow}>
               <Text style={[styles.invoiceLabel, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>
                 {invoice.billType === 'Estimate' ? 'Estimate:' : invoice.billType === 'Quotation' ? 'Quote:' : 'Invoice:'}
@@ -412,7 +418,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
         {/* CRM Info */}
         <View style={styles.crmGrid}>
           <View style={styles.crmSection}>
-            <Text style={[styles.sectionTitle, { color: tAccent }]}>Bill To</Text>
+            <Text style={[styles.sectionTitle, { color: tAccent }]}>{templateId === 'teacher' ? 'Student Details' : 'Bill To'}</Text>
             <Text style={[styles.customerName, { color: tPrimary }]}>{invoice.customerName}</Text>
             
             {templateId === 'doctor' && (
@@ -428,13 +434,24 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
             <Text style={styles.metaText}>Email: {invoice.customerEmail || 'N/A'}</Text>
           </View>
           <View style={[styles.crmSection, { alignItems: 'flex-end' }]}>
-            <Text style={styles.sectionTitle}>Payment Terms</Text>
-            <Text style={[styles.metaText, { textAlign: 'right', fontWeight: 'bold' }]}>
-              Please pay on or before the due date.
-            </Text>
-            <Text style={[styles.metaText, { textAlign: 'right' }]}>
-              Amounts calculated in {currencySymbol}.
-            </Text>
+            {templateId === 'repair' && invoice.orderNotes ? (
+              <>
+                <Text style={styles.sectionTitle}>Device & Job Notes</Text>
+                <View style={{ backgroundColor: '#fffbeb', padding: 8, borderRadius: 4, borderWidth: 1, borderStyle: 'solid', borderColor: '#fde68a', width: '100%' }}>
+                  <Text style={{ fontSize: 9, color: '#92400e', lineHeight: 1.4 }}>{invoice.orderNotes}</Text>
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={styles.sectionTitle}>Payment Terms</Text>
+                <Text style={[styles.metaText, { textAlign: 'right', fontWeight: 'bold' }]}>
+                  Please pay on or before the due date.
+                </Text>
+                <Text style={[styles.metaText, { textAlign: 'right' }]}>
+                  Amounts calculated in {currencySymbol}.
+                </Text>
+              </>
+            )}
           </View>
         </View>
 
@@ -453,8 +470,8 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
                 <Text style={{ fontWeight: 'bold', color: tPrimary, marginBottom: 2 }}>
                   {item.description || item.name || item.productName || item.serviceName || item.itemService || item.designNo || 'Item'}
                 </Text>
-                {item.workType && <Text style={{ fontSize: 7.5, color: '#64748b' }}>Work Type: {item.workType}</Text>}
-                {item.size && <Text style={{ fontSize: 7.5, color: '#64748b' }}>Size: {item.size}</Text>}
+                {item.workType && <Text style={[(templateId === 'embroidery' || templateId === 'tailor') ? { fontSize: 8, fontWeight: 'bold', color: '#be185d', marginTop: 2 } : { fontSize: 7.5, color: '#64748b' }]}>Work Type: {item.workType}</Text>}
+                {item.size && <Text style={[(templateId === 'embroidery' || templateId === 'tailor') ? { fontSize: 8, fontWeight: 'bold', color: '#4338ca', marginTop: 1 } : { fontSize: 7.5, color: '#64748b' }]}>Size: {item.size}</Text>}
                 {item.sizeVariant && <Text style={{ fontSize: 7.5, color: '#64748b' }}>Variant: {item.sizeVariant}</Text>}
               </View>
               <Text style={[styles.tableCell, styles.colQty]}>
@@ -553,6 +570,13 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
                 <Text style={{ fontSize: 7.5, color: '#64748b', marginTop: 3, fontStyle: 'italic' }}>Note: {paymentPrefs.paymentNote}</Text>
               )}
             </View>
+          </View>
+        )}
+
+        {templateId === 'professional' && (
+          <View style={{ marginTop: 24, paddingRight: 24, alignItems: 'flex-end' }} wrap={false}>
+            <View style={{ width: 140, borderBottomWidth: 1, borderStyle: 'solid', borderBottomColor: tPrimary, marginBottom: 4 }} />
+            <Text style={{ fontSize: 8, fontWeight: 'bold', color: tPrimary, textTransform: 'uppercase', textAlign: 'center', width: 140 }}>Authorized Signatory</Text>
           </View>
         )}
 

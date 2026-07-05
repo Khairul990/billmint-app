@@ -195,9 +195,17 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
           </div>
           
           <div className="space-y-1 text-xs font-semibold text-theme-muted dark:text-theme-muted">
-            <div className="flex items-center gap-1.5 justify-start md:justify-end text-theme-primary dark:text-theme-secondary text-sm">
-              <Hash className="w-3.5 h-3.5 text-theme-accent" />
-              <span>Invoice: <strong className="font-extrabold">{invoice.invoiceNumber}</strong></span>
+            <div className="flex flex-col md:items-end gap-1.5">
+              <div className="flex items-center gap-1.5 justify-start md:justify-end text-theme-primary dark:text-theme-secondary text-sm">
+                <Hash className="w-3.5 h-3.5 text-theme-accent" />
+                <span>Invoice: <strong className="font-extrabold">{invoice.invoiceNumber}</strong></span>
+              </div>
+              {templateId === 'retail' && (
+                <div className="px-3 py-1 bg-white border border-slate-200 rounded text-center text-slate-800 hidden md:block">
+                  <div className="font-mono text-[8px] tracking-[0.3em] font-bold opacity-80 leading-none mb-0.5">||| |||| || |||</div>
+                  <div className="text-[7px] uppercase tracking-widest font-black leading-none opacity-50">{invoice.invoiceNumber}</div>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-1.5 justify-start md:justify-end">
               <Calendar className="w-3.5 h-3.5 text-theme-muted dark:text-theme-muted" />
@@ -214,7 +222,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       {/* 2. CLIENT CRM GRID */}
       <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 py-8 border-b text-xs ${templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
         <div>
-          <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block mb-2">Billed To</span>
+          <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block mb-2">{templateId === 'teacher' ? 'Student Details' : 'Billed To'}</span>
           <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary dark:text-theme-primary">{invoice.customerName}</h4>
           
           {templateId === 'doctor' && (
@@ -234,11 +242,24 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
         </div>
         
         <div className="md:text-right">
-          <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block mb-2">Payment Terms</span>
-          <p className="font-semibold text-theme-primary dark:text-theme-muted dark:text-theme-muted leading-relaxed">
-            Please pay online on or before the due date.<br />
-            Amounts are calculated in <strong className="text-theme-accent dark:text-theme-accent font-extrabold">{currencySymbol}</strong>.
-          </p>
+          {templateId === 'repair' && invoice.orderNotes ? (
+            <>
+              <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block mb-2">Device & Job Notes</span>
+              <div className="flex md:justify-end">
+                <p className="font-medium text-theme-primary leading-relaxed bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg border border-amber-200 dark:border-amber-700/30 text-amber-900 dark:text-amber-200 text-left text-xs max-w-xs w-full">
+                  {invoice.orderNotes}
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block mb-2">Payment Terms</span>
+              <p className="font-semibold text-theme-primary dark:text-theme-muted dark:text-theme-muted leading-relaxed">
+                Please pay online on or before the due date.<br />
+                Amounts are calculated in <strong className="text-theme-accent dark:text-theme-accent font-extrabold">{currencySymbol}</strong>.
+              </p>
+            </>
+          )}
         </div>
       </div>
 
@@ -264,14 +285,14 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
                       </span>
                     )}
                     {item.workType && (
-                      <span className="inline-block px-2 py-0.5 bg-theme-surface dark:bg-theme-card text-theme-muted dark:text-theme-muted rounded text-[9px] font-bold">
+                      <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold ${(templateId === 'embroidery' || templateId === 'tailor') ? 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800' : 'bg-theme-surface dark:bg-theme-card text-theme-muted dark:text-theme-muted'}`}>
                         {item.workType}
                       </span>
                     )}
                   </div>
                   <span className="text-xs text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-semibold">{item.description || item.name || 'Stitching Service'}</span>
                   {item.size && item.size !== 'N/A' && (
-                    <span className="block text-[10px] text-theme-muted dark:text-theme-muted font-medium mt-0.5">Size: {item.size}</span>
+                    <span className={`block text-[10px] font-medium mt-0.5 ${(templateId === 'embroidery' || templateId === 'tailor') ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/20 px-1.5 py-0.5 rounded-sm inline-block' : 'text-theme-muted dark:text-theme-muted'}`}>Size: {item.size}</span>
                   )}
                 </td>
                 <td className="py-4 text-center font-bold text-theme-muted dark:text-theme-muted">
@@ -458,6 +479,19 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       )}
 
       {/* 5. BRAND FOOTER SIGNATURE */}
+      {templateId === 'professional' && (
+        <div className="mt-8 flex justify-end">
+          <div className="text-center w-48">
+            <div className="h-16 border-b-2 border-theme-primary dark:border-theme-primary opacity-30 mb-2"></div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-primary dark:text-theme-primary">Authorized Signatory</span>
+          </div>
+        </div>
+      )}
+      {templateId === 'retail' && (
+        <div className="mt-8 text-center text-lg font-black text-theme-primary dark:text-theme-primary italic opacity-50">
+          Thank you for shopping with us!
+        </div>
+      )}
       {templateId === 'doctor' && (
         <div className="mt-8 p-4 bg-emerald-50 dark:bg-emerald-950/20 border-l-4 border-emerald-500 rounded text-[9px] text-emerald-800 dark:text-emerald-300 font-medium italic">
           Disclaimer: This document is for billing purposes only and does not constitute medical advice or a formal prescription unless explicitly signed by a registered practitioner.
