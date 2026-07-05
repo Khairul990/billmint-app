@@ -39,3 +39,8 @@ test-results/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Dev / Temporary
+dev-dist/
+eslint_report.json
+_deleted_backup/

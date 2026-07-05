@@ -335,7 +335,9 @@ const SettingsStudioV2 = ({
     const q = searchQuery.toLowerCase();
     return NAV_GROUPS.map(g => ({
       ...g, items: g.items.filter(item =>
-        item.label.toLowerCase().includes(q) || item.description.toLowerCase().includes(q) || item.id.includes(q)
+        (item.label?.toLowerCase().includes(q)) || 
+        (item.description?.toLowerCase().includes(q)) || 
+        (item.id.includes(q))
       )
     })).filter(g => g.items.length > 0);
   }, [searchQuery]);
@@ -346,7 +348,7 @@ const SettingsStudioV2 = ({
       const q = val.toLowerCase();
       for (const g of NAV_GROUPS) {
         for (const item of g.items) {
-          if (item.label.toLowerCase().includes(q) || item.description.toLowerCase().includes(q) || item.id.includes(q)) {
+          if ((item.label?.toLowerCase().includes(q)) || (item.description?.toLowerCase().includes(q)) || (item.id.includes(q))) {
             setActiveSection(item.id);
             return;
           }
