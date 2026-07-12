@@ -353,13 +353,13 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
   };
 
   const renderTemplate1 = () => {
-    const extraCols = businessSettings?.extraColumns || [];
+    const extraCols = invoice?.settings?.extraColumns || businessSettings?.extraColumns || [];
     const extraColWidth = Math.min(8, Math.floor(24 / Math.max(1, extraCols.length)));
     const totalExtraWidth = extraCols.length * extraColWidth;
     const getDescWidth = (base) => `${Math.max(15, parseInt(base) - totalExtraWidth)}%`;
-    const cCol1 = businessSettings?.customColumns?.col1 || null;
-    const cCol2 = businessSettings?.customColumns?.col2 || 'Qty';
-    const cCol3 = businessSettings?.customColumns?.col3 || 'Rate';
+    const cCol1 = invoice?.settings?.customColumns?.col1 || businessSettings?.customColumns?.col1 || null;
+    const cCol2 = invoice?.settings?.customColumns?.col2 || businessSettings?.customColumns?.col2 || 'Qty';
+    const cCol3 = invoice?.settings?.customColumns?.col3 || businessSettings?.customColumns?.col3 || 'Rate';
 
     return (
     <Page size="A5" style={[styles.compactPage, { fontFamily: dynamicFont }]}>
@@ -450,35 +450,35 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
             {invoice.billType === 'grocery' ? (
               <>
                 <Text style={{ width: getDescWidth(40) }}>{item.description || item.itemService || 'Product'}</Text>
-                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 <Text style={{ width: '12%', textAlign: 'center' }}>{item.size || 'N/A'}</Text>
               </>
             ) : invoice.billType === 'service' ? (
               <>
                 <Text style={{ width: '25%' }}>{item.designNo || item.itemService || 'Service'}</Text>
                   <Text style={{ width: getDescWidth(27) }}>{item.description || 'N/A'}</Text>
-                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 </>
               ) : invoice.billType === 'tailor' ? (
                 <>
                   <Text style={{ width: getDescWidth(52) }}>{item.description || item.itemService || 'Work'}</Text>
-                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 </>
               ) : invoice.billType === 'doctor' || invoice.billType === 'teacher' ? (
                 <>
                   <Text style={{ width: getDescWidth(48) }}>{item.description || item.itemService || 'Fee'}</Text>
-                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 </>
               ) : invoice.billType === 'repair' ? (
                 <>
                   <Text style={{ width: '25%' }}>{item.designNo || item.itemService || 'Repair'}</Text>
                   <Text style={{ width: getDescWidth(27) }}>{item.description || 'N/A'}</Text>
-                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 </>
               ) : invoice.billType === 'retail' ? (
                 <>
                   <Text style={{ width: getDescWidth(30) }}>{item.itemService || item.description || 'Product'}{item.size ? ` (${item.size})` : ''}</Text>
-                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                   <Text style={{ width: '12%', textAlign: 'center' }}>{item.discount || 0}</Text>
                 </>
               ) : (
@@ -489,7 +489,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
                     {item.description || 'Service'} 
                     {item.designNo && item.designNo !== 'N/A' ? ` (${item.designNo})` : ''}
                   </Text>
-                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 </>
               )}
             {invoice.billType === 'retail' ? (
@@ -580,7 +580,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
   }
 
   const renderTemplate2 = () => {
-    const extraCols = businessSettings?.extraColumns || [];
+    const extraCols = invoice?.settings?.extraColumns || businessSettings?.extraColumns || [];
     const extraColWidth = Math.min(10, Math.floor(25 / Math.max(1, extraCols.length)));
     const totalExtraWidth = extraCols.length * extraColWidth;
     const getDescWidth = (base) => `${Math.max(15, parseInt(base) - totalExtraWidth)}%`;
@@ -708,7 +708,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
             {invoice.billType === 'grocery' ? (
               <>
                 <Text style={{ width: getDescWidth(43) }}>{item.description || item.itemService || 'Item'}</Text>
-                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 <Text style={{ width: '15%', textAlign: 'center' }}>{item.size || 'N/A'}</Text>
                 <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '15%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
@@ -717,21 +717,21 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
               <>
                 <Text style={{ width: '25%' }}>{item.designNo || item.itemService || 'Service'}</Text>
                 <Text style={{ width: getDescWidth(30) }}>{item.description || 'N/A'}</Text>
-                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '18%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
               </>
             ) : invoice.billType === 'tailor' ? (
               <>
                 <Text style={{ width: getDescWidth(40) }}>{item.description || item.itemService || 'Work'}</Text>
-                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '10%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
               </>
             ) : invoice.billType === 'doctor' || invoice.billType === 'teacher' ? (
               <>
                 <Text style={{ width: getDescWidth(45) }}>{item.description || item.itemService || 'Fee'}</Text>
-                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 <Text style={{ width: '10%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '10%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
               </>
@@ -739,14 +739,14 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
               <>
                 <Text style={{ width: '15%' }}>{item.designNo || item.itemService || 'Repair'}</Text>
                 <Text style={{ width: getDescWidth(30) }}>{item.description || 'N/A'}</Text>
-                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 <Text style={{ width: '8%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '10%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
               </>
             ) : invoice.billType === 'retail' ? (
               <>
                 <Text style={{ width: getDescWidth(28) }}>{item.itemService || item.description || 'Product'}</Text>
-                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 <Text style={{ width: '10%', textAlign: 'center' }}>{item.size || 'N/A'}</Text>
                 <Text style={{ width: '8%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '10%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
@@ -760,7 +760,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
                   {item.description || 'Service'} 
                   {item.designNo && item.designNo !== 'N/A' ? ` (${item.designNo})` : ''}
                 </Text>
-                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
                 <Text style={{ width: '10%', textAlign: 'center' }}>{item.size || 'N/A'}</Text>
                 <Text style={{ width: '8%', textAlign: 'center' }}>{item.qty} {item.unit ? item.unit.toUpperCase() : ''}</Text>
                 <Text style={{ width: '8%', textAlign: 'right' }}>{parseFloat(item.rate).toFixed(2)}</Text>
