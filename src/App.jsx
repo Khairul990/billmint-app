@@ -1318,6 +1318,7 @@ function App() {
           severity: "Medium",
           page: "invoice"
         });
+        toast.error(`PDF Error: ${err?.toString() || "Unknown error generating PDF"}`);
       });
   };
 
