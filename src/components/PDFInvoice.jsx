@@ -484,9 +484,10 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
               ) : (
                 <>
                   <Text style={{ width: getDescWidth(52) }}>
-                    {item.itemService ? `${item.itemService} - ` : ''}
-                    {item.workType ? `[${item.workType}] ` : ''}
-                    {item.description || 'Service'} 
+                    {item.itemService || ''}
+                    {item.itemService && (item.description || item.workType !== 'Embroidery') ? ' - ' : ''}
+                    {item.workType && item.workType !== 'Embroidery' ? `[${item.workType}] ` : ''}
+                    {item.description ? item.description : (!item.itemService ? (item.name || 'Item') : '')}
                     {item.designNo && item.designNo !== 'N/A' ? ` (${item.designNo})` : ''}
                   </Text>
                   {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{String(item[c.id] || '-')}</Text>)}
