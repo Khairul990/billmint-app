@@ -1,7 +1,8 @@
 import React, { useRef, useState, useCallback, memo } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { Plus, Copy, Trash2, GripVertical, FilePlus, ChevronDown } from 'lucide-react';
+import { Plus, Copy, Trash2, GripVertical, FilePlus, ChevronDown, Settings } from 'lucide-react';
 import QuickProductBar from './QuickProductBar';
+import EditColumnsModal from './EditColumnsModal';
 import { getUnitsByType } from '../../../config/businessPresets';
 
 // Extracted pure function for row calculation
@@ -163,7 +164,9 @@ const MemoizedMobileBillRow = memo(({
         {/* Item Name & Rate */}
         <div className="flex gap-2">
           <div className="flex-1">
-            <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Item Service</label>
+            <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">
+              {item.customCols?.col1 || 'Item Name'}
+            </label>
             <input
               type="text"
               value={item.itemService || ''}
@@ -173,7 +176,9 @@ const MemoizedMobileBillRow = memo(({
             />
           </div>
           <div className="w-28">
-            <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Rate (₹)</label>
+            <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">
+              {item.customCols?.col3 || 'Rate (₹)'}
+            </label>
             <input
               type="number"
               value={item.rate || ''}
@@ -200,7 +205,9 @@ const MemoizedMobileBillRow = memo(({
         {/* Qty, Unit, Disc, Tax */}
         <div className="grid grid-cols-4 gap-2">
           <div className="col-span-1">
-            <label className="text-[9px] font-black uppercase text-theme-muted mb-1 block">Qty</label>
+            <label className="text-[9px] font-black uppercase text-theme-muted mb-1 block">
+              {item.customCols?.col2 || 'Qty'}
+            </label>
             <input
               type="number"
               value={item.qty || ''}
@@ -269,9 +276,12 @@ const MemoizedMobileBillRow = memo(({
 // Main Table Component
 // ----------------------------------------------------------------------
 const ExcelBillTable = ({ products }) => {
-  const { state, dispatch } = useInvoice();
+  const { state, dispatch, businessSettings } = useInvoice();
   const tableRef = useRef(null);
   const [selectedRows, setSelectedRows] = useState(new Set());
+  const [isEditColumnsOpen, setIsEditColumnsOpen] = useState(false);
+  
+  const customCols = state.settings?.customColumns || businessSettings?.customColumns || { col1: 'Item Name', col2: 'Qty', col3: 'Rate (₹)' };
   
   const wsType = state.businessSettings?.businessWorkspaces?.find(ws => ws.id === state.businessSettings.activeWorkspaceId)?.type || state.businessSettings?.type || 'retail';
   const availableUnits = getUnitsByType(wsType);
@@ -373,6 +383,12 @@ const ExcelBillTable = ({ products }) => {
               </button>
             )}
             <button
+              onClick={() => setIsEditColumnsOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-theme-surface hover:bg-theme-card text-theme-primary border border-theme-border-soft text-[10px] font-bold rounded-lg transition-all shadow-sm"
+            >
+              <Settings className="w-3 h-3" /> Edit Columns
+            </button>
+            <button
               onClick={() => {
                 handleAddRow();
                 setTimeout(() => {
@@ -435,11 +451,11 @@ const ExcelBillTable = ({ products }) => {
                   </th>
                   <th className="py-3 px-1 w-6 text-center border-r border-theme-border-soft bg-theme-app/50"></th>
                   <th className="py-3 px-1 w-8 text-center border-r border-theme-border-soft bg-theme-app/50">#</th>
-                  <th className="py-3 px-3 w-[35%] min-w-[200px] border-r border-theme-border-soft bg-theme-app/50">Item Name</th>
+                  <th className="py-3 px-3 w-[35%] min-w-[200px] border-r border-theme-border-soft bg-theme-app/50">{customCols.col1}</th>
                   <th className="py-3 px-3 w-[25%] min-w-[150px] border-r border-theme-border-soft bg-theme-app/50">Description</th>
-                  <th className="py-3 px-2 w-20 text-center border-r border-theme-border-soft bg-theme-app/50">Qty</th>
+                  <th className="py-3 px-2 w-20 text-center border-r border-theme-border-soft bg-theme-app/50">{customCols.col2}</th>
                   <th className="py-3 px-3 w-20 border-r border-theme-border-soft bg-theme-app/50">Unit</th>
-                  <th className="py-3 px-3 w-24 text-right border-r border-theme-border-soft bg-theme-app/50">Rate (₹)</th>
+                  <th className="py-3 px-3 w-24 text-right border-r border-theme-border-soft bg-theme-app/50">{customCols.col3}</th>
                   <th className="py-3 px-3 w-20 text-right border-r border-theme-border-soft bg-theme-app/50">Disc</th>
                   <th className="py-3 px-3 w-16 text-right border-r border-theme-border-soft bg-theme-app/50">Tax%</th>
                   <th className="py-3 px-3 w-28 text-right border-r border-theme-border-soft bg-theme-app/50">Amount</th>
@@ -484,12 +500,27 @@ const ExcelBillTable = ({ products }) => {
                   onUpdateItem={handleUpdateItem}
                   onDeleteRow={handleDeleteRow}
                   availableUnits={availableUnits}
+                  customCols={customCols}
                 />
               ))}
             </div>
           </>
         )}
       </div>
+
+      <EditColumnsModal
+        isOpen={isEditColumnsOpen}
+        onClose={() => setIsEditColumnsOpen(false)}
+        initialColumns={customCols}
+        onSave={(cols) => {
+          dispatch({ type: 'UPDATE_SETTINGS', payload: { customColumns: cols } });
+          try {
+            const globalSettings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
+            globalSettings.customColumns = cols;
+            localStorage.setItem('billqyro_settings', JSON.stringify(globalSettings));
+          } catch(e) {}
+        }}
+      />
     </div>
   );
 };

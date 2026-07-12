@@ -89,7 +89,7 @@ const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWor
         )}
       </button>
       {open && (
-        <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-theme-card border border-theme-accent/50 focus:outline-none z-20">
+        <div className="origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-theme-card border border-theme-accent/50 focus:outline-none z-50 overflow-hidden">
           <div className="py-1">
             {businessWorkspaces.map(ws => (
               <button
