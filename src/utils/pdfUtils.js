@@ -1,6 +1,7 @@
 import React from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { PDFInvoice } from '../components/PDFInvoice';
+import { toast } from 'react-hot-toast';
 
 let isDownloadingPDF = false;
 
@@ -17,7 +18,14 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
   isDownloadingPDF = true;
   try {
     const doc = React.createElement(PDFInvoice, { invoice, businessSettings, isPremium });
-    const blob = await pdf(doc).toBlob();
+    
+    // Add a 15-second timeout to prevent silent hangs in case of font or network issues
+    const pdfPromise = pdf(doc).toBlob();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("PDF generation timed out (network/font issue)")), 15000)
+    );
+    const blob = await Promise.race([pdfPromise, timeoutPromise]);
+    
     const url = URL.createObjectURL(blob);
     
     const link = document.createElement('a');
@@ -33,6 +41,7 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
     return true;
   } catch (error) {
     console.error('Vector PDF generation failed:', error);
+    toast.error(`PDF Error: ${error?.message || error?.toString() || 'Unknown error'}`);
     return false;
   } finally {
     isDownloadingPDF = false;

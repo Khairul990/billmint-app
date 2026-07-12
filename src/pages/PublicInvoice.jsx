@@ -460,6 +460,9 @@ const PublicInvoice = ({ initialInvoice }) => {
         } else {
           toast.error('Failed to generate PDF invoice.');
         }
+      })
+      .catch((err) => {
+        toast.error(`PDF Error: ${err?.toString() || 'Unknown error'}`);
       });
   };
 
