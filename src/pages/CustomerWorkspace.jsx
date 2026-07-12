@@ -75,25 +75,6 @@ export default function CustomerWorkspace({ customerId }) {
     setSessionData({ id, phone });
   };
 
-  if (!sessionData.id || !sessionData.phone || sessionData.id !== activeCustomerId) {
-    return <CustomerPortalLogin onVerificationSuccess={handleVerificationSuccess} prefillId={customerId} />;
-  }
-
-  if (loadingData) {
-    return <div className="min-h-screen bg-theme-main flex flex-col items-center justify-center"><ClassicLoader /><p className="text-theme-muted mt-4 font-bold animate-pulse">Loading Secure Workspace...</p></div>;
-  }
-
-  // Memoized Calculations
-  const activeSymbol = invoices[0]?.regionalSettingsSnapshot?.currency || '₹';
-  const businessInfo = invoices[0]?.businessSnapshot || {};
-  const businessType = businessInfo.businessType || 'retail';
-  const portalLabel = getPortalLabelByType(businessType);
-  const customerLabel = getCustomerLabelByType(businessType);
-  const invoiceLabel = getInvoiceLabelByType(businessType);
-
-  const DynamicCustomerIcon = LucideIcons[getIconForCustomer(businessType)] || User;
-  const DynamicInvoiceIcon = LucideIcons[getIconForInvoice(businessType)] || FileText;
-  
   const { totalDue, totalPaid, totalBills, latestInvoiceDate, payments } = useMemo(() => {
     let tDue = 0;
     let tPaid = 0;
@@ -145,6 +126,25 @@ export default function CustomerWorkspace({ customerId }) {
       inv.paymentStatus?.toLowerCase().includes(q)
     );
   }, [invoices, searchQuery]);
+
+  if (!sessionData.id || !sessionData.phone || sessionData.id !== activeCustomerId) {
+    return <CustomerPortalLogin onVerificationSuccess={handleVerificationSuccess} prefillId={customerId} />;
+  }
+
+  if (loadingData) {
+    return <div className="min-h-screen bg-theme-main flex flex-col items-center justify-center"><ClassicLoader /><p className="text-theme-muted mt-4 font-bold animate-pulse">Loading Secure Workspace...</p></div>;
+  }
+
+  // Memoized Calculations
+  const activeSymbol = invoices[0]?.regionalSettingsSnapshot?.currency || '₹';
+  const businessInfo = invoices[0]?.businessSnapshot || {};
+  const businessType = businessInfo.businessType || 'retail';
+  const portalLabel = getPortalLabelByType(businessType);
+  const customerLabel = getCustomerLabelByType(businessType);
+  const invoiceLabel = getInvoiceLabelByType(businessType);
+
+  const DynamicCustomerIcon = LucideIcons[getIconForCustomer(businessType)] || User;
+  const DynamicInvoiceIcon = LucideIcons[getIconForInvoice(businessType)] || FileText;
 
   return (
     <div className="min-h-screen bg-theme-main text-theme-primary font-sans pb-24 md:pb-8">
