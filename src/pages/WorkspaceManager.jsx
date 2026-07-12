@@ -12,15 +12,9 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BUSINESS_PRESETS, ALL_MODULES as ALL_MODULES_CONFIG } from '../config/businessPresets';
 
-const ALL_MODULES = [
-  { id: 'billing', name: 'Invoicing & Billing' },
-  { id: 'customers', name: 'Customers (CRM)' },
-  { id: 'products', name: 'Products & Inventory' },
-  { id: 'dueLedger', name: 'Due Ledger' },
-  { id: 'expenses', name: 'Expenses' },
-  { id: 'reports', name: 'Reports & Analytics' }
-];
+const ALL_MODULES = ALL_MODULES_CONFIG;
 
 const WorkspaceManager = ({ 
   businessWorkspaces, 
@@ -218,18 +212,9 @@ const WorkspaceManager = ({
                   onChange={(e) => setType(e.target.value)}
                   className="w-full bg-theme-app border border-theme-border-soft rounded-xl p-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors min-h-[44px]"
                 >
-                  <option value="retail">Retail & Shop</option>
-                  <option value="cyber_cafe">Cyber Cafe / Digital Center</option>
-                  <option value="grocery">Grocery & Store</option>
-                  <option value="service">Service & Repair</option>
-                  <option value="doctor">Clinic / Doctor</option>
-                  <option value="teacher">Tutor / Teacher</option>
-                  <option value="tailor">Tailor & Boutique</option>
-                  <option value="embroidery">Embroidery & Designer</option>
-                  <option value="freelance">Freelancer & Agency</option>
-                  <option value="restaurant">Restaurant & Food</option>
-                  <option value="custom">Custom Business</option>
-                  <option value="billing_only">Billing Only</option>
+                  {BUSINESS_PRESETS.map(preset => (
+                    <option key={preset.id} value={preset.id}>{preset.label}</option>
+                  ))}
                 </select>
               </div>
 

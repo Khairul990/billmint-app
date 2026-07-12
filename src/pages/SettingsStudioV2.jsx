@@ -11,7 +11,7 @@ import TemplateMarketplace from './TemplateMarketplace';
 import BackupRestore from './BackupRestore';
 import { applyTheme } from '../hooks/useThemeEngine';
 import { getThemePreviewColors, ALL_THEMES, THEME_INFO } from '../utils/themeUtils';
-import { getCustomerLabelByType, isEducationBusiness } from '../config/businessPresets';
+import { getCustomerLabelByType, isEducationBusiness, BUSINESS_PRESETS } from '../config/businessPresets';
 
 import {
   Building2, MapPin, FileText, Save, Image as ImageIcon, Phone, Mail,
@@ -542,15 +542,9 @@ const SettingsStudioV2 = ({
               <div className="md:col-span-1">
                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Business Type</label>
                 <select value={businessType} onChange={(e) => setBusinessType(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent)] text-gray-900 dark:text-white font-bold">
-                  <option value="retail">Retail Shop</option>
-                  <option value="tailor">Tailor Shop</option>
-                  <option value="coaching">Coaching Center</option>
-                  <option value="tuition">Tuition Teacher</option>
-                  <option value="clinic">Clinic</option>
-                  <option value="service">Service Center</option>
-                  <option value="freelance">Freelancer</option>
-                  <option value="distributor">Distributor</option>
-                  <option value="custom">Custom</option>
+                  {BUSINESS_PRESETS.map(preset => (
+                    <option key={preset.id} value={preset.id}>{preset.label}</option>
+                  ))}
                 </select>
               </div>
               <div className="md:col-span-1">
