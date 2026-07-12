@@ -25,7 +25,8 @@ const MemoizedBillRow = memo(({
   onCopyRow, 
   onDeleteRow, 
   onToggleSelection,
-  availableUnits
+  availableUnits,
+  extraCols = []
 }) => {
   return (
     <tr className={`grid-row group transition-all duration-200 border-b border-theme-border-soft ${isSelected ? 'bg-theme-accent/10 shadow-[inset_4px_0_0_var(--tw-colors-theme-accent)]' : 'hover:bg-theme-surface-hover'}`}>
@@ -64,6 +65,17 @@ const MemoizedBillRow = memo(({
           className="w-full h-full bg-transparent outline-none text-[11px] font-medium text-theme-muted py-2.5 px-3"
         />
       </td>
+      {extraCols.map((col, colIdx) => (
+        <td key={col.id} className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-theme-surface focus-within:shadow-[inset_0_0_0_1px_var(--tw-colors-theme-accent)] transition-all">
+          <input
+            type="text"
+            value={item[col.id] || ''}
+            onChange={(e) => onUpdateItem(rowIndex, col.id, e.target.value)}
+            placeholder="..."
+            className="w-full h-full bg-transparent outline-none text-[11px] font-medium text-theme-muted py-2.5 px-3 text-center"
+          />
+        </td>
+      ))}
       <td className="p-0 border-r border-theme-border-soft bg-transparent focus-within:bg-theme-surface focus-within:shadow-[inset_0_0_0_1px_var(--tw-colors-theme-accent)] transition-all">
         <input
           type="number"
@@ -154,7 +166,8 @@ const MemoizedMobileBillRow = memo(({
   rowIndex, 
   onUpdateItem, 
   onDeleteRow,
-  availableUnits
+  availableUnits,
+  extraCols = []
 }) => {
   return (
     <div className="bg-theme-surface rounded-2xl p-4 mb-4 border border-theme-border-soft shadow-sm relative group overflow-hidden">
@@ -199,6 +212,25 @@ const MemoizedMobileBillRow = memo(({
             className="w-full bg-transparent outline-none text-xs font-bold text-theme-muted placeholder-theme-muted/50 px-1"
           />
         </div>
+
+        {extraCols.length > 0 && (
+          <div className="grid grid-cols-2 gap-2 mt-1">
+            {extraCols.map(col => (
+              <div key={col.id} className="col-span-1">
+                <label className="text-[9px] font-black uppercase text-theme-muted mb-1 block">
+                  {col.name}
+                </label>
+                <input
+                  type="text"
+                  value={item[col.id] || ''}
+                  onChange={(e) => onUpdateItem(rowIndex, col.id, e.target.value)}
+                  placeholder="..."
+                  className="w-full bg-theme-app/50 border border-theme-border-soft rounded-lg px-2 py-1.5 outline-none text-xs font-bold text-theme-primary"
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="h-px w-full bg-theme-border-soft/50 my-1"></div>
 
@@ -282,6 +314,7 @@ const ExcelBillTable = ({ products }) => {
   const [isEditColumnsOpen, setIsEditColumnsOpen] = useState(false);
   
   const customCols = state.settings?.customColumns || businessSettings?.customColumns || { col1: 'Item Name', col2: 'Qty', col3: 'Rate (₹)' };
+  const extraCols = state.settings?.extraColumns || businessSettings?.extraColumns || [];
   
   const wsType = state.businessSettings?.businessWorkspaces?.find(ws => ws.id === state.businessSettings.activeWorkspaceId)?.type || state.businessSettings?.type || 'retail';
   const availableUnits = getUnitsByType(wsType);
@@ -453,6 +486,9 @@ const ExcelBillTable = ({ products }) => {
                   <th className="py-3 px-1 w-8 text-center border-r border-theme-border-soft bg-theme-app/50">#</th>
                   <th className="py-3 px-3 w-[35%] min-w-[200px] border-r border-theme-border-soft bg-theme-app/50">{customCols.col1}</th>
                   <th className="py-3 px-3 w-[25%] min-w-[150px] border-r border-theme-border-soft bg-theme-app/50">Description</th>
+                  {extraCols.map(col => (
+                    <th key={col.id} className="py-3 px-3 min-w-[100px] text-center border-r border-theme-border-soft bg-theme-app/50">{col.name}</th>
+                  ))}
                   <th className="py-3 px-2 w-20 text-center border-r border-theme-border-soft bg-theme-app/50">{customCols.col2}</th>
                   <th className="py-3 px-3 w-20 border-r border-theme-border-soft bg-theme-app/50">Unit</th>
                   <th className="py-3 px-3 w-24 text-right border-r border-theme-border-soft bg-theme-app/50">{customCols.col3}</th>
@@ -475,6 +511,7 @@ const ExcelBillTable = ({ products }) => {
                     onDeleteRow={handleDeleteRow}
                     onToggleSelection={toggleRowSelection}
                     availableUnits={availableUnits}
+                    extraCols={extraCols}
                   />
                 ))}
               </tbody>
@@ -501,6 +538,7 @@ const ExcelBillTable = ({ products }) => {
                   onDeleteRow={handleDeleteRow}
                   availableUnits={availableUnits}
                   customCols={customCols}
+                  extraCols={extraCols}
                 />
               ))}
             </div>
@@ -512,11 +550,13 @@ const ExcelBillTable = ({ products }) => {
         isOpen={isEditColumnsOpen}
         onClose={() => setIsEditColumnsOpen(false)}
         initialColumns={customCols}
-        onSave={(cols) => {
-          dispatch({ type: 'UPDATE_SETTINGS', payload: { customColumns: cols } });
+        initialExtraColumns={extraCols}
+        onSave={(cols, extras) => {
+          dispatch({ type: 'UPDATE_SETTINGS', payload: { customColumns: cols, extraColumns: extras } });
           try {
             const globalSettings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
             globalSettings.customColumns = cols;
+            globalSettings.extraColumns = extras;
             localStorage.setItem('billqyro_settings', JSON.stringify(globalSettings));
           } catch(e) {}
         }}
