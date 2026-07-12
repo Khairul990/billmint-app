@@ -449,18 +449,13 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
             <Text style={styles.compactColSN}>{idx + 1}</Text>
             {invoice.billType === 'grocery' ? (
               <>
-        {(invoice.items || []).map((item, idx) => (
-            <View key={idx} style={styles.tableRow}>
-              <Text style={styles.compactColSN}>{idx + 1}</Text>
-              {invoice.billType === 'grocery' ? (
-                <>
-                  <Text style={{ width: getDescWidth(40) }}>{item.description || item.itemService || 'Product'}</Text>
-                  {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
-                  <Text style={{ width: '12%', textAlign: 'center' }}>{item.size || 'N/A'}</Text>
-                </>
-              ) : invoice.billType === 'service' ? (
-                <>
-                  <Text style={{ width: '25%' }}>{item.designNo || item.itemService || 'Service'}</Text>
+                <Text style={{ width: getDescWidth(40) }}>{item.description || item.itemService || 'Product'}</Text>
+                {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
+                <Text style={{ width: '12%', textAlign: 'center' }}>{item.size || 'N/A'}</Text>
+              </>
+            ) : invoice.billType === 'service' ? (
+              <>
+                <Text style={{ width: '25%' }}>{item.designNo || item.itemService || 'Service'}</Text>
                   <Text style={{ width: getDescWidth(27) }}>{item.description || 'N/A'}</Text>
                   {extraCols.map(c => <Text key={c.id} style={{ width: `${extraColWidth}%`, textAlign: 'center' }}>{item[c.id] || '-'}</Text>)}
                 </>
