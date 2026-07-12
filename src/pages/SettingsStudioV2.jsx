@@ -134,6 +134,7 @@ const SettingsStudioV2 = ({
 
   // Business states
   const [businessName, setBusinessName] = useState('');
+  const [businessType, setBusinessType] = useState('retail');
   const [logoUrl, setLogoUrl] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [phone, setPhone] = useState('');
@@ -218,6 +219,7 @@ const SettingsStudioV2 = ({
     if (settings && Object.keys(settings).length > 0 && !isInitialized.current) {
       isInitialized.current = true;
       setBusinessName(settings.businessName || '');
+      setBusinessType(settings.businessType || 'retail');
       setLogoUrl(settings.logoUrl || '');
       setOwnerName(settings.ownerName || '');
       setPhone(settings.phone || '');
@@ -304,7 +306,7 @@ const SettingsStudioV2 = ({
   useEffect(() => {
     if (!isInitialized.current) return;
     setIsDirty(true);
-  }, [businessName, ownerName, phone, whatsapp, email, address, gstNumber, geminiApiKey, twilioAccountSid, twilioAuthToken,
+  }, [businessName, businessType, ownerName, phone, whatsapp, email, address, gstNumber, geminiApiKey, twilioAccountSid, twilioAuthToken,
     country, language, currency, currencyCode, taxLabel, vatTax, dateFormat, numberFormat,
     invoicePrefix, defaultTax, defaultNotes, terms, pdfFooter, brandColor, invoiceTemplate, defaultBillingTemplate,
     upiId, bkashNumber, nagadNumber, rocketNumber, payeeName, paymentNote, paymentQrEnabled, paymentMethod,
@@ -372,7 +374,7 @@ const SettingsStudioV2 = ({
 
     try {
       const payload = {
-        ...settings, businessName, logoUrl, ownerName, phone, whatsapp, email, address, gstNumber,
+        ...settings, businessName, businessType, logoUrl, ownerName, phone, whatsapp, email, address, gstNumber,
         geminiApiKey, twilioAccountSid, twilioAuthToken, country, language, currency, currencyCode,
         taxLabel, vatTax, dateFormat, numberFormat, invoicePrefix, defaultTax: parseFloat(defaultTax) || 0,
         defaultNotes, terms, pdfFooter, upiId, paymentQrEnabled, paymentMethod, bkashNumber, nagadNumber,
@@ -407,6 +409,7 @@ const SettingsStudioV2 = ({
   const resetStateFromSettings = () => {
     if (!settings || Object.keys(settings).length === 0) return;
     setBusinessName(settings.businessName || '');
+    setBusinessType(settings.businessType || 'retail');
     setLogoUrl(settings.logoUrl || '');
     setOwnerName(settings.ownerName || '');
     setPhone(settings.phone || '');
@@ -536,7 +539,21 @@ const SettingsStudioV2 = ({
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
+              <div className="md:col-span-1">
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Business Type</label>
+                <select value={businessType} onChange={(e) => setBusinessType(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent)] text-gray-900 dark:text-white font-bold">
+                  <option value="retail">Retail Shop</option>
+                  <option value="tailor">Tailor Shop</option>
+                  <option value="coaching">Coaching Center</option>
+                  <option value="tuition">Tuition Teacher</option>
+                  <option value="clinic">Clinic</option>
+                  <option value="service">Service Center</option>
+                  <option value="freelance">Freelancer</option>
+                  <option value="distributor">Distributor</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+              <div className="md:col-span-1">
                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Business Name</label>
                 <input type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="ABC Coaching Center" className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent)] text-gray-900 dark:text-white font-bold" />
               </div>

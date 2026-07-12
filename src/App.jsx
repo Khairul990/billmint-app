@@ -113,8 +113,8 @@ const PremiumPricing = React.lazy(() => import('./pages/PremiumPricing'));
 const PaymentDueScreen = React.lazy(() => import('./pages/PaymentDueScreen'));
 const SandboxAdmin = React.lazy(() => import('./pages/admin/SandboxAdmin'));
 const StudentPortal = React.lazy(() => import('./pages/StudentPortal'));
-const BillingPortal = React.lazy(() => import('./pages/BillingPortal'));
-
+const CustomerWorkspace = React.lazy(() => import('./pages/CustomerWorkspace'));
+const CustomerPortalConfig = React.lazy(() => import('./pages/CustomerPortalConfig'));
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -360,18 +360,24 @@ function App() {
     const newPath = window.location.pathname;
 
     const studentMatchLegacy = newPath.match(/^\/student\/([a-zA-Z0-9_-]+)/);
+    const customerMatch = newPath.match(/^\/customer\/([a-zA-Z0-9_-]+)/);
     const portalMatch = newPath.match(/^\/portal\/([a-zA-Z0-9_-]+)/);
     const billingMatch = newPath.match(/^\/billing\/([a-zA-Z0-9_-]+)/);
     const eduPortalMatch = newPath.match(/^\/student-portal\/([a-zA-Z0-9_-]+)/);
     
     if (eduPortalMatch) {
       setEduPortalId(eduPortalMatch[1]);
+    } else if (customerMatch) {
+      setPortalId(customerMatch[1]);
     } else if (portalMatch) {
       setPortalId(portalMatch[1]);
     } else if (billingMatch) {
       setPortalId(billingMatch[1]);
     } else if (studentMatchLegacy) {
       setPortalId(studentMatchLegacy[1]);
+    } else if (newPath === '/customer' || newPath === '/portal') {
+      // Allow access without ID, CustomerWorkspace handles prompt
+      setPortalId('verification-pending'); 
     }
   }, []);
 
@@ -1392,6 +1398,8 @@ function App() {
         return (
           <HelpCenter />
         );
+      case 'customer-portal-config':
+        return <CustomerPortalConfig />;
       case 'system-health':
         return <SystemHealth setCurrentTab={setCurrentTab} />;
       case 'sandbox-admin':
@@ -1761,7 +1769,7 @@ function App() {
           <ClassicLoader />
         </div>
       }>
-        <BillingPortal customerId={portalId} />
+        <CustomerWorkspace customerId={portalId === 'verification-pending' ? null : portalId} />
       </React.Suspense>
     );
   }

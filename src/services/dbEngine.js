@@ -3265,3 +3265,30 @@ export const getStudentProfile = async (studentId, studentEmail) => {
     return null;
   }
 };
+
+export const getCustomerPortalInvoices = async (customerId, phone) => {
+  if (!firebaseReady) return [];
+  try {
+    const q = query(
+      collection(db, 'publicInvoices'),
+      where('customerId', '==', customerId),
+      where('customerPhone', '==', phone)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => doc.data());
+  } catch (err) {
+    console.error("Failed to fetch customer portal invoices:", err);
+    return [];
+  }
+};
+
+export const verifyCustomerPortal = async (customerId, phone) => {
+  if (!firebaseReady) return false;
+  try {
+    const invoices = await getCustomerPortalInvoices(customerId, phone);
+    return invoices.length > 0;
+  } catch (err) {
+    console.error("Verification failed:", err);
+    return false;
+  }
+};

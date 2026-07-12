@@ -4,7 +4,7 @@ import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, 
 import { logout } from '../services/dbEngine';
 import { t } from '../utils/i18n';
 import { triggerLightHaptic } from '../utils/feedback';
-import { getCustomerLabelByType, getInvoiceLabelByType } from '../config/businessPresets';
+import { getCustomerLabelByType, getInvoiceLabelByType, getPortalLabelByType } from '../config/businessPresets';
 import Logo from './Logo';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import { isEducationBusiness } from '../config/businessPresets';
@@ -45,7 +45,7 @@ const Sidebar = ({
     });
   };
 
-  const wsType = activeWorkspace.type || 'retail';
+  const wsType = businessSettings?.businessType || activeWorkspace.type || 'retail';
 
   const getCustomerLabel = () => getCustomerLabelByType(wsType);
 
@@ -84,7 +84,7 @@ const Sidebar = ({
     { id: 'projects', label: 'Projects', icon: Briefcase, module: 'projects' },
 
     { type: 'label', label: 'Portals' },
-    { id: isEducationBusiness(wsType) ? 'student-portal-settings' : 'billing-portal-settings', label: isEducationBusiness(wsType) ? 'Student Portal' : 'Billing Portal', icon: Globe },
+    { id: 'customer-portal-config', label: getPortalLabelByType(wsType), icon: Globe },
 
     { type: 'label', label: 'System' },
     { id: 'settings', label: 'Settings Studio', icon: SettingsIcon },

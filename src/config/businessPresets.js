@@ -215,6 +215,70 @@ export const BUSINESS_PRESETS = [
     defaultUnits: ['pcs', 'kg', 'gram', 'litre', 'ml', 'hour', 'project', 'box'],
     dashboardKpis: ['dailySales', 'totalInvoices', 'topCustomers'],
     quickActions: ['addInvoice']
+  },
+  {
+    id: 'coaching',
+    label: 'Coaching Center',
+    shortDesc: 'For institutes and coaching',
+    iconName: 'BookOpen',
+    recommendedModules: ['students', 'fees', 'reports', 'billing'],
+    optionalModules: ['attendance', 'dueLedger'],
+    hiddenModules: ['products', 'patients', 'prescription', 'appointments', 'measurements', 'designBook', 'orders', 'delivery', 'devices', 'serviceJobs', 'clients', 'projects', 'customers'],
+    defaultCustomerLabel: 'Students',
+    defaultInvoiceLabel: 'Monthly Fee',
+    defaultProductLabel: 'Course',
+    defaultPortalLabel: 'Student Portal',
+    defaultUnits: ['month', 'semester', 'course'],
+    dashboardKpis: ['totalStudents', 'pendingFees'],
+    quickActions: ['addStudent', 'collectFee']
+  },
+  {
+    id: 'tuition',
+    label: 'Tuition Teacher',
+    shortDesc: 'For private tutors',
+    iconName: 'GraduationCap',
+    recommendedModules: ['students', 'fees', 'billing'],
+    optionalModules: ['attendance'],
+    hiddenModules: ['products', 'patients', 'prescription', 'appointments', 'measurements', 'designBook', 'orders', 'delivery', 'devices', 'serviceJobs', 'clients', 'projects', 'customers'],
+    defaultCustomerLabel: 'Students',
+    defaultInvoiceLabel: 'Monthly Fee',
+    defaultProductLabel: 'Subject',
+    defaultPortalLabel: 'Student Portal',
+    defaultUnits: ['month', 'class'],
+    dashboardKpis: ['totalStudents', 'pendingFees'],
+    quickActions: ['addStudent', 'collectFee']
+  },
+  {
+    id: 'clinic',
+    label: 'Clinic',
+    shortDesc: 'For medical clinics',
+    iconName: 'Stethoscope',
+    recommendedModules: ['billing', 'patients', 'appointments', 'reports'],
+    optionalModules: ['prescription', 'dueLedger'],
+    hiddenModules: ['products', 'students', 'measurements', 'designBook', 'fees', 'attendance', 'orders', 'delivery', 'devices', 'serviceJobs', 'clients', 'projects', 'customers'],
+    defaultCustomerLabel: 'Patients',
+    defaultInvoiceLabel: 'Treatment Bill',
+    defaultProductLabel: 'Treatment',
+    defaultPortalLabel: 'Patient Portal',
+    defaultUnits: ['consultation', 'procedure'],
+    dashboardKpis: ['appointmentsToday', 'patientsCount'],
+    quickActions: ['addPatient', 'addBill']
+  },
+  {
+    id: 'distributor',
+    label: 'Distributor',
+    shortDesc: 'For wholesalers and dealers',
+    iconName: 'Truck',
+    recommendedModules: ['billing', 'customers', 'products', 'dueLedger', 'orders', 'reports'],
+    optionalModules: ['expenses', 'delivery'],
+    hiddenModules: ['patients', 'students', 'prescription', 'appointments', 'measurements', 'designBook', 'fees', 'attendance', 'devices', 'serviceJobs', 'clients', 'projects'],
+    defaultCustomerLabel: 'Dealers',
+    defaultInvoiceLabel: 'Supply Bill',
+    defaultProductLabel: 'Product',
+    defaultPortalLabel: 'Dealer Portal',
+    defaultUnits: ['box', 'carton', 'pcs'],
+    dashboardKpis: ['dailySales', 'totalInvoices', 'dueAmount'],
+    quickActions: ['addInvoice', 'addProduct']
   }
 ];
 
@@ -228,10 +292,11 @@ export const getCustomerLabelByType = (type) => {
   if (preset) return preset.defaultCustomerLabel;
   const t = type.toLowerCase();
   if (t.includes('doctor') || t.includes('clinic')) return 'Patients';
-  if (t.includes('teacher') || t.includes('tuition')) return 'Students';
-  if (t.includes('tailor') || t.includes('embroidery') || t.includes('designer') || t.includes('fashion')) return 'Clients';
-  if (t.includes('service') || t.includes('repair')) return 'Device Owners';
+  if (t.includes('teacher') || t.includes('tuition') || t.includes('coaching')) return 'Students';
+  if (t.includes('tailor') || t.includes('embroidery') || t.includes('designer') || t.includes('fashion')) return 'Customers';
+  if (t.includes('service') || t.includes('repair')) return 'Clients';
   if (t.includes('freelance')) return 'Clients';
+  if (t.includes('distributor')) return 'Dealers';
   return 'Customers';
 };
 
@@ -249,9 +314,11 @@ export const getInvoiceLabelByType = (type) => {
     return preset.defaultInvoiceLabel;
   }
   const t = type.toLowerCase();
-  if (t.includes('teacher') || t.includes('tuition') || t.includes('coaching')) return 'Fee Slips';
-  if (t.includes('doctor') || t.includes('clinic')) return 'Consultation Bills';
-  if (t.includes('tailor') || t.includes('embroidery') || t.includes('designer') || t.includes('fashion')) return 'Order Slips';
+  if (t.includes('teacher') || t.includes('tuition') || t.includes('coaching')) return 'Monthly Fee';
+  if (t.includes('doctor') || t.includes('clinic')) return 'Treatment Bill';
+  if (t.includes('tailor') || t.includes('embroidery') || t.includes('designer') || t.includes('fashion')) return 'Invoice';
+  if (t.includes('service') || t.includes('repair')) return 'Service Bill';
+  if (t.includes('distributor')) return 'Supply Bill';
   if (t.includes('service') || t.includes('repair')) return 'Repair Tickets';
   return 'Bills';
 };
@@ -283,7 +350,37 @@ export const getProductLabelByType = (type) => {
  */
 export const getPortalLabelByType = (type) => {
   const preset = BUSINESS_PRESETS.find(p => p.id === type);
-  return preset?.defaultPortalLabel || 'Billing Portal';
+  if (preset && preset.defaultPortalLabel) return preset.defaultPortalLabel;
+  const t = type?.toLowerCase() || '';
+  if (t.includes('retail') || t.includes('tailor')) return 'Customer Portal';
+  if (t.includes('coaching') || t.includes('tuition') || t.includes('teacher')) return 'Student Portal';
+  if (t.includes('clinic') || t.includes('doctor')) return 'Patient Portal';
+  if (t.includes('service') || t.includes('freelance')) return 'Client Portal';
+  if (t.includes('distributor')) return 'Dealer Portal';
+  return 'Customer Portal';
+};
+
+export const getIconForCustomer = (type) => {
+  const t = type?.toLowerCase() || '';
+  if (t.includes('clinic') || t.includes('doctor')) return 'Stethoscope';
+  if (t.includes('coaching') || t.includes('tuition') || t.includes('teacher')) return 'GraduationCap';
+  if (t.includes('tailor')) return 'Scissors';
+  if (t.includes('retail') || t.includes('grocery')) return 'ShoppingBag';
+  if (t.includes('service') || t.includes('repair')) return 'Wrench';
+  if (t.includes('distributor')) return 'Truck';
+  if (t.includes('freelance')) return 'Briefcase';
+  return 'User';
+};
+
+export const getIconForInvoice = (type) => {
+  const t = type?.toLowerCase() || '';
+  if (t.includes('clinic') || t.includes('doctor')) return 'HeartPulse';
+  if (t.includes('coaching') || t.includes('tuition') || t.includes('teacher')) return 'BookOpen';
+  if (t.includes('tailor')) return 'Scissors';
+  if (t.includes('retail') || t.includes('grocery')) return 'ShoppingCart';
+  if (t.includes('service') || t.includes('repair')) return 'Tool';
+  if (t.includes('distributor')) return 'Package';
+  return 'FileText';
 };
 
 /**

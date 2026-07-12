@@ -4,11 +4,12 @@ import { staggerContainer, staggerItem, fadeInUp, buttonTap, cardHover, scaleOnH
 import { ArrowRight, CheckCircle2, FileSpreadsheet, ShieldCheck, TrendingUp, Users, Sparkles, Download, Link2, Smartphone, Printer, CreditCard, Star, HelpCircle, ChevronDown, MessageCircle, Mail, MapPin, DollarSign, Clock, BarChart3, Globe, Zap } from 'lucide-react';
 import Logo from '../components/Logo';
 import Login from './Login';
-
+import CustomerPortalLogin from '../components/portal/CustomerPortalLogin';
 const Landing = ({ onLoginSuccess }) => {
   const [faqOpen, setFaqOpen] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [portalMode, setPortalMode] = useState('business'); // 'business' | 'customer'
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('billqyro_theme_color') || 'pink';
@@ -187,8 +188,33 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== LOGIN SECTION ===== */}
-      <motion.section id="login" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="border-t border-theme-border-soft bg-theme-surface/50 relative z-10">
-        <Login onLoginSuccess={onLoginSuccess} />
+      <motion.section id="login" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="border-t border-theme-border-soft bg-theme-surface/50 relative z-10 py-12">
+        <div className="max-w-md mx-auto px-4 mb-6">
+          <div className="flex bg-theme-card p-1 rounded-xl border border-theme-border-soft shadow-sm">
+            <button
+              onClick={() => setPortalMode('business')}
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${portalMode === 'business' ? 'bg-theme-accent text-white shadow-md' : 'text-theme-muted hover:text-theme-primary'}`}
+            >
+              Business Login
+            </button>
+            <button
+              onClick={() => setPortalMode('customer')}
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${portalMode === 'customer' ? 'bg-theme-accent text-white shadow-md' : 'text-theme-muted hover:text-theme-primary'}`}
+            >
+              Customer Portal
+            </button>
+          </div>
+        </div>
+        
+        {portalMode === 'business' ? (
+          <Login onLoginSuccess={onLoginSuccess} />
+        ) : (
+          <CustomerPortalLogin onVerificationSuccess={(id, phone) => {
+            sessionStorage.setItem('billqyro_customer_portal_id', id);
+            sessionStorage.setItem('billqyro_customer_portal_phone', phone);
+            window.location.href = `/customer/${id}`;
+          }} />
+        )}
       </motion.section>
 
       {/* ===== FEATURES ===== */}

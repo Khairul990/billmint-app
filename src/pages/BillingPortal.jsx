@@ -1,46 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { LogOut, FileText, CheckCircle, Clock, ShieldCheck, Download, Printer, User } from 'lucide-react';
-import { auth } from '../services/firebaseConfig';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { getStudentInvoices, getStudentProfile } from '../services/dbEngine';
-import PortalLogin from '../components/portal/PortalLogin';
+import { getCustomerPortalInvoices } from '../services/dbEngine';
+import CustomerPortalLogin from '../components/portal/CustomerPortalLogin';
 import ClassicLoader from '../components/ClassicLoader';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { downloadInvoicePDF } from '../utils/pdfUtils';
 import { toast } from 'react-hot-toast';
 
 export default function BillingPortal({ customerId }) {
-  const [user, setUser] = useState(null);
-  const [loadingAuth, setLoadingAuth] = useState(true);
+  const [sessionData, setSessionData] = useState(() => {
+    return {
+      id: sessionStorage.getItem('billqyro_customer_portal_id'),
+      phone: sessionStorage.getItem('billqyro_customer_portal_phone')
+    };
+  });
   
   const [profile, setProfile] = useState(null);
   const [invoices, setInvoices] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoadingAuth(false);
-    });
-    return () => unsubscribe();
-  }, []);
+  const activeCustomerId = customerId || sessionData.id;
 
   useEffect(() => {
-    if (user && customerId) {
-      loadPortalData();
+    if (sessionData.id && sessionData.phone && sessionData.id === activeCustomerId) {
+      loadPortalData(sessionData.id, sessionData.phone);
     }
-  }, [user, customerId]);
+  }, [sessionData, activeCustomerId]);
 
-  const loadPortalData = async () => {
+  const loadPortalData = async (id, phone) => {
     setLoadingData(true);
     try {
-      // Reusing the same backend functions which handle customer data
-      const fetchedInvoices = await getStudentInvoices(customerId, user.email);
-      const fetchedProfile = await getStudentProfile(customerId, user.email);
-      
+      const fetchedInvoices = await getCustomerPortalInvoices(id, phone);
       setInvoices(fetchedInvoices);
-      setProfile(fetchedProfile || { name: 'Customer', email: user.email, id: customerId });
+      if (fetchedInvoices.length > 0) {
+        const inv = fetchedInvoices[0];
+        setProfile({
+          name: inv.customerName,
+          email: inv.customerEmail,
+          phone: inv.customerPhone,
+          id: inv.customerId
+        });
+      } else {
+        setProfile({ name: 'Customer', id });
+      }
     } catch (err) {
       console.error(err);
       toast.error('Failed to load portal data.');
@@ -49,20 +52,23 @@ export default function BillingPortal({ customerId }) {
     }
   };
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    setUser(null);
+  const handleLogout = () => {
+    sessionStorage.removeItem('billqyro_customer_portal_id');
+    sessionStorage.removeItem('billqyro_customer_portal_phone');
+    setSessionData({ id: null, phone: null });
     setInvoices([]);
     setProfile(null);
     toast.success('Securely logged out.');
   };
 
-  if (loadingAuth) {
-    return <div className="min-h-screen bg-theme-main flex items-center justify-center"><ClassicLoader /></div>;
-  }
+  const handleVerificationSuccess = (id, phone) => {
+    sessionStorage.setItem('billqyro_customer_portal_id', id);
+    sessionStorage.setItem('billqyro_customer_portal_phone', phone);
+    setSessionData({ id, phone });
+  };
 
-  if (!user) {
-    return <PortalLogin customerId={customerId} onLoginSuccess={setUser} />;
+  if (!sessionData.id || !sessionData.phone || sessionData.id !== activeCustomerId) {
+    return <CustomerPortalLogin onVerificationSuccess={handleVerificationSuccess} />;
   }
 
   if (loadingData) {
@@ -89,7 +95,7 @@ export default function BillingPortal({ customerId }) {
             <div>
               <h1 className="text-2xl font-black">{profile?.name || 'Billing Portal'}</h1>
               <p className="text-theme-muted text-sm flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-theme-success" /> Secure Session • {profile?.email}
+                <ShieldCheck className="w-4 h-4 text-theme-success" /> Verified Customer • {profile?.id}
               </p>
             </div>
           </div>
