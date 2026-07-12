@@ -5,12 +5,12 @@ import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/
 // Using reliable raw github links to prevent loading hangs
 Font.register({
   family: 'Noto Sans',
-  src: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Regular.ttf'
+  src: '/fonts/NotoSans-Regular.ttf'
 });
 
 Font.register({
   family: 'Noto Sans Bengali',
-  src: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSansBengali/NotoSansBengali-Regular.ttf'
+  src: '/fonts/NotoSansBengali-Regular.ttf'
 });
 
 // Register a clean, premium font hierarchy if desired, otherwise use standard helvetica
