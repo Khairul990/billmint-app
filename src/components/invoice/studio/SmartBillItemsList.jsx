@@ -3,6 +3,7 @@ import { useInvoice } from '../../../contexts/InvoiceContext';
 import { Plus, Trash2, AlertTriangle, ArrowUp, X, Settings2, Copy, Package } from 'lucide-react';
 import { getProductLabelByType } from '../../../config/businessPresets';
 import PremiumEmptyState from '../../../components/PremiumEmptyState';
+import EditColumnsModal from './EditColumnsModal';
 
 const calculateRowAmount = (item) => {
   const q = parseFloat(item.qty) || 0;
@@ -12,31 +13,16 @@ const calculateRowAmount = (item) => {
 };
 
 const SmartBillItemsList = ({ products = [], invoices = [], wsType }) => {
-  const { state, dispatch } = useInvoice();
+  const { state, dispatch, businessSettings } = useInvoice();
   
   // Custom columns state
-  const [columns, setColumns] = useState({ col1: 'Description', col2: 'Qty', col3: 'Rate' });
+  const customCols = state.settings?.customColumns || businessSettings?.customColumns || { col1: 'Item Name', col2: 'Qty', col3: 'Rate' };
+  const extraCols = state.settings?.extraColumns || businessSettings?.extraColumns || [];
   const [showColModal, setShowColModal] = useState(false);
-  const [tempCols, setTempCols] = useState({ col1: '', col2: '', col3: '' });
 
   const productLabel = getProductLabelByType(wsType);
 
-  // Update columns based on template selection
-  useEffect(() => {
-    let col1 = 'Description';
-    let col2 = 'Qty';
-    let col3 = 'Rate';
-
-    const t = state.selectedTemplate?.toLowerCase();
-    if (t === 'embroidery') { col1 = 'Design / Work Name'; col2 = 'Qty'; col3 = 'Rate'; }
-    else if (t === 'tailor') { col1 = 'Work / Measurement'; col2 = 'Qty'; col3 = 'Rate'; }
-    else if (t === 'teacher') { col1 = 'Fee Description'; col2 = 'Month'; col3 = 'Amount'; }
-    else if (t === 'doctor' || t === 'clinic') { col1 = 'Service / Visit'; col2 = 'Qty'; col3 = 'Fee'; }
-    else if (t === 'retail' || t === 'mall') { col1 = 'Product Name'; col2 = 'Qty'; col3 = 'Price'; }
-    else if (t === 'repair') { col1 = 'Problem / Service'; col2 = 'Qty'; col3 = 'Charge'; }
-
-    setColumns({ col1, col2, col3 });
-  }, [state.selectedTemplate]);
+  // Remove the old columns sync effect since we use global custom columns now
 
   // Compute Most Used from real invoice item history
   const mostUsed = useMemo(() => {
@@ -116,13 +102,7 @@ const SmartBillItemsList = ({ products = [], invoices = [], wsType }) => {
   };
 
   const openColModal = () => {
-    setTempCols(columns);
     setShowColModal(true);
-  };
-
-  const saveColumns = () => {
-    setColumns(tempCols);
-    setShowColModal(false);
   };
 
   return (
@@ -202,9 +182,12 @@ const SmartBillItemsList = ({ products = [], invoices = [], wsType }) => {
             <thead>
               <tr className="bg-theme-app/50 border-b border-theme-border-soft">
                 <th className="py-3 px-4 text-xs font-black text-theme-muted w-12 text-center">No</th>
-                <th className="py-3 px-4 text-xs font-black text-theme-muted">{columns.col1}</th>
-                <th className="py-3 px-4 text-xs font-black text-theme-muted w-24 text-center">{columns.col2}</th>
-                <th className="py-3 px-4 text-xs font-black text-theme-muted w-32 text-right">{columns.col3}</th>
+                <th className="py-3 px-4 text-xs font-black text-theme-muted">{customCols.col1}</th>
+                {extraCols.map(col => (
+                  <th key={col.id} className="py-3 px-4 text-xs font-black text-theme-muted min-w-[120px] text-center">{col.name}</th>
+                ))}
+                <th className="py-3 px-4 text-xs font-black text-theme-muted w-24 text-center">{customCols.col2}</th>
+                <th className="py-3 px-4 text-xs font-black text-theme-muted w-32 text-right">{customCols.col3}</th>
                 <th className="py-3 px-4 text-xs font-black text-theme-muted w-32 text-right">Total</th>
                 <th className="py-3 px-4 text-xs font-black text-theme-muted w-16 text-center">Edit</th>
               </tr>
@@ -224,6 +207,17 @@ const SmartBillItemsList = ({ products = [], invoices = [], wsType }) => {
                       className="w-full bg-transparent outline-none text-sm font-bold text-theme-primary placeholder-theme-muted/50"
                     />
                   </td>
+                  {extraCols.map(col => (
+                    <td key={col.id} className="py-3 px-4">
+                      <input
+                        type="text"
+                        value={item[col.id] || ''}
+                        onChange={(e) => handleUpdateItem(index, col.id, e.target.value)}
+                        placeholder="..."
+                        className="w-full bg-transparent outline-none text-sm font-bold text-theme-primary text-center"
+                      />
+                    </td>
+                  ))}
                   <td className="py-3 px-4">
                     <input
                       type="number"
@@ -285,64 +279,21 @@ const SmartBillItemsList = ({ products = [], invoices = [], wsType }) => {
         </div>
       </div>
 
-      {/* Edit Columns Modal */}
-      {showColModal && (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-theme-surface w-full max-w-sm rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-200">
-            <div className="flex items-center justify-between p-5 border-b border-theme-border-soft">
-              <h2 className="text-lg font-black text-theme-primary">Edit Columns</h2>
-              <button onClick={() => setShowColModal(false)} className="p-2 text-theme-muted hover:text-theme-primary bg-theme-app/50 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-5 flex flex-col gap-4">
-              <div>
-                <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Column 2 (Description)</label>
-                <input
-                  type="text"
-                  value={tempCols.col1}
-                  onChange={(e) => setTempCols({ ...tempCols, col1: e.target.value })}
-                  className="w-full bg-theme-app border border-theme-border-soft rounded-xl px-4 py-2.5 outline-none text-sm font-bold text-theme-primary focus:border-theme-accent transition-colors"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Column 3 (Quantity)</label>
-                <input
-                  type="text"
-                  value={tempCols.col2}
-                  onChange={(e) => setTempCols({ ...tempCols, col2: e.target.value })}
-                  className="w-full bg-theme-app border border-theme-border-soft rounded-xl px-4 py-2.5 outline-none text-sm font-bold text-theme-primary focus:border-theme-accent transition-colors"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-black uppercase text-theme-muted mb-1 block">Column 4 (Rate)</label>
-                <input
-                  type="text"
-                  value={tempCols.col3}
-                  onChange={(e) => setTempCols({ ...tempCols, col3: e.target.value })}
-                  className="w-full bg-theme-app border border-theme-border-soft rounded-xl px-4 py-2.5 outline-none text-sm font-bold text-theme-primary focus:border-theme-accent transition-colors"
-                />
-              </div>
-            </div>
-
-            <div className="p-5 bg-theme-app border-t border-theme-border-soft flex gap-3">
-              <button
-                onClick={() => setShowColModal(false)}
-                className="flex-1 py-3 bg-transparent border border-theme-border-soft text-theme-primary font-bold rounded-xl transition-all hover:bg-theme-surface"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveColumns}
-                className="flex-1 py-3 bg-theme-accent hover:bg-theme-accent/90 text-white font-black rounded-xl shadow-premium transition-all active:scale-95"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <EditColumnsModal
+        isOpen={showColModal}
+        onClose={() => setShowColModal(false)}
+        initialColumns={customCols}
+        initialExtraColumns={extraCols}
+        onSave={(cols, extras) => {
+          dispatch({ type: 'UPDATE_SETTINGS', payload: { customColumns: cols, extraColumns: extras } });
+          try {
+            const globalSettings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
+            globalSettings.customColumns = cols;
+            globalSettings.extraColumns = extras;
+            localStorage.setItem('billqyro_settings', JSON.stringify(globalSettings));
+          } catch(e) {}
+        }}
+      />
     </div>
   );
 };
