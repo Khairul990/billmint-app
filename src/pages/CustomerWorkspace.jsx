@@ -124,7 +124,7 @@ export default function CustomerWorkspace({ customerId }) {
     });
 
     return {
-      totalDue,
+      totalDue: tDue,
       totalPaid: tPaid,
       totalBills: invoices.length,
       latestInvoiceDate: latestDate,

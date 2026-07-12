@@ -19,12 +19,20 @@ import {
   Fingerprint,
   Sparkles,
   Globe,
-  Banknote
+  Banknote,
+  Download, 
+  CheckCircle, 
+  Clock, 
+  ExternalLink, 
+  Printer, 
+  FileText
 } from 'lucide-react';
+import { getPublicInvoice } from '../services/dbEngine';
 import { downloadInvoicePDF } from '../utils/pdfUtils';
 import DynamicQRCode from '../components/DynamicQRCode';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../utils/invoiceUtils';
+import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
 import { doc, updateDoc, arrayUnion, collection, addDoc, runTransaction } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../services/firebaseConfig';
@@ -671,43 +679,45 @@ const PublicInvoice = ({ initialInvoice }) => {
                 </div>
               </div>
 
-              {/* Items Table - unchanged */}
+              {/* Items Table - Dynamic Sync */}
               <div className="border border-theme-border-soft rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-[10px] md:text-xs text-left">
                     <thead className={`text-[8px] md:text-[9px] uppercase font-black tracking-wider ${tplStyles.tableHeader}`}>
                       <tr>
-                        <th className="py-2 md:py-3 px-2 md:px-3 text-center w-8 md:w-10">#</th>
-                        {invoice.billType === 'grocery' ? (
-                          <><th className="py-2 md:py-3 px-2 md:px-3">Product</th><th className="py-2 md:py-3 px-2 md:px-3 text-center">Unit</th><th className="py-2 md:py-3 px-2 md:px-3 text-center">Qty</th><th className="py-2 md:py-3 px-2 md:px-3 text-right">Price</th></>
-                        ) : invoice.billType === 'repair' ? (
-                          <><th className="py-2 md:py-3 px-2 md:px-3">Service</th><th className="py-2 md:py-3 px-2 md:px-3">Details</th><th className="py-2 md:py-3 px-2 md:px-3 text-center">Qty</th><th className="py-2 md:py-3 px-2 md:px-3 text-right">Amount</th></>
-                        ) : invoice.billType === 'retail' ? (
-                          <><th className="py-2 md:py-3 px-2 md:px-3">Product</th><th className="py-2 md:py-3 px-2 md:px-3">Variant</th><th className="py-2 md:py-3 px-2 md:px-3 text-center">Qty</th><th className="py-2 md:py-3 px-2 md:px-3 text-right">Price</th><th className="py-2 md:py-3 px-2 md:px-3 text-right">Disc</th></>
-                        ) : invoice.billType === 'custom' ? (
-                          <><th className="py-2 md:py-3 px-2 md:px-3">Item</th><th className="py-2 md:py-3 px-2 md:px-3">Description</th><th className="py-2 md:py-3 px-2 md:px-3 text-center">Qty</th><th className="py-2 md:py-3 px-2 md:px-3 text-right">Rate</th></>
-                        ) : (
-                          <><th className="py-2 md:py-3 px-2 md:px-3">Design</th><th className="py-2 md:py-3 px-2 md:px-3">Type</th><th className="py-2 md:py-3 px-2 md:px-3">Description</th><th className="py-2 md:py-3 px-2 md:px-3 text-center">Qty</th><th className="py-2 md:py-3 px-2 md:px-3 text-right">Rate</th></>
-                        )}
-                        <th className="py-2 md:py-3 px-2 md:px-3 text-right">Total</th>
+                        {getInvoiceColumns(invoice, business).map(col => (
+                          <th key={col.id} className={`py-2 md:py-3 px-2 md:px-3 text-${col.align}`} style={{ width: col.width }}>
+                            {col.label}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-theme-border-soft/50">
                       {(invoice.items || []).map((item, idx) => (
                         <tr key={idx} className="hover:bg-theme-app/50">
-                          <td className="py-2 md:py-2.5 px-2 md:px-3 text-center text-theme-muted font-bold">{idx + 1}</td>
-                          {invoice.billType === 'grocery' ? (
-                            <><td className="py-2 md:py-2.5 px-2 md:px-3 font-extrabold text-theme-primary">{item.description || 'Product'}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-center">{item.size || '—'}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-center">{item.qty}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-right">{formatVal(item.rate)}</td></>
-                          ) : invoice.billType === 'repair' ? (
-                            <><td className="py-2 md:py-2.5 px-2 md:px-3 font-extrabold text-theme-primary">{item.designNo || 'Service'}</td><td className="py-2 md:py-2.5 px-2 md:px-3">{item.description || '—'}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-center">{item.qty}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-right">{formatVal(item.rate)}</td></>
-                          ) : invoice.billType === 'retail' ? (
-                            <><td className="py-2 md:py-2.5 px-2 md:px-3 font-extrabold text-theme-primary">{item.productName || 'Product'}</td><td className="py-2 md:py-2.5 px-2 md:px-3">{item.sizeVariant || '—'}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-center">{item.qty}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-right">{formatVal(item.price)}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-right text-theme-danger">-{formatVal(item.discount || 0)}</td></>
-                          ) : invoice.billType === 'custom' ? (
-                            <><td className="py-2 md:py-2.5 px-2 md:px-3 font-extrabold text-theme-primary">{item.itemService || 'Item'}</td><td className="py-2 md:py-2.5 px-2 md:px-3">{item.description || '—'}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-center">{item.qty}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-right">{formatVal(item.rate)}</td></>
-                          ) : (
-                            <><td className="py-2 md:py-2.5 px-2 md:px-3 font-extrabold text-theme-primary">{item.designNo || '—'}</td><td className="py-2 md:py-2.5 px-2 md:px-3"><span className="badge-premium bg-theme-surface text-theme-muted text-[8px] md:text-[9px]">{item.workType || 'Work'}</span></td><td className="py-2 md:py-2.5 px-2 md:px-3">{item.description || '—'}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-center">{item.qty}</td><td className="py-2 md:py-2.5 px-2 md:px-3 text-right">{formatVal(item.rate)}</td></>
-                          )}
-                          <td className="py-2 md:py-2.5 px-2 md:px-3 text-right font-black text-theme-primary">{formatVal(item.amount)}</td>
+                          {getInvoiceColumns(invoice, business).map(col => {
+                            if (col.id === 'sn') return <td key={col.id} className={`py-2 md:py-2.5 px-2 md:px-3 text-${col.align} text-theme-muted font-bold`}>{idx + 1}</td>;
+                            
+                            const val = getItemValue(item, col.id, invoice.billType);
+                            
+                            // Special formatting for specific columns
+                            if (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') {
+                              return (
+                                <td key={col.id} className={`py-2 md:py-2.5 px-2 md:px-3 text-${col.align} ${col.id === 'amount' ? 'font-black text-theme-primary' : col.id === 'discount' && val > 0 ? 'text-theme-danger' : 'font-semibold'}`}>
+                                  {col.id === 'discount' && val > 0 ? '-' : ''}{formatVal(val)}
+                                </td>
+                              );
+                            }
+                            if (col.id === 'col1') {
+                              return <td key={col.id} className={`py-2 md:py-2.5 px-2 md:px-3 text-${col.align} font-extrabold text-theme-primary`}>{val}</td>;
+                            }
+                            
+                            return (
+                              <td key={col.id} className={`py-2 md:py-2.5 px-2 md:px-3 text-${col.align}`}>
+                                {val}
+                              </td>
+                            );
+                          })}
                         </tr>
                       ))}
                     </tbody>

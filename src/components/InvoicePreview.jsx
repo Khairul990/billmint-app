@@ -1,6 +1,7 @@
 import React from 'react';
 import DynamicQRCode from './DynamicQRCode';
 import { formatCurrency } from '../utils/invoiceUtils';
+import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
 import { ShieldCheck, Calendar, Hash, FileText } from 'lucide-react';
 import { getCategoryWording } from '../config/businessPresets';
 
@@ -263,53 +264,78 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
         </div>
       </div>
 
-      {/* 3. ITEM TABLE */}
+      {/* 3. ITEM TABLE (DYNAMIC SYNC) */}
       <div className="py-6 overflow-x-auto no-scrollbar">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="border-b border-theme-border-soft dark:border-theme-border-soft text-theme-muted dark:text-theme-muted font-bold uppercase tracking-wider">
-              <th className="pb-3 text-left">{categoryWords.items}</th>
-              <th className="pb-3 text-center w-20">{categoryWords.qty}</th>
-              <th className="pb-3 text-right w-32">{categoryWords.price}</th>
-              <th className="pb-3 text-right w-32">Total</th>
+              {getInvoiceColumns(invoice, businessSettings).map(col => (
+                <th key={col.id} className={`pb-3 text-${col.align}`} style={{ width: col.width }}>
+                  {col.label}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40">
             {invoice.items && invoice.items.map((item, idx) => (
               <tr key={idx} className="text-theme-primary dark:text-theme-muted hover:bg-theme-app dark:bg-theme-surface/50 dark:hover:bg-theme-card/20">
-                <td className="py-4 font-semibold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    {item.designNo && item.designNo !== 'N/A' && (
-                      <span className="inline-block px-2 py-0.5 bg-theme-accent-light dark:bg-theme-accent-light text-theme-accent dark:text-theme-accent rounded text-[9px] font-black tracking-wider uppercase border border-theme-border-soft/10">
-                        {item.designNo}
-                      </span>
-                    )}
-                    {item.workType && (
-                      <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold ${(templateId === 'embroidery' || templateId === 'tailor') ? 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800' : 'bg-theme-surface dark:bg-theme-card text-theme-muted dark:text-theme-muted'}`}>
-                        {item.workType}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-xs text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-semibold">{item.description || item.name || 'Stitching Service'}</span>
-                  {item.size && item.size !== 'N/A' && (
-                    <span className={`block text-[10px] font-medium mt-0.5 ${(templateId === 'embroidery' || templateId === 'tailor') ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/20 px-1.5 py-0.5 rounded-sm inline-block' : 'text-theme-muted dark:text-theme-muted'}`}>Size: {item.size}</span>
-                  )}
-                </td>
-                <td className="py-4 text-center font-bold text-theme-muted dark:text-theme-muted">
-                  {item.qty !== undefined ? item.qty : item.quantity}
-                  {item.unit && <span className="text-[10px] ml-1 uppercase">{item.unit}</span>}
-                </td>
-                <td className="py-4 text-right font-semibold text-theme-muted dark:text-theme-muted">
-                  {formatCurrency(item.rate !== undefined ? item.rate : item.price, currencySymbol, regionalPrefs.numberFormat)}
-                </td>
-                <td className="py-4 text-right font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-primary">
-                  {formatCurrency(item.amount !== undefined ? item.amount : item.total, currencySymbol, regionalPrefs.numberFormat)}
-                </td>
+                {getInvoiceColumns(invoice, businessSettings).map(col => {
+                  if (col.id === 'sn') return <td key={col.id} className={`py-4 text-${col.align} text-theme-muted font-bold`}>{idx + 1}</td>;
+                  
+                  const val = getItemValue(item, col.id, invoice.billType);
+                  
+                  // Primary Column 1 gets slightly richer UI in preview
+                  if (col.id === 'col1') {
+                    return (
+                      <td key={col.id} className={`py-4 font-semibold text-theme-primary dark:text-theme-primary dark:text-theme-secondary text-${col.align}`}>
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          {item.designNo && item.designNo !== 'N/A' && (
+                            <span className="inline-block px-2 py-0.5 bg-theme-accent-light dark:bg-theme-accent-light text-theme-accent dark:text-theme-accent rounded text-[9px] font-black tracking-wider uppercase border border-theme-border-soft/10">
+                              {item.designNo}
+                            </span>
+                          )}
+                          {item.workType && (
+                            <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold ${(templateId === 'embroidery' || templateId === 'tailor') ? 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800' : 'bg-theme-surface dark:bg-theme-card text-theme-muted dark:text-theme-muted'}`}>
+                              {item.workType}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-semibold">{val}</span>
+                        {item.size && item.size !== 'N/A' && (
+                          <span className={`block text-[10px] font-medium mt-0.5 ${(templateId === 'embroidery' || templateId === 'tailor') ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/20 px-1.5 py-0.5 rounded-sm inline-block' : 'text-theme-muted dark:text-theme-muted'}`}>Size: {item.size}</span>
+                        )}
+                      </td>
+                    );
+                  }
+                  
+                  if (col.id === 'qty') {
+                    return (
+                      <td key={col.id} className={`py-4 text-${col.align} font-bold text-theme-muted dark:text-theme-muted`}>
+                        {val}
+                        {item.unit && <span className="text-[10px] ml-1 uppercase">{item.unit}</span>}
+                      </td>
+                    );
+                  }
+                  
+                  if (col.id === 'amount' || col.id === 'rate' || col.id === 'discount' || col.id === 'tax') {
+                    return (
+                      <td key={col.id} className={`py-4 text-${col.align} ${col.id === 'amount' ? 'font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-primary' : col.id === 'discount' && val > 0 ? 'text-theme-danger dark:text-theme-danger font-semibold' : 'font-semibold text-theme-muted dark:text-theme-muted'}`}>
+                        {col.id === 'discount' && val > 0 ? '-' : ''}{formatCurrency(val, currencySymbol, regionalPrefs.numberFormat)}
+                      </td>
+                    );
+                  }
+                  
+                  return (
+                    <td key={col.id} className={`py-4 text-${col.align} text-theme-muted dark:text-theme-muted font-medium`}>
+                      {val}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
             {(!invoice.items || invoice.items.length === 0) && (
               <tr>
-                <td colSpan="4" className="py-6 text-center text-theme-muted dark:text-theme-muted font-semibold">
+                <td colSpan="10" className="py-6 text-center text-theme-muted dark:text-theme-muted font-semibold">
                   No items listed on this invoice.
                 </td>
               </tr>
