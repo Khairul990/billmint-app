@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Save, Plus, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -7,6 +8,11 @@ const EditColumnsModal = ({ isOpen, onClose, onSave, initialColumns, initialExtr
   const [col2, setCol2] = useState(initialColumns?.col2 || 'Qty');
   const [col3, setCol3] = useState(initialColumns?.col3 || 'Rate (₹)');
   const [extraCols, setExtraCols] = useState(initialExtraColumns);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleAddExtraColumn = () => {
     const newId = `col_${Date.now()}`;
@@ -31,22 +37,22 @@ const EditColumnsModal = ({ isOpen, onClose, onSave, initialColumns, initialExtr
     onClose();
   };
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-[100]">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90]"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-theme-card border border-theme-border-soft rounded-2xl shadow-premium z-[100] flex flex-col max-h-[90vh]"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-theme-card border border-theme-border-soft rounded-2xl shadow-premium flex flex-col max-h-[90vh]"
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-theme-border-soft shrink-0">
               <h3 className="text-sm font-black text-theme-primary">Customize Columns</h3>
@@ -166,10 +172,12 @@ const EditColumnsModal = ({ isOpen, onClose, onSave, initialColumns, initialExtr
               </button>
             </div>
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   );
+
+  return mounted && typeof document !== 'undefined' ? createPortal(modalContent, document.body) : null;
 };
 
 export default EditColumnsModal;
