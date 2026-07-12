@@ -382,24 +382,6 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
         <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#0f172a', marginTop: 3 }}>{invoice.customerName}</Text>
         <Text style={{ fontSize: 8, color: '#475569', marginTop: 2 }}>
           Ph: {invoice.customerPhone || 'N/A'}  |  Pay Type: {invoice.paymentType || 'Cash'}
-      <View style={styles.compactHeader}>
-        <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#0a1128' }}>
-          {businessSettings?.businessName || 'BillQyro Store'}
-        </Text>
-        <Text style={{ fontSize: 8, color: '#64748b', marginTop: 3 }}>
-          {businessSettings?.address || ''}  |  {businessSettings?.phone || ''}
-        </Text>
-        <Text style={styles.compactTitle}>{getInvoiceTitle(invoice.billType)}</Text>
-        <Text style={{ fontSize: 9, color: '#475569', marginTop: 4 }}>
-          #{invoice.invoiceNumber}  |  Date: {invoice.date}
-        </Text>
-      </View>
-
-      <View style={{ marginBottom: 12 }}>
-        <Text style={{ fontSize: 8, color: '#94a3b8', fontWeight: 'bold', letterSpacing: 0.5 }}>BILL TO:</Text>
-        <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#0f172a', marginTop: 3 }}>{invoice.customerName}</Text>
-        <Text style={{ fontSize: 8, color: '#475569', marginTop: 2 }}>
-          Ph: {invoice.customerPhone || 'N/A'}  |  Pay Type: {invoice.paymentType || 'Cash'}
         </Text>
       </View>
 
