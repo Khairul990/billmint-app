@@ -56,7 +56,7 @@ const MiniHealthCircle = ({ value, label }) => {
   const r = (size - sw) / 2;
   const c = 2 * Math.PI * r;
   const offset = c - (value / 100) * c;
-  const color = value >= 70 ? '#10B981' : value >= 40 ? '#F59E0B' : '#EF4444';
+  const color = value >= 70 ? 'var(--theme-success)' : value >= 40 ? 'var(--theme-warning)' : 'var(--theme-danger)';
   return (
     <div className="flex flex-col items-center gap-1 group">
       <div className="relative transition-transform duration-300 group-hover:scale-110" style={{ width: size, height: size }}>
@@ -84,7 +84,7 @@ const KpiCard = ({ title, value, icon: Icon, trend, trendUp = true }) => (
         {Icon && <Icon className="w-3.5 h-3.5" />}
       </div>
       {trend && (
-        <span className={`flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full ${trendUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+        <span className={`flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full ${trendUp ? 'bg-theme-success/10 text-theme-success' : 'bg-theme-danger/10 text-theme-danger'}`}>
           <TrendingUp className={`w-2.5 h-2.5 ${!trendUp ? 'rotate-180' : ''}`} /> {trend}
         </span>
       )}
@@ -245,8 +245,8 @@ const Dashboard = ({
           type: 'payment_received',
           date: new Date(inv.updatedAt || inv.createdAt).getTime(),
           icon: CheckCircle,
-          iconColor: 'text-emerald-500',
-          iconBg: 'bg-emerald-500/10',
+          iconColor: 'text-theme-success',
+          iconBg: 'bg-theme-success/10',
           text: `Payment received from ${inv.customerName || 'Walk-in Customer'}`,
           subtext: inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`,
           amount: inv.grandTotal || inv.total || 0,
@@ -432,9 +432,9 @@ const Dashboard = ({
       else unpaid += total;
     });
     return [
-      { name: 'Paid', value: paid, color: '#10B981' },
-      { name: 'Partial', value: partial, color: '#F59E0B' },
-      { name: 'Unpaid', value: unpaid, color: '#EF4444' },
+      { name: 'Paid', value: paid, color: 'var(--theme-success)' },
+      { name: 'Partial', value: partial, color: 'var(--theme-warning)' },
+      { name: 'Unpaid', value: unpaid, color: 'var(--theme-danger)' },
     ];
   };
 
@@ -477,11 +477,11 @@ const Dashboard = ({
 
   const statusBadge = (status) => {
     const s = (status || '').toLowerCase();
-    if (s === 'paid') return { label: 'Paid', classes: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
-    if (s === 'partial' || s === 'partially paid') return { label: 'Partial', classes: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
-    if (s === 'pending' || s === 'pending verification') return { label: 'Pending', classes: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
-    if (s === 'overdue') return { label: 'Overdue', classes: 'bg-red-500/10 text-red-500 border-red-500/20' };
-    return { label: 'Due', classes: 'bg-red-500/10 text-red-500 border-red-500/20' };
+    if (s === 'paid') return { label: 'Paid', classes: 'bg-theme-success/10 text-theme-success border-theme-success/20' };
+    if (s === 'partial' || s === 'partially paid') return { label: 'Partial', classes: 'bg-theme-warning/10 text-theme-warning border-theme-warning/20' };
+    if (s === 'pending' || s === 'pending verification') return { label: 'Pending', classes: 'bg-theme-accent/10 text-theme-accent border-theme-accent/20' };
+    if (s === 'overdue') return { label: 'Overdue', classes: 'bg-theme-danger/10 text-theme-danger border-theme-danger/20' };
+    return { label: 'Due', classes: 'bg-theme-danger/10 text-theme-danger border-theme-danger/20' };
   };
 
   const formatDate = (dateStr) => {
@@ -599,7 +599,7 @@ const Dashboard = ({
           {['warn', 'grace', 'locked'].includes(revenueStatus.lockStatus) && (
             <div className={`p-4 rounded-2xl border ${
               revenueStatus.lockStatus === 'warn' ? 'bg-theme-warning/10 border-theme-warning/30' :
-              revenueStatus.lockStatus === 'grace' ? 'bg-orange-500/10 border-orange-500/30' :
+              revenueStatus.lockStatus === 'grace' ? 'bg-theme-warning/10 border-theme-warning/30' :
               'bg-theme-danger/10 border-theme-danger/30'
             }`}>
               <div className="flex items-center gap-3">
@@ -639,7 +639,7 @@ const Dashboard = ({
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/10 backdrop-blur-sm">
-                  <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'Synced' ? 'bg-theme-success animate-pulse' : 'bg-theme-warning'}`} />
                   <span className="text-[7px] font-bold text-white/80 uppercase tracking-wider">{syncStatus === 'Synced' ? 'Live' : syncStatus}</span>
                 </div>
               </div>
@@ -692,8 +692,8 @@ const Dashboard = ({
                 </h2>
                 <p className="text-[10px] text-theme-muted font-medium mt-0.5">{businessSettings?.businessName || 'Your Business'} • {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
               </div>
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-[8px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-[8px] font-bold bg-theme-success/10 text-theme-success border border-theme-success/20 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-theme-success" />
                 {syncStatus === 'Synced' ? 'Live' : syncStatus}
               </div>
             </div>
@@ -703,7 +703,7 @@ const Dashboard = ({
           <div className="card-premium p-4">
             <div className="flex items-center justify-between mb-3">
               <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Business Health</p>
-              <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full ${overallHealth >= 70 ? 'bg-emerald-500/10 text-emerald-500' : overallHealth >= 40 ? 'bg-amber-500/10 text-amber-500' : 'bg-red-500/10 text-red-500'}`}>
+              <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full ${overallHealth >= 70 ? 'bg-theme-success/10 text-theme-success' : overallHealth >= 40 ? 'bg-theme-warning/10 text-theme-warning' : 'bg-theme-danger/10 text-theme-danger'}`}>
                 {overallHealth >= 70 ? 'Great' : overallHealth >= 40 ? 'Fair' : 'Low'}
               </span>
             </div>
@@ -716,7 +716,7 @@ const Dashboard = ({
             </div>
             <div className="flex items-center justify-center gap-2 mt-2">
               <div className="w-full h-1.5 bg-theme-surface rounded-full overflow-hidden">
-                <div className={`h-full rounded-full transition-all duration-1000 ${overallHealth >= 70 ? 'bg-emerald-500' : overallHealth >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${overallHealth}%` }} />
+                <div className={`h-full rounded-full transition-all duration-1000 ${overallHealth >= 70 ? 'bg-theme-success' : overallHealth >= 40 ? 'bg-theme-warning' : 'bg-theme-danger'}`} style={{ width: `${overallHealth}%` }} />
               </div>
               <span className="text-[9px] font-black text-theme-primary shrink-0 tabular-nums">{overallHealth}/100</span>
             </div>
@@ -728,7 +728,7 @@ const Dashboard = ({
               <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-2">Collection Rate</p>
               <p className="text-2xl font-black text-theme-primary tabular-nums">{collectionRate}%</p>
               <div className="w-full h-2 bg-theme-surface rounded-full overflow-hidden mt-2">
-                <div className={`h-full rounded-full ${collectionRate >= 70 ? 'bg-emerald-500' : collectionRate >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${collectionRate}%` }} />
+                <div className={`h-full rounded-full ${collectionRate >= 70 ? 'bg-theme-success' : collectionRate >= 40 ? 'bg-theme-warning' : 'bg-theme-danger'}`} style={{ width: `${collectionRate}%` }} />
               </div>
               <p className="text-[9px] text-theme-muted font-medium mt-1.5">{formatCurrency(totalCollected)} collected of {formatCurrency(totalRevenue)}</p>
             </div>
@@ -740,8 +740,8 @@ const Dashboard = ({
                 <div className="h-20 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={collectionTrendData}>
-                      <Bar dataKey="collection" fill="#10B981" radius={[2,2,0,0]} stackId="a" />
-                      <Bar dataKey="pending" fill="#F59E0B" radius={[2,2,0,0]} stackId="a" />
+                      <Bar dataKey="collection" fill="var(--theme-success)" radius={[2,2,0,0]} stackId="a" />
+                      <Bar dataKey="pending" fill="var(--theme-warning)" radius={[2,2,0,0]} stackId="a" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -819,7 +819,7 @@ const Dashboard = ({
                   return (
                     <div key={payment.id || idx} className="flex items-center justify-between p-2.5 bg-theme-surface rounded-xl">
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-theme-success/10 text-theme-success flex items-center justify-center shrink-0">
                           <CheckCircle className="w-3.5 h-3.5" />
                         </div>
                         <div className="min-w-0">
@@ -910,7 +910,7 @@ const Dashboard = ({
                 {topCustomers.slice(0, 5).map((c, i) => (
                   <div key={c.name} className="flex items-center justify-between p-2 bg-theme-surface rounded-xl">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className={`w-5 h-5 rounded-full text-[8px] font-black flex items-center justify-center shrink-0 ${i === 0 ? 'bg-amber-500/20 text-amber-500' : 'bg-theme-accent/10 text-theme-accent'}`}>{i + 1}</span>
+                      <span className={`w-5 h-5 rounded-full text-[8px] font-black flex items-center justify-center shrink-0 ${i === 0 ? 'bg-theme-warning/20 text-theme-warning' : 'bg-theme-accent/10 text-theme-accent'}`}>{i + 1}</span>
                       <span className="text-[10px] font-bold text-theme-primary truncate">{c.name}</span>
                     </div>
                     <span className="text-[10px] font-black text-theme-primary tabular-nums">{formatCurrency(c.total)}</span>
@@ -925,7 +925,7 @@ const Dashboard = ({
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-premium p-4">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xs font-extrabold text-theme-primary">Due in Next 7 Days</h3>
-                <span className="text-[9px] font-bold text-amber-500">{dueNext7Days.length} bills</span>
+                <span className="text-[9px] font-bold text-theme-warning">{dueNext7Days.length} bills</span>
               </div>
               <div className="space-y-1.5">
                 {dueNext7Days.slice(0, 3).map(inv => (
@@ -1021,18 +1021,18 @@ const Dashboard = ({
           {/* ===== MOBILE SYNC STATUS ===== */}
           <div className="card-premium flex items-center justify-between p-3">
             <div className="flex items-center gap-2">
-              <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${syncStatus === 'Synced' ? 'bg-emerald-500/10 text-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}`}>
+              <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${syncStatus === 'Synced' ? 'bg-theme-success/10 text-theme-success' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-theme-accent/10 text-theme-accent' : 'bg-theme-danger/10 text-theme-danger'}`}>
                 {syncStatus === 'Synced' ? <ShieldCheck className="w-3 h-3" /> : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <AlertTriangle className="w-3 h-3" />}
               </div>
               <div>
-                <span className={`text-[9px] font-bold ${syncStatus === 'Synced' ? 'text-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500' : 'text-red-500'}`}>
+                <span className={`text-[9px] font-bold ${syncStatus === 'Synced' ? 'text-theme-success' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-theme-accent' : 'text-theme-danger'}`}>
                   {syncStatus === 'Synced' ? 'Connected' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'Syncing' : 'Disconnected'}
                 </span>
                 <p className="text-[8px] text-theme-muted font-medium">Synced just now</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+              <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full ${syncStatus === 'Synced' ? 'bg-theme-success/10 text-theme-success' : 'bg-theme-warning/10 text-theme-warning'}`}>
                 {syncStatus === 'Synced' ? 'Healthy' : 'Pending'}
               </span>
               {installPromptEvent && !isAppInstalled && (
@@ -1071,7 +1071,7 @@ const Dashboard = ({
             )}
 
             {['warn', 'grace', 'locked'].includes(revenueStatus.lockStatus) && (
-              <motion.div variants={itemVariants} className={`p-3 rounded-xl border ${revenueStatus.lockStatus === 'warn' ? 'bg-theme-warning/10 border-theme-warning/30' : revenueStatus.lockStatus === 'grace' ? 'bg-orange-500/10 border-orange-500/30' : 'bg-theme-danger/10 border-theme-danger/30'}`}>
+              <motion.div variants={itemVariants} className={`p-3 rounded-xl border ${revenueStatus.lockStatus === 'warn' ? 'bg-theme-warning/10 border-theme-warning/30' : revenueStatus.lockStatus === 'grace' ? 'bg-theme-warning/10 border-theme-warning/30' : 'bg-theme-danger/10 border-theme-danger/30'}`}>
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${revenueStatus.lockStatus === 'locked' ? 'bg-theme-danger/20 text-theme-danger' : 'bg-theme-warning/20 text-theme-warning'}`}>
                     <AlertCircle className="w-4 h-4" />
@@ -1099,7 +1099,7 @@ const Dashboard = ({
                         {greeting.text}, {businessSettings?.ownerName?.split(' ')[0] || 'there'}!
                       </h1>
                       <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/15 backdrop-blur-sm text-white border border-white/20">
-                        <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-400 animate-pulse' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-400 animate-pulse' : 'bg-amber-400'}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'Synced' ? 'bg-theme-success animate-pulse' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-theme-accent animate-pulse' : 'bg-theme-warning'}`} />
                         {syncStatus === 'Synced' ? 'Live' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'Syncing' : syncStatus}
                       </div>
                     </div>
@@ -1160,9 +1160,9 @@ const Dashboard = ({
                 }).length;
                 return [
                   { label: 'Bills Created Today', value: billsToday, icon: FileText, color: 'text-theme-accent' },
-                  { label: 'Amount Collected Today', value: formatCurrency(collectedToday), icon: DollarSign, color: 'text-emerald-500' },
-                  { label: 'Due Bills Today', value: dueToday, icon: Clock, color: 'text-amber-500' },
-                  { label: 'New Customers Today', value: newCustToday, icon: Users, color: 'text-blue-500' }
+                  { label: 'Amount Collected Today', value: formatCurrency(collectedToday), icon: DollarSign, color: 'text-theme-success' },
+                  { label: 'Due Bills Today', value: dueToday, icon: Clock, color: 'text-theme-warning' },
+                  { label: 'New Customers Today', value: newCustToday, icon: Users, color: 'text-theme-accent' }
                 ].map((s, i) => (
                   <motion.div key={i} variants={itemVariants} className="stat-premium">
                     <div className="flex items-center justify-between mb-2">
@@ -1240,7 +1240,7 @@ const Dashboard = ({
               <div className="col-span-4 card-premium p-5 flex flex-col">
                 <div className="section-header">
                   <h3 className="section-header-title">Business Health</h3>
-                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${overallHealth >= 70 ? 'bg-emerald-500/10 text-emerald-500' : overallHealth >= 40 ? 'bg-amber-500/10 text-amber-500' : 'bg-red-500/10 text-red-500'}`}>
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${overallHealth >= 70 ? 'bg-theme-success/10 text-theme-success' : overallHealth >= 40 ? 'bg-theme-warning/10 text-theme-warning' : 'bg-theme-danger/10 text-theme-danger'}`}>
                     {overallHealth >= 70 ? 'Excellent' : overallHealth >= 40 ? 'Fair' : 'Critical'}
                   </span>
                 </div>
@@ -1248,10 +1248,10 @@ const Dashboard = ({
                   <div className="relative w-28 h-28">
                     <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
                       <circle cx="60" cy="60" r="52" fill="none" stroke="var(--theme-border-soft)" strokeWidth="8" />
-                      <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeDasharray={`${overallHealth * 3.267} 326.7`} className={overallHealth >= 70 ? 'text-emerald-500' : overallHealth >= 40 ? 'text-amber-500' : 'text-red-500'} />
+                      <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeDasharray={`${overallHealth * 3.267} 326.7`} className={overallHealth >= 70 ? 'text-theme-success' : overallHealth >= 40 ? 'text-theme-warning' : 'text-theme-danger'} />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className={`text-3xl font-black ${overallHealth >= 70 ? 'text-emerald-500' : overallHealth >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{overallHealth}</span>
+                      <span className={`text-3xl font-black ${overallHealth >= 70 ? 'text-theme-success' : overallHealth >= 40 ? 'text-theme-warning' : 'text-theme-danger'}`}>{overallHealth}</span>
                     </div>
                   </div>
                   <div className="grid grid-cols-5 gap-2 w-full">
@@ -1281,29 +1281,29 @@ const Dashboard = ({
                       <p className="text-lg font-black text-theme-primary tabular-nums">{formatCurrency(totalCollected)}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`flex items-center gap-1 text-xs font-bold ${collectionRate >= 70 ? 'text-emerald-500' : collectionRate >= 40 ? 'text-amber-500' : 'text-red-500'}`}>
+                      <span className={`flex items-center gap-1 text-xs font-bold ${collectionRate >= 70 ? 'text-theme-success' : collectionRate >= 40 ? 'text-theme-warning' : 'text-theme-danger'}`}>
                         <Target className="w-3.5 h-3.5" /> {collectionRate}%
                       </span>
                       <span className="text-xs text-theme-muted font-medium">{totalDue > 0 ? `${formatCurrency(totalDue)} remaining` : 'All collected'}</span>
                     </div>
                   </div>
                   <div className="w-full h-3 bg-theme-surface rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full transition-all duration-1000 relative ${collectionRate >= 70 ? 'bg-emerald-500' : collectionRate >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${collectionRate}%` }}>
+                    <div className={`h-full rounded-full transition-all duration-1000 relative ${collectionRate >= 70 ? 'bg-theme-success' : collectionRate >= 40 ? 'bg-theme-warning' : 'bg-theme-danger'}`} style={{ width: `${collectionRate}%` }}>
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md border-2 border-current" />
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <div className="p-2.5 rounded-xl bg-theme-surface">
                       <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Collected</p>
-                      <p className="text-sm font-black text-emerald-500 tabular-nums">{formatCurrency(totalCollected)}</p>
+                      <p className="text-sm font-black text-theme-success tabular-nums">{formatCurrency(totalCollected)}</p>
                     </div>
                     <div className="p-2.5 rounded-xl bg-theme-surface">
                       <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Pending</p>
-                      <p className="text-sm font-black text-amber-500 tabular-nums">{formatCurrency(totalDue)}</p>
+                      <p className="text-sm font-black text-theme-warning tabular-nums">{formatCurrency(totalDue)}</p>
                     </div>
                     <div className="p-2.5 rounded-xl bg-theme-surface">
                       <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Overdue</p>
-                      <p className="text-sm font-black text-red-500 tabular-nums">{totalOverdue} bills</p>
+                      <p className="text-sm font-black text-theme-danger tabular-nums">{totalOverdue} bills</p>
                     </div>
                   </div>
                 </div>
@@ -1361,15 +1361,15 @@ const Dashboard = ({
                         <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'var(--theme-muted)' }} dy={10} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'var(--theme-muted)' }} dx={-10} />
                         <Tooltip contentStyle={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border-soft)', borderRadius: '12px' }} itemStyle={{ fontSize: '12px', fontWeight: 700 }} />
-                        <Bar dataKey="collection" name="Collected" fill="#10B981" radius={[3,3,0,0]} stackId="a" />
-                        <Bar dataKey="pending" name="Pending" fill="#F59E0B" radius={[3,3,0,0]} stackId="a" />
+                        <Bar dataKey="collection" name="Collected" fill="var(--theme-success)" radius={[3,3,0,0]} stackId="a" />
+                        <Bar dataKey="pending" name="Pending" fill="var(--theme-warning)" radius={[3,3,0,0]} stackId="a" />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
                 </div>
                 <div className="flex items-center justify-center gap-4 mt-2 text-[9px] font-bold">
-                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" /> Collected</span>
-                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-amber-500" /> Pending</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-theme-success" /> Collected</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-theme-warning" /> Pending</span>
                 </div>
               </div>
 
@@ -1435,7 +1435,7 @@ const Dashboard = ({
                   <div className="stat-premium !p-4">
                     <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">New This Month</p>
                     <p className="text-2xl font-black text-theme-primary tabular-nums">{newCustomersThisMonth}</p>
-                    <p className="text-2xs text-emerald-500 font-medium mt-1">This month</p>
+                    <p className="text-2xs text-theme-success font-medium mt-1">This month</p>
                   </div>
                   <div className="stat-premium !p-4">
                     <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Active</p>
@@ -1489,7 +1489,7 @@ const Dashboard = ({
                     topCustomers.map((c, i) => (
                       <motion.div key={c.name} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="flex items-center justify-between p-3 rounded-xl bg-theme-surface hover:bg-theme-accent/5 transition-colors">
                         <div className="flex items-center gap-3 min-w-0">
-                          <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-[9px] font-black ${i === 0 ? 'bg-amber-500/20 text-amber-500' : 'bg-theme-accent/10 text-theme-accent'}`}>
+                          <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-[9px] font-black ${i === 0 ? 'bg-theme-warning/20 text-theme-warning' : 'bg-theme-accent/10 text-theme-accent'}`}>
                             {i + 1}
                           </span>
                           <div className="min-w-0">
@@ -1521,7 +1521,7 @@ const Dashboard = ({
                   <div className="stat-premium !p-4">
                     <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Collection Rate</p>
                     <p className="text-2xl font-black text-theme-primary tabular-nums">{collectionRate}%</p>
-                    <p className="text-2xs text-emerald-500 font-medium mt-1">Overall rate</p>
+                    <p className="text-2xs text-theme-success font-medium mt-1">Overall rate</p>
                   </div>
                   <div className="stat-premium !p-4">
                     <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Top Customer</p>
@@ -1569,7 +1569,7 @@ const Dashboard = ({
                         </div>
                         <div className="flex items-center gap-6">
                           <div className="w-32 h-2 bg-theme-surface rounded-full overflow-hidden hidden sm:block">
-                            <div className={`h-full ${inv.paymentStatus?.toLowerCase() === 'paid' ? 'bg-emerald-500' : 'bg-theme-accent'}`} style={{ width: inv.paymentStatus?.toLowerCase() === 'paid' ? '100%' : inv.amountPaid && inv.grandTotal ? `${Math.min(100, Math.round((inv.amountPaid / inv.grandTotal) * 100))}%` : '65%' }} />
+                            <div className={`h-full ${inv.paymentStatus?.toLowerCase() === 'paid' ? 'bg-theme-success' : 'bg-theme-accent'}`} style={{ width: inv.paymentStatus?.toLowerCase() === 'paid' ? '100%' : inv.amountPaid && inv.grandTotal ? `${Math.min(100, Math.round((inv.amountPaid / inv.grandTotal) * 100))}%` : '65%' }} />
                           </div>
                           <p className="text-sm font-black text-theme-primary w-20 text-right tabular-nums">{formatCurrency(inv.grandTotal || 0)}</p>
                         </div>
@@ -1592,17 +1592,17 @@ const Dashboard = ({
                   <div className="stat-premium !p-4">
                     <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1.5">Collection Rate</p>
                     <p className="text-2xl font-black text-theme-primary mb-1 tabular-nums">{totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0}%</p>
-                    <p className={`text-2xs font-bold ${parseFloat(collectionChange) >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>{parseFloat(collectionChange) >= 0 ? '+' : ''}{collectionChange}pp vs last Week</p>
+                    <p className={`text-2xs font-bold ${parseFloat(collectionChange) >= 0 ? 'text-theme-success' : 'text-theme-danger'}`}>{parseFloat(collectionChange) >= 0 ? '+' : ''}{collectionChange}pp vs last Week</p>
                   </div>
                   <div className="stat-premium !p-4">
                     <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1.5">Overdue Bills</p>
                     <p className="text-2xl font-black text-theme-primary mb-1 tabular-nums">{totalOverdue}</p>
-                    <p className={`text-2xs font-bold ${overdueChange.startsWith('-') ? 'text-emerald-500' : 'text-red-500'}`}>{overdueChange} vs last Week</p>
+                    <p className={`text-2xs font-bold ${overdueChange.startsWith('-') ? 'text-theme-success' : 'text-theme-danger'}`}>{overdueChange} vs last Week</p>
                   </div>
                   <div className="stat-premium !p-4">
                     <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1.5">Total Outstanding</p>
                     <p className="text-2xl font-black text-theme-primary mb-1 tabular-nums">{formatCurrency(totalDue)}</p>
-                    <p className={`text-2xs font-bold ${parseFloat(pendingDueTrend) < 50 ? 'text-emerald-500' : 'text-amber-500'}`}>{pendingDueTrend} of total revenue</p>
+                    <p className={`text-2xs font-bold ${parseFloat(pendingDueTrend) < 50 ? 'text-theme-success' : 'text-theme-warning'}`}>{pendingDueTrend} of total revenue</p>
                   </div>
                 </div>
               </div>
@@ -1628,7 +1628,7 @@ const Dashboard = ({
                   recentPayments.slice(0, 5).map((payment, idx) => (
                     <div key={payment.id || idx} className="flex items-center justify-between p-3 rounded-xl bg-theme-surface hover:bg-theme-accent/5 transition-colors">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-lg bg-theme-success/10 text-theme-success flex items-center justify-center shrink-0">
                           <CheckCircle className="w-4 h-4" />
                         </div>
                         <div className="min-w-0">
@@ -1662,11 +1662,11 @@ const Dashboard = ({
                 </div>
                 <div className="mt-6 grid grid-cols-5 gap-3">
                   {dueNext7Days.map(inv => (
-                    <div key={inv.id} className="p-3 rounded-xl bg-theme-surface border border-amber-500/10 hover:border-amber-500/30 transition-colors">
+                    <div key={inv.id} className="p-3 rounded-xl bg-theme-surface border border-theme-warning/10 hover:border-theme-warning/30 transition-colors">
                       <p className="text-[10px] font-bold text-theme-primary truncate">{inv.customerName || 'Walk-in'}</p>
                       <p className="text-[8px] text-theme-muted font-medium mt-0.5">Due {formatShortDate(inv.dueDate)}</p>
                       <p className="text-xs font-black text-theme-primary mt-1 tabular-nums">{formatCurrency(inv.grandTotal || inv.total || 0)}</p>
-                      <span className={`inline-block mt-1 text-[8px] font-bold px-1.5 py-0.5 rounded-full ${new Date(inv.dueDate) < new Date() ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                      <span className={`inline-block mt-1 text-[8px] font-bold px-1.5 py-0.5 rounded-full ${new Date(inv.dueDate) < new Date() ? 'bg-theme-danger/10 text-theme-danger' : 'bg-theme-warning/10 text-theme-warning'}`}>
                         {new Date(inv.dueDate) < new Date() ? 'Overdue' : 'Upcoming'}
                       </span>
                     </div>
@@ -1684,9 +1684,9 @@ const Dashboard = ({
                 <QuickActions
                   actions={[
                     { id: 'new-bill', label: 'New Bill', icon: Plus, color: 'bg-theme-accent', action: 'onQuickBillOpen' },
-                    { id: 'invoices', label: 'View Bills', icon: FileText, color: 'bg-blue-500', action: 'invoices' },
-                    { id: 'customers', label: 'Customers', icon: Users, color: 'bg-emerald-500', action: 'customers' },
-                    { id: 'collect', label: 'Collect Due', icon: CreditCard, color: 'bg-amber-500', action: 'due-ledger' },
+                    { id: 'invoices', label: 'View Bills', icon: FileText, color: 'bg-theme-accent', action: 'invoices' },
+                    { id: 'customers', label: 'Customers', icon: Users, color: 'bg-theme-success', action: 'customers' },
+                    { id: 'collect', label: 'Collect Due', icon: CreditCard, color: 'bg-theme-warning', action: 'due-ledger' },
                   ]}
                   onAction={(action) => {
                     if (action === 'onQuickBillOpen') onQuickBillOpen();
@@ -1697,12 +1697,12 @@ const Dashboard = ({
                 {/* Sync Status Indicator */}
                 <div className="card-premium flex items-center justify-between p-4">
                   <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${syncStatus === 'Synced' ? 'bg-emerald-500/10 text-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}`}>
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${syncStatus === 'Synced' ? 'bg-theme-success/10 text-theme-success' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-theme-accent/10 text-theme-accent' : 'bg-theme-danger/10 text-theme-danger'}`}>
                       {syncStatus === 'Synced' ? <ShieldCheck className="w-4 h-4" /> : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${syncStatus === 'Synced' ? 'bg-emerald-500' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-pulse' : 'bg-red-500'}`} />
+                        <span className={`w-2 h-2 rounded-full ${syncStatus === 'Synced' ? 'bg-theme-success' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-theme-accent animate-pulse' : 'bg-theme-danger'}`} />
                         <span className="text-xs font-bold text-theme-primary">{syncStatus === 'Synced' ? 'Connected' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'Syncing' : syncStatus === 'Offline' ? 'Disconnected' : 'Warning'}</span>
                       </div>
                       <p className="text-[10px] text-theme-muted font-medium mt-0.5">Last sync: {lastSyncTime ? lastSyncTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '...'}</p>
@@ -1711,7 +1711,7 @@ const Dashboard = ({
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 px-2.5 py-1 bg-theme-surface rounded-lg">
                       <span className="text-[9px] text-theme-muted font-semibold">Data Health</span>
-                      <span className={`text-[9px] font-bold ${syncStatus === 'Synced' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                      <span className={`text-[9px] font-bold ${syncStatus === 'Synced' ? 'text-theme-success' : 'text-theme-warning'}`}>
                         {syncStatus === 'Synced' ? 'Good' : 'Pending'}
                       </span>
                     </div>

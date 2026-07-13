@@ -13,6 +13,9 @@ export const Modal = ({ isOpen, onClose, title, children, className = '' }) => {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
         >
           <motion.div 
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? "modal-title" : undefined}
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
@@ -20,8 +23,8 @@ export const Modal = ({ isOpen, onClose, title, children, className = '' }) => {
           >
             {title && (
               <div className="flex justify-between items-center p-6 border-b border-theme-border-soft bg-theme-surface-elevated shrink-0">
-                <h3 className="text-xl font-black text-theme-primary leading-tight">{title}</h3>
-                <button onClick={onClose} className="p-2 text-theme-muted hover:text-theme-primary bg-theme-surface-hover rounded-xl transition-colors">
+                <h3 id="modal-title" className="text-xl font-black text-theme-primary leading-tight">{title}</h3>
+                <button onClick={onClose} aria-label="Close modal" className="p-2 text-theme-muted hover:text-theme-primary bg-theme-surface-hover rounded-xl transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>

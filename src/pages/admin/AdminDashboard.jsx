@@ -82,17 +82,6 @@ const AdminDashboard = () => {
           });
         });
 
-        // Add cloud backup mock activity (since we don't have global admin audit logs yet)
-        activities.push({
-          id: 'sys_sync',
-          type: 'system',
-          title: 'Daily Cloud Backup Completed',
-          desc: 'System sync successful.',
-          date: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-          icon: CheckCircle2,
-          color: 'theme-success'
-        });
-
         activities.sort((a, b) => b.date - a.date);
 
         setRecentActivities(activities.slice(0, 8));

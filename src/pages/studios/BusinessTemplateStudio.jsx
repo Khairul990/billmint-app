@@ -39,7 +39,7 @@ const BusinessTemplateStudio = ({ settings, onUpdate }) => {
             const isActive = settings?.businessType === preset.id;
             
             return (
-              <div key={preset.id} className={`p-5 rounded-2xl border-2 transition-all relative ${isActive ? 'border-theme-accent bg-theme-surface shadow-xl' : 'border-theme-border-soft bg-theme-main hover:border-gray-500'}`}>
+              <div key={preset.id} className={`p-5 rounded-2xl border-2 transition-all relative ${isActive ? 'border-theme-accent bg-theme-surface shadow-xl' : 'border-theme-border-soft bg-theme-main hover:border-theme-border'}`}>
                 {isActive && <div className="absolute top-3 right-3 bg-theme-accent text-white text-[8px] font-black uppercase px-2 py-1 rounded-md flex items-center gap-1"><Check className="w-3 h-3" /> Active</div>}
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${preset.bg} ${preset.color}`}>
                   <Icon className="w-6 h-6" />

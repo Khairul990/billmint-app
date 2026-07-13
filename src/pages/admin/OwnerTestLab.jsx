@@ -174,7 +174,7 @@ const OwnerTestLab = () => {
     { name: 'Embroidery', icon: '🧵', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
     { name: 'Tailor', icon: '✂️', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
     { name: 'Retail', icon: '🏪', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-    { name: 'Service', icon: '🔧', color: 'bg-slate-500/10 text-slate-400 border-slate-500/20' },
+    { name: 'Service', icon: '🔧', color: 'bg-slate-500/10 text-theme-muted border-slate-500/20' },
     { name: 'Freelancer', icon: '💻', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
   ];
 
@@ -185,7 +185,7 @@ const OwnerTestLab = () => {
           <h2 className="text-2xl font-bold text-white tracking-tight flex items-center">
             <Beaker className="w-6 h-6 mr-3 text-rose-500" /> Owner Test Lab
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Generate sandbox data, mock live links, and manage Demo Sessions safely.</p>
+          <p className="text-theme-muted text-sm mt-1">Generate sandbox data, mock live links, and manage Demo Sessions safely.</p>
         </div>
       </div>
       
@@ -205,9 +205,9 @@ const OwnerTestLab = () => {
       <div className="space-y-6">
         
         {/* Step 1: Persona */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
+        <div className="bg-theme-surface/60 backdrop-blur-md p-6 rounded-3xl border border-theme-border-soft">
           <div className="flex items-center mb-4">
-            <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold mr-3">1</div>
+            <div className="w-8 h-8 rounded-full bg-theme-surface-elevated text-white flex items-center justify-center font-bold mr-3">1</div>
             <h3 className="text-white font-bold text-lg flex items-center">
                Choose Demo Persona
             </h3>
@@ -232,13 +232,13 @@ const OwnerTestLab = () => {
         </div>
 
         {/* Step 2: Generation */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
+        <div className="bg-theme-surface/60 backdrop-blur-md p-6 rounded-3xl border border-theme-border-soft">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold mr-3">2</div>
+              <div className="w-8 h-8 rounded-full bg-theme-surface-elevated text-white flex items-center justify-center font-bold mr-3">2</div>
               <h3 className="text-white font-bold text-lg">Generate Sandbox Data</h3>
             </div>
-            <span className="text-slate-400 text-sm font-bold bg-slate-800 px-3 py-1 rounded-full">
+            <span className="text-theme-muted text-sm font-bold bg-theme-surface-hover px-3 py-1 rounded-full">
               {stats.customers} Cust / {stats.products} Prod / {stats.invoices} Inv
             </span>
           </div>
@@ -257,21 +257,21 @@ const OwnerTestLab = () => {
         {stats.reports && (() => {
           const rep = JSON.parse(localStorage.getItem('billqyro_demo_reports') || '{}');
           return (
-            <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-indigo-500/30">
+            <div className="bg-theme-surface/60 backdrop-blur-md p-6 rounded-3xl border border-indigo-500/30">
               <h3 className="text-indigo-400 font-bold text-lg mb-4 flex items-center">
                 <BarChart2 className="w-5 h-5 mr-2" /> Demo Preview Reports
               </h3>
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-700/50">
-                  <p className="text-slate-400 text-xs font-bold uppercase mb-1">Total Collection</p>
+                <div className="bg-theme-main p-4 rounded-2xl border border-theme-border-soft">
+                  <p className="text-theme-muted text-xs font-bold uppercase mb-1">Total Collection</p>
                   <p className="text-white text-xl font-black">₹{rep.paidAmount?.toLocaleString()}</p>
                 </div>
-                <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-700/50">
+                <div className="bg-theme-main p-4 rounded-2xl border border-theme-border-soft">
                   <p className="text-rose-400 text-xs font-bold uppercase mb-1">Pending Due</p>
                   <p className="text-white text-xl font-black">₹{rep.pendingDue?.toLocaleString()}</p>
                 </div>
-                <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-700/50">
-                  <p className="text-slate-400 text-xs font-bold uppercase mb-1">Total Sales</p>
+                <div className="bg-theme-main p-4 rounded-2xl border border-theme-border-soft">
+                  <p className="text-theme-muted text-xs font-bold uppercase mb-1">Total Sales</p>
                   <p className="text-white text-xl font-black">₹{rep.totalSales?.toLocaleString()}</p>
                 </div>
               </div>
@@ -280,21 +280,21 @@ const OwnerTestLab = () => {
         })()}
 
         {/* Step 3: Video Creator Mode */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
+        <div className="bg-theme-surface/60 backdrop-blur-md p-6 rounded-3xl border border-theme-border-soft">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold mr-3">3</div>
+              <div className="w-8 h-8 rounded-full bg-theme-surface-elevated text-white flex items-center justify-center font-bold mr-3">3</div>
               <h3 className="text-white font-bold text-lg">Video Creator Mode</h3>
             </div>
             {stats.videoCreator && <span className="text-amber-500 text-xs font-bold border border-amber-500/30 bg-amber-500/10 px-2 py-1 rounded-full">Active</span>}
           </div>
-          <p className="ml-11 text-slate-400 text-sm mb-4">
+          <p className="ml-11 text-theme-muted text-sm mb-4">
             Masks your real email, phone, and business logos with generic placeholders for clean YouTube or Instagram recording.
           </p>
           <button 
             onClick={toggleVideoCreatorMode}
             className={`ml-11 w-[calc(100%-2.75rem)] py-3 font-bold rounded-xl flex justify-center items-center transition-all ${
-              stats.videoCreator ? 'bg-amber-500 hover:bg-amber-400 text-amber-950' : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-600'
+              stats.videoCreator ? 'bg-amber-500 hover:bg-amber-400 text-amber-950' : 'bg-theme-surface-hover hover:bg-theme-surface-elevated text-white border border-slate-600'
             }`}
           >
             <Video className="w-4 h-4 mr-2" /> {stats.videoCreator ? 'Disable Video Creator Mode' : 'Enable Video Creator Mode'}
@@ -302,24 +302,24 @@ const OwnerTestLab = () => {
         </div>
 
         {/* Step 4 & 5: Demo Session Control & Guided Journey */}
-        <div className={`backdrop-blur-md p-6 rounded-3xl border transition-all ${demoActive ? 'bg-amber-500/10 border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.1)]' : 'bg-[#1e293b]/60 border-slate-700/50'}`}>
+        <div className={`backdrop-blur-md p-6 rounded-3xl border transition-all ${demoActive ? 'bg-amber-500/10 border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.1)]' : 'bg-theme-surface/60 border-theme-border-soft'}`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${demoActive ? 'bg-amber-500 text-amber-950' : 'bg-slate-700 text-white'}`}>4</div>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${demoActive ? 'bg-amber-500 text-amber-950' : 'bg-theme-surface-elevated text-white'}`}>4</div>
               <h3 className={`${demoActive ? 'text-amber-400' : 'text-white'} font-bold text-lg`}>Guided Demo Journey</h3>
             </div>
             {demoActive && <span className="bg-amber-500 text-amber-950 px-3 py-1 rounded-full text-xs font-bold animate-pulse">LIVE</span>}
           </div>
-          <p className="ml-11 text-slate-400 text-sm mb-4">
+          <p className="ml-11 text-theme-muted text-sm mb-4">
             Follow the guided journey to experience BillQyro from a new user's perspective, or open the workspace directly.
           </p>
 
           {/* Guided Checklist UI */}
-          <div className="ml-11 mb-6 p-4 bg-black/20 rounded-xl border border-slate-700/50">
+          <div className="ml-11 mb-6 p-4 bg-black/20 rounded-xl border border-theme-border-soft">
             <h4 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Journey Flow Preview</h4>
             <div className="flex flex-wrap gap-2">
               {['Login Demo', 'Welcome Board', 'Business Setup', 'Dashboard', 'Create Invoice', 'Download PDF', 'Live Link', 'View Reports'].map((step, idx) => (
-                <div key={idx} className="flex items-center text-xs font-semibold text-slate-300">
+                <div key={idx} className="flex items-center text-xs font-semibold text-theme-secondary">
                   <span className="text-emerald-500 mr-1.5">•</span> {step}
                 </div>
               ))}
@@ -365,14 +365,14 @@ const OwnerTestLab = () => {
         </div>
 
         {/* Step 6: Clear Safety */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
+        <div className="bg-theme-surface/60 backdrop-blur-md p-6 rounded-3xl border border-theme-border-soft">
           <div className="flex items-center mb-4">
-            <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold mr-3">5</div>
+            <div className="w-8 h-8 rounded-full bg-theme-surface-elevated text-white flex items-center justify-center font-bold mr-3">5</div>
             <h3 className="text-white font-bold text-lg">Clear Sandbox Data</h3>
           </div>
           <button 
             onClick={clearTestData}
-            className="ml-11 px-6 py-3 w-[calc(100%-2.75rem)] bg-slate-800 hover:bg-rose-900/40 border border-slate-700 hover:border-rose-500/30 hover:text-rose-400 text-slate-300 font-bold rounded-xl flex justify-center items-center transition-all"
+            className="ml-11 px-6 py-3 w-[calc(100%-2.75rem)] bg-theme-surface-hover hover:bg-rose-900/40 border border-theme-border-soft hover:border-rose-500/30 hover:text-rose-400 text-theme-secondary font-bold rounded-xl flex justify-center items-center transition-all"
           >
             <Trash2 className="w-4 h-4 mr-2" /> Clear All Sandbox Data
           </button>
@@ -380,16 +380,16 @@ const OwnerTestLab = () => {
 
         {/* Demo Payment Proofs Review */}
         {demoPayments.length > 0 && (
-          <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-blue-500/30">
+          <div className="bg-theme-surface/60 backdrop-blur-md p-6 rounded-3xl border border-blue-500/30">
             <h3 className="text-blue-400 font-bold text-lg mb-4 flex items-center">
               <ShieldCheck className="w-5 h-5 mr-2" /> Demo Payment Proofs (Isolated)
             </h3>
             <div className="space-y-3">
               {demoPayments.map((payment) => (
-                <div key={payment.id} className="flex items-center justify-between p-4 bg-[#0f172a] rounded-xl border border-slate-700">
+                <div key={payment.id} className="flex items-center justify-between p-4 bg-theme-main rounded-xl border border-theme-border-soft">
                   <div>
-                    <p className="text-white font-bold">₹{payment.amount} <span className="text-slate-400 text-sm font-normal">via</span> {payment.method}</p>
-                    <p className="text-slate-400 text-xs mt-1">Inv: {payment.invoiceId} • UTR: {payment.utr}</p>
+                    <p className="text-white font-bold">₹{payment.amount} <span className="text-theme-muted text-sm font-normal">via</span> {payment.method}</p>
+                    <p className="text-theme-muted text-xs mt-1">Inv: {payment.invoiceId} • UTR: {payment.utr}</p>
                   </div>
                   {payment.status === 'pending' ? (
                     <div className="flex gap-2">
@@ -408,17 +408,17 @@ const OwnerTestLab = () => {
         )}
 
         {/* Fake Real User Simulation Lab */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-blue-500/30 mt-6">
+        <div className="bg-theme-surface/60 backdrop-blur-md p-6 rounded-3xl border border-blue-500/30 mt-6">
           <h3 className="text-white font-bold text-lg mb-4 flex items-center">
             <Users className="w-5 h-5 mr-2 text-blue-400" /> Fake Real User Simulation Lab
           </h3>
-          <p className="text-slate-400 text-sm mb-4">Login as different user types to safely test the UI flow and feature restrictions.</p>
+          <p className="text-theme-muted text-sm mb-4">Login as different user types to safely test the UI flow and feature restrictions.</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {['Free User', 'Pay Per Bill', 'Premium Monthly', 'Pro Plus Lifetime', 'Trial User', 'Locked User'].map(type => (
               <button 
                 key={type}
                 onClick={() => startFakeUserSimulation(type)}
-                className="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-sm border border-slate-700 transition-colors"
+                className="px-4 py-3 bg-theme-surface-hover hover:bg-theme-surface-elevated text-theme-secondary font-bold rounded-xl text-sm border border-theme-border-soft transition-colors"
               >
                 Login as {type}
               </button>
@@ -427,11 +427,11 @@ const OwnerTestLab = () => {
         </div>
 
         {/* Admin Panel Demo Simulator */}
-        <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-purple-500/30 mt-6">
+        <div className="bg-theme-surface/60 backdrop-blur-md p-6 rounded-3xl border border-purple-500/30 mt-6">
           <h3 className="text-white font-bold text-lg mb-4 flex items-center">
             <BarChart2 className="w-5 h-5 mr-2 text-purple-400" /> Admin Panel Demo Simulator
           </h3>
-          <p className="text-slate-400 text-sm mb-4">Generate 500+ fake users, revenue data, and metrics to see how the Admin Dashboard looks with real usage data.</p>
+          <p className="text-theme-muted text-sm mb-4">Generate 500+ fake users, revenue data, and metrics to see how the Admin Dashboard looks with real usage data.</p>
           
           <button 
             onClick={handleAdminPanelSimulator}
@@ -442,9 +442,9 @@ const OwnerTestLab = () => {
           </button>
           
           {adminSimActive && (
-            <div className="mt-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700">
-              <p className="text-slate-300 text-sm font-bold">✓ 500 fake users created</p>
-              <p className="text-slate-300 text-sm font-bold">✓ ₹1,245,000 fake revenue injected</p>
+            <div className="mt-4 p-4 bg-theme-surface-hover/50 rounded-xl border border-theme-border-soft">
+              <p className="text-theme-secondary text-sm font-bold">✓ 500 fake users created</p>
+              <p className="text-theme-secondary text-sm font-bold">✓ ₹1,245,000 fake revenue injected</p>
               <p className="text-emerald-400 text-sm font-bold mt-2">Go to Admin Dashboard to preview the data!</p>
             </div>
           )}

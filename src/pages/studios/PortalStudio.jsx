@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Globe, Image as ImageIcon, Link, Upload, Trash2, Layout } from 'lucide-react';
+import { Switch } from '../../components/ui/Switch';
 
 const PortalStudio = ({ settings, onUpdate }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -34,7 +35,7 @@ const PortalStudio = ({ settings, onUpdate }) => {
       {/* General Settings */}
       <div className="card-premium p-6">
         <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
             <Globe className="w-5 h-5" />
           </div>
           <div>
@@ -51,7 +52,7 @@ const PortalStudio = ({ settings, onUpdate }) => {
               value={settings?.portalName || `${settings?.businessName || 'Business'} Portal`} 
               onChange={(e) => handleChange('portalName', e.target.value)} 
               placeholder="e.g. Acme Client Portal"
-              className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-cyan-500 transition-colors" 
+              className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-accent transition-colors" 
             />
           </div>
           <div>
@@ -59,7 +60,7 @@ const PortalStudio = ({ settings, onUpdate }) => {
             <select 
               value={settings?.portalThemeOverride || 'inherit'} 
               onChange={(e) => handleChange('portalThemeOverride', e.target.value)} 
-              className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-cyan-500 transition-colors cursor-pointer"
+              className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-accent transition-colors cursor-pointer"
             >
               <option value="inherit">Inherit Main Business Theme</option>
               <option value="light">Always Light Mode</option>
@@ -82,7 +83,7 @@ const PortalStudio = ({ settings, onUpdate }) => {
         </div>
         
         <div 
-          className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all ${isDragging ? 'border-cyan-500 bg-cyan-500/5' : 'border-theme-border-soft bg-theme-surface/50 hover:bg-theme-surface'}`}
+          className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all ${isDragging ? 'border-theme-accent bg-theme-accent/5' : 'border-theme-border-soft bg-theme-surface/50 hover:bg-theme-surface'}`}
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={async (e) => { 
@@ -129,15 +130,10 @@ const PortalStudio = ({ settings, onUpdate }) => {
           ].map(feature => (
             <label key={feature.id} className="flex items-center justify-between p-4 bg-theme-surface/50 border border-theme-border-soft rounded-xl cursor-pointer hover:border-theme-accent transition-colors">
               <span className="text-sm font-bold text-white">{feature.label}</span>
-              <div className="relative inline-block w-10 h-5 align-middle select-none">
-                <input 
-                  type="checkbox" 
-                  checked={settings?.[feature.id] !== false} // Default to true
-                  onChange={(e) => handleChange(feature.id, e.target.checked)}
-                  className="absolute block w-5 h-5 rounded-full bg-white border-2 border-theme-surface appearance-none cursor-pointer transition-transform duration-200 ease-in-out checked:translate-x-5 checked:border-cyan-500 z-10"
-                />
-                <div className={`block w-10 h-5 rounded-full transition-colors duration-200 ease-in-out ${settings?.[feature.id] !== false ? 'bg-cyan-500' : 'bg-slate-700'}`}></div>
-              </div>
+              <Switch 
+                checked={settings?.[feature.id] !== false}
+                onChange={(checked) => handleChange(feature.id, checked)}
+              />
             </label>
           ))}
         </div>

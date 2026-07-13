@@ -1260,7 +1260,7 @@ function App() {
       localStorage.setItem('billqyro_demo_settings', JSON.stringify(payload));
       toast.success('Settings saved to Demo Session');
       window.dispatchEvent(new Event('storage'));
-      return;
+      return true;
     }
     try {
       const updatedSettings = await saveSettings(payload);
@@ -1272,9 +1272,11 @@ function App() {
         page: "settings",
         metadata: { privateDataIncluded: false }
       });
+      return true;
     } catch (error) {
       console.error(error);
       toast.error('Failed to save settings');
+      throw error;
     }
   };
 

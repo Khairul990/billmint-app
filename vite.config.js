@@ -79,7 +79,11 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         inlineDynamicImports: false,
-        hoistTransitiveImports: true
+        hoistTransitiveImports: true,
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'framer-motion'],
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore']
+        }
       }
     },
     chunkSizeWarningLimit: 3000

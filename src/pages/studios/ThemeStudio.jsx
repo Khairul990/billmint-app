@@ -1,5 +1,6 @@
 import React from 'react';
 import { Palette, Sun, Moon, Monitor, PaintBucket, Sparkles } from 'lucide-react';
+import { Switch } from '../../components/ui/Switch';
 import { ALL_THEMES, THEME_INFO } from '../../utils/themeUtils';
 import { applyFullTheme } from '../../hooks/useThemeEngine';
 
@@ -43,12 +44,10 @@ const ThemeStudio = ({ settings, onUpdate }) => {
             <h3 className="text-xs font-bold text-theme-primary">Dark Mode</h3>
             <p className="text-[9px] text-theme-muted">Toggle dark/light appearance across the platform</p>
           </div>
-          <button 
-            onClick={handleToggleDark} 
-            className={`relative w-12 h-6 rounded-full transition-all flex items-center p-1 ${settings?.darkMode ? 'bg-theme-accent' : 'bg-slate-600'}`}
-          >
-            <span className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform ${settings?.darkMode ? 'translate-x-6' : 'translate-x-0'}`} />
-          </button>
+          <Switch 
+            checked={!!settings?.darkMode}
+            onChange={handleToggleDark}
+          />
         </div>
 
         {/* Theme Presets Grid */}
@@ -62,7 +61,7 @@ const ThemeStudio = ({ settings, onUpdate }) => {
                 <button 
                   key={id} 
                   onClick={() => handleChange('themeColor', id)}
-                  className={`relative rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02] ${isActive ? 'border-theme-accent shadow-lg shadow-theme-accent/20 bg-theme-surface' : 'border-theme-border-soft hover:border-gray-500 bg-theme-main'}`}
+                  className={`relative rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02] ${isActive ? 'border-theme-accent shadow-lg shadow-theme-accent/20 bg-theme-surface' : 'border-theme-border-soft hover:border-theme-border bg-theme-main'}`}
                 >
                   <div className="flex gap-1 mb-2">
                     {info?.colors?.slice(0, 3).map((c, i) => <div key={i} className="flex-1 h-3 rounded-sm" style={{ backgroundColor: c }} />)}

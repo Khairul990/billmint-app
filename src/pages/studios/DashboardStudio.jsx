@@ -50,12 +50,12 @@ const DashboardStudio = ({ settings, onUpdate }) => {
                 <div className="flex items-center gap-4">
                   <button 
                     onClick={() => handleToggle(widget.id)}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${widget.visible ? 'bg-theme-warning/20 text-theme-warning' : 'bg-slate-700 text-slate-400'}`}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${widget.visible ? 'bg-theme-warning/20 text-theme-warning' : 'bg-theme-surface-hover text-theme-muted'}`}
                   >
                     {widget.visible ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                   </button>
                   <div>
-                    <span className={`text-sm font-bold block ${widget.visible ? 'text-white' : 'text-slate-500 line-through'}`}>{widget.label}</span>
+                    <span className={`text-sm font-bold block ${widget.visible ? 'text-white' : 'text-theme-muted line-through'}`}>{widget.label}</span>
                     <span className="text-[10px] text-theme-muted">Dashboard Component</span>
                   </div>
                 </div>
@@ -63,14 +63,14 @@ const DashboardStudio = ({ settings, onUpdate }) => {
                   <button 
                     onClick={() => moveWidget(idx, -1)}
                     disabled={idx === 0}
-                    className="p-2 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-2 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-white hover:bg-theme-surface-hover disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <ArrowUp className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={() => moveWidget(idx, 1)}
                     disabled={idx === widgets.length - 1}
-                    className="p-2 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-2 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-white hover:bg-theme-surface-hover disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <ArrowDown className="w-4 h-4" />
                   </button>

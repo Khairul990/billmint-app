@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CheckSquare, Plus, Trash2, GitMerge } from 'lucide-react';
+import { Switch } from '../../components/ui/Switch';
 
 const CONDITIONS = [
   { id: 'invoice_created', label: 'When Invoice is Created' },
@@ -100,15 +101,10 @@ const AutomationStudio = ({ settings, onUpdate }) => {
                 
                 <div className="flex items-center gap-3 shrink-0 w-full md:w-auto mt-4 md:mt-0 justify-between md:justify-end border-t border-theme-border-soft pt-4 md:border-0 md:pt-0">
                   <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-white">
-                    <div className="relative inline-block w-8 h-4 align-middle select-none">
-                      <input 
-                        type="checkbox" 
-                        checked={rule.active}
-                        onChange={(e) => handleUpdateRule(idx, 'active', e.target.checked)}
-                        className="absolute block w-4 h-4 rounded-full bg-white border-2 border-theme-surface appearance-none cursor-pointer transition-transform duration-200 ease-in-out checked:translate-x-4 checked:border-theme-success z-10"
-                      />
-                      <label className={`block overflow-hidden h-5 rounded-full cursor-pointer transition-colors duration-200 ease-in-out ${rule.active ? 'bg-theme-success' : 'bg-slate-700'}`}></label>
-                    </div>
+                    <Switch 
+                      checked={rule.active}
+                      onChange={(checked) => handleUpdateRule(idx, 'active', checked)}
+                    />
                     {rule.active ? 'ON' : 'OFF'}
                   </label>
                   <button onClick={() => handleRemoveRule(idx)} className="p-2 bg-theme-danger/10 text-theme-danger hover:bg-theme-danger/20 rounded-lg">

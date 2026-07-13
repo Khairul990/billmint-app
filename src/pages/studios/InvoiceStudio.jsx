@@ -59,7 +59,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
               className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-3 ${
                 (settings?.invoiceTemplate || 'modern') === tpl 
                   ? 'border-theme-accent bg-theme-accent/10' 
-                  : 'border-theme-border-soft bg-theme-surface hover:border-gray-500'
+                  : 'border-theme-border-soft bg-theme-surface hover:border-theme-border'
               }`}
             >
               <div className="w-full h-24 bg-theme-main rounded border border-theme-border-soft flex flex-col p-2 gap-1 overflow-hidden opacity-80">
@@ -92,24 +92,24 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => handleColumnToggle(col.id)}
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${col.visible ? 'bg-theme-success/20 text-theme-success' : 'bg-slate-700 text-slate-400'}`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${col.visible ? 'bg-theme-success/20 text-theme-success' : 'bg-theme-surface-hover text-theme-muted'}`}
                 >
                   {col.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                 </button>
-                <span className={`text-sm font-bold ${col.visible ? 'text-white' : 'text-slate-500 line-through'}`}>{col.label}</span>
+                <span className={`text-sm font-bold ${col.visible ? 'text-white' : 'text-theme-muted line-through'}`}>{col.label}</span>
               </div>
               <div className="flex items-center gap-1">
                 <button 
                   onClick={() => moveColumn(idx, -1)}
                   disabled={idx === 0}
-                  className="p-1.5 rounded bg-theme-main border border-theme-border-soft text-theme-muted hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-1.5 rounded bg-theme-main border border-theme-border-soft text-theme-muted hover:text-white hover:bg-theme-surface-hover disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ArrowUp className="w-3 h-3" />
                 </button>
                 <button 
                   onClick={() => moveColumn(idx, 1)}
                   disabled={idx === columns.length - 1}
-                  className="p-1.5 rounded bg-theme-main border border-theme-border-soft text-theme-muted hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-1.5 rounded bg-theme-main border border-theme-border-soft text-theme-muted hover:text-white hover:bg-theme-surface-hover disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ArrowDown className="w-3 h-3" />
                 </button>
@@ -157,7 +157,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
 
         <div className="card-premium p-6">
           <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-theme-info/10 text-theme-info flex items-center justify-center">
               <Droplet className="w-5 h-5" />
             </div>
             <div>
@@ -173,7 +173,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
                 value={settings?.watermarkText || ''} 
                 onChange={(e) => handleChange('watermarkText', e.target.value)} 
                 placeholder="e.g. PAID, DRAFT, CONFIDENTIAL"
-                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-sky-500 transition-colors" 
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-info transition-colors" 
               />
             </div>
             <div>
@@ -186,7 +186,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
                 min="5" max="50" step="5"
                 value={settings?.watermarkOpacity || 10} 
                 onChange={(e) => handleChange('watermarkOpacity', parseInt(e.target.value))} 
-                className="w-full accent-sky-500" 
+                className="w-full accent-theme-info" 
               />
             </div>
           </div>

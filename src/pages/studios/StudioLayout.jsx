@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { pageVariants } from '../../utils/animations';
 import { 
@@ -12,21 +12,21 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 
 // Placeholder imports for individual studios (to be created)
-import BusinessStudio from './BusinessStudio';
-import ThemeStudio from './ThemeStudio';
-import InvoiceStudio from './InvoiceStudio';
-import FormBuilder from './FormBuilder';
-import PortalStudio from './PortalStudio';
-import DashboardStudio from './DashboardStudio';
-import AutomationStudio from './AutomationStudio';
-import RoleStudio from './RoleStudio';
-import BusinessTemplateStudio from './BusinessTemplateStudio';
-import DatabaseStudio from './DatabaseStudio';
-import SubscriptionStudio from './SubscriptionStudio';
-import SecurityStudio from './SecurityStudio';
-import BackupStudio from './BackupStudio';
-import LocalizationStudio from './LocalizationStudio';
-import NotificationStudio from './NotificationStudio';
+const BusinessStudio = React.lazy(() => import('./BusinessStudio'));
+const ThemeStudio = React.lazy(() => import('./ThemeStudio'));
+const InvoiceStudio = React.lazy(() => import('./InvoiceStudio'));
+const FormBuilder = React.lazy(() => import('./FormBuilder'));
+const PortalStudio = React.lazy(() => import('./PortalStudio'));
+const DashboardStudio = React.lazy(() => import('./DashboardStudio'));
+const AutomationStudio = React.lazy(() => import('./AutomationStudio'));
+const RoleStudio = React.lazy(() => import('./RoleStudio'));
+const BusinessTemplateStudio = React.lazy(() => import('./BusinessTemplateStudio'));
+const DatabaseStudio = React.lazy(() => import('./DatabaseStudio'));
+const SubscriptionStudio = React.lazy(() => import('./SubscriptionStudio'));
+const SecurityStudio = React.lazy(() => import('./SecurityStudio'));
+const BackupStudio = React.lazy(() => import('./BackupStudio'));
+const LocalizationStudio = React.lazy(() => import('./LocalizationStudio'));
+const NotificationStudio = React.lazy(() => import('./NotificationStudio'));
 
 const STUDIO_ROUTES = [
   { id: 'business', label: 'Business Studio', icon: Building2, desc: 'Brand & Identity' },
@@ -71,10 +71,9 @@ const StudioLayout = ({
     setIsSaving(true);
     try {
       await onSaveSettings(draftSettings);
-      setIsDirty(false);
-      toast.success('Studio configuration saved globally!');
+      reset(draftSettings);
     } catch (e) {
-      toast.error('Failed to save configuration.');
+      // App.jsx handles the toast error
     } finally {
       setIsSaving(false);
     }
@@ -212,20 +211,22 @@ const StudioLayout = ({
               className="max-w-6xl mx-auto w-full"
             >
               <div className="w-full bg-theme-surface border border-theme-border-soft shadow-glass-lg rounded-3xl p-2 sm:p-8 relative overflow-hidden">
-                {activeStudio === 'business' && <BusinessStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'theme' && <ThemeStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'invoice' && <InvoiceStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'form' && <FormBuilder settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'portal' && <PortalStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'dashboard' && <DashboardStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'automation' && <AutomationStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'roles' && <RoleStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'subscription' && <SubscriptionStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'security' && <SecurityStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'backup' && <BackupStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'localization' && <LocalizationStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'notification' && <NotificationStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                {activeStudio === 'database' && <DatabaseStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                <Suspense fallback={<div className="p-12 text-center text-theme-muted"><div className="animate-spin w-8 h-8 border-2 border-theme-accent border-t-transparent rounded-full mx-auto mb-4"></div>Loading Studio...</div>}>
+                  {activeStudio === 'business' && <BusinessStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'theme' && <ThemeStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'invoice' && <InvoiceStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'form' && <FormBuilder settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'portal' && <PortalStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'dashboard' && <DashboardStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'automation' && <AutomationStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'roles' && <RoleStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'subscription' && <SubscriptionStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'security' && <SecurityStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'backup' && <BackupStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'localization' && <LocalizationStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'notification' && <NotificationStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'database' && <DatabaseStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                </Suspense>
                 
                 {/* Fallback for unknown studio */}
                 {![...STUDIO_ROUTES.map(r => r.id)].includes(activeStudio) && (
