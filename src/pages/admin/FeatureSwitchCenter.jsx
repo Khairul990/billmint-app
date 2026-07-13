@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ToggleRight, AlertTriangle, Users } from 'lucide-react';
+import { ToggleRight, AlertTriangle, Users, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { getGlobalAdminSettings, updateGlobalAdminSettings } from '../../services/dbEngine';
 
 const FeatureSwitchCenter = () => {
   const [features, setFeatures] = useState({
@@ -12,16 +13,41 @@ const FeatureSwitchCenter = () => {
     premiumFeatures: true,
     reports: true,
     dueLedger: true,
-    demoMode: false
+    demoMode: false,
+    customerPortal: true,
+    studentPortal: true,
+    offlineMode: true,
+    qrCode: true
   });
+  const [loading, setLoading] = useState(true);
 
-  const handleToggle = (key) => {
-    setFeatures(prev => {
-      const next = { ...prev, [key]: !prev[key] };
-      // Real app would sync to Firestore here
-      toast.success(`Feature ${key} ${next[key] ? 'enabled' : 'disabled'}`);
-      return next;
-    });
+  useEffect(() => {
+    const fetchFeatures = async () => {
+      try {
+        const settings = await getGlobalAdminSettings();
+        if (settings && settings.features) {
+          setFeatures(prev => ({ ...prev, ...settings.features }));
+        }
+      } catch (e) {
+        console.error('Failed to load global features', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeatures();
+  }, []);
+
+  const handleToggle = async (key) => {
+    const nextState = { ...features, [key]: !features[key] };
+    setFeatures(nextState);
+    toast.success(`Feature ${key} ${nextState[key] ? 'enabled' : 'disabled'}`);
+    
+    // Save to Firestore
+    try {
+      await updateGlobalAdminSettings({ features: nextState });
+    } catch (e) {
+      toast.error('Failed to sync global settings to cloud.');
+    }
   };
 
   return (
@@ -44,19 +70,25 @@ const FeatureSwitchCenter = () => {
       </div>
 
       <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Object.entries(features).map(([key, value]) => (
-            <div key={key} className="flex items-center justify-between p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
-              <span className="text-sm font-bold text-slate-300 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-              <button 
-                onClick={() => handleToggle(key)}
-                className={`w-12 h-6 rounded-full transition-colors relative ${value ? 'bg-indigo-500' : 'bg-slate-700'}`}
-              >
-                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${value ? 'translate-x-7' : 'translate-x-1'}`} />
-              </button>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center p-8">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Object.entries(features).map(([key, value]) => (
+              <div key={key} className="flex items-center justify-between p-4 bg-slate-800/50 border border-slate-700 rounded-xl hover:bg-slate-700/50 transition-colors">
+                <span className="text-sm font-bold text-slate-300 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                <button 
+                  onClick={() => handleToggle(key)}
+                  className={`w-12 h-6 rounded-full transition-colors relative ${value ? 'bg-indigo-500' : 'bg-slate-700'}`}
+                >
+                  <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${value ? 'translate-x-7' : 'translate-x-1'}`} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </motion.div>
   );

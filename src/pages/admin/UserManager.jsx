@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Shield, UserX, CheckCircle, Ban, Users, Inbox, Loader2, RefreshCw, ChevronLeft, ChevronRight, Eye, Trash2, RotateCcw, Smartphone, Clock, Cloud, MonitorSmartphone, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAdminUsersList, getAdminPlatformRevenueStates, updateUserBlockStatus } from '../../services/dbEngine';
+import { getAdminUsersList, getAdminPlatformRevenueStates, updateUserBlockStatus, deleteEnterpriseUser, resetEnterpriseWorkspace } from '../../services/dbEngine';
 import { toast } from 'react-hot-toast';
 import { pageVariants } from '../../utils/animations';
 import { TableRowSkeleton } from '../../components/PremiumSkeleton';
@@ -66,12 +66,34 @@ const UserManager = () => {
     }
   };
 
-  const handleDeleteUser = () => {
-    toast.error('Enterprise deletion requires owner PIN.');
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return;
+    if (window.confirm(`WARNING! This will permanently delete ${selectedUser.businessName}'s entire account and all their subcollections. Are you absolutely sure?`)) {
+      setProcessingId(selectedUser.userId);
+      const success = await deleteEnterpriseUser(selectedUser.userId);
+      if (success) {
+        toast.success('Enterprise account completely deleted.');
+        setSelectedUser(null);
+        fetchUsersData();
+      } else {
+        toast.error('Failed to delete account.');
+      }
+      setProcessingId(null);
+    }
   };
 
-  const handleResetWorkspace = () => {
-    toast.success('Workspace reset queued.');
+  const handleResetWorkspace = async () => {
+    if (!selectedUser) return;
+    if (window.confirm(`This will delete all invoices, customers, and products for ${selectedUser.businessName}, but keep their settings. Proceed?`)) {
+      setProcessingId(selectedUser.userId);
+      const success = await resetEnterpriseWorkspace(selectedUser.userId);
+      if (success) {
+        toast.success('Workspace data reset successfully.');
+      } else {
+        toast.error('Failed to reset workspace.');
+      }
+      setProcessingId(null);
+    }
   };
 
   const getRevenueInfo = (userId) => {
@@ -377,8 +399,8 @@ const UserManager = () => {
                         <Ban className="w-4 h-4" /> Suspend User
                       </button>
                     )}
-                    <button onClick={handleDeleteUser} className="btn-premium px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500/20 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors ml-auto">
-                      <Trash2 className="w-4 h-4" /> Delete Account
+                    <button onClick={handleDeleteUser} disabled={processingId === selectedUser.userId} className="btn-premium px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500/20 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors ml-auto">
+                      {processingId === selectedUser.userId ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} Delete Account
                     </button>
                   </div>
                 </div>
