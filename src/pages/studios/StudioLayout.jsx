@@ -17,17 +17,19 @@ import DashboardStudio from './DashboardStudio';
 import AutomationStudio from './AutomationStudio';
 import RoleStudio from './RoleStudio';
 import BusinessTemplateStudio from './BusinessTemplateStudio';
+import DatabaseStudio from './DatabaseStudio';
 
 const STUDIO_ROUTES = [
   { id: 'business', label: 'Business Studio', icon: Building2, desc: 'Brand & Identity' },
-  { id: 'theme', label: 'Theme Studio', icon: Palette, desc: 'Colors & Styles' },
-  { id: 'invoice', label: 'Invoice Studio', icon: FileText, desc: 'Templates & Layouts' },
-  { id: 'form', label: 'Form Builder', icon: FormInput, desc: 'Custom Fields' },
-  { id: 'portal', label: 'Portal Studio', icon: Globe, desc: 'Client Portals' },
-  { id: 'dashboard', label: 'Dashboard Studio', icon: LayoutDashboard, desc: 'Widgets & Metrics' },
-  { id: 'automation', label: 'Automation Studio', icon: CheckSquare, desc: 'Rules & Logic' },
-  { id: 'roles', label: 'Role Studio', icon: Shield, desc: 'Permissions' },
-  { id: 'templates', label: 'Template Studio', icon: Users, desc: 'Business Presets' },
+  { id: 'theme', label: 'Theme Studio', icon: Palette, desc: 'Colors & UI' },
+  { id: 'invoice', label: 'Invoice Studio', icon: FileText, desc: 'Templates & Columns' },
+  { id: 'form', label: 'Form Builder', icon: LayoutTemplate, desc: 'Custom Fields' },
+  { id: 'portal', label: 'Portal Studio', icon: Globe, desc: 'Client Experience' },
+  { id: 'dashboard', label: 'Dashboard Studio', icon: LayoutDashboard, desc: 'Widgets & Layout' },
+  { id: 'automation', label: 'Automation Studio', icon: Zap, desc: 'If-This-Then-That Logic' },
+  { id: 'roles', label: 'Role Studio', icon: Shield, desc: 'Permissions & Access' },
+  { id: 'templates', label: 'Template Studio', icon: Copy, desc: 'Business Presets' },
+  { id: 'database', label: 'Database Studio', icon: Database, desc: 'Custom Collections' }
 ];
 
 const StudioLayout = ({
@@ -172,6 +174,7 @@ const StudioLayout = ({
                 {activeStudio === 'automation' && <AutomationStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
                 {activeStudio === 'roles' && <RoleStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
                 {activeStudio === 'templates' && <BusinessTemplateStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                {activeStudio === 'database' && <DatabaseStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
                 
                 {/* Fallback for unknown studio */}
                 {![...STUDIO_ROUTES.map(r => r.id)].includes(activeStudio) && (

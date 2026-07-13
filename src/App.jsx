@@ -296,6 +296,15 @@ function App() {
       page: currentTab
     });
   }, [currentTab]);
+
+  // PHASE 2 AUTH STABILIZATION: Prevent existing users from being stuck in Onboarding loop due to slow cloud sync
+  useEffect(() => {
+    if (currentTab === 'onboarding' && activeSettings?.setupCompleted) {
+      console.log('[AUTH FIX] Detected completed setup during onboarding. Redirecting to Dashboard to prevent loop.');
+      setCurrentTab('dashboard');
+    }
+  }, [currentTab, activeSettings]);
+
   const [userRole, setUserRole] = useState(() => localStorage.getItem('billqyro_user_role') || 'user');
 
   // Capacitor Android Back Button Handler
