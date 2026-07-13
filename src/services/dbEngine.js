@@ -2811,13 +2811,26 @@ export const syncFromFirestore = async (force = false) => {
     }
 
     // 2. Fetch all cloud data first (from SERVER explicitly) to prevent stale cache serving
-    const settingsDoc = await getDocFromServer(doc(db, 'settings', userId));
-    const customersSnap = await getDocsFromServer(collection(db, 'customers', userId, 'items'));
-    const invoicesSnap = await getDocsFromServer(collection(db, 'invoices', userId, 'items'));
-    const productsSnap = await getDocsFromServer(collection(db, 'products', userId, 'items'));
-    const expensesSnap = await getDocsFromServer(collection(db, 'expenses', userId, 'items'));
-    const studentsSnap = await getDocsFromServer(collection(db, 'students', userId, 'items'));
-    const subDoc = await getDocFromServer(doc(db, 'subscription', userId));
+    // Use parallel fetching with safe fallbacks to prevent permission errors from crashing the sync
+    const safeFetch = async (promise, fallback) => {
+      try { return await promise; }
+      catch (e) { console.warn('Sync fetch error:', e.message || e); return fallback; }
+    };
+
+    const emptyDoc = { exists: () => false, data: () => null };
+    const emptySnap = { forEach: () => {} };
+
+    const [
+      settingsDoc, customersSnap, invoicesSnap, productsSnap, expensesSnap, studentsSnap, subDoc
+    ] = await Promise.all([
+      safeFetch(getDocFromServer(doc(db, 'settings', userId)), emptyDoc),
+      safeFetch(getDocsFromServer(collection(db, 'customers', userId, 'items')), emptySnap),
+      safeFetch(getDocsFromServer(collection(db, 'invoices', userId, 'items')), emptySnap),
+      safeFetch(getDocsFromServer(collection(db, 'products', userId, 'items')), emptySnap),
+      safeFetch(getDocsFromServer(collection(db, 'expenses', userId, 'items')), emptySnap),
+      safeFetch(getDocsFromServer(collection(db, 'students', userId, 'items')), emptySnap),
+      safeFetch(getDocFromServer(doc(db, 'subscription', userId)), emptyDoc)
+    ]);
 
     // 3. Clear current scoped device cache before applying cloud data
     // This prevents old device data from lingering and mixing with Cloud truth

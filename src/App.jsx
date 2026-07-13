@@ -769,11 +769,11 @@ function App() {
         const updated = { ...settings, setupCompleted: true };
         saveSettings(updated);
         setSettings(updated);
-        if (currentTab === 'onboarding') {
+        if (currentTab === 'onboarding' || currentTab === 'landing') {
           setCurrentTab('dashboard');
         }
       } else if (settings.setupCompleted) {
-        if (currentTab === 'onboarding') {
+        if (currentTab === 'onboarding' || currentTab === 'landing') {
           setCurrentTab('dashboard');
         }
       }
