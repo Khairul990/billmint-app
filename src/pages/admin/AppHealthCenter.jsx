@@ -1,7 +1,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
-import { getAdminUsersList, getAdminTotalStats } from '../../services/dbEngine';
+import { adminEngine } from '../../services/adminEngine';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 
@@ -19,8 +19,8 @@ const AppHealthCenter = () => {
   useEffect(() => {
     const fetchHealth = async () => {
       try {
-        const users = await getAdminUsersList();
-        const totals = await getAdminTotalStats();
+        const users = await adminEngine.getUsersList();
+        const totals = await adminEngine.getTotalStats();
         
         const totalWorkspaces = users.reduce((acc, u) => acc + (u.workspacesCount || 1), 0);
         const activeUsers = users.filter(u => !u.blocked).length;

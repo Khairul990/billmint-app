@@ -2,7 +2,7 @@ import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { ToggleRight, AlertTriangle, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { getGlobalAdminSettings, updateGlobalAdminSettings } from '../../services/dbEngine';
+import { adminEngine } from '../../services/adminEngine';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Switch } from '../../components/ui/Switch';
 
@@ -26,7 +26,7 @@ const FeatureSwitchCenter = () => {
   useEffect(() => {
     const fetchFeatures = async () => {
       try {
-        const settings = await getGlobalAdminSettings();
+        const settings = await adminEngine.getGlobalSettings();
         if (settings && settings.features) {
           setFeatures(prev => ({ ...prev, ...settings.features }));
         }
@@ -45,7 +45,7 @@ const FeatureSwitchCenter = () => {
     toast.success(`Feature ${key} ${nextState[key] ? 'enabled' : 'disabled'}`);
     
     try {
-      await updateGlobalAdminSettings({ features: nextState });
+      await adminEngine.updateGlobalSettings({ features: nextState });
     } catch (e) {
       toast.error('Failed to sync global settings to cloud.');
     }

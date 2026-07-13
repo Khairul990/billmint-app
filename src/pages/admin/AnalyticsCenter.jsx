@@ -2,7 +2,7 @@ import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart3, TrendingUp, Users, CreditCard, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { getAdminUsersList, getAdminPlatformRevenueStates } from '../../services/dbEngine';
+import { adminEngine } from '../../services/adminEngine';
 
 const SimpleBarChart = ({ data, color, height = "200px" }) => {
   const max = Math.max(...data.map(d => d.value), 1);
@@ -53,8 +53,8 @@ const AnalyticsCenter = () => {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const users = await getAdminUsersList();
-        const revenue = await getAdminPlatformRevenueStates();
+        const users = await adminEngine.getUsersList();
+        const revenue = await adminEngine.getRevenueStates();
         
         let totalRev = 0;
         revenue.forEach(r => totalRev += (r.totalBillsCreated || 0) * 1); // Mock calculation

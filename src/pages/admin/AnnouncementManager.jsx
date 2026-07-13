@@ -2,7 +2,7 @@ import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { Megaphone, Plus, AlertTriangle, Info, ShieldAlert, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { getAdminAllAnnouncements, createAnnouncement, toggleAnnouncementActive } from '../../services/dbEngine';
+import { adminEngine } from '../../services/adminEngine';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -26,7 +26,7 @@ const AnnouncementManager = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const list = await getAdminAllAnnouncements();
+      const list = await adminEngine.getAnnouncements();
       setAnnouncements(list);
     } catch (e) {
       toast.error('Failed to load announcements');
@@ -46,7 +46,7 @@ const AnnouncementManager = () => {
     }
     
     try {
-      const ann = await createAnnouncement(
+      const ann = await adminEngine.createAnnouncement(
         formData.title,
         formData.message,
         formData.type,
@@ -74,7 +74,7 @@ const AnnouncementManager = () => {
 
   const handleToggleActive = async (id, currentStatus) => {
     try {
-      await toggleAnnouncementActive(id, !currentStatus);
+      await adminEngine.toggleAnnouncement(id, !currentStatus);
       toast.success(`Announcement ${!currentStatus ? 'activated' : 'deactivated'}`);
       loadData();
     } catch (e) {

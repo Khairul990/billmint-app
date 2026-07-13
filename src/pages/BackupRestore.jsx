@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { exportBackup } from '../services/dbEngine';
+import { backupEngine } from '../services/backupEngine';
 import { pageVariants, staggerContainer, staggerItem, modalOverlayVariants, modalContentVariants } from '../utils/animations';
 import { CardSkeleton } from '../components/PremiumSkeleton';
 import PremiumEmptyState from '../components/PremiumEmptyState';

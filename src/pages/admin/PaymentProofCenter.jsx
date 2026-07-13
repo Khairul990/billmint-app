@@ -1,7 +1,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { CreditCard, CheckCircle, XCircle, Clock, ShieldCheck, Image as ImageIcon, Search, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getAdminAllPaymentProofs, updatePlatformPaymentProofStatus } from '../../services/dbEngine';
+import { adminEngine } from '../../services/adminEngine';
 import { toast } from 'react-hot-toast';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -20,7 +20,7 @@ const PaymentProofCenter = () => {
 
   const fetchProofs = async () => {
     try {
-      const allProofs = await getAdminAllPaymentProofs();
+      const allProofs = await adminEngine.getPaymentProofs();
       setProofs(allProofs);
     } catch (e) {
       console.error(e);
@@ -41,7 +41,7 @@ const PaymentProofCenter = () => {
     setProcessingId(proof.id);
     try {
       const note = getAdminNote(proof.id);
-      const success = await updatePlatformPaymentProofStatus(proof.id, status, note, []);
+      const success = await adminEngine.updatePaymentProofStatus(proof.id, status, note, []);
       if (success) {
         toast.success(`Payment proof successfully ${status.toLowerCase()}!`);
         setSelectedProof(null);

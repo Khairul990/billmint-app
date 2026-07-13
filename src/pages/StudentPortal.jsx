@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, BookOpen, GraduationCap, Calendar, FileText, Bell, CheckCircle, ShieldCheck, Download, User, Wallet } from 'lucide-react';
 import { auth } from '../services/firebaseConfig';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { getStudentInvoices, getStudentProfile } from '../services/dbEngine';
+import { invoiceEngine } from '../services/invoiceEngine';
 import StudentLogin from '../components/portal/StudentLogin';
 import ClassicLoader from '../components/ClassicLoader';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -36,8 +36,8 @@ export default function StudentPortal({ studentId }) {
   const loadPortalData = async () => {
     setLoadingData(true);
     try {
-      const fetchedInvoices = await getStudentInvoices(studentId, user.email);
-      const fetchedProfile = await getStudentProfile(studentId, user.email);
+      const fetchedInvoices = await invoiceEngine.getStudentInvoices(studentId, user.email);
+      const fetchedProfile = await invoiceEngine.getStudentProfile(studentId, user.email);
       
       setInvoices(fetchedInvoices);
       setProfile(fetchedProfile || { name: 'Student', email: user.email, id: studentId });

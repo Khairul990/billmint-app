@@ -1,26 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Globe, ShieldAlert, Zap, Sliders, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getGlobalRevenueSettings, saveGlobalRevenueSettings } from '../../services/dbEngine';
+import { adminEngine } from '../../services/adminEngine';
 import { toast } from 'react-hot-toast';
 import { pageVariants } from '../../utils/animations';
 import { CardSkeleton } from '../../components/PremiumSkeleton';
-
-const ToggleSwitch = ({ label, enabled, setEnabled }) => (
-  <label className="flex items-center justify-between cursor-pointer group">
-    <span className="text-sm font-semibold text-slate-300 group-hover:text-white transition-colors">{label}</span>
-    <div className="relative">
-      <input 
-        type="checkbox" 
-        className="sr-only" 
-        checked={enabled}
-        onChange={() => setEnabled(!enabled)} 
-      />
-      <div className={`block w-12 h-6 rounded-full transition-colors ${enabled ? 'bg-emerald-500' : 'bg-slate-700'}`}></div>
-      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${enabled ? 'transform translate-x-6' : ''}`}></div>
-    </div>
-  </label>
-);
+import { Switch } from '../../components/ui/Switch';
+import { Button } from '../../components/ui/Button';
 
 const GlobalSettings = () => {
   const [loading, setLoading] = useState(true);
@@ -39,7 +25,7 @@ const GlobalSettings = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const s = await getGlobalRevenueSettings();
+        const s = await adminEngine.getRevenueSettings();
         setPremiumModeEnabled(s.premiumModeEnabled ?? true);
         setPayPerBillEnabled(s.payPerBillEnabled ?? true);
         setFreeBillLimit(s.freeBillLimit ?? 10);
@@ -78,7 +64,7 @@ const GlobalSettings = () => {
     };
 
     try {
-      const success = await saveGlobalRevenueSettings(payload);
+      const success = await adminEngine.saveRevenueSettings(payload);
       if (success) {
         toast.success('Global revenue settings saved successfully!');
       } else {
@@ -97,8 +83,8 @@ const GlobalSettings = () => {
       <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-6">
         <div className="section-header">
           <div>
-            <h2 className="section-header-title flex items-center">
-              <Sliders className="w-6 h-6 mr-3 text-emerald-400" /> Revenue Settings (Owner)
+            <h2 className="text-2xl font-black text-theme-primary flex items-center tracking-tight">
+              <Sliders className="w-6 h-6 mr-3 text-theme-accent" /> Revenue Settings (Owner)
             </h2>
             <p className="section-header-subtitle">Loading configuration...</p>
           </div>
@@ -121,146 +107,146 @@ const GlobalSettings = () => {
       animate="animate"
       className="space-y-6"
     >
-      <div className="section-header flex-col md:flex-row gap-4 mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h2 className="section-header-title flex items-center">
-            <Sliders className="w-6 h-6 mr-3 text-emerald-400" /> Revenue Settings (Owner)
+          <h2 className="text-3xl font-black text-theme-primary flex items-center tracking-tight">
+            <Sliders className="w-8 h-8 mr-3 text-theme-accent" /> Revenue Settings (Owner)
           </h2>
-          <p className="section-header-subtitle">Configure global monetization parameters and limits.</p>
+          <p className="text-sm text-theme-secondary mt-1">Configure global monetization parameters and limits.</p>
         </div>
-        <button 
+        <Button 
           onClick={handleSave}
-          className="btn-premium px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-emerald-500/20 cursor-pointer"
+          disabled={loading}
+          variant="primary"
+          className="shadow-premium"
         >
-          Save Changes
-        </button>
+          {loading ? 'Saving...' : 'Save Changes'}
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Core Settings */}
-        <div className="card-premium bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 space-y-6">
-          <div className="section-header border-b border-slate-700/50 pb-4 mb-0">
-            <h3 className="section-header-title flex items-center">
-              <Globe className="w-5 h-5 mr-2 text-blue-400" /> Monetization Modes
+        <div className="bg-theme-surface-elevated p-6 rounded-2xl border border-theme-border-soft space-y-6">
+          <div className="border-b border-theme-border-soft pb-4 mb-0">
+            <h3 className="text-lg font-bold text-theme-primary flex items-center">
+              <Globe className="w-5 h-5 mr-2 text-theme-accent" /> Monetization Modes
             </h3>
           </div>
-          <ToggleSwitch 
-            label="Enable Premium Subscriptions" 
-            enabled={premiumModeEnabled} 
-            setEnabled={setPremiumModeEnabled} 
-          />
-          <ToggleSwitch 
-            label="Enable Pay-Per-Bill Model" 
-            enabled={payPerBillEnabled} 
-            setEnabled={setPayPerBillEnabled} 
-          />
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-theme-secondary">Enable Premium Subscriptions</span>
+            <Switch checked={premiumModeEnabled} onChange={(checked) => setPremiumModeEnabled(checked)} />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-theme-secondary">Enable Pay-Per-Bill Model</span>
+            <Switch checked={payPerBillEnabled} onChange={(checked) => setPayPerBillEnabled(checked)} />
+          </div>
         </div>
 
         {/* UPI Payments */}
-        <div className="card-premium bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 space-y-5">
-          <div className="section-header border-b border-slate-700/50 pb-4 mb-0">
-            <h3 className="section-header-title flex items-center">
-              <CreditCard className="w-5 h-5 mr-2 text-purple-400" /> UPI Payment Details
+        <div className="bg-theme-surface-elevated p-6 rounded-2xl border border-theme-border-soft space-y-5">
+          <div className="border-b border-theme-border-soft pb-4 mb-0">
+            <h3 className="text-lg font-bold text-theme-primary flex items-center">
+              <CreditCard className="w-5 h-5 mr-2 text-theme-accent" /> UPI Payment Details
             </h3>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Platform UPI ID</label>
+            <label className="block text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Platform UPI ID</label>
             <input 
               type="text"
               value={upiId}
               onChange={(e) => setUpiId(e.target.value)}
-              className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono"
+              className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all font-mono text-sm"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Payee Name</label>
+            <label className="block text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Payee Name</label>
             <input 
               type="text"
               value={payeeName}
               onChange={(e) => setPayeeName(e.target.value)}
-              className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+              className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all text-sm"
             />
           </div>
         </div>
 
         {/* Business Limits */}
-        <div className="card-premium bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 lg:col-span-2 space-y-6">
-          <div className="section-header border-b border-slate-700/50 pb-4 mb-0">
-            <h3 className="section-header-title flex items-center">
-              <Zap className="w-5 h-5 mr-2 text-amber-400" /> Pricing & Lock Parameters
+        <div className="bg-theme-surface-elevated p-6 rounded-2xl border border-theme-border-soft lg:col-span-2 space-y-6">
+          <div className="border-b border-theme-border-soft pb-4 mb-0">
+            <h3 className="text-lg font-bold text-theme-primary flex items-center">
+              <Zap className="w-5 h-5 mr-2 text-theme-warning" /> Pricing & Lock Parameters
             </h3>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Free Bill Limit</label>
+              <label className="block text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Free Bill Limit</label>
               <input 
                 type="number" 
                 value={freeBillLimit}
                 onChange={(e) => setFreeBillLimit(e.target.value)}
-                className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning transition-all text-sm"
               />
             </div>
             
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Flat Charge Per Bill (₹)</label>
+              <label className="block text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Flat Charge Per Bill (₹)</label>
               <input 
                 type="number" 
                 value={chargePerBill}
                 onChange={(e) => setChargePerBill(e.target.value)}
-                className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning transition-all text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Percentage Charge (%)</label>
+              <label className="block text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Percentage Charge (%)</label>
               <input 
                 type="number" 
                 value={percentageChargeSetting}
                 onChange={(e) => setPercentageChargeSetting(e.target.value)}
-                placeholder="e.g. 1% of bill value (Overrides flat charge)"
-                className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+                placeholder="e.g. 1% of bill value"
+                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning transition-all text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Grace Bills Count</label>
+              <label className="block text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Grace Bills Count</label>
               <input 
                 type="number" 
                 value={monthlyGraceLimit}
                 onChange={(e) => setMonthlyGraceLimit(e.target.value)}
-                className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning transition-all text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Max Pending Dues (₹)</label>
+              <label className="block text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Max Pending Dues (₹)</label>
               <input 
                 type="number" 
                 value={maxPendingDue}
                 onChange={(e) => setMaxPendingDue(e.target.value)}
-                className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning transition-all text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Max Unpaid Bills Count</label>
+              <label className="block text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Max Unpaid Bills Count</label>
               <input 
                 type="number" 
                 value={maxUnpaidBillCount}
                 onChange={(e) => setMaxUnpaidBillCount(e.target.value)}
-                className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 transition-all"
+                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning transition-all text-sm"
               />
             </div>
           </div>
 
           <div className="pt-2">
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Lock Behavior After Limit Exceeded</label>
+            <label className="block text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Lock Behavior After Limit Exceeded</label>
             <select
               value={lockBehavior}
               onChange={(e) => setLockBehavior(e.target.value)}
-              className="input-premium w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer"
+              className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning cursor-pointer text-sm"
             >
               <option value="bill_creation">Lock New Bill Creation Only</option>
               <option value="none">No Lock (Warning Only)</option>
@@ -269,11 +255,11 @@ const GlobalSettings = () => {
         </div>
 
         {/* Info Control */}
-        <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-6 lg:col-span-2 flex items-start space-x-4">
-          <ShieldAlert className="w-6 h-6 text-rose-400 shrink-0 mt-0.5" />
+        <div className="bg-theme-danger/5 border border-theme-danger/20 rounded-2xl p-6 lg:col-span-2 flex items-start space-x-4">
+          <ShieldAlert className="w-6 h-6 text-theme-danger shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-white font-bold text-sm">Security & Enforcement Note</h4>
-            <p className="text-slate-400 text-xs mt-1 leading-relaxed">
+            <h4 className="text-theme-danger font-bold text-sm">Security & Enforcement Note</h4>
+            <p className="text-theme-secondary text-xs mt-1 leading-relaxed">
               When lock enforcement is active, users exceeding their free bill limit, unpaid count, or max dues threshold will be restricted from saving new invoices. However, login, existing invoice viewing, downloads, and backups will remain fully operational.
             </p>
           </div>

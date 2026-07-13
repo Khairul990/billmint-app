@@ -5,7 +5,7 @@ import {
   ShieldAlert, CheckCircle2, TrendingUp, AlertTriangle, Layers, Building2, 
   UserPlus, FileWarning 
 } from 'lucide-react';
-import { getAdminUsersList, getAdminAllPaymentProofs, getAdminPlatformRevenueStates, getAdminTotalStats } from '../../services/dbEngine';
+import { adminEngine } from '../../services/adminEngine';
 import { pageVariants } from '../../utils/animations';
 import { KPISkeleton } from '../../components/PremiumSkeleton';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
@@ -28,10 +28,10 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const users = await getAdminUsersList();
-        const proofs = await getAdminAllPaymentProofs();
-        const revs = await getAdminPlatformRevenueStates();
-        const extraStats = await getAdminTotalStats();
+        const users = await adminEngine.getUsersList();
+        const proofs = await adminEngine.getPaymentProofs();
+        const revs = await adminEngine.getRevenueStates();
+        const extraStats = await adminEngine.getTotalStats();
 
         const totalUsers = users.length;
         const premiumUsers = users.filter(u => u.planStatus === 'premium').length;

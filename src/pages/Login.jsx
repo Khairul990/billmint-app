@@ -26,9 +26,8 @@ import {
 } from "lucide-react";
 import { ShimmerButton } from '../components/magicui/shimmer-button';
 
-import { auth, firebaseReady, db } from '../services/firebaseConfig';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { authEngine } from '../services/authEngine';
+import { firebaseReady } from '../services/firebaseConfig';
 
 import Logo from '../components/Logo';
 
@@ -840,40 +839,12 @@ function LoginPanel({ onLoginSuccess }) {
     }
     
     try {
-      if (firebaseReady && auth) {
+      if (firebaseReady) {
         if (isLoginMode) {
-          await signInWithEmailAndPassword(auth, email.trim(), password.trim());
+          await authEngine.signIn(email.trim(), password.trim());
           onLoginSuccess();
         } else {
-          const result = await createUserWithEmailAndPassword(auth, email.trim(), password.trim());
-          const user = result.user;
-          // Create Firestore documents using standard Date fallback instead of serverTimestamp for simplicity
-          const userDocRef = doc(db, 'usersList', user.uid);
-          await setDoc(userDocRef, {
-            userId: user.uid,
-            email: user.email,
-            createdAt: new Date().toISOString(),
-            role: 'user'
-          }, { merge: true });
-          
-          const settingsRef = doc(db, 'settings', user.uid);
-          const settingsSnap = await getDoc(settingsRef);
-          if (!settingsSnap.exists()) {
-            await setDoc(settingsRef, {
-              email: user.email,
-              contactEmail: user.email,
-              ownerName: name.trim(),
-              businessName: '',
-              phone: '',
-              whatsapp: '',
-              address: '',
-              logoUrl: '',
-              profileSetupCompleted: false,
-              createdAt: new Date().toISOString()
-            });
-          }
-          
-
+          await authEngine.register(email.trim(), password.trim(), name.trim());
           onLoginSuccess();
         }
       } else {
@@ -891,44 +862,11 @@ function LoginPanel({ onLoginSuccess }) {
   };
 
   const handleGoogleLogin = async () => {
-
     setIsSigningIn(true);
     setError('');
     try {
-      if (firebaseReady && auth) {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        
-        // Check/Create user profile
-        const userDocRef = doc(db, 'usersList', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (!userDocSnap.exists()) {
-          await setDoc(userDocRef, {
-            userId: user.uid,
-            email: user.email,
-            createdAt: new Date().toISOString(),
-            role: 'user'
-          }, { merge: true });
-        }
-        
-        const settingsRef = doc(db, 'settings', user.uid);
-        const settingsSnap = await getDoc(settingsRef);
-        if (!settingsSnap.exists()) {
-          await setDoc(settingsRef, {
-            email: user.email,
-            contactEmail: user.email,
-            ownerName: name.trim(),
-            businessName: '',
-            phone: '',
-            whatsapp: '',
-            address: '',
-            logoUrl: '',
-            profileSetupCompleted: false,
-            createdAt: new Date().toISOString()
-          });
-        }
-
+      if (firebaseReady) {
+        await authEngine.signInWithGoogle(name.trim());
         onLoginSuccess();
       } else {
         setError('Firebase is not configured for Google login.');
@@ -1077,7 +1015,7 @@ function LoginPanel({ onLoginSuccess }) {
                   const email = prompt('Enter your email address to reset your password:');
                   if (email && email.includes('@')) {
                     try {
-                      await sendPasswordResetEmail(auth, email);
+                      await authEngine.resetPassword(email.trim());
                       toast.success('Password reset email sent! Check your inbox.');
                     } catch (err) {
                       toast.error(err.message || 'Failed to send reset email.');

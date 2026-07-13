@@ -1,7 +1,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { Search, Filter, Shield, UserX, CheckCircle, Ban, Users, Inbox, Loader2, ChevronLeft, ChevronRight, Eye, Trash2, RotateCcw, Smartphone, Clock, Cloud, MonitorSmartphone, X } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getAdminUsersList, getAdminPlatformRevenueStates, updateUserBlockStatus, deleteEnterpriseUser, resetEnterpriseWorkspace } from '../../services/dbEngine';
+import { adminEngine } from '../../services/adminEngine';
 import { toast } from 'react-hot-toast';
 import { pageVariants } from '../../utils/animations';
 import { TableRowSkeleton } from '../../components/PremiumSkeleton';
@@ -27,8 +27,8 @@ const UserManager = () => {
   const fetchUsersData = async () => {
     setLoading(true);
     try {
-      const list = await getAdminUsersList();
-      const revs = await getAdminPlatformRevenueStates();
+const list = await adminEngine.getUsersList();
+        const revs = await adminEngine.getRevenueStates();
       setUsers(list);
       setRevenueStates(revs);
     } catch (e) {
@@ -51,7 +51,7 @@ const UserManager = () => {
     setProcessingId(user.userId);
     const newBlocked = action === 'suspend';
     try {
-      const success = await updateUserBlockStatus(user.userId, newBlocked);
+      const success = newBlocked ? await adminEngine.blockUser(user.userId) : await adminEngine.unblockUser(user.userId);
       if (success) {
         toast.success(`User successfully ${newBlocked ? 'suspended' : 'activated'}!`);
         fetchUsersData();
@@ -73,7 +73,7 @@ const UserManager = () => {
     if (!selectedUser) return;
     if (window.confirm(`WARNING! This will permanently delete ${selectedUser.businessName}'s entire account and all their subcollections. Are you absolutely sure?`)) {
       setProcessingId(selectedUser.userId);
-      const success = await deleteEnterpriseUser(selectedUser.userId);
+      const success = await adminEngine.deleteUser(selectedUser.userId);
       if (success) {
         toast.success('Enterprise account completely deleted.');
         setSelectedUser(null);
@@ -89,7 +89,7 @@ const UserManager = () => {
     if (!selectedUser) return;
     if (window.confirm(`This will delete all invoices, customers, and products for ${selectedUser.businessName}, but keep their settings. Proceed?`)) {
       setProcessingId(selectedUser.userId);
-      const success = await resetEnterpriseWorkspace(selectedUser.userId);
+      const success = await adminEngine.resetWorkspace(selectedUser.userId);
       if (success) {
         toast.success('Workspace data reset successfully.');
       } else {

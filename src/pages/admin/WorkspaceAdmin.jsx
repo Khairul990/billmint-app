@@ -1,7 +1,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { Search, Building2, HardDrive, Inbox, Download, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getAdminUsersList } from '../../services/dbEngine';
+import { adminEngine } from '../../services/adminEngine';
 import { toast } from 'react-hot-toast';
 import { pageVariants } from '../../utils/animations';
 import { TableRowSkeleton } from '../../components/PremiumSkeleton';
@@ -19,7 +19,7 @@ const WorkspaceAdmin = () => {
   const fetchWorkspaces = async () => {
     setLoading(true);
     try {
-      const list = await getAdminUsersList();
+      const list = await adminEngine.getUsersList();
       setUsers(list);
     } catch (e) {
       console.error(e);

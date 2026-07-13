@@ -54,6 +54,8 @@ import { triggerSuccessFeedback } from './utils/feedback';
 import { sendEmpireEvent, sendEmpireError, sendEmpireHealth } from './services/empireAgent';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from './services/firebaseConfig';
+import { workspaceEngine } from './services/workspaceEngine';
+import { securityEngine } from './services/securityEngine';
 import QuickBillModal from './components/QuickBillModal';
 import AdminPINLogin from './pages/admin/AdminPINLogin';
 import Confetti from 'react-confetti';
@@ -298,6 +300,8 @@ function App() {
   }, [currentTab]);
 
   const [userRole, setUserRole] = useState(() => localStorage.getItem('billqyro_user_role') || 'user');
+  const [userPermissions, setUserPermissions] = useState(null);
+  const [workspaceVerified, setWorkspaceVerified] = useState(false);
 
   // Capacitor Android Back Button Handler
   useEffect(() => {
@@ -661,7 +665,7 @@ function App() {
   // Listen to Firebase Auth state
   useEffect(() => {
     if (firebaseReady && auth) {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
         // Firebase auth state updated
         if (user) {
           const session = getAuthSession();
@@ -673,10 +677,30 @@ function App() {
           };
           localStorage.setItem('billqyro_auth', JSON.stringify(newSession));
           setIsAuthenticated(true);
-          setUserRole(localStorage.getItem('billqyro_user_role') || 'user');
+          const role = localStorage.getItem('billqyro_user_role') || 'user';
+          setUserRole(role);
+
+          // AUTH → WORKSPACE VERIFICATION → PERMISSION CHECK → DASHBOARD
+          try {
+            const currentWs = await workspaceEngine.getCurrent();
+            const verified = await workspaceEngine.verifyAccess(user.uid, currentWs.id);
+            setWorkspaceVerified(verified.authorized);
+            if (!verified.authorized) {
+              console.warn('[AuthFlow] Workspace verification failed:', verified.reason);
+            }
+            const permissions = await securityEngine.getPermissions(user.uid);
+            setUserPermissions(permissions);
+            localStorage.setItem('billqyro_user_permissions', JSON.stringify(permissions));
+          } catch (e) {
+            console.warn('[AuthFlow] Workspace/perm check failed:', e);
+            setWorkspaceVerified(true);
+            setUserPermissions(null);
+          }
         } else {
           setIsAuthenticated(false);
-          setIsAppBooting(false); // Force exit loading state if no real user exists
+          setWorkspaceVerified(false);
+          setUserPermissions(null);
+          setIsAppBooting(false);
           setIsDataHydrating(false);
         }
       });
@@ -1399,6 +1423,8 @@ function App() {
             isLoading={isDataHydrating}
             revenueStatus={revenueStatus}
             onSaveCustomer={handleSaveCustomer}
+            permissions={userPermissions}
+            workspaceVerified={workspaceVerified}
           />
         );
       case 'pending-payments':

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, FileText, CheckCircle, Clock, ShieldCheck, Download, Printer, User, Search, Eye, Building2, MapPin, Phone, Mail, FileCheck2, Calendar, CreditCard, ChevronRight } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { getPortalLabelByType, getCustomerLabelByType, getInvoiceLabelByType, getIconForCustomer, getIconForInvoice } from '../config/businessPresets';
-import { getCustomerPortalInvoices } from '../services/dbEngine';
+import { invoiceEngine } from '../services/invoiceEngine';
 import CustomerPortalLogin from '../components/portal/CustomerPortalLogin';
 import ClassicLoader from '../components/ClassicLoader';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -36,7 +36,7 @@ export default function CustomerWorkspace({ customerId }) {
   const loadPortalData = async (id, phone) => {
     setLoadingData(true);
     try {
-      const fetchedInvoices = await getCustomerPortalInvoices(id, phone);
+      const fetchedInvoices = await invoiceEngine.getCustomerPortalInvoices(id, phone);
       // Sort invoices by date descending
       fetchedInvoices.sort((a, b) => new Date(b.date) - new Date(a.date));
       setInvoices(fetchedInvoices);

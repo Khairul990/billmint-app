@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { LogOut, FileText, CheckCircle, Clock, ShieldCheck, Download, Printer, User } from 'lucide-react';
-import { getCustomerPortalInvoices } from '../services/dbEngine';
+import { invoiceEngine } from '../services/invoiceEngine';
 import CustomerPortalLogin from '../components/portal/CustomerPortalLogin';
 import ClassicLoader from '../components/ClassicLoader';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -31,7 +31,7 @@ export default function BillingPortal({ customerId }) {
   const loadPortalData = async (id, phone) => {
     setLoadingData(true);
     try {
-      const fetchedInvoices = await getCustomerPortalInvoices(id, phone);
+      const fetchedInvoices = await invoiceEngine.getCustomerPortalInvoices(id, phone);
       setInvoices(fetchedInvoices);
       if (fetchedInvoices.length > 0) {
         const inv = fetchedInvoices[0];

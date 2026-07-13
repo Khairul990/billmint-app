@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Database, Download, Upload, Users } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { Button } from '../../components/ui/Button';
 
 const BackupCenter = () => {
   const handleBackup = () => {
@@ -12,36 +13,36 @@ const BackupCenter = () => {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center">
-            <Database className="w-6 h-6 mr-3 text-blue-500" /> Backup Center
+          <h2 className="text-3xl font-black text-theme-primary flex items-center tracking-tight">
+            <Database className="w-8 h-8 mr-3 text-theme-accent" /> Backup Center
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Manage database backups and exports.</p>
+          <p className="text-theme-secondary text-sm mt-1">Manage database backups and exports.</p>
         </div>
       </div>
 
-      <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
-        <h3 className="text-white font-bold mb-4">Platform Backups</h3>
-        <p className="text-slate-400 text-sm mb-6">Create manual backups of the entire Firestore database.</p>
+      <div className="bg-theme-surface-elevated p-6 rounded-3xl border border-theme-border-soft">
+        <h3 className="text-theme-primary font-bold mb-4">Platform Backups</h3>
+        <p className="text-theme-secondary text-sm mb-6">Create manual backups of the entire Firestore database.</p>
         
         <div className="flex flex-wrap gap-4">
-          <button onClick={handleBackup} className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl flex items-center transition-colors">
-            <Database className="w-5 h-5 mr-2" /> Create Backup
-          </button>
-          <button className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl flex items-center border border-slate-700 transition-colors">
-            <Download className="w-5 h-5 mr-2" /> Download Latest
-          </button>
-          <button className="px-6 py-3 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 font-bold rounded-xl flex items-center transition-colors border border-rose-500/20">
-            <Upload className="w-5 h-5 mr-2" /> Restore Backup
-          </button>
+          <Button onClick={handleBackup} variant="primary" leftIcon={Database}>
+            Create Backup
+          </Button>
+          <Button variant="outline" leftIcon={Download}>
+            Download Latest
+          </Button>
+          <Button variant="outline" className="border-theme-danger text-theme-danger hover:bg-theme-danger/10" leftIcon={Upload}>
+            Restore Backup
+          </Button>
         </div>
       </div>
 
-      <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
-        <h3 className="text-white font-bold mb-4">Export Tools</h3>
+      <div className="bg-theme-surface-elevated p-6 rounded-3xl border border-theme-border-soft">
+        <h3 className="text-theme-primary font-bold mb-4">Export Tools</h3>
         <div className="flex flex-wrap gap-4">
-          <button className="px-4 py-2 bg-slate-800 text-slate-300 text-sm font-bold rounded-xl border border-slate-700 hover:bg-slate-700 transition-colors">Export Users (CSV)</button>
-          <button className="px-4 py-2 bg-slate-800 text-slate-300 text-sm font-bold rounded-xl border border-slate-700 hover:bg-slate-700 transition-colors">Export Payment Proofs (ZIP)</button>
-          <button className="px-4 py-2 bg-slate-800 text-slate-300 text-sm font-bold rounded-xl border border-slate-700 hover:bg-slate-700 transition-colors">Export Revenue Reports</button>
+          <Button variant="ghost" className="border border-theme-border-soft" size="sm">Export Users (CSV)</Button>
+          <Button variant="ghost" className="border border-theme-border-soft" size="sm">Export Payment Proofs (ZIP)</Button>
+          <Button variant="ghost" className="border border-theme-border-soft" size="sm">Export Revenue Reports</Button>
         </div>
       </div>
     </motion.div>

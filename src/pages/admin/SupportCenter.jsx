@@ -2,12 +2,7 @@ import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare, CheckCircle2, Clock, Search, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { 
-  getAdminAllSupportTickets, 
-  updateSupportTicketStatus, 
-  getAdminAllFeatureRequests, 
-  updateFeatureRequestStatus 
-} from '../../services/dbEngine';
+import { adminEngine } from '../../services/adminEngine';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -25,10 +20,10 @@ const SupportCenter = () => {
     setIsLoading(true);
     try {
       if (activeSubTab === 'tickets') {
-        const ticketList = await getAdminAllSupportTickets();
+        const ticketList = await adminEngine.getSupportTickets();
         setTickets(ticketList);
       } else {
-        const featureList = await getAdminAllFeatureRequests();
+        const featureList = await adminEngine.getFeatureRequests();
         setFeatures(featureList);
       }
     } catch (e) {
@@ -45,7 +40,7 @@ const SupportCenter = () => {
   const handleUpdateTicket = async (ticketId, status) => {
     const note = adminNote[ticketId] || '';
     try {
-      const ok = await updateSupportTicketStatus(ticketId, status, note);
+      const ok = await adminEngine.updateSupportTicket(ticketId, status, note);
       if (ok) {
         toast.success(`Ticket status updated to ${status}`);
         loadData();
@@ -60,7 +55,7 @@ const SupportCenter = () => {
   const handleUpdateFeature = async (requestId, status) => {
     const note = adminNote[requestId] || '';
     try {
-      const ok = await updateFeatureRequestStatus(requestId, status, note);
+      const ok = await adminEngine.updateFeatureRequest(requestId, status, note);
       if (ok) {
         toast.success(`Feature request status updated to ${status}`);
         loadData();

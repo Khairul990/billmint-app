@@ -40,8 +40,8 @@ const SandboxAdmin = ({ setCurrentTab }) => {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-3 mb-8 border-b border-theme-border-soft pb-4">
-        <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
-          <ShieldCheck className="w-8 h-8 text-amber-500" />
+        <div className="p-3 bg-theme-warning/10 rounded-xl border border-theme-warning/20">
+          <ShieldCheck className="w-8 h-8 text-theme-warning" />
         </div>
         <div>
           <h1 className="text-2xl font-black text-theme-primary tracking-tight">Sandbox Control Center</h1>
@@ -87,7 +87,7 @@ const SandboxAdmin = ({ setCurrentTab }) => {
 
           <button
             onClick={handleReset}
-            className="w-full py-3 bg-rose-500/10 border border-rose-500/20 text-rose-600 font-bold rounded-xl hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center gap-2 mt-auto"
+            className="w-full py-3 bg-theme-danger/10 border border-theme-danger/20 text-theme-danger font-bold rounded-xl hover:bg-theme-danger hover:text-white transition-all flex items-center justify-center gap-2 mt-auto"
           >
             <Trash2 className="w-5 h-5" />
             Factory Reset Sandbox
@@ -98,4 +98,4 @@ const SandboxAdmin = ({ setCurrentTab }) => {
   );
 };
 
-// Quick fix for missing Wrench icon in imports aboveexport default SandboxAdmin;
+export default SandboxAdmin;
