@@ -16,7 +16,20 @@ import {
   getAdminTotalStats as dbGetAdminTotalStats,
   updateUserBlockStatus as dbUpdateUserBlockStatus,
   deleteEnterpriseUser as dbDeleteEnterpriseUser,
-  resetEnterpriseWorkspace as dbResetEnterpriseWorkspace
+  resetEnterpriseWorkspace as dbResetEnterpriseWorkspace,
+  factoryResetAllData as dbFactoryResetAllData,
+  clearAllLocalData as dbClearAllLocalData,
+  clearInvoices as dbClearInvoices,
+  emptyTrash as dbEmptyTrash,
+  clearCustomers as dbClearCustomers,
+  clearProducts as dbClearProducts,
+  clearExpenses as dbClearExpenses,
+  getStorageUsage as dbGetStorageUsage,
+  cleanDuplicateDrafts as dbCleanDuplicateDrafts,
+  cleanTemporaryData as dbCleanTemporaryData,
+  clearCacheOnly as dbClearCacheOnly,
+  migrateGlobalToScopedStorage as dbMigrateGlobalToScopedStorage,
+  getActiveAnnouncement as dbGetActiveAnnouncement
 } from './dbEngine';
 import {
   getAdminAllSupportTickets,
@@ -202,6 +215,20 @@ export const adminEngine = {
   async resetWorkspace(userId) {
     return dbResetEnterpriseWorkspace(userId);
   },
+
+  // Maintenance & Wipe Operations
+  async factoryResetAllData() { return dbFactoryResetAllData(); },
+  async clearAllLocalData() { return dbClearAllLocalData(); },
+  async clearInvoices() { return dbClearInvoices(); },
+  async emptyTrash() { return dbEmptyTrash(); },
+  async clearCustomers() { return dbClearCustomers(); },
+  async clearProducts() { return dbClearProducts(); },
+  async clearExpenses() { return dbClearExpenses(); },
+  getStorageUsage() { return dbGetStorageUsage(); },
+  async cleanDuplicateDrafts() { return dbCleanDuplicateDrafts(); },
+  async cleanTemporaryData() { return dbCleanTemporaryData(); },
+  clearCacheOnly() { return dbClearCacheOnly(); },
+  async migrateGlobalToScopedStorage() { return dbMigrateGlobalToScopedStorage(); },
 
   isAdminUser(session) {
     const adminEmail = 'khairul2052007@gmail.com';

@@ -9,7 +9,7 @@ import {
   generateEmailShareLink,
   generateInvoiceShareText
 } from '../utils/shareUtils';
-import { ensureInvoicePublicToken, resetInvoiceLiveLink } from '../services/dbEngine';
+import { invoiceEngine } from '../services/invoiceEngine';
 import { isEducationCategory } from '../utils/categoryChecks';
 
 // Premium WhatsApp Icon SVG Component
@@ -385,7 +385,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
               <button
                 onClick={() => {
                   toast.loading('Retrying sync...', { id: 'retrySync' });
-                  import('../services/dbEngine').then(m => m.retrySyncInvoice(invoice.id)).then(res => {
+                  import('../services/invoiceEngine').then(m => m.invoiceEngine.retrySync(invoice.id)).then(res => {
                     toast.dismiss('retrySync');
                   });
                 }}

@@ -4,7 +4,7 @@ import BottomNav from './BottomNav';
 import { Search, Bell, Settings as SettingsIcon, Sparkles, ShieldCheck, User, Briefcase, Activity, HelpCircle, LogOut } from 'lucide-react';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import Logo from './Logo';
-import { getSettings, saveSettings } from '../services/dbEngine';
+import { settingsEngine } from '../services/settingsEngine';
 import { flushSyncQueue } from '../services/syncEngine';
 import AnimatedBorderTrail from './AnimatedBorderTrail';
 import { AnimatedThemeToggler } from './AnimatedThemeToggler';
@@ -57,12 +57,12 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
   const toggleTheme = () => {
     const newDarkMode = !isDarkMode;
-    const currentSettings = getSettings() || {};
+    const currentSettings = settingsEngine.getSettings() || {};
     currentSettings.darkMode = newDarkMode;
     if (currentSettings.themePreset === 'dark') {
       currentSettings.themePreset = 'light';
     }
-    saveSettings(currentSettings);
+    settingsEngine.saveSettings(currentSettings);
     
     // Broadcast setting update for ThemeContext
     window.dispatchEvent(new CustomEvent('billqyro:settings-updated', { detail: currentSettings }));

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, FileText, Globe } from 'lucide-react';
-import { logout } from '../services/dbEngine';
+import { authEngine } from '../services/authEngine';
 import { t } from '../utils/i18n';
 import { triggerLightHaptic } from '../utils/feedback';
 import { getCustomerLabelByType, getInvoiceLabelByType, getPortalLabelByType } from '../config/businessPresets';
@@ -36,6 +36,11 @@ const Sidebar = ({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const handleLogout = () => {
+    authEngine.logout();
+    window.location.reload();
+  };
 
   const toggleCollapsed = () => {
     setIsCollapsed(prev => {

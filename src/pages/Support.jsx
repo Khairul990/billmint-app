@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import AnimatedPage from '../components/AnimatedPage';
 import { LifeBuoy, ArrowLeft, Mail, MessageCircle, FileText, Check, AlertCircle, Plus, Send, Upload, Inbox, CheckCircle } from 'lucide-react';
-import { 
-  getAuthSession, 
-  getRealUserId, 
-  submitSupportTicket, 
-  getUserSupportTickets, 
-  submitFeatureRequest, 
-  getUserFeatureRequests, 
-  getAdminAllChangelogs 
-} from '../services/dbEngine';
+import { authEngine } from '../services/authEngine';
+import { adminEngine } from '../services/adminEngine';
+import { supportEngine } from '../services/supportEngine';
 import { toast } from 'react-hot-toast';
 
 export default function Support({ onBack }) {
@@ -38,19 +32,19 @@ export default function Support({ onBack }) {
 
   // Load user email on mount
   useEffect(() => {
-    const session = getAuthSession();
+    const session = authEngine.getAuthSession();
     if (session?.userEmail) {
       setUserEmail(session.userEmail);
     }
   }, []);
 
   const fetchUserData = async () => {
-    const userId = getRealUserId() || 'local-user';
+    const userId = authEngine.getRealUserId() || 'local-user';
     try {
-      const tickets = await getUserSupportTickets(userId);
+      const tickets = await supportEngine.getUserSupportTickets(userId);
       setMyTickets(tickets);
       
-      const features = await getUserFeatureRequests(userId);
+      const features = await supportEngine.getUserFeatureRequests(userId);
       setMyFeatures(features);
     } catch (e) {
       console.error(e);
@@ -60,7 +54,7 @@ export default function Support({ onBack }) {
   const fetchChangelogs = async () => {
     setLoadingChangelogs(true);
     try {
-      const logs = await getAdminAllChangelogs();
+      const logs = await adminEngine.getAdminAllChangelogs();
       setChangelogs(logs);
     } catch (e) {
       console.error(e);
@@ -92,10 +86,10 @@ export default function Support({ onBack }) {
 
     setSubmittingTicket(true);
     try {
-      const userId = getRealUserId() || 'local-user';
-      const email = userEmail || getAuthSession()?.userEmail || 'local-user';
+      const userId = authEngine.getRealUserId() || 'local-user';
+      const email = userEmail || authEngine.getAuthSession()?.userEmail || 'local-user';
       
-      await submitSupportTicket(userId, email, userPhone, issueType, ticketMsg, ticketScreenshotBase64);
+      await supportEngine.submitSupportTicket(userId, email, userPhone, issueType, ticketMsg, ticketScreenshotBase64);
       toast.success('Support ticket submitted successfully!');
       
       // Reset
@@ -121,11 +115,11 @@ export default function Support({ onBack }) {
 
     setSubmittingFeature(true);
     try {
-      const userId = getRealUserId() || 'local-user';
-      const email = userEmail || getAuthSession()?.userEmail || 'local-user';
+      const userId = authEngine.getRealUserId() || 'local-user';
+      const email = userEmail || authEngine.getAuthSession()?.userEmail || 'local-user';
       const businessType = localStorage.getItem('billqyro_business_type') || 'General';
 
-      await submitFeatureRequest(userId, email, featureTitle, featureDesc, businessType, featurePriority);
+      await supportEngine.submitFeatureRequest(userId, email, featureTitle, featureDesc, businessType, featurePriority);
       toast.success('Feature request submitted successfully!');
       
       setFeatureTitle('');

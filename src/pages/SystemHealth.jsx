@@ -125,8 +125,8 @@ const SystemHealth = ({ setCurrentTab }) => {
       const queue = await BillQyroDB.getAll('syncQueue');
       if (queue && queue.length > 0) {
         toast.loading('Flushing offline queue to cloud first...', { id: 'flush-toast' });
-        const { syncOfflineTransactions } = await import('../services/dbEngine');
-        await syncOfflineTransactions();
+        const { offlineEngine } = await import('../services/offlineEngine');
+        await offlineEngine.syncNow();
         
         const newQueue = await BillQyroDB.getAll('syncQueue');
         if (newQueue && newQueue.length > 0) {
@@ -141,11 +141,10 @@ const SystemHealth = ({ setCurrentTab }) => {
         return;
       }
 
-      const { clearCacheOnly, syncFromFirestore } = await import('../services/dbEngine');
-      // Clear local cache first
-      clearCacheOnly();
-      // Sync from Firestore (cloud as source of truth)
-      await syncFromFirestore();
+      const { adminEngine } = await import('../services/adminEngine');
+      const { invoiceEngine } = await import('../services/invoiceEngine');
+      adminEngine.clearCacheOnly();
+      await invoiceEngine.syncFromCloud();
       toast.success('Device data refreshed from cloud. Reloading...');
       setTimeout(() => window.location.reload(true), 1500);
     } catch (e) {
@@ -160,8 +159,8 @@ const SystemHealth = ({ setCurrentTab }) => {
       return;
     }
     if (window.confirm('Are you sure you want to merge old local data into the active account? This cannot be undone.')) {
-      const { migrateGlobalToScopedStorage } = await import('../services/dbEngine');
-      const result = await migrateGlobalToScopedStorage();
+      const { adminEngine } = await import('../services/adminEngine');
+      const result = await adminEngine.migrateGlobalToScopedStorage();
       if (result && result.status === 'success') {
         toast.success(`Successfully migrated ${result.migratedCount} items. Please reload the app.`);
         setTimeout(() => window.location.reload(true), 2000);

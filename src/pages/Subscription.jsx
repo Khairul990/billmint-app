@@ -42,15 +42,10 @@ import {
 } from 'lucide-react';
 import ShineBorder from '../components/ShineBorder';
 import { formatCurrency } from '../utils/invoiceUtils';
-import { 
-  getRealUserId, 
-  submitPremiumRequest, 
-  submitPlatformPaymentProof,
-  getUserPaymentProofs,
-  getUserRevenueState,
-  getGlobalRevenueSettings,
-  getAuthSession
-} from '../services/dbEngine';
+import { authEngine } from '../services/authEngine';
+import { adminEngine } from '../services/adminEngine';
+import { subscriptionEngine } from '../services/subscriptionEngine';
+import { paymentEngine } from '../services/paymentEngine';
 import { addNotification } from '../services/notificationsService';
 import { db, firebaseReady } from '../services/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -159,7 +154,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings, setCur
   }, [country]);
 
   useEffect(() => {
-    const userId = getRealUserId() || 'local-user';
+    const userId = authEngine.getRealUserId() || 'local-user';
     const stored = localStorage.getItem(`billqyro_billing_history_${userId}`);
     if (stored) {
       try {
@@ -173,7 +168,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings, setCur
   }, [currentSubscription]);
 
   const addBillingHistoryEntry = (entry) => {
-    const userId = getRealUserId() || 'local-user';
+    const userId = authEngine.getRealUserId() || 'local-user';
     const updated = [
       {
         id: `hist_${Date.now()}`,
@@ -193,7 +188,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings, setCur
 
   const fetchPendingRequest = async () => {
     if (!firebaseReady) return;
-    const userId = getRealUserId();
+    const userId = authEngine.getRealUserId();
     if (!userId) return;
     
     setCheckingPending(true);
@@ -217,17 +212,17 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings, setCur
   };
 
   const fetchPlatformRevenue = async () => {
-    const userId = getRealUserId() || 'local-user';
-    const grs = await getGlobalRevenueSettings();
+    const userId = authEngine.getRealUserId() || 'local-user';
+    const grs = await adminEngine.getGlobalRevenueSettings();
     setGlobalRevenueSettings(grs);
     
     const localInvoices = JSON.parse(localStorage.getItem(`billqyro_invoices_${userId}`) || '[]');
-    const state = await getUserRevenueState(userId, localInvoices, currentSubscription);
+    const state = await paymentEngine.getUserRevenueState(userId, localInvoices, currentSubscription);
     setRevenueState(state);
     
     setPlatformPaidAmount(state.platformPendingAmount.toString());
 
-    const proofs = await getUserPaymentProofs(userId);
+    const proofs = await paymentEngine.getUserPaymentProofs(userId);
     setPlatformProofs(proofs);
   };
 
@@ -326,7 +321,7 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings, setCur
 
     setLoading(true);
     try {
-      await submitPremiumRequest(selectedPlan, parseFloat(paidAmount) || activePricing.amount, paymentMethod, transactionId, screenshotBase64);
+      await subscriptionEngine.submitPremiumRequest(selectedPlan, parseFloat(paidAmount) || activePricing.amount, paymentMethod, transactionId, screenshotBase64);
       toast.success('Your premium activation request was submitted successfully!');
       addNotification('Premium Request', `Your request for ${selectedPlan} plan has been submitted and is pending verification.`, 'info');
       addBillingHistoryEntry({
@@ -362,11 +357,11 @@ const Subscription = ({ currentSubscription, onUpgrade, businessSettings, setCur
 
     setSubmittingPlatformProof(true);
     try {
-      const userId = getRealUserId() || 'local-user';
-      const session = getAuthSession();
+      const userId = authEngine.getRealUserId() || 'local-user';
+      const session = authEngine.getAuthSession();
       const userEmail = session?.userEmail || session?.email || 'local-user';
 
-      await submitPlatformPaymentProof(
+      await paymentEngine.submitPlatformPaymentProof(
         userId,
         userEmail,
         amt,

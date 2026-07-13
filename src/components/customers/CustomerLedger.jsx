@@ -17,7 +17,7 @@ import {
   Plus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { saveInvoice } from '../../services/dbEngine';
+import { invoiceEngine } from '../../services/invoiceEngine';
 
 /**
  * Customer Ledger Modal
@@ -79,7 +79,7 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
         paymentDate: new Date().toISOString()
       };
 
-      await saveInvoice(updatedInvoice);
+      await invoiceEngine.saveInvoice(updatedInvoice);
       setUpdatingInvoiceId(null);
       setPaymentAmount('');
       setPaymentNote('');

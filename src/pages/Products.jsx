@@ -21,7 +21,7 @@ import { formatCurrency } from '../utils/invoiceUtils';
 import CenteredModal from '../components/CenteredModal';
 import { toast } from 'react-hot-toast';
 import PullToRefresh from '../components/PullToRefresh';
-import { syncFromFirestore } from '../services/dbEngine';
+import { invoiceEngine } from '../services/invoiceEngine';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { getUnitsByType } from '../config/businessPresets';
 import { Loader2 } from 'lucide-react';
@@ -150,7 +150,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
   }, [filteredProducts, displayCount]);
 
   const handleRefresh = async () => {
-    await syncFromFirestore();
+    await invoiceEngine.syncFromCloud();
     window.dispatchEvent(new Event('billqyro_sync'));
   };
 

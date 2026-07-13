@@ -14,7 +14,8 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid } from 'recharts';
 import { formatCurrency } from '../utils/invoiceUtils';
 import PullToRefresh from '../components/PullToRefresh';
-import { syncFromFirestore, getActiveAnnouncement } from '../services/dbEngine';
+import { invoiceEngine } from '../services/invoiceEngine';
+import { analyticsEngine } from '../services/analyticsEngine';
 import AddCustomerSheet from '../components/AddCustomerSheet';
 import StatCard from '../components/StatCard';
 import { KPISkeleton, ChartSkeleton } from '../components/PremiumSkeleton';
@@ -138,7 +139,7 @@ const Dashboard = ({
 
   useEffect(() => {
     const loadAnnouncement = async () => {
-      const ann = await getActiveAnnouncement();
+      const ann = await analyticsEngine.getActiveAnnouncement();
       if (ann) setActiveAnnouncement(ann);
     };
     loadAnnouncement();
@@ -264,7 +265,7 @@ const Dashboard = ({
 
   const handleRefresh = async () => {
     try {
-      await syncFromFirestore();
+      await invoiceEngine.syncFromCloud();
       setLastSyncTime(new Date());
     } catch (e) {
       console.error('Dashboard refresh failed:', e);

@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Sparkles, UploadCloud, X, Loader2, CheckCircle2 } from 'lucide-react';
 import { useInvoice } from '../../contexts/InvoiceContext';
 import { toast } from 'react-hot-toast';
-import { getSettings } from '../../services/dbEngine';
+import { settingsEngine } from '../../services/settingsEngine';
 
 const AIInvoiceScanner = () => {
   const { updateInvoice } = useInvoice();
@@ -17,7 +17,7 @@ const AIInvoiceScanner = () => {
   const processImage = async (file) => {
     try {
       setIsScanning(true);
-      const settings = await getSettings();
+      const settings = await settingsEngine.getSettings();
       const apiKey = settings?.geminiApiKey;
       
       if (!apiKey) {

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, KeyRound, Phone, Hash } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { verifyCustomerPortal } from '../../services/dbEngine';
+import { portalEngine } from '../../services/portalEngine';
 import ClassicLoader from '../ClassicLoader';
 
 export default function CustomerPortalLogin({ onVerificationSuccess, prefillId }) {
@@ -19,7 +19,7 @@ export default function CustomerPortalLogin({ onVerificationSuccess, prefillId }
 
     setLoading(true);
     try {
-      const isVerified = await verifyCustomerPortal(customerId, phone);
+      const isVerified = await portalEngine.verifyCustomerPortal(customerId, phone);
       if (isVerified) {
         toast.success('Verification successful!');
         onVerificationSuccess(customerId, phone);

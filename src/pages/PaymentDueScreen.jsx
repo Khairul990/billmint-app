@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldAlert, Image as ImageIcon, Send, Clock, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
-import { getAuthSession, getRealUserId, submitPlatformPaymentProof, getGlobalRevenueSettings } from '../services/dbEngine';
+import { authEngine } from '../services/authEngine';
+import { paymentEngine } from '../services/paymentEngine';
+import { adminEngine } from '../services/adminEngine';
 import { toast } from 'react-hot-toast';
 
 const PaymentDueScreen = ({ pendingAmount, chargeableBills, onCancel, onLogout }) => {
@@ -13,7 +15,7 @@ const PaymentDueScreen = ({ pendingAmount, chargeableBills, onCancel, onLogout }
 
   useEffect(() => {
     const fetchSettings = async () => {
-      const gs = await getGlobalRevenueSettings();
+      const gs = await adminEngine.getGlobalRevenueSettings();
       setGlobalSettings(gs);
     };
     fetchSettings();
@@ -37,11 +39,11 @@ const PaymentDueScreen = ({ pendingAmount, chargeableBills, onCancel, onLogout }
 
     setLoading(true);
     try {
-      const session = getAuthSession();
-      const userId = session?.uid || getRealUserId() || 'local-user';
+      const session = authEngine.getAuthSession();
+      const userId = session?.uid || authEngine.getRealUserId() || 'local-user';
       const userEmail = session?.userEmail || session?.email || 'local-user';
 
-      await submitPlatformPaymentProof(
+      await paymentEngine.submitPlatformPaymentProof(
         userId,
         userEmail,
         pendingAmount,

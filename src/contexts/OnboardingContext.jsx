@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { getSettings } from '../services/dbEngine';
+import { settingsEngine } from '../services/settingsEngine';
 
 const OnboardingContext = createContext();
 
@@ -15,7 +15,7 @@ export const OnboardingProvider = ({ children }) => {
   const [onboardingStep, setOnboardingStep] = useState(2);
   const [onboardingData, setOnboardingData] = useState(() => {
     // Initialize with existing settings if available
-    const existing = getSettings() || {};
+    const existing = settingsEngine.getSettings() || {};
     return {
       country: existing.country || null,
       businessDetails: {

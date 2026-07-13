@@ -25,7 +25,7 @@ import {
   generateEmailShareLink, 
   generateInvoiceShareText 
 } from '../utils/shareUtils';
-import { ensureInvoicePublicToken, syncFromFirestore } from '../services/dbEngine';
+import { invoiceEngine } from '../services/invoiceEngine';
 import PullToRefresh from '../components/PullToRefresh';
 
 // Premium WhatsApp Icon SVG Component
@@ -171,7 +171,7 @@ const Estimates = ({
   };
 
   const handleRefresh = async () => {
-    await syncFromFirestore();
+    await invoiceEngine.syncFromCloud();
     window.dispatchEvent(new Event('billqyro_sync'));
   };
 

@@ -27,7 +27,9 @@ import {
   BookOpen, DollarSign, Percent, Printer, Share2, Send
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { exportBackup, getAuthSession, getStorageUsage, cleanTemporaryData, cleanDuplicateDrafts, clearCacheOnly, clearAllLocalData, emptyTrash, clearInvoices, clearCustomers, clearProducts, clearExpenses, factoryResetAllData } from '../services/dbEngine';
+import { adminEngine } from '../services/adminEngine';
+import { backupEngine } from '../services/backupEngine';
+import { authEngine } from '../services/authEngine';
 import { firebaseReady } from '../services/firebaseConfig';
 
 const compressImage = (file, maxWidth = 400) => {
@@ -208,7 +210,7 @@ const SettingsStudioV2 = ({
 
   const [isDragging, setIsDragging] = useState(false);
   const [dbProvider, setDbProvider] = useState(() => localStorage.getItem('billmint_db_provider') || 'firebase');
-  const session = getAuthSession();
+  const session = authEngine.getAuthSession();
 
   const loggedInEmail = session?.userEmail || 'unknown';
   const isOnline = navigator.onLine;
@@ -479,7 +481,7 @@ const SettingsStudioV2 = ({
 
   const handleExport = async () => {
     try {
-      const data = await exportBackup();
+      const data = await backupEngine.exportLocal();
       const jsonStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
       const a = document.createElement('a');
       a.setAttribute('href', jsonStr);
@@ -834,10 +836,10 @@ const SettingsStudioV2 = ({
                 <Upload className="text-[var(--accent)]" /><div><div className="font-semibold text-sm">Import Backup</div><div className="text-xs text-gray-500">Restore from a backup file</div></div>
                 <input type="file" accept=".json" onChange={handleImport} className="hidden" />
               </label>
-              <button onClick={() => { if (confirm('Clear cache?')) { clearCacheOnly(); toast.success('Cache cleared'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-yellow-500/30 bg-yellow-500/5 hover:bg-yellow-500/10 text-left">
+              <button onClick={() => { if (confirm('Clear cache?')) { adminEngine.clearCacheOnly(); toast.success('Cache cleared'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-yellow-500/30 bg-yellow-500/5 hover:bg-yellow-500/10 text-left">
                 <RotateCcw className="text-yellow-500" /><div><div className="font-semibold text-sm">Clear Cache</div><div className="text-xs text-gray-500">Reset temporary data</div></div>
               </button>
-              <button onClick={() => { if (confirm('Reset all data? This cannot be undone.')) { factoryResetAllData(); toast.success('Data reset in progress...'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-left">
+              <button onClick={() => { if (confirm('Reset all data? This cannot be undone.')) { adminEngine.factoryResetAllData(); toast.success('Data reset in progress...'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-left">
                 <Trash2 className="text-red-500" /><div><div className="font-semibold text-sm text-red-600">Reset All Data</div><div className="text-xs text-red-400">Wipe everything</div></div>
               </button>
             </div>
@@ -906,9 +908,9 @@ const SettingsStudioV2 = ({
             </div>
             <div className="space-y-3">
               {[
-                { label: 'Clear All Local Data', desc: 'Wipe everything including IndexedDB', action: async () => { if (confirm('Permanently wipe all local data?')) { await clearAllLocalData(); toast.success('Data wiped'); window.location.href = '/'; } }, danger: true },
-                { label: 'Clean Duplicate Drafts', desc: 'Remove empty zero-amount invoices', action: async () => { const r = await cleanDuplicateDrafts(); toast.success('Removed ' + r + ' drafts'); } },
-                { label: 'Empty Trash', desc: 'Permanently delete trashed invoices', action: async () => { const r = await emptyTrash(); toast.success('Deleted ' + r.count + ' items'); } }
+                { label: 'Clear All Local Data', desc: 'Wipe everything including IndexedDB', action: async () => { if (confirm('Permanently wipe all local data?')) { await adminEngine.clearAllLocalData(); toast.success('Data wiped'); window.location.href = '/'; } }, danger: true },
+                { label: 'Clean Duplicate Drafts', desc: 'Remove empty zero-amount invoices', action: async () => { const r = await adminEngine.cleanDuplicateDrafts(); toast.success('Removed ' + r + ' drafts'); } },
+                { label: 'Empty Trash', desc: 'Permanently delete trashed invoices', action: async () => { const r = await adminEngine.emptyTrash(); toast.success('Deleted ' + r.count + ' items'); } }
               ].map((item, i) => (
                 <button key={i} onClick={item.action} className={'w-full flex items-center justify-between p-4 rounded-xl border text-left ' + (item.danger ? 'border-red-500/30 bg-red-500/5 hover:bg-red-500/10' : 'border-gray-200 dark:border-white/10 bg-white/50 dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10')}>
                   <div><p className={'text-xs font-bold ' + (item.danger ? 'text-red-600' : 'text-gray-900 dark:text-white')}>{item.label}</p><p className="text-[9px] text-gray-500">{item.desc}</p></div>

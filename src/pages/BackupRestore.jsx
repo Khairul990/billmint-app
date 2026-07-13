@@ -19,8 +19,8 @@ import {
   Archive
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { exportBackup } from '../services/dbEngine';
 import { backupEngine } from '../services/backupEngine';
+
 import { pageVariants, staggerContainer, staggerItem, modalOverlayVariants, modalContentVariants } from '../utils/animations';
 import { CardSkeleton } from '../components/PremiumSkeleton';
 import PremiumEmptyState from '../components/PremiumEmptyState';
@@ -56,7 +56,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
       const progressTimer = setInterval(() => {
         setProgressPercent(p => Math.min(p + 15, 85));
       }, 400);
-      const backupData = await exportBackup();
+      const backupData = await backupEngine.exportLocal();
       clearInterval(progressTimer);
       setProgressPercent(100);
       const dataStr = JSON.stringify(backupData, null, 2);

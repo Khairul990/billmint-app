@@ -7,6 +7,7 @@ import {
   sendPasswordResetEmail 
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { getAuthSession as dbGetAuthSession, getRealUserId as dbGetRealUserId, logout as dbLogout} from './dbEngine';
 
 export const authEngine = {
   async signIn(email, password) {
@@ -63,5 +64,21 @@ export const authEngine = {
         createdAt: new Date().toISOString()
       });
     }
+  },
+
+  getAuthSession() {
+    return dbGetAuthSession();
+  },
+
+  getRealUserId() {
+    return dbGetRealUserId();
+  },
+
+  async hasCompletedOnboarding() {
+    return dbHasCompletedOnboarding();
+  },
+
+  logout() {
+    return dbLogout();
   }
 };

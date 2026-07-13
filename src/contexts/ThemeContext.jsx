@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { applyTheme } from '../hooks/useThemeEngine';
-import { getSettings } from '../services/dbEngine';
+import { settingsEngine } from '../services/settingsEngine';
 
 const ThemeContext = createContext();
 
@@ -14,8 +14,8 @@ export const ThemeProvider = ({ children }) => {
 
   useEffect(() => {
     // Initial load from settings
-    const loadInitialTheme = () => {
-      const settings = getSettings();
+    const loadInitialTheme = async () => {
+      const settings = await settingsEngine.getSettings();
       if (settings) {
         setThemeState({
           themeId: settings.themeColor || settings.themePreset || 'obsidian-gold',

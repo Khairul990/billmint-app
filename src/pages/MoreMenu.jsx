@@ -26,7 +26,7 @@ import {
   Info,
   MessageSquare
 } from 'lucide-react';
-import { factoryResetAllData } from '../services/dbEngine';
+import { adminEngine } from '../services/adminEngine';
 
 /**
  * Android Settings Style More Menu
@@ -41,7 +41,7 @@ const MoreMenu = ({
 
   const handleFactoryReset = () => {
     if (window.confirm("🚨 WARNING: Are you sure you want to completely factory reset your app? This will wipe all data, invoices, and settings, and return you to the onboarding screen like a new user. This action cannot be undone locally!")) {
-      factoryResetAllData();
+      adminEngine.factoryResetAllData();
     }
   };
 

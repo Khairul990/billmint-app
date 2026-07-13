@@ -80,7 +80,7 @@ const Appointments = ({ invoices, customers = [], businessSettings, setCurrentTa
         } catch (e) { /* ignore */ }
 
         try {
-          const { syncFromFirestore } = await import('../services/dbEngine');
+          const { invoiceEngine } = await import('../services/invoiceEngine');
           if (typeof syncFromFirestore === 'function') {
             await syncFromFirestore();
           }

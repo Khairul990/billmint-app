@@ -6,7 +6,7 @@ import {
   CreditCard, ShieldCheck, Globe, Coffee, Settings, Info, Monitor
 } from 'lucide-react';
 import { BUSINESS_PRESETS, ALL_MODULES } from '../../config/businessPresets';
-import { getAuthSession } from '../../services/dbEngine';
+import { authEngine } from '../../services/authEngine';
 
 const iconMap = {
   ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText, Store, Palette: Paintbrush, Coffee, Settings, Monitor
@@ -19,7 +19,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
     enabledModules: [],
     businessName: businessSettings.businessName || '',
     ownerName: businessSettings.ownerName || '',
-    ownerEmail: getAuthSession()?.userEmail || '',
+    ownerEmail: authEngine.getAuthSession()?.userEmail || '',
     phone: businessSettings.phone || '',
     address: businessSettings.address || '',
     theme: 'titanium-blue',

@@ -32,11 +32,9 @@ import {
   generateEmailShareLink, 
   generateInvoiceShareText 
 } from '../utils/shareUtils';
-import { ensureInvoicePublicToken, saveInvoice, syncFromFirestore } from '../services/dbEngine';
+import { invoiceEngine } from '../services/invoiceEngine';
 import PullToRefresh from '../components/PullToRefresh';
 import { addNotification } from '../services/notificationsService';
-import { doc, getDoc } from 'firebase/firestore';
-import { db, firebaseReady } from '../services/firebaseConfig';
 import PremiumEmptyState from '../components/PremiumEmptyState';
 
 // Premium WhatsApp Icon SVG Component
@@ -89,48 +87,10 @@ const Invoices = ({
 
   // Background Firestore public proofs sweeping & syncing
   useEffect(() => {
-    if (firebaseReady && invoices.length > 0) {
+    if (invoices.length > 0) {
       const sweepAndSync = async () => {
-        let changed = false;
-        const updatedInvoices = [...invoices];
-        for (let i = 0; i < updatedInvoices.length; i++) {
-          const inv = updatedInvoices[i];
-          if (inv.publicToken) {
-            try {
-              const docRef = doc(db, 'publicInvoices', inv.publicToken);
-              const snap = await getDoc(docRef);
-              if (snap.exists()) {
-                const pubData = snap.data();
-                // Compare paymentProofs or status to detect changes
-                const localProofsStr = JSON.stringify(inv.paymentProofs || []);
-                const pubProofsStr = JSON.stringify(pubData.paymentProofs || []);
-                
-                // Check if new proof was added
-                if (pubData.paymentProofs && pubData.paymentProofs.length > (inv.paymentProofs || []).length) {
-                  addNotification('New Payment Proof', `A new payment proof was submitted for Invoice ${inv.invoiceNumber}.`, 'success');
-                }
-
-                if (localProofsStr !== pubProofsStr || inv.paymentStatus !== pubData.paymentStatus) {
-                  updatedInvoices[i] = {
-                    ...inv,
-                    paymentStatus: pubData.paymentStatus,
-                    paymentProofs: pubData.paymentProofs || [],
-                    paymentHistory: pubData.paymentHistory || [],
-                    amountPaid: pubData.amountPaid || inv.amountPaid,
-                    balanceDue: pubData.balanceDue !== undefined ? pubData.balanceDue : inv.balanceDue
-                  };
-                  changed = true;
-                  // Persist to private collection
-                  await saveInvoice(updatedInvoices[i]);
-                }
-              }
-            } catch (err) {
-              console.warn('Failed to background sweep public invoice:', inv.publicToken, err);
-            }
-          }
-        }
-        if (changed) {
-          localStorage.setItem('billqyro_invoices', JSON.stringify(updatedInvoices));
+        const result = await invoiceEngine.syncPublicInvoices(invoices);
+        if (result && result.changed) {
           window.dispatchEvent(new CustomEvent('billqyro_sync'));
         }
       };
@@ -138,46 +98,22 @@ const Invoices = ({
       const delay = setTimeout(sweepAndSync, 1000);
       return () => clearTimeout(delay);
     }
-  }, [firebaseReady, invoices]);
+  }, [invoices]);
 
   // On-demand real-time public proof syncer when viewing an invoice
   useEffect(() => {
     let cancelled = false;
 
-    if (viewingInvoice && viewingInvoice.publicToken && firebaseReady) {
+    if (viewingInvoice && viewingInvoice.publicToken) {
       const fetchLatestFromPublic = async () => {
         try {
-          const docRef = doc(db, 'publicInvoices', viewingInvoice.publicToken);
-          const snap = await getDoc(docRef);
-          if (cancelled || !snap.exists()) return;
-          const pubData = snap.data();
-          const localProofsStr = JSON.stringify(viewingInvoice.paymentProofs || []);
-          const pubProofsStr = JSON.stringify(pubData.paymentProofs || []);
-          if (localProofsStr !== pubProofsStr || viewingInvoice.paymentStatus !== pubData.paymentStatus) {
-            const updated = {
-              ...viewingInvoice,
-              paymentStatus: pubData.paymentStatus,
-              paymentProofs: pubData.paymentProofs || [],
-              paymentHistory: pubData.paymentHistory || [],
-              amountPaid: pubData.amountPaid || viewingInvoice.amountPaid,
-              balanceDue: pubData.balanceDue !== undefined ? pubData.balanceDue : viewingInvoice.balanceDue
-            };
-
-            if (cancelled) return;
-
-            // Save to Firestore collections (both private and public)
-            await saveInvoice(updated);
-
-            if (cancelled) return;
-
-            // Update state locally
-            const updatedInvoices = invoices.map(inv => inv.id === viewingInvoice.id ? updated : inv);
-            localStorage.setItem('billqyro_invoices', JSON.stringify(updatedInvoices));
-            setViewingInvoice(updated);
-
-            // Sync components
-            window.dispatchEvent(new CustomEvent('billqyro_sync'));
-          }
+          const updated = await invoiceEngine.syncSinglePublicInvoice(viewingInvoice);
+          if (cancelled || !updated || updated === viewingInvoice) return;
+          
+          const updatedInvoices = invoices.map(inv => inv.id === viewingInvoice.id ? updated : inv);
+          localStorage.setItem('billqyro_invoices', JSON.stringify(updatedInvoices));
+          setViewingInvoice(updated);
+          window.dispatchEvent(new CustomEvent('billqyro_sync'));
         } catch (err) {
           console.warn('Failed to sync viewingInvoice with public doc:', err);
         }
@@ -186,7 +122,7 @@ const Invoices = ({
     }
 
     return () => { cancelled = true; };
-  }, [viewingInvoice?.id, firebaseReady, invoices]);
+  }, [viewingInvoice?.id, invoices]);
 
   const handleApproveProof = async (proof) => {
     if (!window.confirm(`Are you sure you want to APPROVE this payment proof of ${currencySymbol}${proof.amount}?`)) return;
@@ -234,7 +170,7 @@ const Invoices = ({
     };
 
     // 4. Save
-    await saveInvoice(updatedInvoice);
+    await invoiceEngine.saveInvoice(updatedInvoice);
     
     setViewingInvoice(updatedInvoice);
     toast.success('Payment proof successfully APPROVED!');
@@ -271,7 +207,7 @@ const Invoices = ({
     };
 
     // Save
-    await saveInvoice(updatedInvoice);
+    await invoiceEngine.saveInvoice(updatedInvoice);
     
     setViewingInvoice(updatedInvoice);
     toast.error('Payment proof REJECTED.');
@@ -334,7 +270,7 @@ const Invoices = ({
   };
 
   const handleRefresh = async () => {
-    await syncFromFirestore();
+    await invoiceEngine.syncFromCloud();
     window.dispatchEvent(new Event('billqyro_sync'));
   };
 
@@ -449,7 +385,7 @@ const Invoices = ({
                   }
                 }}
                 onRestore={viewMode === 'trash' ? (id) => {
-                  import('../services/dbEngine').then(({ restoreInvoice }) => restoreInvoice(id)).then(() => {
+                  import('../services/invoiceEngine').then(({ invoiceEngine }) => invoiceEngine.restoreInvoice(id)).then(() => {
                     toast.success('Invoice restored!');
                     window.dispatchEvent(new Event('billqyro_sync'));
                   });
@@ -582,7 +518,7 @@ const Invoices = ({
                     }
                     setGeneratingLink(true);
                     try {
-                      const token = await ensureInvoicePublicToken(viewingInvoice);
+                      const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                       if (!token) {
                         toast.error('Could not create live link. Please try again.');
                         return;
@@ -620,7 +556,7 @@ const Invoices = ({
                 <button
                    onClick={async () => {
                      try {
-                       const token = await ensureInvoicePublicToken(viewingInvoice);
+                       const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                        if (!token) {
                          toast.error('Could not create live link. Please try again.');
                          return;
@@ -641,7 +577,7 @@ const Invoices = ({
                   <button
                      onClick={async () => {
                        try {
-                         const token = await ensureInvoicePublicToken(viewingInvoice);
+                         const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                          if (!token) {
                            toast.error('Could not create live link. Please try again.');
                            return;
@@ -662,7 +598,7 @@ const Invoices = ({
                 <button
                    onClick={async () => {
                      try {
-                       const token = await ensureInvoicePublicToken(viewingInvoice);
+                       const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                        if (!token) {
                          toast.error('Could not create live link. Please try again.');
                          return;
@@ -682,7 +618,7 @@ const Invoices = ({
                 <button
                    onClick={async () => {
                      try {
-                       const token = await ensureInvoicePublicToken(viewingInvoice);
+                       const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                        if (!token) {
                          toast.error('Could not create live link. Please try again.');
                          return;
@@ -804,7 +740,7 @@ const Invoices = ({
               <button
                 onClick={async () => {
                   try {
-                    const token = await ensureInvoicePublicToken(viewingInvoice);
+                    const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                     if (!token) { toast.error('Could not create live link.'); return; }
                     const updatedInvoice = { ...viewingInvoice, publicToken: token };
                     const link = generateWhatsAppShareLink(updatedInvoice, currencySymbol, businessSettings);
@@ -832,7 +768,7 @@ const Invoices = ({
                   const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
                   if (!isLiveLinkEnabled) { toast.error('Live Link is disabled.'); return; }
                   try {
-                    const token = await ensureInvoicePublicToken(viewingInvoice);
+                    const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                     if (!token) { toast.error('Could not create live link.'); return; }
                     const liveLink = `${window.location.origin}/invoice/${token}`;
                     await navigator.clipboard.writeText(liveLink);

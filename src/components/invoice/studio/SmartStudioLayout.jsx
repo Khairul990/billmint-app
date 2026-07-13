@@ -11,7 +11,7 @@ import SmartBillItemsList from './SmartBillItemsList';
 import CompactSummaryStrip from './CompactSummaryStrip';
 import CompactPaymentSection from './CompactPaymentSection';
 import LiveInvoicePreview from '../LiveInvoicePreview';
-import { ensureInvoicePublicToken } from '../../../services/dbEngine';
+import { invoiceEngine } from '../../../services/invoiceEngine';
 
 const SmartStudioLayout = ({ customers, products, invoices = [], onSaveInvoice, onDownloadPDF, onBack }) => {
   const { state, dispatch, businessSettings, editingInvoice } = useInvoice();
@@ -108,7 +108,7 @@ const SmartStudioLayout = ({ customers, products, invoices = [], onSaveInvoice, 
         
         let token = null;
         try {
-          token = await ensureInvoicePublicToken(savedInvoice);
+          token = await invoiceEngine.ensureInvoicePublicToken(savedInvoice);
         } catch (e) {
           console.error('[SmartStudio] Token gen failed (non-blocking):', e);
         }
@@ -175,7 +175,7 @@ const SmartStudioLayout = ({ customers, products, invoices = [], onSaveInvoice, 
 
       let token = null;
       try {
-        token = await ensureInvoicePublicToken(savedInvoice);
+        token = await invoiceEngine.ensureInvoicePublicToken(savedInvoice);
       } catch (e) {
         console.error('[SmartStudio] Token gen failed (non-blocking):', e);
       }

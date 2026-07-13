@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import BottomSheet from '../components/BottomSheet';
 import PullToRefresh from '../components/PullToRefresh';
-import { syncFromFirestore } from '../services/dbEngine';
+import { invoiceEngine } from '../services/invoiceEngine';
 import { getCustomerLabelByType } from '../config/businessPresets';
 import CustomerLedger from '../components/customers/CustomerLedger';
 import PremiumEmptyState from '../components/PremiumEmptyState';
@@ -122,7 +122,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
   }, [filteredCustomers, displayCount]);
 
   const handleRefresh = useCallback(async () => {
-    await syncFromFirestore();
+    await invoiceEngine.syncFromCloud();
     window.dispatchEvent(new Event('billqyro_sync'));
   }, []);
 

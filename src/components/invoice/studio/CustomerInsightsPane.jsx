@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, TrendingUp, AlertCircle, Award, Clock } from 'lucide-react';
-import { getInvoices } from '../../../services/dbEngine';
+import { invoiceEngine } from '../../../services/invoiceEngine';
 
 const CustomerInsightsPane = ({ customerId }) => {
   const [insights, setInsights] = useState(null);
@@ -16,7 +16,7 @@ const CustomerInsightsPane = ({ customerId }) => {
     const fetchInsights = async () => {
       setLoading(true);
       try {
-        const allInvoices = await getInvoices();
+        const allInvoices = await invoiceEngine.getInvoices();
         const customerInvoices = allInvoices.filter(inv => inv.customerId === customerId);
         
         if (customerInvoices.length === 0) {

@@ -5,7 +5,8 @@ import { doc, runTransaction } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import { ArrowLeft, CheckCircle2, XCircle, Clock, Search, ReceiptText, ExternalLink, Image as ImageIcon, ShieldCheck } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
-import { saveInvoice, getInvoices } from '../services/dbEngine';
+import { invoiceEngine } from '../services/invoiceEngine';
+
 import { pageVariants, staggerContainer, staggerItem, modalOverlayVariants, modalContentVariants } from '../utils/animations';
 import { CardSkeleton } from '../components/PremiumSkeleton';
 
@@ -59,7 +60,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
         });
 
         if (payment.invoiceId) {
-          const localInvoices = await getInvoices();
+          const localInvoices = await invoiceEngine.getInvoices();
           const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
           
           if (existingInvoice && existingInvoice.publicToken) {
@@ -89,7 +90,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
 
       // Update local invoice data after successful transaction
       if (payment.invoiceId) {
-        const localInvoices = await getInvoices();
+        const localInvoices = await invoiceEngine.getInvoices();
         const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
         
         if (existingInvoice) {
@@ -103,7 +104,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
           if (newBalance <= 0) newStatus = 'Paid';
           else if (newPaidAmount > 0) newStatus = 'Partially Paid';
 
-          await saveInvoice({
+          await invoiceEngine.saveInvoice({
             ...existingInvoice,
             status: newStatus,
             paymentStatus: newStatus,
@@ -152,7 +153,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
         });
 
         if (payment.invoiceId) {
-          const localInvoices = await getInvoices();
+          const localInvoices = await invoiceEngine.getInvoices();
           const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
           
           if (existingInvoice && existingInvoice.publicToken) {
@@ -181,7 +182,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
         }
       });
 
-      const localInvoices = await getInvoices();
+      const localInvoices = await invoiceEngine.getInvoices();
       const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
       if (existingInvoice) {
         const grandTotal = parseFloat(existingInvoice.grandTotal) || 0;
@@ -194,7 +195,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
         else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
         else revertedStatus = 'Partially Paid';
 
-        await saveInvoice({
+        await invoiceEngine.saveInvoice({
           ...existingInvoice,
           status: revertedStatus,
           paymentStatus: revertedStatus,

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link2, QrCode, Search, Copy, CheckCircle, Smartphone, ExternalLink } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'react-hot-toast';
-import { getCustomers } from '../services/dbEngine';
+import { customerEngine } from '../services/customerEngine';
 import ClassicLoader from '../components/ClassicLoader';
 import { pageVariants } from '../utils/animations';
 
@@ -17,7 +17,7 @@ export default function CustomerPortalConfig() {
   useEffect(() => {
     const loadCustomers = async () => {
       try {
-        const fetched = await getCustomers();
+        const fetched = await customerEngine.getCustomers();
         setCustomers(fetched || []);
       } catch (err) {
         console.error(err);

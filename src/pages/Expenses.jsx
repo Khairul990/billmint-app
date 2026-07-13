@@ -16,7 +16,7 @@ import { formatCurrency } from '../utils/invoiceUtils';
 import CenteredModal from '../components/CenteredModal';
 import { toast } from 'react-hot-toast';
 import PullToRefresh from '../components/PullToRefresh';
-import { syncFromFirestore } from '../services/dbEngine';
+import { invoiceEngine } from '../services/invoiceEngine';
 
 const CATEGORIES = [
   { name: 'Supplies', color: 'bg-theme-accent-light text-theme-accent', border: 'border-theme-border-soft' },
@@ -76,7 +76,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
   };
 
   const handleRefresh = async () => {
-    await syncFromFirestore();
+    await invoiceEngine.syncFromCloud();
     window.dispatchEvent(new Event('billqyro_sync'));
   };
 

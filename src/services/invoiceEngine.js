@@ -8,8 +8,15 @@ import {
   resetInvoiceLiveLink as dbResetInvoiceLiveLink,
   restoreInvoice as dbRestoreInvoice,
   logAudit,
-  getStudentProfile as dbGetStudentProfile
-} from './dbEngine';
+  getStudentProfile as dbGetStudentProfile,
+  ensureInvoicePublicToken as dbEnsureInvoicePublicToken,
+  syncFromFirestore as dbSyncFromFirestore,
+  retrySyncInvoice as dbRetrySyncInvoice,
+  
+  generateSecureToken as dbGenerateSecureToken} from './dbEngine';
+
+import { db, firebaseReady } from './firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
 export const invoiceEngine = {
   async getInvoices(includeDeleted = false) {
@@ -48,6 +55,32 @@ export const invoiceEngine = {
 
   async resetLiveLink(invoiceId) {
     return dbResetInvoiceLiveLink(invoiceId);
+  },
+
+  async ensurePublicToken(invoice) {
+    return dbEnsureInvoicePublicToken(invoice);
+  },
+
+  async syncFromCloud() {
+    return dbSyncFromFirestore();
+  },
+
+  async retrySync(invoiceId) {
+    return dbRetrySyncInvoice(invoiceId);
+  },
+
+  async updateInvoice(invoiceId, updates) { const invoice = await this.getInvoiceById(invoiceId); if (invoice) { return await dbSaveInvoice({ ...invoice, ...updates }); } return null; },
+
+  generateSecureToken() {
+    return dbGenerateSecureToken();
+  },
+
+  async getInvoiceByPublicToken(token) {
+    return await dbGetInvoiceByPublicToken(token);
+  },
+
+  async ensureInvoicePublicToken(invoiceId) {
+    return await dbEnsureInvoicePublicToken(invoiceId);
   },
 
   calculatePaymentStatus(invoice) {
@@ -121,5 +154,80 @@ export const invoiceEngine = {
       else stats.unpaid++;
     });
     return stats;
+  },
+
+  async syncPublicInvoices(invoices) {
+    if (!firebaseReady || !invoices || invoices.length === 0) return { changed: false, updatedInvoices: invoices };
+    let changed = false;
+    const updatedInvoices = [...invoices];
+    
+    for (let i = 0; i < updatedInvoices.length; i++) {
+      const inv = updatedInvoices[i];
+      if (inv.publicToken) {
+        try {
+          const docRef = doc(db, 'publicInvoices', inv.publicToken);
+          const snap = await getDoc(docRef);
+          if (snap.exists()) {
+            const pubData = snap.data();
+            const localProofsStr = JSON.stringify(inv.paymentProofs || []);
+            const pubProofsStr = JSON.stringify(pubData.paymentProofs || []);
+            
+            let newProof = false;
+            if (pubData.paymentProofs && pubData.paymentProofs.length > (inv.paymentProofs || []).length) {
+              newProof = true;
+            }
+
+            if (localProofsStr !== pubProofsStr || inv.paymentStatus !== pubData.paymentStatus) {
+              updatedInvoices[i] = {
+                ...inv,
+                paymentStatus: pubData.paymentStatus,
+                paymentProofs: pubData.paymentProofs || [],
+                paymentHistory: pubData.paymentHistory || [],
+                amountPaid: pubData.amountPaid || inv.amountPaid,
+                balanceDue: pubData.balanceDue !== undefined ? pubData.balanceDue : inv.balanceDue
+              };
+              changed = true;
+              await dbSaveInvoice(updatedInvoices[i]);
+            }
+          }
+        } catch (err) {
+          console.warn('Failed to background sweep public invoice:', inv.publicToken, err);
+        }
+      }
+    }
+    
+    if (changed) {
+      localStorage.setItem('billqyro_invoices', JSON.stringify(updatedInvoices));
+    }
+    return { changed, updatedInvoices };
+  },
+
+  async syncSinglePublicInvoice(invoice) {
+    if (!firebaseReady || !invoice || !invoice.publicToken) return invoice;
+    try {
+      const docRef = doc(db, 'publicInvoices', invoice.publicToken);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) return invoice;
+      
+      const pubData = snap.data();
+      const localProofsStr = JSON.stringify(invoice.paymentProofs || []);
+      const pubProofsStr = JSON.stringify(pubData.paymentProofs || []);
+      
+      if (localProofsStr !== pubProofsStr || invoice.paymentStatus !== pubData.paymentStatus) {
+        const updated = {
+          ...invoice,
+          paymentStatus: pubData.paymentStatus,
+          paymentProofs: pubData.paymentProofs || [],
+          paymentHistory: pubData.paymentHistory || [],
+          amountPaid: pubData.amountPaid || invoice.amountPaid,
+          balanceDue: pubData.balanceDue !== undefined ? pubData.balanceDue : invoice.balanceDue
+        };
+        await dbSaveInvoice(updated);
+        return updated;
+      }
+    } catch (err) {
+      console.warn('Failed to sync single public invoice:', err);
+    }
+    return invoice;
   }
 };
