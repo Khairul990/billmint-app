@@ -1984,6 +1984,9 @@ function App() {
                 onSaveSettings={(newSettings) => {
                   settingsEngine.saveSettings(newSettings);
                   setSettings(newSettings);
+                  if (isDemoSessionActive) {
+                    setDemoSettings(newSettings);
+                  }
                   setCurrentTab('dashboard');
                 }}
                 setCurrentTab={setCurrentTab}
