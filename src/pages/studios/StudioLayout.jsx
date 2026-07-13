@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { pageVariants } from '../../utils/animations';
 import { 
   Building2, Palette, FileText, Globe, LayoutDashboard, 
-  FormInput, CheckSquare, Shield, Users, Save, X, Search 
+  LayoutTemplate, Zap, Shield, Copy, Save, X, Search, Database 
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
