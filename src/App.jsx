@@ -73,7 +73,7 @@ const CreateInvoice = React.lazy(() => import('./pages/CreateInvoice'));
 const HelpCenter = React.lazy(() => import('./pages/HelpCenter'));
 const Customers = React.lazy(() => import('./pages/Customers'));
 const Products = React.lazy(() => import('./pages/Products'));
-const Settings = React.lazy(() => import('./pages/SettingsStudioV2'));
+const StudioLayout = React.lazy(() => import('./pages/studios/StudioLayout'));
 const Expenses = React.lazy(() => import('./pages/Expenses'));
 const Subscription = React.lazy(() => import('./pages/Subscription'));
 const MoreMenu = React.lazy(() => import('./pages/MoreMenu'));
@@ -1714,7 +1714,7 @@ function App() {
       case 'settings': {
         const session = getAuthSession();
         return (
-          <Settings
+          <StudioLayout
             settings={activeSettings}
             onSaveSettings={handleSaveSettings}
             isAdmin={isAdminUser(session)}
