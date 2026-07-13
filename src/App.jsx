@@ -20,6 +20,7 @@ import {
 import { validatePayload, invoiceSchema, customerSchema } from './utils/validation';
 import { calculateTotals } from './utils/invoiceUtils';
 import { isEducationBusiness } from './config/businessPresets';
+import { initializeStorage } from './services/dbEngine';
 
 import { authEngine } from './services/authEngine';
 import { settingsEngine } from './services/settingsEngine';
@@ -644,7 +645,7 @@ function App() {
 
   // Initialize Database on App mount
   useEffect(() => {
-    adminEngine.initializeStorage();
+    initializeStorage();
   }, []);
 
   // Listen to Firebase Auth state
