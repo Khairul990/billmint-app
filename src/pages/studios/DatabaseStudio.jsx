@@ -6,7 +6,7 @@ const DatabaseStudio = ({ settings, onUpdate }) => {
     <div className="space-y-6">
       <div className="card-premium p-6">
         <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
             <Database className="w-5 h-5" />
           </div>
           <div>
@@ -23,7 +23,7 @@ const DatabaseStudio = ({ settings, onUpdate }) => {
           </p>
           
           <div className="flex justify-center gap-4">
-            <button className="px-4 py-2 bg-blue-500/20 text-blue-400 font-bold text-xs rounded-xl border border-blue-500/30 opacity-50 cursor-not-allowed flex items-center gap-2">
+            <button className="px-4 py-2 bg-theme-accent/20 text-theme-accent font-bold text-xs rounded-xl border border-theme-accent/30 opacity-50 cursor-not-allowed flex items-center gap-2">
               <Plus className="w-4 h-4" /> Create Table
             </button>
             <button className="px-4 py-2 bg-theme-main text-theme-muted font-bold text-xs rounded-xl border border-theme-border-soft flex items-center gap-2">

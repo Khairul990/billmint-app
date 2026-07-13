@@ -33,7 +33,7 @@ const DashboardStudio = ({ settings, onUpdate }) => {
     <div className="space-y-6">
       <div className="card-premium p-6">
         <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-theme-warning/10 text-theme-warning flex items-center justify-center">
             <LayoutDashboard className="w-5 h-5" />
           </div>
           <div>
@@ -46,11 +46,11 @@ const DashboardStudio = ({ settings, onUpdate }) => {
           <h3 className="text-xs font-bold text-theme-muted uppercase tracking-wider mb-4">Widget Manager</h3>
           <div className="space-y-3">
             {widgets.map((widget, idx) => (
-              <div key={widget.id} className="flex items-center justify-between p-4 bg-theme-main border border-theme-border-soft rounded-xl hover:border-orange-500/50 transition-colors">
+              <div key={widget.id} className="flex items-center justify-between p-4 bg-theme-main border border-theme-border-soft rounded-xl hover:border-theme-warning/50 transition-colors">
                 <div className="flex items-center gap-4">
                   <button 
                     onClick={() => handleToggle(widget.id)}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${widget.visible ? 'bg-orange-500/20 text-orange-500' : 'bg-slate-700 text-slate-400'}`}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${widget.visible ? 'bg-theme-warning/20 text-theme-warning' : 'bg-slate-700 text-slate-400'}`}
                   >
                     {widget.visible ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                   </button>

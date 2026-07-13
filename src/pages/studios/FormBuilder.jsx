@@ -63,7 +63,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-2">
         <div>
           <h2 className="text-xl font-black text-theme-primary flex items-center">
-            <FormInput className="w-6 h-6 mr-3 text-rose-500" /> Form Builder
+            <FormInput className="w-6 h-6 mr-3 text-theme-accent" /> Form Builder
           </h2>
           <p className="text-xs text-theme-muted mt-1">Design custom data collection fields for your business entities.</p>
         </div>
@@ -71,7 +71,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
           <button
             onClick={() => setActiveTab('invoice')}
             className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${
-              activeTab === 'invoice' ? 'bg-rose-500 text-white shadow-lg' : 'text-theme-muted hover:text-white'
+              activeTab === 'invoice' ? 'bg-theme-accent text-white shadow-lg' : 'text-theme-muted hover:text-white'
             }`}
           >
             Invoice Fields
@@ -79,7 +79,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
           <button
             onClick={() => setActiveTab('customer')}
             className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${
-              activeTab === 'customer' ? 'bg-rose-500 text-white shadow-lg' : 'text-theme-muted hover:text-white'
+              activeTab === 'customer' ? 'bg-theme-accent text-white shadow-lg' : 'text-theme-muted hover:text-white'
             }`}
           >
             Customer Fields
@@ -95,7 +95,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
             <p className="text-[10px] text-theme-muted mb-4">You haven't added any custom fields for {activeTab}s yet.</p>
             <button 
               onClick={handleAddField}
-              className="px-4 py-2 bg-rose-500/10 text-rose-500 font-bold text-xs rounded-xl hover:bg-rose-500/20 transition-colors inline-flex items-center gap-2"
+              className="px-4 py-2 bg-theme-accent/10 text-theme-accent font-bold text-xs rounded-xl hover:bg-theme-accent/20 transition-colors inline-flex items-center gap-2"
             >
               <Plus className="w-4 h-4" /> Add First Field
             </button>
@@ -110,7 +110,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
                     type="text"
                     value={field.label}
                     onChange={(e) => handleUpdateField(index, 'label', e.target.value)}
-                    className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-rose-500"
+                    className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-theme-accent"
                   />
                 </div>
                 <div className="flex flex-col gap-1 w-full md:w-1/4">
@@ -132,7 +132,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
                       value={field.options || ''}
                       placeholder="Opt 1, Opt 2, Opt 3"
                       onChange={(e) => handleUpdateField(index, 'options', e.target.value)}
-                      className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-rose-500"
+                      className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-theme-accent"
                     />
                   </div>
                 )}
@@ -143,7 +143,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
                       type="checkbox"
                       checked={field.required}
                       onChange={(e) => handleUpdateField(index, 'required', e.target.checked)}
-                      className="rounded bg-theme-main border-theme-border-soft accent-rose-500"
+                      className="rounded bg-theme-main border-theme-border-soft accent-theme-accent"
                     /> Required
                   </label>
                   <div className="flex items-center bg-theme-main rounded-lg border border-theme-border-soft p-1">

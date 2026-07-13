@@ -28,8 +28,8 @@ const ThemeStudio = ({ settings, onUpdate }) => {
     <div className="space-y-6">
       <div className="card-premium p-6">
         <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
-            <Palette className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+            <Sparkles className="w-5 h-5" />
           </div>
           <div>
             <h2 className="text-lg font-black text-theme-primary">Theme Engine</h2>

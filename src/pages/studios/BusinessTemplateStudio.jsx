@@ -2,9 +2,9 @@ import React from 'react';
 import { Copy, Users, Check, LayoutTemplate, Box, ArrowRight } from 'lucide-react';
 
 const PRESETS = [
-  { id: 'retail', name: 'Retail / Shop', icon: Box, color: 'text-orange-400', bg: 'bg-orange-500/10' },
-  { id: 'service', name: 'Service Business', icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-  { id: 'education', name: 'Education / Coaching', icon: LayoutTemplate, color: 'text-purple-400', bg: 'bg-purple-500/10' }
+  { id: 'retail', name: 'Retail / Shop', icon: Box, color: 'text-theme-warning', bg: 'bg-theme-warning/10' },
+  { id: 'service', name: 'Service Business', icon: Users, color: 'text-theme-accent', bg: 'bg-theme-accent/10' },
+  { id: 'education', name: 'Education / Coaching', icon: LayoutTemplate, color: 'text-theme-success', bg: 'bg-theme-success/10' }
 ];
 
 const BusinessTemplateStudio = ({ settings, onUpdate }) => {
@@ -24,7 +24,7 @@ const BusinessTemplateStudio = ({ settings, onUpdate }) => {
     <div className="space-y-6">
       <div className="card-premium p-6">
         <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
             <Copy className="w-5 h-5" />
           </div>
           <div>
@@ -39,8 +39,8 @@ const BusinessTemplateStudio = ({ settings, onUpdate }) => {
             const isActive = settings?.businessType === preset.id;
             
             return (
-              <div key={preset.id} className={`p-5 rounded-2xl border-2 transition-all relative ${isActive ? 'border-indigo-500 bg-theme-surface shadow-xl' : 'border-theme-border-soft bg-theme-main hover:border-gray-500'}`}>
-                {isActive && <div className="absolute top-3 right-3 bg-indigo-500 text-white text-[8px] font-black uppercase px-2 py-1 rounded-md flex items-center gap-1"><Check className="w-3 h-3" /> Active</div>}
+              <div key={preset.id} className={`p-5 rounded-2xl border-2 transition-all relative ${isActive ? 'border-theme-accent bg-theme-surface shadow-xl' : 'border-theme-border-soft bg-theme-main hover:border-gray-500'}`}>
+                {isActive && <div className="absolute top-3 right-3 bg-theme-accent text-white text-[8px] font-black uppercase px-2 py-1 rounded-md flex items-center gap-1"><Check className="w-3 h-3" /> Active</div>}
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${preset.bg} ${preset.color}`}>
                   <Icon className="w-6 h-6" />
                 </div>
@@ -51,7 +51,7 @@ const BusinessTemplateStudio = ({ settings, onUpdate }) => {
                 <button 
                   onClick={() => handleApplyPreset(preset.id)}
                   disabled={isActive}
-                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 ${isActive ? 'bg-indigo-500/20 text-indigo-400 cursor-not-allowed' : 'bg-theme-surface border border-theme-border-soft text-white hover:bg-white hover:text-black'}`}
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 ${isActive ? 'bg-theme-accent/20 text-theme-accent cursor-not-allowed' : 'bg-theme-surface border border-theme-border-soft text-white hover:bg-white hover:text-black'}`}
                 >
                   {isActive ? 'Currently Active' : <>Apply Preset <ArrowRight className="w-3 h-3" /></>}
                 </button>

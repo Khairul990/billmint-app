@@ -42,7 +42,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
       {/* Template Selection */}
       <div className="card-premium p-6">
         <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
             <LayoutTemplate className="w-5 h-5" />
           </div>
           <div>
@@ -58,12 +58,12 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
               onClick={() => handleChange('invoiceTemplate', tpl)}
               className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-3 ${
                 (settings?.invoiceTemplate || 'modern') === tpl 
-                  ? 'border-indigo-500 bg-indigo-500/10' 
+                  ? 'border-theme-accent bg-theme-accent/10' 
                   : 'border-theme-border-soft bg-theme-surface hover:border-gray-500'
               }`}
             >
               <div className="w-full h-24 bg-theme-main rounded border border-theme-border-soft flex flex-col p-2 gap-1 overflow-hidden opacity-80">
-                <div className="w-1/3 h-2 bg-indigo-500 rounded" />
+                <div className="w-1/3 h-2 bg-theme-accent rounded" />
                 <div className="w-1/4 h-2 bg-theme-muted rounded" />
                 <div className="mt-2 w-full h-8 bg-theme-surface rounded border border-theme-border-soft" />
                 <div className="w-1/2 h-2 bg-theme-muted rounded ml-auto mt-1" />
@@ -77,7 +77,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
       {/* Column Manager */}
       <div className="card-premium p-6">
         <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-theme-success/10 text-theme-success flex items-center justify-center">
             <Columns className="w-5 h-5" />
           </div>
           <div>
@@ -92,7 +92,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => handleColumnToggle(col.id)}
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${col.visible ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-400'}`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${col.visible ? 'bg-theme-success/20 text-theme-success' : 'bg-slate-700 text-slate-400'}`}
                 >
                   {col.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                 </button>
@@ -123,7 +123,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card-premium p-6">
           <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-theme-warning/10 text-theme-warning flex items-center justify-center">
               <FileText className="w-5 h-5" />
             </div>
             <div>
@@ -139,7 +139,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
                 onChange={(e) => handleChange('defaultNotes', e.target.value)} 
                 rows={3} 
                 placeholder="Thank you for your business!"
-                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-amber-500 transition-colors resize-none" 
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-theme-warning transition-colors resize-none" 
               />
             </div>
             <div>
@@ -149,7 +149,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
                 onChange={(e) => handleChange('terms', e.target.value)} 
                 rows={4} 
                 placeholder="1. Payment due in 30 days..."
-                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-amber-500 transition-colors resize-none" 
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-theme-warning transition-colors resize-none" 
               />
             </div>
           </div>

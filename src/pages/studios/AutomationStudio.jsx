@@ -44,7 +44,7 @@ const AutomationStudio = ({ settings, onUpdate }) => {
       <div className="card-premium p-6">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6 border-b border-theme-border-soft pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-green-500/10 text-green-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-theme-success/10 text-theme-success flex items-center justify-center">
               <CheckSquare className="w-5 h-5" />
             </div>
             <div>
@@ -54,7 +54,7 @@ const AutomationStudio = ({ settings, onUpdate }) => {
           </div>
           <button 
             onClick={handleAddRule}
-            className="px-4 py-2 bg-green-500 text-white font-bold text-xs rounded-xl shadow-lg hover:bg-green-600 transition-colors inline-flex items-center gap-2"
+            className="px-4 py-2 bg-theme-success text-white font-bold text-xs rounded-xl shadow-lg hover:bg-theme-success/80 transition-colors inline-flex items-center gap-2"
           >
             <Plus className="w-4 h-4" /> New Rule
           </button>
@@ -76,7 +76,7 @@ const AutomationStudio = ({ settings, onUpdate }) => {
                     <select
                       value={rule.condition}
                       onChange={(e) => handleUpdateRule(idx, 'condition', e.target.value)}
-                      className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2.5 rounded-lg focus:outline-none focus:border-green-500 cursor-pointer"
+                      className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2.5 rounded-lg focus:outline-none focus:border-theme-success cursor-pointer"
                     >
                       {CONDITIONS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                     </select>
@@ -91,7 +91,7 @@ const AutomationStudio = ({ settings, onUpdate }) => {
                     <select
                       value={rule.action}
                       onChange={(e) => handleUpdateRule(idx, 'action', e.target.value)}
-                      className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2.5 rounded-lg focus:outline-none focus:border-green-500 cursor-pointer"
+                      className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2.5 rounded-lg focus:outline-none focus:border-theme-success cursor-pointer"
                     >
                       {ACTIONS.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
                     </select>
@@ -105,9 +105,9 @@ const AutomationStudio = ({ settings, onUpdate }) => {
                         type="checkbox" 
                         checked={rule.active}
                         onChange={(e) => handleUpdateRule(idx, 'active', e.target.checked)}
-                        className="absolute block w-4 h-4 rounded-full bg-white border-2 border-theme-surface appearance-none cursor-pointer transition-transform duration-200 ease-in-out checked:translate-x-4 checked:border-green-500 z-10"
+                        className="absolute block w-4 h-4 rounded-full bg-white border-2 border-theme-surface appearance-none cursor-pointer transition-transform duration-200 ease-in-out checked:translate-x-4 checked:border-theme-success z-10"
                       />
-                      <div className={`block w-8 h-4 rounded-full transition-colors duration-200 ease-in-out ${rule.active ? 'bg-green-500' : 'bg-slate-700'}`}></div>
+                      <label className={`block overflow-hidden h-5 rounded-full cursor-pointer transition-colors duration-200 ease-in-out ${rule.active ? 'bg-theme-success' : 'bg-slate-700'}`}></label>
                     </div>
                     {rule.active ? 'ON' : 'OFF'}
                   </label>

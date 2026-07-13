@@ -72,7 +72,7 @@ const PortalStudio = ({ settings, onUpdate }) => {
       {/* Banner & Media */}
       <div className="card-premium p-6">
         <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
             <ImageIcon className="w-5 h-5" />
           </div>
           <div>
@@ -111,7 +111,7 @@ const PortalStudio = ({ settings, onUpdate }) => {
       {/* Quick Links & Layout */}
       <div className="card-premium p-6">
         <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
             <Layout className="w-5 h-5" />
           </div>
           <div>

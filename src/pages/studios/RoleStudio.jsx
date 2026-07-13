@@ -35,7 +35,7 @@ const RoleStudio = ({ settings, onUpdate }) => {
       <div className="card-premium p-6">
         <div className="flex items-center justify-between mb-6 border-b border-theme-border-soft pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-theme-danger/10 text-theme-danger flex items-center justify-center">
               <Shield className="w-5 h-5" />
             </div>
             <div>
@@ -45,11 +45,11 @@ const RoleStudio = ({ settings, onUpdate }) => {
           </div>
         </div>
 
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6 flex gap-3 items-start">
-          <ShieldAlert className="w-5 h-5 text-amber-500 shrink-0" />
+        <div className="bg-theme-warning/10 border border-theme-warning/20 rounded-xl p-4 mb-6 flex gap-3 items-start">
+          <ShieldAlert className="w-5 h-5 text-theme-warning shrink-0" />
           <div>
-            <h3 className="text-xs font-bold text-amber-500 mb-1">Owner Privileges Fixed</h3>
-            <p className="text-[10px] text-amber-500/80 leading-relaxed">
+            <h3 className="text-xs font-bold text-theme-warning mb-1">Owner Privileges Fixed</h3>
+            <p className="text-[10px] text-theme-warning/80 leading-relaxed">
               The 'Owner' role has unrestricted access to all modules, billing, and settings. You cannot modify Owner permissions. Use this studio to restrict access for secondary accounts (e.g. your staff).
             </p>
           </div>
@@ -77,10 +77,10 @@ const RoleStudio = ({ settings, onUpdate }) => {
                       className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-theme-main transition-colors text-left"
                     >
                       <div className="flex items-center gap-2">
-                        {isDangerous && <Lock className="w-3 h-3 text-red-400" />}
+                        {isDangerous && <Lock className="w-3 h-3 text-theme-danger" />}
                         <span className={`text-xs ${hasPerm ? 'text-white font-bold' : 'text-theme-muted'}`}>{perm.label}</span>
                       </div>
-                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${hasPerm ? 'bg-red-500 border-red-500' : 'bg-transparent border-theme-border-soft'}`}>
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${hasPerm ? 'bg-theme-danger border-theme-danger' : 'bg-transparent border-theme-border-soft'}`}>
                         {hasPerm && <Check className="w-3 h-3 text-white" />}
                       </div>
                     </button>

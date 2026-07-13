@@ -94,7 +94,7 @@ const BusinessStudio = ({ settings, onUpdate }) => {
       {/* Localization */}
       <div className="card-premium p-6">
         <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
             <Globe className="w-5 h-5" />
           </div>
           <div>
@@ -106,7 +106,7 @@ const BusinessStudio = ({ settings, onUpdate }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div>
             <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2 flex items-center gap-1"><Languages className="w-3 h-3" /> Language</label>
-            <select value={settings?.language || 'English'} onChange={(e) => handleChange('language', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
+            <select value={settings?.language || 'English'} onChange={(e) => handleChange('language', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-accent transition-colors cursor-pointer">
               <option value="English">English</option>
               <option value="Bengali">Bengali</option>
               <option value="Hindi">Hindi</option>
@@ -114,11 +114,11 @@ const BusinessStudio = ({ settings, onUpdate }) => {
           </div>
           <div>
             <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2 flex items-center gap-1"><DollarSign className="w-3 h-3" /> Currency Symbol</label>
-            <input type="text" value={settings?.currency || '\u20B9'} onChange={(e) => handleChange('currency', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-blue-500 transition-colors" />
+            <input type="text" value={settings?.currency || '₹'} onChange={(e) => handleChange('currency', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-accent transition-colors" />
           </div>
           <div>
             <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2 flex items-center gap-1"><Percent className="w-3 h-3" /> Tax Label</label>
-            <input type="text" value={settings?.taxLabel || 'GST'} onChange={(e) => handleChange('taxLabel', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-blue-500 transition-colors" />
+            <input type="text" value={settings?.taxLabel || 'GST'} onChange={(e) => handleChange('taxLabel', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-accent transition-colors" />
           </div>
         </div>
       </div>
@@ -126,7 +126,7 @@ const BusinessStudio = ({ settings, onUpdate }) => {
       {/* Invoice Defaults */}
       <div className="card-premium p-6">
         <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-theme-success/10 text-theme-success flex items-center justify-center">
             <FileText className="w-5 h-5" />
           </div>
           <div>
@@ -139,12 +139,12 @@ const BusinessStudio = ({ settings, onUpdate }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Invoice Prefix</label>
-              <input type="text" value={settings?.invoicePrefix || 'INV-'} onChange={(e) => handleChange('invoicePrefix', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+              <input type="text" value={settings?.invoicePrefix || 'INV-'} onChange={(e) => handleChange('invoicePrefix', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-success transition-colors" />
             </div>
             <div>
               <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Digital Signature Image</label>
               <div 
-                className={`relative border-2 border-dashed rounded-xl p-3 text-center transition-all ${isDragging ? 'border-emerald-500 bg-emerald-500/5' : 'border-theme-border-soft bg-theme-surface/50 hover:bg-theme-surface'}`}
+                className={`relative border-2 border-dashed rounded-xl p-3 text-center transition-all ${isDragging ? 'border-theme-success bg-theme-success/5' : 'border-theme-border-soft bg-theme-surface/50 hover:bg-theme-surface'}`}
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={async (e) => { 
@@ -168,7 +168,7 @@ const BusinessStudio = ({ settings, onUpdate }) => {
           </div>
           <div>
             <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Global PDF Footer Text</label>
-            <textarea value={settings?.pdfFooter || ''} onChange={(e) => handleChange('pdfFooter', e.target.value)} placeholder="Thank you for your business. Generated by BillQyro." rows={2} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-emerald-500 transition-colors resize-none" />
+            <textarea value={settings?.pdfFooter || ''} onChange={(e) => handleChange('pdfFooter', e.target.value)} placeholder="Thank you for your business. Generated by BillQyro." rows={2} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-theme-success transition-colors resize-none" />
           </div>
         </div>
       </div>
