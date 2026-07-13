@@ -27,7 +27,7 @@ import {
   Printer, 
   FileText
 } from 'lucide-react';
-import { getPublicInvoice } from '../services/dbEngine';
+// Removed unused import: getPublicInvoice
 import { downloadInvoicePDF } from '../utils/pdfUtils';
 import DynamicQRCode from '../components/DynamicQRCode';
 import { toast } from 'react-hot-toast';

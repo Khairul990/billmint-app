@@ -401,8 +401,9 @@ function App() {
     } else if (!s.activeWorkspaceId && s.businessWorkspaces.length) {
       s.activeWorkspaceId = s.businessWorkspaces[0].id;
     }
-    // Persist defaults if newly added
-    saveSettings(s);
+    // Do not call saveSettings(s) here, as it may queue an offline sync
+    // that overwrites the user's cloud settings before syncFromFirestore downloads them.
+    // The defaults will live in memory until the user completes onboarding.
     return s;
   });
   const [expenses, setExpenses] = useState([]);

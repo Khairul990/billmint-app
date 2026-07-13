@@ -857,18 +857,21 @@ function LoginPanel({ onLoginSuccess }) {
           }, { merge: true });
           
           const settingsRef = doc(db, 'settings', user.uid);
-          await setDoc(settingsRef, {
-            email: user.email,
-            contactEmail: user.email,
-            ownerName: name.trim(),
-            businessName: '',
-            phone: '',
-            whatsapp: '',
-            address: '',
-            logoUrl: '',
-            profileSetupCompleted: false,
-            createdAt: new Date().toISOString()
-          }, { merge: true });
+          const settingsSnap = await getDoc(settingsRef);
+          if (!settingsSnap.exists()) {
+            await setDoc(settingsRef, {
+              email: user.email,
+              contactEmail: user.email,
+              ownerName: name.trim(),
+              businessName: '',
+              phone: '',
+              whatsapp: '',
+              address: '',
+              logoUrl: '',
+              profileSetupCompleted: false,
+              createdAt: new Date().toISOString()
+            });
+          }
           
 
           onLoginSuccess();
@@ -907,8 +910,11 @@ function LoginPanel({ onLoginSuccess }) {
             createdAt: new Date().toISOString(),
             role: 'user'
           }, { merge: true });
-          
-          const settingsRef = doc(db, 'settings', user.uid);
+        }
+        
+        const settingsRef = doc(db, 'settings', user.uid);
+        const settingsSnap = await getDoc(settingsRef);
+        if (!settingsSnap.exists()) {
           await setDoc(settingsRef, {
             email: user.email,
             contactEmail: user.email,
@@ -920,7 +926,7 @@ function LoginPanel({ onLoginSuccess }) {
             logoUrl: '',
             profileSetupCompleted: false,
             createdAt: new Date().toISOString()
-          }, { merge: true });
+          });
         }
 
         onLoginSuccess();
