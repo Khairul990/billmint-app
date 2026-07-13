@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { Crown, Search, Loader2, Save } from 'lucide-react';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 import { toast } from 'react-hot-toast';
 import { getGlobalRevenueSettings, saveGlobalRevenueSettings } from '../../services/platformRevenueService';
+import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 
 const PremiumControlCenter = () => {
   const [targetUserId, setTargetUserId] = useState('');
@@ -105,191 +108,184 @@ const PremiumControlCenter = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <div className="flex items-center justify-between">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-32">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center">
-            <Crown className="w-6 h-6 mr-3 text-amber-500" /> Premium Control Center
+          <h2 className="text-3xl font-black text-theme-primary tracking-tight flex items-center">
+            <Crown className="w-8 h-8 mr-3 text-theme-accent" /> Subscription Center
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Manage user subscriptions, global pricing, and payment settings.</p>
+          <p className="text-sm text-theme-secondary mt-1">Manage user subscriptions, global pricing, and payment settings.</p>
         </div>
       </div>
 
-      <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
-        <h3 className="text-white font-bold mb-4">User Lookup</h3>
-        <p className="text-slate-400 text-sm mb-4">Enter a user ID to apply plan overrides.</p>
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={targetUserId}
-            onChange={(e) => setTargetUserId(e.target.value)}
-            placeholder="Enter Firebase User ID (uid)"
-            className="flex-1 bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-purple-500 font-semibold"
-          />
-          <button
-            onClick={handleLookupUser}
-            disabled={loading}
-            className="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-            Lookup
-          </button>
-        </div>
-        {targetUserEmail && (
-          <p className="text-slate-300 text-xs font-semibold mb-4">User: {targetUserEmail}</p>
-        )}
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>User Lookup</CardTitle>
+            <p className="text-xs text-theme-secondary mt-1">Enter a Firebase User ID to apply plan overrides.</p>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                value={targetUserId}
+                onChange={(e) => setTargetUserId(e.target.value)}
+                placeholder="Enter User ID (uid)"
+                className="flex-1"
+              />
+              <Button
+                onClick={handleLookupUser}
+                disabled={loading}
+                variant="primary"
+                leftIcon={loading ? Loader2 : Search}
+              >
+                Lookup
+              </Button>
+            </div>
+            {targetUserEmail && (
+              <p className="text-theme-success text-xs font-bold mt-4">Found User: {targetUserEmail}</p>
+            )}
+          </CardContent>
+        </Card>
 
-      <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
-        <h3 className="text-white font-bold mb-4">User Override Controls</h3>
-        <p className="text-slate-400 text-sm mb-4">Apply plan override to the looked-up user.</p>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => handleOverride('free')}
-            disabled={actionLoading !== null}
-            className="px-4 py-2 bg-slate-800 text-slate-300 text-sm font-bold rounded-xl border border-slate-700 hover:bg-slate-700 transition-all disabled:opacity-50"
-          >
-            {actionLoading === 'free' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Make Free'}
-          </button>
-          <button
-            onClick={() => handleOverride('premium')}
-            disabled={actionLoading !== null}
-            className="px-4 py-2 bg-amber-500/20 text-amber-400 text-sm font-bold rounded-xl border border-amber-500/30 hover:bg-amber-500/30 transition-all disabled:opacity-50"
-          >
-            {actionLoading === 'premium' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Make Premium'}
-          </button>
-          <button
-            onClick={() => handleOverride('lifetime')}
-            disabled={actionLoading !== null}
-            className="px-4 py-2 bg-purple-500/20 text-purple-400 text-sm font-bold rounded-xl border border-purple-500/30 hover:bg-purple-500/30 transition-all disabled:opacity-50"
-          >
-            {actionLoading === 'lifetime' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Make Lifetime'}
-          </button>
-          <button
-            onClick={() => handleOverride('trial')}
-            disabled={actionLoading !== null}
-            className="px-4 py-2 bg-emerald-500/20 text-emerald-400 text-sm font-bold rounded-xl border border-emerald-500/30 hover:bg-emerald-500/30 transition-all disabled:opacity-50"
-          >
-            {actionLoading === 'trial' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Give Trial'}
-          </button>
-          <button
-            disabled
-            className="px-4 py-2 bg-blue-500/20 text-blue-400 text-sm font-bold rounded-xl border border-blue-500/30 opacity-60 cursor-not-allowed"
-          >
-            Exempt User
-          </button>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>User Override Controls</CardTitle>
+            <p className="text-xs text-theme-secondary mt-1">Force apply a subscription plan to the looked-up user.</p>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                variant="outline"
+                onClick={() => handleOverride('free')}
+                disabled={actionLoading !== null}
+                leftIcon={actionLoading === 'free' ? Loader2 : null}
+              >
+                Make Free
+              </Button>
+              <Button
+                variant="outline"
+                className="border-theme-accent text-theme-accent hover:bg-theme-accent/10"
+                onClick={() => handleOverride('premium')}
+                disabled={actionLoading !== null}
+                leftIcon={actionLoading === 'premium' ? Loader2 : null}
+              >
+                Make Premium
+              </Button>
+              <Button
+                variant="outline"
+                className="border-theme-primary text-theme-primary hover:bg-theme-surface-hover"
+                onClick={() => handleOverride('lifetime')}
+                disabled={actionLoading !== null}
+                leftIcon={actionLoading === 'lifetime' ? Loader2 : null}
+              >
+                Make Lifetime
+              </Button>
+              <Button
+                variant="outline"
+                className="border-theme-success text-theme-success hover:bg-theme-success/10"
+                onClick={() => handleOverride('trial')}
+                disabled={actionLoading !== null}
+                leftIcon={actionLoading === 'trial' ? Loader2 : null}
+              >
+                Give Trial
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {!settingsLoading && globalSettings && (
-        <>
-          <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
-            <h3 className="text-white font-bold mb-4">Global Plan Pricing</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-slate-400 text-xs font-bold mb-1 block">Monthly Price</label>
-                <input
+        <div className="grid grid-cols-1 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Global Plan Pricing</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Input
+                  label="Monthly Price"
                   type="number"
                   value={globalSettings.priceMonthly || ''}
                   onChange={(e) => handleSettingChange('priceMonthly', parseFloat(e.target.value))}
-                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
                 />
-              </div>
-              <div>
-                <label className="text-slate-400 text-xs font-bold mb-1 block">Quarterly Price</label>
-                <input
+                <Input
+                  label="Quarterly Price"
                   type="number"
                   value={globalSettings.priceQuarterly || ''}
                   onChange={(e) => handleSettingChange('priceQuarterly', parseFloat(e.target.value))}
-                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
                 />
-              </div>
-              <div>
-                <label className="text-slate-400 text-xs font-bold mb-1 block">Yearly Price</label>
-                <input
+                <Input
+                  label="Yearly Price"
                   type="number"
                   value={globalSettings.priceYearly || ''}
                   onChange={(e) => handleSettingChange('priceYearly', parseFloat(e.target.value))}
-                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
                 />
-              </div>
-              <div>
-                <label className="text-slate-400 text-xs font-bold mb-1 block">Lifetime Price</label>
-                <input
+                <Input
+                  label="Lifetime Price"
                   type="number"
                   value={globalSettings.priceLifetime || ''}
                   onChange={(e) => handleSettingChange('priceLifetime', parseFloat(e.target.value))}
-                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
                 />
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
-            <h3 className="text-white font-bold mb-4">Global Payment Settings</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-slate-400 text-xs font-bold mb-1 block">Bank Account Name</label>
-                <input
+          <Card>
+            <CardHeader>
+              <CardTitle>Global Payment Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input
+                  label="Bank Account Name"
                   type="text"
                   value={globalSettings.bankAccountName || ''}
                   onChange={(e) => handleSettingChange('bankAccountName', e.target.value)}
-                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
                 />
-              </div>
-              <div>
-                <label className="text-slate-400 text-xs font-bold mb-1 block">Bank Account Number</label>
-                <input
+                <Input
+                  label="Bank Account Number"
                   type="text"
                   value={globalSettings.bankAccountNumber || ''}
                   onChange={(e) => handleSettingChange('bankAccountNumber', e.target.value)}
-                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
                 />
-              </div>
-              <div>
-                <label className="text-slate-400 text-xs font-bold mb-1 block">Bank Name</label>
-                <input
+                <Input
+                  label="Bank Name"
                   type="text"
                   value={globalSettings.bankName || ''}
                   onChange={(e) => handleSettingChange('bankName', e.target.value)}
-                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
                 />
-              </div>
-              <div>
-                <label className="text-slate-400 text-xs font-bold mb-1 block">Bank IFSC Code</label>
-                <input
+                <Input
+                  label="Bank IFSC Code"
                   type="text"
                   value={globalSettings.bankIfsc || ''}
                   onChange={(e) => handleSettingChange('bankIfsc', e.target.value)}
-                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
                 />
-              </div>
-              <div>
-                <label className="text-slate-400 text-xs font-bold mb-1 block">UPI ID</label>
-                <input
+                <Input
+                  label="UPI ID"
                   type="text"
                   value={globalSettings.upiId || ''}
                   onChange={(e) => handleSettingChange('upiId', e.target.value)}
-                  className="w-full bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500"
                 />
               </div>
-            </div>
-            
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={handleSaveSettings}
-                disabled={savingSettings}
-                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 disabled:opacity-50"
-              >
-                {savingSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Save Settings
-              </button>
-            </div>
-          </div>
-        </>
+              
+              <div className="mt-6 flex justify-end">
+                <Button
+                  onClick={handleSaveSettings}
+                  disabled={savingSettings}
+                  variant="primary"
+                  className="bg-theme-success border-theme-success shadow-glass"
+                  leftIcon={savingSettings ? Loader2 : Save}
+                >
+                  Save Global Settings
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </motion.div>
   );
 };
 
-export default PremiumControlCenter;
+export default memo(PremiumControlCenter);

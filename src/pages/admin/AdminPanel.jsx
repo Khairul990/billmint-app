@@ -15,6 +15,9 @@ import BackupCenter from './BackupCenter';
 import ChangelogManager from './ChangelogManager';
 import SupportCenter from './SupportCenter';
 import AnnouncementManager from './AnnouncementManager';
+import AnalyticsCenter from './AnalyticsCenter';
+import AutomationCenter from './AutomationCenter';
+import DatabaseCenter from './DatabaseCenter';
 import { pageVariants } from '../../utils/animations';
 
 const AdminPanel = ({ currentTab, setCurrentTab }) => {
@@ -42,6 +45,9 @@ const AdminPanel = ({ currentTab, setCurrentTab }) => {
         {activeAdminTab === 'changelog' && <ChangelogManager />}
         {activeAdminTab === 'support' && <SupportCenter />}
         {activeAdminTab === 'announcements' && <AnnouncementManager />}
+        {activeAdminTab === 'database' && <DatabaseCenter />}
+        {activeAdminTab === 'analytics' && <AnalyticsCenter />}
+        {activeAdminTab === 'automation' && <AutomationCenter />}
       </AdminLayout>
     </motion.div>
   );

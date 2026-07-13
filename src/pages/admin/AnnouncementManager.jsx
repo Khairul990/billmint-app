@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
-import { Megaphone, Plus, Trash2, Edit2, AlertTriangle, Info, ShieldAlert } from 'lucide-react';
+import { Megaphone, Plus, AlertTriangle, Info, ShieldAlert, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getAdminAllAnnouncements, createAnnouncement, toggleAnnouncementActive } from '../../services/dbEngine';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Input, Select, Textarea, Label } from '../../components/ui/Input';
+import { Switch } from '../../components/ui/Switch';
 
 const AnnouncementManager = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -79,148 +84,152 @@ const AnnouncementManager = () => {
 
   const getIconForType = (type) => {
     switch (type) {
-      case 'maintenance': return <ShieldAlert className="w-5 h-5 text-rose-500" />;
-      case 'warning': return <AlertTriangle className="w-5 h-5 text-amber-500" />;
-      case 'update': return <Megaphone className="w-5 h-5 text-emerald-500" />;
-      default: return <Info className="w-5 h-5 text-blue-500" />;
+      case 'maintenance': return <ShieldAlert className="w-5 h-5 text-theme-danger" />;
+      case 'warning': return <AlertTriangle className="w-5 h-5 text-theme-warning" />;
+      case 'update': return <Megaphone className="w-5 h-5 text-theme-success" />;
+      default: return <Info className="w-5 h-5 text-theme-accent" />;
     }
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <div className="flex items-center justify-between">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-32">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center">
-            <Megaphone className="w-6 h-6 mr-3 text-purple-500" /> Announcements & Maintenance
+          <h2 className="text-3xl font-black text-theme-primary tracking-tight flex items-center">
+            <Megaphone className="w-8 h-8 mr-3 text-theme-accent" /> Announcements
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Broadcast messages to all users or trigger global maintenance mode.</p>
+          <p className="text-sm text-theme-secondary mt-1">Broadcast messages to all users or trigger global maintenance mode.</p>
         </div>
-        <button
+        <Button
           onClick={() => setIsCreating(!isCreating)}
-          className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white font-bold rounded-xl flex items-center transition-colors"
+          variant={isCreating ? 'outline' : 'primary'}
+          leftIcon={isCreating ? null : Plus}
         >
-          {isCreating ? 'Cancel' : <><Plus className="w-4 h-4 mr-2" /> New Broadcast</>}
-        </button>
+          {isCreating ? 'Cancel' : 'New Broadcast'}
+        </Button>
       </div>
 
       {isCreating && (
-        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-purple-500/30 overflow-hidden">
-          <h3 className="font-bold text-white mb-4">Create New Broadcast</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">Title</label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={e => setFormData({...formData, title: e.target.value})}
-                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500"
-                placeholder="e.g., Scheduled Maintenance"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">Broadcast Type</label>
-              <select
-                value={formData.type}
-                onChange={e => setFormData({...formData, type: e.target.value})}
-                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 appearance-none"
-              >
-                <option value="info">Info / News</option>
-                <option value="update">Platform Update</option>
-                <option value="warning">Warning / Alert</option>
-                <option value="maintenance">Global Maintenance (Locks App)</option>
-              </select>
-            </div>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block text-xs font-bold text-slate-400 mb-1">Message Body</label>
-            <textarea
-              rows="3"
-              value={formData.message}
-              onChange={e => setFormData({...formData, message: e.target.value})}
-              className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 resize-none"
-              placeholder="Enter the broadcast message..."
-            />
-          </div>
+        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}>
+          <Card className="border-theme-accent/30 shadow-glass">
+            <CardContent className="p-6">
+              <h3 className="font-bold text-theme-primary mb-6">Create New Broadcast</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <Label>Title</Label>
+                  <Input
+                    type="text"
+                    value={formData.title}
+                    onChange={e => setFormData({...formData, title: e.target.value})}
+                    placeholder="e.g., Scheduled Maintenance"
+                  />
+                </div>
+                <div>
+                  <Label>Broadcast Type</Label>
+                  <Select
+                    value={formData.type}
+                    onChange={e => setFormData({...formData, type: e.target.value})}
+                  >
+                    <option value="info">Info / News</option>
+                    <option value="update">Platform Update</option>
+                    <option value="warning">Warning / Alert</option>
+                    <option value="maintenance">Global Maintenance (Locks App)</option>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <Label>Message Body</Label>
+                <Textarea
+                  value={formData.message}
+                  onChange={e => setFormData({...formData, message: e.target.value})}
+                  placeholder="Enter the broadcast message..."
+                />
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">Start Date</label>
-              <input
-                type="date"
-                value={formData.startDate}
-                onChange={e => setFormData({...formData, startDate: e.target.value})}
-                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">End Date (Optional)</label>
-              <input
-                type="date"
-                value={formData.endDate}
-                onChange={e => setFormData({...formData, endDate: e.target.value})}
-                className="w-full bg-[#0f172a]/50 text-white border border-slate-600 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500"
-              />
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 mb-6">
-            <input 
-              type="checkbox" 
-              checked={formData.active} 
-              onChange={e => setFormData({...formData, active: e.target.checked})}
-              id="activeToggle"
-              className="w-4 h-4 rounded text-purple-500 bg-slate-800 border-slate-600 focus:ring-purple-500"
-            />
-            <label htmlFor="activeToggle" className="text-sm font-bold text-white cursor-pointer">Activate Immediately</label>
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <Label>Start Date</Label>
+                  <Input
+                    type="date"
+                    value={formData.startDate}
+                    onChange={e => setFormData({...formData, startDate: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>End Date (Optional)</Label>
+                  <Input
+                    type="date"
+                    value={formData.endDate}
+                    onChange={e => setFormData({...formData, endDate: e.target.value})}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 mb-8">
+                <Switch 
+                  checked={formData.active} 
+                  onChange={(val) => setFormData({...formData, active: val})}
+                />
+                <span className="text-sm font-bold text-theme-primary">Activate Immediately</span>
+              </div>
 
-          <div className="flex justify-end">
-            <button onClick={handleCreate} className="px-6 py-2.5 bg-purple-500 text-white font-bold rounded-xl hover:bg-purple-600 transition-colors">
-              Publish Broadcast
-            </button>
-          </div>
+              <div className="flex justify-end">
+                <Button onClick={handleCreate} variant="primary">
+                  Publish Broadcast
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       )}
 
-      {/* List */}
       <div className="space-y-4">
         {isLoading ? (
-          <div className="text-center py-10 text-slate-500 font-bold text-sm">Loading broadcasts...</div>
+          <Card className="flex justify-center p-12 border-transparent">
+            <Loader2 className="w-8 h-8 animate-spin text-theme-accent" />
+          </Card>
         ) : announcements.length === 0 ? (
-          <div className="text-center py-12 bg-[#1e293b]/60 backdrop-blur-md rounded-3xl border border-slate-700/50">
-            <Megaphone className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-            <p className="text-slate-400 font-bold">No broadcasts yet</p>
-          </div>
+          <Card className="text-center p-12 border-transparent shadow-glass">
+            <Megaphone className="w-12 h-12 text-theme-muted mx-auto mb-4" />
+            <p className="text-theme-secondary font-bold">No broadcasts yet</p>
+          </Card>
         ) : (
           announcements.map((ann) => (
-            <div key={ann.id} className="bg-[#1e293b]/60 backdrop-blur-md p-5 rounded-2xl border border-slate-700/50 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            <Card key={ann.id} className="border-transparent flex flex-col md:flex-row gap-4 items-start md:items-center justify-between p-5 hover:bg-theme-surface-hover transition-colors">
               <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-xl ${ann.type === 'maintenance' ? 'bg-rose-500/10' : ann.type === 'warning' ? 'bg-amber-500/10' : ann.type === 'update' ? 'bg-emerald-500/10' : 'bg-blue-500/10'}`}>
+                <div className={`p-3 rounded-xl ${
+                  ann.type === 'maintenance' ? 'bg-theme-danger/10' : 
+                  ann.type === 'warning' ? 'bg-theme-warning/10' : 
+                  ann.type === 'update' ? 'bg-theme-success/10' : 'bg-theme-accent/10'
+                }`}>
                   {getIconForType(ann.type)}
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-black text-white text-base">{ann.title}</h3>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${ann.active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-400'}`}>
+                    <h3 className="font-black text-theme-primary text-base">{ann.title}</h3>
+                    <Badge variant={ann.active ? 'success' : 'outline'}>
                       {ann.active ? 'Active' : 'Inactive'}
-                    </span>
+                    </Badge>
                   </div>
-                  <p className="text-slate-300 text-sm font-semibold mb-2">{ann.message}</p>
-                  <p className="text-[10px] text-slate-500 font-bold">
+                  <p className="text-theme-secondary text-sm font-semibold mb-2">{ann.message}</p>
+                  <p className="text-[10px] text-theme-muted font-bold">
                     Start: {ann.startDate || 'N/A'} {ann.endDate && ` • End: ${ann.endDate}`}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button
+                <Button
                   onClick={() => handleToggleActive(ann.id, ann.active)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${ann.active ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'}`}
+                  variant={ann.active ? 'outline' : 'primary'}
+                  className={ann.active ? '' : 'bg-theme-success border-theme-success'}
+                  size="sm"
                 >
                   {ann.active ? 'Deactivate' : 'Activate'}
-                </button>
+                </Button>
               </div>
-            </div>
+            </Card>
           ))
         )}
       </div>
@@ -228,4 +237,4 @@ const AnnouncementManager = () => {
   );
 };
 
-export default AnnouncementManager;
+export default memo(AnnouncementManager);

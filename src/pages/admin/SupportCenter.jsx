@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, CheckCircle2, Clock } from 'lucide-react';
+import { MessageSquare, CheckCircle2, Clock, Search, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { 
   getAdminAllSupportTickets, 
@@ -8,6 +8,10 @@ import {
   getAdminAllFeatureRequests, 
   updateFeatureRequestStatus 
 } from '../../services/dbEngine';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 
 const SupportCenter = () => {
   const [activeSubTab, setActiveSubTab] = useState('tickets');
@@ -73,216 +77,222 @@ const SupportCenter = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <div className="flex items-center justify-between">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-32">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center">
-            <MessageSquare className="w-6 h-6 mr-3 text-pink-500" /> Support & Feature Triage
+          <h2 className="text-3xl font-black text-theme-primary tracking-tight flex items-center">
+            <MessageSquare className="w-8 h-8 mr-3 text-theme-accent" /> Support & Feature Triage
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Review user bug reports, support tickets, and feature suggestions.</p>
+          <p className="text-sm text-theme-secondary mt-1">Review user bug reports, support tickets, and feature suggestions.</p>
         </div>
       </div>
 
-      {/* Tabs + Search */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div className="flex gap-2 p-1.5 bg-slate-800/50 rounded-2xl border border-slate-700/50 w-fit">
-          <button
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-theme-surface-elevated p-2 rounded-xl border border-theme-border-soft">
+        <div className="flex gap-2">
+          <Button
+            variant={activeSubTab === 'tickets' ? 'primary' : 'ghost'}
             onClick={() => setActiveSubTab('tickets')}
-            className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${
-              activeSubTab === 'tickets' ? 'bg-pink-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'
-            }`}
+            className={activeSubTab === 'tickets' ? 'shadow-glass' : ''}
+            size="sm"
           >
             Support Tickets ({tickets.length})
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={activeSubTab === 'features' ? 'primary' : 'ghost'}
             onClick={() => setActiveSubTab('features')}
-            className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${
-              activeSubTab === 'features' ? 'bg-pink-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'
-            }`}
+            className={activeSubTab === 'features' ? 'shadow-glass' : ''}
+            size="sm"
           >
             Feature Suggestions ({features.length})
-          </button>
+          </Button>
         </div>
         {activeSubTab === 'tickets' && tickets.length > 0 && (
-          <input
-            type="text"
-            placeholder="Search by email, message, or user ID..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-slate-800/60 text-white border border-slate-700/50 rounded-xl px-4 py-2 text-xs w-full sm:w-72 focus:outline-none focus:border-pink-500 transition-all placeholder-slate-500 font-semibold"
-          />
+          <div className="w-full sm:w-72">
+            <Input
+              icon={Search}
+              type="text"
+              placeholder="Search tickets..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         )}
       </div>
 
-      {/* List Container */}
-      <div className="bg-[#1e293b]/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50">
-        {isLoading ? (
-          <div className="text-center py-12 text-slate-400 font-bold animate-pulse text-xs">Loading items...</div>
-        ) : activeSubTab === 'tickets' ? (
-          <div className="space-y-4">
-            <h3 className="text-white font-bold mb-2">User Support Queue</h3>
-            {(() => {
-              const filteredTickets = tickets.filter(t => {
-                if (!searchTerm) return true;
-                const term = searchTerm.toLowerCase();
-                return (t.message?.toLowerCase().includes(term) || '') ||
-                       (t.userEmail?.toLowerCase().includes(term) || '') ||
-                       (t.userId?.toLowerCase().includes(term) || '') ||
-                       (t.issueType?.toLowerCase().includes(term) || '');
-              });
-              return filteredTickets.length > 0 ? (
-              filteredTickets.map((ticket) => (
-                <div key={ticket.id} className="p-5 bg-[#0f172a] rounded-2xl border border-slate-700 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded ${
-                        ticket.issueType === 'Bug' ? 'bg-rose-500/10 text-rose-400' :
-                        ticket.issueType === 'Billing' ? 'bg-amber-500/10 text-amber-400' :
-                        'bg-blue-500/10 text-blue-400'
-                      }`}>
-                        {ticket.issueType || 'General'}
-                      </span>
-                      <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded ${
-                        ticket.status === 'Open' ? 'bg-emerald-500/10 text-emerald-400 animate-pulse' : 'bg-slate-700/30 text-slate-400'
-                      }`}>
-                        {ticket.status}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-slate-500 font-bold">{new Date(ticket.createdAt).toLocaleString()}</span>
-                  </div>
+      <Card className="border-transparent">
+        <CardContent className="p-6">
+          {isLoading ? (
+            <div className="flex justify-center p-12">
+              <Loader2 className="w-8 h-8 animate-spin text-theme-accent" />
+            </div>
+          ) : activeSubTab === 'tickets' ? (
+            <div className="space-y-4">
+              {(() => {
+                const filteredTickets = tickets.filter(t => {
+                  if (!searchTerm) return true;
+                  const term = searchTerm.toLowerCase();
+                  return (t.message?.toLowerCase().includes(term) || '') ||
+                         (t.userEmail?.toLowerCase().includes(term) || '') ||
+                         (t.userId?.toLowerCase().includes(term) || '') ||
+                         (t.issueType?.toLowerCase().includes(term) || '');
+                });
+                return filteredTickets.length > 0 ? (
+                  filteredTickets.map((ticket) => (
+                    <div key={ticket.id} className="p-5 bg-theme-surface-hover rounded-2xl border border-theme-border-soft space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-theme-border-soft pb-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant={
+                            ticket.issueType === 'Bug' ? 'danger' :
+                            ticket.issueType === 'Billing' ? 'warning' : 'primary'
+                          }>
+                            {ticket.issueType || 'General'}
+                          </Badge>
+                          <Badge variant={ticket.status === 'Open' ? 'success' : 'outline'}>
+                            {ticket.status}
+                          </Badge>
+                        </div>
+                        <span className="text-[10px] text-theme-muted font-bold">{new Date(ticket.createdAt).toLocaleString()}</span>
+                      </div>
 
-                  <div className="space-y-2">
-                    <p className="text-white text-sm font-semibold whitespace-pre-wrap">{ticket.message}</p>
-                    <div className="text-xs text-slate-400 space-y-1">
-                      <p><strong>From User ID:</strong> {ticket.userId}</p>
-                      <p><strong>User Email:</strong> <span className="select-all text-pink-400">{ticket.userEmail}</span></p>
-                      {ticket.userPhone && <p><strong>User Phone:</strong> <span className="select-all text-pink-400">{ticket.userPhone}</span></p>}
+                      <div className="space-y-2">
+                        <p className="text-theme-primary text-sm font-semibold whitespace-pre-wrap">{ticket.message}</p>
+                        <div className="text-xs text-theme-secondary space-y-1">
+                          <p><strong>From User ID:</strong> {ticket.userId}</p>
+                          <p><strong>User Email:</strong> <span className="select-all text-theme-accent">{ticket.userEmail}</span></p>
+                          {ticket.userPhone && <p><strong>User Phone:</strong> <span className="select-all text-theme-accent">{ticket.userPhone}</span></p>}
+                        </div>
+
+                        {ticket.screenshotBase64 && (
+                          <div className="pt-2">
+                            <span className="text-[10px] text-theme-muted font-bold block mb-1">Attached Screenshot:</span>
+                            <img 
+                              src={ticket.screenshotBase64} 
+                              alt="Screenshot" 
+                              className="max-h-40 rounded-xl border border-theme-border-soft hover:max-h-none transition-all cursor-pointer shadow-sm"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="pt-3 border-t border-theme-border-soft space-y-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-theme-muted mb-1.5">Admin Note / Response</label>
+                          <textarea
+                            rows="2"
+                            value={adminNote[ticket.id] || ticket.adminNote || ''}
+                            onChange={(e) => handleNoteChange(ticket.id, e.target.value)}
+                            placeholder="Add internal resolution notes or email response record..."
+                            className="w-full bg-theme-main border border-theme-border-soft rounded-xl p-3 text-theme-primary text-xs focus:outline-none focus:border-theme-accent transition-colors resize-none"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            onClick={() => handleUpdateTicket(ticket.id, 'Open')}
+                            variant="outline"
+                            size="sm"
+                            leftIcon={Clock}
+                          >
+                            Save Note
+                          </Button>
+                          <Button
+                            onClick={() => handleUpdateTicket(ticket.id, 'Closed')}
+                            variant="outline"
+                            className="border-theme-success text-theme-success hover:bg-theme-success/10"
+                            size="sm"
+                            leftIcon={CheckCircle2}
+                          >
+                            Resolve & Close
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-10 text-theme-muted font-bold text-xs">{searchTerm ? 'No tickets match your search.' : 'No active support tickets in the queue.'}</div>
+                )})()}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {features.length > 0 ? (
+                features.map((feature) => (
+                  <div key={feature.id} className="p-5 bg-theme-surface-hover rounded-2xl border border-theme-border-soft space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-theme-border-soft pb-3">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={
+                          feature.priority === 'High' ? 'danger' :
+                          feature.priority === 'Low' ? 'outline' : 'primary'
+                        }>
+                          {feature.priority} Priority
+                        </Badge>
+                        <Badge variant={
+                          feature.status === 'New' ? 'primary' :
+                          feature.status === 'Planned' ? 'warning' :
+                          feature.status === 'Done' ? 'success' : 'danger'
+                        }>
+                          {feature.status}
+                        </Badge>
+                      </div>
+                      <span className="text-[10px] text-theme-muted font-bold">{new Date(feature.createdAt).toLocaleString()}</span>
                     </div>
 
-                    {ticket.screenshotBase64 && (
-                      <div className="pt-2">
-                        <span className="text-[10px] text-slate-400 font-bold block mb-1">Attached Screenshot:</span>
-                        <img 
-                          src={ticket.screenshotBase64} 
-                          alt="Screenshot" 
-                          className="max-h-40 rounded-xl border border-slate-700/80 hover:max-h-none transition-all cursor-pointer"
+                    <div className="space-y-2">
+                      <h4 className="text-theme-primary text-sm font-black">{feature.title}</h4>
+                      <p className="text-theme-secondary text-xs font-semibold whitespace-pre-wrap">{feature.description}</p>
+                      <div className="text-[10px] text-theme-muted space-y-0.5 pt-1.5">
+                        <p><strong>Business Type:</strong> {feature.businessType}</p>
+                        <p><strong>Requestor:</strong> <span className="select-all text-theme-accent">{feature.userEmail}</span></p>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-theme-border-soft space-y-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-theme-muted mb-1.5">Admin Note / Decision Rationale</label>
+                        <textarea
+                          rows="2"
+                          value={adminNote[feature.id] || feature.adminNote || ''}
+                          onChange={(e) => handleNoteChange(feature.id, e.target.value)}
+                          placeholder="Add notes about roadmap integration, feasibility, or rejection reasons..."
+                          className="w-full bg-theme-main border border-theme-border-soft rounded-xl p-3 text-theme-primary text-xs focus:outline-none focus:border-theme-accent transition-colors resize-none"
                         />
                       </div>
-                    )}
-                  </div>
-
-                  {/* Reply Input */}
-                  <div className="pt-3 border-t border-slate-800/60 space-y-3">
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-400 mb-1.5">Admin Note / Response</label>
-                      <textarea
-                        rows="2"
-                        value={adminNote[ticket.id] || ticket.adminNote || ''}
-                        onChange={(e) => handleNoteChange(ticket.id, e.target.value)}
-                        placeholder="Add internal resolution notes or email response record..."
-                        className="w-full bg-slate-800/40 border border-slate-700 rounded-xl p-3 text-white text-xs focus:outline-none focus:border-pink-500 transition-colors resize-none"
-                      />
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => handleUpdateTicket(ticket.id, 'Open')}
-                        className="px-3.5 py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-700 transition-colors flex items-center gap-1.5"
-                      >
-                        <Clock className="w-3.5 h-3.5" /> Save Note
-                      </button>
-                      <button
-                        onClick={() => handleUpdateTicket(ticket.id, 'Closed')}
-                        className="px-3.5 py-2 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-xl hover:bg-emerald-500/20 transition-colors flex items-center gap-1.5"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Resolve & Close
-                      </button>
+                      <div className="flex flex-wrap gap-2 justify-end">
+                        <Button
+                          onClick={() => handleUpdateFeature(feature.id, 'Planned')}
+                          variant="outline"
+                          className="border-theme-warning text-theme-warning hover:bg-theme-warning/10"
+                          size="sm"
+                        >
+                          📅 Mark Planned
+                        </Button>
+                        <Button
+                          onClick={() => handleUpdateFeature(feature.id, 'Done')}
+                          variant="outline"
+                          className="border-theme-success text-theme-success hover:bg-theme-success/10"
+                          size="sm"
+                        >
+                          ✓ Mark Completed
+                        </Button>
+                        <Button
+                          onClick={() => handleUpdateFeature(feature.id, 'Rejected')}
+                          variant="outline"
+                          className="border-theme-danger text-theme-danger hover:bg-theme-danger/10"
+                          size="sm"
+                        >
+                          ✗ Reject Request
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-10 text-slate-500 font-bold text-xs">{searchTerm ? 'No tickets match your search.' : 'No active support tickets in the queue.'}</div>
-            )})()}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <h3 className="text-white font-bold mb-2">Feature Request Board</h3>
-            {features.length > 0 ? (
-              features.map((feature) => (
-                <div key={feature.id} className="p-5 bg-[#0f172a] rounded-2xl border border-slate-700 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded ${
-                        feature.priority === 'High' ? 'bg-rose-500/10 text-rose-400' :
-                        feature.priority === 'Low' ? 'bg-slate-700 text-slate-400' :
-                        'bg-blue-500/10 text-blue-400'
-                      }`}>
-                        {feature.priority} Priority
-                      </span>
-                      <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded ${
-                        feature.status === 'New' ? 'bg-blue-500/10 text-blue-400' :
-                        feature.status === 'Planned' ? 'bg-amber-500/10 text-amber-400' :
-                        feature.status === 'Done' ? 'bg-emerald-500/10 text-emerald-400' :
-                        'bg-rose-500/10 text-rose-400'
-                      }`}>
-                        {feature.status}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-slate-500 font-bold">{new Date(feature.createdAt).toLocaleString()}</span>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="text-white text-sm font-black">{feature.title}</h4>
-                    <p className="text-slate-300 text-xs font-semibold whitespace-pre-wrap">{feature.description}</p>
-                    <div className="text-[10px] text-slate-400 space-y-0.5 pt-1.5">
-                      <p><strong>Business Type:</strong> {feature.businessType}</p>
-                      <p><strong>Requestor:</strong> <span className="select-all text-pink-400">{feature.userEmail}</span></p>
-                    </div>
-                  </div>
-
-                  {/* Actions & Notes */}
-                  <div className="pt-3 border-t border-slate-800/60 space-y-3">
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-400 mb-1.5">Admin Note / Decision Rationale</label>
-                      <textarea
-                        rows="2"
-                        value={adminNote[feature.id] || feature.adminNote || ''}
-                        onChange={(e) => handleNoteChange(feature.id, e.target.value)}
-                        placeholder="Add notes about roadmap integration, feasibility, or rejection reasons..."
-                        className="w-full bg-slate-800/40 border border-slate-700 rounded-xl p-3 text-white text-xs focus:outline-none focus:border-pink-500 transition-colors resize-none"
-                      />
-                    </div>
-                    <div className="flex flex-wrap gap-2 justify-end">
-                      <button
-                        onClick={() => handleUpdateFeature(feature.id, 'Planned')}
-                        className="px-3 py-1.5 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-xl hover:bg-amber-500/20 transition-colors"
-                      >
-                        📅 Mark Planned
-                      </button>
-                      <button
-                        onClick={() => handleUpdateFeature(feature.id, 'Done')}
-                        className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-xl hover:bg-emerald-500/20 transition-colors"
-                      >
-                        ✓ Mark Completed
-                      </button>
-                      <button
-                        onClick={() => handleUpdateFeature(feature.id, 'Rejected')}
-                        className="px-3 py-1.5 bg-rose-500/10 text-rose-400 text-xs font-bold rounded-xl hover:bg-rose-500/20 transition-colors"
-                      >
-                        ✗ Reject Request
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-10 text-slate-500 font-bold text-xs">No active feature suggestions submitted yet.</div>
-            )}
-          </div>
-        )}
-      </div>
+                ))
+              ) : (
+                <div className="text-center py-10 text-theme-muted font-bold text-xs">No active feature suggestions submitted yet.</div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </motion.div>
   );
 };
 
-export default SupportCenter;
+export default memo(SupportCenter);

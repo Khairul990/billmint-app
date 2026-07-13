@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, Shield, UserX, CheckCircle, Ban, Users, Inbox, Loader2, RefreshCw, ChevronLeft, ChevronRight, Eye, Trash2, RotateCcw, Smartphone, Clock, Cloud, MonitorSmartphone, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, memo } from 'react';
+import { Search, Filter, Shield, UserX, CheckCircle, Ban, Users, Inbox, Loader2, ChevronLeft, ChevronRight, Eye, Trash2, RotateCcw, Smartphone, Clock, Cloud, MonitorSmartphone, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { getAdminUsersList, getAdminPlatformRevenueStates, updateUserBlockStatus, deleteEnterpriseUser, resetEnterpriseWorkspace } from '../../services/dbEngine';
 import { toast } from 'react-hot-toast';
 import { pageVariants } from '../../utils/animations';
 import { TableRowSkeleton } from '../../components/PremiumSkeleton';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/Table';
+import { Input, Select } from '../../components/ui/Input';
+import { Modal } from '../../components/ui/Modal';
 
 const PAGE_SIZE = 15;
 
@@ -12,7 +18,6 @@ const UserManager = () => {
   const [users, setUsers] = useState([]);
   const [revenueStates, setRevenueStates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [processingId, setProcessingId] = useState(null);
@@ -21,7 +26,6 @@ const UserManager = () => {
 
   const fetchUsersData = async () => {
     setLoading(true);
-    setLoadError(false);
     try {
       const list = await getAdminUsersList();
       const revs = await getAdminPlatformRevenueStates();
@@ -29,7 +33,6 @@ const UserManager = () => {
       setRevenueStates(revs);
     } catch (e) {
       console.error(e);
-      setLoadError(true);
       toast.error('Failed to load user list.');
     } finally {
       setLoading(false);
@@ -98,11 +101,7 @@ const UserManager = () => {
 
   const getRevenueInfo = (userId) => {
     const state = revenueStates.find(r => r.userId === userId);
-    return state || {
-      platformPendingAmount: 0,
-      lockStatus: 'none',
-      totalBillsCreated: 0
-    };
+    return state || { platformPendingAmount: 0, lockStatus: 'none', totalBillsCreated: 0 };
   };
 
   const filteredUsers = users.filter(user => {
@@ -129,290 +128,226 @@ const UserManager = () => {
   if (loading) {
     return (
       <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-6">
-        <div className="section-header">
-          <div>
-            <h2 className="section-header-title flex items-center">
-              <Users className="w-6 h-6 mr-3 text-blue-400" /> User Manager
-            </h2>
-          </div>
-        </div>
-        <div className="card-premium p-4">
+        <div className="mb-6"><h2 className="text-2xl font-black text-theme-primary">User Manager</h2></div>
+        <Card className="p-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <TableRowSkeleton key={i} cols={5} />
           ))}
-        </div>
+        </Card>
       </motion.div>
     );
   }
 
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-6 pb-32">
-      <div className="section-header flex-col md:flex-row gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h2 className="section-header-title flex items-center">
-            <Users className="w-6 h-6 mr-3 text-blue-400" /> User Control Center
+          <h2 className="text-3xl font-black text-theme-primary tracking-tight flex items-center">
+            <Users className="w-8 h-8 mr-3 text-theme-accent" /> User Control Center
           </h2>
-          <p className="section-header-subtitle">Search, filter, view profiles, and manage enterprise security limits.</p>
+          <p className="text-sm text-theme-secondary mt-1">Search, filter, view profiles, and manage enterprise security limits.</p>
         </div>
         
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500" />
-            <input 
-              type="text" 
-              placeholder="Search users..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-premium bg-[#1e293b]/60 backdrop-blur-md text-white border border-slate-700/50 rounded-xl pl-10 pr-4 py-2.5 w-full md:w-64 text-sm focus:outline-none focus:border-blue-500 transition-all placeholder-slate-500 font-semibold"
-            />
-          </div>
-          <div className="relative">
-            <select 
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="input-premium appearance-none bg-[#1e293b]/60 backdrop-blur-md text-white border border-slate-700/50 rounded-xl pl-10 pr-8 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-all cursor-pointer font-semibold"
-            >
-              <option value="all">All Status</option>
-              <option value="premium">Premium Users</option>
-              <option value="free">Free Starter</option>
-              <option value="locked">Locked Dues</option>
-              <option value="suspended">Suspended</option>
-            </select>
-            <Filter className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500" />
-          </div>
-        </div>
-      </div>
-
-      <div className="card-premium bg-[#1e293b]/40 backdrop-blur-md rounded-2xl border border-slate-700/50 overflow-hidden shadow-xl">
-        <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-slate-700/50 bg-slate-800/50 text-xs font-bold text-slate-400 uppercase tracking-wider">
-          <div className="col-span-4">User Details</div>
-          <div className="col-span-2 text-center">Plan</div>
-          <div className="col-span-2 text-center">Storage</div>
-          <div className="col-span-2 text-center">Status</div>
-          <div className="col-span-2 text-right">Actions</div>
-        </div>
-
-        {paginatedUsers.length === 0 ? (
-          <div className="empty-state p-12">
-            <Inbox className="w-10 h-10 text-blue-400 mx-auto mb-4" />
-            <h3 className="empty-state-title text-center">No users found</h3>
-          </div>
-        ) : (
-          <div className="divide-y divide-slate-800">
-            {paginatedUsers.map((user) => {
-              const rev = getRevenueInfo(user.userId);
-              const workspacesCount = user.workspacesCount || 1;
-              return (
-                <div key={user.userId} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center text-sm hover:bg-slate-800/20 transition-colors">
-                  
-                  {/* User Email & Profile */}
-                  <div className="col-span-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-lg shrink-0">
-                      {user.email?.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-extrabold text-white truncate">{user.businessName || 'Unnamed Business'}</p>
-                      <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
-                    </div>
-                  </div>
-
-                  {/* Plan */}
-                  <div className="col-span-2 text-center flex flex-col items-center">
-                    <span className={`badge-premium px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border ${
-                      user.planStatus === 'premium' ? 'bg-purple-500/15 text-purple-400 border-purple-500/20' : 'bg-slate-700/20 text-slate-400 border-slate-700/30'
-                    }`}>
-                      {user.planStatus === 'premium' ? 'Premium' : 'Free'}
-                    </span>
-                    <p className="text-[10px] text-slate-500 mt-1 font-bold">{workspacesCount} Workspace(s)</p>
-                  </div>
-
-                  {/* Storage */}
-                  <div className="col-span-2 text-center flex flex-col items-center">
-                    <div className="flex items-center gap-1 text-slate-300 font-bold">
-                      <Cloud className="w-3.5 h-3.5 text-blue-400" />
-                      {(workspacesCount * 0.05).toFixed(2)} GB
-                    </div>
-                  </div>
-
-                  {/* Status */}
-                  <div className="col-span-2 text-center flex flex-col items-center">
-                    {user.blocked ? (
-                      <span className="badge-premium px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-rose-500/15 text-rose-400 border border-rose-500/20">
-                        Suspended
-                      </span>
-                    ) : rev.lockStatus === 'locked' ? (
-                      <span className="badge-premium px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-orange-500/15 text-orange-400 border border-orange-500/20">
-                        Locked (Dues)
-                      </span>
-                    ) : (
-                      <span className="badge-premium px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                        Active
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="col-span-2 flex justify-end gap-2">
-                    <button onClick={() => setSelectedUser(user)} className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    {user.blocked ? (
-                      <button onClick={() => handleToggleBlock(user, 'activate')} className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-colors">
-                        <CheckCircle className="w-4 h-4" />
-                      </button>
-                    ) : (
-                      <button onClick={() => handleToggleBlock(user, 'suspend')} className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-colors">
-                        <Ban className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-      
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between p-4 border-t border-slate-700/50 bg-slate-800/30 rounded-xl">
-          <span className="text-xs text-slate-400 font-semibold">
-            Showing {(safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, filteredUsers.length)} of {filteredUsers.length}
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={safePage <= 1}
-              className="btn-premium p-2 bg-slate-800 text-slate-400 rounded-lg hover:text-white disabled:opacity-30"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="text-xs text-slate-400 font-bold px-2">{safePage} / {totalPages}</span>
-            <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={safePage >= totalPages}
-              className="btn-premium p-2 bg-slate-800 text-slate-400 rounded-lg hover:text-white disabled:opacity-30"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* User Profile Modal */}
-      <AnimatePresence>
-        {selectedUser && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          <Input 
+            icon={Search}
+            type="text" 
+            placeholder="Search users..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full md:w-64"
+          />
+          <Select 
+            icon={Filter}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#0f172a] border border-slate-700/50 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
-            >
-              <div className="flex justify-between items-center p-6 border-b border-slate-800/50 bg-slate-800/20">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white font-black text-xl shadow-lg">
-                    {selectedUser.email?.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black text-white leading-tight">{selectedUser.businessName || 'Unnamed Business'}</h3>
-                    <p className="text-sm text-blue-400 font-medium">{selectedUser.email}</p>
-                  </div>
-                </div>
-                <button onClick={() => setSelectedUser(null)} className="p-2 text-slate-400 hover:text-white bg-slate-800/50 rounded-xl transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+            <option value="all">All Status</option>
+            <option value="premium">Premium Users</option>
+            <option value="free">Free Starter</option>
+            <option value="locked">Locked Dues</option>
+            <option value="suspended">Suspended</option>
+          </Select>
+        </div>
+      </div>
 
-              <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-8">
-                
-                {/* Meta Overview */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Status</p>
-                    <p className={`font-bold ${selectedUser.blocked ? 'text-rose-400' : 'text-emerald-400'}`}>
-                      {selectedUser.blocked ? 'Suspended' : 'Active'}
-                    </p>
-                  </div>
-                  <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Storage Used</p>
-                    <p className="font-bold text-white flex items-center gap-2"><Cloud className="w-4 h-4 text-blue-400"/> {((selectedUser.workspacesCount || 1) * 0.05).toFixed(2)} GB</p>
-                  </div>
-                  <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Plan</p>
-                    <p className={`font-bold ${selectedUser.planStatus === 'premium' ? 'text-purple-400' : 'text-slate-300'}`}>
-                      {selectedUser.planStatus === 'premium' ? 'Premium' : 'Free Starter'}
-                    </p>
-                  </div>
-                  <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Workspaces</p>
-                    <p className="font-bold text-white">{selectedUser.workspacesCount || 1} Active</p>
-                  </div>
-                </div>
-
-                {/* Device & Login History */}
-                <div>
-                  <h4 className="text-sm font-bold text-white mb-4 flex items-center gap-2"><Clock className="w-4 h-4 text-amber-400" /> Recent Logins & Devices</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between bg-slate-800/30 border border-slate-700/30 p-3 rounded-xl">
+      <Card className="overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>User Details</TableHead>
+              <TableHead className="text-center">Plan</TableHead>
+              <TableHead className="text-center">Storage</TableHead>
+              <TableHead className="text-center">Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedUsers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-12">
+                  <Inbox className="w-10 h-10 text-theme-muted mx-auto mb-4" />
+                  <p className="text-theme-secondary font-bold">No users found.</p>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedUsers.map((user) => {
+                const rev = getRevenueInfo(user.userId);
+                const workspacesCount = user.workspacesCount || 1;
+                return (
+                  <TableRow key={user.userId}>
+                    <TableCell>
                       <div className="flex items-center gap-3">
-                        <MonitorSmartphone className="w-5 h-5 text-slate-400" />
-                        <div>
-                          <p className="text-sm font-bold text-slate-200">Chrome on Windows 11</p>
-                          <p className="text-[10px] text-slate-500 uppercase font-mono mt-0.5">IP: 192.168.1.1 (Mumbai, IN)</p>
+                        <div className="w-10 h-10 rounded-xl bg-theme-accent/10 flex items-center justify-center text-theme-accent font-black text-lg shrink-0">
+                          {user.email?.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-black text-theme-primary truncate">{user.businessName || 'Unnamed Business'}</p>
+                          <p className="text-[11px] text-theme-secondary truncate">{user.email}</p>
                         </div>
                       </div>
-                      <span className="text-xs text-emerald-400 font-bold">Active Now</span>
-                    </div>
-                    <div className="flex items-center justify-between bg-slate-800/30 border border-slate-700/30 p-3 rounded-xl">
-                      <div className="flex items-center gap-3">
-                        <Smartphone className="w-5 h-5 text-slate-400" />
-                        <div>
-                          <p className="text-sm font-bold text-slate-200">Safari on iPhone 14 Pro</p>
-                          <p className="text-[10px] text-slate-500 uppercase font-mono mt-0.5">IP: 103.14.21.0 (Delhi, IN)</p>
-                        </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant={user.planStatus === 'premium' ? 'primary' : 'outline'}>
+                        {user.planStatus === 'premium' ? 'Premium' : 'Free'}
+                      </Badge>
+                      <p className="text-[10px] text-theme-secondary mt-1 font-bold">{workspacesCount} Workspace(s)</p>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1 text-theme-primary font-bold">
+                        <Cloud className="w-3.5 h-3.5 text-theme-accent" />
+                        {(workspacesCount * 0.05).toFixed(2)} GB
                       </div>
-                      <span className="text-xs text-slate-500 font-bold">2 days ago</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="border-t border-slate-800/50 pt-6">
-                  <h4 className="text-sm font-bold text-white mb-4">Danger Zone & Administrative Actions</h4>
-                  <div className="flex flex-wrap gap-3">
-                    <button onClick={handleResetWorkspace} className="btn-premium px-4 py-2 bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
-                      <RotateCcw className="w-4 h-4" /> Reset Workspace
-                    </button>
-                    {selectedUser.blocked ? (
-                      <button onClick={() => handleToggleBlock(selectedUser, 'activate')} className="btn-premium px-4 py-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
-                        <CheckCircle className="w-4 h-4" /> Restore User
-                      </button>
-                    ) : (
-                      <button onClick={() => handleToggleBlock(selectedUser, 'suspend')} className="btn-premium px-4 py-2 bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
-                        <Ban className="w-4 h-4" /> Suspend User
-                      </button>
-                    )}
-                    <button onClick={handleDeleteUser} disabled={processingId === selectedUser.userId} className="btn-premium px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500/20 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors ml-auto">
-                      {processingId === selectedUser.userId ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} Delete Account
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            </motion.div>
-          </motion.div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {user.blocked ? (
+                        <Badge variant="danger">Suspended</Badge>
+                      ) : rev.lockStatus === 'locked' ? (
+                        <Badge variant="warning">Locked (Dues)</Badge>
+                      ) : (
+                        <Badge variant="success">Active</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => setSelectedUser(user)}>
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        {user.blocked ? (
+                          <Button variant="outline" className="border-theme-success text-theme-success" size="sm" onClick={() => handleToggleBlock(user, 'activate')}>
+                            <CheckCircle className="w-4 h-4" />
+                          </Button>
+                        ) : (
+                          <Button variant="outline" className="border-theme-danger text-theme-danger" size="sm" onClick={() => handleToggleBlock(user, 'suspend')}>
+                            <Ban className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+        
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 border-t border-theme-border-soft bg-theme-surface-elevated">
+            <span className="text-xs text-theme-secondary font-semibold">
+              Showing {(safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, filteredUsers.length)} of {filteredUsers.length}
+            </span>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={safePage <= 1}>
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <span className="text-xs text-theme-primary font-bold px-2">{safePage} / {totalPages}</span>
+              <Button variant="ghost" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={safePage >= totalPages}>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </Card>
 
+      <Modal isOpen={!!selectedUser} onClose={() => setSelectedUser(null)} title={selectedUser?.businessName || 'Unnamed Business'} className="max-w-3xl">
+        {selectedUser && (
+          <div className="p-6 space-y-8">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-theme-accent/10 flex items-center justify-center text-theme-accent font-black text-xl">
+                {selectedUser.email?.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="text-sm text-theme-secondary font-medium">{selectedUser.email}</p>
+                <p className="text-xs text-theme-muted font-mono">{selectedUser.userId}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card className="p-4 border-transparent shadow-none bg-theme-surface-elevated">
+                <p className="text-[10px] font-black text-theme-muted uppercase tracking-wider mb-1">Status</p>
+                <p className={`font-bold ${selectedUser.blocked ? 'text-theme-danger' : 'text-theme-success'}`}>
+                  {selectedUser.blocked ? 'Suspended' : 'Active'}
+                </p>
+              </Card>
+              <Card className="p-4 border-transparent shadow-none bg-theme-surface-elevated">
+                <p className="text-[10px] font-black text-theme-muted uppercase tracking-wider mb-1">Storage Used</p>
+                <p className="font-bold text-theme-primary flex items-center gap-2">
+                  <Cloud className="w-4 h-4 text-theme-accent"/> {((selectedUser.workspacesCount || 1) * 0.05).toFixed(2)} GB
+                </p>
+              </Card>
+              <Card className="p-4 border-transparent shadow-none bg-theme-surface-elevated">
+                <p className="text-[10px] font-black text-theme-muted uppercase tracking-wider mb-1">Plan</p>
+                <p className={`font-bold ${selectedUser.planStatus === 'premium' ? 'text-theme-accent' : 'text-theme-primary'}`}>
+                  {selectedUser.planStatus === 'premium' ? 'Premium' : 'Free Starter'}
+                </p>
+              </Card>
+              <Card className="p-4 border-transparent shadow-none bg-theme-surface-elevated">
+                <p className="text-[10px] font-black text-theme-muted uppercase tracking-wider mb-1">Workspaces</p>
+                <p className="font-bold text-theme-primary">{selectedUser.workspacesCount || 1} Active</p>
+              </Card>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-bold text-theme-primary mb-4 flex items-center gap-2"><Clock className="w-4 h-4 text-theme-warning" /> Recent Logins & Devices</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between bg-theme-surface-elevated border border-theme-border-soft p-3 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <MonitorSmartphone className="w-5 h-5 text-theme-muted" />
+                    <div>
+                      <p className="text-sm font-bold text-theme-primary">Chrome on Windows 11</p>
+                      <p className="text-[10px] text-theme-secondary uppercase font-mono mt-0.5">IP: 192.168.1.1 (Mumbai, IN)</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-theme-success font-bold">Active Now</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-theme-border-soft pt-6">
+              <h4 className="text-sm font-bold text-theme-primary mb-4">Danger Zone</h4>
+              <div className="flex flex-wrap gap-3">
+                <Button variant="outline" className="border-theme-warning text-theme-warning hover:bg-theme-warning/10" onClick={handleResetWorkspace} leftIcon={RotateCcw}>
+                  Reset Workspace
+                </Button>
+                {selectedUser.blocked ? (
+                  <Button variant="outline" className="border-theme-success text-theme-success hover:bg-theme-success/10" onClick={() => handleToggleBlock(selectedUser, 'activate')} leftIcon={CheckCircle}>
+                    Restore User
+                  </Button>
+                ) : (
+                  <Button variant="outline" className="border-theme-danger text-theme-danger hover:bg-theme-danger/10" onClick={() => handleToggleBlock(selectedUser, 'suspend')} leftIcon={Ban}>
+                    Suspend User
+                  </Button>
+                )}
+                <Button variant="primary" className="bg-theme-danger hover:bg-theme-danger/80 border-theme-danger shadow-[0_0_15px_var(--danger)] ml-auto" disabled={processingId === selectedUser.userId} onClick={handleDeleteUser} leftIcon={processingId === selectedUser.userId ? Loader2 : Trash2}>
+                  {processingId === selectedUser.userId ? 'Deleting...' : 'Delete Account'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </motion.div>
   );
 };
 
-export default UserManager;
+export default memo(UserManager);

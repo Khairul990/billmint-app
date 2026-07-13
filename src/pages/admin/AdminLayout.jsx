@@ -1,35 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { getAuthSession } from '../../services/dbEngine';
-import { auth } from '../../services/firebaseConfig';
-import { Lock, ShieldAlert, ArrowLeft, Activity, Users, Settings as SettingsIcon, CreditCard, ShieldCheck, Menu, X, User, Crown, ToggleRight, Database, ListPlus, MessageSquare, Megaphone, Building2 } from 'lucide-react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Lock, ShieldAlert, ArrowLeft, Activity, Users, Settings as SettingsIcon, 
+  CreditCard, ShieldCheck, Menu, X, User, Crown, ToggleRight, Database, 
+  ListPlus, MessageSquare, Megaphone, Building2, Workflow, BarChart3
+} from 'lucide-react';
 
 const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTab }) => {
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [pin, setPin] = useState('');
-  const [pinError, setPinError] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const adminMenu = [
     { id: 'dashboard', label: 'Dashboard', icon: <Activity className="w-5 h-5" /> },
     { id: 'users', label: 'User Manager', icon: <Users className="w-5 h-5" /> },
-    { id: 'workspaces', label: 'Workspace Admin', icon: <Building2 className="w-5 h-5" /> },
-    { id: 'premium', label: 'Premium Control', icon: <Crown className="w-5 h-5" /> },
-    { id: 'payments', label: 'Payment Proofs', icon: <CreditCard className="w-5 h-5" /> },
-    { id: 'settings', label: 'Global Settings', icon: <SettingsIcon className="w-5 h-5" /> },
-    { id: 'features', label: 'Feature Switch', icon: <ToggleRight className="w-5 h-5" /> },
-    { id: 'lab', label: 'Owner Test Lab', icon: <ShieldAlert className="w-5 h-5" /> },
+    { id: 'workspaces', label: 'Workspaces', icon: <Building2 className="w-5 h-5" /> },
+    { id: 'premium', label: 'Subscriptions', icon: <Crown className="w-5 h-5" /> },
+    { id: 'payments', label: 'Payments', icon: <CreditCard className="w-5 h-5" /> },
+    { id: 'features', label: 'Feature Control', icon: <ToggleRight className="w-5 h-5" /> },
     { id: 'health', label: 'App Health', icon: <Activity className="w-5 h-5" /> },
     { id: 'security', label: 'Security Center', icon: <ShieldCheck className="w-5 h-5" /> },
-    { id: 'backup', label: 'Backup Center', icon: <Database className="w-5 h-5" /> },
-    { id: 'changelog', label: 'Changelog Manager', icon: <ListPlus className="w-5 h-5" /> },
-    { id: 'support', label: 'Support & Features', icon: <MessageSquare className="w-5 h-5" /> },
+    { id: 'database', label: 'Database', icon: <Database className="w-5 h-5" /> },
+    { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-5 h-5" /> },
+    { id: 'automation', label: 'Automation', icon: <Workflow className="w-5 h-5" /> },
+    { id: 'support', label: 'Support', icon: <MessageSquare className="w-5 h-5" /> },
     { id: 'announcements', label: 'Announcements', icon: <Megaphone className="w-5 h-5" /> },
+    { id: 'settings', label: 'Global Settings', icon: <SettingsIcon className="w-5 h-5" /> },
+    { id: 'lab', label: 'Owner Test Lab', icon: <ShieldAlert className="w-5 h-5" /> },
+    { id: 'changelog', label: 'Changelog', icon: <ListPlus className="w-5 h-5" /> },
   ];
-
-  // The PIN check is now handled upstream by App.jsx -> AdminPINLogin.jsx
-  // So we don't need the internal lock screen here. IsAuthorized logic is removed to avoid conflicts.
-  // We can just rely on the parent wrapper guarding access.
 
   const handleNavClick = (id) => {
     setActiveAdminTab(id);
@@ -38,17 +35,18 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
 
   const SidebarContent = () => (
     <>
-      <div className="p-6 border-b border-slate-800/50">
-        <h1 className="text-white font-black text-xl tracking-tight flex items-center">
-          <Lock className="w-5 h-5 mr-2 text-rose-500" /> KM Admin
-        </h1>
-        <p className="text-[10px] text-emerald-400 uppercase tracking-wider font-bold mt-2 flex items-center">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
-          Secure Session
-        </p>
+      <div className="p-6 border-b border-theme-border-soft flex items-center shrink-0">
+        <Lock className="w-5 h-5 mr-2 text-theme-danger" />
+        <div>
+          <h1 className="text-theme-primary font-black text-xl tracking-tight leading-none">KM Admin</h1>
+          <p className="text-[10px] text-theme-success uppercase tracking-wider font-bold mt-1 flex items-center">
+            <span className="w-1.5 h-1.5 rounded-full bg-theme-success mr-2 animate-pulse"></span>
+            Secure Session
+          </p>
+        </div>
       </div>
       
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
         {adminMenu.map(item => {
           const isActive = activeAdminTab === item.id;
           return (
@@ -57,14 +55,14 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
               onClick={() => handleNavClick(item.id)}
               className={`w-full flex items-center p-3 rounded-xl transition-all duration-200 text-sm font-semibold relative overflow-hidden group ${
                 isActive 
-                  ? 'bg-gradient-to-r from-rose-500/10 to-transparent text-rose-400' 
-                  : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
+                  ? 'bg-theme-accent/10 text-theme-accent border border-theme-accent/20' 
+                  : 'text-theme-secondary hover:bg-theme-surface-hover hover:text-theme-primary border border-transparent'
               }`}
             >
               {isActive && (
                 <motion.div 
                   layoutId="activeTabIndicator"
-                  className="absolute left-0 top-0 bottom-0 w-1 bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]" 
+                  className="absolute left-0 top-0 bottom-0 w-1 bg-theme-accent shadow-[0_0_10px_var(--accent)]" 
                 />
               )}
               <div className={`mr-3 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
@@ -76,31 +74,33 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
         })}
       </nav>
       
-      <div className="p-4 border-t border-slate-800/50">
+      <div className="p-4 border-t border-theme-border-soft shrink-0">
         <button
           onClick={() => setCurrentTab('dashboard')}
-          className="w-full flex items-center justify-center p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700/80 text-slate-300 text-sm font-bold transition-all border border-slate-700/50 hover:border-slate-600"
+          className="w-full flex items-center justify-center p-3 rounded-xl bg-theme-surface-elevated hover:bg-theme-surface-hover text-theme-primary text-sm font-bold transition-all border border-theme-border-soft"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to BillQyro
+          <ArrowLeft className="w-4 h-4 mr-2" /> Exit Admin
         </button>
       </div>
     </>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-[#0f172a] to-slate-900 text-slate-200 font-sans flex flex-col md:flex-row overflow-hidden">
+    <div className="min-h-screen bg-theme-main text-theme-primary font-sans flex flex-col md:flex-row overflow-hidden relative">
+      {/* Background gradients similar to platform studio */}
+      <div className="absolute top-0 left-0 w-full h-96 bg-theme-accent/5 rounded-b-[100%] blur-[120px] pointer-events-none" />
       
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 bg-[#1e293b]/40 backdrop-blur-xl border-r border-slate-800/50 flex-col z-20 shrink-0">
+      <aside className="hidden md:flex w-64 bg-theme-surface/80 backdrop-blur-xl border-r border-theme-border-soft flex-col z-20 shrink-0">
         <SidebarContent />
       </aside>
 
       {/* Mobile Header & Sidebar */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-[#1e293b]/80 backdrop-blur-lg border-b border-slate-800/50 z-30 sticky top-0">
-        <div className="flex items-center text-white font-black text-lg">
-          <Lock className="w-5 h-5 mr-2 text-rose-500" /> KM Admin
+      <div className="md:hidden flex items-center justify-between p-4 bg-theme-surface/80 backdrop-blur-lg border-b border-theme-border-soft z-30 sticky top-0">
+        <div className="flex items-center text-theme-primary font-black text-lg">
+          <Lock className="w-5 h-5 mr-2 text-theme-danger" /> KM Admin
         </div>
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-slate-300 hover:text-white p-2">
+        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-theme-secondary hover:text-theme-primary p-2">
           {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
@@ -111,7 +111,7 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="md:hidden absolute top-[69px] left-0 right-0 bottom-0 bg-[#0f172a] z-20 flex flex-col"
+            className="md:hidden absolute top-[69px] left-0 right-0 bottom-0 bg-theme-main z-20 flex flex-col"
           >
             <SidebarContent />
           </motion.div>
@@ -119,35 +119,35 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
       </AnimatePresence>
       
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
         
         {/* Top Header */}
-        <header className="hidden md:flex h-20 items-center justify-between px-8 bg-transparent border-b border-slate-800/30 shrink-0">
+        <header className="hidden md:flex h-20 items-center justify-between px-8 bg-transparent border-b border-theme-border-soft shrink-0">
           <div>
-            <h2 className="text-xl font-bold text-white tracking-tight">Owner Control Panel</h2>
-            <p className="text-xs text-slate-400 mt-1">Manage all aspects of the BillQyro platform.</p>
+            <h2 className="text-xl font-bold text-theme-primary tracking-tight">Enterprise Control Center</h2>
+            <p className="text-xs text-theme-secondary mt-1">Manage global platform resources and security.</p>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="flex items-center px-3 py-1.5 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
-              <span className="text-xs font-bold text-emerald-400">System Healthy</span>
+            <div className="flex items-center px-3 py-1.5 bg-theme-success/10 rounded-full border border-theme-success/20">
+              <span className="w-2 h-2 rounded-full bg-theme-success mr-2 animate-pulse"></span>
+              <span className="text-xs font-bold text-theme-success">System Healthy</span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 p-[2px]">
-              <div className="w-full h-full bg-slate-900 rounded-full flex items-center justify-center overflow-hidden">
-                <User className="w-5 h-5 text-rose-100" />
+            <div className="w-10 h-10 rounded-full bg-theme-accent/20 border border-theme-accent p-0.5 shadow-glass">
+              <div className="w-full h-full bg-theme-surface rounded-full flex items-center justify-center overflow-hidden">
+                <User className="w-5 h-5 text-theme-accent" />
               </div>
             </div>
           </div>
         </header>
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative z-10">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar relative z-10">
           <motion.div
             key={activeAdminTab}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="max-w-7xl mx-auto"
+            className="max-w-7xl mx-auto w-full"
           >
             {children}
           </motion.div>
