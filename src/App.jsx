@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Trash2, AlertTriangle, Lock } from 'lucide-react';
+import ClassicLoader from './components/ClassicLoader';
+import PostLoginWelcome from './components/PostLoginWelcome';
+import Layout from './components/Layout';
 import { useThemeEngine } from './hooks/useThemeEngine';
 import { 
   isDemoModeActive, 
