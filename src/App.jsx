@@ -136,7 +136,7 @@ class ErrorBoundary extends React.Component {
 
 
 const AdminRouteGuard = ({ setCurrentTab, children }) => {
-  const session = authEngine.authEngine.getAuthSession();
+  const session = authEngine.getAuthSession();
   const [isUnlocked, setIsUnlocked] = useState(
     localStorage.getItem('billqyro_admin_unlocked') === 'true'
   );
@@ -186,7 +186,7 @@ function App() {
   }, []);
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const realAuth = !!authEngine.authEngine.getAuthSession();
+    const realAuth = !!authEngine.getAuthSession();
     const demoAuth = localStorage.getItem('billqyro_demo_session_active') === 'true' && 
                      localStorage.getItem('billqyro_demo_journey_mode') === 'true' && 
                      localStorage.getItem('billqyro_demo_logged_in') === 'true';
@@ -237,7 +237,7 @@ function App() {
       return 'admin-panel';
     }
     const saved = localStorage.getItem('billqyro_last_route');
-    const isAuth = !!authEngine.authEngine.getAuthSession() || (localStorage.getItem('billqyro_demo_session_active') === 'true' && localStorage.getItem('billqyro_demo_journey_mode') === 'true' && localStorage.getItem('billqyro_demo_logged_in') === 'true');
+    const isAuth = !!authEngine.getAuthSession() || (localStorage.getItem('billqyro_demo_session_active') === 'true' && localStorage.getItem('billqyro_demo_journey_mode') === 'true' && localStorage.getItem('billqyro_demo_logged_in') === 'true');
     if (isAuth && saved && saved !== 'admin-panel') {
       return saved;
     }
@@ -402,7 +402,7 @@ function App() {
 
   useEffect(() => {
     const fetchRevenue = async () => {
-      const session = authEngine.authEngine.getAuthSession();
+      const session = authEngine.getAuthSession();
       const userId = session?.uid || authEngine.getRealUserId() || 'local-user';
       try {
         const status = await paymentEngine.getUserRevenueState(userId, invoices, subscription);
@@ -523,7 +523,7 @@ function App() {
         setExpenses(await expenseEngine.getExpenses() || []);
         const latestSettings = settingsEngine.getSettings();
         if (latestSettings) {
-          if (adminEngine.isAdminUser(authEngine.authEngine.getAuthSession()) && latestSettings.maintenanceMode) {
+          if (adminEngine.isAdminUser(authEngine.getAuthSession()) && latestSettings.maintenanceMode) {
             const cleaned = { ...latestSettings };
             delete cleaned.maintenanceMode;
             setSettings(cleaned);
@@ -632,7 +632,7 @@ function App() {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         // Firebase auth state updated
         if (user) {
-          const session = authEngine.authEngine.getAuthSession();
+          const session = authEngine.getAuthSession();
           const newSession = {
             timestamp: Date.now(),
             token: 'billqyro-secure-session',
@@ -1344,7 +1344,7 @@ function App() {
 
   // --- TAB ROUTER SWITCHBOARD ---
   const renderTabContent = () => {
-    const isMaintenanceMode = (globalMaintenanceMode || activeSettings?.maintenanceMode) && !adminEngine.isAdminUser(authEngine.authEngine.getAuthSession());
+    const isMaintenanceMode = (globalMaintenanceMode || activeSettings?.maintenanceMode) && !adminEngine.isAdminUser(authEngine.getAuthSession());
 
     switch (currentTab) {
       case 'landing':
@@ -1455,7 +1455,7 @@ function App() {
           />
         );
       case 'create-invoice':
-        if ((isMaintenanceMode || (activeSettings?.disableNewBillCreation && !adminEngine.isAdminUser(authEngine.authEngine.getAuthSession()))) && !editingInvoice) {
+        if ((isMaintenanceMode || (activeSettings?.disableNewBillCreation && !adminEngine.isAdminUser(authEngine.getAuthSession()))) && !editingInvoice) {
           return (
             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
               <div className="w-16 h-16 bg-theme-warning/20 text-theme-warning rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -1714,7 +1714,7 @@ function App() {
           />
         );
       case 'settings': {
-        const session = authEngine.authEngine.getAuthSession();
+        const session = authEngine.getAuthSession();
         return (
           <StudioLayout
             settings={activeSettings}
@@ -1824,7 +1824,7 @@ function App() {
 
   // --- Account Blocked Interceptor ---
   if (settings?.blocked === true) {
-    const session = authEngine.authEngine.getAuthSession();
+    const session = authEngine.getAuthSession();
     if (!adminEngine.isAdminUser(session)) {
       return (
         <div className="min-h-screen bg-theme-main flex flex-col items-center justify-center p-6 text-center font-sans text-white">
@@ -1871,7 +1871,7 @@ function App() {
     const pendingAmount = chargeableBills * chargePerBill;
     
     if (pendingAmount >= pendingAmountLimit) {
-      const session = authEngine.authEngine.getAuthSession();
+      const session = authEngine.getAuthSession();
       if (!adminEngine.isAdminUser(session)) {
         return (
           <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
@@ -1981,7 +1981,7 @@ function App() {
                 userRole={userRole}
                 invoices={activeInvoices}
                 subscription={subscription}
-                userEmail={authEngine.authEngine.getAuthSession()?.userEmail}
+                userEmail={authEngine.getAuthSession()?.userEmail}
                 onQuickBillOpen={() => setIsQuickBillOpen(true)}
                 pendingPaymentsCount={pendingPayments.length}
                 businessWorkspaces={businessWorkspaces}
