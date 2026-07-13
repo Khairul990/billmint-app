@@ -1,7 +1,7 @@
 import React from 'react';
 import { Palette, Sun, Moon, Monitor, PaintBucket } from 'lucide-react';
 import { ALL_THEMES, THEME_INFO } from '../../utils/themeUtils';
-import { applyTheme } from '../../hooks/useThemeEngine';
+import { applyFullTheme } from '../../hooks/useThemeEngine';
 
 const THEME_PRESETS = [
   { id: 'light', label: 'Light', icon: Sun },
@@ -13,18 +13,11 @@ const THEME_PRESETS = [
 const ThemeStudio = ({ settings, onUpdate }) => {
   
   const handleChange = (key, value) => {
+    const updatedSettings = { ...settings, [key]: value };
     onUpdate({ [key]: value });
     
-    // Live preview theme apply
-    if (key === 'themeColor') {
-      applyTheme(value, settings.brandColor, settings.darkMode);
-    }
-    if (key === 'darkMode') {
-      applyTheme(settings.themeColor, settings.brandColor, value);
-    }
-    if (key === 'brandColor') {
-      applyTheme(settings.themeColor, value, settings.darkMode);
-    }
+    // Live preview theme apply instantly injects CSS variables to :root
+    applyFullTheme(updatedSettings, false);
   };
 
   const handleToggleDark = () => {

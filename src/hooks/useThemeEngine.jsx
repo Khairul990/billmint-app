@@ -18,7 +18,15 @@ const shadeColor = (color, percent) => {
 };
 
 export const applyTheme = (themeId, brandColor = null, darkMode = false, persist = true) => {
+  applyFullTheme({ themeColor: themeId, brandColor, darkMode }, persist);
+};
+
+export const applyFullTheme = (settings, persist = true) => {
+  if (!settings) return;
   const root = document.documentElement;
+  
+  const { themeColor, brandColor, darkMode, cornerRadius, shadowIntensity, animationSpeed, fontDensity } = settings;
+  const themeId = themeColor || 'obsidian-gold';
 
   if (darkMode) {
     root.classList.add('dark');
@@ -26,6 +34,7 @@ export const applyTheme = (themeId, brandColor = null, darkMode = false, persist
     root.classList.remove('dark');
   }
 
+  // Brand Color
   if (brandColor && themeId === 'custom') {
     const rgb = hexToRgb(brandColor);
     if (rgb) {
@@ -51,6 +60,11 @@ export const applyTheme = (themeId, brandColor = null, darkMode = false, persist
     root.setAttribute('data-theme', themeId);
   }
 
+  // Modifiers
+  if (cornerRadius !== undefined) root.style.setProperty('--radius-base', `${cornerRadius}px`);
+  if (animationSpeed !== undefined) root.style.setProperty('--animation-multiplier', `${animationSpeed}s`);
+  if (shadowIntensity !== undefined) root.style.setProperty('--shadow-opacity', `${shadowIntensity / 100}`);
+
   updateFaviconForTheme(themeId);
   
   if (persist) {
@@ -63,12 +77,6 @@ export const useThemeEngine = (businessSettings) => {
   useEffect(() => {
     if (!businessSettings) return;
 
-    const themeId = businessSettings.themeColor || businessSettings.themePreset || 'obsidian-gold';
-    const brandColor = businessSettings.brandColor || null;
-    const darkMode = businessSettings.darkMode ?? false;
-    const themeType = businessSettings.themeType || 'built-in';
-
-    const effectiveThemeId = themeType === 'custom' && brandColor ? 'custom' : themeId;
-    applyTheme(effectiveThemeId, brandColor, darkMode);
-  }, [businessSettings?.themeColor, businessSettings?.brandColor, businessSettings?.themeType, businessSettings?.darkMode, businessSettings?.plan]);
+    applyFullTheme(businessSettings);
+  }, [businessSettings?.themeColor, businessSettings?.brandColor, businessSettings?.themeType, businessSettings?.darkMode, businessSettings?.plan, businessSettings?.cornerRadius, businessSettings?.animationSpeed, businessSettings?.shadowIntensity]);
 };

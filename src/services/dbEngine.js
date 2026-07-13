@@ -1476,6 +1476,29 @@ export const updateUserBlockStatus = async (targetUserId, blocked) => {
 };
 
 // --- SETTINGS ---
+export const migrateSettingsSchema_v3 = (settings) => {
+  if (!settings) return null;
+  if (settings.v3Migrated) return settings;
+  
+  // Backward compatibility migration map for the new 14-Studio Platform Architecture
+  return {
+    ...settings,
+    autoBackup: settings.autoBackup ?? true,
+    currency: settings.currency || 'USD',
+    timezone: settings.timezone || 'UTC',
+    dateFormat: settings.dateFormat || 'MM/DD/YYYY',
+    numberFormat: settings.numberFormat || 'en-US',
+    taxLabel: settings.taxLabel || 'Tax',
+    defaultTaxRate: settings.defaultTaxRate || 0,
+    whatsappEnabled: settings.whatsappEnabled ?? false,
+    smsEnabled: settings.smsEnabled ?? false,
+    cornerRadius: settings.cornerRadius ?? 12,
+    shadowIntensity: settings.shadowIntensity ?? 50,
+    animationSpeed: settings.animationSpeed ?? 1,
+    v3Migrated: true
+  };
+};
+
 export const getSettings = () => {
   if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
     const s = JSON.parse(localStorage.getItem('billqyro_demo_settings') || 'null');
@@ -1490,7 +1513,12 @@ export const getSettings = () => {
     };
   }
   initializeStorage();
-  const settings = JSON.parse(localStorage.getItem(KEYS.SETTINGS));
+  let settings = JSON.parse(localStorage.getItem(KEYS.SETTINGS));
+  
+  if (settings) {
+    settings = migrateSettingsSchema_v3(settings);
+  }
+
   if (settings && (!settings.email || settings.email === 'billing@firm.com' || settings.email.includes('firm email demo'))) {
     const authSession = localStorage.getItem(GLOBAL_KEYS.AUTH);
     if (authSession) {
