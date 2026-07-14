@@ -20,7 +20,7 @@ import {
 import { validatePayload, invoiceSchema, customerSchema } from './utils/validation';
 import { calculateTotals } from './utils/invoiceUtils';
 import { isEducationBusiness } from './config/businessPresets';
-import { initializeStorage } from './services/dbEngine';
+import { initializeStorage, getSettings as dbGetSettings } from './services/dbEngine';
 
 import { authEngine } from './services/authEngine';
 import { settingsEngine } from './services/settingsEngine';
@@ -378,7 +378,7 @@ function App() {
   const [products, setProducts] = useState([]);
   // Settings with workspace support
   const [settings, setSettings] = useState(() => {
-    const s = settingsEngine.getSettings() || {};
+    const s = dbGetSettings() || {};
     if (!s.businessWorkspaces) {
       // Initialize default workspace
       const defaultWs = {
@@ -543,7 +543,7 @@ function App() {
         setProducts(await productEngine.getProducts() || []);
         setStudents(await customerEngine.getCustomers() || []);
         setExpenses(await expenseEngine.getExpenses() || []);
-        const latestSettings = settingsEngine.getSettings();
+        const latestSettings = await settingsEngine.getSettings();
         if (latestSettings) {
           if (adminEngine.isAdminUser(authEngine.getAuthSession()) && latestSettings.maintenanceMode) {
             const cleaned = { ...latestSettings };

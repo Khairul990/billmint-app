@@ -55,9 +55,9 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const toggleTheme = () => {
+  const toggleTheme = async () => {
     const newDarkMode = !isDarkMode;
-    const currentSettings = settingsEngine.getSettings() || {};
+    const currentSettings = await settingsEngine.getSettings() || {};
     currentSettings.darkMode = newDarkMode;
     if (currentSettings.themePreset === 'dark') {
       currentSettings.themePreset = 'light';
