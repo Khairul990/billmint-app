@@ -770,35 +770,21 @@ function App() {
       setShowWelcomeAnimation(true);
       sessionStorage.setItem('billqyro_welcome_shown', 'true');
     }
-    // Auth state changes (isAuthenticated, sync) are handled reactively by onAuthStateChanged.
+    // Set default authenticated route to dashboard immediately
+    setCurrentTab('dashboard');
   };
 
-  // Onboarding Interceptor for Authenticated Session Boot
+  // Handle Legacy User Silent Upgrade (No redirects)
   useEffect(() => {
-    // Wait until boot and sync is completely finished
     if (isAuthenticated && !isAppBooting && settings && cloudSyncDone) {
-      // Onboarding check complete
       const isLegacyConfigured = !!(settings.businessName && settings.businessName.trim());
-      
-      if (!settings.setupCompleted && !isLegacyConfigured) {
-        if (currentTab !== 'onboarding') {
-          setCurrentTab('onboarding');
-        }
-      } else if (!settings.setupCompleted && isLegacyConfigured) {
-        // Silently upgrade legacy users to completed setup
+      if (!settings.setupCompleted && isLegacyConfigured) {
         const updated = { ...settings, setupCompleted: true };
         settingsEngine.saveSettings(updated);
         setSettings(updated);
-        if (currentTab === 'onboarding' || currentTab === 'landing') {
-          setCurrentTab('dashboard');
-        }
-      } else if (settings.setupCompleted) {
-        if (currentTab === 'onboarding' || currentTab === 'landing') {
-          setCurrentTab('dashboard');
-        }
       }
     }
-  }, [isAuthenticated, isAppBooting, settings, currentTab]);
+  }, [isAuthenticated, isAppBooting, settings, cloudSyncDone]);
 
   const handleLogout = async () => {
     try {
@@ -1916,15 +1902,21 @@ function App() {
   const path = window.location.pathname;
   const showAdminRoute = path === '/km-admin' || currentTab === 'admin-panel';
 
+  // Enterprise Route Gate - Wait for Auth, Workspace, and Sync to resolve
+  const isAppReady = !isAppBooting && (!isAuthenticated || (cloudSyncDone && settings));
+
   return (
     <ErrorBoundary>
       <AnimatePresence mode="wait">
-        {isAppBooting ? (
+        {!isAppReady ? (
           <motion.div 
             key="global-loader"
             exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeOut' } }}
             className="fixed inset-0 z-[9999] bg-theme-main flex flex-col items-center justify-center font-sans"
-          />
+          >
+            <ClassicLoader />
+            <p className="text-theme-muted font-bold mt-4 animate-pulse">Loading workspace...</p>
+          </motion.div>
         ) : showAdminRoute ? (
           <motion.div key="admin-route" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full">
             <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
