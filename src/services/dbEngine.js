@@ -281,12 +281,19 @@ export const cleanupStaleData = async () => {
   }
 };
 
+let pendingSyncResolvers = [];
 export const syncOfflineTransactions = async () => {
   return new Promise((resolve) => {
+    pendingSyncResolvers.push(resolve);
     if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
     
     syncDebounceTimer = setTimeout(async () => {
-      if (isSyncing) return resolve(null);
+      const resolvers = [...pendingSyncResolvers];
+      pendingSyncResolvers = [];
+      if (isSyncing) {
+        resolvers.forEach(r => r(null));
+        return;
+      }
       isSyncing = true;
       try {
         await _runSyncOfflineTransactions();
@@ -294,7 +301,7 @@ export const syncOfflineTransactions = async () => {
         console.error('Background sync failed:', e);
       } finally {
         isSyncing = false;
-        resolve(true);
+        resolvers.forEach(r => r(true));
       }
     }, 300); // 300ms batch window
   });
