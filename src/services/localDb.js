@@ -3,7 +3,7 @@
  * Provides fast, offline-first asynchronous storage structures for larger data collections.
  */
 const DB_NAME = 'billqyro-db';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 let _dbInstance = null;
 let _dbOpenPromise = null;

@@ -321,7 +321,7 @@ const _runSyncOfflineTransactions = async () => {
       return;
     }
     const queue = await BillQyroDB.getAll('syncQueue');
-    const userQueue = queue.filter(tx => tx.userId === userId || !tx.userId);
+    const userQueue = queue.filter(tx => tx.userId === userId);
     
     if (userQueue.length === 0) return;
 
@@ -1836,6 +1836,34 @@ export const deleteCustomer = async (id, permanent = false) => {
     firebaseStatus = 'offline';
   }
   return { updatedCustomers: filtered.filter(c => !c.isDeleted), firebaseStatus };
+};
+
+export const restoreCustomer = async (id) => {
+  const customers = await getCustomers(true);
+  const idx = customers.findIndex(c => c.id === id);
+  if (idx === -1) return { updatedCustomers: customers.filter(c => !c.isDeleted), firebaseStatus: 'failed' };
+  
+  customers[idx].isDeleted = false;
+  customers[idx].deletedAt = null;
+  customers[idx].syncStatus = 'pending';
+  const filtered = customers.filter(c => !c.isDeleted);
+  updateLocalCache(KEYS.CUSTOMERS, customers);
+  await BillQyroDB.put('customers', customers[idx]);
+
+  let firebaseStatus = 'pending';
+  await queueSyncTransaction('save', 'customers', id, customers[idx]);
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+
+  if (firebaseReady) {
+    if (navigator.onLine) {
+      syncOfflineTransactions().catch(e => console.error(e));
+    } else {
+      firebaseStatus = 'offline';
+    }
+  } else {
+    firebaseStatus = 'offline';
+  }
+  return { updatedCustomers: filtered, firebaseStatus };
 };
 
 // --- PRODUCTS ---

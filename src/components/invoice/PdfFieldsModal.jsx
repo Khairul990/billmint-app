@@ -2,7 +2,7 @@ import React from 'react';
 import { X, Check } from 'lucide-react';
 
 const PdfFieldsModal = ({ 
-  showPdfSettings, setShowPdfSettings, pdfVisibleFields, togglePdfField, billType 
+  showPdfSettings, setShowPdfSettings, pdfVisibleFields, setPdfVisibleFields, togglePdfField, billType, ALL_FIELDS_BY_TEMPLATE 
 }) => {
   return (
     <>

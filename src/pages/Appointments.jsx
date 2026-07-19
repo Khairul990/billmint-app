@@ -80,11 +80,9 @@ const Appointments = ({ invoices, customers = [], businessSettings, setCurrentTa
         } catch (e) { /* ignore */ }
 
         try {
-          const { invoiceEngine } = await import('../services/invoiceEngine');
-          if (typeof syncFromFirestore === 'function') {
-            await syncFromFirestore();
-          }
-        } catch (e) { /* dbEngine functions not available */ }
+          const { appointmentEngine } = await import('../services/appointmentEngine');
+          await appointmentEngine.syncFromCloud();
+        } catch (e) { /* engine not available */ }
 
         if (!cancelled) {
           setAppointments(Array.isArray(stored) ? stored : []);

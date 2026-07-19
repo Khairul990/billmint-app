@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Building2, Upload, Trash2, Globe, Languages, DollarSign, Percent, FileText, Image as ImageIcon } from 'lucide-react';
+import { BUSINESS_PRESETS } from '../../config/businessPresets';
 
 const BusinessStudio = ({ settings, onUpdate }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -70,22 +71,20 @@ const BusinessStudio = ({ settings, onUpdate }) => {
                 </>
               )}
             </div>
-            <input type="url" value={settings?.logoUrl || ''} onChange={(e) => handleChange('logoUrl', e.target.value)} placeholder="Or paste image URL..." className="mt-3 w-full px-4 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs text-white focus:outline-none focus:border-theme-accent transition-colors" />
+            <input type="url" value={settings?.logoUrl || ''} onChange={(e) => handleChange('logoUrl', e.target.value)} placeholder="Or paste image URL..." className="mt-3 w-full px-4 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs text-theme-primary focus:outline-none focus:border-theme-accent transition-colors" />
           </div>
 
           <div>
             <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Business Name</label>
-            <input type="text" value={settings?.businessName || ''} onChange={(e) => handleChange('businessName', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-accent transition-colors" />
+            <input type="text" value={settings?.businessName || ''} onChange={(e) => handleChange('businessName', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors" />
           </div>
 
           <div>
             <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Business Type</label>
-            <select value={settings?.businessType || 'retail'} onChange={(e) => handleChange('businessType', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-accent transition-colors cursor-pointer">
-              <option value="retail">Retail / Shop</option>
-              <option value="service">Services / Agency</option>
-              <option value="education">Education / Coaching</option>
-              <option value="medical">Medical / Clinic</option>
-              <option value="freelance">Freelancer</option>
+            <select value={settings?.businessType || 'retail'} onChange={(e) => handleChange('businessType', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors cursor-pointer">
+              {BUSINESS_PRESETS.map(preset => (
+                <option key={preset.id} value={preset.id}>{preset.label}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -106,7 +105,7 @@ const BusinessStudio = ({ settings, onUpdate }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div>
             <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2 flex items-center gap-1"><Languages className="w-3 h-3" /> Language</label>
-            <select value={settings?.language || 'English'} onChange={(e) => handleChange('language', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-accent transition-colors cursor-pointer">
+            <select value={settings?.language || 'English'} onChange={(e) => handleChange('language', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors cursor-pointer">
               <option value="English">English</option>
               <option value="Bengali">Bengali</option>
               <option value="Hindi">Hindi</option>
@@ -114,11 +113,11 @@ const BusinessStudio = ({ settings, onUpdate }) => {
           </div>
           <div>
             <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2 flex items-center gap-1"><DollarSign className="w-3 h-3" /> Currency Symbol</label>
-            <input type="text" value={settings?.currency || '₹'} onChange={(e) => handleChange('currency', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-accent transition-colors" />
+            <input type="text" value={settings?.currency || '₹'} onChange={(e) => handleChange('currency', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors" />
           </div>
           <div>
             <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2 flex items-center gap-1"><Percent className="w-3 h-3" /> Tax Label</label>
-            <input type="text" value={settings?.taxLabel || 'GST'} onChange={(e) => handleChange('taxLabel', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-accent transition-colors" />
+            <input type="text" value={settings?.taxLabel || 'GST'} onChange={(e) => handleChange('taxLabel', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors" />
           </div>
         </div>
       </div>
@@ -139,7 +138,7 @@ const BusinessStudio = ({ settings, onUpdate }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Invoice Prefix</label>
-              <input type="text" value={settings?.invoicePrefix || 'INV-'} onChange={(e) => handleChange('invoicePrefix', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-success transition-colors" />
+              <input type="text" value={settings?.invoicePrefix || 'INV-'} onChange={(e) => handleChange('invoicePrefix', e.target.value)} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-success transition-colors" />
             </div>
             <div>
               <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Digital Signature Image</label>
@@ -168,7 +167,7 @@ const BusinessStudio = ({ settings, onUpdate }) => {
           </div>
           <div>
             <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Global PDF Footer Text</label>
-            <textarea value={settings?.pdfFooter || ''} onChange={(e) => handleChange('pdfFooter', e.target.value)} placeholder="Thank you for your business. Generated by BillQyro." rows={2} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-theme-success transition-colors resize-none" />
+            <textarea value={settings?.pdfFooter || ''} onChange={(e) => handleChange('pdfFooter', e.target.value)} placeholder="Thank you for your business. Generated by BillQyro." rows={2} className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-success transition-colors resize-none" />
           </div>
         </div>
       </div>

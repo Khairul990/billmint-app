@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const ItemsSheetModal = ({ 
   isSheetExpanded, setIsSheetExpanded, items, setItems, billType, currencySymbol,
   addQuickFillItem, removeItemRow, handleDuplicateItem, openSmartRateCalculator,
-  customerName // some bindings might need this
+  customerName, handleItemChange, getExpandedGridCols, addItemRow, subtotal, grandTotal
 }) => {
   // Pass through component
   return (

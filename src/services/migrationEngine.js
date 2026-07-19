@@ -19,7 +19,6 @@ class MigrationEngine {
       if (schemaVersion === 1) {
         console.log(`[MigrationEngine] Running migration V1 -> V2...`);
         await this._migrateV1toV2(workspaceId, settings);
-        schemaVersion = 2;
       }
       
       // Update schema version in settings
@@ -35,7 +34,7 @@ class MigrationEngine {
     return false;
   }
 
-  async _migrateV1toV2(workspaceId, settings) {
+  async _migrateV1toV2(workspaceId, _settings) {
     // Example migration: Map legacy fields to new Enterprise structure
     // e.g. moving `user.brandColor` to `user.theme.brandColor`
     

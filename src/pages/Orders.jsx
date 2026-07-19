@@ -99,7 +99,12 @@ const Orders = ({ invoices = [], customers = [], businessSettings, setCurrentTab
   }, [orders, statusFilter, searchQuery]);
 
   const handleRefresh = async () => {
-    try { await syncFromFirestore(); window.dispatchEvent(new Event('billqyro_sync')); toast.success('Orders refreshed'); }
+    try { 
+      const { orderEngine } = await import('../services/orderEngine');
+      await orderEngine.syncFromCloud(); 
+      window.dispatchEvent(new Event('billqyro_sync')); 
+      toast.success('Orders refreshed'); 
+    }
     catch { toast.error('Sync failed'); }
   };
 

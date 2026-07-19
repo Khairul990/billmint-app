@@ -264,11 +264,11 @@ function App() {
       return saved;
     }
     if (!isAuth) return 'landing';
-    return 'dashboard';
+    return null; // Neutral boot state - resolved centrally by the app gate
   });
 
   useEffect(() => {
-    if (currentTab !== 'landing') {
+    if (currentTab && currentTab !== 'landing') {
       localStorage.setItem('billqyro_last_route', currentTab);
     }
     
@@ -398,13 +398,8 @@ function App() {
     return s;
   });
 
-  // PHASE 2 AUTH STABILIZATION: Prevent existing users from being stuck in Onboarding loop due to slow cloud sync
-  useEffect(() => {
-    if (currentTab === 'onboarding' && settings?.setupCompleted) {
-      console.log('[AUTH FIX] Detected completed setup during onboarding. Redirecting to Dashboard to prevent loop.');
-      setCurrentTab('dashboard');
-    }
-  }, [currentTab, settings]);
+  // PHASE 2 AUTH STABILIZATION: Removed reactive boot-time redirect to prevent Dashboard flash
+
 
   const [expenses, setExpenses] = useState([]);
   const [students, setStudents] = useState([]);
@@ -436,16 +431,22 @@ function App() {
     fetchRevenue();
   }, [invoices, subscription, isAuthenticated]);
   // Workspace state
-  const [businessWorkspaces, setBusinessWorkspaces] = useState(settings.businessWorkspaces || []);
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState(settings.activeWorkspaceId || (settings.businessWorkspaces && settings.businessWorkspaces[0]?.id));
+  const safeSettings = settings || {};
+  const safeWorkspaces = safeSettings.businessWorkspaces || [];
+  
+  const [businessWorkspaces, setBusinessWorkspaces] = useState(safeWorkspaces);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState(safeSettings.activeWorkspaceId || (safeWorkspaces.length > 0 ? safeWorkspaces[0].id : null));
 
   // Keep workspaces in sync with cloud settings updates
   useEffect(() => {
-    if (settings.businessWorkspaces && JSON.stringify(settings.businessWorkspaces) !== JSON.stringify(businessWorkspaces)) {
-      setBusinessWorkspaces(settings.businessWorkspaces);
+    const currentSafeSettings = settings || {};
+    const currentSafeWorkspaces = currentSafeSettings.businessWorkspaces || [];
+    
+    if (currentSafeSettings.businessWorkspaces && JSON.stringify(currentSafeWorkspaces) !== JSON.stringify(businessWorkspaces)) {
+      setBusinessWorkspaces(currentSafeWorkspaces);
     }
-    if (settings.activeWorkspaceId && settings.activeWorkspaceId !== activeWorkspaceId) {
-      setActiveWorkspaceId(settings.activeWorkspaceId);
+    if (currentSafeSettings.activeWorkspaceId && currentSafeSettings.activeWorkspaceId !== activeWorkspaceId) {
+      setActiveWorkspaceId(currentSafeSettings.activeWorkspaceId);
     }
   }, [settings]);
 
@@ -453,7 +454,7 @@ function App() {
   const updateWorkspaceState = (newWorkspaces, newActiveId) => {
     setBusinessWorkspaces(newWorkspaces);
     setActiveWorkspaceId(newActiveId);
-    const updated = { ...settings, businessWorkspaces: newWorkspaces, activeWorkspaceId: newActiveId };
+    const updated = { ...(settings || {}), businessWorkspaces: newWorkspaces, activeWorkspaceId: newActiveId };
     setSettings(updated);
     settingsEngine.saveSettings(updated);
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
@@ -700,9 +701,16 @@ function App() {
   // Sync from Firebase Firestore when authenticated
   useEffect(() => {
     if (isAuthenticated) {
+      const currentUserId = authEngine.getAuthSession()?.uid;
       const runSync = async () => {
         try {
           const synced = await invoiceEngine.syncFromCloud();
+          
+          if (currentUserId !== authEngine.getAuthSession()?.uid) {
+            console.warn('[Session Guard] Stale sync aborted due to session change');
+            return;
+          }
+          
           if (synced) {
             if (synced.invoices) setInvoices(synced.invoices);
             if (synced.customers) setCustomers(synced.customers);
@@ -770,8 +778,8 @@ function App() {
       setShowWelcomeAnimation(true);
       sessionStorage.setItem('billqyro_welcome_shown', 'true');
     }
-    // Set default authenticated route to dashboard immediately
-    setCurrentTab('dashboard');
+    // Yield route control to the Central App Gate
+    setCurrentTab(null);
   };
 
   // Handle Legacy User Silent Upgrade (No redirects)
@@ -797,6 +805,22 @@ function App() {
     authEngine.logout();
     localStorage.removeItem('billqyro_user_role');
     localStorage.removeItem('billqyro_admin_unlocked');
+    
+    // STRICT MEMORY WIPE
+    setSettings({});
+    setBusinessWorkspaces([]);
+    setActiveWorkspaceId(null);
+    setInvoices([]);
+    setCustomers([]);
+    setProducts([]);
+    setExpenses([]);
+    setPendingPayments([]);
+    setStudents([]);
+    setSubscription(subscriptionEngine.getSubscriptionDetails());
+    
+    // RESET GLOBAL DOM THEME
+    window.dispatchEvent(new CustomEvent('billqyro:settings-updated', { detail: {} }));
+    
     setUserRole('user');
     setIsAuthenticated(false);
     setCurrentTab('landing');
@@ -1351,10 +1375,10 @@ function App() {
   }
 
   // --- TAB ROUTER SWITCHBOARD ---
-  const renderTabContent = () => {
+  const renderTabContent = (targetTab = currentTab) => {
     const isMaintenanceMode = (globalMaintenanceMode || activeSettings?.maintenanceMode) && !adminEngine.isAdminUser(authEngine.getAuthSession());
 
-    switch (currentTab) {
+    switch (targetTab) {
       case 'landing':
         return <Landing onLoginSuccess={handleLoginSuccess} />;
       case 'cyber-dashboard':
@@ -1904,6 +1928,10 @@ function App() {
 
   // Enterprise Route Gate - Wait for Auth, Workspace, and Sync to resolve
   const isAppReady = !isAppBooting && (!isAuthenticated || (cloudSyncDone && settings));
+  const isSetupIncomplete = isAuthenticated && activeSettings && !activeSettings.setupCompleted && !activeSettings.businessName;
+
+  // Resolve currentTab when we reach layout (defaulting to dashboard if null)
+  const resolvedTab = currentTab || 'dashboard';
 
   return (
     <ErrorBoundary>
@@ -1927,7 +1955,7 @@ function App() {
                 }
               }}>
                 <AdminPanel 
-                  currentTab={currentTab} 
+                  currentTab={resolvedTab} 
                   setCurrentTab={(tab) => {
                     setCurrentTab(tab);
                     if (window.location.pathname === '/km-admin') {
@@ -1969,7 +1997,7 @@ function App() {
               userName={settings?.businessName || ''} 
               onComplete={() => setShowWelcomeAnimation(false)} 
             />
-            {(currentTab === 'onboarding' || (activeSettings && !activeSettings.setupCompleted && !activeSettings.businessName)) ? (
+            {isSetupIncomplete ? (
               <OnboardingWizard 
                 onComplete={() => setCurrentTab('dashboard')} 
                 businessSettings={activeSettings} 
@@ -1985,7 +2013,7 @@ function App() {
               />
             ) : (
               <Layout
-                currentTab={currentTab}
+                currentTab={resolvedTab}
                 setCurrentTab={(tab) => {
                   if (tab !== 'create-invoice') {
                     setEditingInvoice(null);
@@ -2009,7 +2037,7 @@ function App() {
               >
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={currentTab}
+                    key={resolvedTab}
                     variants={pageVariants}
                     initial="initial"
                     animate="animate"
@@ -2021,7 +2049,7 @@ function App() {
                         <ClassicLoader text="Loading..." />
                       </div>
                     }>
-                      {renderTabContent()}
+                      {renderTabContent(resolvedTab)}
                     </React.Suspense>
                   </motion.div>
                 </AnimatePresence>

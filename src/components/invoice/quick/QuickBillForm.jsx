@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, Save, Check } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useInvoice } from '../../../contexts/InvoiceContext';
 import ProductSearch from '../ProductSearch';
 import { getCustomerLabelByType } from '../../../config/businessPresets';

@@ -2,8 +2,8 @@ import React from 'react';
 import { X, Check } from 'lucide-react';
 
 const SmartRateModal = ({ 
-  showSmartRate, setShowSmartRate, activeItemIndex, items, 
-  smartCharges, setSmartCharges, applySmartRate 
+  showSmartRate, setShowSmartRate, activeItemIndex, setActiveItemIndex, items, 
+  smartCharges, setSmartCharges, applySmartRate, currencySymbol
 }) => {
   return (
     <>

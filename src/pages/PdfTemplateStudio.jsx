@@ -205,7 +205,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
     if (enableWatermark) updated.pdfWatermark = true;
     if (signaturePlacement !== 'none') updated.pdfSignaturePlacement = signaturePlacement;
     if (qrPlacement !== 'none') updated.pdfQrPlacement = qrPlacement;
-    await saveSettings(updated);
+    await settingsEngine.saveSettings(updated);
     if (setSettings) setSettings(updated);
     toast.success('Template applied successfully!');
   };

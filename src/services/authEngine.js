@@ -75,7 +75,14 @@ export const authEngine = {
   },
 
   async hasCompletedOnboarding() {
-    return dbHasCompletedOnboarding();
+    const user = auth.currentUser;
+    if (!user) return false;
+    try {
+      const settingsSnap = await getDoc(doc(db, 'settings', user.uid));
+      return settingsSnap.exists() && settingsSnap.data().profileSetupCompleted === true;
+    } catch (e) {
+      return false;
+    }
   },
 
   logout() {

@@ -1,4 +1,4 @@
-import { getCustomers, saveCustomer, deleteCustomer } from './dbEngine';
+import { getCustomers, saveCustomer, deleteCustomer, restoreCustomer } from './dbEngine';
 
 class CustomerEngine {
   async getCustomers(includeDeleted = false) {
