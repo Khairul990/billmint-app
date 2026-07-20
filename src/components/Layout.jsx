@@ -421,9 +421,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                         <button onClick={() => { setCurrentTab('more'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
                           <Briefcase className="w-4 h-4 text-theme-muted" /> Workspace Manager
                         </button>
-                        <button onClick={() => { setCurrentTab('subscription'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
-                          <Sparkles className="w-4 h-4 text-theme-muted" /> Subscription Plan
-                        </button>
                         <button onClick={() => { setCurrentTab('system-health'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
                           <Activity className="w-4 h-4 text-theme-muted" /> Storage & Health
                         </button>

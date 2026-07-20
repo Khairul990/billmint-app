@@ -283,36 +283,6 @@ const Sidebar = ({
         </div>
       </nav>
 
-      {/* Sidebar Footer */}
-      <div className="shrink-0 border-t border-theme-accent/50 bg-theme-sidebar/50"
-        style={{ padding: isCollapsed ? '12px 8px' : '16px 12px', transition: isMounted ? 'padding 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none' }}
-      >
-        <button
-          onClick={() => setCurrentTab('settings')}
-          className={`w-full group relative overflow-hidden rounded-xl border-2 border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-orange-600/10 hover:from-amber-500/20 hover:to-orange-600/20 hover:border-amber-500/40 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300 ${
-            isCollapsed ? 'p-2 flex items-center justify-center' : 'p-3.5 text-left flex flex-col items-start gap-1'
-          }`}
-        >
-          {isCollapsed ? (
-            <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
-          ) : (
-            <>
-              <div className="flex items-center gap-1.5 mb-1 w-full">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                <span className="text-[8px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/15 px-1.5 py-0.5 rounded-sm">
-                  PREMIUM
-                </span>
-              </div>
-              <p className="text-xs font-extrabold text-theme-primary truncate w-full group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                Unlock Premium
-              </p>
-              <p className="text-[10px] text-theme-muted font-medium truncate w-full">
-                Unlimited billing & features
-              </p>
-            </>
-          )}
-        </button>
-      </div>
     </aside>
   );
 };
