@@ -3,8 +3,8 @@ import { z } from 'zod';
 export const invoiceSchema = z.object({
   id: z.string().nullish(),
   invoiceNumber: z.string().nullish(),
-  date: z.string().min(1, 'Date is required'),
-  customerName: z.string().min(1, 'Customer name is required'),
+  date: z.string().optional(),
+  customerName: z.string().optional(),
   items: z.array(z.object({
     id: z.string().optional(),
     name: z.string().optional(),
@@ -14,11 +14,11 @@ export const invoiceSchema = z.object({
     price: z.number().or(z.string()).optional(),
     total: z.number().or(z.string()).optional()
   }).passthrough()).optional(),
-  subtotal: z.number().min(0),
+  subtotal: z.number().min(0).optional(),
   taxTotal: z.number().min(0).optional(),
   discountTotal: z.number().min(0).optional(),
-  grandTotal: z.number().min(0),
-  paymentStatus: z.enum(['Paid', 'Partially Paid', 'Unpaid', 'Pending', 'Pending Verification']).optional().default('Unpaid'),
+  grandTotal: z.number().min(0).optional(),
+  paymentStatus: z.string().optional().default('Unpaid'),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional()
 }).passthrough();
