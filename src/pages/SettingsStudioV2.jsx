@@ -694,17 +694,17 @@ const SettingsStudioV2 = ({
                   <h3 className="text-xs font-bold text-gray-900 dark:text-white">Custom Brand Color</h3>
                   <p className="text-[9px] text-gray-500">Set a specific accent color</p>
                 </div>
-                <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} className="w-10 h-10 rounded-xl cursor-pointer border border-gray-200" />
-                <input type="text" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} className="flex-1 px-3 py-2 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs font-mono" />
+                <input type="color" value={brandColor} onChange={(e) => { setBrandColor(e.target.value); setThemeId('custom'); applyTheme('custom', e.target.value, darkMode, false); }} className="w-10 h-10 rounded-xl cursor-pointer border border-gray-200" />
+                <input type="text" value={brandColor} onChange={(e) => { setBrandColor(e.target.value); setThemeId('custom'); applyTheme('custom', e.target.value, darkMode, false); }} className="flex-1 px-3 py-2 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs font-mono" />
               </div>
 
               {/* Advanced Settings */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: 'Corner Radius', value: cornerRadius, set: setCornerRadius, min: 4, max: 24, unit: 'px' },
-                  { label: 'Shadow Intensity', value: shadowIntensity, set: setShadowIntensity, min: 0, max: 100, unit: '%' },
-                  { label: 'Animation Speed', value: animationSpeed, set: setAnimationSpeed, min: 0.25, max: 2, step: 0.25, unit: 'x' },
-                  { label: 'Font Density', value: fontDensity === 'compact' ? 0 : fontDensity === 'normal' ? 1 : 2, set: (v) => setFontDensity(['compact', 'normal', 'relaxed'][v]), min: 0, max: 2, step: 1, unit: '', display: fontDensity }
+                  { label: 'Corner Radius', value: cornerRadius, set: (v) => { setCornerRadius(v); applyTheme(themeId, brandColor, darkMode, false); document.documentElement.style.setProperty('--radius-base', `${v}px`); }, min: 4, max: 24, unit: 'px' },
+                  { label: 'Shadow Intensity', value: shadowIntensity, set: (v) => { setShadowIntensity(v); document.documentElement.style.setProperty('--shadow-opacity', `${v / 100}`); }, min: 0, max: 100, unit: '%' },
+                  { label: 'Animation Speed', value: animationSpeed, set: (v) => { setAnimationSpeed(v); document.documentElement.style.setProperty('--animation-multiplier', `${v}s`); }, min: 0.25, max: 2, step: 0.25, unit: 'x' },
+                  { label: 'Font Density', value: fontDensity === 'compact' ? 0 : fontDensity === 'normal' ? 1 : 2, set: (v) => { const newDensity = ['compact', 'normal', 'relaxed'][v]; setFontDensity(newDensity); }, min: 0, max: 2, step: 1, unit: '', display: fontDensity }
                 ].map((opt, i) => (
                   <div key={i} className="p-4 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl">
                     <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">{opt.label}</label>

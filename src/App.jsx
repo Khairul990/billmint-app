@@ -98,7 +98,6 @@ const PortalHub = React.lazy(() => import('./pages/cybercafe/PortalHub'));
 const QuickToolsCenter = React.lazy(() => import('./pages/cybercafe/QuickToolsCenter'));
 const CustomerRegister = React.lazy(() => import('./pages/cybercafe/CustomerRegister'));
 const CashManagement = React.lazy(() => import('./pages/cybercafe/CashManagement'));
-const PremiumPricing = React.lazy(() => import('./pages/PremiumPricing'));
 const PaymentDueScreen = React.lazy(() => import('./pages/PaymentDueScreen'));
 const SandboxAdmin = React.lazy(() => import('./pages/admin/SandboxAdmin'));
 const StudentPortal = React.lazy(() => import('./pages/StudentPortal'));
@@ -1285,6 +1284,7 @@ function App() {
     try {
       const updatedSettings = await settingsEngine.saveSettings(payload);
       setSettings(updatedSettings);
+      window.dispatchEvent(new CustomEvent('billqyro:settings-updated', { detail: updatedSettings }));
       toast.success('Settings saved successfully');
       sendEmpireEvent({
         eventType: "settings_updated",
