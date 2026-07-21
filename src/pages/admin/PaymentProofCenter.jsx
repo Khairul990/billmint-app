@@ -20,7 +20,13 @@ const PaymentProofCenter = () => {
 
   const fetchProofs = async () => {
     try {
-      const allProofs = await adminEngine.getPaymentProofs();
+      const [dues, premium] = await Promise.all([
+        adminEngine.getPaymentProofs(),
+        adminEngine.getPremiumRequests()
+      ]);
+      const mappedDues = dues.map(p => ({ ...p, proofType: 'Dues' }));
+      const mappedPremium = premium.map(p => ({ ...p, proofType: 'Premium', amount: p.paidAmount || p.amount || 0 }));
+      const allProofs = [...mappedDues, ...mappedPremium].sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
       setProofs(allProofs);
     } catch (e) {
       console.error(e);
@@ -40,10 +46,14 @@ const PaymentProofCenter = () => {
   const handleAction = async (proof, status) => {
     setProcessingId(proof.id);
     try {
-      const note = getAdminNote(proof.id);
-      const success = await adminEngine.updatePaymentProofStatus(proof.id, status, note, []);
-      if (success) {
-        toast.success(`Payment proof successfully ${status.toLowerCase()}!`);
+      let success = false;
+      if (proof.proofType === 'Premium') {
+        success = await adminEngine.updatePremiumRequestStatus(proof.id, status, proof.userId, proof.plan, note);
+      } else {
+        success = await adminEngine.updatePaymentProofStatus(proof.id, status, note, []);
+      }
+      if (success !== false) { // updatePremiumRequestStatus doesn't return boolean on success, it throws on error, but returns undefined.
+        toast.success(`${proof.proofType} proof successfully ${status.toLowerCase()}!`);
         setSelectedProof(null);
         setAdminNotes(prev => { const n = { ...prev }; delete n[proof.id]; return n; });
         fetchProofs();
@@ -180,8 +190,13 @@ const PaymentProofCenter = () => {
               <div className="p-6 flex-1 flex flex-col justify-between bg-theme-surface-elevated">
                 <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
                   <div>
-                    <h4 className="text-theme-primary font-extrabold text-xl font-mono">₹{proof.amount.toFixed(2)}</h4>
-                    <p className="text-theme-primary text-sm font-semibold mt-1">User: {proof.userEmail}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant={proof.proofType === 'Premium' ? 'primary' : 'warning'} className="text-[9px] uppercase tracking-wider">
+                        {proof.proofType} {proof.proofType === 'Premium' ? `(${proof.plan})` : ''}
+                      </Badge>
+                    </div>
+                    <h4 className="text-theme-primary font-extrabold text-xl font-mono">₹{proof.amount?.toFixed(2) || proof.amount}</h4>
+                    <p className="text-theme-primary text-sm font-semibold mt-1">User: {proof.userEmail || proof.userId}</p>
                     <p className="text-theme-secondary text-xs font-mono mt-1 select-all bg-theme-main px-2.5 py-1 rounded-lg border border-theme-border-soft inline-block">
                       UTR: {proof.transactionId}
                     </p>

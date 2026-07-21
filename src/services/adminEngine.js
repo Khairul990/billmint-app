@@ -29,7 +29,9 @@ import {
   cleanTemporaryData as dbCleanTemporaryData,
   clearCacheOnly as dbClearCacheOnly,
   migrateGlobalToScopedStorage as dbMigrateGlobalToScopedStorage,
-  getActiveAnnouncement as dbGetActiveAnnouncement
+  getActiveAnnouncement as dbGetActiveAnnouncement,
+  getAdminPremiumRequests as dbGetAdminPremiumRequests,
+  updatePremiumRequestStatus as dbUpdatePremiumRequestStatus
 } from './dbEngine';
 import {
   getAdminAllSupportTickets,
@@ -198,6 +200,14 @@ export const adminEngine = {
 
   async updatePaymentProofStatus(proofId, status, note, invoices = []) {
     return updatePlatformPaymentProofStatus(proofId, status, note, invoices);
+  },
+
+  async getPremiumRequests() {
+    return dbGetAdminPremiumRequests();
+  },
+
+  async updatePremiumRequestStatus(requestId, status, targetUserId, plan, rejectionReason = '') {
+    return dbUpdatePremiumRequestStatus(requestId, status, targetUserId, plan, rejectionReason);
   },
 
   async blockUser(userId) {
