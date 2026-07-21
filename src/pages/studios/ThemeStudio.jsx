@@ -60,12 +60,7 @@ const ThemeStudio = ({ settings, onUpdate }) => {
               return (
                 <button 
                   key={id} 
-                  onClick={() => {
-                    handleChange('themeColor', id);
-                    if (category === 'Premium Dark') {
-                      setTimeout(() => handleChange('darkMode', true), 50);
-                    }
-                  }}
+                  onClick={() => handleChange('themeColor', id)}
                   className={`relative rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02] ${isActive ? 'border-theme-accent shadow-lg shadow-theme-accent/20 bg-theme-surface' : 'border-theme-border-soft hover:border-theme-border bg-theme-main'}`}
                 >
                   <div className="flex gap-1 mb-2">
