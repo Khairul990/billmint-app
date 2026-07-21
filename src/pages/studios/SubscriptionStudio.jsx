@@ -13,7 +13,7 @@ import { Progress, ProgressRing } from '../../components/ui/Progress';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/Table';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
 import { Accordion, AccordionItem } from '../../components/ui/Accordion';
-import DynamicQRCode from '../DynamicQRCode';
+import DynamicQRCode from '../../components/DynamicQRCode';
 
 import { authEngine } from '../../services/authEngine';
 import { paymentEngine } from '../../services/paymentEngine';

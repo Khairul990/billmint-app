@@ -64,7 +64,6 @@ const Customers = React.lazy(() => import('./pages/Customers'));
 const Products = React.lazy(() => import('./pages/Products'));
 const StudioLayout = React.lazy(() => import('./pages/studios/StudioLayout'));
 const Expenses = React.lazy(() => import('./pages/Expenses'));
-const Subscription = React.lazy(() => import('./pages/Subscription'));
 const MoreMenu = React.lazy(() => import('./pages/MoreMenu'));
 const PublicInvoice = React.lazy(() => import('./pages/PublicInvoice'));
 const PendingPayments = React.lazy(() => import('./pages/PendingPayments'));
@@ -1622,18 +1621,22 @@ function App() {
           );
         }
         return (
-          <Subscription
-            currentSubscription={subscription}
-            onUpgrade={handleSaveSubscription}
-            businessSettings={activeSettings}
+          <StudioLayout 
+            businessSettings={activeSettings} 
+            setSettings={setSettings} 
+            currentTab="settings-studio"
+            setCurrentAppTab={setCurrentTab}
+            subscription={subscription}
           />
         );
       case 'subscription':
         return (
-          <Subscription
-            currentSubscription={subscription}
-            onUpgrade={handleSaveSubscription}
-            businessSettings={activeSettings}
+          <StudioLayout 
+            businessSettings={activeSettings} 
+            setSettings={setSettings} 
+            currentTab="settings-studio"
+            setCurrentAppTab={setCurrentTab}
+            subscription={subscription}
           />
         );
 
