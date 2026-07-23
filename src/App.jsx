@@ -966,7 +966,7 @@ function App() {
     }
 
     // Fire and forget saveInvoice for Layer 2 persistence
-    invoiceEngine.updateInvoice(payload).then(({ updatedInvoices, firebaseStatus }) => {
+    invoiceEngine.saveInvoice(payload).then(({ updatedInvoices, firebaseStatus }) => {
       setInvoices(updatedInvoices);
 
       if (!isSilent) {
