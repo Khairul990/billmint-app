@@ -1,5 +1,4 @@
 import { updateFaviconForTheme } from '../utils/themeIcon';
-import * as dbEngine from './dbEngine';
 // Note: If using offline engine, dbEngine will route appropriately based on the new architecture.
 
 export const ALL_THEME_COLORS = {

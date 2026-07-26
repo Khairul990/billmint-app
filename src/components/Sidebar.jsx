@@ -8,6 +8,7 @@ import { getCustomerLabelByType, getInvoiceLabelByType, getPortalLabelByType } f
 import Logo from './Logo';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import { isEducationBusiness } from '../config/businessPresets';
+import { useFeatureControl } from '../hooks/useFeatureControl';
 
 /**
  * Premium Collapsible Desktop Sidebar Navigation
@@ -37,15 +38,17 @@ const Sidebar = ({
     setIsMounted(true);
   }, []);
 
-  const handleLogout = () => {
-    authEngine.logout();
+  const handleLogout = async () => {
+    await authEngine.logout();
     window.location.reload();
   };
+
+  const { isFeatureEnabled, isCategoryEnabled, loading: featuresLoading } = useFeatureControl(activeWsId);
 
   const toggleCollapsed = () => {
     setIsCollapsed(prev => {
       const next = !prev;
-      try { localStorage.setItem('billqyro_sidebar_collapsed', String(next)); } catch {}
+      try { localStorage.setItem('billqyro_sidebar_collapsed', String(next)); } catch (e) { console.warn(e); }
       return next;
     });
   };
@@ -60,33 +63,33 @@ const Sidebar = ({
     { id: 'dashboard', label: "Today's Business", icon: LayoutDashboard },
 
     { type: 'label', label: 'Billing' },
-    { id: 'invoices', label: getInvoiceLabel(), icon: FileSpreadsheet, module: 'billing' },
-    { id: 'estimates', label: 'Estimates & Quotes', icon: FileSpreadsheet },
+    { id: 'invoices', label: getInvoiceLabel(), icon: FileSpreadsheet, featureId: 'invoice' },
+    { id: 'estimates', label: 'Estimates & Quotes', icon: FileSpreadsheet, featureId: 'invoice' },
 
     { type: 'label', label: 'Customers' },
-    { id: 'customers', label: getCustomerLabel(), icon: Users, module: 'customers' },
-    { id: 'patients', label: 'Patient Records', icon: Users, module: 'patients' },
-    { id: 'students', label: 'Student Directory', icon: Users, module: 'students' },
-    { id: 'clients', label: 'Client Roster', icon: Users, module: 'clients' },
+    { id: 'customers', label: getCustomerLabel(), icon: Users, featureId: 'customer' },
+    { id: 'patients', label: 'Patient Records', icon: Users, featureId: 'customer' },
+    { id: 'students', label: 'Student Directory', icon: Users, featureId: 'customer' },
+    { id: 'clients', label: 'Client Roster', icon: Users, featureId: 'customer' },
 
     { type: 'label', label: 'Collections' },
-    { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen, module: 'dueLedger' },
-    { id: 'pending-payments', label: 'Payment Proofs', icon: Bell, module: 'paymentProofs' },
+    { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen, featureId: 'treasury' },
+    { id: 'pending-payments', label: 'Payment Proofs', icon: Bell, featureId: 'payment' },
 
     { type: 'label', label: 'Analytics' },
-    { id: 'reports', label: 'Reports', icon: PieChart, module: 'reports' },
-    { id: 'expenses', label: t('expenses'), icon: TrendingDown, module: 'expenses' },
+    { id: 'reports', label: 'Reports', icon: PieChart, featureId: 'reports' },
+    { id: 'expenses', label: t('expenses'), icon: TrendingDown, featureId: 'treasury.moneyOut' },
 
     { type: 'label', label: 'Operations' },
-    { id: 'products', label: t('products'), icon: Layers, module: 'products' },
-    { id: 'orders', label: 'Orders', icon: ShoppingBag, module: 'orders' },
-    { id: 'appointments', label: 'Appointments', icon: Calendar, module: 'appointments' },
-    { id: 'delivery', label: 'Delivery Tracking', icon: Truck, module: 'delivery' },
-    { id: 'measurements', label: 'Measurements', icon: Scissors, module: 'measurements' },
-    { id: 'designBook', label: 'Design Book', icon: BookOpen, module: 'designBook' },
-    { id: 'devices', label: 'Device Management', icon: Wrench, module: 'devices' },
-    { id: 'serviceJobs', label: 'Service Jobs', icon: Wrench, module: 'serviceJobs' },
-    { id: 'projects', label: 'Projects', icon: Briefcase, module: 'projects' },
+    { id: 'products', label: t('products'), icon: Layers, featureId: 'product' },
+    { id: 'orders', label: 'Orders', icon: ShoppingBag, featureId: 'product' },
+    { id: 'appointments', label: 'Appointments', icon: Calendar, featureId: 'customer' },
+    { id: 'delivery', label: 'Delivery Tracking', icon: Truck, featureId: 'product' },
+    { id: 'measurements', label: 'Measurements', icon: Scissors, featureId: 'product' },
+    { id: 'designBook', label: 'Design Book', icon: BookOpen, featureId: 'product' },
+    { id: 'devices', label: 'Device Management', icon: Wrench, featureId: 'product' },
+    { id: 'serviceJobs', label: 'Service Jobs', icon: Wrench, featureId: 'product' },
+    { id: 'projects', label: 'Projects', icon: Briefcase, featureId: 'product' },
 
     { type: 'label', label: 'Portals' },
     { id: 'customer-portal-config', label: getPortalLabelByType(wsType), icon: Globe },
@@ -113,24 +116,39 @@ const Sidebar = ({
     ];
   }
 
-  // Filter items based on enabledModules (if any)
-  if (enabledModules.length) {
+  // Filter items based on V8 Feature Control
+  if (!featuresLoading) {
     menuItems = menuItems.filter(item => {
-      // If the item has a 'module' property, check if it's enabled
-      if (item.module && !enabledModules.includes(item.module)) {
-        // Special case: if wsType is 'billing_only' and module is 'customers', we still show it because it's recommended
-        if (wsType === 'billing_only' && item.module === 'customers') return true;
-        // Always show sandbox module
-        if (item.module === 'sandbox') return true;
-        return false;
+      // Backwards compat check if module is defined but featureId is missing
+      if (item.module && !item.featureId) {
+        if (!enabledModules.includes(item.module)) {
+          if (wsType === 'billing_only' && item.module === 'customers') return true;
+          if (item.module === 'sandbox') return true;
+          return false;
+        }
+      }
+      // V8 Feature Engine Check
+      if (item.featureId) {
+        return isFeatureEnabled(item.featureId);
       }
       return true;
     });
   }
 
+  // Final pass: clean up empty labels
+  menuItems = menuItems.filter((item, index) => {
+    if (item.type === 'label') {
+      const nextItem = menuItems[index + 1];
+      if (!nextItem || nextItem.type === 'label') {
+        return false;
+      }
+    }
+    return true;
+  });
+
   return (
     <aside
-      className="hidden lg:flex flex-col h-full z-30 overflow-hidden shrink-0 border-r border-theme-accent/50 bg-theme-sidebar/80 backdrop-blur-xl shadow-[4px_0_24px_-6px_rgba(0,0,0,0.08)]"
+      className="hidden lg:flex flex-col h-full z-30 overflow-hidden shrink-0 border-r border-theme-accent/50 glass-panel"
       style={{
         width: isCollapsed ? 72 : 240,
         minWidth: isCollapsed ? 72 : 240,

@@ -27,6 +27,7 @@ const SecurityStudio = React.lazy(() => import('./SecurityStudio'));
 const BackupStudio = React.lazy(() => import('./BackupStudio'));
 const LocalizationStudio = React.lazy(() => import('./LocalizationStudio'));
 const NotificationStudio = React.lazy(() => import('./NotificationStudio'));
+const FeatureControlStudio = React.lazy(() => import('./FeatureControlStudio'));
 
 const STUDIO_ROUTES = [
   { id: 'business', label: 'Business Studio', icon: Building2, desc: 'Brand & Identity' },
@@ -42,7 +43,8 @@ const STUDIO_ROUTES = [
   { id: 'backup', label: 'Backup Studio', icon: HardDrive, desc: 'Cloud Restore' },
   { id: 'localization', label: 'Localization Studio', icon: Globe2, desc: 'Currency & Time' },
   { id: 'notification', label: 'Notification Studio', icon: Bell, desc: 'Email & SMS' },
-  { id: 'database', label: 'Database Studio', icon: Database, desc: 'Custom Collections' }
+  { id: 'database', label: 'Database Studio', icon: Database, desc: 'Custom Collections' },
+  { id: 'features', label: 'Feature Control', icon: Zap, desc: 'Universal Modules' }
 ];
 
 const StudioLayout = ({
@@ -225,7 +227,8 @@ const StudioLayout = ({
                   {activeStudio === 'backup' && <BackupStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
                   {activeStudio === 'localization' && <LocalizationStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
                   {activeStudio === 'notification' && <NotificationStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
-                  {activeStudio === 'database' && <DatabaseStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  { activeStudio === 'database' && <DatabaseStudio settings={draftSettings} onUpdate={handleUpdateDraft} /> }
+                  { activeStudio === 'features' && <FeatureControlStudio workspaceId={settings?.workspaceId || settings?.id} /> }
                 </Suspense>
                 
                 {/* Fallback for unknown studio */}

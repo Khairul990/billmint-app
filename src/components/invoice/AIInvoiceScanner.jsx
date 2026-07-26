@@ -79,7 +79,7 @@ const AIInvoiceScanner = () => {
         parsedObj = JSON.parse(cleanedText);
       } catch (e) {
         console.error('Failed to parse Gemini output:', cleanedText);
-        throw new Error('AI returned invalid format.');
+        throw new Error('AI returned invalid format.', { cause: e });
       }
 
       // 3. Populate Context

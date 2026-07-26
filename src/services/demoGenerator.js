@@ -1,4 +1,4 @@
-export const generateDemoWorkspace = (workspaceType = 'retail') => {
+export const generateDemoWorkspace = () => {
   const isSandbox = localStorage.getItem('billqyro_demo_session_active') === 'true';
   if (!isSandbox) {
     console.error('Cannot generate demo data outside of Sandbox mode.');

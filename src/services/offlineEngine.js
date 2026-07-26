@@ -19,6 +19,7 @@ export const offlineEngine = {
       const completed = queue.filter(tx => tx.status === 'completed');
       return { total: queue.length, pending: pending.length, failed: failed.length, completed: completed.length, items: queue };
     } catch (e) {
+      console.error('[Offline Engine] getQueueStatus failed:', e);
       return { total: 0, pending: 0, failed: 0, completed: 0, items: [] };
     }
   },
@@ -39,6 +40,7 @@ export const offlineEngine = {
       await startBackgroundSync();
       return { status: 'synced' };
     } catch (e) {
+      console.error('[Offline Engine] syncNow failed:', e);
       return { status: 'error', message: e.message };
     }
   },

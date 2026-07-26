@@ -33,7 +33,6 @@ const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
  * @param {Function} onDownload - Download PDF callback
  */
 const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, compact = false, onView, onEdit, onDelete, onDownload, onRestore, onDownloadBackup, isDeleted }) => {
-  if (!invoice) return null;
   const [showShareMenu, setShowShareMenu] = useState(false);
   const menuRef = useRef(null);
 
@@ -51,6 +50,8 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showShareMenu]);
+
+  if (!invoice) return null;
 
   const getSyncStatusStyle = (status) => {
     switch (status) {

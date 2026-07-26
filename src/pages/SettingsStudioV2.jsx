@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { pageVariants } from '../utils/animations';
 import { CardSkeleton } from '../components/PremiumSkeleton';
 import LivePreviewPanel from '../components/settings/LivePreviewPanel';
+import { CyberPortalsConfig, CyberToolsConfig } from './cybercafe/SettingsStudioIntegration';
 import Subscription from './Subscription';
 import PdfTemplateStudio from './PdfTemplateStudio';
 import LiveLinkTemplateStudio from './LiveLinkTemplateStudio';
@@ -208,6 +209,11 @@ const SettingsStudioV2 = ({
   const [marketingEmails, setMarketingEmails] = useState(false);
   const [securityAlerts, setSecurityAlerts] = useState(true);
 
+  // Cyber Cafe states
+  const [cyberPortals, setCyberPortals] = useState([]);
+  const [removeBgApiKey, setRemoveBgApiKey] = useState('');
+  const [enablePhotoMaker, setEnablePhotoMaker] = useState(true);
+
   const [isDragging, setIsDragging] = useState(false);
   const [dbProvider, setDbProvider] = useState(() => localStorage.getItem('billmint_db_provider') || 'firebase');
   const session = authEngine.getAuthSession();
@@ -281,6 +287,12 @@ const SettingsStudioV2 = ({
         setMarketingEmails(settings.notifications.marketing || false);
         setSecurityAlerts(settings.notifications.securityAlerts !== false);
       }
+
+      if (settings.cyberCafeConfig) {
+        setCyberPortals(settings.cyberCafeConfig.portals || []);
+        setRemoveBgApiKey(settings.cyberCafeConfig.removeBgApiKey || '');
+        setEnablePhotoMaker(settings.cyberCafeConfig.enablePhotoMaker !== false);
+      }
     }
   }, [settings]);
 
@@ -316,7 +328,8 @@ const SettingsStudioV2 = ({
     enableLiveLink, showPaymentQrOnLink, allowPdfDownload, allowPaymentProofSubmit,
     showPaidDueAmount, showContactButton, requireTransactionId, requirePaymentScreenshot,
     themeId, darkMode, logoUrl, cornerRadius, shadowIntensity, animationSpeed, fontDensity,
-    emailNotifications, whatsappNotifications, dueDateReminders, paymentConfirmation, marketingEmails, securityAlerts
+    emailNotifications, whatsappNotifications, dueDateReminders, paymentConfirmation, marketingEmails, securityAlerts,
+    cyberPortals, removeBgApiKey, enablePhotoMaker
   ]);
 
   // Theme application
@@ -334,23 +347,40 @@ const SettingsStudioV2 = ({
   }, [darkMode, themeId]);
 
   // Search
+  const getDynamicNav = () => {
+    let baseNav = [...NAV_GROUPS];
+    if (businessType === 'cybercafe') {
+      baseNav = baseNav.filter(g => g.group !== 'Invoice' && g.group !== 'Payment');
+      baseNav.splice(1, 0, {
+        group: 'Cyber Cafe', icon: Monitor,
+        items: [
+          { id: 'cyber-portals', label: 'Portal Hub Config', icon: Link, description: 'Manage quick links' },
+          { id: 'cyber-tools', label: 'Tools & AI Config', icon: Zap, description: 'Background remover, APIs' }
+        ]
+      });
+    }
+    return baseNav;
+  };
+
   const filteredNav = useMemo(() => {
-    if (!searchQuery.trim()) return NAV_GROUPS;
+    const dNav = getDynamicNav();
+    if (!searchQuery.trim()) return dNav;
     const q = searchQuery.toLowerCase();
-    return NAV_GROUPS.map(g => ({
+    return dNav.map(g => ({
       ...g, items: g.items.filter(item =>
         (item.label?.toLowerCase().includes(q)) || 
         (item.description?.toLowerCase().includes(q)) || 
         (item.id.includes(q))
       )
     })).filter(g => g.items.length > 0);
-  }, [searchQuery]);
+  }, [searchQuery, businessType]);
 
   const handleSearchChange = (val) => {
     setSearchQuery(val);
     if (val.trim()) {
       const q = val.toLowerCase();
-      for (const g of NAV_GROUPS) {
+      const dNav = getDynamicNav();
+      for (const g of dNav) {
         for (const item of g.items) {
           if ((item.label?.toLowerCase().includes(q)) || (item.description?.toLowerCase().includes(q)) || (item.id.includes(q))) {
             setActiveSection(item.id);
@@ -393,7 +423,8 @@ const SettingsStudioV2 = ({
           ctaPreset: settings?.customerLiveLinkSettings?.ctaPreset || 'payNow',
           conversionLayout: settings?.customerLiveLinkSettings?.conversionLayout || 'modern'
         },
-        notifications: { email: emailNotifications, whatsapp: whatsappNotifications, dueDateReminders, paymentConfirmation, marketing: marketingEmails, securityAlerts }
+        notifications: { email: emailNotifications, whatsapp: whatsappNotifications, dueDateReminders, paymentConfirmation, marketing: marketingEmails, securityAlerts },
+        cyberCafeConfig: { portals: cyberPortals, removeBgApiKey, enablePhotoMaker }
       };
       onSaveSettings(payload);
       setIsDirty(false);
@@ -469,6 +500,15 @@ const SettingsStudioV2 = ({
       setPaymentConfirmation(settings.notifications.paymentConfirmation !== false);
       setMarketingEmails(settings.notifications.marketing || false);
       setSecurityAlerts(settings.notifications.securityAlerts !== false);
+    }
+    if (settings.cyberCafeConfig) {
+      setCyberPortals(settings.cyberCafeConfig.portals || []);
+      setRemoveBgApiKey(settings.cyberCafeConfig.removeBgApiKey || '');
+      setEnablePhotoMaker(settings.cyberCafeConfig.enablePhotoMaker !== false);
+    } else {
+      setCyberPortals([]);
+      setRemoveBgApiKey('');
+      setEnablePhotoMaker(true);
     }
   };
 
@@ -919,6 +959,17 @@ const SettingsStudioV2 = ({
               ))}
             </div>
           </div>
+        );
+
+      case 'cyber-portals':
+        return <CyberPortalsConfig cyberPortals={cyberPortals} setCyberPortals={setCyberPortals} />;
+
+      case 'cyber-tools':
+        return (
+          <CyberToolsConfig 
+            enablePhotoMaker={enablePhotoMaker} setEnablePhotoMaker={setEnablePhotoMaker} 
+            removeBgApiKey={removeBgApiKey} setRemoveBgApiKey={setRemoveBgApiKey} 
+          />
         );
 
       default:

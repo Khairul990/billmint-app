@@ -158,7 +158,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
         {/* ===== PREMIUM HEADER ===== */}
         {/* Desktop: Full featured header. Mobile: Compact 2-row (max-height 110px) */}
-        <header className="sticky top-0 z-40 bg-theme-card/70 backdrop-blur-2xl border-b border-theme-accent/30 text-theme-primary shadow-premium-sm transition-all">
+        <header className="sticky top-0 z-40 glass-header text-theme-primary shadow-premium-sm transition-all">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-0 right-0 w-64 h-64 bg-theme-surface dark:bg-theme-surface/5 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
             <div className="absolute -bottom-10 left-10 w-48 h-48 bg-theme-accent-light dark:bg-theme-accent-light rounded-full blur-2xl"></div>

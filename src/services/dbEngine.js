@@ -334,6 +334,7 @@ const _runSyncOfflineTransactions = async () => {
     for (const tx of sortedQueue) {
       if ((tx.retryCount || 0) >= MAX_RETRIES) {
         console.warn(`[SYNC QUEUE] Dropping TX ${tx.id}: exceeded max retries (${MAX_RETRIES})`);
+        toast.error('Failed to sync some offline data permanently. Check your connection.');
         await BillQyroDB.delete('syncQueue', tx.id);
         continue;
       }
@@ -433,6 +434,7 @@ const _runSyncOfflineTransactions = async () => {
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
   } catch (error) {
     console.error('[SYNC QUEUE] Error in syncOfflineTransactions:', error);
+    toast.error('Offline data sync encountered a problem.');
   }
 };
 

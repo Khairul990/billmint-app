@@ -24,6 +24,12 @@ import { invoiceEngine } from '../../services/invoiceEngine';
  * Displays a comprehensive view of a customer's history and metrics.
  */
 const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymbol = '₹', onCreateBill }) => {
+  const [updatingInvoiceId, setUpdatingInvoiceId] = React.useState(null);
+  const [paymentAmount, setPaymentAmount] = React.useState('');
+  const [paymentMethod, setPaymentMethod] = React.useState('Cash');
+  const [paymentNote, setPaymentNote] = React.useState('');
+  const [isSaving, setIsSaving] = React.useState(false);
+
   if (!isOpen || !customer) return null;
 
   // 1. Filter invoices for this customer
@@ -49,12 +55,6 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
     }).format(amount || 0);
     return `${currencySymbol} ${formattedNum}`;
   };
-
-  const [updatingInvoiceId, setUpdatingInvoiceId] = React.useState(null);
-  const [paymentAmount, setPaymentAmount] = React.useState('');
-  const [paymentMethod, setPaymentMethod] = React.useState('Cash');
-  const [paymentNote, setPaymentNote] = React.useState('');
-  const [isSaving, setIsSaving] = React.useState(false);
 
   const handleUpdatePayment = async (inv) => {
     setIsSaving(true);

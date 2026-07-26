@@ -21,11 +21,12 @@ import { validatePayload, invoiceSchema, customerSchema } from './utils/validati
 import { calculateTotals } from './utils/invoiceUtils';
 import { isEducationBusiness } from './config/businessPresets';
 import { initializeStorage, getSettings as dbGetSettings } from './services/dbEngine';
+import { useFeatureControl } from './hooks/useFeatureControl';
 
 import { authEngine } from './services/authEngine';
 import { settingsEngine } from './services/settingsEngine';
 import { adminEngine } from './services/adminEngine';
-import { offlineEngine } from './services/offlineEngine';
+
 import { invoiceEngine } from './services/invoiceEngine';
 import { customerEngine } from './services/customerEngine';
 import { productEngine } from './services/productEngine';
@@ -50,7 +51,7 @@ import CommandPalette from './components/CommandPalette';
 import { pageVariants } from './utils/animations';
 
 const Landing = React.lazy(() => import('./pages/Landing'));
-const Login = React.lazy(() => import('./pages/Login'));
+
 const DemoLogin = React.lazy(() => import('./pages/DemoLogin'));
 const OnboardingWizard = React.lazy(() => import('./pages/onboarding/OnboardingWizard'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
@@ -220,7 +221,7 @@ function App() {
   const [demoInvoices, setDemoInvoices] = useState([]);
   const [demoCustomers, setDemoCustomers] = useState([]);
   const [demoProducts, setDemoProducts] = useState([]);
-  const [demoExpenses, setDemoExpenses] = useState([]);
+  const [demoExpenses] = useState([]);
   const [demoSettings, setDemoSettings] = useState(null);
 
   useEffect(() => {
@@ -434,6 +435,9 @@ function App() {
   
   const [businessWorkspaces, setBusinessWorkspaces] = useState(safeWorkspaces);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState(safeSettings.activeWorkspaceId || (safeWorkspaces.length > 0 ? safeWorkspaces[0].id : null));
+  
+  // Feature Control Engine Integration
+  const { isFeatureEnabled, loading: featuresLoading } = useFeatureControl(activeWorkspaceId || settings?.activeWorkspaceId);
 
   // Keep workspaces in sync with cloud settings updates
   useEffect(() => {
@@ -446,7 +450,7 @@ function App() {
     if (currentSafeSettings.activeWorkspaceId && currentSafeSettings.activeWorkspaceId !== activeWorkspaceId) {
       setActiveWorkspaceId(currentSafeSettings.activeWorkspaceId);
     }
-  }, [settings]);
+  }, [settings, businessWorkspaces, activeWorkspaceId]);
 
   // Handle local workspace changes
   const updateWorkspaceState = (newWorkspaces, newActiveId) => {
@@ -800,7 +804,7 @@ function App() {
     } catch (err) {
       console.error('Firebase sign out error', err);
     }
-    authEngine.logout();
+    await authEngine.logout();
     localStorage.removeItem('billqyro_user_role');
     localStorage.removeItem('billqyro_admin_unlocked');
     
@@ -881,7 +885,9 @@ function App() {
       console.error('Invoice Validation Failed:', validationResult.errors);
       return;
     }
-    const validatedPayload = validationResult.success ? validationResult.data : payload;
+    if (validationResult.success) {
+      payload = validationResult.data;
+    }
 
     // Final Integrity Check
     if (payload.items && payload.items.length > 0) {
@@ -1266,11 +1272,6 @@ function App() {
     }
   };
 
-  // Subscription
-  const handleSaveSubscription = (status) => {
-    const updated = subscriptionEngine.upgradePlan(status);
-    setSubscription(updated);
-  };
 
   // Settings
   const handleSaveSettings = async (payload) => {
@@ -1374,8 +1375,36 @@ function App() {
   }
 
   // --- TAB ROUTER SWITCHBOARD ---
+  const TAB_TO_FEATURE_MAP = {
+    'invoices': 'invoice', 'create-invoice': 'invoice', 'estimates': 'invoice',
+    'customers': 'customer', 'patients': 'customer', 'students': 'customer', 'clients': 'customer',
+    'due-ledger': 'treasury', 'pending-payments': 'payment', 'reports': 'reports',
+    'expenses': 'treasury.moneyOut', 'products': 'product', 'orders': 'product',
+    'appointments': 'customer', 'delivery': 'product', 'measurements': 'product',
+    'designBook': 'product', 'devices': 'product', 'serviceJobs': 'product', 'projects': 'product'
+  };
+
   const renderTabContent = (targetTab = currentTab) => {
     const isMaintenanceMode = (globalMaintenanceMode || activeSettings?.maintenanceMode) && !adminEngine.isAdminUser(authEngine.getAuthSession());
+
+    // Feature gating fallback
+    if (!featuresLoading) {
+      const requiredFeature = TAB_TO_FEATURE_MAP[targetTab];
+      if (requiredFeature && !isFeatureEnabled(requiredFeature)) {
+        return (
+          <div className="flex flex-col items-center justify-center h-full text-center p-10 bg-theme-main">
+            <Lock className="w-16 h-16 text-theme-muted mb-4" />
+            <h2 className="text-2xl font-black text-white mb-2">Feature Disabled</h2>
+            <p className="text-theme-muted max-w-md mb-6">
+              The '{targetTab}' module is currently disabled for this workspace. You can enable it from the Settings Studio.
+            </p>
+            <button onClick={() => setCurrentTab('dashboard')} className="px-6 py-2.5 bg-theme-accent text-white font-bold rounded-xl hover:bg-theme-accent/80 transition-colors">
+              Return to Dashboard
+            </button>
+          </div>
+        );
+      }
+    }
 
     switch (targetTab) {
       case 'landing':
