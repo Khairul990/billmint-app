@@ -1,20 +1,14 @@
 import { toast } from 'react-hot-toast';
-import React, { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { pageVariants } from '../utils/animations';
 import {
-  ArrowRight,
-  Building2,
   Check,
   CreditCard,
   Download,
-  Eye,
-  EyeOff,
   FileCheck2,
   FileText,
   Globe2,
   IndianRupee,
-  Link2,
   Mail,
   Plus,
   QrCode,
@@ -22,14 +16,11 @@ import {
   Share2,
   Smartphone,
   UserRound,
-  Zap,
 } from "lucide-react";
-import { ShimmerButton } from '../components/magicui/shimmer-button';
 
 import { authEngine } from '../services/authEngine';
 import { firebaseReady } from '../services/firebaseConfig';
 
-import Logo from '../components/Logo';
 
 const STEPS = [
   { key: "login", title: "Secure Login", sub: "Enter BillQyro workspace", icon: Check },

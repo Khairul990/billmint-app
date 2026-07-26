@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Briefcase, Plus, Search, Trash2, Edit2, Calendar, DollarSign, User, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Briefcase, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { pageVariants, staggerContainer, staggerItem } from '../../utils/animations';
-import { CardSkeleton } from '../../components/PremiumSkeleton';
-import BottomSheet from '../../components/BottomSheet';
 
 const LS_KEY = 'billqyro_projects';
 const STATUS_OPTIONS = ['Active', 'In Progress', 'Completed', 'On Hold', 'Cancelled'];
@@ -32,7 +29,7 @@ const Projects = () => {
   const [form, setForm] = useState({ name: '', client: '', description: '', status: 'Active', deadline: '', budget: '' });
 
   useEffect(() => {
-    try { setItems(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); } catch {}
+    try { setItems(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); } catch (error) { console.error('Error:', error);  }
     setLoading(false);
   }, []);
 

@@ -1,5 +1,5 @@
 import { db, firebaseReady } from './firebaseConfig';
-import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import {
   getSettings,
   saveSettings,

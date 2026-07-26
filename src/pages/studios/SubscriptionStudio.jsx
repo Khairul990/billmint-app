@@ -1,26 +1,11 @@
-import React, { useState, useEffect, memo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Crown, Sparkles, CheckCircle2, TrendingUp, Download, Receipt, AlertTriangle, 
-  Settings, Check, X, CreditCard, Building, Building2, Phone, Mail, 
-  MessageSquare, Zap, Shield, FileText, Cloud, Clock, Upload, AlertCircle
+import { useState, useEffect, memo } from 'react';
+import { Download, Zap, Shield, FileText, Cloud
 } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
-import { Input, Select, Label } from '../../components/ui/Input';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/Card';
-import { Badge } from '../../components/ui/Badge';
-import { Progress, ProgressRing } from '../../components/ui/Progress';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/Table';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
-import { Accordion, AccordionItem } from '../../components/ui/Accordion';
-import DynamicQRCode from '../../components/DynamicQRCode';
 
 import { authEngine } from '../../services/authEngine';
 import { paymentEngine } from '../../services/paymentEngine';
 import { subscriptionEngine } from '../../services/subscriptionEngine';
 import { adminEngine } from '../../services/adminEngine';
-import { db, firebaseReady } from '../../services/firebaseConfig';
-import { collection, query, where, getDocs } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 
 // ----------------------------------------------------------------------
@@ -309,7 +294,6 @@ const Section7UpgradeJourney = memo(({ pendingReq, rejectedReq, currentPlanId })
   );
 });
 
-// (Other pure UI sections removed for brevity or kept identical)
 const Section8PremiumBenefits = memo(() => (
   <div className="mb-16">
     <h2 className="text-2xl font-black text-theme-primary mb-6">Enterprise Benefits</h2>
@@ -340,7 +324,6 @@ const SubscriptionStudio = ({ settings, onUpdate }) => {
   const [platformProofs, setPlatformProofs] = useState([]);
   const [revenueState, setRevenueState] = useState(null);
   
-  // Form Modal State
   const [showUpgradeForm, setShowUpgradeForm] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('Monthly');
   const [paidAmount, setPaidAmount] = useState('');
@@ -355,7 +338,7 @@ const SubscriptionStudio = ({ settings, onUpdate }) => {
 
   useEffect(() => {
     fetchPlatformRevenue();
-    fetchPendingRequest();
+    fetchRequests();
   }, [settings]);
 
   const fetchPlatformRevenue = async () => {
@@ -366,29 +349,16 @@ const SubscriptionStudio = ({ settings, onUpdate }) => {
     const localInvoices = JSON.parse(localStorage.getItem(`billqyro_invoices_${userId}`) || '[]');
     const state = await paymentEngine.getUserRevenueState(userId, localInvoices, { plan: currentPlanId });
     setRevenueState(state);
-    
-    // Fetch all premium requests as history
-    if (firebaseReady) {
-      try {
-        const q = query(collection(db, 'premiumRequests'), where('userId', '==', userId));
-        const snap = await getDocs(q);
-        const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        setPlatformProofs(docs.sort((a,b) => b.createdAt - a.createdAt));
-      } catch (e) {
-        console.error(e);
-      }
-    }
   };
 
-  const fetchPendingRequest = async () => {
-    if (!firebaseReady) return;
+  const fetchRequests = async () => {
     const userId = authEngine.getRealUserId();
     if (!userId) return;
     
     try {
-      const q = query(collection(db, 'premiumRequests'), where('userId', '==', userId));
-      const snap = await getDocs(q);
-      const docs = snap.docs.map(d => d.data());
+      const docs = await subscriptionEngine.getPremiumRequests(userId);
+      setPlatformProofs(docs.sort((a,b) => b.createdAt - a.createdAt));
+      
       const pending = docs.find(d => d.status === 'Pending');
       const rejected = docs.find(d => d.status === 'Rejected');
       
@@ -438,7 +408,7 @@ const SubscriptionStudio = ({ settings, onUpdate }) => {
       );
       toast.success('Premium activation request submitted! Pending admin verification.');
       setShowUpgradeForm(false);
-      fetchPendingRequest();
+      fetchRequests();
       fetchPlatformRevenue();
     } catch (error) {
       toast.error(error.message || 'Failed to submit request.');

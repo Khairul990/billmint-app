@@ -1,10 +1,7 @@
-﻿import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Package, Plus, Search, Trash2, Edit2, Phone, MapPin, Calendar, Truck, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+﻿import { useState, useEffect } from 'react';
+import { Package, Truck, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { pageVariants, staggerContainer, staggerItem } from '../../utils/animations';
-import { CardSkeleton } from '../../components/PremiumSkeleton';
-import BottomSheet from '../../components/BottomSheet';
 
 const LS_KEY = 'billqyro_delivery';
 const STATUS_OPTIONS = ['Pending', 'Picked Up', 'In Transit', 'Out for Delivery', 'Delivered', 'Cancelled'];
@@ -33,7 +30,7 @@ const Delivery = () => {
   const [form, setForm] = useState({ customerName: '', phone: '', address: '', packageDesc: '', status: 'Pending', deliveryDate: '', trackingId: '' });
 
   useEffect(() => {
-    try { setItems(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); } catch {}
+    try { setItems(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); } catch (error) { console.error('Error:', error);  }
     setLoading(false);
   }, []);
 

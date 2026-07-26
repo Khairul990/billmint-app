@@ -1,9 +1,7 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { Plus, Trash2, AlertTriangle, ArrowUp, X, Settings2, Copy, Package } from 'lucide-react';
+import { Package } from 'lucide-react';
 import { getProductLabelByType } from '../../../config/businessPresets';
-import PremiumEmptyState from '../../../components/PremiumEmptyState';
-import EditColumnsModal from './EditColumnsModal';
 
 const calculateRowAmount = (item) => {
   const q = parseFloat(item.qty) || 0;
@@ -291,7 +289,7 @@ const SmartBillItemsList = ({ products = [], invoices = [], wsType }) => {
             globalSettings.customColumns = cols;
             globalSettings.extraColumns = extras;
             localStorage.setItem('billqyro_settings', JSON.stringify(globalSettings));
-          } catch(e) {}
+          } catch(error) { console.error('Error:', error);  }
         }}
       />
     </div>

@@ -1,10 +1,6 @@
-import React, { useState, useEffect, memo } from 'react';
-import { motion } from 'framer-motion';
-import { ToggleRight, AlertTriangle, Loader2 } from 'lucide-react';
+import { useState, useEffect, memo } from 'react';
 import { toast } from 'react-hot-toast';
 import { adminEngine } from '../../services/adminEngine';
-import { Card, CardContent } from '../../components/ui/Card';
-import { Switch } from '../../components/ui/Switch';
 
 const FeatureSwitchCenter = () => {
   const [features, setFeatures] = useState({

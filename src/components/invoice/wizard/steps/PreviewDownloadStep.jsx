@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { useInvoice } from '../../../../contexts/InvoiceContext';
-import { Download, Send, CheckCircle2, Copy, Loader2 } from 'lucide-react';
-import InvoicePreview from '../../../InvoicePreview';
 import useGeneratePDF from '../../../../hooks/useGeneratePDF';
 import { generatePaymentLink } from '../../../../services/paymentLinkService';
 import { formatCurrency } from '../../../../utils/invoiceUtils';

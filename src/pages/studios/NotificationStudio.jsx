@@ -1,6 +1,4 @@
-import React from 'react';
-import { Bell, Mail, MessageSquare, Send } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
+import { Send } from 'lucide-react';
 
 const NotificationStudio = ({ settings, onUpdate }) => {
   return (

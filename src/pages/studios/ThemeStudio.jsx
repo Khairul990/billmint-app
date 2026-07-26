@@ -1,6 +1,4 @@
-import React from 'react';
-import { Palette, Sun, Moon, Monitor, PaintBucket, Sparkles } from 'lucide-react';
-import { Switch } from '../../components/ui/Switch';
+import { Sun, Moon, Monitor, PaintBucket } from 'lucide-react';
 import { ALL_THEMES, THEME_INFO } from '../../utils/themeUtils';
 import { applyFullTheme } from '../../hooks/useThemeEngine';
 

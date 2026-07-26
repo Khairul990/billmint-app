@@ -1,10 +1,5 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Lock, ShieldAlert, ArrowLeft, Activity, Users, Settings as SettingsIcon, 
-  CreditCard, ShieldCheck, Menu, X, User, Crown, ToggleRight, Database, 
-  ListPlus, MessageSquare, Megaphone, Building2, Workflow, BarChart3
-} from 'lucide-react';
+import { useState } from 'react';
+
 
 const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTab }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

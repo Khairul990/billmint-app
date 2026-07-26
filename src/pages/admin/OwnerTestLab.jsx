@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Beaker, Users, FileText, RefreshCw, Loader, AlertTriangle, Trash2, Video, BarChart2, CheckCircle2, Play, ArrowLeft, Power, Box, ArrowRight, Eye, ShieldCheck, XCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { motion } from 'framer-motion';
 import { generateSmartDemoData } from '../../utils/demoDataGenerator';
 import { clearDemoData, generateFakeAdminData } from '../../utils/demoDataManager';
-import { ShimmerButton } from '../../components/magicui/shimmer-button';
 
 const OwnerTestLab = () => {
   const [isGenerating, setIsGenerating] = useState('');

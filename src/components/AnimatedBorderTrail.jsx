@@ -1,5 +1,3 @@
-import React from 'react';
-import { motion } from 'framer-motion';
 
 const AnimatedBorderTrail = ({ borderRadius = 16, duration = 3, size = 20, className = '' }) => (
   <div

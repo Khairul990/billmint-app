@@ -1,6 +1,3 @@
-import React, { useState } from 'react';
-import { CheckSquare, Plus, Trash2, GitMerge } from 'lucide-react';
-import { Switch } from '../../components/ui/Switch';
 
 const CONDITIONS = [
   { id: 'invoice_created', label: 'When Invoice is Created' },

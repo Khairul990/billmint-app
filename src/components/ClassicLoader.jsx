@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function ClassicLoader({ size = 'md', text }) {
   const sizes = {

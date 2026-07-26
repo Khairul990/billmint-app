@@ -1,6 +1,4 @@
-import React from 'react';
-import { Cloud, HardDrive, Download, RotateCcw, Clock, CheckCircle2 } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
+import { Cloud } from 'lucide-react';
 
 const BackupStudio = ({ settings, onUpdate }) => {
   return (

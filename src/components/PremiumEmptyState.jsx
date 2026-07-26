@@ -1,8 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Users, BarChart3, CreditCard, ShoppingBag, Calendar,
-  FileText, Palette, Sliders, Award, Plus, ArrowRight, Sparkles
+  FileText, Palette, Sliders, Award
 } from 'lucide-react';
 import { fadeInUp } from '../utils/animations';
 

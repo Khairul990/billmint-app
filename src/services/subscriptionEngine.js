@@ -1,5 +1,5 @@
 import * as dbEngine from './dbEngine';
-import {  submitPremiumRequest as dbSubmitPremiumRequest  } from './dbEngine';
+import {  submitPremiumRequest as dbSubmitPremiumRequest, getUserPremiumRequests as dbGetUserPremiumRequests  } from './dbEngine';
 
 const SUBSCRIPTION_PLANS = {
   FREE: {
@@ -38,6 +38,10 @@ const SUBSCRIPTION_PLANS = {
 };
 
 class SubscriptionEngine {
+  async getPremiumRequests(userId) {
+    return await dbGetUserPremiumRequests(userId);
+  }
+
   async getSubscriptionDetails(workspaceId) {
     // In a real app, this queries dbEngine for the workspace's subscription doc
     // For now, returning a mock or fetched setting

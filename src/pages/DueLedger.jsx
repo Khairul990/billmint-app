@@ -1,10 +1,7 @@
-import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Clock, Search, CheckCircle2, AlertCircle, CreditCard, ChevronRight, Calendar, X, Bell, User, DollarSign, TrendingUp, TrendingDown, Send, Eye, Ban, Download } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Clock, AlertCircle, Calendar } from 'lucide-react';
 import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
 import { formatCurrency } from '../utils/invoiceUtils';
-import { CardSkeleton } from '../components/PremiumSkeleton';
-import CustomerLedger from '../components/customers/CustomerLedger';
 
 const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
   const [searchQuery, setSearchQuery] = useState('');

@@ -1,4 +1,3 @@
-import React from 'react';
 
 const SkeletonLine = ({ width = '100%', className = '' }) => (
   <div className={`skeleton-line ${className}`} style={{ width }} />

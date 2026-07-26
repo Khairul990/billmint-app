@@ -1,6 +1,4 @@
-import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { useEffect } from 'react';
 
 const BottomSheet = ({ isOpen, onClose, title, children }) => {
   // Prevent body scroll when open

@@ -1,9 +1,6 @@
-import React, { memo } from 'react';
-import { motion } from 'framer-motion';
-import { Database, Download, Upload, Server } from 'lucide-react';
+import { memo } from 'react';
+import { Database, Download, Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
 
 const DatabaseCenter = () => {
   const handleBackup = () => {

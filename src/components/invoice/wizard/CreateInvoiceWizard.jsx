@@ -1,16 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Save, Eye, Loader2, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
 import { toast } from 'react-hot-toast';
 import { auth } from '../../../services/firebaseConfig';
 import { generateInvoiceNumber } from '../../../services/invoiceNumberService';
-import { ShimmerButton } from '../../magicui/shimmer-button';
 
-import CustomerSelectionStep from './steps/CustomerSelectionStep';
-import ItemsSelectionStep from './steps/ItemsSelectionStep';
-import PaymentDiscountStep from './steps/PaymentDiscountStep';
-import PreviewDownloadStep from './steps/PreviewDownloadStep';
 
 const STEPS = [
   { id: 1, title: '১. কাস্টমার নির্বাচন' },

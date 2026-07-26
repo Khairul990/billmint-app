@@ -1,35 +1,9 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import {
-  CheckCircle2,
-  Lock,
-  FileSpreadsheet,
-  Palette,
-  Eye,
-  Crown,
-  FileText,
-  Tag,
-  Layers,
-  Star,
-  X,
-  Search,
-  QrCode,
-  Pen,
-  Image,
-  Sliders,
-  RefreshCw,
-  ArrowRight,
-  Maximize,
-  Minimize,
-  Download,
-  Filter,
-  ArrowLeft
-} from 'lucide-react';
+import { useState } from 'react';
+
+
 import { toast } from 'react-hot-toast';
 import { settingsEngine } from '../services/settingsEngine';
 import { BUSINESS_PRESETS } from '../config/businessPresets';
-import InvoicePreview from '../components/InvoicePreview';
-import LazyPreview from '../components/LazyPreview';
 import { getDemoInvoice } from '../utils/demoDataGenerator';
 
 

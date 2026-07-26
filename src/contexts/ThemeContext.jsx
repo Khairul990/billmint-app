@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { applyTheme } from '../hooks/useThemeEngine';
 import { settingsEngine } from '../services/settingsEngine';
 

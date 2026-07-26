@@ -1,17 +1,10 @@
-import React, { useState, useEffect, memo } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, memo } from 'react';
 import { 
-  Users, CreditCard, Activity, Crown, Cloud, IndianRupee, 
-  ShieldAlert, CheckCircle2, TrendingUp, AlertTriangle, Layers, Building2, 
+  Users, CreditCard, Crown, Cloud, IndianRupee, TrendingUp, AlertTriangle, Layers, Building2, 
   UserPlus, FileWarning 
 } from 'lucide-react';
 import { adminEngine } from '../../services/adminEngine';
 import { pageVariants } from '../../utils/animations';
-import { KPISkeleton } from '../../components/PremiumSkeleton';
-import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
-import { Progress, ProgressRing } from '../../components/ui/Progress';
-import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
 
 const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);

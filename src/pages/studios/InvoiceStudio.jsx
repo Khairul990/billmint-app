@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import { FileText, LayoutTemplate, Columns, Droplet, ArrowUp, ArrowDown, Eye, EyeOff } from 'lucide-react';
 
 const DEFAULT_COLUMNS = [
   { id: 'item', label: 'Item/Service', visible: true, order: 1 },

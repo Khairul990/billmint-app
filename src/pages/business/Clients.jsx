@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Users, Plus, Search, Trash2, Edit2, Phone, Mail, Building2, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Users, Phone, Mail } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { pageVariants, staggerContainer, staggerItem } from '../../utils/animations';
-import { CardSkeleton } from '../../components/PremiumSkeleton';
-import BottomSheet from '../../components/BottomSheet';
 
 const LS_KEY = 'billqyro_clients';
 
@@ -21,7 +18,7 @@ const Clients = () => {
     try {
       const data = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
       setItems(data);
-    } catch {}
+    } catch (error) { console.error('Error:', error);  }
     setLoading(false);
   }, []);
 

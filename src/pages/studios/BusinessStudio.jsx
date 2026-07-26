@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Building2, Upload, Trash2, Globe, Languages, DollarSign, Percent, FileText, Image as ImageIcon } from 'lucide-react';
+import { useState } from 'react';
 import { BUSINESS_PRESETS } from '../../config/businessPresets';
 
 const BusinessStudio = ({ settings, onUpdate }) => {

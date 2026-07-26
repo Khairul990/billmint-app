@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Smartphone, Plus, Search, Trash2, Edit2, Phone, User, Hash, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Smartphone, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { pageVariants, staggerContainer, staggerItem } from '../../utils/animations';
-import { CardSkeleton } from '../../components/PremiumSkeleton';
-import BottomSheet from '../../components/BottomSheet';
 
 const LS_KEY = 'billqyro_devices';
 const STATUS_OPTIONS = ['Pending', 'Diagnosing', 'In Repair', 'Completed', 'Delivered', 'Cancelled'];
@@ -26,7 +23,7 @@ const Devices = () => {
   const [form, setForm] = useState({ customerName: '', phone: '', deviceName: '', brand: '', model: '', imei: '', issue: '', status: 'Pending' });
 
   useEffect(() => {
-    try { setItems(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); } catch {}
+    try { setItems(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); } catch (error) { console.error('Error:', error);  }
     setLoading(false);
   }, []);
 

@@ -1,7 +1,6 @@
-import React from 'react';
 import { LayoutDashboard, CreditCard, Users, MoreHorizontal } from 'lucide-react';
 import { triggerLightHaptic } from '../utils/feedback';
-import { getCustomerLabelByType, getInvoiceLabelByType } from '../config/businessPresets';
+import { getCustomerLabelByType } from '../config/businessPresets';
 
 const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPaymentsCount = 0, businessSettings }) => {
   const activeWsId = businessSettings?.activeWorkspaceId;

@@ -1,6 +1,4 @@
-import React from 'react';
 import { useInvoice } from '../../contexts/InvoiceContext';
-import InvoicePreview from '../InvoicePreview';
 
 const LiveInvoicePreview = () => {
   const { state, businessSettings, dispatch } = useInvoice();

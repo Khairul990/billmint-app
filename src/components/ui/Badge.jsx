@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const Badge = ({ children, variant = 'primary', className = '', ...props }) => {
   const variants = {

@@ -1,10 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Link2, QrCode, Search, Copy, CheckCircle, Smartphone, ExternalLink } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { customerEngine } from '../services/customerEngine';
-import ClassicLoader from '../components/ClassicLoader';
 import { pageVariants } from '../utils/animations';
 
 export default function CustomerPortalConfig() {

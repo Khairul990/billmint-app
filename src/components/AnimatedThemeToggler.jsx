@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react"
-import { Moon, Sun } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 
 function polygonCollapsed(cx, cy, vertexCount) {

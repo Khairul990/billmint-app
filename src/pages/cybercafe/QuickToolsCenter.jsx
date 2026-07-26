@@ -1,6 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Image as ImageIcon, Scissors, FileText, FileDown, Lock, Code, Crop } from 'lucide-react';
+import { Scissors, FileText, FileDown, Crop } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const TOOLS = [
   { id: 'passport-photo', name: 'Passport Photo Maker', icon: Crop, desc: 'Auto-crop and generate A4 print sheets', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20' },
@@ -21,7 +20,7 @@ export default function QuickToolsCenter() {
         {TOOLS.map(tool => (
           <button
             key={tool.id}
-            onClick={() => alert('Tool interface launching soon...')}
+            onClick={() => toast.error()}
             className="text-left bg-theme-card border border-theme-border-soft p-5 rounded-2xl hover:border-theme-accent hover:shadow-lg transition-all group"
           >
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 border ${tool.color}`}>

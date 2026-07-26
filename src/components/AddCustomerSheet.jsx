@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-import BottomSheet from './BottomSheet';
-import { Save, User, Phone, MapPin, Mail } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 const AddCustomerSheet = ({ isOpen, onClose, onSave, title, label = 'Customer' }) => {

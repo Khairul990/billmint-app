@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, Users, FileText, Settings, X, CreditCard, PieChart } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Users, FileText, Settings, CreditCard, PieChart } from 'lucide-react';
 
 const CommandPalette = ({ isOpen, onClose, onNavigate }) => {
   const [query, setQuery] = useState('');

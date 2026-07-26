@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ListPlus, Send, History } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Send } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { adminEngine } from '../../services/adminEngine';
-import { Button } from '../../components/ui/Button';
 
 const ChangelogManager = () => {
   const [version, setVersion] = useState('');

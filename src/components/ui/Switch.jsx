@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const Switch = ({ checked, onChange, disabled, ...props }) => {
   return (

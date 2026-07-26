@@ -1,5 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import { triggerSuccessFeedback } from '../utils/feedback';
 
 const PullToRefresh = ({ onRefresh, children }) => {

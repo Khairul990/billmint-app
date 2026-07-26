@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Search, ExternalLink, Globe, Star } from 'lucide-react';
+import { useState } from 'react';
 
 const DEFAULT_PORTALS = [
   { id: 'uidai', name: 'Aadhaar (UIDAI)', url: 'https://uidai.gov.in', category: 'Govt' },

@@ -1,39 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { pageVariants } from '../utils/animations';
-import {
-  Phone,
-  Mail,
-  FileDown,
-  CheckCircle2,
-  Copy,
-  Info,
-  Upload,
-  AlertCircle,
-  Wallet,
-  ShieldCheck,
-  ArrowRight,
-  Lock,
-  MessageCircle,
-  Share2,
-  Fingerprint,
-  Sparkles,
-  Globe,
-  Banknote,
-  Download, 
-  CheckCircle, 
-  Clock, 
-  ExternalLink, 
-  Printer, 
-  FileText
-} from 'lucide-react';
+
+
 // Removed unused import: getPublicInvoice
 import { downloadInvoicePDF } from '../utils/pdfUtils';
-import DynamicQRCode from '../components/DynamicQRCode';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
-import { doc, updateDoc, arrayUnion, collection, addDoc, runTransaction } from 'firebase/firestore';
+import { doc, arrayUnion, collection, runTransaction } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../services/firebaseConfig';
 import { sendPaymentReceiptEmail, verifyTransactionId } from '../services/cloudFunctions';
@@ -195,7 +169,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           uploadedUrl = await getDownloadURL(uploadResult.ref);
         } catch (uploadErr) {
           toast.dismiss('uploadToast');
-          throw new Error('Failed to upload image to secure storage: ' + uploadErr.message);
+          throw new Error('Failed to upload image to secure storage: ' + uploadErr.message, { cause: uploadErr });
         }
 
         const invoiceRef = doc(db, 'publicInvoices', docId);

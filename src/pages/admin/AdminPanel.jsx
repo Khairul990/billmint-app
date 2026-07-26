@@ -1,23 +1,4 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import AdminLayout from './AdminLayout';
-import AdminDashboard from './AdminDashboard';
-import UserManager from './UserManager';
-import WorkspaceAdmin from './WorkspaceAdmin';
-import PaymentProofCenter from './PaymentProofCenter';
-import GlobalSettings from './GlobalSettings';
-import OwnerTestLab from './OwnerTestLab';
-import PremiumControlCenter from './PremiumControlCenter';
-import FeatureSwitchCenter from './FeatureSwitchCenter';
-import AppHealthCenter from './AppHealthCenter';
-import SecurityCenter from './SecurityCenter';
-import BackupCenter from './BackupCenter';
-import ChangelogManager from './ChangelogManager';
-import SupportCenter from './SupportCenter';
-import AnnouncementManager from './AnnouncementManager';
-import AnalyticsCenter from './AnalyticsCenter';
-import AutomationCenter from './AutomationCenter';
-import DatabaseCenter from './DatabaseCenter';
+import { useState } from 'react';
 import { pageVariants } from '../../utils/animations';
 
 const AdminPanel = ({ currentTab, setCurrentTab }) => {

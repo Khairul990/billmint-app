@@ -1,5 +1,3 @@
-import React from 'react';
-import { Shield, ArrowLeft, Trash2, Download } from 'lucide-react';
 
 export default function DataDeletion({ onBack }) {
   return (

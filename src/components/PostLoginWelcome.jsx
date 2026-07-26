@@ -1,16 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import {
-  ArrowRight,
   CheckCircle2,
   FileText,
   LayoutDashboard,
   ShieldCheck,
-  Sparkles,
-  Trophy,
   Zap,
 } from "lucide-react";
-import Logo from "./Logo";
 
 const READY_STEPS = [
   { label: "Login successful", icon: CheckCircle2 },

@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useMemo } from 'react';
 import {
-  ShoppingBag, Plus, Search, X, CheckCircle2, Clock, Truck, Ban,
-  Package, TrendingUp, User, Calendar, Hash, Loader2, AlertTriangle
+  ShoppingBag, CheckCircle2, Clock, Truck, Ban,
+  Package, TrendingUp, Loader2
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
-import { CardSkeleton } from '../components/PremiumSkeleton';
 import { toast } from 'react-hot-toast';
 const getOrders = async () => { try { const d = localStorage.getItem('billqyro_orders'); return d ? JSON.parse(d) : []; } catch { return []; } };
 const saveOrder = async (order) => { const orders = await getOrders(); const idx = orders.findIndex(o => o.id === order.id); if (idx >= 0) orders[idx] = order; else orders.push(order); localStorage.setItem('billqyro_orders', JSON.stringify(orders)); window.dispatchEvent(new Event('billqyro_sync')); };

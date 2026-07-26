@@ -1,5 +1,3 @@
-import React from 'react';
-import { ArrowLeft, RefreshCcw } from 'lucide-react';
 
 const RefundPolicy = ({ setCurrentTab }) => {
   return (

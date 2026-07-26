@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
-import { IndianRupee, Scissors, Receipt, Calculator, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 const CompactSummaryStrip = () => {
   const { state, dispatch } = useInvoice();

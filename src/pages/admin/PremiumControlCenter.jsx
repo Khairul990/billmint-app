@@ -1,13 +1,8 @@
-import React, { useState, useEffect, memo } from 'react';
-import { motion } from 'framer-motion';
-import { Crown, Search, Loader2, Save } from 'lucide-react';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { db } from '../../services/firebaseConfig';
+import { useState, useEffect, memo } from 'react';
+import { Search, Loader2, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { adminEngine } from '../../services/adminEngine';
 import { getGlobalRevenueSettings, saveGlobalRevenueSettings } from '../../services/platformRevenueService';
-import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
 
 const PremiumControlCenter = () => {
   const [targetUserId, setTargetUserId] = useState('');
@@ -38,9 +33,9 @@ const PremiumControlCenter = () => {
     if (!targetUserId.trim()) return;
     setLoading(true);
     try {
-      const userDoc = await getDoc(doc(db, 'usersList', targetUserId));
-      if (userDoc.exists()) {
-        setTargetUserEmail(userDoc.data().email || 'Found user');
+      const userDoc = await adminEngine.lookupUser(targetUserId);
+      if (userDoc) {
+        setTargetUserEmail(userDoc.email || 'Found user');
         toast.success('User found!');
       } else {
         setTargetUserEmail('User not found');
@@ -54,38 +49,21 @@ const PremiumControlCenter = () => {
   };
 
   const handleOverride = async (newPlan) => {
-    if (!targetUserId.trim()) {
-      toast.error('Enter a user ID first.');
-      return;
-    }
-    setActionLoading(newPlan);
-    try {
-      const subRef = doc(db, 'subscription', targetUserId);
-      const userRef = doc(db, 'usersList', targetUserId);
-      const settingsRef = doc(db, 'settings', targetUserId);
-
-      const now = Date.now();
-      const durationMs = newPlan === 'trial' ? 7 * 24 * 60 * 60 * 1000 : 365 * 24 * 60 * 60 * 1000;
-      const expiresAt = newPlan === 'free' ? null : now + durationMs;
-
-      await setDoc(subRef, {
-        status: newPlan === 'free' ? 'free' : 'premium',
-        plan: newPlan,
-        activatedAt: newPlan === 'free' ? null : now,
-        expiresAt,
-        updatedAt: now
-      });
-      await setDoc(userRef, { planStatus: newPlan === 'free' ? 'free' : 'premium' }, { merge: true });
-      await setDoc(settingsRef, { planStatus: newPlan === 'free' ? 'free' : 'premium' }, { merge: true });
-
-      toast.success(`User set to ${newPlan} successfully!`);
-    } catch (e) {
-      console.error('Override failed:', e);
-      toast.error('Failed to update user plan.');
-    } finally {
-      setActionLoading(null);
-    }
-  };
+      if (!targetUserId.trim()) {
+        toast.error('Enter a user ID first.');
+        return;
+      }
+      setActionLoading(newPlan);
+      try {
+        await adminEngine.overrideUserPlan(targetUserId, newPlan);
+        toast.success(`User set to ${newPlan} successfully!`);
+      } catch (e) {
+        console.error('Override failed:', e);
+        toast.error('Failed to update user plan.');
+      } finally {
+        setActionLoading(null);
+      }
+    };
 
   const handleSaveSettings = async () => {
     setSavingSettings(true);

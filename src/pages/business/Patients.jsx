@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Heart, Plus, Search, Trash2, Edit2, Phone, Droplets, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Heart, User } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { pageVariants, staggerContainer, staggerItem } from '../../utils/animations';
-import { CardSkeleton } from '../../components/PremiumSkeleton';
-import BottomSheet from '../../components/BottomSheet';
 
 const LS_KEY = 'billqyro_patients';
 
@@ -18,7 +15,7 @@ const Patients = () => {
   const [form, setForm] = useState({ name: '', phone: '', age: '', gender: '', bloodGroup: '', address: '', notes: '' });
 
   useEffect(() => {
-    try { setItems(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); } catch {}
+    try { setItems(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); } catch (error) { console.error('Error:', error);  }
     setLoading(false);
   }, []);
 

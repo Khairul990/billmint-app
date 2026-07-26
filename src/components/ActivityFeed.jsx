@@ -1,6 +1,4 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FileText, CheckCircle, AlertCircle, Clock, DollarSign } from 'lucide-react';
+import { FileText, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { staggerContainer, staggerItem } from '../utils/animations';
 import { formatCurrency } from '../utils/invoiceUtils';
 

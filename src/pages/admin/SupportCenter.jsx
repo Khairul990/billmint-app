@@ -1,12 +1,7 @@
-import React, { useState, useEffect, memo } from 'react';
-import { motion } from 'framer-motion';
-import { MessageSquare, CheckCircle2, Clock, Search, Loader2 } from 'lucide-react';
+import { useState, useEffect, memo } from 'react';
+import { CheckCircle2, Clock, Search } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { adminEngine } from '../../services/adminEngine';
-import { Card, CardContent } from '../../components/ui/Card';
-import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
 
 const SupportCenter = () => {
   const [activeSubTab, setActiveSubTab] = useState('tickets');

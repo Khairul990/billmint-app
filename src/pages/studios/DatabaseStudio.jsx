@@ -1,5 +1,3 @@
-import React from 'react';
-import { Database, Table, Plus, Save, Server, Shield } from 'lucide-react';
 
 const DatabaseStudio = ({ settings, onUpdate }) => {
   return (

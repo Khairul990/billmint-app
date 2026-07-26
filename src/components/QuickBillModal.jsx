@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
-import BottomSheet from './BottomSheet';
+import { useState } from 'react';
 import { generateNextInvoiceNumber } from '../utils/invoiceUtils';
-import { Download, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getCustomerLabelByType } from '../config/businessPresets';
 

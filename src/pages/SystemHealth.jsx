@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import AnimatedPage from '../components/AnimatedPage';
-import { ArrowLeft, HardDrive, Wifi, WifiOff, RefreshCcw, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { BillQyroDB } from '../services/localDb';
 

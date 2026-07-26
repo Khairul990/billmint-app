@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer, useEffect } from 'react';
 import { calculateTotals, generateNextInvoiceNumber } from '../utils/invoiceUtils';
 import { invoiceTemplates } from '../config/invoiceTemplates';
 import { invoiceEngine } from '../services/invoiceEngine';

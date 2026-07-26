@@ -1,6 +1,3 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Users, Plus, Search } from 'lucide-react';
 
 export default function CustomerRegister() {
   return (

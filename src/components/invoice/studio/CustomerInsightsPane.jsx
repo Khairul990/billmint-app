@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, TrendingUp, AlertCircle, Award, Clock } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Sparkles, TrendingUp, AlertCircle, Award } from 'lucide-react';
 import { invoiceEngine } from '../../../services/invoiceEngine';
 
 const CustomerInsightsPane = ({ customerId }) => {

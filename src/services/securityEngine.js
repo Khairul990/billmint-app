@@ -1,6 +1,5 @@
 import { firebaseReady, auth, db } from './firebaseConfig';
-import { doc, getDoc, setDoc, collection, getDocs, query, where } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import {
   logAudit,
   getAuthSession,

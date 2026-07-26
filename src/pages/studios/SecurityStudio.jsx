@@ -1,6 +1,4 @@
-import React from 'react';
-import { Shield, Key, Smartphone, Clock, AlertTriangle } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
+import { AlertTriangle } from 'lucide-react';
 
 const SecurityStudio = ({ settings, onUpdate }) => {
   return (

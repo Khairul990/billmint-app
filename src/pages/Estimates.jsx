@@ -1,32 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import AnimatedPage from '../components/AnimatedPage';
-import InvoiceCard from '../components/InvoiceCard';
-import InvoicePreview from '../components/InvoicePreview';
-import { 
-  Search, 
-  Plus, 
-  FileSpreadsheet, 
-  X, 
-  Printer, 
-  Download, 
-  Edit,
-  Mail,
-  Copy,
-  Check,
-  Share2,
-  Link,
-  ArrowRightLeft
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+
+
 import { createPortal } from 'react-dom';
 import { toast } from 'react-hot-toast';
-import { 
-  generateWhatsAppShareLink, 
-  generateEmailShareLink, 
-  generateInvoiceShareText 
-} from '../utils/shareUtils';
+
+
 import { invoiceEngine } from '../services/invoiceEngine';
-import PullToRefresh from '../components/PullToRefresh';
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (

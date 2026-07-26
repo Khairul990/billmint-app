@@ -1,15 +1,10 @@
-import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, 
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend 
-} from 'recharts';
-import { 
-  Filter, Download, Printer, PieChart as PieChartIcon, 
-  TrendingUp, DollarSign, FileText, CheckCircle2, AlertCircle, Clock
-} from 'lucide-react';
+import { useState, useMemo } from 'react';
+
+
+
 import { formatCurrency } from '../utils/invoiceUtils';
 import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
+import { toast } from 'react-hot-toast';
 
 const COLORS = {
   emerald: '#10b981',
@@ -78,9 +73,7 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
       return true;
     }).map(inv => {
       const grandTotal = parseFloat(inv.grandTotal || inv.total) || 0;
-      let paid = 0;
-      if (inv.paymentStatus === 'Paid') paid = grandTotal;
-      else paid = parseFloat(inv.amountPaid) || 0;
+      const paid = inv.paymentStatus === 'Paid' ? grandTotal : (parseFloat(inv.amountPaid) || 0);
 
       return {
         ...inv,
@@ -174,7 +167,7 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
   }, [invoices, dateRange, customStart, customEnd, docType, paymentStatus]);
 
   const exportCSV = () => {
-    if (filteredData.length === 0) return alert("No data to export.");
+    if (filteredData.length === 0) return toast.error();
     
     const escapeCSV = (val) => {
       const str = String(val ?? '').replace(/\n/g, ' ').replace(/\r/g, ' ');

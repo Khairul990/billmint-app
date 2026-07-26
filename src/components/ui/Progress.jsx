@@ -1,5 +1,3 @@
-import React from 'react';
-import { motion } from 'framer-motion';
 
 export const Progress = ({ value = 0, max = 100, className = '', colorClass = 'bg-theme-accent', shadowClass = 'shadow-[0_0_10px_var(--accent)]' }) => {
   const percentage = Math.min(100, Math.max(0, (value / max) * 100));

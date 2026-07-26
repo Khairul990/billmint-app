@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Plus, AlertTriangle, ArrowUp } from 'lucide-react';
+import { useState } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
 
 const QuickProductBar = ({ products = [] }) => {

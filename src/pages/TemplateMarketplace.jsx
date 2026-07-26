@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import {
   Store,
   Scissors,
@@ -7,17 +6,7 @@ import {
   Wrench,
   Cpu,
   Smartphone,
-  ShoppingBag,
-  CheckCircle2,
-  Lock,
-  FileText,
-  Star,
-  Sparkles,
-  Eye,
-  X,
-  ExternalLink,
-  Clock,
-  Globe
+  ShoppingBag
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 

@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useMemo } from 'react';
 import { 
-  Store, CheckCircle2, ChevronRight, ChevronLeft, Building2, User, Paintbrush, Play,
-  ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText,
-  CreditCard, ShieldCheck, Globe, Coffee, Settings, Info, Monitor
+  Store, Paintbrush,
+  ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText, Coffee, Settings, Monitor
 } from 'lucide-react';
 import { BUSINESS_PRESETS, ALL_MODULES } from '../../config/businessPresets';
 import { authEngine } from '../../services/authEngine';
+import { toast } from 'react-hot-toast';
 
 const iconMap = {
   ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText, Store, Palette: Paintbrush, Coffee, Settings, Monitor
@@ -276,7 +275,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
       utterance.lang = langCode;
       window.speechSynthesis.speak(utterance);
     } else {
-      alert("Text-to-speech is not supported in your browser.");
+      toast.error();
     }
   };
 

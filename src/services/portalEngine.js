@@ -1,9 +1,25 @@
 import { invoiceEngine } from './invoiceEngine';
-import * as dbEngine from './dbEngine';
-import {  verifyCustomerPortal as dbVerifyCustomerPortal  } from './dbEngine';
+import {  
+  verifyCustomerPortal as dbVerifyCustomerPortal,
+  listenToPublicInvoice as dbListenToPublicInvoice,
+  submitPublicPaymentProofTransaction as dbSubmitPublicPaymentProofTransaction,
+  uploadPublicPaymentProof as dbUploadPublicPaymentProof
+} from './dbEngine';
 import { paymentEngine } from './paymentEngine';
 
 class PortalEngine {
+  listenToPublicInvoice(token, callback) {
+    return dbListenToPublicInvoice(token, callback);
+  }
+
+  async submitPublicPaymentProofTransaction(docId, invoice, amount, paymentMethod, downloadURL, notes) {
+    return await dbSubmitPublicPaymentProofTransaction(docId, invoice, amount, paymentMethod, downloadURL, notes);
+  }
+
+  async uploadPublicPaymentProof(docId, file) {
+    return await dbUploadPublicPaymentProof(docId, file);
+  }
+
   // Public invoice access
   async getPublicInvoice(invoiceId) {
     // In production, this would query a dedicated public endpoint or verify tokens.

@@ -1,8 +1,5 @@
-import React from 'react';
-import DynamicQRCode from './DynamicQRCode';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
-import { ShieldCheck, Calendar, Hash, FileText } from 'lucide-react';
 import { getCategoryWording } from '../config/businessPresets';
 
 /**

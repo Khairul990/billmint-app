@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { useOnboarding } from '../../contexts/OnboardingContext';
-import Confetti from 'react-confetti';
-import { CheckCircle } from 'lucide-react';
 
 const useWindowSize = () => {
   const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight });

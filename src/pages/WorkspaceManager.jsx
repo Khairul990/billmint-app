@@ -1,17 +1,7 @@
-import React, { useState } from 'react';
-import AnimatedPage from '../components/AnimatedPage';
-import { 
-  Store, 
-  Plus, 
-  Edit3, 
-  Archive, 
-  CheckCircle2, 
-  Circle,
-  Settings2,
-  ChevronRight,
-  ArrowLeft
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+
+
 import { BUSINESS_PRESETS, ALL_MODULES as ALL_MODULES_CONFIG } from '../config/businessPresets';
 
 const ALL_MODULES = ALL_MODULES_CONFIG;
@@ -91,7 +81,7 @@ const WorkspaceManager = ({
 
   const handleToggleArchive = (ws) => {
     if (ws.id === activeWorkspaceId) {
-      alert("Cannot archive the currently active workspace.");
+      toast("Cannot archive the currently active workspace.");
       return;
     }
     

@@ -1,5 +1,3 @@
-import React from 'react';
-import { ArrowLeft, Shield } from 'lucide-react';
 
 const PrivacyPolicy = ({ setCurrentTab }) => {
   return (

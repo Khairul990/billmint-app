@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const LazyPreview = ({ children, fallback, threshold = 0.1 }) => {
   const [isVisible, setIsVisible] = useState(false);

@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { User, Phone, Mail, MapPin, Search, FileText, Check } from 'lucide-react';
+import { useState } from 'react';
 import * as Icons from 'lucide-react';
 import { useInvoice } from '../../../../contexts/InvoiceContext';
 import { invoiceTemplates } from '../../../../config/invoiceTemplates';

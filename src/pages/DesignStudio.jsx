@@ -1,9 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import LazyPreview from '../components/LazyPreview';
-import PublicInvoice from './PublicInvoice';
-import InvoicePreview from '../components/InvoicePreview';
+import { useState, useEffect } from 'react';
 
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Palette,
   FileText,
@@ -12,7 +8,6 @@ import {
   Building2,
   Tags,
   Sparkles,
-  ArrowRight,
   Store,
   Scissors,
   Stethoscope,
@@ -20,22 +15,12 @@ import {
   Cpu,
   Smartphone,
   ShoppingBag,
-  Layers,
-  Eye,
-  Monitor,
-  QrCode,
-  CheckCircle2,
   Grid3X3,
   PaintBucket,
   Briefcase,
-  Star,
   User,
   BarChart3,
-  LayoutDashboard,
-  Lightbulb,
-  X,
-  RotateCcw,
-  ArrowLeft
+  LayoutDashboard
 } from 'lucide-react';
 import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
 import { getDemoInvoice } from '../utils/demoDataGenerator';
@@ -210,7 +195,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
   const [businessFilter, setBusinessFilter] = useState('All');
   const [showCompare, setShowCompare] = useState(false);
   const [favoriteThemes, setFavoriteThemes] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('billqyro_design_favorites') || '[]'); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem('billqyro_design_favorites') || '[]'); } catch (error) { console.error('Error:', error);  }
   });
 
   const toggleFavorite = (themeId) => {
@@ -238,7 +223,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
       const activities = raw ? JSON.parse(raw) : [];
       activities.unshift({ action, detail, time: Date.now() });
       localStorage.setItem('billqyro_design_activity', JSON.stringify(activities.slice(0, 20)));
-    } catch {}
+    } catch (error) { console.error('Error:', error);  }
   };
 
   return (
@@ -327,7 +312,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
           <div className="space-y-2">
             {(() => {
               let activities = [];
-              try { const raw = localStorage.getItem('billqyro_design_activity'); activities = raw ? JSON.parse(raw) : []; } catch (e) { activities = []; }
+              try { const raw = localStorage.getItem('billqyro_design_activity'); activities = raw ? JSON.parse(raw) : []; } catch (error) { console.error('Error:', error);  }
               const defaults = [
                 { action: 'Template updated', detail: 'PDF Classic layout', time: Date.now() - 86400000 * 2 },
                 { action: 'Brand color changed', detail: 'Obsidian Gold applied', time: Date.now() - 86400000 * 4 },

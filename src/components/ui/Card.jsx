@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const Card = ({ className = '', children, ...props }) => (
   <div className={`bg-theme-surface border border-theme-border-soft rounded-3xl backdrop-blur-md shadow-glass overflow-hidden ${className}`} {...props}>

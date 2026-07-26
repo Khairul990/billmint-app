@@ -1,29 +1,20 @@
 import React from 'react';
-import { 
-  X, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  FileText, 
-  TrendingUp, 
-  AlertCircle,
-  MessageCircle,
-  CheckCircle2,
-  Calendar,
-  Clock,
-  Banknote,
-  Save,
-  Loader2,
-  Plus
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+
+
 import { invoiceEngine } from '../../services/invoiceEngine';
+import { toast } from 'react-hot-toast';
 
 /**
  * Customer Ledger Modal
  * Displays a comprehensive view of a customer's history and metrics.
  */
 const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymbol = '₹', onCreateBill }) => {
+  const [updatingInvoiceId, setUpdatingInvoiceId] = React.useState(null);
+  const [paymentAmount, setPaymentAmount] = React.useState('');
+  const [paymentMethod, setPaymentMethod] = React.useState('Cash');
+  const [paymentNote, setPaymentNote] = React.useState('');
+  const [isSaving, setIsSaving] = React.useState(false);
+
   if (!isOpen || !customer) return null;
 
   // 1. Filter invoices for this customer
@@ -49,12 +40,6 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
     }).format(amount || 0);
     return `${currencySymbol} ${formattedNum}`;
   };
-
-  const [updatingInvoiceId, setUpdatingInvoiceId] = React.useState(null);
-  const [paymentAmount, setPaymentAmount] = React.useState('');
-  const [paymentMethod, setPaymentMethod] = React.useState('Cash');
-  const [paymentNote, setPaymentNote] = React.useState('');
-  const [isSaving, setIsSaving] = React.useState(false);
 
   const handleUpdatePayment = async (inv) => {
     setIsSaving(true);
@@ -85,10 +70,10 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
       setPaymentNote('');
       // We don't have a direct way to trigger a re-render of App.jsx invoices here unless we pass a callback, 
       // but dbEngine's onSnapshot handles live updates if online, or the user can refresh/re-open.
-      alert('Payment updated successfully! The ledger will reflect changes shortly.');
+      toast.success();
     } catch (err) {
       console.error(err);
-      alert('Failed to update payment');
+      toast.error();
     } finally {
       setIsSaving(false);
     }
@@ -101,7 +86,7 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
     if (phone) {
       window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
     } else {
-      alert("No phone number found for this customer.");
+      toast.error();
     }
   };
 

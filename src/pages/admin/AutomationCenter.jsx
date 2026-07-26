@@ -1,10 +1,6 @@
-import React, { useState, memo } from 'react';
-import { motion } from 'framer-motion';
-import { Bot, Mail, Calendar, Database, ShieldAlert, Zap } from 'lucide-react';
+import { useState, memo } from 'react';
+import { Zap } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { Switch } from '../../components/ui/Switch';
-import { Button } from '../../components/ui/Button';
 
 const AutomationCenter = () => {
   const [automations, setAutomations] = useState({

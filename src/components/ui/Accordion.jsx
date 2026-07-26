@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 
 export const Accordion = ({ children, className = '' }) => {
   return <div className={`divide-y divide-theme-border-soft ${className}`}>{children}</div>;

@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Save, Plus, Trash2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const EditColumnsModal = ({ isOpen, onClose, onSave, initialColumns, initialExtraColumns = [] }) => {
   const [col1, setCol1] = useState(initialColumns?.col1 || 'Item Name');

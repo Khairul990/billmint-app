@@ -1,6 +1,4 @@
-import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { useEffect } from 'react';
 
 const CenteredModal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-xl' }) => {
   // Prevent body scroll when open

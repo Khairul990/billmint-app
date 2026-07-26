@@ -1,7 +1,8 @@
-import { db, firebaseReady, auth } from './firebaseConfig';
+import { db, storage, firebaseReady, auth } from './firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from 'react-hot-toast';
 import JSZip from 'jszip';
-import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where, runTransaction } from 'firebase/firestore';
 import { getAdminEmail, isAdminUser } from '../utils/adminAccess';
 import { BillQyroDB } from './localDb';
 import { generateVerificationCode } from './verificationCodeService';
@@ -1395,6 +1396,176 @@ export const resetEnterpriseWorkspace = async (targetUserId) => {
     console.error('Failed to reset enterprise workspace:', e);
     return false;
   }
+};
+
+export const getUserPremiumRequests = async (userId) => {
+  if (!firebaseReady || !userId) return [];
+  try {
+    const q = query(collection(db, 'premiumRequests'), where('userId', '==', userId));
+    const snap = await getDocs(q);
+    const list = [];
+    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+    return list;
+  } catch (e) {
+    console.error('Failed to getUserPremiumRequests:', e);
+    return [];
+  }
+};
+
+export const listenToPendingPaymentProofs = (userId, callback) => {
+  if (!firebaseReady || !userId) return () => {};
+  const q = query(collection(db, 'payment_proofs'), where('ownerId', '==', userId), where('status', '==', 'pending'));
+  return onSnapshot(q, (snapshot) => {
+    const proofs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    callback(proofs);
+  });
+};
+
+export const uploadPublicPaymentProof = async (docId, file) => {
+  if (!firebaseReady) throw new Error('System Offline');
+  const timestamp = Date.now();
+  const safeFilename = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+  const storageRef = ref(storage, `paymentProofs/${docId}/${timestamp}_${safeFilename}`);
+  const uploadResult = await uploadBytes(storageRef, file);
+  return await getDownloadURL(uploadResult.ref);
+};
+
+export const listenToPublicInvoice = (token, callback) => {
+  if (!firebaseReady || !token) return () => {};
+  const docRef = doc(db, 'publicInvoices', token);
+  return onSnapshot(docRef, (snap) => {
+    if (snap.exists()) {
+      callback(snap.data());
+    }
+  });
+};
+
+export const submitPublicPaymentProofTransaction = async (docId, invoice, amount, paymentMethod, downloadURL, notes) => {
+  if (!firebaseReady) throw new Error('System Offline');
+  const invoiceRef = doc(db, 'publicInvoices', docId);
+  await runTransaction(db, async (transaction) => {
+    const pInvDoc = await transaction.get(invoiceRef);
+    if (!pInvDoc.exists()) throw new Error('Invoice not found');
+    const pInvData = pInvDoc.data();
+    if (pInvData.status === 'Paid' || pInvData.paymentStatus === 'Paid') {
+      throw new Error('This invoice has already been paid or has a pending verification.');
+    }
+    transaction.set(doc(collection(db, 'payment_proofs')), {
+      invoiceId: invoice.id,
+      publicInvoiceId: invoice.id,
+      ownerId: invoice.userId || invoice.createdByUid || invoice.ownerId || 'unknown',
+      amount: Number(amount),
+      method: paymentMethod,
+      date: new Date().toISOString(),
+      proofUrl: downloadURL,
+      notes: notes,
+      status: 'pending',
+      createdAt: Date.now()
+    });
+    const currentPaid = pInvData.amountPaid || 0;
+    const newPaid = currentPaid + Number(amount);
+    let newStatus = pInvData.status;
+    if (newPaid >= pInvData.grandTotal) {
+      newStatus = 'Paid';
+    } else if (newPaid > 0) {
+      newStatus = 'Partial';
+    }
+    transaction.update(invoiceRef, {
+      amountPaid: newPaid,
+      status: newStatus,
+      paymentStatus: newStatus,
+      updatedAt: new Date().toISOString()
+    });
+  });
+  return true;
+};
+
+export const approvePaymentProof = async (proofId, amount, publicToken) => {
+  if (!firebaseReady) throw new Error('System Offline');
+  const proofRef = doc(db, 'payment_proofs', proofId);
+  await runTransaction(db, async (transaction) => {
+    const proofDoc = await transaction.get(proofRef);
+    if (!proofDoc.exists()) throw new Error('Payment proof not found.');
+    const proofData = proofDoc.data();
+    if (proofData.status === 'approved') throw new Error('This payment has already been approved.');
+    if (proofData.status === 'rejected') throw new Error('This payment has already been rejected.');
+    
+    transaction.update(proofRef, { 
+      status: 'approved',
+      updatedAt: new Date().toISOString()
+    });
+
+    if (publicToken) {
+      const publicInvRef = doc(db, 'publicInvoices', publicToken);
+      const pInvDoc = await transaction.get(publicInvRef);
+      if (pInvDoc.exists()) {
+        const pData = pInvDoc.data();
+        const grandTotal = pData.grandTotal || 0;
+        const currentPaid = parseFloat(pData.amountPaid) || 0;
+        const paymentAmount = parseFloat(amount) || 0;
+        const newPaid = currentPaid + paymentAmount;
+        const newBalance = Math.max(0, grandTotal - newPaid);
+        let newStatus = pData.paymentStatus;
+        if (newBalance <= 0) newStatus = 'Paid';
+        else if (newPaid > 0) newStatus = 'Partially Paid';
+        
+        transaction.update(publicInvRef, { 
+          paymentStatus: newStatus,
+          status: newStatus,
+          amountPaid: newPaid,
+          balanceDue: newBalance
+        });
+      }
+    }
+  });
+};
+
+export const rejectPaymentProof = async (proofId) => {
+  if (!firebaseReady) throw new Error('System Offline');
+  const proofRef = doc(db, 'payment_proofs', proofId);
+  await runTransaction(db, async (transaction) => {
+    const proofDoc = await transaction.get(proofRef);
+    if (!proofDoc.exists()) throw new Error('Payment proof not found.');
+    const proofData = proofDoc.data();
+    if (proofData.status === 'rejected') throw new Error('This payment has already been rejected.');
+    if (proofData.status === 'approved') throw new Error('This payment has already been approved and cannot be rejected.');
+    
+    transaction.update(proofRef, { 
+      status: 'rejected',
+      updatedAt: new Date().toISOString()
+    });
+  });
+};
+
+export const lookupUserByAdmin = async (userId) => {
+  if (!firebaseReady) throw new Error('System Offline');
+  const userDoc = await getDoc(doc(db, 'usersList', userId));
+  return userDoc.exists() ? userDoc.data() : null;
+};
+
+export const overrideUserPlanByAdmin = async (userId, newPlan) => {
+  if (!firebaseReady) throw new Error('System Offline');
+  const subRef = doc(db, 'subscription', userId);
+  const userRef = doc(db, 'usersList', userId);
+  const settingsRef = doc(db, 'settings', userId);
+
+  const now = Date.now();
+  const durationMs = newPlan === 'trial' ? 7 * 24 * 60 * 60 * 1000 : 365 * 24 * 60 * 60 * 1000;
+  const expiresAt = newPlan === 'free' ? null : now + durationMs;
+
+  await setDoc(subRef, {
+    status: newPlan === 'free' ? 'free' : 'premium',
+    plan: newPlan,
+    activatedAt: newPlan === 'free' ? null : now,
+    expiresAt,
+    autoRenew: false
+  }, { merge: true });
+
+  await setDoc(userRef, { role: newPlan === 'free' ? 'user' : 'premium' }, { merge: true });
+  await setDoc(settingsRef, {
+    premiumFeatures: newPlan !== 'free',
+    updatedAt: new Date().toISOString()
+  }, { merge: true });
 };
 
 export const getAdminPremiumRequests = async () => {

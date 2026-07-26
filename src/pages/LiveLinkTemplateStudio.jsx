@@ -1,12 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import LazyPreview from '../components/LazyPreview';
-import PublicInvoice from './PublicInvoice';
+import { useState, useEffect } from 'react';
 
-import { motion } from 'framer-motion';
 import { 
-  Palette, 
-  CheckCircle2, 
-  Lock, 
   Smartphone, 
   Building2, 
   Briefcase, 
@@ -16,32 +10,14 @@ import {
   LayoutTemplate,
   Monitor,
   Tablet,
-  QrCode,
   CreditCard,
   Globe,
-  Star,
   Layers,
   Sun,
-  X,
-  Eye,
   FileText,
   Download,
-  Settings,
   Sparkles,
-  ArrowRight,
-  Search,
-  Filter,
-  Grid,
-  Type,
-  Image,
-  Pen,
-  Sliders,
-  Plus,
-  RotateCcw,
-  Maximize,
-  Minimize,
-  RefreshCw,
-  ArrowLeft
+  Type
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { BUSINESS_PRESETS } from '../config/businessPresets';

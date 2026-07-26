@@ -1,7 +1,4 @@
-import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import AnimatedPage from '../components/AnimatedPage';
-import { Search, ChevronRight, Languages, Clock, X, Play, CheckCircle2 } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import * as Icons from 'lucide-react';
 import { guides, categories, faqs as faqsData } from '../data/guides';
 

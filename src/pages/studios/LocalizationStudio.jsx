@@ -1,6 +1,3 @@
-import React from 'react';
-import { Globe2, Clock, DollarSign, Percent } from 'lucide-react';
-import { Input, Select, Label } from '../../components/ui/Input';
 
 const LocalizationStudio = ({ settings, onUpdate }) => {
   return (

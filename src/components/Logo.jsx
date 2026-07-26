@@ -1,5 +1,3 @@
-import React from 'react';
-import { motion } from 'framer-motion';
 
 /**
  * High-fidelity Vector Logo and Brand Asset Component for BillQyro

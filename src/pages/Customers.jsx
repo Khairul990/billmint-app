@@ -1,26 +1,9 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useMemo, useCallback } from 'react';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
-import AnimatedPage from '../components/AnimatedPage';
-import {
-  Plus,
-  Search,
-  Trash2,
-  Edit2,
-  Save,
-  Phone,
-  Mail,
-  UserPlus,
-  MapPin,
-  FileText,
-  Loader2,
-} from 'lucide-react';
-import BottomSheet from '../components/BottomSheet';
-import PullToRefresh from '../components/PullToRefresh';
+
+
 import { invoiceEngine } from '../services/invoiceEngine';
 import { getCustomerLabelByType } from '../config/businessPresets';
-import CustomerLedger from '../components/customers/CustomerLedger';
-import PremiumEmptyState from '../components/PremiumEmptyState';
 import { toast } from 'react-hot-toast';
 
 /**
@@ -69,7 +52,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
     e.preventDefault();
     if (isSaving) return;
     if (!name) {
-      alert('Please specify a client name.');
+      toast.error();
       return;
     }
     setIsSaving(true);
@@ -84,7 +67,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
       await onSaveCustomer(payload);
       setIsModalOpen(false);
     } catch (err) {
-      alert('Failed to save. Please try again.');
+      toast.error();
     } finally {
       setIsSaving(false);
     }

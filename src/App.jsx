@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import toast, { Toaster } from 'react-hot-toast';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Trash2, AlertTriangle, Lock } from 'lucide-react';
-import ClassicLoader from './components/ClassicLoader';
-import PostLoginWelcome from './components/PostLoginWelcome';
-import Layout from './components/Layout';
+import toast from 'react-hot-toast';
 import { useThemeEngine } from './hooks/useThemeEngine';
 import { 
   isDemoModeActive, 
@@ -25,7 +20,6 @@ import { initializeStorage, getSettings as dbGetSettings } from './services/dbEn
 import { authEngine } from './services/authEngine';
 import { settingsEngine } from './services/settingsEngine';
 import { adminEngine } from './services/adminEngine';
-import { offlineEngine } from './services/offlineEngine';
 import { invoiceEngine } from './services/invoiceEngine';
 import { customerEngine } from './services/customerEngine';
 import { productEngine } from './services/productEngine';
@@ -39,14 +33,8 @@ import { auth, firebaseReady } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { triggerSuccessFeedback } from './utils/feedback';
 import { sendEmpireEvent, sendEmpireError, sendEmpireHealth } from './services/empireAgent';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from './services/firebaseConfig';
 import { workspaceEngine } from './services/workspaceEngine';
 import { securityEngine } from './services/securityEngine';
-import QuickBillModal from './components/QuickBillModal';
-import AdminPINLogin from './pages/admin/AdminPINLogin';
-import Confetti from 'react-confetti';
-import CommandPalette from './components/CommandPalette';
 import { pageVariants } from './utils/animations';
 
 const Landing = React.lazy(() => import('./pages/Landing'));
@@ -466,21 +454,14 @@ function App() {
   const [pendingPayments, setPendingPayments] = useState([]);
   
   useEffect(() => {
-    if (!isAuthenticated || !db || !auth) return;
-    
+    if (!isAuthenticated || !auth) return;
+      
     let unsubscribe = () => {};
     
     // Listen for auth state changes to get current user UID
     const authUnsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        const q = query(
-          collection(db, 'payment_proofs'),
-          where('ownerId', '==', user.uid),
-          where('status', '==', 'pending')
-        );
-        
-        unsubscribe = onSnapshot(q, (snapshot) => {
-          const proofs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        unsubscribe = paymentEngine.listenToPendingPaymentProofs(user.uid, (proofs) => {
           setPendingPayments(proofs);
         });
       } else {
@@ -1327,7 +1308,7 @@ function App() {
   // --- PDF GENERATOR WORKER ---
   const handleDownloadPDF = (invoice) => {
     if (!settings || !settings.businessName) {
-      alert('⚠️ Business settings are incomplete. Please complete your business settings first.');
+      toast.error('⚠️ Business settings are incomplete. Please complete your business settings first.');
       setCurrentTab('settings');
       return;
     }
