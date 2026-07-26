@@ -1379,6 +1379,10 @@ function App() {
 
     switch (targetTab) {
       case 'landing':
+        if (isAuthenticated) {
+          setTimeout(() => setCurrentTab('dashboard'), 0);
+          return <div className="flex flex-col items-center justify-center h-full text-center p-10"><ClassicLoader /></div>;
+        }
         return <Landing onLoginSuccess={handleLoginSuccess} />;
       case 'cyber-dashboard':
         return <CyberDashboard setCurrentTab={setCurrentTab} />;
