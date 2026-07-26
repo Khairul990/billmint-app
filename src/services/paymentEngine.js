@@ -1,25 +1,8 @@
 import { invoiceEngine } from './invoiceEngine';
-import {  submitPlatformPaymentProof as dbSubmitPlatformPaymentProof, 
-  getUserPaymentProofs as dbGetUserPaymentProofs, 
-  getUserRevenueState as dbGetUserRevenueState, 
-  listenToPendingPaymentProofs as dbListenToPendingPaymentProofs,
-  approvePaymentProof as dbApprovePaymentProof,
-  rejectPaymentProof as dbRejectPaymentProof
-} from './dbEngine';
+import * as dbEngine from './dbEngine';
+import {  submitPlatformPaymentProof as dbSubmitPlatformPaymentProof, getUserPaymentProofs as dbGetUserPaymentProofs, getUserRevenueState as dbGetUserRevenueState  } from './dbEngine';
 
 class PaymentEngine {
-  listenToPendingPaymentProofs(userId, callback) {
-    return dbListenToPendingPaymentProofs(userId, callback);
-  }
-
-  async approvePaymentProof(proofId, amount, publicToken) {
-    return await dbApprovePaymentProof(proofId, amount, publicToken);
-  }
-
-  async rejectPaymentProof(proofId) {
-    return await dbRejectPaymentProof(proofId);
-  }
-
   // Add payment transaction to an invoice
   async addPayment(invoiceId, paymentData) {
     const invoice = await invoiceEngine.getInvoiceById(invoiceId);

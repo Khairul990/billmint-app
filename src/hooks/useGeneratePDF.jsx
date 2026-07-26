@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { pdf } from '@react-pdf/renderer';
+import PdfDocument from '../components/PdfDocument';
 import { toast } from 'react-hot-toast';
 import QRCode from 'qrcode';
 

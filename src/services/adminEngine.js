@@ -1,12 +1,17 @@
 import { db, firebaseReady } from './firebaseConfig';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, deleteDoc, query, where } from 'firebase/firestore';
 import {
   getInvoices as dbGetInvoices,
   getCustomers as dbGetCustomers,
   getProducts as dbGetProducts,
   getExpenses as dbGetExpenses,
+  getSettings as dbGetSettings,
+  saveSettings as dbSaveSettings,
   getGlobalAdminSettings as dbGetGlobalAdminSettings,
   updateGlobalAdminSettings as dbUpdateGlobalAdminSettings,
+  logAudit,
+  getRealUserId,
+  getAuthSession,
   getAdminUsersList as dbGetAdminUsersList,
   getAdminTotalStats as dbGetAdminTotalStats,
   updateUserBlockStatus as dbUpdateUserBlockStatus,
@@ -24,10 +29,9 @@ import {
   cleanTemporaryData as dbCleanTemporaryData,
   clearCacheOnly as dbClearCacheOnly,
   migrateGlobalToScopedStorage as dbMigrateGlobalToScopedStorage,
+  getActiveAnnouncement as dbGetActiveAnnouncement,
   getAdminPremiumRequests as dbGetAdminPremiumRequests,
-  updatePremiumRequestStatus as dbUpdatePremiumRequestStatus,
-  lookupUserByAdmin as dbLookupUserByAdmin,
-  overrideUserPlanByAdmin as dbOverrideUserPlanByAdmin
+  updatePremiumRequestStatus as dbUpdatePremiumRequestStatus
 } from './dbEngine';
 import {
   getAdminAllSupportTickets,
@@ -204,14 +208,6 @@ export const adminEngine = {
 
   async updatePremiumRequestStatus(requestId, status, targetUserId, plan, rejectionReason = '') {
     return dbUpdatePremiumRequestStatus(requestId, status, targetUserId, plan, rejectionReason);
-  },
-
-  async lookupUser(userId) {
-    return await dbLookupUserByAdmin(userId);
-  },
-
-  async overrideUserPlan(userId, newPlan) {
-    return await dbOverrideUserPlanByAdmin(userId, newPlan);
   },
 
   async blockUser(userId) {

@@ -1,4 +1,7 @@
+import React from 'react';
+import { motion } from 'framer-motion';
 import { useInvoice } from '../../../../contexts/InvoiceContext';
+import { Percent, Banknote, FileText, FileSignature } from 'lucide-react';
 
 const PaymentDiscountStep = () => {
   const { state, dispatch, businessSettings } = useInvoice();

@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import AnimatedPage from '../components/AnimatedPage';
+import { LifeBuoy, ArrowLeft, Mail, MessageCircle, FileText, Check, AlertCircle, Plus, Send, Upload, Inbox, CheckCircle } from 'lucide-react';
 import { authEngine } from '../services/authEngine';
 import { adminEngine } from '../services/adminEngine';
 import { supportEngine } from '../services/supportEngine';

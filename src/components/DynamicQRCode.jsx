@@ -1,3 +1,5 @@
+import React from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const DynamicQRCode = ({ value, size = 120, logoUrl }) => {
   return (

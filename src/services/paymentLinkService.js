@@ -1,4 +1,4 @@
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 import { isEducationCategory } from '../utils/categoryChecks';
 

@@ -1,8 +1,16 @@
-import { useState, useEffect, memo } from 'react';
-import { Search, Filter, CheckCircle, Ban, Loader2, Trash2, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect, memo } from 'react';
+import { Search, Filter, Shield, UserX, CheckCircle, Ban, Users, Inbox, Loader2, ChevronLeft, ChevronRight, Eye, Trash2, RotateCcw, Smartphone, Clock, Cloud, MonitorSmartphone, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { adminEngine } from '../../services/adminEngine';
 import { toast } from 'react-hot-toast';
 import { pageVariants } from '../../utils/animations';
+import { TableRowSkeleton } from '../../components/PremiumSkeleton';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/Table';
+import { Input, Select } from '../../components/ui/Input';
+import { Modal } from '../../components/ui/Modal';
 
 const PAGE_SIZE = 15;
 

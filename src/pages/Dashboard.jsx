@@ -1,11 +1,27 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
+import AnimatedPage from '../components/AnimatedPage';
 import {
-  Plus, CreditCard, FileText, DollarSign, Users, Clock,
-  CheckCircle
+  Plus, CreditCard, Bell, ArrowRight, Receipt, AlertCircle,
+  Shield, ShieldCheck, Megaphone, FileText, DollarSign, Users, Clock,
+  CheckCircle, Activity, Calendar, TrendingUp, Wallet,
+  BarChart3, RefreshCw, MoreHorizontal, Eye, Download,
+  Search, Link, Camera, FileSpreadsheet, ListChecks,
+  AlertTriangle, ChevronRight, Circle, Briefcase,
+  Zap, Target, Percent, Building2, Smartphone, Globe,
+  ArrowUpRight, ArrowDownRight, Timer, TrendingDown
 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid } from 'recharts';
 import { formatCurrency } from '../utils/invoiceUtils';
+import PullToRefresh from '../components/PullToRefresh';
 import { invoiceEngine } from '../services/invoiceEngine';
 import { analyticsEngine } from '../services/analyticsEngine';
+import AddCustomerSheet from '../components/AddCustomerSheet';
+import StatCard from '../components/StatCard';
+import { KPISkeleton, ChartSkeleton } from '../components/PremiumSkeleton';
+import ActivityFeed from '../components/ActivityFeed';
+import QuickActions from '../components/QuickActions';
+import PremiumEmptyState from '../components/PremiumEmptyState';
 
 const AnimatedNumber = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(null);

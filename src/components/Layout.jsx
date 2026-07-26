@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import Sidebar from './Sidebar';
+import BottomNav from './BottomNav';
+import { Search, Bell, Settings as SettingsIcon, Sparkles, ShieldCheck, User, Briefcase, Activity, HelpCircle, LogOut } from 'lucide-react';
+import WorkspaceSwitcher from './WorkspaceSwitcher';
+import Logo from './Logo';
 import { settingsEngine } from '../services/settingsEngine';
 import { flushSyncQueue } from '../services/syncEngine';
+import AnimatedBorderTrail from './AnimatedBorderTrail';
+import { AnimatedThemeToggler } from './AnimatedThemeToggler';
 import { getNotifications, markNotificationAsRead, clearAllNotifications } from '../services/notificationsService';
 import { useTheme } from '../contexts/ThemeContext';
 

@@ -1,4 +1,6 @@
+import React from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
+import { Loader2, Cloud, CloudOff, FileText, Eye, ArrowLeft, Save } from 'lucide-react';
 
 const StudioHeader = ({ showPreviewModal, setShowPreviewModal, lastSaved, saveStatus, isSaving, onSaveDraft, onDownloadPDF, onBack }) => {
   const { state, dispatch } = useInvoice();

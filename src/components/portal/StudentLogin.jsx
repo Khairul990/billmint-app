@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Lock, Mail, Key, GraduationCap } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
+import ClassicLoader from '../ClassicLoader';
 
 export default function StudentLogin({ studentId, onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);

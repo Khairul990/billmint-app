@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { pageVariants } from '../../utils/animations';
 import { 
   Building2, Palette, FileText, Globe, LayoutDashboard, 
-  LayoutTemplate, Zap, Shield, Save, Database, RotateCcw,
+  LayoutTemplate, Zap, Shield, Copy, Save, X, Search, Database, Undo, Redo, RotateCcw,
   Crown, Lock, HardDrive, Globe2, Bell
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useSettingsHistory } from '../../hooks/useSettingsHistory';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 
 // Placeholder imports for individual studios (to be created)
 const BusinessStudio = React.lazy(() => import('./BusinessStudio'));
@@ -43,9 +46,9 @@ const STUDIO_ROUTES = [
 ];
 
 const StudioLayout = ({
-  settings, onSaveSettings, isAdmin, subscription, setCurrentTab, initialStudio = 'business'
+  settings, onSaveSettings, isAdmin, subscription, setCurrentTab
 }) => {
-  const [activeStudio, setActiveStudio] = useState(initialStudio);
+  const [activeStudio, setActiveStudio] = useState('business');
   const [searchQuery, setSearchQuery] = useState('');
   const {
     draftSettings,

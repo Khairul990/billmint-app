@@ -1,3 +1,4 @@
+import JSZip from 'jszip';
 import {
   exportBackup as dbExportBackup,
   exportBackupZip as dbExportBackupZip,
@@ -5,8 +6,9 @@ import {
   backupLocalData as dbBackupLocalData,
   syncFromFirestore as dbSyncFromFirestore
 } from './dbEngine';
+import { BillQyroDB } from './localDb';
 import { firebaseReady, db } from './firebaseConfig';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, getDocs } from 'firebase/firestore';
 
 export const backupEngine = {
   async exportLocal() {

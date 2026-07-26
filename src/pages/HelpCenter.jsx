@@ -1,9 +1,15 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedPage from '../components/AnimatedPage';
 import { 
-  FileText
+  Search, X, Clock, ChevronRight, Play, CheckCircle2, 
+  HelpCircle, BookOpen, Video, LifeBuoy, AlertTriangle, 
+  FileText, Users, Package, DollarSign, LayoutDashboard,
+  ArrowRight, ShieldAlert, Zap, MessageSquare, Phone
 } from 'lucide-react';
 import * as Icons from 'lucide-react';
-import { guides, faqs } from '../data/guides';
+import { guides, categories, faqs } from '../data/guides';
+import { t } from '../utils/i18n';
 
 // --- SUB-COMPONENTS ---
 

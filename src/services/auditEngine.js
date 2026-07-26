@@ -1,27 +1,7 @@
-import { BillQyroDB } from './localDb';
+import * as dbEngine from './dbEngine';
+import { authEngine } from './authEngine';
 
 class AuditEngine {
-  async getAllAuditLogsFromDb() {
-    try {
-      return await BillQyroDB.getAll('auditLogs');
-    } catch (e) {
-      console.error('Error fetching audit logs from DB', e);
-      return [];
-    }
-  }
-
-  async clearAllAuditLogsDb() {
-    try {
-      const allLogs = await this.getAllAuditLogsFromDb();
-      for (const log of allLogs) {
-        await BillQyroDB.delete('auditLogs', log.id);
-      }
-      return true;
-    } catch (e) {
-      console.error('Error clearing audit logs from DB', e);
-      return false;
-    }
-  }
   async logAuditEvent(workspaceId, eventType, details = {}, severity = 'info') {
     // severity: 'info', 'warning', 'critical'
     // eventType: 'SETTINGS_CHANGED', 'ROLE_UPDATED', 'LOGIN_FAILED', 'DATA_EXPORTED'

@@ -1,4 +1,7 @@
-import { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
+import { motion } from 'framer-motion';
+import { ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 
 const SecurityCenter = () => {
   const [logs, setLogs] = useState([]);

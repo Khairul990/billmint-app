@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { FileText, Eye, Edit2, Trash2, Download, Share2, Mail, Copy, Check, Link, RefreshCw } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
 import {
@@ -7,6 +9,7 @@ import {
   generateEmailShareLink,
   generateInvoiceShareText
 } from '../utils/shareUtils';
+import { invoiceEngine } from '../services/invoiceEngine';
 import { isEducationCategory } from '../utils/categoryChecks';
 
 // Premium WhatsApp Icon SVG Component
@@ -30,6 +33,7 @@ const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
  * @param {Function} onDownload - Download PDF callback
  */
 const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, compact = false, onView, onEdit, onDelete, onDownload, onRestore, onDownloadBackup, isDeleted }) => {
+  if (!invoice) return null;
   const [showShareMenu, setShowShareMenu] = useState(false);
   const menuRef = useRef(null);
 
@@ -47,8 +51,6 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showShareMenu]);
-
-  if (!invoice) return null;
 
   const getSyncStatusStyle = (status) => {
     switch (status) {

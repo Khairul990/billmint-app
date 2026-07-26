@@ -1,3 +1,5 @@
+import React from 'react';
+import { ArrowLeft, FileText } from 'lucide-react';
 
 const TermsOfService = ({ setCurrentTab }) => {
   return (

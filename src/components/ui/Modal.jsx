@@ -1,3 +1,6 @@
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 
 export const Modal = ({ isOpen, onClose, title, children, className = '' }) => {
   return (

@@ -1,5 +1,9 @@
-import { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
+import { motion } from 'framer-motion';
+import { Activity, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { adminEngine } from '../../services/adminEngine';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
 
 const AppHealthCenter = () => {
   const [loading, setLoading] = useState(true);

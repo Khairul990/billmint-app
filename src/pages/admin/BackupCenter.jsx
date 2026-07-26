@@ -1,5 +1,8 @@
-import { Database, Download, Upload } from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Database, Download, Upload, Users } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { Button } from '../../components/ui/Button';
 
 const BackupCenter = () => {
   const handleBackup = () => {

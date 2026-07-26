@@ -1,4 +1,7 @@
+import React from 'react';
+import { motion } from 'framer-motion';
 import { cardHover } from '../utils/animations';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 const StatCard = ({ title, value, icon: Icon, trend, trendUp = true, accentColor, subtitle, onClick, loading = false }) => {
   if (loading) {

@@ -1,3 +1,5 @@
+import React, { useState } from 'react';
+import { Shield, ShieldAlert, Key, Check, Users, Lock } from 'lucide-react';
 
 const ROLES = [
   { id: 'manager', label: 'Store Manager', desc: 'Can manage invoices, customers, and view reports, but cannot change settings.' },

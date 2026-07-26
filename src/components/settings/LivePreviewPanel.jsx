@@ -1,6 +1,8 @@
-import { useState, useMemo } from 'react';
-import { FileText, LayoutDashboard, Globe, CreditCard, GraduationCap, Users } from 'lucide-react';
-import { DEMO_INVOICE } from './DemoData';
+import React, { useState, useMemo, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Eye, FileText, LayoutDashboard, Globe, CreditCard, GraduationCap, Users, QrCode, X } from 'lucide-react';
+import InvoicePreview from '../InvoicePreview';
+import { DEMO_INVOICE, DEMO_BUSINESS } from './DemoData';
 import { getThemePreviewColors } from '../../utils/themeUtils';
 import { isEducationBusiness } from '../../config/businessPresets';
 

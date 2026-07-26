@@ -1,7 +1,13 @@
-import { useState, useEffect, memo } from 'react';
-import { Plus } from 'lucide-react';
+import React, { useState, useEffect, memo } from 'react';
+import { motion } from 'framer-motion';
+import { Megaphone, Plus, AlertTriangle, Info, ShieldAlert, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { adminEngine } from '../../services/adminEngine';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Input, Select, Textarea, Label } from '../../components/ui/Input';
+import { Switch } from '../../components/ui/Switch';
 
 const AnnouncementManager = () => {
   const [announcements, setAnnouncements] = useState([]);

@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Calendar,
-  CheckCircle, AlertCircle, XCircle, Loader2
+  Calendar, Clock, User, Plus, X, Phone, Mail, Stethoscope,
+  CheckCircle, AlertCircle, XCircle, HelpCircle, Loader2,
+  CalendarCheck, CalendarRange, CalendarX, ChevronRight,
+  MessageSquare, FileText
 } from 'lucide-react';
 import { pageVariants, staggerContainer, staggerItem, modalOverlayVariants, modalContentVariants } from '../utils/animations';
+import { CardSkeleton } from '../components/PremiumSkeleton';
 import { toast } from 'react-hot-toast';
 
 const STATUS_CONFIG = {

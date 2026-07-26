@@ -1,4 +1,8 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import AnimatedPage from "../components/AnimatedPage";
+import { ArrowRight, Eye, EyeOff, Mail, ShieldCheck } from "lucide-react";
+import Logo from "../components/Logo";
 
 function BrandMark() {
   return (

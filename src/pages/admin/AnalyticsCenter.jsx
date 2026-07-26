@@ -1,4 +1,7 @@
-import { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
+import { motion } from 'framer-motion';
+import { BarChart3, TrendingUp, Users, CreditCard, Activity } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { adminEngine } from '../../services/adminEngine';
 
 const SimpleBarChart = ({ data, color, height = "200px" }) => {

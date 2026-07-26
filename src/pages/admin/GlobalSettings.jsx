@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Settings as SettingsIcon, Globe, ShieldAlert, Zap, Sliders, CreditCard } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { adminEngine } from '../../services/adminEngine';
 import { toast } from 'react-hot-toast';
 import { pageVariants } from '../../utils/animations';
+import { CardSkeleton } from '../../components/PremiumSkeleton';
+import { Switch } from '../../components/ui/Switch';
+import { Button } from '../../components/ui/Button';
 
 const GlobalSettings = () => {
   const [loading, setLoading] = useState(true);

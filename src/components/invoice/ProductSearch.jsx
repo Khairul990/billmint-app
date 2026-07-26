@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Plus } from 'lucide-react';
 
 const ProductSearch = ({ 
   value, 

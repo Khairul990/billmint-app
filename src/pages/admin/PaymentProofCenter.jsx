@@ -1,7 +1,13 @@
-import { useState, useEffect, memo } from 'react';
-import { CheckCircle, XCircle, Search, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, memo } from 'react';
+import { CreditCard, CheckCircle, XCircle, Clock, ShieldCheck, Image as ImageIcon, Search, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { adminEngine } from '../../services/adminEngine';
 import { toast } from 'react-hot-toast';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
+import { Modal } from '../../components/ui/Modal';
 
 const PaymentProofCenter = () => {
   const [proofs, setProofs] = useState([]);
@@ -39,7 +45,6 @@ const PaymentProofCenter = () => {
 
   const handleAction = async (proof, status) => {
     setProcessingId(proof.id);
-    const note = getAdminNote(proof.id);
     try {
       let success = false;
       if (proof.proofType === 'Premium') {

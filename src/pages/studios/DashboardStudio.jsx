@@ -1,3 +1,5 @@
+import React from 'react';
+import { LayoutDashboard, BarChart3, PieChart, Activity, Users, FileText, Settings, ArrowUp, ArrowDown, Eye, EyeOff } from 'lucide-react';
 
 const DEFAULT_WIDGETS = [
   { id: 'revenueOverview', label: 'Revenue Overview (Chart)', visible: true },

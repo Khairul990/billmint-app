@@ -1,5 +1,9 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { LogOut, FileText, CheckCircle, Clock, ShieldCheck, Download, Printer, User } from 'lucide-react';
 import { invoiceEngine } from '../services/invoiceEngine';
+import CustomerPortalLogin from '../components/portal/CustomerPortalLogin';
+import ClassicLoader from '../components/ClassicLoader';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { downloadInvoicePDF } from '../utils/pdfUtils';
 import { toast } from 'react-hot-toast';

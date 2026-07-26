@@ -1,4 +1,5 @@
-import { StyleSheet, Font } from '@react-pdf/renderer';
+import React from 'react';
+import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
 import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
 
 // Register Google Fonts to support regional currency symbols and scripts

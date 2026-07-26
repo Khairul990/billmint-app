@@ -1,5 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useInvoice } from '../../../contexts/InvoiceContext';
+import { UserPlus, Search, ChevronDown, ChevronRight, Check, Phone, Mail, MapPin, MessageCircle, Clock, IndianRupee, Star, History } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import CustomerInsightsPane from './CustomerInsightsPane';
 import { getCustomerLabelByType } from '../../../config/businessPresets';
 
 const SmartCustomerSelect = ({ customers = [] }) => {

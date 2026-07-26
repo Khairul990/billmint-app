@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, Globe } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, FileText, Globe } from 'lucide-react';
 import { authEngine } from '../services/authEngine';
 import { t } from '../utils/i18n';
 import { triggerLightHaptic } from '../utils/feedback';
 import { getCustomerLabelByType, getInvoiceLabelByType, getPortalLabelByType } from '../config/businessPresets';
+import Logo from './Logo';
+import WorkspaceSwitcher from './WorkspaceSwitcher';
+import { isEducationBusiness } from '../config/businessPresets';
 
 /**
  * Premium Collapsible Desktop Sidebar Navigation
@@ -41,7 +45,7 @@ const Sidebar = ({
   const toggleCollapsed = () => {
     setIsCollapsed(prev => {
       const next = !prev;
-      try { localStorage.setItem('billqyro_sidebar_collapsed', String(next)); } catch (error) { console.error('Error:', error);  }
+      try { localStorage.setItem('billqyro_sidebar_collapsed', String(next)); } catch {}
       return next;
     });
   };

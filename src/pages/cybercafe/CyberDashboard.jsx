@@ -1,3 +1,6 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { IndianRupee, Users, Target, Activity } from 'lucide-react';
 
 export default function CyberDashboard({ setCurrentTab }) {
   return (

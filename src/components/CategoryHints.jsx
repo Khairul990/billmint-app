@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Palette,
   Scissors,
@@ -5,7 +6,9 @@ import {
   Stethoscope,
   BookOpen,
   Wrench,
-  Briefcase
+  Briefcase,
+  Lightbulb,
+  Sparkles
 } from 'lucide-react';
 import { getCategoryExperience } from '../config/categoryExperience';
 

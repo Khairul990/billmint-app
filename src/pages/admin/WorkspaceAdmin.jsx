@@ -1,8 +1,15 @@
-import { useState, useEffect, memo } from 'react';
-import { Search } from 'lucide-react';
+import React, { useState, useEffect, memo } from 'react';
+import { Search, Building2, HardDrive, Inbox, Download, Trash2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { adminEngine } from '../../services/adminEngine';
 import { toast } from 'react-hot-toast';
 import { pageVariants } from '../../utils/animations';
+import { TableRowSkeleton } from '../../components/PremiumSkeleton';
+import { Card } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/Table';
+import { Input } from '../../components/ui/Input';
 
 const WorkspaceAdmin = () => {
   const [users, setUsers] = useState([]);

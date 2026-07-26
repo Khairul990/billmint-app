@@ -1,3 +1,4 @@
+import React from 'react';
 
 export const Table = ({ className = '', children, ...props }) => (
   <div className="w-full overflow-auto rounded-2xl border border-theme-border-soft bg-theme-surface">

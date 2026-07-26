@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { settingsEngine } from '../services/settingsEngine';
 
 const OnboardingContext = createContext();

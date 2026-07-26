@@ -1,9 +1,30 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
+import AnimatedPage from '../components/AnimatedPage';
+import InvoiceCard from '../components/InvoiceCard';
+import InvoicePreview from '../components/InvoicePreview';
 import { 
-  Search
+  Search, 
+  Plus, 
+  FileSpreadsheet, 
+  FileText,
+  X, 
+  Printer, 
+  Download, 
+  Edit,
+  ArrowDownWideNarrow,
+  FileDown,
+  Mail,
+  Copy,
+  Check,
+  Share2,
+  ShieldCheck,
+  Link,
+  AlertTriangle
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
 import { 
   generateWhatsAppShareLink, 
@@ -12,6 +33,9 @@ import {
   generateInvoiceShareText 
 } from '../utils/shareUtils';
 import { invoiceEngine } from '../services/invoiceEngine';
+import PullToRefresh from '../components/PullToRefresh';
+import { addNotification } from '../services/notificationsService';
+import PremiumEmptyState from '../components/PremiumEmptyState';
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (

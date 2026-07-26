@@ -1,6 +1,10 @@
-import { useEffect, useState } from 'react';
-import { staggerContainer, staggerItem, fadeInUp, buttonTap, scaleOnHover } from '../utils/animations';
-import { FileSpreadsheet, ShieldCheck, TrendingUp, Users, Download, Link2, Smartphone, Printer, CreditCard, MessageCircle, BarChart3, Globe, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { staggerContainer, staggerItem, fadeInUp, buttonTap, cardHover, scaleOnHover } from '../utils/animations';
+import { ArrowRight, CheckCircle2, FileSpreadsheet, ShieldCheck, TrendingUp, Users, Sparkles, Download, Link2, Smartphone, Printer, CreditCard, Star, HelpCircle, ChevronDown, MessageCircle, Mail, MapPin, DollarSign, Clock, BarChart3, Globe, Zap } from 'lucide-react';
+import Logo from '../components/Logo';
+import Login from './Login';
+import CustomerPortalLogin from '../components/portal/CustomerPortalLogin';
 const Landing = ({ onLoginSuccess }) => {
   const [faqOpen, setFaqOpen] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

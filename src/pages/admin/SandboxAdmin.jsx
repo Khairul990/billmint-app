@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { ShieldCheck, RefreshCw, Trash2, Database, Play, Bell, Wrench } from 'lucide-react';
 import { generateDemoWorkspace, resetSandboxData } from '../../services/demoGenerator';
 import { toast } from 'react-hot-toast';
 import { addNotification } from '../../services/notificationsService';

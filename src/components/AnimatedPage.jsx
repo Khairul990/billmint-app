@@ -1,3 +1,5 @@
+import React from 'react';
+import { motion } from 'framer-motion';
 import { pageVariants } from '../utils/animations';
 
 const AnimatedPage = ({ children, className = '', ...props }) => {

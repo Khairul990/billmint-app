@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { ShieldAlert, Image as ImageIcon, Send, Clock, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import { authEngine } from '../services/authEngine';
 import { paymentEngine } from '../services/paymentEngine';
 import { adminEngine } from '../services/adminEngine';

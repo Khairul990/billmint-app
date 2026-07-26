@@ -1,6 +1,10 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useInvoice } from '../../../../contexts/InvoiceContext';
 import { invoiceTemplates } from '../../../../config/invoiceTemplates';
+import { Plus, Trash2, GripVertical, Package, X } from 'lucide-react';
 import {
+  DndContext,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
@@ -9,12 +13,14 @@ import {
 } from '@dnd-kit/core';
 import {
   arrayMove,
+  SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import * as Icons from 'lucide-react';
+import ProductSearch from '../../ProductSearch';
 
 const CustomTemplateBuilder = ({ templateFields, setTemplateFields }) => {
   const addField = (type) => {

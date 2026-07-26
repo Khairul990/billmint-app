@@ -1,5 +1,7 @@
-import { StyleSheet, Font } from '@react-pdf/renderer';
+import React from 'react';
+import { Page, Text, View, Document, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { formatCurrency } from '../utils/invoiceUtils';
+import { t } from '../utils/i18n';
 
 // Register Fonts
 Font.register({

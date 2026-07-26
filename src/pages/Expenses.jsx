@@ -1,8 +1,21 @@
-import { useState, useMemo } from 'react';
-
-
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedPage from '../components/AnimatedPage';
+import { 
+  Plus, 
+  Trash2, 
+  IndianRupee, 
+  Calendar, 
+  Tag, 
+  PieChart, 
+  Wrench, 
+  Receipt,
+  Lightbulb
+} from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
+import CenteredModal from '../components/CenteredModal';
 import { toast } from 'react-hot-toast';
+import PullToRefresh from '../components/PullToRefresh';
 import { invoiceEngine } from '../services/invoiceEngine';
 
 const CATEGORIES = [

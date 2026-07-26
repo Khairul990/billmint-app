@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Shield, KeyRound, Phone, Hash } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { portalEngine } from '../../services/portalEngine';
+import ClassicLoader from '../ClassicLoader';
 
 export default function CustomerPortalLogin({ onVerificationSuccess, prefillId }) {
   const [customerId, setCustomerId] = useState(prefillId || '');

@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
-import { BookOpen, Calendar, Bell, Wallet } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { LogOut, BookOpen, GraduationCap, Calendar, FileText, Bell, CheckCircle, ShieldCheck, Download, User, Wallet } from 'lucide-react';
 import { auth } from '../services/firebaseConfig';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { invoiceEngine } from '../services/invoiceEngine';
+import StudentLogin from '../components/portal/StudentLogin';
+import ClassicLoader from '../components/ClassicLoader';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { downloadInvoicePDF } from '../utils/pdfUtils';
 import { toast } from 'react-hot-toast';

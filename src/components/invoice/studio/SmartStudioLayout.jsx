@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useInvoice } from '../../../contexts/InvoiceContext';
 import { toast } from 'react-hot-toast';
+import { Check, User, ShoppingBag, CreditCard, AlertTriangle, Loader2, ArrowRight, ArrowLeft, Eye, X, ExternalLink, MessageCircle, Download, CheckCircle2 } from 'lucide-react';
 import { getCustomerLabelByType } from '../../../config/businessPresets';
 
+import StudioHeader from './StudioHeader';
+import SmartCustomerSelect from './SmartCustomerSelect';
+import SmartBillItemsList from './SmartBillItemsList';
+import CompactSummaryStrip from './CompactSummaryStrip';
+import CompactPaymentSection from './CompactPaymentSection';
+import LiveInvoicePreview from '../LiveInvoicePreview';
 import { invoiceEngine } from '../../../services/invoiceEngine';
 
 const SmartStudioLayout = ({ customers, products, invoices = [], onSaveInvoice, onDownloadPDF, onBack }) => {

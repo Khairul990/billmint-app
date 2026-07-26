@@ -1,4 +1,6 @@
-import { Plus, FileText, Users, CreditCard } from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Plus, FileText, Users, CreditCard, Download, BarChart3 } from 'lucide-react';
 import { staggerContainer, staggerItem } from '../utils/animations';
 
 const defaultActions = [

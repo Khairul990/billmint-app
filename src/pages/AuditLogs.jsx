@@ -1,5 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
-import { auditEngine } from '../services/auditEngine';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Shield, Clock, Activity, Search, Download, Trash2, Filter, X, AlertTriangle } from 'lucide-react';
+import { BillQyroDB } from '../services/localDb';
 import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
 
 const AuditLogs = ({ setCurrentTab }) => {
@@ -18,7 +20,7 @@ const AuditLogs = ({ setCurrentTab }) => {
   const loadLogs = async () => {
     setLoading(true);
     try {
-      const allLogs = await auditEngine.getAllAuditLogsFromDb();
+      const allLogs = await BillQyroDB.getAll('auditLogs');
       const sorted = (allLogs || []).sort((a, b) => b.createdAt - a.createdAt);
       setLogs(sorted);
     } catch (e) { console.error(e); }
@@ -88,7 +90,8 @@ const AuditLogs = ({ setCurrentTab }) => {
 
   const clearAll = async () => {
     try {
-      await auditEngine.clearAllAuditLogsDb();
+      const allLogs = await BillQyroDB.getAll('auditLogs');
+      for (const log of allLogs) await BillQyroDB.delete('auditLogs', log.id);
       setLogs([]);
     } catch (e) { console.error(e); }
     setShowConfirm(false);

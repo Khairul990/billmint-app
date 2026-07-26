@@ -1,16 +1,29 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Database, 
   DownloadCloud, 
-  UploadCloud,
+  UploadCloud, 
+  AlertTriangle, 
+  CheckCircle2, 
+  ShieldCheck,
   Shield,
+  History,
+  FileJson,
+  Settings,
+  RefreshCw,
+  Clock,
   Cloud,
-  Server
+  Server,
+  ArrowRight,
+  Archive
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { backupEngine } from '../services/backupEngine';
 
 import { pageVariants, staggerContainer, staggerItem, modalOverlayVariants, modalContentVariants } from '../utils/animations';
+import { CardSkeleton } from '../components/PremiumSkeleton';
+import PremiumEmptyState from '../components/PremiumEmptyState';
 
 const BackupRestore = ({ settings, invoices, customers, products, expenses, onImportBackup }) => {
   const [isExporting, setIsExporting] = useState(false);

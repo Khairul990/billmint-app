@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { FormInput, Plus, Trash2, Settings, ArrowUp, ArrowDown } from 'lucide-react';
 
 const FIELD_TYPES = [
   { id: 'text', label: 'Short Text' },

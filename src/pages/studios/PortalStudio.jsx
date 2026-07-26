@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Globe, Image as ImageIcon, Link, Upload, Trash2, Layout } from 'lucide-react';
+import { Switch } from '../../components/ui/Switch';
 
 const PortalStudio = ({ settings, onUpdate }) => {
   const [isDragging, setIsDragging] = useState(false);

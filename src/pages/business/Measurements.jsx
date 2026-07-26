@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Scissors, User, Ruler } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Scissors, Plus, Search, Trash2, Edit2, Phone, User, Ruler } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { pageVariants, staggerContainer, staggerItem } from '../../utils/animations';
+import { CardSkeleton } from '../../components/PremiumSkeleton';
+import BottomSheet from '../../components/BottomSheet';
 
 const LS_KEY = 'billqyro_measurements';
 
@@ -15,7 +18,7 @@ const Measurements = () => {
   const [form, setForm] = useState({ customerName: '', phone: '', garmentType: '', chest: '', waist: '', hips: '', length: '', shoulders: '', sleeve: '', notes: '' });
 
   useEffect(() => {
-    try { setItems(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); } catch (error) { console.error('Error:', error);  }
+    try { setItems(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); } catch {}
     setLoading(false);
   }, []);
 

@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Upload, Check, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const PaymentModal = ({ invoice, onClose }) => {
