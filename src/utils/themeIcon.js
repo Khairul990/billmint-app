@@ -9,7 +9,7 @@ const themeFolderMap = {
   'ruby': 'ruby-burgundy',
   'champagne': 'champagne-black',
 
-  // Map the new 20 valid themes to the closest matching physical folder
+  // Map the new 25 valid themes to the closest matching physical folder
   'obsidian-gold': 'champagne-black',
   'arctic-teal': 'emerald-business',
   'sapphire-noir': 'midnight-blue',
@@ -32,7 +32,21 @@ const themeFolderMap = {
   'silver-elite': 'billqyro-classic',
   'crimson-red': 'ruby-burgundy',
   'purple-haze': 'royal-indigo',
-  'golden-luxury': 'champagne-black'
+  'golden-luxury': 'champagne-black',
+  
+  // Missing ones added to fix favicon updates
+  'pink-blossom': 'pink-premium',
+  'ocean-waves': 'billqyro-classic',
+  'lush-green': 'emerald-business',
+  'royal-purple': 'royal-indigo',
+  'slate-gray': 'midnight-blue',
+  'warm-amber': 'champagne-black',
+  'cyber-teal': 'emerald-business',
+  'soft-lavender': 'royal-indigo',
+  'ocean-deep': 'midnight-blue',
+  'forest-pine': 'emerald-business',
+  'cherry-blossom': 'pink-premium',
+  'gold-coast': 'champagne-black'
 };
 
 export const updateFaviconForTheme = (themeId) => {

@@ -2326,13 +2326,13 @@ export const saveInvoice = async (invoice) => {
   }
 
   // Sync / queue + syncStatus tracking
-  invoice.syncStatus = 'pending';
-  const idx = invoices.findIndex(inv => inv.id === invoice.id);
-  if (idx !== -1) invoices[idx] = invoice;
-  updateLocalCache(KEYS.INVOICES, invoices);
-  await BillQyroDB.put('invoices', invoice);
-  
-  await queueSyncTransaction('save', 'invoices', invoice.id, invoice);
+  const stamped = invoices.find(inv => inv.id === invoice.id);
+  if (stamped) {
+    stamped.syncStatus = 'pending';
+    updateLocalCache(KEYS.INVOICES, invoices);
+    await BillQyroDB.put('invoices', stamped);
+    await queueSyncTransaction('save', 'invoices', stamped.id, stamped);
+  }
   window.dispatchEvent(new CustomEvent('billqyro_sync'));
 
   let firebaseStatus = 'pending';
