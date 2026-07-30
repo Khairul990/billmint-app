@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cloud, HardDrive, Download, RotateCcw, Clock, CheckCircle2, Upload, Trash2 } from 'lucide-react';
+import { Cloud, HardDrive, Download, RotateCcw, Clock, CheckCircle2, Upload, Trash2, DatabaseZap } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { backupEngine } from '../../services/backupEngine';
 import { adminEngine } from '../../services/adminEngine';
@@ -106,14 +106,26 @@ const BackupStudio = ({ settings, onUpdate }) => {
               <input type="file" accept=".json" onChange={handleImport} className="hidden" />
             </label>
 
-            <button onClick={() => { if (confirm('Reset all data? This cannot be undone.')) { adminEngine.factoryResetAllData(); toast.success('Data reset in progress...'); } }} className="w-full p-4 bg-rose-500/5 hover:bg-rose-500/10 rounded-2xl border border-rose-500/20 hover:border-rose-500/50 transition-all flex items-center justify-between group cursor-pointer mt-4">
+            <button onClick={() => { if (confirm('Are you sure you want to delete all invoices, customers, and products? Your account and settings will remain safe.')) { adminEngine.resetBusinessDataOnly(); toast.success('Business Data reset in progress...'); } }} className="w-full p-4 bg-amber-500/5 hover:bg-amber-500/10 rounded-2xl border border-amber-500/20 hover:border-amber-500/50 transition-all flex items-center justify-between group cursor-pointer mt-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                  <DatabaseZap className="w-5 h-5 text-amber-500" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-amber-600 transition-colors">Reset Business Data</p>
+                  <p className="text-[10px] text-amber-500/80 mt-0.5">Wipe all records but keep account safe</p>
+                </div>
+              </div>
+            </button>
+
+            <button onClick={() => { if (confirm('Reset entire app? This will wipe your account, settings, and ALL data. You will be logged out and treated as a new user. This CANNOT be undone.')) { adminEngine.factoryResetAllData(); toast.success('Factory reset in progress...'); } }} className="w-full p-4 bg-rose-500/5 hover:bg-rose-500/10 rounded-2xl border border-rose-500/20 hover:border-rose-500/50 transition-all flex items-center justify-between group cursor-pointer mt-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center">
                   <Trash2 className="w-5 h-5 text-rose-500" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-bold text-rose-600 transition-colors">Factory Reset</p>
-                  <p className="text-[10px] text-rose-500/80 mt-0.5">Wipe all local data permanently</p>
+                  <p className="text-xs font-bold text-rose-600 transition-colors">Factory Reset App</p>
+                  <p className="text-[10px] text-rose-500/80 mt-0.5">Wipe account & all data permanently</p>
                 </div>
               </div>
             </button>

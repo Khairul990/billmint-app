@@ -1066,6 +1066,30 @@ export const logout = async () => {
   }
 };
 
+export const resetBusinessDataOnly = async () => {
+  const userId = getRealUserId();
+  
+  if (firebaseReady && userId) {
+    try {
+      await resetEnterpriseWorkspace(userId);
+    } catch (e) {
+      console.error('[WIPE] Failed to wipe cloud data during data reset', e);
+    }
+  }
+
+  try {
+    await BillQyroDB.clear('invoices').catch(() => {});
+    await BillQyroDB.clear('customers').catch(() => {});
+    await BillQyroDB.clear('products').catch(() => {});
+    await BillQyroDB.clear('expenses').catch(() => {});
+    await BillQyroDB.clear('syncQueue').catch(() => {});
+    await BillQyroDB.clear('auditLogs').catch(() => {});
+    await BillQyroDB.clear('errorLogs').catch(() => {});
+  } catch (e) { console.warn('Ignored error in resetBusinessDataOnly:', e); }
+  
+  window.location.reload();
+};
+
 export const factoryResetAllData = async () => {
   // Get userId before clearing local storage
   const userId = getRealUserId();

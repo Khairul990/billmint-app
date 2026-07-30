@@ -17,6 +17,7 @@ import {
   updateUserBlockStatus as dbUpdateUserBlockStatus,
   deleteEnterpriseUser as dbDeleteEnterpriseUser,
   resetEnterpriseWorkspace as dbResetEnterpriseWorkspace,
+  resetBusinessDataOnly as dbResetBusinessDataOnly,
   factoryResetAllData as dbFactoryResetAllData,
   clearAllLocalData as dbClearAllLocalData,
   clearInvoices as dbClearInvoices,
@@ -227,6 +228,7 @@ export const adminEngine = {
   },
 
   // Maintenance & Wipe Operations
+  async resetBusinessDataOnly() { return dbResetBusinessDataOnly(); },
   async factoryResetAllData() { return dbFactoryResetAllData(); },
   async clearAllLocalData() { return dbClearAllLocalData(); },
   async clearInvoices() { return dbClearInvoices(); },
