@@ -1114,7 +1114,12 @@ export const factoryResetAllData = async () => {
   if (firebaseReady) {
     try {
       if (auth.currentUser) {
-        await auth.signOut();
+        try {
+          await auth.currentUser.delete();
+        } catch (delErr) {
+          console.warn('Failed to delete auth user, signing out instead:', delErr);
+          await auth.signOut();
+        }
       }
     } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   }
@@ -1149,7 +1154,7 @@ export const clearAllLocalData = async () => {
 export const wipeUserFirestoreData = async (userId) => {
   if (!firebaseReady) return;
   try {
-    const collectionsToEmpty = ['invoices', 'customers', 'products', 'expenses'];
+    const collectionsToEmpty = ['invoices', 'customers', 'products', 'expenses', 'students'];
     for (const colName of collectionsToEmpty) {
       const itemsRef = collection(db, colName, userId, 'items');
       const snapshot = await getDocs(itemsRef);
