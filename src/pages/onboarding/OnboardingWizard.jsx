@@ -45,7 +45,19 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
     }
   }, [formData.businessType]);
 
-  const nextStep = () => setStep(s => Math.min(s + 1, 6));
+  const nextStep = () => {
+    setStep(s => {
+      const next = Math.min(s + 1, 6);
+      if (next === 6) {
+        import('../../utils/feedback').then(({ triggerPaymentSuccessFeedback, triggerVoiceFeedback }) => {
+          triggerPaymentSuccessFeedback();
+          triggerVoiceFeedback("You're all set! Welcome to BillQyro.");
+          window.dispatchEvent(new Event('trigger-confetti'));
+        }).catch(() => {});
+      }
+      return next;
+    });
+  };
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
   const isAddWorkspaceMode = businessSettings?.setupCompleted === true;
@@ -114,7 +126,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
                   // Pre-set and skip to payment/legal maybe?
                 }
               }}
-              className={`p-4 rounded-3xl border text-left transition-all flex flex-col items-start ${formData.businessType === type.id ? 'bg-theme-accent/5 border-theme-accent ring-2 ring-theme-accent/20' : 'bg-theme-card border-theme-border-soft hover:border-theme-accent/50'}`}
+              className={`p-4 rounded-3xl border text-left transition-all flex flex-col items-start hover-glow-effect ${formData.businessType === type.id ? 'bg-theme-accent/5 border-theme-accent ring-2 ring-theme-accent/20 shadow-[0_0_20px_var(--accent-glow)]' : 'bg-theme-card border-theme-border-soft hover:border-theme-accent/50'}`}
             >
               <IconComponent className={`w-8 h-8 mb-3 ${formData.businessType === type.id ? 'text-theme-accent' : 'text-theme-muted'}`} />
               <h3 className="font-extrabold text-theme-primary text-sm">{type.label}</h3>
@@ -238,7 +250,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
                     setFormData({ ...formData, enabledModules: [...formData.enabledModules, mod.id] });
                   }
                 }}
-                className={`w-full flex flex-col p-4 rounded-2xl border transition-colors ${isEnabled ? 'bg-theme-accent/5 border-theme-accent/30' : 'bg-theme-app border-theme-border-soft hover:bg-theme-surface'}`}
+                className={`w-full flex flex-col p-4 rounded-2xl border transition-colors hover-glow-effect ${isEnabled ? 'bg-theme-accent/5 border-theme-accent/50 shadow-[0_0_15px_var(--accent-glow)]' : 'bg-theme-app border-theme-border-soft hover:bg-theme-surface'}`}
               >
                 <div className="flex items-center justify-between w-full">
                   <span className="font-extrabold text-sm text-theme-primary flex items-center gap-2">
@@ -293,49 +305,52 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
       <div className="space-y-4 bg-theme-card p-6 rounded-3xl border border-theme-border-soft shadow-premium">
         
         {/* India Payment */}
-        <div className="p-4 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-3">
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider">India (UPI ID)</label>
+        <div className="p-5 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-3 hover-glow-effect transition-all relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider relative z-10">India (UPI ID)</label>
           <input 
             value={paymentForm.indiaUpi}
             onChange={(e) => setPaymentForm({...paymentForm, indiaUpi: e.target.value})}
             placeholder="e.g. name@okhdfcbank" 
-            className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-theme-accent" 
+            className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-4 text-sm font-bold focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all relative z-10" 
           />
         </div>
 
         {/* Bangladesh Payment */}
-        <div className="p-4 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-3">
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider">Bangladesh (MFS)</label>
-          <div className="flex gap-2">
+        <div className="p-5 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-3 hover-glow-effect transition-all relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider relative z-10">Bangladesh (MFS)</label>
+          <div className="flex gap-3 relative z-10">
             <input 
               value={paymentForm.bdBkash}
               onChange={(e) => setPaymentForm({...paymentForm, bdBkash: e.target.value})}
               placeholder="bKash Number" 
-              className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-theme-accent" 
+              className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-4 text-sm font-bold focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all" 
             />
             <input 
               value={paymentForm.bdNagad}
               onChange={(e) => setPaymentForm({...paymentForm, bdNagad: e.target.value})}
               placeholder="Nagad Number" 
-              className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-theme-accent" 
+              className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-4 text-sm font-bold focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all" 
             />
           </div>
         </div>
 
         {/* Other Bank */}
-        <div className="p-4 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-3">
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider">Bank Transfer (Other)</label>
+        <div className="p-5 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-3 hover-glow-effect transition-all relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider relative z-10">Bank Transfer (Other)</label>
           <input 
             value={paymentForm.bankName}
             onChange={(e) => setPaymentForm({...paymentForm, bankName: e.target.value})}
             placeholder="Bank Name" 
-            className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-theme-accent mb-2" 
+            className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-4 text-sm font-bold focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all mb-3 relative z-10" 
           />
           <input 
             value={paymentForm.accNum}
             onChange={(e) => setPaymentForm({...paymentForm, accNum: e.target.value})}
             placeholder="Account Number / IBAN" 
-            className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-theme-accent" 
+            className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-4 text-sm font-bold focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all relative z-10" 
           />
         </div>
       </div>
@@ -385,19 +400,21 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
             </select>
           </div>
 
-          <div className="p-4 bg-theme-danger/5 border border-theme-danger/20 rounded-2xl">
-            <h4 className="text-theme-danger text-sm font-black mb-2 flex items-center gap-2">Fraud Warning</h4>
-            <p className="text-xs text-theme-danger/80 font-semibold leading-relaxed mb-4">
+          <div className="p-5 bg-theme-app border border-theme-border-soft rounded-2xl hover-glow-effect transition-all">
+            <h4 className="text-theme-primary text-sm font-black mb-2 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-theme-accent" /> Legal & Fraud Warning
+            </h4>
+            <p className="text-xs text-theme-muted font-bold leading-relaxed mb-5">
               {legalTextEnglish}
             </p>
             <div className="flex flex-wrap gap-2">
-              <button onClick={() => handleSpeak(legalTextEnglish, 'en-US')} className="text-[10px] bg-theme-danger/10 text-theme-danger px-3 py-1.5 rounded-full font-bold hover:bg-theme-danger/20 flex items-center gap-1">
+              <button onClick={() => handleSpeak(legalTextEnglish, 'en-US')} className="text-[10px] bg-theme-accent/10 text-theme-accent px-4 py-2 rounded-xl font-bold hover:bg-theme-accent/20 flex items-center gap-1.5 transition-colors">
                 <Play className="w-3 h-3"/> Listen (EN)
               </button>
-              <button onClick={() => handleSpeak(legalTextBengali, 'bn-BD')} className="text-[10px] bg-theme-danger/10 text-theme-danger px-3 py-1.5 rounded-full font-bold hover:bg-theme-danger/20 flex items-center gap-1">
+              <button onClick={() => handleSpeak(legalTextBengali, 'bn-BD')} className="text-[10px] bg-theme-accent/10 text-theme-accent px-4 py-2 rounded-xl font-bold hover:bg-theme-accent/20 flex items-center gap-1.5 transition-colors">
                 <Play className="w-3 h-3"/> Listen (BN)
               </button>
-              <button onClick={() => handleSpeak(legalTextHindi, 'hi-IN')} className="text-[10px] bg-theme-danger/10 text-theme-danger px-3 py-1.5 rounded-full font-bold hover:bg-theme-danger/20 flex items-center gap-1">
+              <button onClick={() => handleSpeak(legalTextHindi, 'hi-IN')} className="text-[10px] bg-theme-accent/10 text-theme-accent px-4 py-2 rounded-xl font-bold hover:bg-theme-accent/20 flex items-center gap-1.5 transition-colors">
                 <Play className="w-3 h-3"/> Listen (HI)
               </button>
             </div>
