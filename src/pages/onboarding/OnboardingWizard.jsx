@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { BUSINESS_PRESETS, ALL_MODULES } from '../../config/businessPresets';
 import { authEngine } from '../../services/authEngine';
+import { soundEngine } from '../../utils/soundEngine';
 
 const iconMap = {
   ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText, Store, Palette: Paintbrush, Coffee, Settings, Monitor
@@ -100,6 +101,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
       // Theme defaults handled outside in App/Settings
     }
 
+    soundEngine.playPaymentSuccess();
     await onSaveSettings(updatedSettings);
     setCurrentTab('dashboard');
   };
@@ -121,7 +123,9 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
           return (
             <button
               key={type.id}
+              onMouseEnter={() => soundEngine.playHover()}
               onClick={() => {
+                soundEngine.playClick();
                 setFormData({ ...formData, businessType: type.id });
               }}
               className={`relative overflow-hidden p-5 md:p-6 rounded-3xl border text-left transition-all duration-300 flex flex-col items-start hover:-translate-y-1 group ${
@@ -295,7 +299,9 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
             return (
               <button
                 key={mod.id}
+                onMouseEnter={() => soundEngine.playHover()}
                 onClick={() => {
+                  soundEngine.playClick();
                   if (isEnabled) {
                     setFormData({ ...formData, enabledModules: formData.enabledModules.filter(id => id !== mod.id) });
                   } else {
@@ -535,7 +541,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
         <div className="mt-10 flex items-center gap-4 max-w-2xl w-full mx-auto">
           {step > 1 && step < 6 && (
             <button 
-              onClick={prevStep}
+              onClick={() => { soundEngine.playClick(); prevStep(); }}
               className="py-4 px-6 bg-theme-card text-theme-primary font-black rounded-2xl border border-theme-border-soft hover:bg-theme-surface transition-colors"
             >
               Back
@@ -543,7 +549,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
           )}
           {step < 6 ? (
             <button 
-              onClick={nextStep}
+              onClick={() => { soundEngine.playClick(); nextStep(); }}
               disabled={
                 (step === 1 && !formData.businessType) || 
                 (step === 2 && !isAddWorkspaceMode && (!formData.ownerName.trim() || !formData.phone.trim())) ||
@@ -555,7 +561,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
             </button>
           ) : (
             <button 
-              onClick={handleFinish}
+              onClick={() => { soundEngine.playClick(); handleFinish(); }}
               className="w-full py-4 bg-theme-success text-white font-black rounded-2xl shadow-premium flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               <Play className="w-5 h-5 fill-current" /> Go To Dashboard

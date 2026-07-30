@@ -52,6 +52,35 @@ class SoundEngine {
     this.playTone(800, 'sine', 0.15, 0.05, 0.05);
   }
 
+  // A very soft, high-frequency 'tick' for hover interactions
+  playHover() {
+    this.initContext();
+    this.playTone(800, 'sine', 0.05, 0.02);
+  }
+
+  // A modern click/tap sound for buttons
+  playClick() {
+    this.initContext();
+    if (!this.isEnabled || !this.context) return;
+
+    const osc = this.context.createOscillator();
+    const gainNode = this.context.createGain();
+
+    osc.type = 'sine';
+    // Frequency drop for a click effect
+    osc.frequency.setValueAtTime(600, this.context.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, this.context.currentTime + 0.1);
+
+    gainNode.gain.setValueAtTime(0.08, this.context.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + 0.1);
+
+    osc.connect(gainNode);
+    gainNode.connect(this.context.destination);
+
+    osc.start();
+    osc.stop(this.context.currentTime + 0.1);
+  }
+
   // A magical chord for Payment Success!
   playPaymentSuccess() {
     this.initContext();
