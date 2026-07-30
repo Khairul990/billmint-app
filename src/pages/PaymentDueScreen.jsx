@@ -4,7 +4,7 @@ import { authEngine } from '../services/authEngine';
 import { paymentEngine } from '../services/paymentEngine';
 import { adminEngine } from '../services/adminEngine';
 import { toast } from 'react-hot-toast';
-import { triggerPaymentSuccessFeedback } from '../utils/feedback';
+import { triggerPaymentSuccessFeedback, triggerVoiceFeedback } from '../utils/feedback';
 
 const PaymentDueScreen = ({ pendingAmount, chargeableBills, onCancel, onLogout }) => {
   const [screenshot, setScreenshot] = useState(null);
@@ -56,6 +56,8 @@ const PaymentDueScreen = ({ pendingAmount, chargeableBills, onCancel, onLogout }
 
       setSubmitted(true);
       triggerPaymentSuccessFeedback();
+      triggerVoiceFeedback("Payment proof submitted successfully!");
+      window.dispatchEvent(new Event('trigger-confetti'));
       toast.success('Payment proof submitted successfully!');
     } catch (err) {
       console.error(err);

@@ -992,6 +992,8 @@ function App() {
         // Trigger haptic & audio feedback
         if (payload.paymentStatus === 'Paid' && (!oldInvoice || oldInvoice.paymentStatus !== 'Paid')) {
           triggerPaymentSuccessFeedback();
+          triggerVoiceFeedback("Payment received successfully!");
+          window.dispatchEvent(new Event('trigger-confetti'));
         } else {
           triggerPopFeedback();
         }

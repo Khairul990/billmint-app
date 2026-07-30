@@ -2018,3 +2018,14 @@ button:active {
     --input-bg: #4C1935;
     --chart-primary: #8A8FA3;
   }
+
+/* --- Premium Hover Glow Effects --- */
+.hover-glow-effect {
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.hover-glow-effect:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 15px 30px -5px var(--accent-glow), 0 0 10px 0px var(--accent-glow);
+  border-color: var(--accent);
+  z-index: 10;
+}

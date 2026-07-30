@@ -78,7 +78,7 @@ const KpiCard = ({ title, value, icon: Icon, trend, trendUp = true }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] } }}
-    className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-premium-sm hover:shadow-premium-hover transition-all duration-200 hover:-translate-y-0.5 relative overflow-hidden group"
+    className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-premium-sm hover:shadow-premium-hover hover-glow-effect transition-all duration-200 relative overflow-hidden group"
   >
     <div className="flex items-start justify-between mb-2">
       <div className="p-2 rounded-lg bg-theme-accent/10 text-theme-accent group-hover:scale-105 transition-transform shrink-0">
@@ -628,7 +628,7 @@ const Dashboard = ({
           )}
 
           {/* PREMIUM MOBILE HERO */}
-          <div className="bg-[image:var(--accent-gradient)] text-white rounded-2xl p-5 shadow-premium relative overflow-hidden">
+          <div className="bg-[image:var(--accent-gradient)] text-white rounded-2xl p-5 shadow-premium hover-glow-effect relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
             <div className="relative z-10">

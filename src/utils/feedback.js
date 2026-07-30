@@ -172,6 +172,37 @@ export const triggerPopFeedback = () => {
   }
 };
 
+export const triggerVoiceFeedback = (text = "Payment received successfully") => {
+  let enableSounds = true;
+  try {
+    const settings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
+    if (settings.enableSounds === false) enableSounds = false;
+  } catch (e) {}
+
+  if (enableSounds && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    try {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.1; // Slightly cheerful
+      utterance.volume = 0.8;
+      
+      // Try to find a female English voice for a better assistant feel
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const preferredVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Samantha')));
+        if (preferredVoice) utterance.voice = preferredVoice;
+      }
+      
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.warn("Voice feedback failed", e);
+    }
+  }
+};
+
 export const triggerLightHaptic = () => {
   let enableHaptics = true;
   try {
