@@ -114,7 +114,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
         <p className="text-sm font-bold text-theme-muted">Select ONE main business to start. You can add more later.</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-5">
         {BUSINESS_PRESETS.map(type => {
           const IconComponent = iconMap[type.iconName] || Store;
           const isSelected = formData.businessType === type.id;
@@ -504,15 +504,20 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
 
   return (
     <div className="min-h-screen bg-theme-main flex flex-col font-sans relative overflow-hidden">
+      {/* Decorative Premium Background Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--accent)]/10 rounded-full blur-[100px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
+      <div className="absolute top-[30%] right-[10%] w-[20%] h-[20%] bg-purple-500/10 rounded-full blur-[80px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
+
       {/* Top Progress Bar */}
       <div className="h-1.5 w-full bg-theme-surface fixed top-0 left-0 z-50">
         <div 
-          className="h-full bg-theme-accent transition-all duration-500 ease-out"
+          className="h-full bg-[image:var(--accent-gradient)] transition-all duration-700 ease-out shadow-[0_0_10px_var(--accent-glow)]"
           style={{ width: `${(step / 6) * 100}%` }}
         />
       </div>
 
-      <div className="flex-1 max-w-3xl w-full mx-auto p-6 md:p-12 flex flex-col justify-center pb-24">
+      <div className={`flex-1 w-full mx-auto p-6 md:p-12 flex flex-col justify-center pb-24 transition-all duration-500 relative z-10 ${step === 1 || step === 3 ? 'max-w-6xl' : 'max-w-3xl'}`}>
         <AnimatePresence mode="wait">
           {step === 1 && renderStep1()}
           {step === 2 && renderStep2()}
