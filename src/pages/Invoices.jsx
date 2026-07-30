@@ -22,7 +22,8 @@ import {
   ShieldCheck,
   Link,
   AlertTriangle,
-  Upload
+  Upload,
+  Trash2
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -78,6 +79,8 @@ const Invoices = ({
   const [generatingLink, setGeneratingLink] = useState(false);
   const [linkCache, setLinkCache] = useState({});
   const [paidDeleteTarget, setPaidDeleteTarget] = useState(null);
+  const [permanentDeleteTarget, setPermanentDeleteTarget] = useState(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const currencySymbol = businessSettings?.currency || '₹';
 
   useEffect(() => {
@@ -410,12 +413,8 @@ const Invoices = ({
                       onDeleteInvoice(id, false);
                     }
                   } else {
-                    const confirmText = window.prompt('Type DELETE to permanently delete this invoice:');
-                    if (confirmText === 'DELETE') {
-                      onDeleteInvoice(id, true); // permanent delete
-                    } else if (confirmText !== null) {
-                      toast.error('Deletion cancelled. You must type DELETE exactly.');
-                    }
+                    setPermanentDeleteTarget(invoice);
+                    setDeleteConfirmText('');
                   }
                 }}
                 onRestore={viewMode === 'trash' ? (id) => {
@@ -449,40 +448,97 @@ const Invoices = ({
 
       {/* Paid Invoice Delete Confirmation */}
       {paidDeleteTarget && createPortal(
-        <div className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPaidDeleteTarget(null)}>
+        <div className="fixed inset-0 z-[10000] bg-black/40 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setPaidDeleteTarget(null)}>
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-theme-surface border border-theme-border-soft rounded-2xl shadow-2xl w-full max-w-sm p-6"
+            className="bg-theme-surface/90 backdrop-blur-xl border border-rose-500/20 rounded-3xl shadow-[0_0_50px_rgba(244,63,94,0.15)] w-full max-w-sm p-6 overflow-hidden relative"
           >
-            <div className="flex items-center gap-3 text-rose-500 mb-4">
-              <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-5 h-5" />
+            {/* Background Glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-rose-500/20 blur-[50px] rounded-full pointer-events-none"></div>
+
+            <div className="flex flex-col items-center text-center relative z-10">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-rose-500/20 to-rose-500/5 text-rose-500 flex items-center justify-center mb-5 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
+                <AlertTriangle className="w-8 h-8" />
               </div>
-              <h3 className="text-lg font-black text-theme-primary leading-tight">Delete Paid Invoice?</h3>
+              <h3 className="text-xl font-black text-theme-primary mb-2">Move Paid Invoice to Trash?</h3>
+              <p className="text-sm font-bold text-theme-muted mb-8 leading-relaxed">
+                This invoice contains completed payment records. Are you sure you want to move it to the trash?
+              </p>
+
+              <div className="flex w-full gap-3">
+                <button
+                  onClick={() => setPaidDeleteTarget(null)}
+                  className="flex-1 bg-theme-app border border-theme-border-soft text-theme-primary font-bold py-3 rounded-xl transition-all hover:bg-theme-border-soft hover:shadow-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    onDeleteInvoice(paidDeleteTarget.id, false, true); // skip second confirmation
+                    setPaidDeleteTarget(null);
+                  }}
+                  className="flex-1 bg-gradient-to-r from-rose-500 to-rose-600 text-white font-black py-3 rounded-xl transition-all hover:from-rose-600 hover:to-rose-700 shadow-lg shadow-rose-500/25"
+                >
+                  Move To Trash
+                </button>
+              </div>
             </div>
+          </motion.div>
+        </div>,
+        document.body
+      )}
 
-            <p className="text-sm font-bold text-theme-muted mb-6">
-              This invoice contains completed payment records. Moving it to trash is recommended.
-            </p>
+      {/* Permanent Delete Confirmation */}
+      {permanentDeleteTarget && createPortal(
+        <div className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setPermanentDeleteTarget(null)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-theme-surface/95 backdrop-blur-2xl border border-rose-500/30 rounded-3xl shadow-[0_0_60px_rgba(244,63,94,0.2)] w-full max-w-md p-8 overflow-hidden relative"
+          >
+            {/* Background Glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-rose-600/20 blur-[60px] rounded-full pointer-events-none"></div>
 
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={() => {
-                  onDeleteInvoice(paidDeleteTarget.id, false);
-                  setPaidDeleteTarget(null);
-                }}
-                className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition-colors"
-              >
-                Move To Trash
-              </button>
-              <button
-                onClick={() => setPaidDeleteTarget(null)}
-                className="w-full py-3 bg-transparent hover:bg-theme-border-soft text-theme-muted hover:text-theme-primary text-sm font-bold rounded-xl transition-colors"
-              >
-                Cancel
-              </button>
+            <div className="flex flex-col items-center text-center relative z-10">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-rose-600/20 to-rose-600/5 text-rose-500 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(244,63,94,0.3)] border border-rose-500/20">
+                <Trash2 className="w-10 h-10" />
+              </div>
+              <h3 className="text-2xl font-black text-theme-primary mb-3">Permanent Deletion</h3>
+              <p className="text-sm font-bold text-theme-muted mb-6 leading-relaxed">
+                You are about to permanently delete invoice <span className="text-rose-500">{permanentDeleteTarget.invoiceNumber}</span>. This action cannot be undone. Please type <span className="text-theme-primary font-black bg-theme-app px-2 py-1 rounded-md border border-theme-border-soft">DELETE</span> below to confirm.
+              </p>
+
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Type DELETE"
+                className="w-full text-center text-lg font-black tracking-widest uppercase bg-theme-app dark:bg-theme-card border-2 border-theme-border-soft focus:border-rose-500 rounded-xl px-4 py-4 mb-6 text-theme-primary focus:outline-none transition-all placeholder:text-theme-muted/50"
+              />
+
+              <div className="flex w-full gap-3">
+                <button
+                  onClick={() => setPermanentDeleteTarget(null)}
+                  className="flex-1 bg-theme-app border border-theme-border-soft text-theme-primary font-bold py-3.5 rounded-xl transition-all hover:bg-theme-border-soft hover:shadow-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  disabled={deleteConfirmText !== 'DELETE'}
+                  onClick={() => {
+                    onDeleteInvoice(permanentDeleteTarget.id, true);
+                    setPermanentDeleteTarget(null);
+                  }}
+                  className="flex-1 bg-gradient-to-r from-rose-600 to-rose-700 disabled:from-theme-border-soft disabled:to-theme-border-soft disabled:text-theme-muted disabled:cursor-not-allowed text-white font-black py-3.5 rounded-xl transition-all hover:from-rose-700 hover:to-rose-800 shadow-lg shadow-rose-600/30 disabled:shadow-none"
+                >
+                  Permanently Delete
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>,

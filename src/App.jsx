@@ -1052,7 +1052,7 @@ function App() {
     return payload;
   };
 
-  const handleDeleteInvoice = async (id, permanent = false) => {
+  const handleDeleteInvoice = async (id, permanent = false, skipConfirmation = false) => {
     if (isDemoSessionActive) {
       deleteDemoInvoice(id);
       toast.success('Deleted from Demo Session');
@@ -1069,24 +1069,24 @@ function App() {
       }
     };
 
-    if (permanent) {
+    if (permanent || skipConfirmation) {
       await executeDelete();
     } else {
       toast.custom(
         (t) => (
-          <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-sm w-full bg-theme-app dark:bg-theme-surface shadow-2xl rounded-2xl pointer-events-auto border border-theme-border-soft overflow-hidden`}>
-            <div className="p-5 flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-theme-danger/10 text-theme-danger flex items-center justify-center mb-3">
-                <Trash2 className="w-6 h-6" />
+          <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-sm w-full bg-theme-surface/90 backdrop-blur-xl shadow-[0_0_50px_rgba(244,63,94,0.15)] rounded-2xl pointer-events-auto border border-rose-500/20 overflow-hidden`}>
+            <div className="p-6 flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-rose-500/20 to-rose-500/5 text-rose-500 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
+                <Trash2 className="w-7 h-7" />
               </div>
-              <h3 className="text-lg font-black text-theme-primary dark:text-theme-primary mb-1">Move to Trash?</h3>
-              <p className="text-xs text-theme-muted font-semibold mb-6">
+              <h3 className="text-xl font-black text-theme-primary mb-2">Move to Trash?</h3>
+              <p className="text-sm text-theme-muted font-bold mb-6">
                 Are you sure you want to move this invoice to the trash? You can restore it later if needed.
               </p>
-              <div className="flex w-full gap-2">
+              <div className="flex w-full gap-3">
                 <button
                   onClick={() => toast.dismiss(t.id)}
-                  className="flex-1 bg-theme-card border border-theme-border-soft text-theme-muted font-bold py-2.5 rounded-xl transition-all hover:bg-theme-border-soft"
+                  className="flex-1 bg-theme-app border border-theme-border-soft text-theme-primary font-bold py-3 rounded-xl transition-all hover:bg-theme-border-soft hover:shadow-md"
                 >
                   Cancel
                 </button>
@@ -1095,7 +1095,7 @@ function App() {
                     toast.dismiss(t.id);
                     await executeDelete();
                   }}
-                  className="flex-1 bg-theme-danger text-white font-bold py-2.5 rounded-xl transition-all hover:bg-rose-600 shadow-md"
+                  className="flex-1 bg-gradient-to-r from-rose-500 to-rose-600 text-white font-black py-3 rounded-xl transition-all hover:from-rose-600 hover:to-rose-700 shadow-lg shadow-rose-500/25"
                 >
                   Yes, Delete
                 </button>
@@ -1103,7 +1103,7 @@ function App() {
             </div>
           </div>
         ),
-        { duration: 5000 }
+        { duration: 4000 }
       );
     }
   };
