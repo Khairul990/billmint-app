@@ -114,7 +114,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
         <p className="text-sm font-bold text-theme-muted">Select ONE main business to start. You can add more later.</p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 lg:gap-5">
         {BUSINESS_PRESETS.map(type => {
           const IconComponent = iconMap[type.iconName] || Store;
           const isSelected = formData.businessType === type.id;
@@ -124,7 +124,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
               onClick={() => {
                 setFormData({ ...formData, businessType: type.id });
               }}
-              className={`relative overflow-hidden p-4 md:p-5 rounded-3xl border text-left transition-all duration-300 flex flex-col items-start hover:-translate-y-1 group ${
+              className={`relative overflow-hidden p-5 md:p-6 rounded-3xl border text-left transition-all duration-300 flex flex-col items-start hover:-translate-y-1 group ${
                 isSelected 
                   ? 'bg-theme-accent/5 border-theme-accent shadow-[0_8px_30px_var(--accent-glow)] ring-2 ring-theme-accent/30 scale-[1.02]' 
                   : 'bg-theme-card border-theme-border-soft hover:border-theme-accent/40 hover:shadow-xl'
@@ -134,11 +134,10 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
               <div className={`absolute -inset-10 bg-gradient-to-br from-theme-accent/20 to-transparent opacity-0 transition-opacity duration-500 blur-3xl ${isSelected ? 'opacity-100' : 'group-hover:opacity-40'}`}></div>
               
               <div className="relative z-10 w-full flex flex-col h-full">
-                <div className="flex items-start justify-between w-full mb-3">
-                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-[1rem] flex items-center justify-center transition-all duration-300 relative ${isSelected ? 'bg-[image:var(--accent-gradient)] text-white shadow-lg shadow-theme-accent/40 scale-110' : 'bg-theme-surface border border-theme-border-soft text-theme-muted group-hover:text-theme-accent group-hover:border-theme-accent/30 group-hover:bg-theme-accent/10'}`}>
-                    <IconComponent className="w-5 h-5 md:w-6 md:h-6 relative z-10" />
-                    {/* Inner highlight for pro look */}
-                    <div className="absolute inset-0 bg-white/10 rounded-[1rem] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="flex items-start justify-between w-full mb-4">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 relative ${isSelected ? 'bg-[image:var(--accent-gradient)] text-white shadow-lg shadow-theme-accent/40 scale-110' : 'bg-theme-surface border border-theme-border-soft text-theme-muted group-hover:text-theme-accent group-hover:border-theme-accent/30 group-hover:bg-theme-accent/10'}`}>
+                    <IconComponent className="w-6 h-6 relative z-10" />
+                    <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </div>
                   
                   {/* Selection Check Indicator */}
@@ -530,7 +529,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
         </AnimatePresence>
 
         {/* Footer Navigation */}
-        <div className="mt-10 flex items-center gap-4">
+        <div className="mt-10 flex items-center gap-4 max-w-2xl w-full mx-auto">
           {step > 1 && step < 6 && (
             <button 
               onClick={prevStep}
