@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Store, CheckCircle2, ChevronRight, ChevronLeft, Building2, User, Paintbrush, Play,
   ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText,
-  CreditCard, ShieldCheck, Globe, Coffee, Settings, Info, Monitor, Phone, Mail, MapPin
+  CreditCard, ShieldCheck, Globe, Coffee, Settings, Info, Monitor, Phone, Mail, MapPin, Smartphone
 } from 'lucide-react';
 import { BUSINESS_PRESETS, ALL_MODULES } from '../../config/businessPresets';
 import { authEngine } from '../../services/authEngine';
@@ -363,7 +363,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
         {/* India Payment */}
         <div className="p-5 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-4 hover-glow-effect transition-all relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest relative z-10 flex items-center gap-1.5"><img src="https://flagcdn.com/w20/in.png" alt="India" className="w-4 h-auto rounded-[2px]" /> India (UPI ID)</label>
+          <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest relative z-10 flex items-center gap-2"><Smartphone className="w-4 h-4 text-theme-accent" /> India (UPI ID)</label>
           <div className="relative z-10 group-focus-within:text-theme-accent transition-colors">
             <input 
               value={paymentForm.indiaUpi}
@@ -377,7 +377,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
         {/* Bangladesh Payment */}
         <div className="p-5 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-4 hover-glow-effect transition-all relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest relative z-10 flex items-center gap-1.5"><img src="https://flagcdn.com/w20/bd.png" alt="Bangladesh" className="w-4 h-auto rounded-[2px]" /> Bangladesh (MFS)</label>
+          <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest relative z-10 flex items-center gap-2"><Smartphone className="w-4 h-4 text-theme-accent" /> Bangladesh (MFS)</label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 relative z-10">
             <input 
               value={paymentForm.bdBkash}
@@ -397,7 +397,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
         {/* Other Bank */}
         <div className="p-5 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-4 hover-glow-effect transition-all relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest relative z-10 flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5" /> Bank Transfer (Other)</label>
+          <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest relative z-10 flex items-center gap-2"><Building2 className="w-4 h-4 text-theme-accent" /> Bank Transfer (Other)</label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 relative z-10">
             <input 
               value={paymentForm.bankName}
@@ -549,7 +549,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
                 (step === 2 && !isAddWorkspaceMode && (!formData.ownerName.trim() || !formData.phone.trim())) ||
                 (step === 5 && !isAddWorkspaceMode && !formData.legalAgreed)
               }
-              className="flex-1 py-4 bg-[image:var(--accent-gradient)] text-white font-black rounded-2xl shadow-premium flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="flex-1 py-4 bg-theme-accent text-white font-black rounded-2xl shadow-lg shadow-theme-accent/30 flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               Continue <ChevronRight className="w-5 h-5" />
             </button>
