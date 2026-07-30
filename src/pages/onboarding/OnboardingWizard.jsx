@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Store, CheckCircle2, ChevronRight, ChevronLeft, Building2, User, Paintbrush, Play,
   ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText,
-  CreditCard, ShieldCheck, Globe, Coffee, Settings, Info, Monitor
+  CreditCard, ShieldCheck, Globe, Coffee, Settings, Info, Monitor, Phone, Mail, MapPin
 } from 'lucide-react';
 import { BUSINESS_PRESETS, ALL_MODULES } from '../../config/businessPresets';
 import { authEngine } from '../../services/authEngine';
