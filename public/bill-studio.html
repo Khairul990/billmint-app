@@ -509,7 +509,7 @@
         <div class="grid-2">
             <div class="form-group">
                 <label for="customerName">Customer Name</label>
-                <input type="text" id="customerName" list="customerList" oninput="handleCustomerSelect()" placeholder="Search or enter customer name...">
+                <input type="text" id="customerName" list="customerList" oninput="handleCustomerSelect(this.value)" placeholder="Search or enter customer name...">
                 <datalist id="customerList"></datalist>
                 <datalist id="productList"></datalist>
             </div>
