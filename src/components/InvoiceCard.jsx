@@ -116,11 +116,11 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
   };
 
   return (
-    <div className="bg-theme-card dark:bg-theme-card rounded-2xl p-5 md:p-5 border border-theme-border-soft dark:border-theme-border-soft/80 shadow-premium hover:shadow-premium-hover transition-all duration-300">
+    <div className="bg-theme-card dark:bg-theme-card rounded-2xl p-5 md:p-5 border border-theme-border-soft dark:border-theme-border-soft/80 shadow-premium hover:shadow-2xl hover:border-theme-accent/30 dark:hover:border-theme-accent/40 transition-all duration-500 group">
       <div className={`flex flex-col ${compact ? '' : 'md:flex-row md:items-center'} justify-between gap-4`}>
         {/* Top/Left Section: Metadata */}
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-theme-app to-theme-surface dark:from-theme-surface dark:to-theme-card text-theme-accent dark:text-theme-accent rounded-xl border border-theme-border-soft shadow-sm hidden sm:block">
+          <div className="p-3 bg-gradient-to-br from-theme-app to-theme-surface dark:from-theme-surface dark:to-theme-card text-theme-accent dark:text-theme-accent rounded-xl border border-theme-border-soft shadow-sm hidden sm:block group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-theme-accent/20 transition-all duration-300">
             <FileText className="w-6 h-6" />
           </div>
           <div>
@@ -198,6 +198,34 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                   className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/30 rounded-xl transition-all cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={async () => {
+                    const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
+                    if (!isLiveLinkEnabled) {
+                      toast.error('Live Link is disabled. Enable it from Settings.');
+                      return;
+                    }
+                    try {
+                      const customerId = invoice.customerId || invoice.customer?.id;
+                      if (!customerId) {
+                        toast.error('Please assign a customer to share the Portal.');
+                        return;
+                      }
+                      const isEdu = isEducationCategory(businessSettings?.businessCategory);
+                      const portalPath = isEdu ? '/student-portal' : '/portal';
+                      const liveLink = `${window.location.origin}${portalPath}/${customerId}`;
+                      await navigator.clipboard.writeText(liveLink);
+                      toast.success('Live Invoice Link copied to clipboard!');
+                    } catch (err) {
+                      toast.error(err.message || 'Could not create live link. Please try again.');
+                    }
+                  }}
+                  title="Copy Live Link"
+                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/30 rounded-xl transition-all cursor-pointer"
+                >
+                  <Link className="w-4 h-4" />
                 </button>
 
                 {/* Quick Share Popover Dropdown */}
@@ -294,34 +322,6 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                           <span>Email Invoice</span>
                         </button>
 
-                        <button
-                          onClick={async () => {
-                            const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
-                            if (!isLiveLinkEnabled) {
-                              toast.error('Live Link is disabled. Enable it from Settings.');
-                              return;
-                            }
-                            try {
-                              const customerId = invoice.customerId || invoice.customer?.id;
-                              if (!customerId) {
-                                toast.error('Please assign a customer to share the Portal.');
-                                return;
-                              }
-                              const isEdu = isEducationCategory(businessSettings?.businessCategory);
-                              const portalPath = isEdu ? '/student-portal' : '/portal';
-                              const liveLink = `${window.location.origin}${portalPath}/${customerId}`;
-                              await navigator.clipboard.writeText(liveLink);
-                              toast.success('Live Invoice Link copied to clipboard!');
-                              setShowShareMenu(false);
-                            } catch (err) {
-                              toast.error(err.message || 'Could not create live link. Please try again.');
-                            }
-                          }}
-                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-theme-accent-light hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
-                        >
-                          <Link className="w-3.5 h-3.5 text-theme-accent" />
-                          <span>Copy Live Link</span>
-                        </button>
 
                         <button
                           onClick={async () => {
@@ -372,7 +372,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
               </button>
             )}
 
-            {invoice.paymentStatus !== 'Paid' && (
+            {!isDeleted && (
               <button
                 onClick={() => onDelete(invoice.id)}
                 title={isDeleted ? "Permanently Delete" : "Move to Trash"}
