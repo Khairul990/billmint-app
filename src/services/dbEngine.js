@@ -1067,20 +1067,37 @@ export const logout = async () => {
 };
 
 export const factoryResetAllData = async () => {
+  // Wipe all local storage
   localStorage.clear();
   sessionStorage.clear();
   
   try {
+    // Manually clear all object stores first as a fallback
+    await BillQyroDB.clear('invoices').catch(() => {});
+    await BillQyroDB.clear('customers').catch(() => {});
+    await BillQyroDB.clear('products').catch(() => {});
+    await BillQyroDB.clear('expenses').catch(() => {});
+    await BillQyroDB.clear('students').catch(() => {});
+    await BillQyroDB.clear('syncQueue').catch(() => {});
+    await BillQyroDB.clear('auditLogs').catch(() => {});
+    await BillQyroDB.clear('errorLogs').catch(() => {});
+    
+    // Now close and delete the whole database
     BillQyroDB.close();
     await new Promise((resolve, reject) => {
       const req = indexedDB.deleteDatabase('billqyro-db');
       req.onsuccess = () => resolve();
       req.onerror = () => reject(req.error);
       req.onblocked = () => {
-        console.warn('Database deletion blocked. Force resolving.');
+        console.warn('Database deletion blocked by another tab. Stores were cleared though.');
         resolve();
       };
     });
+    
+    const caches = await window.caches.keys();
+    for (const name of caches) {
+      await window.caches.delete(name);
+    }
   } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   
   if (firebaseReady) {
