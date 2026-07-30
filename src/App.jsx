@@ -38,7 +38,7 @@ import { paymentEngine } from './services/paymentEngine';
 import { downloadInvoicePDF } from './utils/pdfUtils';
 import { auth, firebaseReady } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
-import { triggerSuccessFeedback } from './utils/feedback';
+import { triggerSuccessFeedback, triggerPaymentSuccessFeedback, triggerPopFeedback, triggerDeleteFeedback } from './utils/feedback';
 import { sendEmpireEvent, sendEmpireError, sendEmpireHealth } from './services/empireAgent';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from './services/firebaseConfig';
@@ -990,7 +990,11 @@ function App() {
         });
 
         // Trigger haptic & audio feedback
-        triggerSuccessFeedback();
+        if (payload.paymentStatus === 'Paid' && (!oldInvoice || oldInvoice.paymentStatus !== 'Paid')) {
+          triggerPaymentSuccessFeedback();
+        } else {
+          triggerPopFeedback();
+        }
 
         if (unlinkedItems) {
           toast.custom(
@@ -1060,6 +1064,7 @@ function App() {
     }
 
     const executeDelete = async () => {
+      triggerDeleteFeedback();
       const { updatedInvoices, firebaseStatus } = await invoiceEngine.deleteInvoice(id, permanent);
       setInvoices(updatedInvoices);
       if (firebaseStatus === 'failed') {
