@@ -21,7 +21,8 @@ import {
   Share2,
   ShieldCheck,
   Link,
-  AlertTriangle
+  AlertTriangle,
+  Upload
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -259,6 +260,28 @@ const Invoices = ({
     downloadAnchorNode.remove();
   };
 
+  const handleImportInvoice = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        if (!data.id || !data.invoiceNumber || !data.items) {
+          throw new Error('Not a valid invoice backup format.');
+        }
+        await invoiceEngine.saveInvoice(data);
+        toast.success(`Invoice ${data.invoiceNumber} imported successfully!`);
+        window.dispatchEvent(new Event('billqyro_sync'));
+      } catch (err) {
+        toast.error('Failed to import invoice: ' + err.message);
+      }
+    };
+    reader.onerror = () => toast.error('Failed to read file.');
+    reader.readAsText(file);
+    e.target.value = ''; // Reset input
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.1 } }
@@ -305,6 +328,17 @@ const Invoices = ({
             {viewMode === 'active' ? 'View Trash' : 'View Active Invoices'}
           </button>
           
+          <label className="flex items-center justify-center gap-2 bg-theme-surface text-theme-primary font-bold text-xs px-4 py-3.5 rounded-2xl border border-theme-border-soft hover:bg-theme-app transition-all cursor-pointer">
+            <Upload className="w-4 h-4 text-theme-accent" />
+            <span className="hidden sm:inline">Import Invoice</span>
+            <input 
+              type="file" 
+              accept=".json,.billqyro" 
+              onChange={handleImportInvoice} 
+              className="hidden" 
+            />
+          </label>
+
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

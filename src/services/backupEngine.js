@@ -24,6 +24,23 @@ export const backupEngine = {
     return data;
   },
 
+  async importLocal(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          await this.restore(data);
+          resolve(data);
+        } catch (err) {
+          reject(new Error('Invalid backup file format.'));
+        }
+      };
+      reader.onerror = () => reject(new Error('Failed to read backup file.'));
+      reader.readAsText(file);
+    });
+  },
+
   async exportZip() {
     const result = await dbExportBackupZip();
     localStorage.setItem('last_export_date', new Date().toISOString());
