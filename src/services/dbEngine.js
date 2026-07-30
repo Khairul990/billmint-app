@@ -1067,6 +1067,17 @@ export const logout = async () => {
 };
 
 export const factoryResetAllData = async () => {
+  // Get userId before clearing local storage
+  const userId = getRealUserId();
+  
+  if (firebaseReady && userId) {
+    try {
+      await wipeUserFirestoreData(userId);
+    } catch (e) {
+      console.error('[WIPE] Failed to wipe cloud data during factory reset', e);
+    }
+  }
+
   // Wipe all local storage
   localStorage.clear();
   sessionStorage.clear();
