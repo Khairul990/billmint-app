@@ -68,10 +68,10 @@ const Sidebar = ({
     { id: 'estimates', label: 'Estimates & Quotes', icon: FileSpreadsheet, featureId: 'invoice' },
 
     { type: 'label', label: 'Customers' },
-    { id: 'customers', label: getCustomerLabel(), icon: Users, featureId: 'customer' },
-    { id: 'patients', label: 'Patient Records', icon: Users, featureId: 'customer' },
-    { id: 'students', label: 'Student Directory', icon: Users, featureId: 'customer' },
-    { id: 'clients', label: 'Client Roster', icon: Users, featureId: 'customer' },
+    ...(enabledModules.includes('customers') || wsType === 'billing_only' ? [{ id: 'customers', label: getCustomerLabel(), icon: Users, featureId: 'customer' }] : []),
+    ...(enabledModules.includes('patients') ? [{ id: 'patients', label: 'Patient Records', icon: Users, featureId: 'customer' }] : []),
+    ...(enabledModules.includes('students') ? [{ id: 'students', label: 'Student Directory', icon: Users, featureId: 'customer' }] : []),
+    ...(enabledModules.includes('clients') ? [{ id: 'clients', label: 'Client Roster', icon: Users, featureId: 'customer' }] : []),
 
     { type: 'label', label: 'Collections' },
     { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen, featureId: 'treasury' },
