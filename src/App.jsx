@@ -1662,20 +1662,18 @@ function App() {
         }
         return (
           <StudioLayout 
-            businessSettings={activeSettings} 
-            setSettings={setSettings} 
-            currentTab="settings-studio"
-            setCurrentAppTab={setCurrentTab}
+            settings={activeSettings} 
+            onSaveSettings={handleSaveSettings} 
+            setCurrentTab={setCurrentTab}
             subscription={subscription}
           />
         );
       case 'subscription':
         return (
           <StudioLayout 
-            businessSettings={activeSettings} 
-            setSettings={setSettings} 
-            currentTab="settings-studio"
-            setCurrentAppTab={setCurrentTab}
+            settings={activeSettings} 
+            onSaveSettings={handleSaveSettings} 
+            setCurrentTab={setCurrentTab}
             subscription={subscription}
           />
         );

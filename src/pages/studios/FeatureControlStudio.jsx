@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Shield, Zap, Box, Users, FileText, CreditCard, Link as LinkIcon, Database, Bell, Palette, HardDrive, Cpu, AlertTriangle } from 'lucide-react';
+import { Settings, Shield, Zap, Box, Users, FileText, CreditCard, Link as LinkIcon, Database, Bell, Palette, HardDrive, Cpu, AlertTriangle, Briefcase } from 'lucide-react';
 import { Switch } from '../../components/ui/Switch';
 import { featureControlEngine } from '../../services/featureControlEngine';
 import ClassicLoader from '../../components/ClassicLoader';
@@ -17,7 +17,8 @@ const CATEGORY_ICONS = {
   security: Shield,
   appearance: Palette,
   backup: HardDrive,
-  advanced: Cpu
+  advanced: Cpu,
+  operations: Briefcase
 };
 
 const FeatureControlStudio = ({ workspaceId }) => {

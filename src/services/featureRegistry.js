@@ -12,7 +12,8 @@ export const FEATURE_CATEGORIES = {
   SECURITY: 'security',
   APPEARANCE: 'appearance',
   BACKUP: 'backup',
-  ADVANCED: 'advanced'
+  ADVANCED: 'advanced',
+  OPERATIONS: 'operations'
 };
 
 // Default category states
@@ -28,7 +29,8 @@ export const DEFAULT_CATEGORY_STATE = {
   [FEATURE_CATEGORIES.SECURITY]: true,
   [FEATURE_CATEGORIES.APPEARANCE]: true,
   [FEATURE_CATEGORIES.BACKUP]: true,
-  [FEATURE_CATEGORIES.ADVANCED]: true
+  [FEATURE_CATEGORIES.ADVANCED]: true,
+  [FEATURE_CATEGORIES.OPERATIONS]: true
 };
 
 // Feature Registry Definition
@@ -305,6 +307,88 @@ export const FEATURE_REGISTRY = {
     description: 'Master ledger for treasury accounts.',
     defaultEnabled: true,
     dependencies: ['treasury'],
+    settingsSchema: {},
+    version: 1
+  },
+
+  // --- OPERATIONS FEATURES ---
+  'operations.orders': {
+    id: 'operations.orders',
+    category: FEATURE_CATEGORIES.OPERATIONS,
+    name: 'Orders',
+    description: 'Manage sales and purchase orders.',
+    defaultEnabled: true,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+  'operations.appointments': {
+    id: 'operations.appointments',
+    category: FEATURE_CATEGORIES.OPERATIONS,
+    name: 'Appointments',
+    description: 'Schedule and manage appointments.',
+    defaultEnabled: false,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+  'operations.delivery': {
+    id: 'operations.delivery',
+    category: FEATURE_CATEGORIES.OPERATIONS,
+    name: 'Delivery Tracking',
+    description: 'Track delivery of goods or services.',
+    defaultEnabled: false,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+  'operations.measurements': {
+    id: 'operations.measurements',
+    category: FEATURE_CATEGORIES.OPERATIONS,
+    name: 'Measurements',
+    description: 'Record custom measurements for customers.',
+    defaultEnabled: false,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+  'operations.designBook': {
+    id: 'operations.designBook',
+    category: FEATURE_CATEGORIES.OPERATIONS,
+    name: 'Design Book',
+    description: 'Manage design catalogs and lookbooks.',
+    defaultEnabled: false,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+  'operations.devices': {
+    id: 'operations.devices',
+    category: FEATURE_CATEGORIES.OPERATIONS,
+    name: 'Device Management',
+    description: 'Track devices or assets.',
+    defaultEnabled: false,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+  'operations.serviceJobs': {
+    id: 'operations.serviceJobs',
+    category: FEATURE_CATEGORIES.OPERATIONS,
+    name: 'Service Jobs',
+    description: 'Manage repair or service tickets.',
+    defaultEnabled: false,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+  'operations.projects': {
+    id: 'operations.projects',
+    category: FEATURE_CATEGORIES.OPERATIONS,
+    name: 'Projects',
+    description: 'Manage long-term projects and tasks.',
+    defaultEnabled: false,
+    dependencies: [],
     settingsSchema: {},
     version: 1
   }
