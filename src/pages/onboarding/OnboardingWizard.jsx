@@ -114,23 +114,40 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
         <p className="text-sm font-bold text-theme-muted">Select ONE main business to start. You can add more later.</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-5">
         {BUSINESS_PRESETS.map(type => {
           const IconComponent = iconMap[type.iconName] || Store;
+          const isSelected = formData.businessType === type.id;
           return (
             <button
               key={type.id}
               onClick={() => {
                 setFormData({ ...formData, businessType: type.id });
-                if (type.id === 'billing_only') {
-                  // Pre-set and skip to payment/legal maybe?
-                }
               }}
-              className={`p-4 rounded-3xl border text-left transition-all flex flex-col items-start hover-glow-effect ${formData.businessType === type.id ? 'bg-theme-accent/5 border-theme-accent ring-2 ring-theme-accent/20 shadow-[0_0_20px_var(--accent-glow)]' : 'bg-theme-card border-theme-border-soft hover:border-theme-accent/50'}`}
+              className={`relative overflow-hidden p-5 md:p-6 rounded-3xl border text-left transition-all duration-300 flex flex-col items-start hover:-translate-y-1 group ${
+                isSelected 
+                  ? 'bg-theme-accent/5 border-theme-accent shadow-[0_8px_30px_var(--accent-glow)] ring-2 ring-theme-accent/30 scale-[1.02]' 
+                  : 'bg-theme-card border-theme-border-soft hover:border-theme-accent/40 hover:shadow-xl'
+              }`}
             >
-              <IconComponent className={`w-8 h-8 mb-3 ${formData.businessType === type.id ? 'text-theme-accent' : 'text-theme-muted'}`} />
-              <h3 className="font-extrabold text-theme-primary text-sm">{type.label}</h3>
-              <p className="text-[10px] text-theme-muted font-semibold mt-1">{type.shortDesc}</p>
+              {/* Soft Gradient Glow Background */}
+              <div className={`absolute -inset-10 bg-gradient-to-br from-theme-accent/20 to-transparent opacity-0 transition-opacity duration-500 blur-3xl ${isSelected ? 'opacity-100' : 'group-hover:opacity-40'}`}></div>
+              
+              <div className="relative z-10 w-full flex flex-col h-full">
+                <div className="flex items-start justify-between w-full mb-4">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${isSelected ? 'bg-theme-accent text-white shadow-lg shadow-theme-accent/40 scale-110' : 'bg-theme-surface border border-theme-border-soft text-theme-muted group-hover:text-theme-accent group-hover:border-theme-accent/30 group-hover:bg-theme-accent/5'}`}>
+                    <IconComponent className="w-6 h-6" />
+                  </div>
+                  
+                  {/* Selection Check Indicator */}
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? 'border-theme-accent bg-theme-accent scale-100' : 'border-theme-border-soft group-hover:border-theme-accent/30 scale-90 opacity-50 group-hover:opacity-100'}`}>
+                    {isSelected && <CheckCircle2 className="w-4 h-4 text-white drop-shadow-sm" />}
+                  </div>
+                </div>
+                
+                <h3 className={`font-black text-sm md:text-[15px] mb-1.5 transition-colors duration-300 ${isSelected ? 'text-theme-accent' : 'text-theme-primary group-hover:text-theme-accent'}`}>{type.label}</h3>
+                <p className={`text-[10px] md:text-xs font-bold leading-relaxed transition-colors ${isSelected ? 'text-theme-accent/80' : 'text-theme-muted group-hover:text-theme-muted/80'}`}>{type.shortDesc}</p>
+              </div>
             </button>
           )
         })}
