@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Invoice Builder</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FAF6EE;
+            --surface-color: #FFFFFF;
+            --primary-accent: #C9A227;
+            --primary-accent-hover: #b08d1e;
+            --primary-dark: #6a040f; /* dark maroon */
+            --primary-dark-hover: #52030b;
+            --text-main: #2A2118;
+            --text-muted: #6b6255;
+            --danger: #DC5B5B;
+            --danger-hover: #c44d4d;
+            --border-color: #e5dfd3;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-sm: 0 2px 8px rgba(42, 33, 24, 0.05);
+            --shadow-md: 0 4px 16px rgba(42, 33, 24, 0.08);
+            --transition: all 0.2s ease-in-out;
+            --font-heading: 'Sora', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: transparent;
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-family: var(--font-heading);
+            color: var(--text-main);
+        }
+
+        .section-label {
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Header */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-row h1 {
+            font-size: 1.75rem;
+        }
+
+        .invoice-badge {
+            background: var(--bg-color);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            text-align: right;
+        }
+        .invoice-badge div {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .invoice-badge span {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Forms */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        input, select, textarea {
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--surface-color);
+            color: var(--text-main);
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15);
+        }
+
+        /* Table Area */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 0 -1.5rem;
+            padding: 0 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th {
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: left;
+            padding: 0.75rem 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.75rem 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        tr {
+            transition: background var(--transition);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(201, 162, 39, 0.03);
+        }
+
+        /* Item Label Edit */
+        .item-label-edit {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .item-label-input {
+            width: 140px;
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+        }
+        .reset-label-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+        .reset-label-btn:hover {
+            color: var(--primary-accent);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-dark);
+            color: white;
+            box-shadow: 0 4px 10px rgba(106, 4, 15, 0.2);
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark-hover);
+            box-shadow: 0 6px 15px rgba(106, 4, 15, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border-color: var(--primary-accent);
+            color: var(--primary-accent);
+        }
+        .btn-secondary:hover {
+            background-color: rgba(201, 162, 39, 0.05);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border-color: var(--border-color);
+            color: var(--text-main);
+        }
+        .btn-outline:hover {
+            border-color: var(--text-muted);
+            background-color: #f9f9f9;
+        }
+
+        .btn-danger {
+            background-color: transparent;
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+        .btn-danger:hover {
+            background-color: rgba(220, 91, 91, 0.05);
+        }
+
+        .btn-dashed {
+            border: 1px dashed var(--primary-accent);
+            color: var(--primary-accent);
+            background: transparent;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        .btn-dashed:hover {
+            background: rgba(201, 162, 39, 0.05);
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 50%;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .icon-btn:hover {
+            background-color: rgba(0,0,0,0.05);
+            color: var(--text-main);
+        }
+        .icon-btn.delete:hover {
+            background-color: rgba(220, 91, 91, 0.1);
+            color: var(--danger);
+        }
+
+        /* Totals Area */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .notes-area textarea {
+            width: 100%;
+            height: 120px;
+            resize: vertical;
+        }
+
+        .totals-area {
+            background: var(--bg-color);
+            padding: 1.5rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        .total-row .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 180px;
+        }
+        .total-row .input-group input, .total-row .input-group select {
+            padding: 0.3rem 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .total-row.grand-total {
+            border-top: 2px solid var(--border-color);
+            margin-top: 1rem;
+            padding-top: 1rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: var(--font-heading);
+            color: var(--primary-dark);
+        }
+
+        .total-note {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        /* Footer Actions */
+        .footer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+        }
+        
+        .error-msg {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-right: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--surface-color);
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow-md);
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-card h3 {
+            margin-bottom: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--text-main);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-md);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1100;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Animations */
+        @keyframes fadeInRow {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-row {
+            animation: fadeInRow 0.25s ease-out forwards;
+        }
+
+        /* Custom Column Header */
+        .custom-col-th {
+            position: relative;
+            padding-right: 24px;
+        }
+        .delete-col-btn {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+        }
+        .delete-col-btn:hover {
+            color: var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+            .header-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .invoice-badge {
+                text-align: left;
+                width: 100%;
+            }
+            .footer-actions {
+                flex-direction: column-reverse;
+                gap: 1rem;
+            }
+            .footer-actions > div {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header Section -->
+    <div class="header-row">
+        <h1>Invoice Builder</h1>
+        <div class="invoice-badge">
+            <div id="invoice-date-display">Date: </div>
+            <div>Invoice No: <span id="invoice-no-display">INV-0001</span></div>
+        </div>
+    </div>
+
+    <!-- Customer Info Card -->
+    <div class="card">
+        <span class="section-label">Customer Information</span>
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="customerName">Customer Name</label>
+                <input type="text" id="customerName" list="customerList" oninput="handleCustomerSelect()" placeholder="Search or enter customer name...">
+                <datalist id="customerList"></datalist>
+                <datalist id="productList"></datalist>
+            </div>
+            <div class="form-group">
+                <label for="customerId">Phone / Client ID</label>
+                <input type="text" id="customerId" placeholder="Enter phone or ID">
+            </div>
+        </div>
+    </div>
+
+    <!-- Items Table Card -->
+    <div class="card">
+        <div class="header-row" style="margin-bottom: 1rem;">
+            <span class="section-label" style="margin-bottom: 0;">Line Items</span>
+            <button class="btn btn-dashed" onclick="openColumnModal()">+ Add Column</button>
+        </div>
+        
+        <div class="table-responsive">
+            <table id="itemsTable">
+                <thead>
+                    <tr id="tableHeaderRow">
+                        <!-- Default Columns Generated via JS -->
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Rows Generated via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1rem; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn btn-secondary" onclick="addRow()">+ Add Row</button>
+                <button class="btn btn-outline" onclick="showToast('Catalog feature coming soon!')">+ Add from Catalog</button>
+            </div>
+            <button class="btn btn-danger" onclick="resetAll()">Reset All</button>
+        </div>
+    </div>
+
+    <!-- Notes & Totals Section -->
+    <div class="bottom-grid">
+        <div class="card notes-area">
+            <span class="section-label">Notes & Terms</span>
+            <textarea id="invoiceNotes" placeholder="Enter payment terms, delivery notes, or warranty information..."></textarea>
+        </div>
+        
+        <div class="totals-area">
+            <span class="section-label">Summary</span>
+            <div class="total-row">
+                <span>Subtotal</span>
+                <span id="subtotalDisplay">$0.00</span>
+            </div>
+            
+            <div class="total-row">
+                <span>Discount</span>
+                <div class="input-group">
+                    <select id="discountType" onchange="calculateTotals()">
+                        <option value="none">None</option>
+                        <option value="percentage">%</option>
+                        <option value="fixed" id="discountFixedSymbol">$</option>
+                    </select>
+                    <input type="number" id="discountValue" value="0" min="0" oninput="calculateTotals()" style="width: 80px;">
+                </div>
+                <span id="discountDisplay">-$0.00</span>
+            </div>
+
+            <div class="total-row">
+                <span>Tax</span>
+                <div class="input-group" style="justify-content: flex-end;">
+                    <input type="number" id="taxValue" value="0" min="0" oninput="calculateTotals()" style="width: 80px;">
+                    <span>%</span>
+                </div>
+                <span id="taxDisplay">$0.00</span>
+            </div>
+
+            <div class="total-row">
+                <span>Shipping</span>
+                <div class="input-group" style="justify-content: flex-end;">
+                    <span style="color: var(--text-muted);" id="shippingSymbol">$</span>
+                    <input type="number" id="shippingValue" value="0" min="0" oninput="calculateTotals()" style="width: 80px;">
+                </div>
+                <span id="shippingDisplay">$0.00</span>
+            </div>
+
+            <div class="total-row grand-total">
+                <span>Grand Total</span>
+                <span id="grandTotalDisplay">$0.00</span>
+            </div>
+            <div class="total-note">Custom fields do not affect totals</div>
+            <!-- Digital Signature Placeholder -->
+            <div class="summary-row" id="signatureBox" style="display: none; border-top: 1px dashed var(--border-color); padding-top: 1rem; flex-direction: column; align-items: flex-start; gap: 1rem;">
+                <span class="section-label" style="margin-bottom: 0;">Digital Signature</span>
+                <div style="width: 100%; height: 100px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted);">
+                    Click to sign
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="footer-actions">
+        <button class="btn btn-outline" onclick="exportPayload()">Export Payload</button>
+        <div style="display: flex; align-items: center;">
+            <span id="validationError" class="error-msg">Please add at least one valid item name.</span>
+            <button class="btn btn-primary" onclick="saveInvoice()">Save / Continue</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Column Modal -->
+<div class="modal-overlay" id="columnModal">
+    <div class="modal-card">
+        <h3>Add Custom Column</h3>
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Column Name</label>
+            <input type="text" id="colNameInput" placeholder="e.g. Size, Color, Warranty">
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Field Type</label>
+            <select id="colTypeInput" onchange="toggleOptionsInput()">
+                <option value="text">Text Input</option>
+                <option value="number">Number Input</option>
+                <option value="dropdown">Dropdown (Select)</option>
+            </select>
+        </div>
+        <div class="form-group" id="colOptionsGroup" style="display: none; margin-bottom: 1rem;">
+            <label>Options (comma separated)</label>
+            <input type="text" id="colOptionsInput" placeholder="e.g. S, M, L, XL">
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeColumnModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="addColumn()">Add Column</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Icons (SVG inline for no dependencies) -->
+<template id="icon-copy">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+</template>
+<template id="icon-trash">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+</template>
+
+<script>
+    // State
+    const state = {
+        invoiceDate: new Date().toLocaleDateString(),
+        invoiceNumber: `INV-${Math.floor(1000 + Math.random() * 9000)}`,
+        itemLabel: 'Item',
+        customColumns: [], // { id, name, type, options }
+        items: [], // { id, name, qty, price, customFields: {} }
+    };
+
+    // Initialize
+    function init() {
+        document.getElementById('invoice-date-display').textContent = `Date: ${state.invoiceDate}`;
+        document.getElementById('invoice-no-display').textContent = state.invoiceNumber;
+        
+        // Add one initial row
+        addRow(false);
+        renderTable();
+    }
+
+    // --- Table Rendering ---
+    function renderTable() {
+        const thead = document.getElementById('tableHeaderRow');
+        const tbody = document.getElementById('tableBody');
+
+        // Render Header
+        let thHTML = `
+            <th>
+                <div class="item-label-edit">
+                    <input type="text" class="item-label-input" id="itemLabelInput" value="${state.itemLabel}" onblur="updateItemLabel(this.value)">
+                    <button class="reset-label-btn" onclick="updateItemLabel('Item')" title="Reset to Item">↺ Reset</button>
+                </div>
+            </th>
+        `;
+
+        state.customColumns.forEach(col => {
+            thHTML += `
+                <th class="custom-col-th">
+                    ${col.name}
+                    <button class="delete-col-btn" onclick="deleteColumn('${col.id}')" title="Delete Column">×</button>
+                </th>
+            `;
+        });
+
+        thHTML += `
+            <th width="100">Qty</th>
+            <th width="150">Price</th>
+            <th width="120">Total</th>
+            <th width="100" style="text-align: right;">Actions</th>
+        `;
+        thead.innerHTML = thHTML;
+
+        // Render Rows
+        tbody.innerHTML = '';
+        state.items.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.id = `row-${item.id}`;
+            
+            let customColsHTML = '';
+            state.customColumns.forEach(col => {
+                const val = item.customFields[col.id] || '';
+                if (col.type === 'dropdown') {
+                    const opts = col.options.split(',').map(o => o.trim()).filter(o => o);
+                    let optionsHTML = '<option value="">Select...</option>';
+                    opts.forEach(opt => {
+                        optionsHTML += `<option value="${opt}" ${val === opt ? 'selected' : ''}>${opt}</option>`;
+                    });
+                    customColsHTML += `<td><select onchange="updateCustomField('${item.id}', '${col.id}', this.value)" style="width: 100%; min-width: 120px;">${optionsHTML}</select></td>`;
+                } else if (col.type === 'number') {
+                    customColsHTML += `<td><input type="number" value="${val}" oninput="updateCustomField('${item.id}', '${col.id}', this.value)" style="width: 100%; min-width: 100px;"></td>`;
+                } else {
+                    customColsHTML += `<td><input type="text" value="${val}" oninput="updateCustomField('${item.id}', '${col.id}', this.value)" style="width: 100%; min-width: 120px;"></td>`;
+                }
+            });
+
+            tr.innerHTML = `
+                <td><input type="text" value="${item.name}" placeholder="Item description" ${studioFeatures.enableProductAutocomplete !== false ? 'list="productList"' : ''} oninput="handleProductSelect('${item.id}', this.value)" style="width: 100%; min-width: 200px;"></td>
+                ${customColsHTML}
+                <td><input type="number" value="${item.qty}" min="1" oninput="updateItem('${item.id}', 'qty', this.value)" style="width: 100%;"></td>
+                <td><input type="number" value="${item.price}" min="0" step="0.01" oninput="updateItem('${item.id}', 'price', this.value)" style="width: 100%;"></td>
+                <td style="font-weight: 500; vertical-align: middle;">${formatCurrency(item.qty * item.price)}</td>
+                <td style="text-align: right; vertical-align: middle;">
+                    <button class="icon-btn" onclick="duplicateRow('${item.id}')" title="Duplicate">${document.getElementById('icon-copy').innerHTML}</button>
+                    <button class="icon-btn delete" onclick="deleteRow('${item.id}')" title="Delete">${document.getElementById('icon-trash').innerHTML}</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        calculateTotals();
+    }
+
+    // --- Actions ---
+    function updateItemLabel(val) {
+        state.itemLabel = val.trim() || 'Item';
+        document.getElementById('itemLabelInput').value = state.itemLabel;
+    }
+
+    function addRow(animate = true) {
+        const id = 'item_' + Date.now() + Math.random().toString(36).substr(2, 5);
+        const newItem = { id, name: '', qty: 1, price: 0, customFields: {} };
+        state.customColumns.forEach(col => {
+            newItem.customFields[col.id] = '';
+        });
+        state.items.push(newItem);
+        renderTable();
+        
+        if(animate) {
+            const row = document.getElementById(`row-${id}`);
+            if(row) row.classList.add('fade-in-row');
+        }
+    }
+
+    function duplicateRow(id) {
+        const itemIndex = state.items.findIndex(i => i.id === id);
+        if(itemIndex > -1) {
+            const original = state.items[itemIndex];
+            const newId = 'item_' + Date.now();
+            const copy = JSON.parse(JSON.stringify(original));
+            copy.id = newId;
+            state.items.splice(itemIndex + 1, 0, copy);
+            renderTable();
+            
+            const row = document.getElementById(`row-${newId}`);
+            if(row) row.classList.add('fade-in-row');
+        }
+    }
+
+    function deleteRow(id) {
+        if(state.items.length <= 1) {
+            showToast("Cannot delete the last row.");
+            return;
+        }
+        state.items = state.items.filter(i => i.id !== id);
+        renderTable();
+    }
+
+    function updateItem(id, field, value) {
+        const item = state.items.find(i => i.id === id);
+        if(item) {
+            item[field] = field === 'name' ? value : parseFloat(value) || 0;
+            if(field === 'qty' || field === 'price') {
+                const tr = document.getElementById(`row-${id}`);
+                if (tr) {
+                    const totalCellIndex = 3 + state.customColumns.length;
+                    tr.cells[totalCellIndex].textContent = formatCurrency(item.qty * item.price);
+                }
+                calculateTotals();
+            }
+        }
+    }
+
+    function updateCustomField(itemId, colId, value) {
+        const item = state.items.find(i => i.id === itemId);
+        if(item) {
+            item.customFields[colId] = value;
+        }
+    }
+
+    function resetAll() {
+        if(confirm("Are you sure you want to reset all items and custom columns? This cannot be undone.")) {
+            state.customColumns = [];
+            state.items = [];
+            addRow(false);
+            
+            // reset totals form
+            document.getElementById('discountType').value = 'none';
+            document.getElementById('discountValue').value = 0;
+            document.getElementById('taxValue').value = 0;
+            document.getElementById('shippingValue').value = 0;
+            document.getElementById('invoiceNotes').value = '';
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerId').value = '';
+            
+            updateItemLabel('Item');
+            renderTable();
+            showToast("Invoice reset to default.");
+        }
+    }
+
+    // --- Custom Columns ---
+    function openColumnModal() {
+        document.getElementById('colNameInput').value = '';
+        document.getElementById('colTypeInput').value = 'text';
+        document.getElementById('colOptionsInput').value = '';
+        toggleOptionsInput();
+        document.getElementById('columnModal').classList.add('active');
+        document.getElementById('colNameInput').focus();
+    }
+
+    function closeColumnModal() {
+        document.getElementById('columnModal').classList.remove('active');
+    }
+
+    function toggleOptionsInput() {
+        const type = document.getElementById('colTypeInput').value;
+        document.getElementById('colOptionsGroup').style.display = type === 'dropdown' ? 'block' : 'none';
+    }
+
+    function addColumn() {
+        const name = document.getElementById('colNameInput').value.trim();
+        const type = document.getElementById('colTypeInput').value;
+        const options = document.getElementById('colOptionsInput').value.trim();
+
+        if(!name) {
+            alert("Column name is required.");
+            return;
+        }
+        if(type === 'dropdown' && !options) {
+            alert("Please provide at least one option for the dropdown.");
+            return;
+        }
+
+        const id = 'col_' + Date.now();
+        state.customColumns.push({ id, name, type, options });
+        
+        // Add empty values to existing items
+        state.items.forEach(item => {
+            item.customFields[id] = '';
+        });
+
+        closeColumnModal();
+        renderTable();
+        showToast(`Column "${name}" added.`);
+    }
+
+    function deleteColumn(colId) {
+        if(confirm("Are you sure? This column and all its data will be removed from all rows.")) {
+            const colIndex = state.customColumns.findIndex(c => c.id === colId);
+            if(colIndex > -1) {
+                const colName = state.customColumns[colIndex].name;
+                state.customColumns.splice(colIndex, 1);
+                state.items.forEach(item => {
+                    delete item.customFields[colId];
+                });
+                renderTable();
+                showToast(`Column "${colName}" removed.`);
+            }
+        }
+    }
+    // --- State & Settings ---
+    let currencySymbol = '$';
+
+    function handleProductSelect(id, value) {
+        updateItem(id, 'name', value);
+        if (studioFeatures.enableProductAutocomplete !== false) {
+            const matchedProduct = availableProducts.find(p => p.name.toLowerCase() === value.toLowerCase());
+            if (matchedProduct) {
+                updateItem(id, 'price', matchedProduct.price);
+                // Also could update default qty if we had it, but standard is keep existing qty
+            }
+        }
+    }
+
+    // --- Totals ---
+    function formatCurrency(val) {
+        return currencySymbol + parseFloat(val).toFixed(2);
+    }
+
+    function calculateTotals() {
+        let subtotal = 0;
+        state.items.forEach(item => {
+            subtotal += (item.qty * item.price);
+        });
+
+        const discountType = document.getElementById('discountType').value;
+        const discountVal = parseFloat(document.getElementById('discountValue').value) || 0;
+        const taxPercent = parseFloat(document.getElementById('taxValue').value) || 0;
+        const shipping = parseFloat(document.getElementById('shippingValue').value) || 0;
+
+        let discountAmount = 0;
+        if (discountType === 'percentage') {
+            discountAmount = subtotal * (discountVal / 100);
+        } else if (discountType === 'fixed') {
+            discountAmount = discountVal;
+        }
+        if (discountAmount > subtotal) discountAmount = subtotal;
+
+        const subAfterDiscount = subtotal - discountAmount;
+        const taxAmount = subAfterDiscount * (taxPercent / 100);
+        const grandTotal = subAfterDiscount + taxAmount + shipping;
+
+        document.getElementById('subtotalDisplay').textContent = formatCurrency(subtotal);
+        document.getElementById('discountDisplay').textContent = '-' + formatCurrency(discountAmount);
+        document.getElementById('taxDisplay').textContent = formatCurrency(taxAmount);
+        document.getElementById('shippingDisplay').textContent = formatCurrency(shipping);
+        document.getElementById('grandTotalDisplay').textContent = formatCurrency(grandTotal);
+    }
+
+    // --- Footer Actions ---
+    function getPayload() {
+        const customerName = document.getElementById('customerName').value.trim();
+        const customerId = document.getElementById('customerId').value.trim();
+        const notes = document.getElementById('invoiceNotes').value.trim();
+
+        // format items nicely, swap custom field IDs for names for cleaner payload
+        const cleanItems = state.items.map(item => {
+            const cleanCustom = {};
+            state.customColumns.forEach(c => {
+                cleanCustom[c.name] = item.customFields[c.id];
+            });
+            return {
+                name: item.name,
+                qty: item.qty,
+                price: item.price,
+                total: item.qty * item.price,
+                customFields: cleanCustom
+            };
+        });
+
+        return {
+            invoiceNumber: state.invoiceNumber,
+            date: state.invoiceDate,
+            customer: { name: customerName, id: customerId },
+            itemLabel: state.itemLabel,
+            items: cleanItems,
+            notes: notes,
+            totals: {
+                subtotal: document.getElementById('subtotalDisplay').textContent,
+                discount: document.getElementById('discountDisplay').textContent,
+                tax: document.getElementById('taxDisplay').textContent,
+                shipping: document.getElementById('shippingDisplay').textContent,
+                grandTotal: document.getElementById('grandTotalDisplay').textContent
+            }
+        };
+    }
+
+    function exportPayload() {
+        const payload = getPayload();
+        const jsonStr = JSON.stringify(payload, null, 2);
+        console.log("=== INVOICE PAYLOAD ===");
+        console.log(jsonStr);
+        
+        navigator.clipboard.writeText(jsonStr).then(() => {
+            showToast("Copied to clipboard! Check console for payload.");
+        }).catch(err => {
+            showToast("Check console for payload.");
+        });
+    }
+
+    function saveInvoice() {
+        const errSpan = document.getElementById('validationError');
+        const hasValidItem = state.items.some(i => i.name.trim() !== '');
+        
+        if(!hasValidItem) {
+            errSpan.style.opacity = '1';
+            setTimeout(() => { errSpan.style.opacity = '0'; }, 3000);
+            return;
+        }
+
+        const payload = getPayload();
+        showToast("Invoice sending to BillQyro...");
+        console.log("Saved Invoice:", payload);
+        
+        if (window.parent !== window) {
+            window.parent.postMessage({ type: 'SAVE_INVOICE', payload: payload }, '*');
+        }
+    }
+
+    // --- Utilities ---
+    let toastTimeout;
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // --- Customers Integration ---
+    let availableCustomers = [];
+    let availableProducts = [];
+    let studioFeatures = {};
+    
+    window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'LOAD_CUSTOMERS') {
+            availableCustomers = event.data.payload || [];
+            const dataList = document.getElementById('customerList');
+            dataList.innerHTML = '';
+            availableCustomers.forEach(cust => {
+                const option = document.createElement('option');
+                option.value = cust.name;
+                dataList.appendChild(option);
+            });
+        }
+        
+        if (event.data && event.data.type === 'LOAD_PRODUCTS') {
+            availableProducts = event.data.payload || [];
+            const dataList = document.getElementById('productList');
+            if (dataList) {
+                dataList.innerHTML = '';
+                availableProducts.forEach(prod => {
+                    const option = document.createElement('option');
+                    option.value = prod.name;
+                    dataList.appendChild(option);
+                });
+            }
+        }
+        
+        if (event.data && event.data.type === 'SET_THEME') {
+            const { brandColor, isDarkMode, currencySymbol: passedCurrency, features } = event.data.payload;
+            if (features) {
+                studioFeatures = features;
+                if (studioFeatures.enableDigitalSignature) {
+                    const sigBox = document.getElementById('signatureBox');
+                    if (sigBox) sigBox.style.display = 'flex';
+                } else {
+                    const sigBox = document.getElementById('signatureBox');
+                    if (sigBox) sigBox.style.display = 'none';
+                }
+                renderItems(); // Re-render to apply toggles (e.g., list attribute)
+            }
+            if (brandColor) {
+                document.documentElement.style.setProperty('--primary-accent', brandColor);
+                document.documentElement.style.setProperty('--primary-dark', brandColor);
+                document.documentElement.style.setProperty('--danger', brandColor);
+            }
+            if (isDarkMode) {
+                document.documentElement.style.setProperty('--surface-color', '#1c1c1e');
+                document.documentElement.style.setProperty('--text-main', '#ffffff');
+                document.documentElement.style.setProperty('--text-muted', '#a1a1aa');
+                document.documentElement.style.setProperty('--border-color', '#3f3f46');
+            }
+            if (passedCurrency) {
+                currencySymbol = passedCurrency;
+                document.getElementById('discountFixedSymbol').textContent = currencySymbol;
+                document.getElementById('shippingSymbol').textContent = currencySymbol;
+                calculateTotals();
+                renderItems();
+            }
+        }
+    });
+
+    function handleCustomerSelect(val) {
+        const found = availableCustomers.find(c => c.name.toLowerCase() === val.toLowerCase());
+        if (found && found.phone) {
+            document.getElementById('customerId').value = found.phone;
+        }
+    }
+
+    // Startup
+    window.onload = () => {
+        init();
+        if (window.parent !== window) {
+            window.parent.postMessage({ type: 'STUDIO_READY' }, '*');
+        }
+    };
+</script>
+
+</body>
+</html>

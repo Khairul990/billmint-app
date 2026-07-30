@@ -300,11 +300,16 @@ const styles = StyleSheet.create({
 });
 
 import { getCategoryWording } from '../config/businessPresets';
+import { getTemplateLayoutFamily } from '../services/TemplateEngine';
 
 const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' }) => {
   if (!invoice) return null;
 
-  const templateId = businessSettings?.selectedPdfTemplate || 'classic';
+  const rawTemplateId = (businessSettings?.selectedPdfTemplate || invoice.pdfTemplate || 'classic').toLowerCase();
+  const templateFamily = getTemplateLayoutFamily(rawTemplateId);
+  const templateId = (rawTemplateId === 'repair' || rawTemplateId === 'teacher' || rawTemplateId === 'doctor') 
+    ? rawTemplateId 
+    : templateFamily;
   const billType = invoice.billType || 'default';
   const categoryWords = getCategoryWording(billType);
 
@@ -351,6 +356,8 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
   let tText = '#334155';
   
   if (templateId === 'modern') { tPrimary = '#1e293b'; tAccent = '#3b82f6'; }
+  else if (templateId === 'premium-gold') { tPrimary = '#1a1a1a'; tAccent = '#d97706'; }
+  else if (templateId === 'classic-elegant') { tPrimary = '#27272a'; tAccent = '#059669'; }
   else if (templateId === 'minimal') { tPrimary = '#000000'; tAccent = '#000000'; tText = '#000000'; }
   else if (templateId === 'professional') { tPrimary = '#1e3a8a'; tAccent = '#1d4ed8'; }
   else if (templateId === 'retail') { tPrimary = '#0f172a'; tAccent = '#eab308'; }

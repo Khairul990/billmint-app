@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import PremiumClock from './PremiumClock';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
-import { Search, Bell, Settings as SettingsIcon, Sparkles, ShieldCheck, User, Briefcase, Activity, HelpCircle, LogOut } from 'lucide-react';
+import { Search, Bell, Settings as SettingsIcon, Sparkles, ShieldCheck, User, Briefcase, Activity, HelpCircle, LogOut, Cloud, CloudOff, RefreshCw } from 'lucide-react';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import Logo from './Logo';
 import { settingsEngine } from '../services/settingsEngine';
@@ -10,6 +11,7 @@ import AnimatedBorderTrail from './AnimatedBorderTrail';
 import { AnimatedThemeToggler } from './AnimatedThemeToggler';
 import { getNotifications, markNotificationAsRead, clearAllNotifications } from '../services/notificationsService';
 import { useTheme } from '../contexts/ThemeContext';
+import { useOnClickOutside } from '../hooks/useOnClickOutside';
 
 const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncSource, syncStatus }) => {
   const { themeState } = useTheme();
@@ -20,6 +22,15 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   const [notifications, setNotifications] = useState([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const searchInputRef = React.useRef(null);
+  const notificationMenuRef = React.useRef(null);
+  const accountMenuRef = React.useRef(null);
+  const mobileNotificationMenuRef = React.useRef(null);
+  const mobileAccountMenuRef = React.useRef(null);
+
+  useOnClickOutside(notificationMenuRef, () => setIsNotificationMenuOpen(false));
+  useOnClickOutside(accountMenuRef, () => setIsAccountMenuOpen(false));
+  useOnClickOutside(mobileNotificationMenuRef, () => setIsNotificationMenuOpen(false));
+  useOnClickOutside(mobileAccountMenuRef, () => setIsAccountMenuOpen(false));
 
   useEffect(() => {
     setNotifications(getNotifications());
@@ -156,16 +167,12 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
           </div>
         )}
 
-        {/* ===== PREMIUM HEADER ===== */}
-        {/* Desktop: Full featured header. Mobile: Compact 2-row (max-height 110px) */}
-        <header className="sticky top-0 z-40 glass-header text-theme-primary shadow-premium-sm transition-all">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-theme-surface dark:bg-theme-surface/5 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
-            <div className="absolute -bottom-10 left-10 w-48 h-48 bg-theme-accent-light dark:bg-theme-accent-light rounded-full blur-2xl"></div>
-          </div>
+        {/* ===== ULTRA PREMIUM HEADER ===== */}
+        {/* Desktop: Full featured header. Mobile: Compact 2-row */}
+        <header className="sticky top-0 z-40 bg-theme-app/95 backdrop-blur-xl text-theme-primary shadow-sm border-b border-theme-border-soft transition-all">
 
           {/* ===== DESKTOP HEADER (unchanged) ===== */}
-          <div className="max-w-full w-full mx-auto px-4 lg:px-6 hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10 py-4 md:py-5">
+          <div className="max-w-full w-full mx-auto px-4 lg:px-6 hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10 py-2.5 md:py-3">
             
             <div className="flex items-start md:items-center gap-3">
               <div className="flex flex-col">
@@ -181,9 +188,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                     setActiveWorkspace={setActiveWorkspace}
                     setCurrentTab={setCurrentTab}
                   />
-                  <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-theme-accent bg-theme-accent-light border border-theme-accent/15 px-2 py-0.5 rounded-full">
-                    <ShieldCheck className="w-3 h-3" /> Secure
-                  </span>
                   {localStorage.getItem('billqyro_demo_session_active') === 'true' ? (
                     <div className="relative group flex items-center gap-2">
                       <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors text-amber-500 bg-amber-500/10 border border-amber-500/20">
@@ -203,29 +207,28 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                       )}
                     </div>
                   ) : (
-                    <div className="relative group flex items-center gap-2">
-                      <span className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
-                        syncStatus === 'Synced' ? 'text-emerald-500 bg-emerald-500/10 border border-emerald-500/20' : 
-                        syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500 bg-blue-500/10 border border-blue-500/20 animate-pulse' : 
-                        syncStatus === 'Offline' ? 'text-red-500 bg-red-500/10 border border-red-500/20' :
-                        'text-amber-500 bg-amber-500/10 border border-amber-500/20'
+                    <div className="group relative flex items-center gap-2">
+                      <div className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full transition-all duration-300 ${
+                        syncStatus === 'Synced' ? 'text-theme-muted hover:text-theme-primary' : 
+                        syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'text-blue-500 bg-blue-500/10' : 
+                        syncStatus === 'Offline' ? 'text-red-500 bg-red-500/10' :
+                        'text-amber-500 bg-amber-500/10'
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${
-                          syncStatus === 'Synced' ? 'bg-emerald-500' : 
-                          syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'bg-blue-500 animate-ping' : 
-                          syncStatus === 'Offline' ? 'bg-red-500' :
-                          'bg-amber-500'
-                        }`}></span> 
-                        {syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}
-                      </span>
+                        {syncStatus === 'Synced' ? <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span> : 
+                         syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? <RefreshCw className="w-3 h-3 animate-spin" /> : 
+                         <CloudOff className="w-3 h-3" />}
+                        
+                        <span className="hidden sm:inline-block">
+                          {syncStatus === 'Synced' ? 'Synced' : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? 'Syncing...' : syncStatus === 'Offline' ? 'Offline' : 'Sync Error'}
+                        </span>
+                      </div>
                       {(syncStatus === 'Pending Sync' || syncStatus === 'Sync Error') && (
-                        <div className="absolute top-full left-0 mt-1 hidden group-hover:block z-50">
+                        <div className="absolute top-full left-0 mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                           <button
                             onClick={flushSyncQueue}
                             className="text-[10px] font-bold uppercase tracking-wider bg-theme-card border border-theme-border-soft px-3 py-1.5 rounded shadow-lg text-theme-primary hover:bg-theme-accent hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                            Retry Sync
+                            <RefreshCw className="w-3 h-3" /> Retry Sync
                           </button>
                         </div>
                       )}
@@ -248,46 +251,49 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
             <div className="flex-1 max-w-xl hidden md:block px-4">
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-theme-muted group-focus-within:text-theme-accent transition-colors" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-theme-muted group-focus-within:text-theme-primary transition-colors duration-300" />
                 </div>
                 <input
                   ref={searchInputRef}
                   data-search-input
                   type="text"
                   placeholder="Search invoices, customers, products..."
-                  className="block w-full pl-10 pr-14 py-2.5 bg-theme-surface border border-theme-accent/50 rounded-full text-sm font-semibold shadow-sm text-theme-primary placeholder-theme-secondary focus:bg-theme-card focus:outline-none focus:ring-2 focus:ring-theme-accent/50 focus:border-theme-accent transition-all duration-300 hover:shadow-md hover:border-theme-accent/70"
+                  className="block w-full pl-10 pr-14 py-2 bg-theme-surface/50 backdrop-blur-md border border-theme-border-soft rounded-full text-sm font-semibold shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] text-theme-primary placeholder-theme-secondary focus:bg-theme-card focus:outline-none focus:ring-2 focus:ring-theme-accent/40 focus:border-theme-accent transition-all duration-300 hover:bg-theme-surface"
                 />
-                <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
-                  <span className="text-[10px] font-bold text-theme-muted bg-theme-surface px-1.5 py-0.5 rounded-md border border-theme-border-soft shadow-sm">
+
+                <div className="absolute inset-y-0 right-0 pr-1.5 flex items-center">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-theme-muted bg-theme-app px-2 py-1 rounded-full shadow-sm border border-theme-border-soft">
                     Ctrl K
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3 justify-end">
-              <button title="Search" aria-label="Search" className="md:hidden w-11 h-11 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden">
+            <div className="flex items-center justify-end">
+              <PremiumClock />
+              
+              <div className="flex items-center gap-2 p-1.5 ml-3 bg-theme-surface/40 backdrop-blur-xl border border-theme-border-soft rounded-full shadow-sm">
+              <button title="Search" aria-label="Search" className="md:hidden w-[38px] h-[38px] rounded-full bg-theme-card border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-accent hover:text-white hover:border-theme-accent hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-300 relative group overflow-hidden">
                 <AnimatedBorderTrail />
-                <Search className="w-5 h-5 relative z-10" />
+                <Search className="w-4 h-4 relative z-10" />
               </button>
 
-              <div className="relative">
+              <div className="relative" ref={notificationMenuRef}>
                 <button 
-                  onClick={() => setIsNotificationMenuOpen(!isNotificationMenuOpen)}
+                  onClick={() => setIsNotificationMenuOpen(prev => !prev)}
                   title="Notifications"
                   aria-label="Notifications"
-                  className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden"
+                  className="w-[38px] h-[38px] rounded-full bg-theme-card border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-accent hover:text-white hover:border-theme-accent hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-300 relative group overflow-hidden"
                 >
                   <AnimatedBorderTrail />
-                  <Bell className="w-5 h-5 relative z-10" />
-                  <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-theme-danger rounded-full border border-theme-app animate-pulse z-20"></span>
+                  <Bell className="w-4 h-4 relative z-10" />
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-theme-danger rounded-full border border-theme-app animate-pulse z-20"></span>
                 </button>
                 
                 {isNotificationMenuOpen && (
                   <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsNotificationMenuOpen(false)} />
-                    <div className="absolute top-14 right-0 w-80 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
+                    <div className="absolute top-12 right-0 w-80 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
                       <div className="p-4 border-b border-theme-border-soft flex justify-between items-center bg-theme-surface/50">
                         <h3 className="text-sm font-bold text-theme-primary">Notifications</h3>
                         {notifications.filter(n => !n.read).length > 0 && (
@@ -304,7 +310,10 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                           notifications.map((notif) => (
                             <div 
                               key={notif.id} 
-                              onClick={() => markNotificationAsRead(notif.id)}
+                              onClick={() => {
+                                markNotificationAsRead(notif.id);
+                                setIsNotificationMenuOpen(false);
+                              }}
                               className={`p-3 hover:bg-theme-surface rounded-xl transition-colors cursor-pointer flex gap-3 ${notif.read ? 'opacity-60' : ''}`}
                             >
                               <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'success' ? 'bg-emerald-500/10 text-emerald-500' : notif.type === 'error' ? 'bg-rose-500/10 text-rose-500' : 'bg-theme-accent/10 text-theme-accent'}`}>
@@ -324,7 +333,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               </div>
 
               <AnimatedThemeToggler
-                className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden"
+                className="w-[38px] h-[38px] rounded-full bg-theme-card border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-accent hover:text-white hover:border-theme-accent hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-300 relative group overflow-hidden"
                 variant="circle"
                 theme={isDarkMode ? "dark" : "light"}
                 onThemeChange={(newTheme) => {
@@ -340,31 +349,29 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
               <button
                 onClick={() => setCurrentTab('settings')}
-                className="hidden sm:flex w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-theme-surface border border-theme-border-soft items-center justify-center text-theme-primary hover:bg-theme-app hover:shadow-md hover:border-theme-accent/30 active:scale-95 transition-all duration-300 shadow-sm relative group overflow-hidden"
+                className="hidden sm:flex w-[38px] h-[38px] rounded-full bg-theme-card border border-theme-border-soft items-center justify-center text-theme-primary hover:bg-theme-accent hover:text-white hover:border-theme-accent hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-300 relative group overflow-hidden"
                 title="Settings"
               >
                 <AnimatedBorderTrail />
-                <SettingsIcon className="w-5 h-5 relative z-10" />
+                <SettingsIcon className="w-4 h-4 relative z-10" />
               </button>
 
-              <div className="relative flex items-center">
+              <div className="relative flex items-center" ref={accountMenuRef}>
                 <button
-                  onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
-                  className="w-11 h-11 md:w-[42px] md:h-[42px] rounded-2xl bg-[image:var(--accent-gradient)] shadow-premium text-theme-button-text flex items-center justify-center hover:scale-105 active:scale-95 transition-transform cursor-pointer overflow-hidden border border-white/10 group relative"
+                  onClick={() => setIsAccountMenuOpen(prev => !prev)}
+                  className="w-[38px] h-[38px] ml-1 rounded-full bg-[image:var(--accent-gradient)] shadow-sm text-theme-button-text flex items-center justify-center hover:shadow-md hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer overflow-hidden border border-white/20 group relative"
                   title="Account Settings"
                 >
                   <AnimatedBorderTrail />
                   {businessSettings?.logoUrl ? (
                     <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover relative z-10" />
                   ) : (
-                    <span className="font-black text-lg relative z-10">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
+                    <span className="font-black text-[15px] relative z-10">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
                   )}
                 </button>
 
                 {isAccountMenuOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsAccountMenuOpen(false)} />
-                    <div className="absolute top-14 right-0 w-80 bg-theme-card rounded-3xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
+                  <div className="absolute top-12 right-0 w-64 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden py-2 flex flex-col">
                       
                       <div className="p-5 bg-theme-surface/50 border-b border-theme-border-soft flex items-center gap-3">
                         <div className="w-12 h-12 rounded-xl bg-theme-card shadow-sm border border-theme-border-soft flex items-center justify-center overflow-hidden shrink-0">
@@ -385,9 +392,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                       </div>
                       
                       <div className="p-4">
-                        <div className="bg-[image:var(--accent-gradient)] rounded-2xl p-4 shadow-premium relative overflow-hidden text-white">
-                          <div className="absolute inset-0 bg-white/10 mix-blend-overlay"></div>
-                          <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/20 blur-2xl rounded-full"></div>
+                        <div className="bg-[image:var(--accent-gradient)] rounded-xl p-4 shadow-sm relative overflow-hidden text-white">
                           
                           <div className="relative z-10 flex items-start justify-between">
                             <div>
@@ -461,8 +466,8 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                         )}
                       </div>
                     </div>
-                  </>
                 )}
+              </div>
               </div>
             </div>
           </div>
@@ -518,9 +523,9 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               >
                 <Search className="w-[18px] h-[18px]" />
               </button>
-              <div className="relative">
+              <div className="relative" ref={mobileNotificationMenuRef}>
                 <button
-                  onClick={() => setIsNotificationMenuOpen(!isNotificationMenuOpen)}
+                  onClick={() => setIsNotificationMenuOpen(prev => !prev)}
                   title="Notifications"
                   aria-label="Notifications"
                   className="w-9 h-9 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary active:scale-95 transition-all"
@@ -533,8 +538,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   )}
                 </button>
                 {isNotificationMenuOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsNotificationMenuOpen(false)} />
                     <div className="absolute top-12 right-0 w-72 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
                       <div className="p-3 border-b border-theme-border-soft flex justify-between items-center">
                         <p className="text-xs font-bold text-theme-primary">Notifications</p>
@@ -564,7 +567,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                         )}
                       </div>
                     </div>
-                  </>
                 )}
               </div>
               <AnimatedThemeToggler
@@ -578,8 +580,9 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 title={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
                 aria-label={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
               />
-              <button
-                onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
+              <div className="relative" ref={mobileAccountMenuRef}>
+                <button
+                  onClick={() => setIsAccountMenuOpen(prev => !prev)}
                 title="Account"
                 aria-label="Account"
                 className="w-9 h-9 rounded-xl bg-[image:var(--accent-gradient)] text-theme-button-text flex items-center justify-center active:scale-95 transition-transform overflow-hidden border border-white/10 shadow-sm"
@@ -590,6 +593,27 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   <span className="font-black text-sm">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
                 )}
               </button>
+              {isAccountMenuOpen && (
+                <div className="absolute top-12 right-0 w-64 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden py-2 flex flex-col">
+                  <div className="px-3 pb-3 space-y-1 border-b border-theme-border-soft">
+                    <button onClick={() => { setCurrentTab('dashboard'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
+                      <User className="w-4 h-4 text-theme-muted" /> Profile
+                    </button>
+                    <button onClick={() => { setCurrentTab('settings'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
+                      <SettingsIcon className="w-4 h-4 text-theme-muted" /> Business Settings
+                    </button>
+                    <button onClick={() => { setCurrentTab('more'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
+                      <Briefcase className="w-4 h-4 text-theme-muted" /> Workspace Manager
+                    </button>
+                  </div>
+                  <div className="p-2">
+                    <button onClick={() => { setIsAccountMenuOpen(false); if(onLogout) onLogout(); }} className="w-full flex items-center justify-center gap-2 p-3 text-sm font-bold text-theme-danger hover:bg-theme-danger/10 rounded-xl transition-colors cursor-pointer">
+                      <LogOut className="w-4 h-4" /> Log Out
+                    </button>
+                  </div>
+                </div>
+              )}
+              </div>
             </div>
           </div>
         </header>

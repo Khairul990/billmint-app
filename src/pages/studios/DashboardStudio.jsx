@@ -55,7 +55,7 @@ const DashboardStudio = ({ settings, onUpdate }) => {
                     {widget.visible ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                   </button>
                   <div>
-                    <span className={`text-sm font-bold block ${widget.visible ? 'text-white' : 'text-theme-muted line-through'}`}>{widget.label}</span>
+                    <span className={`text-sm font-bold block ${widget.visible ? 'text-theme-primary' : 'text-theme-muted line-through'}`}>{widget.label}</span>
                     <span className="text-[10px] text-theme-muted">Dashboard Component</span>
                   </div>
                 </div>
@@ -63,14 +63,14 @@ const DashboardStudio = ({ settings, onUpdate }) => {
                   <button 
                     onClick={() => moveWidget(idx, -1)}
                     disabled={idx === 0}
-                    className="p-2 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-white hover:bg-theme-surface-hover disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-2 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-theme-primary hover:bg-theme-card disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <ArrowUp className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={() => moveWidget(idx, 1)}
                     disabled={idx === widgets.length - 1}
-                    className="p-2 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-white hover:bg-theme-surface-hover disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-2 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-theme-primary hover:bg-theme-card disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <ArrowDown className="w-4 h-4" />
                   </button>

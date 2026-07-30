@@ -60,7 +60,7 @@ const RoleStudio = ({ settings, onUpdate }) => {
             <div key={role.id} className="bg-theme-surface/50 border border-theme-border-soft rounded-2xl p-5 relative overflow-hidden group">
               <div className="flex items-center gap-3 mb-2">
                 <Users className="w-4 h-4 text-theme-muted" />
-                <h3 className="text-sm font-bold text-white">{role.label}</h3>
+                <h3 className="text-sm font-bold text-theme-primary">{role.label}</h3>
               </div>
               <p className="text-[10px] text-theme-muted mb-4 h-6">{role.desc}</p>
               
@@ -78,7 +78,7 @@ const RoleStudio = ({ settings, onUpdate }) => {
                     >
                       <div className="flex items-center gap-2">
                         {isDangerous && <Lock className="w-3 h-3 text-theme-danger" />}
-                        <span className={`text-xs ${hasPerm ? 'text-white font-bold' : 'text-theme-muted'}`}>{perm.label}</span>
+                        <span className={`text-xs ${hasPerm ? 'text-theme-primary font-bold' : 'text-theme-muted'}`}>{perm.label}</span>
                       </div>
                       <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${hasPerm ? 'bg-theme-danger border-theme-danger' : 'bg-transparent border-theme-border-soft'}`}>
                         {hasPerm && <Check className="w-3 h-3 text-white" />}

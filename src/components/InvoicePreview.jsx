@@ -2,8 +2,10 @@ import React from 'react';
 import DynamicQRCode from './DynamicQRCode';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
-import { ShieldCheck, Calendar, Hash, FileText } from 'lucide-react';
+import { ShieldCheck, Calendar, Hash, FileText, Phone, Mail, Globe, MapPin, Building2, Receipt, CheckCircle2, Zap, Scissors, Briefcase, QrCode } from 'lucide-react';
 import { getCategoryWording } from '../config/businessPresets';
+import { getTemplateLayoutFamily } from '../services/TemplateEngine';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * High-fidelity Printable Invoice Letterhead Layout
@@ -13,7 +15,27 @@ import { getCategoryWording } from '../config/businessPresets';
 const InvoicePreview = ({ invoice, businessSettings }) => {
   if (!invoice) return null;
 
-  const templateId = businessSettings?.selectedPdfTemplate || 'classic';
+  const businessPrefs = invoice.businessSnapshot || {
+    businessName: businessSettings?.businessName || 'BillQyro Store',
+    logoUrl: businessSettings?.logoUrl || '',
+    ownerName: businessSettings?.ownerName || 'Manager',
+    phone: businessSettings?.phone || '',
+    whatsapp: businessSettings?.whatsapp || '',
+    email: businessSettings?.email || '',
+    address: businessSettings?.address || '',
+    gstNumber: businessSettings?.gstNumber || '',
+    currency: businessSettings?.currency || '₹',
+    taxLabel: businessSettings?.taxLabel || 'GST'
+  };
+
+  const rawTemplateId = (businessSettings?.selectedPdfTemplate || invoice.pdfTemplate || 'classic').toLowerCase();
+  // Map templates to their layout families so rendering is robust for all templates
+  const templateFamily = getTemplateLayoutFamily(rawTemplateId);
+  const templateId = (rawTemplateId === 'repair' || rawTemplateId === 'teacher' || rawTemplateId === 'doctor') 
+    ? rawTemplateId 
+    : templateFamily;
+
+  const isDarkTheme = templateId === 'modern' || templateId === 'gold' || templateId === 'corporate';
 
   // Destructure Snapshots with Fallbacks
   const regionalPrefs = invoice.regionalSettingsSnapshot || {
@@ -37,19 +59,6 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
     paymentNote: businessSettings?.paymentNote || '',
     customPaymentLink: businessSettings?.customPaymentLink || '',
     showQrInPreview: businessSettings?.showQrInPreview !== undefined ? businessSettings?.showQrInPreview : true
-  };
-
-  const businessPrefs = invoice.businessSnapshot || {
-    businessName: businessSettings?.businessName || 'BillQyro Store',
-    logoUrl: businessSettings?.logoUrl || '',
-    ownerName: businessSettings?.ownerName || 'Manager',
-    phone: businessSettings?.phone || '',
-    whatsapp: businessSettings?.whatsapp || '',
-    email: businessSettings?.email || '',
-    address: businessSettings?.address || '',
-    gstNumber: businessSettings?.gstNumber || '',
-    currency: businessSettings?.currency || '₹',
-    taxLabel: businessSettings?.taxLabel || 'GST'
   };
 
   const currencySymbol = regionalPrefs.currency || '₹';
@@ -87,8 +96,8 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
   return (
     <div 
       id="invoice-preview-capture" 
-      className={`bg-theme-card dark:bg-theme-card border ${templateId === 'minimal' ? 'border-black rounded-none shadow-none' : 'border-theme-border-soft dark:border-theme-border-soft rounded-3xl shadow-premium'} p-6 md:p-10 max-w-4xl mx-auto text-theme-primary dark:text-theme-primary transition-all duration-300 relative overflow-hidden`}
-      style={{ fontFamily: "'Inter', sans-serif" }}
+      className={`bg-theme-card dark:bg-theme-card border ${templateId === 'minimal' ? 'border-black rounded-none shadow-none' : templateId === 'classic-elegant' ? 'border-emerald-800 rounded-none shadow-md' : 'border-theme-border-soft dark:border-theme-border-soft rounded-3xl shadow-premium'} p-6 md:p-10 max-w-4xl mx-auto text-theme-primary dark:text-theme-primary transition-all duration-300 relative overflow-hidden`}
+      style={{ fontFamily: (templateId === 'classic-elegant' || templateId === 'premium-gold') ? "'Georgia', serif" : "'Inter', sans-serif" }}
     >
       {/* 0. ORDER TRACKING TIMELINE STEPPER */}
       {invoice.orderStatus && (
@@ -157,7 +166,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       )}
 
       {/* 1. BRAND HEADER & METADATA GRID */}
-      <div className={`flex flex-col md:flex-row justify-between items-start gap-6 border-b pb-8 ${templateId === 'modern' ? 'bg-slate-900 text-slate-200 -mx-6 -mt-6 md:-mx-10 md:-mt-10 p-6 md:p-10 rounded-t-3xl border-slate-800' : templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
+      <div className={`flex flex-col md:flex-row justify-between items-start gap-6 border-b pb-8 ${templateId === 'modern' ? 'bg-slate-900 text-slate-200 -mx-6 -mt-6 md:-mx-10 md:-mt-10 p-6 md:p-10 rounded-t-3xl border-slate-800' : templateId === 'gold' ? 'bg-slate-900 text-amber-100 -mx-6 -mt-6 md:-mx-10 md:-mt-10 p-6 md:p-10 rounded-t-3xl border-amber-500/30' : templateId === 'corporate' ? 'border-b-4 border-emerald-800' : templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
         {/* Left Side: Business logo & details */}
         <div>
           <div className="flex items-center gap-3">
@@ -173,7 +182,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
               </div>
             )}
             <div>
-              <h3 className={`font-extrabold text-xl tracking-tight ${templateId === 'modern' ? 'text-white' : 'text-theme-primary dark:text-theme-primary'}`}>{businessPrefs?.businessName || 'BillQyro Client'}</h3>
+              <h3 className={`font-extrabold text-xl tracking-tight ${templateId === 'modern' ? 'text-white' : templateId === 'gold' ? 'text-amber-400' : templateId === 'corporate' ? 'text-emerald-900' : 'text-theme-primary dark:text-theme-primary'}`}>{businessPrefs?.businessName || 'BillQyro Client'}</h3>
               {businessPrefs?.gstNumber && (
                 <p className="text-xs text-theme-muted dark:text-theme-muted font-semibold uppercase tracking-wider mt-0.5">{regionalPrefs.taxLabel || 'GST'}: {businessPrefs.gstNumber}</p>
               )}
@@ -221,7 +230,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       </div>
 
       {/* 2. CLIENT CRM GRID */}
-      <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 py-8 border-b text-xs ${templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 py-8 border-b text-xs ${templateId === 'minimal' ? 'border-black' : templateId === 'corporate' ? 'border-emerald-800/30' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
         <div>
           <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block mb-2">{templateId === 'teacher' ? 'Student Details' : 'Billed To'}</span>
           <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary dark:text-theme-primary">{invoice.customerName}</h4>
@@ -268,7 +277,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
       <div className="py-6 overflow-x-auto no-scrollbar">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="border-b border-theme-border-soft dark:border-theme-border-soft text-theme-muted dark:text-theme-muted font-bold uppercase tracking-wider">
+            <tr className={`border-b text-theme-muted dark:text-theme-muted font-bold uppercase tracking-wider ${templateId === 'classic-elegant' ? 'border-emerald-800 text-emerald-900' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
               {getInvoiceColumns(invoice, businessSettings).map(col => (
                 <th key={col.id} className={`pb-3 text-${col.align}`} style={{ width: col.width }}>
                   {col.label}
@@ -375,7 +384,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
             <span className="text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-bold">{formatCurrency(invoice.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
           </div>
           
-          <div className="flex justify-between items-center border-t border-theme-border-soft dark:border-theme-border-soft pt-3 text-theme-primary dark:text-theme-primary dark:text-theme-primary">
+          <div className={`flex justify-between items-center border-t pt-3 text-theme-primary dark:text-theme-primary dark:text-theme-primary ${templateId === 'classic-elegant' ? 'border-emerald-800/50' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
             <span className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Grand Total</span>
             <span className="text-lg font-black text-theme-accent dark:text-theme-accent">
               {formatCurrency(invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}

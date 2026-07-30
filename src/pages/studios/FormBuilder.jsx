@@ -71,7 +71,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
           <button
             onClick={() => setActiveTab('invoice')}
             className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${
-              activeTab === 'invoice' ? 'bg-theme-accent text-white shadow-lg' : 'text-theme-muted hover:text-white'
+              activeTab === 'invoice' ? 'bg-theme-accent text-white shadow-lg' : 'text-theme-muted hover:text-theme-primary'
             }`}
           >
             Invoice Fields
@@ -79,7 +79,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
           <button
             onClick={() => setActiveTab('customer')}
             className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${
-              activeTab === 'customer' ? 'bg-theme-accent text-white shadow-lg' : 'text-theme-muted hover:text-white'
+              activeTab === 'customer' ? 'bg-theme-accent text-white shadow-lg' : 'text-theme-muted hover:text-theme-primary'
             }`}
           >
             Customer Fields
@@ -110,7 +110,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
                     type="text"
                     value={field.label}
                     onChange={(e) => handleUpdateField(index, 'label', e.target.value)}
-                    className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-theme-accent"
+                    className="w-full bg-theme-main border border-theme-border-soft text-theme-primary text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-theme-accent"
                   />
                 </div>
                 <div className="flex flex-col gap-1 w-full md:w-1/4">
@@ -118,7 +118,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
                   <select
                     value={field.type}
                     onChange={(e) => handleUpdateField(index, 'type', e.target.value)}
-                    className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2 rounded-lg focus:outline-none cursor-pointer"
+                    className="w-full bg-theme-main border border-theme-border-soft text-theme-primary text-xs px-3 py-2 rounded-lg focus:outline-none cursor-pointer"
                   >
                     {FIELD_TYPES.map(ft => <option key={ft.id} value={ft.id}>{ft.label}</option>)}
                   </select>
@@ -132,7 +132,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
                       value={field.options || ''}
                       placeholder="Opt 1, Opt 2, Opt 3"
                       onChange={(e) => handleUpdateField(index, 'options', e.target.value)}
-                      className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-theme-accent"
+                      className="w-full bg-theme-main border border-theme-border-soft text-theme-primary text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-theme-accent"
                     />
                   </div>
                 )}
@@ -147,8 +147,8 @@ const FormBuilder = ({ settings, onUpdate }) => {
                     /> Required
                   </label>
                   <div className="flex items-center bg-theme-main rounded-lg border border-theme-border-soft p-1">
-                    <button onClick={() => moveField(index, -1)} disabled={index === 0} className="p-1 hover:text-white text-theme-muted disabled:opacity-30"><ArrowUp className="w-3 h-3" /></button>
-                    <button onClick={() => moveField(index, 1)} disabled={index === fields.length - 1} className="p-1 hover:text-white text-theme-muted disabled:opacity-30"><ArrowDown className="w-3 h-3" /></button>
+                    <button onClick={() => moveField(index, -1)} disabled={index === 0} className="p-1 hover:text-theme-primary text-theme-muted disabled:opacity-30"><ArrowUp className="w-3 h-3" /></button>
+                    <button onClick={() => moveField(index, 1)} disabled={index === fields.length - 1} className="p-1 hover:text-theme-primary text-theme-muted disabled:opacity-30"><ArrowDown className="w-3 h-3" /></button>
                   </div>
                   <button onClick={() => handleRemoveField(index)} className="p-2 bg-theme-danger/10 text-theme-danger hover:bg-theme-danger/20 rounded-lg ml-1">
                     <Trash2 className="w-4 h-4" />
@@ -159,7 +159,7 @@ const FormBuilder = ({ settings, onUpdate }) => {
             <div className="pt-2">
               <button 
                 onClick={handleAddField}
-                className="w-full py-3 bg-theme-surface border border-theme-border-soft border-dashed text-theme-muted hover:text-white hover:border-theme-muted font-bold text-xs rounded-2xl transition-colors inline-flex items-center justify-center gap-2"
+                className="w-full py-3 bg-theme-surface border border-theme-border-soft border-dashed text-theme-muted hover:text-theme-primary hover:border-theme-primary font-bold text-xs rounded-2xl transition-colors inline-flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" /> Add Custom Field
               </button>

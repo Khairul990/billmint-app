@@ -52,7 +52,7 @@ const PortalStudio = ({ settings, onUpdate }) => {
               value={settings?.portalName || `${settings?.businessName || 'Business'} Portal`} 
               onChange={(e) => handleChange('portalName', e.target.value)} 
               placeholder="e.g. Acme Client Portal"
-              className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-accent transition-colors" 
+              className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors" 
             />
           </div>
           <div>
@@ -60,7 +60,7 @@ const PortalStudio = ({ settings, onUpdate }) => {
             <select 
               value={settings?.portalThemeOverride || 'inherit'} 
               onChange={(e) => handleChange('portalThemeOverride', e.target.value)} 
-              className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-accent transition-colors cursor-pointer"
+              className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors cursor-pointer"
             >
               <option value="inherit">Inherit Main Business Theme</option>
               <option value="light">Always Light Mode</option>
@@ -102,7 +102,7 @@ const PortalStudio = ({ settings, onUpdate }) => {
           ) : (
             <div className="py-4">
               <Upload className="w-8 h-8 mx-auto text-theme-muted mb-3" />
-              <p className="text-sm font-bold text-white mb-1">Upload Hero Banner</p>
+              <p className="text-sm font-bold text-theme-primary mb-1">Upload Hero Banner</p>
               <p className="text-xs text-theme-muted">Recommended size: 1200x300px</p>
             </div>
           )}
@@ -129,7 +129,7 @@ const PortalStudio = ({ settings, onUpdate }) => {
             { id: 'portalShowAttachments', label: 'Show Public Attachments' }
           ].map(feature => (
             <label key={feature.id} className="flex items-center justify-between p-4 bg-theme-surface/50 border border-theme-border-soft rounded-xl cursor-pointer hover:border-theme-accent transition-colors">
-              <span className="text-sm font-bold text-white">{feature.label}</span>
+              <span className="text-sm font-bold text-theme-primary">{feature.label}</span>
               <Switch 
                 checked={settings?.[feature.id] !== false}
                 onChange={(checked) => handleChange(feature.id, checked)}

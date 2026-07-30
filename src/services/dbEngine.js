@@ -1069,13 +1069,22 @@ export const logout = async () => {
 export const factoryResetAllData = async () => {
   localStorage.clear();
   sessionStorage.clear();
+  
   try {
-    indexedDB.deleteDatabase('billqyro-db');
+    BillQyroDB.close();
+    await new Promise((resolve, reject) => {
+      const req = indexedDB.deleteDatabase('billqyro-db');
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+      req.onblocked = () => {
+        console.warn('Database deletion blocked. Force resolving.');
+        resolve();
+      };
+    });
   } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   
   if (firebaseReady) {
     try {
-      
       if (auth.currentUser) {
         await auth.signOut();
       }
@@ -1089,16 +1098,21 @@ export const clearAllLocalData = async () => {
   localStorage.clear();
   sessionStorage.clear();
   try {
-    await BillQyroDB.clear('invoices');
-    await BillQyroDB.clear('customers');
-    await BillQyroDB.clear('products');
-    await BillQyroDB.clear('expenses');
-    await BillQyroDB.clear('syncQueue');
+    BillQyroDB.close();
+    await new Promise((resolve, reject) => {
+      const req = indexedDB.deleteDatabase('billqyro-db');
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+      req.onblocked = () => {
+        console.warn('Database deletion blocked. Force resolving.');
+        resolve();
+      };
+    });
+    
     const caches = await window.caches.keys();
     for (const name of caches) {
       await window.caches.delete(name);
     }
-
   } catch (err) {
     console.error('Error clearing storage', err);
   }
@@ -1152,11 +1166,17 @@ export const resetAccountKeepAuth = async () => {
   localStorage.clear();
   sessionStorage.clear();
   try {
-    await BillQyroDB.clear('invoices');
-    await BillQyroDB.clear('customers');
-    await BillQyroDB.clear('products');
-    await BillQyroDB.clear('expenses');
-    await BillQyroDB.clear('syncQueue');
+    BillQyroDB.close();
+    await new Promise((resolve, reject) => {
+      const req = indexedDB.deleteDatabase('billqyro-db');
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+      req.onblocked = () => {
+        console.warn('Database deletion blocked. Force resolving.');
+        resolve();
+      };
+    });
+    
     const caches = await window.caches.keys();
     for (const name of caches) {
       await window.caches.delete(name);
@@ -1587,8 +1607,7 @@ export const getExpenses = async (includeDeleted = false) => {
     return JSON.parse(localStorage.getItem('billqyro_demo_expenses') || '[]');
   }
   initializeStorage();
-  const userId = getRealUserId();
-  if (!userId) return [];
+  const userId = getRealUserId() || 'local-user';
   const settings = getSettings();
   const workspaceId = settings?.activeWorkspaceId;
   try {
@@ -1704,8 +1723,7 @@ export const getCustomers = async (includeDeleted = false) => {
     return JSON.parse(localStorage.getItem('billqyro_demo_customers') || '[]');
   }
   initializeStorage();
-  const userId = getRealUserId();
-  if (!userId) return [];
+  const userId = getRealUserId() || 'local-user';
   const settings = getSettings();
   const workspaceId = settings?.activeWorkspaceId;
   try {
@@ -1873,8 +1891,7 @@ export const getProducts = async (includeDeleted = false) => {
     return JSON.parse(localStorage.getItem('billqyro_demo_products') || '[]');
   }
   initializeStorage();
-  const userId = getRealUserId();
-  if (!userId) return [];
+  const userId = getRealUserId() || 'local-user';
   const settings = getSettings();
   const workspaceId = settings?.activeWorkspaceId;
   try {
@@ -2013,8 +2030,7 @@ export const getStudents = async (includeDeleted = false) => {
     return JSON.parse(localStorage.getItem('billqyro_demo_students') || '[]');
   }
   initializeStorage();
-  const userId = getRealUserId();
-  if (!userId) return [];
+  const userId = getRealUserId() || 'local-user';
   const settings = getSettings();
   const workspaceId = settings?.activeWorkspaceId;
   try {
@@ -2119,8 +2135,7 @@ export const getInvoices = async (includeDeleted = false) => {
     return JSON.parse(localStorage.getItem('billqyro_demo_invoices') || '[]');
   }
   initializeStorage();
-  const userId = getRealUserId();
-  if (!userId) return [];
+  const userId = getRealUserId() || 'local-user';
   const settings = getSettings();
   const workspaceId = settings?.activeWorkspaceId;
   try {
@@ -3203,8 +3218,9 @@ export const flushSyncQueue = async () => {
     const queue = await BillQyroDB.getAll('syncQueue');
     const pendingItems = queue.filter(tx => (tx.userId === userId || !tx.userId) && (tx.status === 'pending' || !tx.status));
     
-    if (pendingItems.length === 0) {
-      window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Synced' }));
+    if (pendingItems.length === 0 || !userId) {
+      // If no real UID, they are in local mode, so it's not a real sync error.
+      window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: !userId ? 'Local Mode' : 'Synced' }));
     } else {
       window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Sync Error' }));
     }

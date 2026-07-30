@@ -13,6 +13,7 @@ import {
   Star,
   X,
   Search,
+  Globe,
   QrCode,
   Pen,
   Image,
@@ -31,25 +32,15 @@ import { BUSINESS_PRESETS } from '../config/businessPresets';
 import InvoicePreview from '../components/InvoicePreview';
 import LazyPreview from '../components/LazyPreview';
 import { getDemoInvoice } from '../utils/demoDataGenerator';
+import PublicInvoice from './PublicInvoice';
+import { UNIVERSAL_TEMPLATES, getTemplateFeatures, getTemplateGradient } from '../services/TemplateEngine';
 
-
-const templates = [
-  { id: 'classic', name: 'Classic (Default)', type: 'FREE', desc: 'Clean, professional layout for general business.', color: 'bg-theme-app' },
-  { id: 'cartoon', name: 'Cartoon Premium', type: 'FREE', desc: 'Premium modern layout with custom branding colors.', color: 'bg-blue-500' },
-  { id: 'modern', name: 'Modern Dark', type: 'FREE', desc: 'Bold dark headers with crisp spacing.', color: 'bg-indigo-950' },
-  { id: 'minimal', name: 'Minimalist B&W', type: 'FREE', desc: 'Ultra-clean black and white design.', color: 'bg-white' },
-  { id: 'retail', name: 'Retail Shop', type: 'FREE', desc: 'Item-focused layout perfect for stores.', color: 'bg-yellow-50' },
-  { id: 'professional', name: 'Premium Corporate', type: 'PRO', desc: 'High-end corporate style structure.', color: 'bg-blue-900' },
-  { id: 'embroidery', name: 'Boutique / Tailor', type: 'PRO', desc: 'Highlights sizes and work types.', color: 'bg-pink-50' },
-  { id: 'doctor', name: 'Clinic / Medical', type: 'PRO', desc: 'Includes patient/medical disclaimers.', color: 'bg-emerald-50' },
-  { id: 'repair', name: 'Service & Repair', type: 'PRO', desc: 'Focuses on job notes and terms.', color: 'bg-orange-50' },
-  { id: 'executive', name: 'Executive Suite', type: 'PRO', desc: 'Premium two-column executive layout with letterhead.', color: 'bg-slate-900' },
-  { id: 'corporate', name: 'Corporate Pro', type: 'PRO', desc: 'Ultra-formal corporate branding with watermark support.', color: 'bg-blue-950' },
-  { id: 'saas', name: 'SaaS / Subscription', type: 'PRO', desc: 'Subscription-style invoice with plan details and auto-pay.', color: 'bg-violet-900' },
-  { id: 'tailor', name: 'Tailor / Fashion', type: 'PRO', desc: 'Elegant fashion order slip with size chart and style notes.', color: 'bg-rose-50' },
-  { id: 'teacher', name: 'Teacher / Fee Slip', type: 'PRO', desc: 'Fee receipt format for tuition and coaching centers.', color: 'bg-sky-50' },
-  { id: 'medical', name: 'Medical / Hospital', type: 'PRO', desc: 'Hospital-grade invoice with insurance and patient fields.', color: 'bg-teal-50' }
-];
+const templateStyles = {
+  classic: 'Clean', cartoon: 'Modern', modern: 'Modern', minimal: 'Minimal',
+  retail: 'Thermal', 'premium-gold': 'Luxury', 'classic-elegant': 'Corporate',
+  corporate: 'Corporate', boutique: 'Fashion', clinic: 'Clean', repair: 'Utility',
+  executive: 'Luxury', saas: 'Modern', teacher: 'Clean', medical: 'Clean', tailor: 'Fashion', embroidery: 'Clean'
+};
 
 const pageVariants = {
   initial: { opacity: 0, y: 10 },
@@ -65,95 +56,7 @@ const staggerItem = {
   animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] } }
 };
 
-const templateTags = {
-  classic: ['A4', 'Classic'],
-  cartoon: ['A4', 'Premium'],
-  modern: ['A4', 'Modern'],
-  minimal: ['Letter', 'Minimal'],
-  retail: ['A5', 'Compact'],
-  professional: ['A4', 'Premium'],
-  embroidery: ['A5', 'Detail'],
-  doctor: ['A4', 'Medical'],
-  repair: ['A4', 'Workshop'],
-  executive: ['A4', 'Executive'],
-  corporate: ['A4', 'Corporate'],
-  saas: ['A4', 'Subscription'],
-  tailor: ['A5', 'Detail'],
-  teacher: ['A4', 'Education'],
-  medical: ['A4', 'Medical']
-};
-
-const templateFeatures = {
-  classic: ['Logo Ready'],
-  cartoon: ['Rounded UI', 'Modern Colors'],
-  modern: ['Dark Mode'],
-  minimal: ['B&W Print'],
-  retail: ['Item Grid', 'Barcode'],
-  professional: ['Watermark', 'Signature Line'],
-  embroidery: ['Size Chart', 'Design No'],
-  doctor: ['Disclaimer', 'Patient Info'],
-  repair: ['Job Notes', 'Terms'],
-  executive: ['Watermark', 'Signature Line', 'Letterhead'],
-  corporate: ['Watermark', 'Seal', 'Signature Line'],
-  saas: ['Subscription ID', 'Plan Details', 'Auto-Pay'],
-  tailor: ['Size Chart', 'Design No', 'Fabric'],
-  teacher: ['Student Info', 'Fee Breakdown'],
-  medical: ['Patient Info', 'Insurance', 'Disclaimer']
-};
-
-const templateCategory = {
-  classic: 'Classic',
-  cartoon: 'Modern',
-  modern: 'Modern',
-  minimal: 'Classic',
-  retail: 'Business',
-  professional: 'Professional',
-  embroidery: 'Business',
-  doctor: 'Professional',
-  repair: 'Business',
-  executive: 'Professional',
-  corporate: 'Professional',
-  saas: 'Modern',
-  tailor: 'Business',
-  teacher: 'Classic',
-  medical: 'Professional'
-};
-
-const previewGradients = {
-  classic: 'from-blue-400 to-blue-600',
-  cartoon: 'from-blue-500 to-indigo-500',
-  modern: 'from-indigo-800 to-purple-900',
-  minimal: 'from-gray-100 to-gray-300',
-  retail: 'from-yellow-300 to-amber-500',
-  professional: 'from-slate-800 to-blue-900',
-  embroidery: 'from-pink-300 to-rose-500',
-  doctor: 'from-emerald-400 to-teal-600',
-  repair: 'from-orange-400 to-red-500',
-  executive: 'from-slate-700 to-slate-900',
-  corporate: 'from-blue-800 to-indigo-900',
-  saas: 'from-violet-500 to-purple-700',
-  tailor: 'from-rose-300 to-pink-500',
-  teacher: 'from-sky-400 to-cyan-600',
-  medical: 'from-teal-400 to-emerald-600'
-};
-
-const templateStyles = {
-  classic: 'Classic',
-  cartoon: 'Premium',
-  modern: 'Modern',
-  minimal: 'Minimal',
-  retail: 'Business',
-  professional: 'Professional',
-  embroidery: 'Boutique',
-  doctor: 'Medical',
-  repair: 'Service',
-  executive: 'Executive',
-  corporate: 'Corporate',
-  saas: 'SaaS',
-  tailor: 'Fashion',
-  teacher: 'Education',
-  medical: 'Medical'
-};
+// Removed old template dictionaries
 
 const brandPresetIcons = {
   retail: 'Store',
@@ -181,33 +84,42 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
   const [showOptions, setShowOptions] = useState(false);
   const [showBrandPresets, setShowBrandPresets] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null);
+  const [viewMode, setViewMode] = useState('pdf'); // 'pdf' | 'livelink' | 'print'
 
   const activeTemplate = businessSettings?.selectedPdfTemplate || 'classic';
   const isPremium = subscription?.status === 'premium';
   const categories = ['All', 'Classic', 'Modern', 'Business', 'Professional'];
 
-  const filteredTemplates = templates.filter(t => {
-    const matchesCategory = filterCategory === 'All' || templateCategory[t.id] === filterCategory;
-    const matchesSearch = searchQuery === '' ||
-      t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredTemplates = UNIVERSAL_TEMPLATES.filter(t => {
+    const matchesCategory = filterCategory === 'All' || t.tags.includes(filterCategory) || templateStyles[t.id] === filterCategory;
+    const matchesSearch = searchQuery === '' || 
+      t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
       t.desc.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
   const handleApply = async (templateId, type) => {
     if (type === 'PRO' && !isPremium) {
-      setCurrentTab('subscription');
+      setCurrentTab?.('subscription');
       toast('Upgrade to Premium to unlock this template!', { icon: '👑' });
       return;
     }
 
-    const updated = { ...businessSettings, selectedPdfTemplate: templateId };
+    const updated = { ...businessSettings, selectedPdfTemplate: templateId, defaultBillingTemplate: templateId };
+    
+    // Also update Live Link settings to match
+    updated.customerLiveLinkSettings = {
+      ...(updated.customerLiveLinkSettings || {}),
+      selectedLiveLinkTemplate: templateId
+    };
+
     if (enableWatermark) updated.pdfWatermark = true;
     if (signaturePlacement !== 'none') updated.pdfSignaturePlacement = signaturePlacement;
     if (qrPlacement !== 'none') updated.pdfQrPlacement = qrPlacement;
+    
     await settingsEngine.saveSettings(updated);
     if (setSettings) setSettings(updated);
-    toast.success('Template applied successfully!');
+    toast.success('Universal template applied to all formats!');
   };
 
   const handlePresetSelect = (preset) => {
@@ -358,6 +270,32 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
               </select>
             </div>
 
+            {/* Online Layout Toggle */}
+            <div className="flex items-center justify-between p-3 rounded-xl bg-theme-app border border-theme-border-soft">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-theme-accent/10 flex items-center justify-center">
+                  <Globe className="w-4 h-4 text-theme-accent" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-theme-primary">Online Layout</p>
+                  <p className="text-[9px] text-theme-muted font-medium">Extra UI for Live Link</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  const updated = { ...businessSettings };
+                  updated.customerLiveLinkSettings = {
+                    ...(updated.customerLiveLinkSettings || {}),
+                    enableOnlineLayout: !(businessSettings?.customerLiveLinkSettings?.enableOnlineLayout ?? true)
+                  };
+                  if (setSettings) setSettings(updated);
+                }}
+                className={`relative w-10 h-5 rounded-full transition-all ${(businessSettings?.customerLiveLinkSettings?.enableOnlineLayout ?? true) ? 'bg-theme-accent' : 'bg-theme-border-soft'}`}
+              >
+                <motion.div animate={{ x: (businessSettings?.customerLiveLinkSettings?.enableOnlineLayout ?? true) ? 20 : 2 }} className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow" />
+              </button>
+            </div>
+
             {/* QR Code Placement */}
             <div className="flex items-center justify-between p-3 rounded-xl bg-theme-app border border-theme-border-soft">
               <div className="flex items-center gap-2">
@@ -411,22 +349,28 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
       )}
 
       <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
           <p className="text-sm font-semibold text-theme-muted">
-            Select a layout for your PDF invoices and estimates. Free accounts include access to 4 templates.
+            Select a design. It will automatically apply to your PDF invoices, Online Live Links, and Print bills.
           </p>
-          <div className="hidden md:flex items-center gap-1 bg-theme-app rounded-lg p-0.5">
+          <div className="flex bg-theme-app border border-theme-border-soft rounded-lg p-1 w-full md:w-auto">
             <button
-              onClick={() => setPreviewSize('A4')}
-              className={`px-3 py-1.5 rounded-md text-[9px] font-bold transition-all ${previewSize === 'A4' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
+              onClick={() => { setViewMode('pdf'); setPreviewSize('A4'); }}
+              className={`flex-1 md:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all ${viewMode === 'pdf' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
             >
-              <Maximize className="w-3 h-3 inline mr-1" />A4
+              PDF View
             </button>
             <button
-              onClick={() => setPreviewSize('A5')}
-              className={`px-3 py-1.5 rounded-md text-[9px] font-bold transition-all ${previewSize === 'A5' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
+              onClick={() => setViewMode('livelink')}
+              className={`flex-1 md:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all ${viewMode === 'livelink' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
             >
-              <Minimize className="w-3 h-3 inline mr-1" />A5
+              Live Link
+            </button>
+            <button
+              onClick={() => { setViewMode('print'); setPreviewSize('A5'); }}
+              className={`flex-1 md:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all ${viewMode === 'print' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
+            >
+              Print Bill
             </button>
           </div>
         </div>
@@ -443,8 +387,9 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
             {filteredTemplates.map((tpl) => {
               const isActive = activeTemplate === tpl.id;
               const isLocked = tpl.type === 'PRO' && !isPremium;
-              const tags = templateTags[tpl.id] || [];
-              const features = templateFeatures[tpl.id] || [];
+              const tags = tpl.tags || [];
+              const features = getTemplateFeatures(tpl.id);
+              const previewGradient = getTemplateGradient(tpl.id);
 
               return (
                 <motion.div
@@ -496,14 +441,20 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                   )}
 
                   {/* Mockup Preview Area */}
-                  <div className={`h-40 w-full bg-gradient-to-br ${previewGradients[tpl.id] || 'from-gray-400 to-gray-600'} flex items-center justify-center relative overflow-hidden`}>
+                  <div className={`h-40 w-full bg-gradient-to-br ${previewGradient} flex items-center justify-center relative overflow-hidden`}>
                     <LazyPreview fallback={<div className="text-white/60 text-[10px] font-bold uppercase tracking-widest animate-pulse">Loading {tpl.name}...</div>}>
-                      <div className="w-[800px] h-[1000px] transform origin-top-left scale-[0.35] lg:scale-[0.4] pointer-events-none mt-20 ml-20 bg-white shadow-xl">
-                        <InvoicePreview invoice={getDemoInvoice(businessSettings?.businessCategory)} businessSettings={{ ...businessSettings, selectedPdfTemplate: tpl.id }} />
-                      </div>
+                      {viewMode === 'livelink' ? (
+                        <div className="w-[320px] h-[550px] transform origin-top scale-[0.3] pointer-events-none mt-20 bg-theme-app rounded-3xl overflow-hidden shadow-2xl border-4 border-gray-800">
+                          <PublicInvoice initialInvoice={{...getDemoInvoice(businessSettings?.businessCategory), paymentSettingsSnapshot: { customerLiveLinkSettings: { selectedLiveLinkTemplate: tpl.id } }}} />
+                        </div>
+                      ) : (
+                        <div className={`w-[800px] ${previewSize === 'A5' ? 'h-[600px]' : 'h-[1000px]'} transform origin-top-left scale-[0.35] lg:scale-[0.4] pointer-events-none mt-20 ml-20 bg-white shadow-xl`}>
+                          <InvoicePreview invoice={getDemoInvoice(businessSettings?.businessCategory)} businessSettings={{ ...businessSettings, selectedPdfTemplate: tpl.id }} />
+                        </div>
+                      )}
                     </LazyPreview>
 
-                    {enableWatermark && tpl.type === 'PRO' && (
+                    {enableWatermark && tpl.type === 'PRO' && viewMode !== 'livelink' && (
                       <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
                         <span className="text-black/10 text-[32px] font-black uppercase tracking-[0.3em] -rotate-30 select-none">Watermark</span>
                       </div>
@@ -587,11 +538,19 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              {/* Invoice Preview */}
-              <div className="p-2 md:p-4 lg:p-6">
-                <div className="transform scale-[0.85] md:scale-[0.9] lg:scale-100 origin-top">
-                  <InvoicePreview invoice={getDemoInvoice(businessSettings?.businessCategory)} businessSettings={businessSettings} />
-                </div>
+              <div className="p-2 md:p-4 lg:p-6 flex justify-center bg-theme-surface">
+                {viewMode === 'livelink' ? (
+                  <div className="w-[375px] max-w-full transform origin-top bg-theme-app border-8 border-gray-800 rounded-[2.5rem] overflow-hidden shadow-2xl relative min-h-[700px]">
+                    <div className="h-6 bg-gray-800 w-full absolute top-0 z-50 flex items-center justify-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-red-500"></div><div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div><div className="w-1.5 h-1.5 rounded-full bg-green-500"></div></div>
+                    <div className="mt-6 h-full overflow-y-auto">
+                      <PublicInvoice initialInvoice={{...getDemoInvoice(businessSettings?.businessCategory), paymentSettingsSnapshot: { customerLiveLinkSettings: { selectedLiveLinkTemplate: tpl.id } }}} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="transform scale-[0.85] md:scale-[0.9] lg:scale-100 origin-top bg-white">
+                    <InvoicePreview invoice={getDemoInvoice(businessSettings?.businessCategory)} businessSettings={{ ...businessSettings, selectedPdfTemplate: tpl.id }} />
+                  </div>
+                )}
               </div>
             </div>
           </div>

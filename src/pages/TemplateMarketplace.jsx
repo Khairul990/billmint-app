@@ -17,7 +17,8 @@ import {
   X,
   ExternalLink,
   Clock,
-  Globe
+  Globe,
+  ArrowLeft
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -208,6 +209,16 @@ const TemplateMarketplace = ({ settings, onSaveSettings, subscription, setCurren
 
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" className="p-4 md:p-8 w-full space-y-6">
+      {/* Back to Settings Button */}
+      {setCurrentTab && (
+        <button
+          onClick={() => setCurrentTab('settings')}
+          className="btn-premium flex items-center gap-2 px-4 py-2 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-xl font-bold text-xs mb-4 shadow-sm w-fit transition-all active:scale-95"
+        >
+          <ArrowLeft className="w-4 h-4 text-theme-muted" /> Back to Settings Studio
+        </button>
+      )}
+
       {/* Header */}
       <div className="bg-gradient-to-r from-theme-accent/10 to-transparent dark:from-theme-accent/5 p-6 rounded-3xl border border-theme-border-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-4 section-header">
         <div>

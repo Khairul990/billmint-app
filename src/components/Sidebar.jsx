@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, FileText, Globe } from 'lucide-react';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, FileText, Globe, ChevronDown } from 'lucide-react';
 import { authEngine } from '../services/authEngine';
 import { t } from '../utils/i18n';
 import { triggerLightHaptic } from '../utils/feedback';
@@ -33,6 +33,7 @@ const Sidebar = ({
     }
   });
   
+  const [expandedGroups, setExpandedGroups] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
@@ -146,12 +147,67 @@ const Sidebar = ({
     return true;
   });
 
+  // Transform into structured grouped menu
+  const structuredMenu = [];
+  let currentGroup = null;
+  
+  menuItems.forEach(item => {
+    if (item.type === 'label') {
+      currentGroup = {
+        id: `group-${item.label.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+        label: item.label,
+        isGroup: true,
+        icon: null,
+        items: []
+      };
+      structuredMenu.push(currentGroup);
+    } else {
+      if (currentGroup) {
+        if (!currentGroup.icon) currentGroup.icon = item.icon; // Inherit icon
+        currentGroup.items.push(item);
+      } else {
+        structuredMenu.push(item);
+      }
+    }
+  });
+
+  // Auto-expand group containing current active tab
+  useEffect(() => {
+    if (featuresLoading) return;
+    let foundGroupId = null;
+    let currentGrp = null;
+    for (const item of menuItems) {
+      if (item.type === 'label') {
+        currentGrp = `group-${item.label.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+      } else {
+        if (currentGrp && (item.id === currentTab || (item.id === 'invoices' && currentTab === 'create-invoice'))) {
+          foundGroupId = currentGrp;
+          break;
+        }
+      }
+    }
+    if (foundGroupId) {
+      setExpandedGroups(prev => prev.includes(foundGroupId) ? prev : [...prev, foundGroupId]);
+    }
+  }, [currentTab, featuresLoading]);
+
+  const toggleGroup = (groupId) => {
+    if (isCollapsed) {
+      setIsCollapsed(false);
+      setExpandedGroups(prev => prev.includes(groupId) ? prev : [...prev, groupId]);
+    } else {
+      setExpandedGroups(prev => 
+        prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
+      );
+    }
+  };
+
   return (
     <aside
-      className="hidden lg:flex flex-col h-full z-30 overflow-hidden shrink-0 border-r border-theme-accent/50 glass-panel"
+      className="hidden lg:flex flex-col h-full z-30 overflow-hidden shrink-0 border-r border-theme-border-soft bg-theme-surface shadow-xl"
       style={{
-        width: isCollapsed ? 72 : 240,
-        minWidth: isCollapsed ? 72 : 240,
+        width: isCollapsed ? 72 : 220,
+        minWidth: isCollapsed ? 72 : 220,
         transition: isMounted ? 'width 200ms cubic-bezier(0.25,0.1,0.25,1), min-width 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none',
       }}
     >
@@ -216,20 +272,114 @@ const Sidebar = ({
         style={{ padding: isCollapsed ? '8px 8px' : '8px 12px', transition: isMounted ? 'padding 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none' }}
       >
         <div className="space-y-0.5">
-          {menuItems.map((item, idx) => {
-            if (item.type === 'label') {
-              if (isCollapsed) return <div key={`label-${idx}`} className="h-2" />;
+          {structuredMenu.map((item, idx) => {
+            if (item.isGroup) {
+              const isExpanded = expandedGroups.includes(item.id);
+              const isActiveGroup = item.items.some(i => i.id === currentTab || (i.id === 'invoices' && currentTab === 'create-invoice'));
+              const GroupIcon = item.icon;
+
               return (
-                <div key={`label-${idx}`} className="pt-3 pb-1 px-3.5">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-theme-sidebar-text/30">{item.label}</p>
+                <div key={item.id} className="relative group mb-1">
+                  {/* Group Header */}
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => toggleGroup(item.id)}
+                    className={`relative w-full flex items-center justify-between rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer overflow-hidden group/header ${
+                      isCollapsed ? 'px-0 py-2.5 justify-center' : 'px-3.5 py-2.5'
+                    } ${
+                      isActiveGroup && !isExpanded
+                        ? 'bg-theme-accent-light/15 text-theme-accent shadow-sm'
+                        : 'text-theme-sidebar-text/75 hover:text-theme-sidebar-text hover:bg-theme-accent-light/10'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <GroupIcon className={`relative z-10 w-[18px] h-[18px] shrink-0 transition-transform duration-200 ${
+                        isActiveGroup && !isExpanded ? 'text-theme-accent' : 'group-hover/header:scale-110 group-hover/header:text-theme-accent'
+                      }`} />
+                      {!isCollapsed && (
+                        <span className="truncate whitespace-nowrap text-[12px] uppercase tracking-wider font-black">
+                          {item.label}
+                        </span>
+                      )}
+                    </div>
+                    {!isCollapsed && (
+                      <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                    )}
+                  </motion.button>
+                  
+                  {/* Tooltip for group when collapsed */}
+                  {isCollapsed && (
+                    <div className="absolute left-full top-0 ml-2 px-3 py-1.5 bg-theme-card text-theme-primary text-xs font-bold rounded-lg shadow-xl border border-theme-border-soft whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-[100]">
+                      {item.label} (Expand to see options)
+                      <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-theme-card" />
+                    </div>
+                  )}
+
+                  {/* Dropdown Items */}
+                  <AnimatePresence initial={false}>
+                    {isExpanded && !isCollapsed && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pl-6 pr-2 py-1 space-y-0.5 relative mt-1">
+                           {/* Tree branch line */}
+                           <div className="absolute left-[20px] top-0 bottom-3 w-px bg-theme-border-soft/60" />
+                           
+                           {item.items.map(subItem => {
+                             const isSubActive = currentTab === subItem.id || (subItem.id === 'invoices' && currentTab === 'create-invoice');
+                             const SubIcon = subItem.icon;
+                             return (
+                               <motion.button
+                                 key={subItem.id}
+                                 whileTap={{ scale: 0.97 }}
+                                 onClick={() => {
+                                   triggerLightHaptic();
+                                   setCurrentTab(subItem.id);
+                                 }}
+                                 className={`relative w-full flex items-center rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer overflow-hidden gap-3 px-3 py-2 group/sub ${
+                                   isSubActive
+                                     ? 'text-theme-accent bg-theme-accent/10 font-bold'
+                                     : 'text-theme-sidebar-text/65 hover:text-theme-sidebar-text hover:bg-theme-accent-light/10'
+                                 }`}
+                               >
+                                  
+                                  {isSubActive && (
+                                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3 bg-theme-accent rounded-r-full shadow-sm z-10" />
+                                  )}
+                                  
+                                  <SubIcon className={`relative z-10 w-[14px] h-[14px] shrink-0 transition-transform duration-200 ${
+                                    isSubActive ? 'text-theme-accent' : 'group-hover/sub:scale-110 group-hover/sub:text-theme-accent'
+                                  }`} />
+                                  <span className="relative z-10 truncate whitespace-nowrap">
+                                    {subItem.label}
+                                  </span>
+                                  
+                                  {subItem.id === 'pending-payments' && pendingPaymentsCount > 0 && (
+                                    <span className="relative z-10 ml-auto px-1.5 py-0.5 bg-red-500 text-white text-[9px] font-black rounded-full shadow-lg shadow-red-500/30 animate-pulse">
+                                      {pendingPaymentsCount}
+                                    </span>
+                                  )}
+                               </motion.button>
+                             );
+                           })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               );
             }
+
+            // Standard Item rendering for non-group items (e.g. Dashboard)
             const Icon = item.icon;
             const isActive = currentTab === item.id || (item.id === 'invoices' && currentTab === 'create-invoice');
 
             return (
-              <div key={item.id} className="relative group">
+              <div key={item.id} className="relative group mb-0.5">
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={() => {
@@ -290,7 +440,7 @@ const Sidebar = ({
 
                 {/* Tooltip when collapsed */}
                 {isCollapsed && (
-                  <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-theme-card dark:bg-theme-card text-theme-primary text-xs font-bold rounded-lg shadow-xl border border-theme-border-soft whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-[100]">
+                  <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-theme-card text-theme-primary text-xs font-bold rounded-lg shadow-xl border border-theme-border-soft whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-[100]">
                     {item.label}
                     <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-theme-card" />
                   </div>

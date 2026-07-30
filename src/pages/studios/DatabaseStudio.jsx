@@ -17,7 +17,7 @@ const DatabaseStudio = ({ settings, onUpdate }) => {
 
         <div className="bg-theme-surface/50 border border-theme-border-soft rounded-2xl p-6 text-center">
           <Server className="w-12 h-12 text-theme-muted mx-auto mb-4" />
-          <h3 className="text-sm font-bold text-white mb-2">Custom Collections (Coming Soon)</h3>
+          <h3 className="text-sm font-bold text-theme-primary mb-2">Custom Collections (Coming Soon)</h3>
           <p className="text-xs text-theme-muted mb-6 max-w-md mx-auto">
             The No-Code Database Studio will allow you to create custom tables (e.g., Inventory, Tasks, Vehicles) that automatically sync with Firestore and support offline mode.
           </p>

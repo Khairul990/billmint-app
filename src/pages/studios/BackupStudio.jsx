@@ -1,8 +1,32 @@
 import React from 'react';
-import { Cloud, HardDrive, Download, RotateCcw, Clock, CheckCircle2 } from 'lucide-react';
+import { Cloud, HardDrive, Download, RotateCcw, Clock, CheckCircle2, Upload, Trash2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import { backupEngine } from '../../services/backupEngine';
+import { adminEngine } from '../../services/adminEngine';
+import { toast } from 'react-hot-toast';
 
 const BackupStudio = ({ settings, onUpdate }) => {
+  const handleExport = async () => {
+    try {
+      await backupEngine.exportLocal();
+      toast.success('Backup downloaded successfully!');
+    } catch (e) {
+      toast.error('Export failed: ' + e.message);
+    }
+  };
+
+  const handleImport = async (e) => {
+    try {
+      const file = e.target.files[0];
+      if (!file) return;
+      await backupEngine.importLocal(file);
+      toast.success('Backup restored successfully!');
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (err) {
+      toast.error('Import failed: ' + err.message);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4 mb-6 border-b border-theme-border-soft pb-6">
@@ -57,26 +81,39 @@ const BackupStudio = ({ settings, onUpdate }) => {
           </p>
           
           <div className="space-y-3 mb-6">
-            <button className="w-full p-4 bg-theme-surface-elevated hover:bg-theme-surface-hover rounded-2xl border border-theme-border-soft hover:border-theme-accent/50 transition-all flex items-center justify-between group cursor-pointer">
+            <button onClick={handleExport} className="w-full p-4 bg-theme-surface-elevated hover:bg-theme-surface-hover rounded-2xl border border-theme-border-soft hover:border-theme-accent/50 transition-all flex items-center justify-between group cursor-pointer">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-theme-accent/10 flex items-center justify-center">
                   <Download className="w-5 h-5 text-theme-accent" />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors">Export Database</p>
-                  <p className="text-[10px] text-theme-secondary mt-0.5">Download full .bqy backup</p>
+                  <p className="text-[10px] text-theme-secondary mt-0.5">Download full JSON backup</p>
                 </div>
               </div>
             </button>
             
-            <button className="w-full p-4 bg-theme-surface-elevated hover:bg-theme-surface-hover rounded-2xl border border-theme-border-soft hover:border-theme-warning/50 transition-all flex items-center justify-between group cursor-pointer">
+            <label className="w-full p-4 bg-theme-surface-elevated hover:bg-theme-surface-hover rounded-2xl border border-theme-border-soft hover:border-theme-warning/50 transition-all flex items-center justify-between group cursor-pointer">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-theme-warning/10 flex items-center justify-center">
-                  <RotateCcw className="w-5 h-5 text-theme-warning" />
+                  <Upload className="w-5 h-5 text-theme-warning" />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold text-theme-primary group-hover:text-theme-warning transition-colors">Restore from File</p>
-                  <p className="text-[10px] text-theme-secondary mt-0.5">Upload a .bqy backup file</p>
+                  <p className="text-[10px] text-theme-secondary mt-0.5">Upload a JSON backup file</p>
+                </div>
+              </div>
+              <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+            </label>
+
+            <button onClick={() => { if (confirm('Reset all data? This cannot be undone.')) { adminEngine.factoryResetAllData(); toast.success('Data reset in progress...'); } }} className="w-full p-4 bg-rose-500/5 hover:bg-rose-500/10 rounded-2xl border border-rose-500/20 hover:border-rose-500/50 transition-all flex items-center justify-between group cursor-pointer mt-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center">
+                  <Trash2 className="w-5 h-5 text-rose-500" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-rose-600 transition-colors">Factory Reset</p>
+                  <p className="text-[10px] text-rose-500/80 mt-0.5">Wipe all local data permanently</p>
                 </div>
               </div>
             </button>

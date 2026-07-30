@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useOnClickOutside } from '../hooks/useOnClickOutside';
 
 const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWorkspace, setCurrentTab, mobile }) => {
   const [open, setOpen] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
+  const dropdownRef = useRef(null);
   const activeWorkspace = (businessWorkspaces || []).find(ws => ws.id === activeWorkspaceId) || {};
+
+  useOnClickOutside(dropdownRef, () => setOpen(false));
 
   const handleSelect = (id) => {
     setIsSwitching(true);
@@ -17,9 +21,9 @@ const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWor
 
   if (mobile) {
     return (
-      <div className="relative inline-block text-left z-50">
+      <div className="relative inline-block text-left z-50" ref={dropdownRef}>
         <button
-          onClick={() => setOpen(!open)}
+          onClick={() => setOpen(prev => !prev)}
           disabled={isSwitching}
           className="inline-flex items-center justify-center rounded-lg border border-theme-accent/40 px-2 py-1 bg-theme-surface text-xs font-bold text-theme-primary hover:bg-theme-card active:scale-95 transition-all"
         >
@@ -36,9 +40,7 @@ const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWor
           )}
         </button>
         {open && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-            <div className="origin-top-left absolute left-0 mt-1.5 w-48 rounded-xl shadow-lg bg-theme-card border border-theme-accent/30 focus:outline-none z-50 overflow-hidden">
+          <div className="origin-top-left absolute left-0 mt-1.5 w-48 rounded-xl shadow-lg bg-theme-card border border-theme-accent/30 focus:outline-none z-50 overflow-hidden">
               <div className="py-1">
                 {(businessWorkspaces || []).map(ws => (
                   <button
@@ -62,16 +64,15 @@ const WorkspaceSwitcher = ({ businessWorkspaces, activeWorkspaceId, setActiveWor
                 </div>
               </div>
             </div>
-          </>
         )}
       </div>
     );
   }
 
   return (
-    <div className="relative inline-block text-left mr-4 z-50">
+    <div className="relative inline-block text-left mr-4 z-50" ref={dropdownRef}>
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen(prev => !prev)}
         disabled={isSwitching}
         className="inline-flex items-center justify-center w-full rounded-md border border-theme-accent/50 shadow-sm px-3 py-1.5 bg-theme-surface text-sm font-bold text-theme-primary hover:bg-theme-card hover:border-theme-accent/70 focus:outline-none transition-colors"
         title="Switch Workspace"

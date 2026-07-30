@@ -87,12 +87,12 @@ const ThemeStudio = ({ settings, onUpdate }) => {
             onChange={(e) => handleChange('brandColor', e.target.value)} 
             className="w-10 h-10 rounded-xl cursor-pointer border border-theme-border-soft bg-transparent" 
           />
-          <input 
-            type="text" 
-            value={settings?.brandColor || '#14b8a6'} 
-            onChange={(e) => handleChange('brandColor', e.target.value)} 
-            className="w-24 px-3 py-2 bg-theme-main border border-theme-border-soft rounded-lg text-xs font-mono text-white text-center focus:outline-none focus:border-theme-accent" 
-          />
+            <input 
+              type="text" 
+              value={settings?.brandColor || '#14b8a6'} 
+              onChange={(e) => handleChange('brandColor', e.target.value)} 
+              className="w-24 px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-lg text-xs font-mono text-theme-primary text-center focus:outline-none focus:border-theme-accent" 
+            />
         </div>
 
         {/* Layout Modifiers */}
@@ -111,7 +111,7 @@ const ThemeStudio = ({ settings, onUpdate }) => {
                   <select 
                     value={settings?.[opt.key] || opt.default}
                     onChange={(e) => handleChange(opt.key, e.target.value)}
-                    className="w-full bg-theme-main border border-theme-border-soft text-white text-xs rounded-lg p-2 focus:outline-none cursor-pointer"
+                    className="w-full bg-theme-surface border border-theme-border-soft text-theme-primary text-xs rounded-lg p-2 focus:outline-none cursor-pointer"
                   >
                     {opt.options.map(o => <option key={o} value={o}>{o}</option>)}
                   </select>

@@ -25,8 +25,8 @@ export const applyFullTheme = (settings, persist = true) => {
   if (!settings) return;
   const root = document.documentElement;
   
-  const { themeColor, brandColor, darkMode, cornerRadius, shadowIntensity, animationSpeed, fontDensity } = settings;
-  const themeId = themeColor || 'obsidian-gold';
+  const { themeColor, brandColor, darkMode, cornerRadius, shadowIntensity, animationSpeed, fontDensity, themeType } = settings;
+  const themeId = (themeType === 'custom' && brandColor) ? 'custom' : (themeColor || 'obsidian-gold');
 
   if (darkMode) {
     root.classList.add('dark');

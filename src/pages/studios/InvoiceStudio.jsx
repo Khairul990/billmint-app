@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FileText, LayoutTemplate, Columns, Droplet, ArrowUp, ArrowDown, Eye, EyeOff } from 'lucide-react';
+import PdfTemplateStudio from '../PdfTemplateStudio';
 
 const DEFAULT_COLUMNS = [
   { id: 'item', label: 'Item/Service', visible: true, order: 1 },
@@ -40,39 +41,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
   return (
     <div className="space-y-6">
       {/* Template Selection */}
-      <div className="card-premium p-6">
-        <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
-            <LayoutTemplate className="w-5 h-5" />
-          </div>
-          <div>
-            <h2 className="text-lg font-black text-theme-primary">Invoice Templates</h2>
-            <p className="text-xs text-theme-muted">Select your default PDF layout structure</p>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {['classic', 'modern', 'minimal', 'cyber', 'corporate'].map((tpl) => (
-            <button
-              key={tpl}
-              onClick={() => handleChange('invoiceTemplate', tpl)}
-              className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-3 ${
-                (settings?.invoiceTemplate || 'modern') === tpl 
-                  ? 'border-theme-accent bg-theme-accent/10' 
-                  : 'border-theme-border-soft bg-theme-surface hover:border-theme-border'
-              }`}
-            >
-              <div className="w-full h-24 bg-theme-main rounded border border-theme-border-soft flex flex-col p-2 gap-1 overflow-hidden opacity-80">
-                <div className="w-1/3 h-2 bg-theme-accent rounded" />
-                <div className="w-1/4 h-2 bg-theme-muted rounded" />
-                <div className="mt-2 w-full h-8 bg-theme-surface rounded border border-theme-border-soft" />
-                <div className="w-1/2 h-2 bg-theme-muted rounded ml-auto mt-1" />
-              </div>
-              <span className="text-xs font-bold capitalize text-white">{tpl} Template</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      <PdfTemplateStudio businessSettings={settings} setSettings={onUpdate} />
 
       {/* Column Manager */}
       <div className="card-premium p-6">
@@ -96,20 +65,20 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
                 >
                   {col.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                 </button>
-                <span className={`text-sm font-bold ${col.visible ? 'text-white' : 'text-theme-muted line-through'}`}>{col.label}</span>
+                <span className={`text-sm font-bold ${col.visible ? 'text-theme-primary' : 'text-theme-muted line-through'}`}>{col.label}</span>
               </div>
               <div className="flex items-center gap-1">
                 <button 
                   onClick={() => moveColumn(idx, -1)}
                   disabled={idx === 0}
-                  className="p-1.5 rounded bg-theme-main border border-theme-border-soft text-theme-muted hover:text-white hover:bg-theme-surface-hover disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-1.5 rounded bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-theme-primary hover:bg-theme-card disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ArrowUp className="w-3 h-3" />
                 </button>
                 <button 
                   onClick={() => moveColumn(idx, 1)}
                   disabled={idx === columns.length - 1}
-                  className="p-1.5 rounded bg-theme-main border border-theme-border-soft text-theme-muted hover:text-white hover:bg-theme-surface-hover disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-1.5 rounded bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-theme-primary hover:bg-theme-card disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ArrowDown className="w-3 h-3" />
                 </button>
@@ -139,7 +108,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
                 onChange={(e) => handleChange('defaultNotes', e.target.value)} 
                 rows={3} 
                 placeholder="Thank you for your business!"
-                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-theme-warning transition-colors resize-none" 
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-warning transition-colors resize-none" 
               />
             </div>
             <div>
@@ -149,7 +118,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
                 onChange={(e) => handleChange('terms', e.target.value)} 
                 rows={4} 
                 placeholder="1. Payment due in 30 days..."
-                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-theme-warning transition-colors resize-none" 
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-warning transition-colors resize-none" 
               />
             </div>
           </div>
@@ -173,13 +142,13 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
                 value={settings?.watermarkText || ''} 
                 onChange={(e) => handleChange('watermarkText', e.target.value)} 
                 placeholder="e.g. PAID, DRAFT, CONFIDENTIAL"
-                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-white focus:outline-none focus:border-theme-info transition-colors" 
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-info transition-colors" 
               />
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider">Opacity</label>
-                <span className="text-[10px] text-white font-bold">{settings?.watermarkOpacity || 10}%</span>
+                <span className="text-[10px] text-theme-primary font-bold">{settings?.watermarkOpacity || 10}%</span>
               </div>
               <input 
                 type="range" 

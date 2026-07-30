@@ -44,14 +44,14 @@ const BusinessTemplateStudio = ({ settings, onUpdate }) => {
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${preset.bg} ${preset.color}`}>
                   <Icon className="w-6 h-6" />
                 </div>
-                <h3 className="text-sm font-bold text-white mb-2">{preset.name}</h3>
+                <h3 className="text-sm font-bold text-theme-primary mb-2">{preset.name}</h3>
                 <p className="text-[10px] text-theme-muted mb-6 leading-relaxed">
                   Pre-configured layout with specific data fields tailored for the {preset.name.toLowerCase()} industry.
                 </p>
                 <button 
                   onClick={() => handleApplyPreset(preset.id)}
                   disabled={isActive}
-                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 ${isActive ? 'bg-theme-accent/20 text-theme-accent cursor-not-allowed' : 'bg-theme-surface border border-theme-border-soft text-white hover:bg-white hover:text-black'}`}
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 ${isActive ? 'bg-theme-accent/20 text-theme-accent cursor-not-allowed' : 'bg-theme-surface border border-theme-border-soft text-theme-primary hover:bg-theme-primary hover:text-theme-card'}`}
                 >
                   {isActive ? 'Currently Active' : <>Apply Preset <ArrowRight className="w-3 h-3" /></>}
                 </button>
@@ -62,7 +62,7 @@ const BusinessTemplateStudio = ({ settings, onUpdate }) => {
 
         <div className="mt-8 p-5 bg-theme-surface/50 border border-theme-border-soft rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <h3 className="text-sm font-bold text-white mb-1">Create Custom Preset</h3>
+            <h3 className="text-sm font-bold text-theme-primary mb-1">Create Custom Preset</h3>
             <p className="text-xs text-theme-muted">Save your current platform layout as a reusable template.</p>
           </div>
           <button className="px-4 py-2 bg-theme-main border border-theme-border-soft text-theme-muted text-xs font-bold rounded-xl opacity-50 cursor-not-allowed">

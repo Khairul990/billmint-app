@@ -102,7 +102,7 @@ const FeatureControlStudio = ({ workspaceId }) => {
             <Zap className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-theme-primary">Universal Feature Control</h2>
+            <h2 className="text-lg font-black text-theme-primary">Module Manager</h2>
             <p className="text-xs text-theme-muted">Enable or disable core modules and advanced capabilities.</p>
           </div>
         </div>

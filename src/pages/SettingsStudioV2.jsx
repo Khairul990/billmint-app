@@ -65,9 +65,8 @@ const NAV_GROUPS = [
   {
     group: 'Invoice', icon: FileText,
     items: [
-      { id: 'invoice-templates', label: 'Invoice Templates', icon: LayoutTemplate, description: 'PDF invoice layouts' },
-      { id: 'pdf-templates', label: 'PDF Templates', icon: Printer, description: 'Print-ready templates' },
-      { id: 'billing-portal', dynamicLabel: (isEdu) => isEdu ? 'Student Portal' : 'Billing Portal', icon: Globe, dynamicDesc: (isEdu) => isEdu ? 'Student fee portal' : 'Customer payment portal' }
+      { id: 'invoice-builder', label: 'Invoice Builder', icon: LayoutTemplate, description: 'Advanced builder settings' },
+      { id: 'template-gallery', label: 'Template Gallery', icon: LayoutTemplate, description: 'Unified template selection' }
     ]
   },
   {
@@ -214,6 +213,15 @@ const SettingsStudioV2 = ({
   const [removeBgApiKey, setRemoveBgApiKey] = useState('');
   const [enablePhotoMaker, setEnablePhotoMaker] = useState(true);
 
+  // Invoice Builder states
+  const [enableProductAutocomplete, setEnableProductAutocomplete] = useState(true);
+  const [enableTemplateSwitcher, setEnableTemplateSwitcher] = useState(true);
+  const [enableItemLevelDiscount, setEnableItemLevelDiscount] = useState(false);
+  const [enableItemLevelTax, setEnableItemLevelTax] = useState(false);
+  const [enableDragAndDrop, setEnableDragAndDrop] = useState(true);
+  const [enableDigitalSignature, setEnableDigitalSignature] = useState(true);
+  const [enableLivePreview, setEnableLivePreview] = useState(true);
+
   const [isDragging, setIsDragging] = useState(false);
   const [dbProvider, setDbProvider] = useState(() => localStorage.getItem('billmint_db_provider') || 'firebase');
   const session = authEngine.getAuthSession();
@@ -292,6 +300,16 @@ const SettingsStudioV2 = ({
         setCyberPortals(settings.cyberCafeConfig.portals || []);
         setRemoveBgApiKey(settings.cyberCafeConfig.removeBgApiKey || '');
         setEnablePhotoMaker(settings.cyberCafeConfig.enablePhotoMaker !== false);
+      }
+
+      if (settings.invoiceBuilderSettings) {
+        setEnableProductAutocomplete(settings.invoiceBuilderSettings.enableProductAutocomplete !== false);
+        setEnableTemplateSwitcher(settings.invoiceBuilderSettings.enableTemplateSwitcher !== false);
+        setEnableItemLevelDiscount(settings.invoiceBuilderSettings.enableItemLevelDiscount === true);
+        setEnableItemLevelTax(settings.invoiceBuilderSettings.enableItemLevelTax === true);
+        setEnableDragAndDrop(settings.invoiceBuilderSettings.enableDragAndDrop !== false);
+        setEnableDigitalSignature(settings.invoiceBuilderSettings.enableDigitalSignature !== false);
+        setEnableLivePreview(settings.invoiceBuilderSettings.enableLivePreview !== false);
       }
     }
   }, [settings]);
@@ -424,7 +442,16 @@ const SettingsStudioV2 = ({
           conversionLayout: settings?.customerLiveLinkSettings?.conversionLayout || 'modern'
         },
         notifications: { email: emailNotifications, whatsapp: whatsappNotifications, dueDateReminders, paymentConfirmation, marketing: marketingEmails, securityAlerts },
-        cyberCafeConfig: { portals: cyberPortals, removeBgApiKey, enablePhotoMaker }
+        cyberCafeConfig: { portals: cyberPortals, removeBgApiKey, enablePhotoMaker },
+        invoiceBuilderSettings: {
+          enableProductAutocomplete,
+          enableTemplateSwitcher,
+          enableItemLevelDiscount,
+          enableItemLevelTax,
+          enableDragAndDrop,
+          enableDigitalSignature,
+          enableLivePreview
+        }
       };
       onSaveSettings(payload);
       setIsDirty(false);
@@ -510,6 +537,24 @@ const SettingsStudioV2 = ({
       setRemoveBgApiKey('');
       setEnablePhotoMaker(true);
     }
+    
+    if (settings.invoiceBuilderSettings) {
+      setEnableProductAutocomplete(settings.invoiceBuilderSettings.enableProductAutocomplete !== false);
+      setEnableTemplateSwitcher(settings.invoiceBuilderSettings.enableTemplateSwitcher !== false);
+      setEnableItemLevelDiscount(settings.invoiceBuilderSettings.enableItemLevelDiscount === true);
+      setEnableItemLevelTax(settings.invoiceBuilderSettings.enableItemLevelTax === true);
+      setEnableDragAndDrop(settings.invoiceBuilderSettings.enableDragAndDrop !== false);
+      setEnableDigitalSignature(settings.invoiceBuilderSettings.enableDigitalSignature !== false);
+      setEnableLivePreview(settings.invoiceBuilderSettings.enableLivePreview !== false);
+    } else {
+      setEnableProductAutocomplete(true);
+      setEnableTemplateSwitcher(true);
+      setEnableItemLevelDiscount(false);
+      setEnableItemLevelTax(false);
+      setEnableDragAndDrop(true);
+      setEnableDigitalSignature(true);
+      setEnableLivePreview(true);
+    }
   };
 
   const handleDiscard = () => {
@@ -521,14 +566,11 @@ const SettingsStudioV2 = ({
 
   const handleExport = async () => {
     try {
-      const data = await backupEngine.exportLocal();
-      const jsonStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
-      const a = document.createElement('a');
-      a.setAttribute('href', jsonStr);
-      a.setAttribute('download', 'billqyro-backup-' + new Date().toISOString().split('T')[0] + '.json');
-      document.body.appendChild(a); a.click(); a.remove();
-      toast.success('Backup exported');
-    } catch (e) { toast.error('Export failed: ' + e.message); }
+      await backupEngine.exportLocal();
+      toast.success('Backup downloaded successfully!');
+    } catch (e) {
+      toast.error('Export failed: ' + e.message);
+    }
   };
 
   const handleImport = async (e) => {
@@ -869,19 +911,97 @@ const SettingsStudioV2 = ({
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button onClick={handleExport} className="flex items-center gap-3 p-4 rounded-xl border border-green-500/30 bg-green-500/5 hover:bg-green-500/10 text-left">
-                <Download className="text-green-500" /><div><div className="font-semibold text-sm">Export Backup</div><div className="text-xs text-gray-500">Download all data as JSON</div></div>
+              <button onClick={handleExport} className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 text-left transition-colors">
+                <Download className="text-emerald-500 w-5 h-5 shrink-0" />
+                <div>
+                  <div className="font-extrabold text-sm text-theme-primary">Export Backup</div>
+                  <div className="text-[10px] font-semibold text-theme-muted mt-0.5">Download all data as JSON</div>
+                </div>
               </button>
-              <label className="flex items-center gap-3 p-4 rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/5 hover:bg-[var(--accent)]/10 cursor-pointer text-left">
-                <Upload className="text-[var(--accent)]" /><div><div className="font-semibold text-sm">Import Backup</div><div className="text-xs text-gray-500">Restore from a backup file</div></div>
+              <label className="flex items-center gap-3 p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 cursor-pointer text-left transition-colors">
+                <Upload className="text-blue-500 w-5 h-5 shrink-0" />
+                <div>
+                  <div className="font-extrabold text-sm text-theme-primary">Import Backup</div>
+                  <div className="text-[10px] font-semibold text-theme-muted mt-0.5">Restore from a backup file</div>
+                </div>
                 <input type="file" accept=".json" onChange={handleImport} className="hidden" />
               </label>
-              <button onClick={() => { if (confirm('Clear cache?')) { adminEngine.clearCacheOnly(); toast.success('Cache cleared'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-yellow-500/30 bg-yellow-500/5 hover:bg-yellow-500/10 text-left">
-                <RotateCcw className="text-yellow-500" /><div><div className="font-semibold text-sm">Clear Cache</div><div className="text-xs text-gray-500">Reset temporary data</div></div>
+              <button onClick={() => { if (confirm('Clear cache?')) { adminEngine.clearCacheOnly(); toast.success('Cache cleared'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 text-left transition-colors">
+                <RotateCcw className="text-amber-500 w-5 h-5 shrink-0" />
+                <div>
+                  <div className="font-extrabold text-sm text-theme-primary">Clear Cache</div>
+                  <div className="text-[10px] font-semibold text-theme-muted mt-0.5">Reset temporary data</div>
+                </div>
               </button>
-              <button onClick={() => { if (confirm('Reset all data? This cannot be undone.')) { adminEngine.factoryResetAllData(); toast.success('Data reset in progress...'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-left">
-                <Trash2 className="text-red-500" /><div><div className="font-semibold text-sm text-red-600">Reset All Data</div><div className="text-xs text-red-400">Wipe everything</div></div>
+              <button onClick={() => { if (confirm('Reset all data? This cannot be undone.')) { adminEngine.factoryResetAllData(); toast.success('Data reset in progress...'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/10 text-left transition-colors">
+                <Trash2 className="text-rose-500 w-5 h-5 shrink-0" />
+                <div>
+                  <div className="font-extrabold text-sm text-rose-600 dark:text-rose-400">Factory Reset</div>
+                  <div className="text-[10px] font-bold text-rose-500/80 mt-0.5">Wipe all local data permanently</div>
+                </div>
               </button>
+            </div>
+          </div>
+        );
+
+      case 'invoice-builder':
+        return (
+          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+            <div className="section-header border-b border-gray-200 dark:border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0">
+                  <LayoutTemplate className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="section-header-title">Invoice Builder Controls</h2>
+                  <p className="section-header-subtitle">Enable or disable premium features in the invoice builder</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ToggleSwitch
+                enabled={enableProductAutocomplete}
+                onChange={setEnableProductAutocomplete}
+                label="Product Autocomplete"
+                description="Auto-suggest items from your catalog"
+              />
+              <ToggleSwitch
+                enabled={enableTemplateSwitcher}
+                onChange={setEnableTemplateSwitcher}
+                label="Template Switcher"
+                description="Allow switching invoice designs"
+              />
+              <ToggleSwitch
+                enabled={enableItemLevelDiscount}
+                onChange={setEnableItemLevelDiscount}
+                label="Item-Level Discount"
+                description="Allow adding discounts per line item"
+              />
+              <ToggleSwitch
+                enabled={enableItemLevelTax}
+                onChange={setEnableItemLevelTax}
+                label="Item-Level Tax"
+                description="Allow adding tax per line item"
+              />
+              <ToggleSwitch
+                enabled={enableDragAndDrop}
+                onChange={setEnableDragAndDrop}
+                label="Drag & Drop Rows"
+                description="Reorder items by dragging"
+              />
+              <ToggleSwitch
+                enabled={enableDigitalSignature}
+                onChange={setEnableDigitalSignature}
+                label="Digital Signature"
+                description="Enable signature pad on invoice"
+              />
+              <ToggleSwitch
+                enabled={enableLivePreview}
+                onChange={setEnableLivePreview}
+                label="Live PDF Preview"
+                description="Real-time PDF rendering preview"
+              />
             </div>
           </div>
         );
@@ -889,36 +1009,18 @@ const SettingsStudioV2 = ({
       case 'subscription':
         return <div className="animate-fadeIn"><Subscription currentSubscription={subscription} onUpgrade={onUpgrade} businessSettings={settings} /></div>;
 
-      case 'invoice-templates':
-      case 'pdf-templates':
+      case 'template-gallery':
         return (
           <div className="animate-fadeIn">
             <div className="flex items-center justify-between mb-4">
               <div className="section-header">
-                <h2 className="section-header-title">Template Studio</h2>
-                <p className="section-header-subtitle">Design professional invoice templates</p>
+                <h2 className="section-header-title">Universal Template Gallery</h2>
+                <p className="section-header-subtitle">Select a single design to unify your PDF, Live Link, and Printed invoices.</p>
               </div>
             </div>
             <PdfTemplateStudio setCurrentTab={(tab) => {
               if (tab === 'dashboard') setCurrentTab?.('dashboard');
               else if (tab === 'settings') setActiveSection('business');
-              else setActiveSection(tab);
-            }} businessSettings={settings} setSettings={onSaveSettings} />
-          </div>
-        );
-
-      case 'billing-portal':
-        const isEdu = isEducationBusiness(settings.defaultBillingTemplate);
-        return (
-          <div className="animate-fadeIn">
-            <div className="flex items-center justify-between mb-4">
-              <div className="section-header">
-                <h2 className="section-header-title">{isEdu ? 'Student Portal' : 'Billing Portal'}</h2>
-                <p className="section-header-subtitle">{isEdu ? 'Student-facing fee portal configuration' : 'Customer-facing payment portal configuration'}</p>
-              </div>
-            </div>
-            <LiveLinkTemplateStudio setCurrentTab={(tab) => {
-              if (tab === 'dashboard') setCurrentTab?.('dashboard');
               else setActiveSection(tab);
             }} businessSettings={settings} setSettings={onSaveSettings} />
           </div>

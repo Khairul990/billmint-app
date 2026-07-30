@@ -93,7 +93,7 @@
             champagne: 'champagne-black'
           };
           
-          var folder = themeFolderMap[activeTheme];
+          var folder = themeFolderMap[activeTheme] || 'billqyro-classic';
           if (folder) {
             var f32 = document.getElementById('favicon-32');
             if (f32) f32.href = '/icons/themes/' + folder + '/favicon-32x32.png';

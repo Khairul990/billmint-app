@@ -27,6 +27,7 @@ import {
   Printer, 
   FileText
 } from 'lucide-react';
+import InvoicePreview from '../components/InvoicePreview';
 // Removed unused import: getPublicInvoice
 import { downloadInvoicePDF } from '../utils/pdfUtils';
 import DynamicQRCode from '../components/DynamicQRCode';
@@ -37,6 +38,7 @@ import { doc, updateDoc, arrayUnion, collection, addDoc, runTransaction } from '
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../services/firebaseConfig';
 import { sendPaymentReceiptEmail, verifyTransactionId } from '../services/cloudFunctions';
+import { getTemplateLayoutFamily } from '../services/TemplateEngine';
 
 // Sanitize string input to prevent XSS in payment proofs
 const sanitizeInput = (str) => {
@@ -365,7 +367,13 @@ const PublicInvoice = ({ initialInvoice }) => {
     setTimeout(() => setCopiedText(''), 2000);
   };
 
-  const activeTemplate = liveLinkPrefs.selectedLiveLinkTemplate || 'classic';
+  const rawActiveTemplate = liveLinkPrefs.selectedLiveLinkTemplate || 'classic';
+  const activeTemplateFamily = getTemplateLayoutFamily(rawActiveTemplate);
+  
+  // Use specific logic for templates that have dedicated Live Link styles, otherwise fallback to family
+  const activeTemplate = ['mobile', 'boutique', 'clinic', 'repair', 'cartoon'].includes(rawActiveTemplate) 
+    ? rawTemplateId 
+    : activeTemplateFamily;
 
   const getTemplateStyles = () => {
     switch (activeTemplate) {
@@ -376,6 +384,17 @@ const PublicInvoice = ({ initialInvoice }) => {
           addressBox: "bg-indigo-50/50 dark:bg-indigo-950/20 border-0 rounded-2xl p-5",
           tableHeader: "bg-gradient-to-r from-indigo-600 to-purple-600 text-white",
           totalsBox: "bg-indigo-50/30 dark:bg-indigo-950/10 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-5"
+        };
+      case 'gold':
+      case 'premium-gold':
+      case 'executive':
+        return {
+          container: "bg-slate-900 text-amber-50 rounded-3xl border border-amber-500/20 shadow-[0_0_40px_rgba(245,158,11,0.15)] p-6 md:p-8 space-y-6 relative overflow-hidden",
+          header: "border-b border-amber-500/30 pb-6",
+          addressBox: "bg-black/40 border border-amber-500/20 rounded-2xl p-5",
+          tableHeader: "bg-gradient-to-r from-amber-600 to-yellow-500 text-slate-900 font-bold",
+          totalsBox: "bg-black/40 border border-amber-500/30 rounded-2xl p-5",
+          textOverride: "text-amber-50"
         };
       case 'mobile':
         return {
@@ -395,35 +414,38 @@ const PublicInvoice = ({ initialInvoice }) => {
           totalsBox: "bg-transparent border-0 rounded-none p-2"
         };
       case 'corporate':
+      case 'classic-elegant':
         return {
           container: "bg-theme-card rounded-xl border border-theme-border-soft shadow-lg p-8 md:p-10 space-y-8 relative overflow-hidden font-sans",
           header: "border-b-4 border-theme-border-soft pb-8",
           addressBox: "bg-theme-surface/50 border-l-4 border-theme-border-soft rounded-r-xl rounded-l-none p-5",
-          tableHeader: "bg-theme-surface text-theme-primary",
+          tableHeader: "bg-emerald-800 text-white",
           totalsBox: "bg-theme-surface/50 border border-theme-border-strong rounded-xl p-6"
         };
+      case 'minimal':
       case 'boutique':
         return {
-          container: "bg-rose-50/30 dark:bg-rose-950/20 rounded-3xl border border-rose-100 dark:border-rose-900/50 shadow-xl p-6 md:p-10 space-y-8 relative overflow-hidden font-serif",
-          header: "border-b border-rose-200 dark:border-rose-900/50 pb-8 sm:text-center flex-col sm:items-center",
-          addressBox: "bg-white/60 dark:bg-theme-card/60 border border-rose-100 dark:border-rose-900/30 rounded-3xl p-6 shadow-sm",
-          tableHeader: "bg-rose-900 dark:bg-rose-950 text-rose-50",
-          totalsBox: "bg-white/60 dark:bg-theme-card/60 border border-rose-100 dark:border-rose-900/30 rounded-3xl p-6 shadow-sm"
+          container: "bg-white dark:bg-zinc-950 rounded-none border border-zinc-200 dark:border-zinc-800 shadow-sm p-6 md:p-10 space-y-8 relative overflow-hidden font-serif",
+          header: "border-b border-zinc-200 dark:border-zinc-800 pb-8 sm:text-center flex-col sm:items-center",
+          addressBox: "bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-none p-6",
+          tableHeader: "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100",
+          totalsBox: "bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-none p-6"
         };
+      case 'doctor':
       case 'clinic':
         return {
-          container: "bg-theme-card rounded-2xl border-t-8 border-t-blue-500 border-x border-b border-theme-border-soft shadow-lg p-6 md:p-8 space-y-6 relative overflow-hidden",
-          header: "border-b border-blue-100 dark:border-blue-900/30 pb-6",
-          addressBox: "bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-xl p-5",
-          tableHeader: "bg-blue-600 dark:bg-blue-800 text-white",
-          totalsBox: "bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-xl p-5"
+          container: "bg-theme-card rounded-2xl border-t-8 border-t-teal-500 border-x border-b border-theme-border-soft shadow-lg p-6 md:p-8 space-y-6 relative overflow-hidden",
+          header: "border-b border-teal-100 dark:border-teal-900/30 pb-6",
+          addressBox: "bg-teal-50/50 dark:bg-teal-950/20 border border-teal-100 dark:border-teal-900/30 rounded-xl p-5",
+          tableHeader: "bg-teal-600 dark:bg-teal-800 text-white",
+          totalsBox: "bg-teal-50/50 dark:bg-teal-950/20 border border-teal-100 dark:border-teal-900/30 rounded-xl p-5"
         };
       case 'repair':
         return {
-          container: "bg-theme-surface rounded-xl border-l-8 border-l-yellow-500 border-y border-r border-theme-border-strong shadow-md p-6 md:p-8 space-y-6 relative overflow-hidden",
+          container: "bg-theme-surface rounded-xl border-l-8 border-l-orange-500 border-y border-r border-theme-border-strong shadow-md p-6 md:p-8 space-y-6 relative overflow-hidden",
           header: "border-b border-theme-border-strong pb-6",
           addressBox: "bg-theme-card border border-theme-border-soft rounded-lg p-4 shadow-sm",
-          tableHeader: "bg-theme-app text-yellow-500 border-b-2 border-yellow-500",
+          tableHeader: "bg-theme-app text-orange-600 border-b-2 border-orange-500",
           totalsBox: "bg-theme-card border border-theme-border-soft rounded-lg p-4 shadow-sm"
         };
       case 'cartoon':
@@ -516,6 +538,25 @@ const PublicInvoice = ({ initialInvoice }) => {
         return 'bg-theme-surface dark:bg-theme-card text-theme-primary';
     }
   };
+
+  const enableOnlineLayout = liveLinkPrefs.enableOnlineLayout ?? true;
+
+  if (!enableOnlineLayout) {
+    return (
+      <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen bg-theme-app py-8 px-4 flex justify-center">
+        <div className="w-full max-w-4xl relative">
+          <div className="flex justify-end mb-4">
+             {liveLinkPrefs.allowCustomerPdfDownload && (
+              <button onClick={handleDownloadPDF} className="btn-premium px-4 py-2 text-xs">
+                <FileDown className="w-4 h-4" /> Download PDF
+              </button>
+            )}
+          </div>
+          <InvoicePreview invoice={invoice} businessSettings={{ ...business, selectedPdfTemplate: activeTemplate }} />
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

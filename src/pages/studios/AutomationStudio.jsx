@@ -77,7 +77,7 @@ const AutomationStudio = ({ settings, onUpdate }) => {
                     <select
                       value={rule.condition}
                       onChange={(e) => handleUpdateRule(idx, 'condition', e.target.value)}
-                      className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2.5 rounded-lg focus:outline-none focus:border-theme-success cursor-pointer"
+                      className="w-full bg-theme-main border border-theme-border-soft text-theme-primary text-xs px-3 py-2.5 rounded-lg focus:outline-none focus:border-theme-success cursor-pointer"
                     >
                       {CONDITIONS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                     </select>
@@ -92,7 +92,7 @@ const AutomationStudio = ({ settings, onUpdate }) => {
                     <select
                       value={rule.action}
                       onChange={(e) => handleUpdateRule(idx, 'action', e.target.value)}
-                      className="w-full bg-theme-main border border-theme-border-soft text-white text-xs px-3 py-2.5 rounded-lg focus:outline-none focus:border-theme-success cursor-pointer"
+                      className="w-full bg-theme-main border border-theme-border-soft text-theme-primary text-xs px-3 py-2.5 rounded-lg focus:outline-none focus:border-theme-success cursor-pointer"
                     >
                       {ACTIONS.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
                     </select>
@@ -100,7 +100,7 @@ const AutomationStudio = ({ settings, onUpdate }) => {
                 </div>
                 
                 <div className="flex items-center gap-3 shrink-0 w-full md:w-auto mt-4 md:mt-0 justify-between md:justify-end border-t border-theme-border-soft pt-4 md:border-0 md:pt-0">
-                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-white">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-theme-primary">
                     <Switch 
                       checked={rule.active}
                       onChange={(checked) => handleUpdateRule(idx, 'active', checked)}

@@ -4,7 +4,7 @@ import { pageVariants } from '../../utils/animations';
 import { 
   Building2, Palette, FileText, Globe, LayoutDashboard, 
   LayoutTemplate, Zap, Shield, Copy, Save, X, Search, Database, Undo, Redo, RotateCcw,
-  Crown, Lock, HardDrive, Globe2, Bell
+  Crown, Lock, HardDrive, Globe2, Bell, ArrowLeft
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useSettingsHistory } from '../../hooks/useSettingsHistory';
@@ -30,21 +30,28 @@ const NotificationStudio = React.lazy(() => import('./NotificationStudio'));
 const FeatureControlStudio = React.lazy(() => import('./FeatureControlStudio'));
 
 const STUDIO_ROUTES = [
+  { type: 'label', label: 'Core Platform' },
   { id: 'business', label: 'Business Studio', icon: Building2, desc: 'Brand & Identity' },
+  { id: 'features', label: 'Module Manager', icon: Zap, desc: 'Toggle Sidebar Features' },
+  { id: 'subscription', label: 'Subscription Studio', icon: Crown, desc: 'Plans & Limits' },
+
+  { type: 'label', label: 'Customization' },
   { id: 'theme', label: 'Theme Studio', icon: Palette, desc: 'Colors & UI' },
-  { id: 'invoice', label: 'Invoice Studio', icon: FileText, desc: 'Templates & Columns' },
+  { id: 'invoice', label: 'Template Gallery', icon: LayoutTemplate, desc: 'Universal Templates & Columns' },
   { id: 'form', label: 'Form Builder', icon: LayoutTemplate, desc: 'Custom Fields' },
   { id: 'portal', label: 'Portal Studio', icon: Globe, desc: 'Client Experience' },
+
+  { type: 'label', label: 'Access & Security' },
+  { id: 'roles', label: 'Role Studio', icon: Shield, desc: 'Permissions & Access' },
+  { id: 'security', label: 'Security Studio', icon: Lock, desc: '2FA & Sessions' },
+
+  { type: 'label', label: 'Advanced System' },
   { id: 'dashboard', label: 'Dashboard Studio', icon: LayoutDashboard, desc: 'Widgets & Layout' },
   { id: 'automation', label: 'Automation Studio', icon: Zap, desc: 'If-This-Then-That Logic' },
-  { id: 'roles', label: 'Role Studio', icon: Shield, desc: 'Permissions & Access' },
-  { id: 'subscription', label: 'Subscription Studio', icon: Crown, desc: 'Plans & Limits' },
-  { id: 'security', label: 'Security Studio', icon: Lock, desc: '2FA & Sessions' },
-  { id: 'backup', label: 'Backup Studio', icon: HardDrive, desc: 'Cloud Restore' },
-  { id: 'localization', label: 'Localization Studio', icon: Globe2, desc: 'Currency & Time' },
   { id: 'notification', label: 'Notification Studio', icon: Bell, desc: 'Email & SMS' },
-  { id: 'database', label: 'Database Studio', icon: Database, desc: 'Custom Collections' },
-  { id: 'features', label: 'Feature Control', icon: Zap, desc: 'Universal Modules' }
+  { id: 'localization', label: 'Localization Studio', icon: Globe2, desc: 'Currency & Time' },
+  { id: 'backup', label: 'Backup Studio', icon: HardDrive, desc: 'Cloud Restore' },
+  { id: 'database', label: 'Database Studio', icon: Database, desc: 'Custom Collections' }
 ];
 
 const StudioLayout = ({
@@ -86,13 +93,24 @@ const StudioLayout = ({
     toast('Changes discarded');
   };
 
-  const filteredRoutes = STUDIO_ROUTES.filter(r => 
+  let filteredRoutes = STUDIO_ROUTES.filter(r => 
+    r.type === 'label' ||
     r.label.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    r.desc.toLowerCase().includes(searchQuery.toLowerCase())
+    (r.desc && r.desc.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  filteredRoutes = filteredRoutes.filter((route, index) => {
+    if (route.type === 'label') {
+      const nextRoute = filteredRoutes[index + 1];
+      if (!nextRoute || nextRoute.type === 'label') {
+        return false;
+      }
+    }
+    return true;
+  });
+
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-gradient-to-br from-theme-main via-theme-main to-theme-surface text-white">
+    <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-gradient-to-br from-theme-main via-theme-main to-theme-surface text-theme-primary">
       {/* Premium Glass Sidebar */}
       <div className="w-72 bg-theme-surface/30 backdrop-blur-xl border-r border-theme-border-soft flex flex-col shrink-0 z-20 shadow-premium">
         <div className="p-6 border-b border-white/5 backdrop-blur-md">
@@ -110,7 +128,14 @@ const StudioLayout = ({
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-1.5 custom-scrollbar">
-          {filteredRoutes.map(route => {
+          {filteredRoutes.map((route, idx) => {
+            if (route.type === 'label') {
+              return (
+                <div key={`label-${idx}`} className="pt-4 pb-1 px-3">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-theme-muted">{route.label}</p>
+                </div>
+              );
+            }
             const Icon = route.icon;
             const isActive = activeStudio === route.id;
             return (
@@ -149,6 +174,13 @@ const StudioLayout = ({
         {/* Sticky Header */}
         <div className="h-[72px] border-b border-theme-border-soft bg-theme-surface/40 backdrop-blur-xl flex items-center justify-between px-8 shrink-0 z-10 shadow-sm sticky top-0">
           <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setCurrentTab('dashboard')} 
+              className="mr-2 p-2 rounded-full hover:bg-theme-main text-theme-muted hover:text-theme-primary transition-colors shadow-sm bg-theme-surface border border-theme-border-soft"
+              title="Back to Dashboard"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
             <div className="w-10 h-10 rounded-xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center">
               {React.createElement(STUDIO_ROUTES.find(r => r.id === activeStudio)?.icon || Building2, { className: 'w-5 h-5 text-theme-accent' })}
             </div>
@@ -238,7 +270,7 @@ const StudioLayout = ({
                       <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/20 to-transparent opacity-50" />
                       {React.createElement(STUDIO_ROUTES.find(r => r.id === activeStudio)?.icon || Building2, { className: 'w-10 h-10 text-theme-accent relative z-10' })}
                     </div>
-                    <h3 className="text-2xl font-black text-white mb-2 tracking-tight">{STUDIO_ROUTES.find(r => r.id === activeStudio)?.label}</h3>
+                    <h3 className="text-2xl font-black text-theme-primary mb-2 tracking-tight">{STUDIO_ROUTES.find(r => r.id === activeStudio)?.label}</h3>
                     <p className="text-sm text-theme-muted max-w-md">This studio module is currently being finalized for the production 3.0 release.</p>
                   </div>
                 )}
