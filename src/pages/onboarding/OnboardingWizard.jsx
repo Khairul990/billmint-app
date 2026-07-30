@@ -156,54 +156,88 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
           </p>
         </div>
 
-        <div>
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Full Name <span className="text-theme-accent">*</span></label>
-          <input
-            type="text"
-            value={formData.ownerName}
-            onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
-            placeholder="e.g. John Doe"
-            className="w-full bg-theme-app border border-theme-border-soft rounded-xl p-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Phone Number <span className="text-theme-accent">*</span></label>
-          <input
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            placeholder="e.g. +91 98765 43210"
-            className="w-full bg-theme-app border border-theme-border-soft rounded-xl p-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Email Address (Auto-filled)</label>
-          <input
-            type="email"
-            value={formData.ownerEmail}
-            readOnly
-            className="w-full bg-theme-app border border-theme-border-soft rounded-xl p-4 text-sm font-bold text-theme-muted opacity-70 cursor-not-allowed focus:outline-none"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Business Name (Optional)</label>
-          <input
-            type="text"
-            value={formData.businessName}
-            onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-            placeholder={`e.g. My ${selectedPreset.label}`}
-            className="w-full bg-theme-app border border-theme-border-soft rounded-xl p-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Address</label>
-          <input
-            type="text"
-            value={formData.address}
-            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-            placeholder="e.g. 123 Main Street"
-            className="w-full bg-theme-app border border-theme-border-soft rounded-xl p-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="md:col-span-1 relative group">
+            <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5 ml-1">Full Name <span className="text-theme-accent">*</span></label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-theme-muted group-focus-within:text-theme-accent transition-colors">
+                <User className="w-4 h-4" />
+              </span>
+              <input
+                type="text"
+                value={formData.ownerName}
+                onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
+                placeholder="e.g. John Doe"
+                className="w-full bg-theme-app border border-theme-border-soft rounded-2xl py-4 pl-11 pr-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent focus:ring-4 focus:ring-theme-accent/10 transition-all hover:border-theme-border"
+              />
+            </div>
+          </div>
+          
+          <div className="md:col-span-1 relative group">
+            <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5 ml-1">Phone Number <span className="text-theme-accent">*</span></label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-theme-muted group-focus-within:text-theme-accent transition-colors">
+                <Phone className="w-4 h-4" />
+              </span>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="+91 98765 43210"
+                className="w-full bg-theme-app border border-theme-border-soft rounded-2xl py-4 pl-11 pr-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent focus:ring-4 focus:ring-theme-accent/10 transition-all hover:border-theme-border"
+              />
+            </div>
+          </div>
+
+          <div className="md:col-span-2 relative group">
+            <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5 ml-1">Email Address</label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-theme-muted">
+                <Mail className="w-4 h-4" />
+              </span>
+              <input
+                type="email"
+                value={formData.ownerEmail}
+                readOnly
+                className="w-full bg-theme-surface border border-theme-border-soft rounded-2xl py-4 pl-11 pr-4 text-sm font-bold text-theme-muted opacity-70 cursor-not-allowed"
+              />
+              <span className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                <span className="text-[9px] font-black uppercase text-theme-accent bg-theme-accent/10 px-2 py-1 rounded-md">Auto-filled</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="md:col-span-1 relative group">
+            <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5 ml-1">Business Name <span className="text-theme-muted font-semibold lowercase tracking-normal">(Optional)</span></label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-theme-muted group-focus-within:text-theme-accent transition-colors">
+                <Building2 className="w-4 h-4" />
+              </span>
+              <input
+                type="text"
+                value={formData.businessName}
+                onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                placeholder={`My ${selectedPreset.label}`}
+                className="w-full bg-theme-app border border-theme-border-soft rounded-2xl py-4 pl-11 pr-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent focus:ring-4 focus:ring-theme-accent/10 transition-all hover:border-theme-border"
+              />
+            </div>
+          </div>
+
+          <div className="md:col-span-1 relative group">
+            <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5 ml-1">Business Address</label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-theme-muted group-focus-within:text-theme-accent transition-colors">
+                <MapPin className="w-4 h-4" />
+              </span>
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                placeholder="123 Main Street"
+                className="w-full bg-theme-app border border-theme-border-soft rounded-2xl py-4 pl-11 pr-4 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent focus:ring-4 focus:ring-theme-accent/10 transition-all hover:border-theme-border"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -236,7 +270,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
           <p className="text-sm font-bold text-theme-muted">We have pre-selected recommended features for a {selectedPreset.label}.</p>
         </div>
 
-        <div className="space-y-3 bg-theme-card p-4 rounded-3xl border border-theme-border-soft shadow-premium">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-theme-card p-5 rounded-3xl border border-theme-border-soft shadow-premium">
           {availableModules.map(mod => {
             const isRecommended = selectedPreset.recommendedModules.includes(mod.id);
             const isEnabled = formData.enabledModules.includes(mod.id);
@@ -250,20 +284,21 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
                     setFormData({ ...formData, enabledModules: [...formData.enabledModules, mod.id] });
                   }
                 }}
-                className={`w-full flex flex-col p-4 rounded-2xl border transition-colors hover-glow-effect ${isEnabled ? 'bg-theme-accent/5 border-theme-accent/50 shadow-[0_0_15px_var(--accent-glow)]' : 'bg-theme-app border-theme-border-soft hover:bg-theme-surface'}`}
+                className={`w-full flex flex-col p-4 rounded-2xl border transition-all hover-glow-effect relative overflow-hidden group ${isEnabled ? 'bg-theme-accent/5 border-theme-accent/50 shadow-[0_0_15px_var(--accent-glow)]' : 'bg-theme-app border-theme-border-soft hover:bg-theme-surface hover:border-theme-border'}`}
               >
-                <div className="flex items-center justify-between w-full">
+                <div className={`absolute inset-0 bg-gradient-to-br from-theme-accent/10 to-transparent transition-opacity duration-300 ${isEnabled ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}></div>
+                <div className="flex items-center justify-between w-full relative z-10">
                   <span className="font-extrabold text-sm text-theme-primary flex items-center gap-2">
                     {mod.name}
-                    {isRecommended && <span className="bg-theme-accent text-white text-[9px] uppercase px-2 py-0.5 rounded-full tracking-wider">Recommended</span>}
+                    {isRecommended && <span className="bg-theme-accent text-white text-[9px] uppercase px-2 py-0.5 rounded-full tracking-wider shadow-sm">Recommended</span>}
                   </span>
                   {isEnabled ? (
-                    <CheckCircle2 className="w-6 h-6 text-theme-accent" />
+                    <CheckCircle2 className="w-5 h-5 text-theme-accent drop-shadow-sm" />
                   ) : (
-                    <div className="w-6 h-6 rounded-full border-2 border-theme-border-soft" />
+                    <div className="w-5 h-5 rounded-full border-2 border-theme-border-soft transition-colors group-hover:border-theme-accent/30" />
                   )}
                 </div>
-                <p className="text-xs text-theme-muted font-medium mt-1 text-left">{mod.desc}</p>
+                <p className="text-[10px] text-theme-muted font-bold mt-1.5 text-left relative z-10 leading-relaxed">{mod.desc}</p>
               </button>
             )
           })}
@@ -302,56 +337,60 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
         <p className="text-sm font-bold text-theme-muted">How do you want to get paid? (You can skip this for now)</p>
       </div>
 
-      <div className="space-y-4 bg-theme-card p-6 rounded-3xl border border-theme-border-soft shadow-premium">
+      <div className="space-y-5 bg-theme-card p-6 rounded-3xl border border-theme-border-soft shadow-premium">
         
         {/* India Payment */}
-        <div className="p-5 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-3 hover-glow-effect transition-all relative overflow-hidden group">
+        <div className="p-5 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-4 hover-glow-effect transition-all relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider relative z-10">India (UPI ID)</label>
-          <input 
-            value={paymentForm.indiaUpi}
-            onChange={(e) => setPaymentForm({...paymentForm, indiaUpi: e.target.value})}
-            placeholder="e.g. name@okhdfcbank" 
-            className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-4 text-sm font-bold focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all relative z-10" 
-          />
+          <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest relative z-10 flex items-center gap-1.5"><img src="https://flagcdn.com/w20/in.png" alt="India" className="w-4 h-auto rounded-[2px]" /> India (UPI ID)</label>
+          <div className="relative z-10 group-focus-within:text-theme-accent transition-colors">
+            <input 
+              value={paymentForm.indiaUpi}
+              onChange={(e) => setPaymentForm({...paymentForm, indiaUpi: e.target.value})}
+              placeholder="e.g. name@okhdfcbank" 
+              className="w-full bg-theme-surface border border-theme-border-soft rounded-xl py-4 px-5 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent focus:ring-4 focus:ring-theme-accent/10 transition-all hover:border-theme-border" 
+            />
+          </div>
         </div>
 
         {/* Bangladesh Payment */}
-        <div className="p-5 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-3 hover-glow-effect transition-all relative overflow-hidden group">
+        <div className="p-5 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-4 hover-glow-effect transition-all relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider relative z-10">Bangladesh (MFS)</label>
-          <div className="flex gap-3 relative z-10">
+          <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest relative z-10 flex items-center gap-1.5"><img src="https://flagcdn.com/w20/bd.png" alt="Bangladesh" className="w-4 h-auto rounded-[2px]" /> Bangladesh (MFS)</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 relative z-10">
             <input 
               value={paymentForm.bdBkash}
               onChange={(e) => setPaymentForm({...paymentForm, bdBkash: e.target.value})}
               placeholder="bKash Number" 
-              className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-4 text-sm font-bold focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all" 
+              className="w-full bg-theme-surface border border-theme-border-soft rounded-xl py-4 px-5 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent focus:ring-4 focus:ring-theme-accent/10 transition-all hover:border-theme-border" 
             />
             <input 
               value={paymentForm.bdNagad}
               onChange={(e) => setPaymentForm({...paymentForm, bdNagad: e.target.value})}
               placeholder="Nagad Number" 
-              className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-4 text-sm font-bold focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all" 
+              className="w-full bg-theme-surface border border-theme-border-soft rounded-xl py-4 px-5 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent focus:ring-4 focus:ring-theme-accent/10 transition-all hover:border-theme-border" 
             />
           </div>
         </div>
 
         {/* Other Bank */}
-        <div className="p-5 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-3 hover-glow-effect transition-all relative overflow-hidden group">
+        <div className="p-5 border border-theme-border-soft rounded-2xl bg-theme-app text-left space-y-4 hover-glow-effect transition-all relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <label className="block text-xs font-black text-theme-muted uppercase tracking-wider relative z-10">Bank Transfer (Other)</label>
-          <input 
-            value={paymentForm.bankName}
-            onChange={(e) => setPaymentForm({...paymentForm, bankName: e.target.value})}
-            placeholder="Bank Name" 
-            className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-4 text-sm font-bold focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all mb-3 relative z-10" 
-          />
-          <input 
-            value={paymentForm.accNum}
-            onChange={(e) => setPaymentForm({...paymentForm, accNum: e.target.value})}
-            placeholder="Account Number / IBAN" 
-            className="w-full bg-theme-surface border border-theme-border-soft rounded-xl p-4 text-sm font-bold focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all relative z-10" 
-          />
+          <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest relative z-10 flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5" /> Bank Transfer (Other)</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 relative z-10">
+            <input 
+              value={paymentForm.bankName}
+              onChange={(e) => setPaymentForm({...paymentForm, bankName: e.target.value})}
+              placeholder="Bank Name" 
+              className="w-full bg-theme-surface border border-theme-border-soft rounded-xl py-4 px-5 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent focus:ring-4 focus:ring-theme-accent/10 transition-all hover:border-theme-border" 
+            />
+            <input 
+              value={paymentForm.accNum}
+              onChange={(e) => setPaymentForm({...paymentForm, accNum: e.target.value})}
+              placeholder="Account Number / IBAN" 
+              className="w-full bg-theme-surface border border-theme-border-soft rounded-xl py-4 px-5 text-sm font-bold text-theme-primary focus:outline-none focus:border-theme-accent focus:ring-4 focus:ring-theme-accent/10 transition-all hover:border-theme-border" 
+            />
+          </div>
         </div>
       </div>
     </motion.div>
