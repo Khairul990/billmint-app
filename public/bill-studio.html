@@ -172,28 +172,11 @@
             background-color: rgba(201, 162, 39, 0.03);
         }
 
-        /* Item Label Edit */
-        .item-label-edit {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .item-label-input {
-            width: 140px;
+        /* Item Label */
+        .item-label-display {
             font-family: var(--font-heading);
             font-size: 0.85rem;
             font-weight: 600;
-            padding: 0.2rem 0.5rem;
-        }
-        .reset-label-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-muted);
-            font-size: 0.75rem;
-        }
-        .reset-label-btn:hover {
-            color: var(--primary-accent);
         }
 
         /* Buttons */
@@ -437,25 +420,8 @@
             animation: fadeInRow 0.25s ease-out forwards;
         }
 
-        /* Custom Column Header */
         .custom-col-th {
             position: relative;
-            padding-right: 24px;
-        }
-        .delete-col-btn {
-            position: absolute;
-            right: 4px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 1rem;
-            line-height: 1;
-        }
-        .delete-col-btn:hover {
-            color: var(--danger);
         }
 
         /* Responsive */
@@ -524,7 +490,6 @@
     <div class="card">
         <div class="header-row" style="margin-bottom: 1rem;">
             <span class="section-label" style="margin-bottom: 0;">Line Items</span>
-            <button class="btn btn-dashed" onclick="openColumnModal()">+ Add Column</button>
         </div>
         
         <div class="table-responsive">
@@ -619,32 +584,6 @@
     </div>
 </div>
 
-<!-- Add Column Modal -->
-<div class="modal-overlay" id="columnModal">
-    <div class="modal-card">
-        <h3>Add Custom Column</h3>
-        <div class="form-group" style="margin-bottom: 1rem;">
-            <label>Column Name</label>
-            <input type="text" id="colNameInput" placeholder="e.g. Size, Color, Warranty">
-        </div>
-        <div class="form-group" style="margin-bottom: 1rem;">
-            <label>Field Type</label>
-            <select id="colTypeInput" onchange="toggleOptionsInput()">
-                <option value="text">Text Input</option>
-                <option value="number">Number Input</option>
-                <option value="dropdown">Dropdown (Select)</option>
-            </select>
-        </div>
-        <div class="form-group" id="colOptionsGroup" style="display: none; margin-bottom: 1rem;">
-            <label>Options (comma separated)</label>
-            <input type="text" id="colOptionsInput" placeholder="e.g. S, M, L, XL">
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-outline" onclick="closeColumnModal()">Cancel</button>
-            <button class="btn btn-primary" onclick="addColumn()">Add Column</button>
-        </div>
-    </div>
-</div>
 
 <!-- Toast -->
 <div id="toast" class="toast"></div>
@@ -685,10 +624,7 @@
         // Render Header
         let thHTML = `
             <th>
-                <div class="item-label-edit">
-                    <input type="text" class="item-label-input" id="itemLabelInput" value="${state.itemLabel}" onblur="updateItemLabel(this.value)">
-                    <button class="reset-label-btn" onclick="updateItemLabel('Item')" title="Reset to Item">↺ Reset</button>
-                </div>
+                <div class="item-label-display">${state.itemLabel}</div>
             </th>
         `;
 
@@ -696,7 +632,6 @@
             thHTML += `
                 <th class="custom-col-th">
                     ${col.name}
-                    <button class="delete-col-btn" onclick="deleteColumn('${col.id}')" title="Delete Column">×</button>
                 </th>
             `;
         });
@@ -750,10 +685,6 @@
     }
 
     // --- Actions ---
-    function updateItemLabel(val) {
-        state.itemLabel = val.trim() || 'Item';
-        document.getElementById('itemLabelInput').value = state.itemLabel;
-    }
 
     function addRow(animate = true) {
         const id = 'item_' + Date.now() + Math.random().toString(36).substr(2, 5);
@@ -837,66 +768,6 @@
         }
     }
 
-    // --- Custom Columns ---
-    function openColumnModal() {
-        document.getElementById('colNameInput').value = '';
-        document.getElementById('colTypeInput').value = 'text';
-        document.getElementById('colOptionsInput').value = '';
-        toggleOptionsInput();
-        document.getElementById('columnModal').classList.add('active');
-        document.getElementById('colNameInput').focus();
-    }
-
-    function closeColumnModal() {
-        document.getElementById('columnModal').classList.remove('active');
-    }
-
-    function toggleOptionsInput() {
-        const type = document.getElementById('colTypeInput').value;
-        document.getElementById('colOptionsGroup').style.display = type === 'dropdown' ? 'block' : 'none';
-    }
-
-    function addColumn() {
-        const name = document.getElementById('colNameInput').value.trim();
-        const type = document.getElementById('colTypeInput').value;
-        const options = document.getElementById('colOptionsInput').value.trim();
-
-        if(!name) {
-            alert("Column name is required.");
-            return;
-        }
-        if(type === 'dropdown' && !options) {
-            alert("Please provide at least one option for the dropdown.");
-            return;
-        }
-
-        const id = 'col_' + Date.now();
-        state.customColumns.push({ id, name, type, options });
-        
-        // Add empty values to existing items
-        state.items.forEach(item => {
-            item.customFields[id] = '';
-        });
-
-        closeColumnModal();
-        renderTable();
-        showToast(`Column "${name}" added.`);
-    }
-
-    function deleteColumn(colId) {
-        if(confirm("Are you sure? This column and all its data will be removed from all rows.")) {
-            const colIndex = state.customColumns.findIndex(c => c.id === colId);
-            if(colIndex > -1) {
-                const colName = state.customColumns[colIndex].name;
-                state.customColumns.splice(colIndex, 1);
-                state.items.forEach(item => {
-                    delete item.customFields[colId];
-                });
-                renderTable();
-                showToast(`Column "${colName}" removed.`);
-            }
-        }
-    }
     // --- State & Settings ---
     let currencySymbol = '$';
 
@@ -1069,7 +940,22 @@
                     const sigBox = document.getElementById('signatureBox');
                     if (sigBox) sigBox.style.display = 'none';
                 }
-                renderItems(); // Re-render to apply toggles (e.g., list attribute)
+                if (features.itemLabel) {
+                    state.itemLabel = features.itemLabel;
+                }
+                if (features.customColumns && Array.isArray(features.customColumns)) {
+                    state.customColumns = features.customColumns;
+                    
+                    // Sync empty fields for existing items if they are missing
+                    state.items.forEach(item => {
+                        state.customColumns.forEach(col => {
+                            if (item.customFields[col.id] === undefined) {
+                                item.customFields[col.id] = '';
+                            }
+                        });
+                    });
+                }
+                renderTable(); // Re-render to apply toggles (e.g., list attribute)
             }
             if (brandColor) {
                 document.documentElement.style.setProperty('--primary-accent', brandColor);

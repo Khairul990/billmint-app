@@ -221,6 +221,8 @@ const SettingsStudioV2 = ({
   const [enableDragAndDrop, setEnableDragAndDrop] = useState(true);
   const [enableDigitalSignature, setEnableDigitalSignature] = useState(true);
   const [enableLivePreview, setEnableLivePreview] = useState(true);
+  const [invoiceItemLabel, setInvoiceItemLabel] = useState('Item');
+  const [invoiceCustomColumns, setInvoiceCustomColumns] = useState([]);
 
   const [isDragging, setIsDragging] = useState(false);
   const [dbProvider, setDbProvider] = useState(() => localStorage.getItem('billmint_db_provider') || 'firebase');
@@ -310,6 +312,8 @@ const SettingsStudioV2 = ({
         setEnableDragAndDrop(settings.invoiceBuilderSettings.enableDragAndDrop !== false);
         setEnableDigitalSignature(settings.invoiceBuilderSettings.enableDigitalSignature !== false);
         setEnableLivePreview(settings.invoiceBuilderSettings.enableLivePreview !== false);
+        setInvoiceItemLabel(settings.invoiceBuilderSettings.itemLabel || 'Item');
+        setInvoiceCustomColumns(settings.invoiceBuilderSettings.customColumns || []);
       }
     }
   }, [settings]);
@@ -347,7 +351,8 @@ const SettingsStudioV2 = ({
     showPaidDueAmount, showContactButton, requireTransactionId, requirePaymentScreenshot,
     themeId, darkMode, logoUrl, cornerRadius, shadowIntensity, animationSpeed, fontDensity,
     emailNotifications, whatsappNotifications, dueDateReminders, paymentConfirmation, marketingEmails, securityAlerts,
-    cyberPortals, removeBgApiKey, enablePhotoMaker
+    cyberPortals, removeBgApiKey, enablePhotoMaker,
+    invoiceItemLabel, invoiceCustomColumns
   ]);
 
   // Theme application
@@ -450,7 +455,9 @@ const SettingsStudioV2 = ({
           enableItemLevelTax,
           enableDragAndDrop,
           enableDigitalSignature,
-          enableLivePreview
+          enableLivePreview,
+          itemLabel: invoiceItemLabel,
+          customColumns: invoiceCustomColumns
         }
       };
       onSaveSettings(payload);
@@ -1002,6 +1009,89 @@ const SettingsStudioV2 = ({
                 label="Live PDF Preview"
                 description="Real-time PDF rendering preview"
               />
+            </div>
+            
+            {/* Custom Columns & Labels */}
+            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
+              <h3 className="text-lg font-bold text-theme-primary mb-4">Table Customization</h3>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-theme-main mb-2">Item/Product Column Label</label>
+                <input
+                  type="text"
+                  value={invoiceItemLabel}
+                  onChange={(e) => setInvoiceItemLabel(e.target.value)}
+                  className="w-full max-w-xs px-4 py-2 bg-theme-surface border border-theme-border rounded-xl focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent text-theme-main"
+                  placeholder="e.g. Item, Product, Service"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <label className="block text-sm font-semibold text-theme-main">Custom Columns</label>
+                    <p className="text-xs text-theme-muted mt-1">Add additional columns to your invoice table (e.g. Size, Color, Warranty)</p>
+                  </div>
+                  <button onClick={() => setInvoiceCustomColumns([...invoiceCustomColumns, { id: 'col_' + Date.now(), name: '', type: 'text', options: '' }])} className="px-3 py-1.5 text-xs font-bold bg-theme-accent text-white rounded-lg shadow-sm hover:brightness-110 transition-all">+ Add Column</button>
+                </div>
+                {invoiceCustomColumns.length === 0 ? (
+                  <p className="text-sm text-theme-muted p-4 bg-gray-50 dark:bg-black/20 rounded-xl border border-dashed border-gray-300 dark:border-white/20 text-center">No custom columns added.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {invoiceCustomColumns.map((col, index) => (
+                      <div key={col.id} className="flex flex-wrap items-center gap-3 p-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl">
+                        <input
+                          type="text"
+                          value={col.name}
+                          onChange={(e) => {
+                            const newCols = [...invoiceCustomColumns];
+                            newCols[index].name = e.target.value;
+                            setInvoiceCustomColumns(newCols);
+                          }}
+                          className="flex-1 min-w-[120px] px-3 py-1.5 text-sm bg-theme-surface border border-theme-border rounded-lg text-theme-main focus:outline-none focus:border-theme-accent"
+                          placeholder="Column Name"
+                        />
+                        <select
+                          value={col.type}
+                          onChange={(e) => {
+                            const newCols = [...invoiceCustomColumns];
+                            newCols[index].type = e.target.value;
+                            setInvoiceCustomColumns(newCols);
+                          }}
+                          className="px-3 py-1.5 text-sm bg-theme-surface border border-theme-border rounded-lg text-theme-main focus:outline-none focus:border-theme-accent"
+                        >
+                          <option value="text">Text Input</option>
+                          <option value="number">Number Input</option>
+                          <option value="dropdown">Dropdown</option>
+                        </select>
+                        {col.type === 'dropdown' && (
+                          <input
+                            type="text"
+                            value={col.options || ''}
+                            onChange={(e) => {
+                              const newCols = [...invoiceCustomColumns];
+                              newCols[index].options = e.target.value;
+                              setInvoiceCustomColumns(newCols);
+                            }}
+                            className="flex-1 min-w-[150px] px-3 py-1.5 text-sm bg-theme-surface border border-theme-border rounded-lg text-theme-main focus:outline-none focus:border-theme-accent"
+                            placeholder="Options (comma separated)"
+                          />
+                        )}
+                        <button
+                          onClick={() => {
+                            const newCols = invoiceCustomColumns.filter((_, i) => i !== index);
+                            setInvoiceCustomColumns(newCols);
+                          }}
+                          className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors shrink-0"
+                          title="Remove Column"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );
