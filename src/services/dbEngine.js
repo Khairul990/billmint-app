@@ -1096,7 +1096,7 @@ export const factoryResetAllData = async () => {
   
   if (firebaseReady && userId) {
     try {
-      await wipeUserFirestoreData(userId);
+      await deleteEnterpriseUser(userId);
     } catch (e) {
       console.error('[WIPE] Failed to wipe cloud data during factory reset', e);
     }
