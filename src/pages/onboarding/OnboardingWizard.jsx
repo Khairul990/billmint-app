@@ -288,7 +288,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
           <p className="text-sm font-bold text-theme-muted">We have pre-selected recommended features for a {selectedPreset.label}.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 bg-theme-card p-5 rounded-3xl border border-theme-border-soft shadow-premium">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 bg-theme-card p-4 md:p-5 rounded-3xl border border-theme-border-soft shadow-premium">
           {availableModules.map(mod => {
             const isRecommended = selectedPreset.recommendedModules.includes(mod.id);
             const isEnabled = formData.enabledModules.includes(mod.id);
@@ -305,18 +305,21 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
                 className={`w-full flex flex-col p-4 rounded-2xl border transition-all hover-glow-effect relative overflow-hidden group ${isEnabled ? 'bg-theme-accent/5 border-theme-accent/50 shadow-[0_0_15px_var(--accent-glow)]' : 'bg-theme-app border-theme-border-soft hover:bg-theme-surface hover:border-theme-border'}`}
               >
                 <div className={`absolute inset-0 bg-gradient-to-br from-theme-accent/10 to-transparent transition-opacity duration-300 ${isEnabled ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}></div>
-                <div className="flex items-center justify-between w-full relative z-10">
-                  <span className="font-extrabold text-sm text-theme-primary flex items-center gap-2">
-                    {mod.name}
-                    {isRecommended && <span className="bg-theme-accent text-white text-[9px] uppercase px-2 py-0.5 rounded-full tracking-wider shadow-sm">Recommended</span>}
-                  </span>
+                
+                <div className="flex items-start justify-between w-full relative z-10 mb-1">
+                  <div className="flex flex-col gap-1 items-start text-left">
+                    {isRecommended && <span className="bg-theme-accent text-white text-[8px] uppercase px-1.5 py-0.5 rounded-sm tracking-widest shadow-sm font-black">Recommended</span>}
+                    <span className="font-extrabold text-[13px] md:text-sm text-theme-primary leading-tight">
+                      {mod.name}
+                    </span>
+                  </div>
                   {isEnabled ? (
-                    <CheckCircle2 className="w-5 h-5 text-theme-accent drop-shadow-sm" />
+                    <CheckCircle2 className="w-5 h-5 text-theme-accent drop-shadow-sm shrink-0 ml-2" />
                   ) : (
-                    <div className="w-5 h-5 rounded-full border-2 border-theme-border-soft transition-colors group-hover:border-theme-accent/30" />
+                    <div className="w-5 h-5 rounded-full border-2 border-theme-border-soft transition-colors group-hover:border-theme-accent/30 shrink-0 ml-2" />
                   )}
                 </div>
-                <p className="text-[10px] text-theme-muted font-bold mt-1.5 text-left relative z-10 leading-relaxed">{mod.desc}</p>
+                <p className="text-[10px] text-theme-muted font-bold mt-1 text-left relative z-10 leading-relaxed pr-2">{mod.desc}</p>
               </button>
             )
           })}
