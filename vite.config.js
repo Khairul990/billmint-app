@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         maximumFileSizeToCacheInBytes: 5000000,
         navigateFallback: 'index.html',
-        navigateFallbackDenylist: [/^\/__/, /^\/api\//, /^\/publicInvoices\//],
+        navigateFallbackDenylist: [/^\/__/, /^\/api\//, /^\/publicInvoices\//, /\.html$/],
         ignoreURLParametersMatching: [/^token/, /^secret/, /^auth/],
         cleanupOutdatedCaches: true,
         skipWaiting: true,
