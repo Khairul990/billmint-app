@@ -25,7 +25,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
     address: businessSettings?.address || '',
     gstNumber: businessSettings?.gstNumber || '',
     currency: businessSettings?.currency || '₹',
-    taxLabel: businessSettings?.taxLabel || 'GST'
+    taxLabel: businessSettings?.invoiceBuilderSettings?.taxLabel || businessSettings?.taxLabel || 'GST'
   };
 
   const rawTemplateId = (businessSettings?.selectedPdfTemplate || invoice.pdfTemplate || 'classic').toLowerCase();
@@ -43,7 +43,7 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
     currency: businessSettings?.currency || '₹',
     currencyCode: businessSettings?.currencyCode || 'INR',
     language: businessSettings?.language || 'English',
-    taxLabel: businessSettings?.taxLabel || 'GST',
+    taxLabel: businessSettings?.invoiceBuilderSettings?.taxLabel || businessSettings?.taxLabel || 'GST',
     dateFormat: businessSettings?.dateFormat || 'DD/MM/YYYY',
     numberFormat: businessSettings?.numberFormat || 'Indian'
   };
@@ -60,6 +60,9 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
     customPaymentLink: businessSettings?.customPaymentLink || '',
     showQrInPreview: businessSettings?.showQrInPreview !== undefined ? businessSettings?.showQrInPreview : true
   };
+
+  const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
+  const bankDetails = invoiceBuilderSettings.bankDetails;
 
   const currencySymbol = regionalPrefs.currency || '₹';
 
@@ -494,7 +497,36 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
         })()
       )}
 
-      {/* 4.5. PAYMENT PROOFS */}
+      {/* 4.6. BANK DETAILS */}
+      {bankDetails && (bankDetails.name || bankDetails.account || bankDetails.ifsc) && (
+        <div className="mt-8 p-5 bg-theme-surface/30 dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-2xl">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-theme-muted dark:text-theme-muted flex items-center gap-2 mb-3">
+            <Building2 className="w-4 h-4 text-theme-info" /> Bank & Payment Details
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+            {bankDetails.name && (
+              <div>
+                <span className="block text-[10px] text-theme-muted uppercase tracking-wider font-bold mb-0.5">Bank Name</span>
+                <span className="font-semibold text-theme-primary">{bankDetails.name}</span>
+              </div>
+            )}
+            {bankDetails.account && (
+              <div>
+                <span className="block text-[10px] text-theme-muted uppercase tracking-wider font-bold mb-0.5">Account Number</span>
+                <span className="font-mono font-bold text-theme-primary">{bankDetails.account}</span>
+              </div>
+            )}
+            {bankDetails.ifsc && (
+              <div>
+                <span className="block text-[10px] text-theme-muted uppercase tracking-wider font-bold mb-0.5">IFSC / Routing</span>
+                <span className="font-mono font-bold text-theme-primary">{bankDetails.ifsc}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 4.7. PAYMENT PROOFS */}
       {invoice.paymentProofs && invoice.paymentProofs.length > 0 && (
         <div className="mt-8 border border-theme-border-soft rounded-2xl p-6 bg-theme-surface/50">
           <h4 className="text-xs font-bold uppercase tracking-wider text-theme-muted mb-4 flex items-center gap-2">

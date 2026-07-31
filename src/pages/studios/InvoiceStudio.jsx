@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, LayoutTemplate, Columns, Droplet, ArrowUp, ArrowDown, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { FileText, LayoutTemplate, Columns, Droplet, ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Building, DollarSign } from 'lucide-react';
 import PdfTemplateStudio from '../PdfTemplateStudio';
 
 const DEFAULT_COLUMNS = [
@@ -27,6 +27,9 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
   const invoiceBuilderSettings = settings?.invoiceBuilderSettings || {};
   const invoiceItemLabel = invoiceBuilderSettings.itemLabel || 'Item';
   const invoiceCustomColumns = invoiceBuilderSettings.customColumns || [];
+  const taxLabel = invoiceBuilderSettings.taxLabel || settings?.taxLabel || 'Tax';
+  const showDiscount = invoiceBuilderSettings.showDiscount !== false;
+  const bankDetails = invoiceBuilderSettings.bankDetails || { name: '', account: '', ifsc: '' };
 
   const handleUpdateBuilderSettings = (updates) => {
     onUpdate({
@@ -265,6 +268,82 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
                 value={settings?.watermarkOpacity || 10} 
                 onChange={(e) => handleChange('watermarkOpacity', parseInt(e.target.value))} 
                 className="w-full accent-theme-info" 
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Financial Settings & Bank Details */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="card-premium p-6">
+          <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
+            <div className="w-10 h-10 rounded-xl bg-theme-success/10 text-theme-success flex items-center justify-center">
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-theme-primary">Financial Settings</h2>
+              <p className="text-xs text-theme-muted">Configure tax labels and discounts</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Tax Label (e.g. GST, VAT, Tax)</label>
+              <input 
+                type="text" 
+                value={taxLabel} 
+                onChange={(e) => handleUpdateBuilderSettings({ taxLabel: e.target.value })} 
+                placeholder="GST"
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-success transition-colors" 
+              />
+            </div>
+            <div className="flex items-center gap-3 p-4 bg-theme-surface/50 border border-theme-border-soft rounded-xl">
+              <input 
+                type="checkbox" 
+                id="showDiscount"
+                checked={showDiscount}
+                onChange={(e) => handleUpdateBuilderSettings({ showDiscount: e.target.checked })} 
+                className="w-4 h-4 rounded text-theme-success focus:ring-theme-success bg-theme-surface border-theme-border-soft"
+              />
+              <label htmlFor="showDiscount" className="text-sm font-bold text-theme-primary cursor-pointer">
+                Show Discount Row on Invoices
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="card-premium p-6">
+          <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
+            <div className="w-10 h-10 rounded-xl bg-theme-info/10 text-theme-info flex items-center justify-center">
+              <Building className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-theme-primary">Bank & Payment Details</h2>
+              <p className="text-xs text-theme-muted">Prints at the bottom of the invoice</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <input 
+                type="text" 
+                value={bankDetails.name} 
+                onChange={(e) => handleUpdateBuilderSettings({ bankDetails: { ...bankDetails, name: e.target.value } })} 
+                placeholder="Bank Name (e.g. State Bank of India)"
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-info transition-colors mb-3" 
+              />
+              <input 
+                type="text" 
+                value={bankDetails.account} 
+                onChange={(e) => handleUpdateBuilderSettings({ bankDetails: { ...bankDetails, account: e.target.value } })} 
+                placeholder="Account Number"
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-info transition-colors mb-3" 
+              />
+              <input 
+                type="text" 
+                value={bankDetails.ifsc} 
+                onChange={(e) => handleUpdateBuilderSettings({ bankDetails: { ...bankDetails, ifsc: e.target.value } })} 
+                placeholder="IFSC / Routing Code"
+                className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-info transition-colors" 
               />
             </div>
           </div>
