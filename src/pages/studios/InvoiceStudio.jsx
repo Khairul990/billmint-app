@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, LayoutTemplate, Columns, Droplet, ArrowUp, ArrowDown, Eye, EyeOff } from 'lucide-react';
+import { FileText, LayoutTemplate, Columns, Droplet, ArrowUp, ArrowDown, Eye, EyeOff, Trash2 } from 'lucide-react';
 import PdfTemplateStudio from '../PdfTemplateStudio';
 
 const DEFAULT_COLUMNS = [
@@ -22,6 +22,19 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
   const handleColumnToggle = (id) => {
     const newCols = columns.map(c => c.id === id ? { ...c, visible: !c.visible } : c);
     handleChange('invoiceColumns', newCols);
+  };
+
+  const invoiceBuilderSettings = settings?.invoiceBuilderSettings || {};
+  const invoiceItemLabel = invoiceBuilderSettings.itemLabel || 'Item';
+  const invoiceCustomColumns = invoiceBuilderSettings.customColumns || [];
+
+  const handleUpdateBuilderSettings = (updates) => {
+    onUpdate({
+      invoiceBuilderSettings: {
+        ...invoiceBuilderSettings,
+        ...updates
+      }
+    });
   };
 
   const moveColumn = (index, direction) => {
@@ -85,6 +98,102 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Table Customization */}
+      <div className="card-premium p-6">
+        <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
+          <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+            <LayoutTemplate className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-black text-theme-primary">Table Customization</h2>
+            <p className="text-xs text-theme-muted">Configure item labels and custom columns for invoices</p>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Item/Product Column Label</label>
+          <input
+            type="text"
+            value={invoiceItemLabel}
+            onChange={(e) => handleUpdateBuilderSettings({ itemLabel: e.target.value })}
+            className="w-full max-w-xs px-4 py-2 bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:border-theme-accent text-theme-primary font-bold text-sm"
+            placeholder="e.g. Item, Product, Service"
+          />
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider">Custom Columns</label>
+              <p className="text-xs text-theme-muted mt-1">Add additional columns to your invoice table (e.g. Size, Color, Warranty)</p>
+            </div>
+            <button 
+              onClick={() => handleUpdateBuilderSettings({ customColumns: [...invoiceCustomColumns, { id: 'col_' + Date.now(), name: '', type: 'text', options: '' }] })} 
+              className="px-4 py-2 text-xs font-bold bg-theme-accent text-white rounded-xl shadow-sm hover:brightness-110 transition-all"
+            >
+              + Add Column
+            </button>
+          </div>
+          {invoiceCustomColumns.length === 0 ? (
+            <p className="text-sm text-theme-muted p-4 bg-theme-surface/50 rounded-xl border border-dashed border-theme-border-soft text-center font-semibold">No custom columns added.</p>
+          ) : (
+            <div className="space-y-3">
+              {invoiceCustomColumns.map((col, index) => (
+                <div key={col.id} className="flex flex-wrap items-center gap-3 p-3 bg-theme-surface/30 border border-theme-border-soft rounded-xl">
+                  <input
+                    type="text"
+                    value={col.name}
+                    onChange={(e) => {
+                      const newCols = [...invoiceCustomColumns];
+                      newCols[index].name = e.target.value;
+                      handleUpdateBuilderSettings({ customColumns: newCols });
+                    }}
+                    className="flex-1 min-w-[120px] px-3 py-1.5 text-sm bg-theme-surface border border-theme-border-soft rounded-lg text-theme-primary font-bold focus:outline-none focus:border-theme-accent"
+                    placeholder="Column Name"
+                  />
+                  <select
+                    value={col.type}
+                    onChange={(e) => {
+                      const newCols = [...invoiceCustomColumns];
+                      newCols[index].type = e.target.value;
+                      handleUpdateBuilderSettings({ customColumns: newCols });
+                    }}
+                    className="px-3 py-1.5 text-sm bg-theme-surface border border-theme-border-soft rounded-lg text-theme-primary font-bold focus:outline-none focus:border-theme-accent"
+                  >
+                    <option value="text">Text Input</option>
+                    <option value="number">Number Input</option>
+                    <option value="dropdown">Dropdown</option>
+                  </select>
+                  {col.type === 'dropdown' && (
+                    <input
+                      type="text"
+                      value={col.options || ''}
+                      onChange={(e) => {
+                        const newCols = [...invoiceCustomColumns];
+                        newCols[index].options = e.target.value;
+                        handleUpdateBuilderSettings({ customColumns: newCols });
+                      }}
+                      className="flex-1 min-w-[150px] px-3 py-1.5 text-sm bg-theme-surface border border-theme-border-soft rounded-lg text-theme-primary font-bold focus:outline-none focus:border-theme-accent"
+                      placeholder="Options (comma separated)"
+                    />
+                  )}
+                  <button
+                    onClick={() => {
+                      const newCols = invoiceCustomColumns.filter((_, i) => i !== index);
+                      handleUpdateBuilderSettings({ customColumns: newCols });
+                    }}
+                    className="p-1.5 text-theme-danger hover:bg-theme-danger/10 rounded-lg transition-colors shrink-0"
+                    title="Remove Column"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
