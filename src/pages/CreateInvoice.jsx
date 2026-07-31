@@ -71,7 +71,7 @@ const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessS
     <div style={{ width: '100%', height: 'calc(100vh - 64px)' }}>
       <iframe 
         ref={iframeRef}
-        src="/bill-studio.html?v=3" 
+        src="/bill-studio.html?v=4" 
         title="Bill Studio"
         style={{ width: '100%', height: '100%', border: 'none', backgroundColor: 'transparent' }}
         sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads"
