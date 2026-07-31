@@ -37,7 +37,7 @@ const STUDIO_ROUTES = [
 
   { type: 'label', label: 'Customization' },
   { id: 'theme', label: 'Theme Studio', icon: Palette, desc: 'Colors & UI' },
-  { id: 'invoice', label: 'Template Gallery', icon: LayoutTemplate, desc: 'Universal Templates & Columns' },
+  { id: 'invoice', label: 'Template Gallery', icon: LayoutTemplate, desc: 'Invoice Builder, Templates & Columns' },
   { id: 'form', label: 'Form Builder', icon: LayoutTemplate, desc: 'Custom Fields' },
   { id: 'portal', label: 'Portal Studio', icon: Globe, desc: 'Client Experience' },
 
