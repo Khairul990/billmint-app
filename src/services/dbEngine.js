@@ -1481,7 +1481,7 @@ export const getAdminPremiumRequests = async () => {
   try {
     const snap = await getDocs(collection(db, 'premiumRequests'));
     const list = [];
-    snap.forEach(d => list.push(d.data()));
+    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
     return list;
   } catch (e) {
     console.error('Failed to getAdminPremiumRequests:', e);

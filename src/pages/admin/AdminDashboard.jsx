@@ -28,10 +28,12 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const users = await adminEngine.getUsersList();
-        const proofs = await adminEngine.getPaymentProofs();
-        const revs = await adminEngine.getRevenueStates();
-        const extraStats = await adminEngine.getTotalStats();
+        const [users, proofs, revs, extraStats] = await Promise.all([
+          adminEngine.getUsersList(),
+          adminEngine.getPaymentProofs(),
+          adminEngine.getRevenueStates(),
+          adminEngine.getTotalStats()
+        ]);
 
         const totalUsers = users.length;
         const premiumUsers = users.filter(u => u.planStatus === 'premium').length;
