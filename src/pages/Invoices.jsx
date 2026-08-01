@@ -38,6 +38,7 @@ import { invoiceEngine } from '../services/invoiceEngine';
 import PullToRefresh from '../components/PullToRefresh';
 import { addNotification } from '../services/notificationsService';
 import PremiumEmptyState from '../components/PremiumEmptyState';
+import { getPortalLabelByType } from '../config/businessPresets';
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
@@ -82,6 +83,7 @@ const Invoices = ({
   const [permanentDeleteTarget, setPermanentDeleteTarget] = useState(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const currencySymbol = businessSettings?.currency || '₹';
+  const portalLabel = getPortalLabelByType(businessSettings?.businessType);
 
   useEffect(() => {
     if (editingInvoice) {
@@ -596,35 +598,35 @@ const Invoices = ({
                   onClick={async () => {
                     const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
                     if (!isLiveLinkEnabled) {
-                      toast.error('Live Link is disabled. Enable it from Settings.');
+                      toast.error(`${portalLabel} is disabled. Enable it from Settings.`);
                       return;
                     }
                     const invoiceId = viewingInvoice?.id;
                     if (!invoiceId) return;
                     if (linkCache[invoiceId]) {
                       await navigator.clipboard.writeText(linkCache[invoiceId]);
-                      toast.success('Live Invoice Link copied to clipboard!');
+                      toast.success(`${portalLabel} Link copied to clipboard!`);
                       return;
                     }
                     setGeneratingLink(true);
                     try {
                       const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                       if (!token) {
-                        toast.error('Could not create live link. Please try again.');
+                        toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                         return;
                       }
                       const liveLink = `${window.location.origin}/invoice/${token}`;
                       setLinkCache(prev => ({ ...prev, [invoiceId]: liveLink }));
                       await navigator.clipboard.writeText(liveLink);
-                      toast.success('Live Invoice Link copied to clipboard!');
+                      toast.success(`${portalLabel} Link copied to clipboard!`);
                     } catch (err) {
-                      toast.error('Could not create live link. Please try again.');
+                      toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                     } finally {
                       setGeneratingLink(false);
                     }
                   }}
                   className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all cursor-pointer disabled:opacity-40"
-                  title="Copy Live Link"
+                  title={`Copy ${portalLabel}`}
                   disabled={generatingLink}
                 >
                   {generatingLink ? <span className="w-4 h-4 border-2 border-theme-accent/30 border-t-theme-accent rounded-full animate-spin block" /> : <Link className="w-4 h-4" />}
@@ -648,14 +650,14 @@ const Invoices = ({
                      try {
                        const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                        if (!token) {
-                         toast.error('Could not create live link. Please try again.');
+                         toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                          return;
                        }
                        const updatedInvoice = { ...viewingInvoice, publicToken: token };
                        const link = generateWhatsAppShareLink(updatedInvoice, currencySymbol, businessSettings);
                        window.open(link, '_blank');
                      } catch (err) {
-                       toast.error('Could not create live link. Please try again.');
+                       toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                      }
                    }}
                    className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light rounded-xl transition-all flex items-center justify-center cursor-pointer"
@@ -669,14 +671,14 @@ const Invoices = ({
                        try {
                          const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                          if (!token) {
-                           toast.error('Could not create live link. Please try again.');
+                           toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                            return;
                          }
                          const updatedInvoice = { ...viewingInvoice, publicToken: token };
                          const link = generateWhatsAppReminderLink(updatedInvoice, currencySymbol, businessSettings);
                          window.open(link, '_blank');
                        } catch (err) {
-                         toast.error('Could not create live link. Please try again.');
+                         toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                        }
                      }}
                      className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all flex items-center justify-center cursor-pointer"
@@ -690,14 +692,14 @@ const Invoices = ({
                      try {
                        const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                        if (!token) {
-                         toast.error('Could not create live link. Please try again.');
+                         toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                          return;
                        }
                        const updatedInvoice = { ...viewingInvoice, publicToken: token };
                        const { mailto } = generateEmailShareLink(updatedInvoice, currencySymbol, businessSettings);
                        window.open(mailto, '_blank');
                      } catch (err) {
-                       toast.error('Could not create live link. Please try again.');
+                       toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                      }
                    }}
                    className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light rounded-xl transition-all flex items-center justify-center cursor-pointer"
@@ -710,7 +712,7 @@ const Invoices = ({
                      try {
                        const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                        if (!token) {
-                         toast.error('Could not create live link. Please try again.');
+                         toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                          return;
                        }
                        const updatedInvoice = { ...viewingInvoice, publicToken: token };
@@ -718,7 +720,7 @@ const Invoices = ({
                        await navigator.clipboard.writeText(text);
                        toast.success('Invoicing summary copied to clipboard!');
                      } catch (err) {
-                       toast.error('Could not create live link. Please try again.');
+                       toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                      }
                    }}
                    className="p-2 text-theme-muted hover:text-theme-warning hover:bg-theme-warning/5 rounded-xl transition-all flex items-center justify-center cursor-pointer"
@@ -835,7 +837,7 @@ const Invoices = ({
                     const updatedInvoice = { ...viewingInvoice, publicToken: token };
                     const link = generateWhatsAppShareLink(updatedInvoice, currencySymbol, businessSettings);
                     window.open(link, '_blank');
-                  } catch (err) { toast.error('Could not create live link.'); }
+                  } catch (err) { toast.error(`Could not create ${portalLabel.toLowerCase()}.`); }
                 }}
                 className="flex flex-col items-center gap-1 min-w-[60px]"
               >
@@ -856,14 +858,14 @@ const Invoices = ({
               <button
                 onClick={async () => {
                   const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
-                  if (!isLiveLinkEnabled) { toast.error('Live Link is disabled.'); return; }
+                  if (!isLiveLinkEnabled) { toast.error(`${portalLabel} is disabled.`); return; }
                   try {
                     const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
-                    if (!token) { toast.error('Could not create live link.'); return; }
+                    if (!token) { toast.error(`Could not create ${portalLabel.toLowerCase()}.`); return; }
                     const liveLink = `${window.location.origin}/invoice/${token}`;
                     await navigator.clipboard.writeText(liveLink);
-                    toast.success('Live Link copied!');
-                  } catch (err) { toast.error('Could not create live link.'); }
+                    toast.success(`${portalLabel} Link copied!`);
+                  } catch (err) { toast.error(`Could not create ${portalLabel.toLowerCase()}.`); }
                 }}
                 className="flex flex-col items-center gap-1 min-w-[60px]"
               >

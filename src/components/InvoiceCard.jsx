@@ -11,6 +11,7 @@ import {
 } from '../utils/shareUtils';
 import { invoiceEngine } from '../services/invoiceEngine';
 import { isEducationCategory } from '../utils/categoryChecks';
+import { getPortalLabelByType } from '../config/businessPresets';
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
@@ -35,6 +36,7 @@ const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
 const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, compact = false, onView, onEdit, onDelete, onDownload, onRestore, onDownloadBackup, isDeleted }) => {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const menuRef = useRef(null);
+  const portalLabel = getPortalLabelByType(businessSettings?.businessType);
 
   // Close sharing popover on click outside
   useEffect(() => {
@@ -202,7 +204,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                   onClick={async () => {
                     const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
                     if (!isLiveLinkEnabled) {
-                      toast.error('Live Link is disabled. Enable it from Settings.');
+                      toast.error(`${portalLabel} is disabled. Enable it from Settings.`);
                       return;
                     }
                     try {
@@ -215,12 +217,12 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                       const portalPath = isEdu ? '/student-portal' : '/portal';
                       const liveLink = `${window.location.origin}${portalPath}/${encodeURIComponent(customerId)}`;
                       await navigator.clipboard.writeText(liveLink);
-                      toast.success('Live Invoice Link copied to clipboard!');
+                      toast.success(`${portalLabel} Link copied to clipboard!`);
                     } catch (err) {
-                      toast.error(err.message || 'Could not create live link. Please try again.');
+                      toast.error(err.message || `Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                     }
                   }}
-                  title="Copy Live Link"
+                  title={`Copy ${portalLabel}`}
                   className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/30 rounded-xl transition-all cursor-pointer"
                 >
                   <Link className="w-4 h-4" />

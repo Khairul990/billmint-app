@@ -6,6 +6,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import PdfTemplateStudio from '../PdfTemplateStudio';
 import InvoicePreview from '../../components/InvoicePreview';
+import { getPortalLabelByType } from '../../config/businessPresets';
 
 const DEFAULT_COLUMNS = [
   { id: 'item', label: 'Item/Service', visible: true, order: 1 },
@@ -50,6 +51,7 @@ const DUMMY_BUSINESS = {
 const InvoiceStudio = ({ settings, onUpdate }) => {
   const [activeTab, setActiveTab] = useState('templates');
   const [viewMode, setViewMode] = useState('pdf');
+  const portalLabel = getPortalLabelByType(settings?.businessType);
 
   const handleChange = (key, value) => {
     onUpdate({ [key]: value });
@@ -467,7 +469,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
           <div className="bg-theme-app border-b border-theme-border-soft px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4 text-theme-accent" />
-              <span className="text-xs font-black text-theme-primary uppercase tracking-widest">{viewMode === 'livelink' ? 'Live Link Preview' : 'PDF Preview'}</span>
+              <span className="text-xs font-black text-theme-primary uppercase tracking-widest">{viewMode === 'livelink' ? `${portalLabel} Preview` : 'PDF Preview'}</span>
             </div>
             <div className="flex gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-theme-border-soft"></div>
@@ -478,7 +480,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
           <div className={`p-4 bg-gray-100 overflow-y-auto custom-scrollbar flex justify-center ${viewMode === 'livelink' ? 'h-[calc(100vh-200px)] items-start' : 'h-[calc(100vh-200px)]'}`}>
             {viewMode === 'livelink' ? (
               <div className="w-full max-w-[375px] shrink-0 h-max">
-                {/* Mobile Phone Mockup Frame for Live Link */}
+                {/* Mobile Phone Mockup Frame for Portal */}
                 <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden border-[8px] border-slate-900 mx-auto relative h-[700px]">
                   {/* Notch */}
                   <div className="absolute top-0 inset-x-0 h-6 bg-slate-900 rounded-b-3xl w-40 mx-auto z-50"></div>

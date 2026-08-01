@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
 import { getDemoInvoice } from '../utils/demoDataGenerator';
+import { getPortalLabelByType } from '../config/businessPresets';
 
 const STUDIO_SECTIONS = [
   {
@@ -203,6 +204,7 @@ const TEMPLATE_COMPARISON_FEATURES = [
 // Removed hardcoded demoInvoice
 const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initialTab = 'overview' }) => {
   const [activeSubTab, setActiveSubTab] = useState(initialTab);
+  const portalLabel = getPortalLabelByType(businessSettings?.businessType);
   const [templateCategory, setTemplateCategory] = useState('All');
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState('All');
@@ -310,7 +312,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
                 }`}
               >
                 <TabIcon className="w-4 h-4" />
-                {tab.label}
+                {tab.id === 'live-link' ? portalLabel : tab.label}
               </button>
             );
           })}
@@ -404,7 +406,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-base font-extrabold text-theme-primary mb-1">
-                    {section.title}
+                    {section.id === 'live-link-studio' ? `${portalLabel} Studio` : section.title}
                   </h3>
                   <p className="text-[11px] font-semibold text-theme-muted mb-4 leading-relaxed">
                     {section.description}
@@ -730,7 +732,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
         >
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">Live Link Templates</h2>
+              <h2 className="text-sm font-black text-theme-primary uppercase tracking-wider">{portalLabel} Templates</h2>
               <p className="text-[10px] text-theme-muted font-semibold mt-0.5">Beautiful payment links for your customers</p>
             </div>
             <div className="flex gap-2">

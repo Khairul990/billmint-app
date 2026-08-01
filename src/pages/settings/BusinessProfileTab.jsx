@@ -1,7 +1,9 @@
 import React from 'react';
 import { Building2, Globe, CreditCard, FileText, Link, Upload, Trash2, ShieldAlert } from 'lucide-react';
+import { getPortalLabelByType } from '../../config/businessPresets';
 
 const BusinessProfileTab = (props) => {
+  const portalLabel = getPortalLabelByType(props.businessSettings?.businessType);
   const { businessName, setBusinessName, logoUrl, handleLogoChange, handleRemoveLogo, ownerName, setOwnerName, phone, setPhone, whatsapp, setWhatsapp, email, setEmail, address, setAddress, gstNumber, setGstNumber, country, setCountry, language, setLanguage, currency, setCurrency, currencyCode, setCurrencyCode, taxLabel, setTaxLabel, vatTax, setVatTax, dateFormat, setDateFormat, numberFormat, setNumberFormat, upiId, setUpiId, bkashNumber, setBkashNumber, nagadNumber, setNagadNumber, rocketNumber, setRocketNumber, payeeName, setPayeeName, paymentNote, setPaymentNote, paymentQrEnabled, setPaymentQrEnabled, paymentMethod, setPaymentMethod, customPaymentLink, setCustomPaymentLink, invoicePrefix, setInvoicePrefix, defaultTax, setDefaultTax, defaultNotes, setDefaultNotes, terms, setTerms, pdfFooter, setPdfFooter, defaultBillingTemplate, setDefaultBillingTemplate, enableLiveLink, setEnableLiveLink, showPaymentQrOnLink, setShowPaymentQrOnLink, allowPdfDownload, setAllowPdfDownload, allowPaymentProofSubmit, setAllowPaymentProofSubmit, showPaidDueAmount, setShowPaidDueAmount, showContactButton, setShowContactButton, requireTransactionId, setRequireTransactionId, requirePaymentScreenshot, setRequirePaymentScreenshot, isDragging, setIsDragging } = props;
 
   return (
@@ -924,7 +926,7 @@ const BusinessProfileTab = (props) => {
                 <Link className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Customer Live Link Settings</h2>
+                <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">{portalLabel} Settings</h2>
                 <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Configure what public customers see and interact with</p>
               </div>
             </div>
@@ -933,7 +935,7 @@ const BusinessProfileTab = (props) => {
 
               {/* Checkboxes */}
               {[
-                { state: enableLiveLink, setter: setEnableLiveLink, label: 'Enable Secure Live Link', desc: 'Generate unique public url endpoints for customers' },
+                { state: enableLiveLink, setter: setEnableLiveLink, label: `Enable Secure ${portalLabel}`, desc: 'Generate unique public url endpoints for customers' },
                 { state: showPaymentQrOnLink, setter: setShowPaymentQrOnLink, label: 'Show Payment QR Code', desc: 'Display scan-to-pay QR module on public invoice pages' },
                 { state: allowPdfDownload, setter: setAllowPdfDownload, label: 'Allow Customer PDF Download', desc: 'Allow client to print/download official invoice PDF documents' },
                 { state: allowPaymentProofSubmit, setter: setAllowPaymentProofSubmit, label: 'Allow Payment Proof Submission', desc: 'Render "I Have Paid" flow to submit payment proofs' },

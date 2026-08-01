@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import LazyPreview from '../components/LazyPreview';
 import PublicInvoice from './PublicInvoice';
+import { getPortalLabelByType } from '../config/businessPresets';
 
 import { motion } from 'framer-motion';
 import { 
@@ -191,17 +192,19 @@ const conversionLayouts = [
 ];
 
 // Removed hardcoded demoInvoice
-
 const loadRatings = () => {
   try { return JSON.parse(localStorage.getItem('ll_template_ratings') || '{}'); } catch { return {}; }
 };
 const saveRatings = (r) => localStorage.setItem('ll_template_ratings', JSON.stringify(r));
 
-const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCurrentTab }) => {
-  const [selectedTemplate, setSelectedTemplate] = useState('classic');
+const LiveLinkTemplateStudio = ({ settings, onSaveSettings, setCurrentTab, userSubscription }) => {
+  const [selectedTemplate, setSelectedTemplate] = useState(
+    settings?.customerLiveLinkSettings?.selectedLiveLinkTemplate || 'classic-minimal'
+  );
   const [filterCategory, setFilterCategory] = useState('All');
   const [ratings, setRatings] = useState(loadRatings);
   const [previewModal, setPreviewModal] = useState(null);
+  const portalLabel = getPortalLabelByType(settings?.businessType);
   const [previewDevice, setPreviewDevice] = useState('mobile');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('light');
@@ -252,7 +255,7 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
     if (onSaveSettings) {
       await onSaveSettings(updatedSettings);
       setSelectedTemplate(template.id);
-      toast.success(`${template.name} template applied to Live Links!`);
+      toast.success(`${template.name} template applied to ${portalLabel}!`);
     }
   };
 
@@ -286,7 +289,7 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, subscription, setCur
           <Smartphone className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-black text-theme-primary tracking-tight">Live Link Template Studio</h1>
+          <h1 className="text-2xl font-black text-theme-primary tracking-tight">{portalLabel} Design Studio</h1>
           <p className="text-xs text-theme-muted font-bold mt-1">Select how your customers see your public invoice payment links.</p>
         </div>
       </div>

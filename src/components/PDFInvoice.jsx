@@ -1,6 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
 import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
+import { getTemplateLayoutFamily } from '../services/TemplateEngine';
 
 // Register Google Fonts to support regional currency symbols and scripts
 // Using reliable raw github links to prevent loading hangs
@@ -264,7 +265,10 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
 
   const currencySymbol = regionalPrefs.currency || '\u20b9';
   const rawTemplateId = (businessSettings?.selectedPdfTemplate || invoice?.pdfTemplate || businessSettings?.invoiceTemplate || 'classic').toLowerCase();
-  const templateId = rawTemplateId === 'modern' ? 'modern' : 'classic';
+  
+  // Resolve layout family instead of binary classic/modern
+  const layoutFamily = getTemplateLayoutFamily(rawTemplateId);
+  const templateId = layoutFamily;
   
   const themePreset = businessSettings?.themePreset || 'light';
   let brandColor = '#19C3A3'; 
@@ -272,16 +276,26 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
   let tableHeaderBg = '#14284B';
   let totalHighlightBg = '#eff6ff';
 
-  if (themePreset === 'dark') {
-    brandColor = '#9FE5CF';
+  if (themePreset === 'dark' || layoutFamily === 'gold') {
+    brandColor = layoutFamily === 'gold' ? '#D4AF37' : '#9FE5CF'; // Gold accent for gold family
     headerColor = '#071B3A';
-    tableHeaderBg = '#071B3A';
-    totalHighlightBg = 'rgba(159, 229, 207, 0.12)';
+    tableHeaderBg = layoutFamily === 'gold' ? '#1a1a1a' : '#071B3A'; // Darker table header for gold
+    totalHighlightBg = layoutFamily === 'gold' ? '#262626' : 'rgba(159, 229, 207, 0.12)';
   } else if (themePreset === 'rose') {
     brandColor = '#F43F5E';
     headerColor = '#881337';
     tableHeaderBg = '#881337';
     totalHighlightBg = '#FFF1F2';
+  } else if (layoutFamily === 'corporate') {
+    brandColor = '#10B981';
+    headerColor = '#064E3B';
+    tableHeaderBg = '#064E3B';
+    totalHighlightBg = '#F0FDF4';
+  } else if (layoutFamily === 'minimal') {
+    brandColor = '#1e293b';
+    headerColor = '#0f172a';
+    tableHeaderBg = '#f8fafc';
+    totalHighlightBg = '#f1f5f9';
   } else {
     brandColor = '#19C3A3';
     headerColor = '#14284B';
@@ -406,7 +420,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
         <View style={styles.table}>
           <View style={[styles.compactTableHeader, { backgroundColor: tableHeaderBg }]}>
             {getInvoiceColumns(invoice, businessSettings).map(col => (
-              <Text key={col.id} style={{ width: col.width, textAlign: col.align === 'left' ? 'left' : (col.align === 'right' ? 'right' : 'center') }}>
+              <Text key={col.id} style={{ width: col.width, textAlign: col.align === 'left' ? 'left' : (col.align === 'right' ? 'right' : 'center'), color: layoutFamily === 'minimal' ? '#0f172a' : '#ffffff' }}>
                 {col.label}
               </Text>
             ))}
@@ -484,8 +498,8 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
             </View>
           )}
           <View style={[styles.grandTotalRow, { backgroundColor: totalHighlightBg }]}>
-            <Text style={{ fontSize: 10, fontWeight: 'bold', color: themePreset === 'rose' ? '#881337' : '#0f172a' }}>Grand Total</Text>
-            <Text style={{ fontSize: 10, fontWeight: 'bold', color: themePreset === 'rose' ? '#881337' : '#0f172a' }}>{formatVal(invoice.grandTotal)}</Text>
+            <Text style={{ fontSize: 10, fontWeight: 'bold', color: themePreset === 'rose' || layoutFamily === 'minimal' ? '#881337' : (layoutFamily === 'gold' ? '#D4AF37' : '#0f172a') }}>Grand Total</Text>
+            <Text style={{ fontSize: 10, fontWeight: 'bold', color: themePreset === 'rose' || layoutFamily === 'minimal' ? '#881337' : (layoutFamily === 'gold' ? '#D4AF37' : '#0f172a') }}>{formatVal(invoice.grandTotal)}</Text>
           </View>
           {invoice.balanceDue > 0 && (
             <View style={styles.dueRow}>
@@ -569,7 +583,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
       <View style={styles.table}>
         <View style={[styles.tableHeader, { backgroundColor: tableHeaderBg }]}>
           {getInvoiceColumns(invoice, businessSettings).map(col => (
-            <Text key={col.id} style={{ width: col.width, textAlign: col.align === 'left' ? 'left' : (col.align === 'right' ? 'right' : 'center') }}>
+            <Text key={col.id} style={{ width: col.width, textAlign: col.align === 'left' ? 'left' : (col.align === 'right' ? 'right' : 'center'), color: layoutFamily === 'minimal' ? '#0f172a' : '#ffffff' }}>
               {col.label}
             </Text>
           ))}
@@ -673,8 +687,8 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
           )}
 
           <View style={[styles.grandTotalRow, { backgroundColor: totalHighlightBg }]}>
-            <Text style={{ fontWeight: 'bold', color: themePreset === 'rose' ? '#881337' : '#0f172a' }}>Grand Total</Text>
-            <Text style={{ fontWeight: 'bold', color: themePreset === 'rose' ? '#881337' : '#0f172a' }}>{formatVal(invoice.grandTotal)}</Text>
+            <Text style={{ fontWeight: 'bold', color: themePreset === 'rose' || layoutFamily === 'minimal' ? '#881337' : (layoutFamily === 'gold' ? '#D4AF37' : '#0f172a') }}>Grand Total</Text>
+            <Text style={{ fontWeight: 'bold', color: themePreset === 'rose' || layoutFamily === 'minimal' ? '#881337' : (layoutFamily === 'gold' ? '#D4AF37' : '#0f172a') }}>{formatVal(invoice.grandTotal)}</Text>
           </View>
 
           <View style={styles.totalRow}>
@@ -711,7 +725,9 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
 
   return (
     <Document>
-      {templateId === 'classic' ? renderTemplate1() : renderTemplate2()}
+      {(layoutFamily === 'classic' || layoutFamily === 'retail' || layoutFamily === 'repair' || layoutFamily === 'teacher') 
+        ? renderTemplate1() 
+        : renderTemplate2()}
     </Document>
   );
 };
