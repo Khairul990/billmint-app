@@ -32,7 +32,8 @@ const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessS
              description: i.name,
              qty: i.qty,
              rate: i.price,
-             amount: i.total
+             amount: i.total,
+             customFields: i.customFields || {}
           }))
         };
 

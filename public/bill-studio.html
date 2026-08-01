@@ -748,7 +748,7 @@
             if(field === 'qty' || field === 'price') {
                 const tr = document.getElementById(`row-${id}`);
                 if (tr) {
-                    const totalCellIndex = 3 + state.customColumns.length;
+                    const totalCellIndex = 4 + state.customColumns.length;
                     tr.cells[totalCellIndex].textContent = formatCurrency(item.qty * item.price);
                 }
                 calculateTotals();
@@ -843,9 +843,10 @@
         const cleanItems = state.items.map(item => {
             const cleanCustom = {};
             state.customColumns.forEach(c => {
-                cleanCustom[c.name] = item.customFields[c.id];
+                cleanCustom[c.id] = item.customFields[c.id];
             });
             return {
+                sNo: item.sNo,
                 name: item.name,
                 qty: item.qty,
                 price: item.price,
@@ -1004,7 +1005,7 @@
                 document.getElementById('discountFixedSymbol').textContent = currencySymbol;
                 document.getElementById('shippingSymbol').textContent = currencySymbol;
                 calculateTotals();
-                renderItems();
+                renderTable();
             }
         }
     });

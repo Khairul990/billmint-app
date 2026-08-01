@@ -14,19 +14,21 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
   const bType = invoice.billType || 'default';
   const categoryWords = getCategoryWording(bType);
 
-  // Extract customizations
+  const builderSettings = invoice.settings?.invoiceBuilderSettings || businessSettings?.invoiceBuilderSettings || {};
   const customCols = invoice.settings?.customColumns || businessSettings?.customColumns || {};
-  const extraCols = invoice.settings?.extraColumns || businessSettings?.extraColumns || [];
+  const extraCols = builderSettings.customColumns || invoice.settings?.extraColumns || businessSettings?.extraColumns || [];
+  
+  // Use user's configured columns or fallback to default visibility logic
+  const configuredColumns = invoice.settings?.invoiceColumns || businessSettings?.invoiceColumns;
 
-  // Define base columns based on bill type for semantic fallback labels
-  const col1Label = customCols.col1 || (bType === 'grocery' || bType === 'retail' ? 'Product' : bType === 'repair' ? 'Service' : bType === 'custom' ? 'Item' : categoryWords.items || 'Item Name');
+  const col1Label = builderSettings.itemLabel || customCols.col1 || (bType === 'grocery' || bType === 'retail' ? 'Product' : bType === 'repair' ? 'Service' : bType === 'custom' ? 'Item' : categoryWords.items || 'Item Name');
   const col2Label = customCols.col2 || categoryWords.qty || 'Qty';
   const col3Label = customCols.col3 || categoryWords.price || 'Rate';
 
-  // Base Schema definition for all standard fields
   const baseSchema = {
     sn: { id: 'sn', label: '#', align: 'center', width: '5%' },
-    col1: { id: 'col1', label: col1Label, align: 'left', width: '25%' },
+    item: { id: 'item', label: col1Label, align: 'left', width: '25%' },
+    hsn: { id: 'hsn', label: 'HSN/SAC', align: 'center', width: '10%' },
     description: { id: 'description', label: 'Details', align: 'left', width: '20%' },
     qty: { id: 'qty', label: col2Label, align: 'center', width: '10%' },
     unit: { id: 'unit', label: 'Unit', align: 'center', width: '8%' },
@@ -36,62 +38,83 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
     amount: { id: 'amount', label: 'Total', align: 'right', width: '15%' }
   };
 
-  // Convert extra columns into the same format
   const dynamicExtraCols = extraCols.map((col) => ({
-    id: col.id,
-    label: col.label,
+    id: col.id, // e.g. col_123
+    label: col.name,
     align: 'center',
-    width: '10%', // will be adjusted relative to the container
+    width: '10%',
     isExtra: true
   }));
 
-  // Build the final array of columns to render
   const columns = [];
 
+  // SN is always first
   columns.push(baseSchema.sn);
-  columns.push(baseSchema.col1);
 
-  // If the invoice actually has description data OR it's not a retail bill, show description
-  // Note: some legacy templates didn't show description for retail, but if we are unifying, we should check if data exists or just always show it if it's in the builder.
-  // The builder ALWAYS has description. We should include it, but perhaps check if ANY item has it to save space?
-  const hasDescription = (invoice.items || []).some(item => item.description || (bType !== 'custom' && item.workType));
-  if (hasDescription) {
-    columns.push(baseSchema.description);
+  if (configuredColumns) {
+    // If studio columns are configured, follow their visibility and order
+    const sortedConfig = [...configuredColumns].sort((a, b) => a.order - b.order);
+    
+    sortedConfig.forEach(conf => {
+      if (conf.visible && baseSchema[conf.id]) {
+        columns.push(baseSchema[conf.id]);
+        
+        // Add description right after item if configured
+        if (conf.id === 'item') {
+          const hasDescription = (invoice.items || []).some(item => item.description || (bType !== 'custom' && item.workType));
+          if (hasDescription) {
+            columns.push(baseSchema.description);
+          }
+          // Also insert custom columns after item
+          columns.push(...dynamicExtraCols);
+        }
+        
+        // If unit data exists, inject it after qty
+        if (conf.id === 'qty') {
+          const hasUnit = (invoice.items || []).some(item => item.unit);
+          if (hasUnit) {
+            columns.push(baseSchema.unit);
+          }
+        }
+      }
+    });
+  } else {
+    // Fallback legacy logic
+    columns.push(baseSchema.item);
+    
+    const hasDescription = (invoice.items || []).some(item => item.description || (bType !== 'custom' && item.workType));
+    if (hasDescription) {
+      columns.push(baseSchema.description);
+    }
+    
+    columns.push(...dynamicExtraCols);
+    columns.push(baseSchema.qty);
+    
+    const hasUnit = (invoice.items || []).some(item => item.unit);
+    if (hasUnit) {
+      columns.push(baseSchema.unit);
+    }
+    
+    columns.push(baseSchema.rate);
+    
+    const hasDiscount = (invoice.items || []).some(item => parseFloat(item.discount || 0) > 0);
+    if (hasDiscount) {
+      columns.push(baseSchema.discount);
+    }
+    
+    const hasTax = (invoice.items || []).some(item => parseFloat(item.tax || 0) > 0);
+    if (hasTax) {
+      columns.push(baseSchema.tax);
+    }
+    
+    columns.push(baseSchema.amount);
   }
 
-  // Insert extra columns BEFORE qty
-  columns.push(...dynamicExtraCols);
-
-  columns.push(baseSchema.qty);
-
-  const hasUnit = (invoice.items || []).some(item => item.unit);
-  if (hasUnit) {
-    columns.push(baseSchema.unit);
-  }
-
-  columns.push(baseSchema.rate);
-
-  const hasDiscount = (invoice.items || []).some(item => parseFloat(item.discount || 0) > 0);
-  if (hasDiscount) {
-    columns.push(baseSchema.discount);
-  }
-
-  // Tax column
-  const hasTax = (invoice.items || []).some(item => parseFloat(item.tax || 0) > 0);
-  if (hasTax) {
-    columns.push(baseSchema.tax);
-  }
-
-  columns.push(baseSchema.amount);
-
-  // Recalculate widths to ensure they sum to roughly 100%
-  const count = columns.length;
-  // Sn: 5%, Amount: 15%, col1 takes remaining
   const fixedWidths = { 'sn': 5, 'amount': 15, 'qty': 8, 'rate': 12 };
   let remainingWidth = 100 - Object.values(fixedWidths).reduce((a, b) => a + b, 0);
   
   const flexibleCols = columns.filter(c => !fixedWidths[c.id]);
-  const flexWidth = Math.floor(remainingWidth / flexibleCols.length);
+  const flexWidth = Math.floor(remainingWidth / (flexibleCols.length || 1));
 
   return columns.map(col => ({
     ...col,
@@ -106,8 +129,8 @@ export const getItemValue = (item, colId, bType) => {
   if (!item) return '';
 
   switch (colId) {
+    case 'item':
     case 'col1':
-      // Map UI values based on billType legacy support
       if (bType === 'grocery') return item.description || item.itemService || 'Product';
       if (bType === 'retail') return item.productName || item.itemService || 'Product';
       if (bType === 'repair') return item.designNo || item.itemService || 'Service';
@@ -134,7 +157,7 @@ export const getItemValue = (item, colId, bType) => {
       return item.amount !== undefined ? item.amount : (item.total !== undefined ? item.total : 0);
       
     default:
-      // Includes 'unit', 'discount', 'tax', and extraCols
-      return item[colId] || '';
+      // Includes 'unit', 'discount', 'tax', 'hsn', and extra custom columns
+      return item[colId] || item.customFields?.[colId] || '';
   }
 };
