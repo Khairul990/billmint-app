@@ -436,7 +436,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
       </div>
 
       {/* RIGHT PANEL: Live Preview */}
-      <div className="hidden lg:block lg:w-[450px] xl:w-[500px] shrink-0 sticky top-24 h-max pb-8">
+      <div className="hidden lg:block flex-1 sticky top-6 h-[calc(100vh-120px)] pb-8 min-w-[450px]">
         <div className="card-premium overflow-hidden border-2 border-theme-border-soft shadow-2xl flex flex-col h-full bg-theme-card">
           <div className="bg-theme-app border-b border-theme-border-soft px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
