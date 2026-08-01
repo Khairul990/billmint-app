@@ -579,7 +579,7 @@
         <button class="btn btn-outline" onclick="exportPayload()">Export Payload</button>
         <div style="display: flex; align-items: center;">
             <span id="validationError" class="error-msg">Please add at least one valid item name.</span>
-            <button class="btn btn-primary" onclick="saveInvoice()">Save / Continue</button>
+            <button class="btn btn-primary" onclick="saveInvoice()" style="display: none;">Generate Invoice</button>
         </div>
     </div>
 </div>
@@ -945,6 +945,10 @@
             }
         }
         
+        if (event.data && event.data.type === 'TRIGGER_SAVE') {
+            saveInvoice();
+        }
+
         if (event.data && event.data.type === 'SET_THEME') {
             const { brandColor, isDarkMode, currencySymbol: passedCurrency, features, themeVars } = event.data.payload;
             if (features) {

@@ -1,7 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { ArrowLeft, Save, LayoutTemplate } from 'lucide-react';
+import { Button } from '../components/ui/Button';
 import studioHtml from '../../public/bill-studio.html?raw';
 
-const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessSettings }) => {
+const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessSettings, onBack }) => {
   const iframeRef = useRef(null);
 
   useEffect(() => {
@@ -77,17 +80,58 @@ const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessS
     return () => window.removeEventListener('message', handleMessage);
   }, [onSaveInvoice, customers, products, businessSettings]);
 
+  const triggerSave = () => {
+    if (iframeRef.current) {
+      iframeRef.current.contentWindow.postMessage({ type: 'TRIGGER_SAVE' }, '*');
+    }
+  };
+
   return (
-    <div style={{ width: '100%', height: 'calc(100vh - 64px)' }}>
-      <iframe 
-        ref={iframeRef}
+    <>
+      {document.getElementById('studio-header-portal') && createPortal(
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => onBack ? onBack() : window.history.back()} 
+              className="mr-2 p-2 rounded-full hover:bg-theme-main text-theme-muted hover:text-theme-primary transition-colors shadow-sm bg-theme-surface border border-theme-border-soft"
+              title="Back"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <div className="w-10 h-10 rounded-xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center">
+              <LayoutTemplate className="w-5 h-5 text-theme-accent" />
+            </div>
+            <div>
+              <div className="text-sm font-black text-theme-primary">Invoice Builder</div>
+              <div className="text-[10px] text-theme-secondary font-bold flex items-center gap-2">
+                <span className="flex items-center gap-1 text-theme-success"><span className="w-1.5 h-1.5 rounded-full bg-theme-success animate-pulse" /> Live Preview</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-4 mr-4">
+            <Button 
+              variant="primary"
+              size="md"
+              onClick={triggerSave}
+              leftIcon={Save}
+            >
+              Generate Invoice
+            </Button>
+          </div>
+        </div>,
+        document.getElementById('studio-header-portal')
+      )}
+      <div style={{ width: '100%', height: 'calc(100vh - 64px)' }}>
+        <iframe 
+          ref={iframeRef}
         srcDoc={studioHtml} 
         title="Bill Studio"
         style={{ width: '100%', height: '100%', border: 'none', backgroundColor: 'transparent' }}
         sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads"
         allowtransparency="true"
       ></iframe>
-    </div>
+      </div>
+    </>
   );
 };
 

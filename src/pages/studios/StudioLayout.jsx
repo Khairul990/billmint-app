@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { pageVariants } from '../../utils/animations';
+import { createPortal } from 'react-dom';
 import { 
   Building2, Palette, FileText, Globe, LayoutDashboard, 
   LayoutTemplate, Zap, Shield, Copy, Save, X, Search, Database, Undo, Redo, RotateCcw,
@@ -193,70 +194,73 @@ const StudioLayout = ({
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-theme-accent/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-theme-accent-dark/5 rounded-full blur-[120px] pointer-events-none" />
 
-        {/* Sticky Header */}
-        <div className="h-[72px] border-b border-theme-border-soft bg-theme-surface/40 backdrop-blur-xl flex items-center justify-between px-8 shrink-0 z-10 shadow-sm sticky top-0">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setCurrentTab('dashboard')} 
-              className="mr-2 p-2 rounded-full hover:bg-theme-main text-theme-muted hover:text-theme-primary transition-colors shadow-sm bg-theme-surface border border-theme-border-soft"
-              title="Back to Dashboard"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            <div className="w-10 h-10 rounded-xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center">
-              {React.createElement(STUDIO_ROUTES.find(r => r.id === activeStudio)?.icon || Building2, { className: 'w-5 h-5 text-theme-accent' })}
-            </div>
-            <div>
-              <div className="text-sm font-black text-theme-primary">{STUDIO_ROUTES.find(r => r.id === activeStudio)?.label || 'Studio'}</div>
-              <div className="text-[10px] text-theme-secondary font-bold flex items-center gap-2">
-                {isDirty ? (
-                  <span className="flex items-center gap-1 text-theme-warning"><span className="w-1.5 h-1.5 rounded-full bg-theme-warning animate-pulse" /> Unsaved Changes Draft</span>
-                ) : (
-                  <span className="flex items-center gap-1 text-theme-success"><span className="w-1.5 h-1.5 rounded-full bg-theme-success" /> Published</span>
-                )}
+        {/* Sticky Header via Portal */}
+        {document.getElementById('studio-header-portal') && createPortal(
+          <div className="flex w-full items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setCurrentTab('dashboard')} 
+                className="mr-2 p-2 rounded-full hover:bg-theme-main text-theme-muted hover:text-theme-primary transition-colors shadow-sm bg-theme-surface border border-theme-border-soft"
+                title="Back to Dashboard"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <div className="w-10 h-10 rounded-xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center">
+                {React.createElement(STUDIO_ROUTES.find(r => r.id === activeStudio)?.icon || Building2, { className: 'w-5 h-5 text-theme-accent' })}
+              </div>
+              <div>
+                <div className="text-sm font-black text-theme-primary">{STUDIO_ROUTES.find(r => r.id === activeStudio)?.label || 'Studio'}</div>
+                <div className="text-[10px] text-theme-secondary font-bold flex items-center gap-2">
+                  {isDirty ? (
+                    <span className="flex items-center gap-1 text-theme-warning"><span className="w-1.5 h-1.5 rounded-full bg-theme-warning animate-pulse" /> Unsaved Changes Draft</span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-theme-success"><span className="w-1.5 h-1.5 rounded-full bg-theme-success" /> Published</span>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 bg-theme-surface-elevated border border-theme-border-soft rounded-xl p-1 backdrop-blur-md">
+            <div className="flex items-center gap-4 mr-4">
+              <div className="flex items-center gap-1 bg-theme-surface-elevated border border-theme-border-soft rounded-xl p-1 backdrop-blur-md">
+                <Button 
+                  variant="ghost" size="icon"
+                  onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)"
+                >
+                  <Undo className="w-4 h-4" />
+                </Button>
+                <Button 
+                  variant="ghost" size="icon"
+                  onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Y)"
+                >
+                  <Redo className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              {isDirty && (
+                <Button 
+                  variant="danger" size="sm"
+                  onClick={handleDiscard} title="Discard all changes"
+                  leftIcon={RotateCcw}
+                >
+                  Discard
+                </Button>
+              )}
               <Button 
-                variant="ghost" size="icon"
-                onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)"
+                variant={isDirty ? 'primary' : 'secondary'}
+                size="md"
+                onClick={handleSave}
+                disabled={!isDirty || isSaving}
+                isLoading={isSaving}
+                leftIcon={Save}
               >
-                <Undo className="w-4 h-4" />
-              </Button>
-              <Button 
-                variant="ghost" size="icon"
-                onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Y)"
-              >
-                <Redo className="w-4 h-4" />
+                {isSaving ? 'Publishing...' : 'Publish'}
               </Button>
             </div>
-            
-            {isDirty && (
-              <Button 
-                variant="danger" size="sm"
-                onClick={handleDiscard} title="Discard all changes"
-                leftIcon={RotateCcw}
-              >
-                Discard
-              </Button>
-            )}
-            <Button 
-              variant={isDirty ? 'primary' : 'secondary'}
-              size="md"
-              onClick={handleSave}
-              disabled={!isDirty || isSaving}
-              isLoading={isSaving}
-              leftIcon={Save}
-            >
-              {isSaving ? 'Publishing...' : 'Publish Changes'}
-            </Button>
-          </div>
-        </div>
+          </div>,
+          document.getElementById('studio-header-portal')
+        )}
 
         {/* Dynamic Studio Renderer */}
-        <div className="flex-1 overflow-y-auto p-8 z-0 relative custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 z-0 relative custom-scrollbar">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeStudio}
