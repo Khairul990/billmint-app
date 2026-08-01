@@ -2,6 +2,7 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { t } from '../utils/i18n';
+import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
 
 // Register Fonts
 Font.register({
@@ -356,8 +357,8 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
   let tText = '#334155';
   
   if (templateId === 'modern') { tPrimary = '#1e293b'; tAccent = '#3b82f6'; }
-  else if (templateId === 'premium-gold') { tPrimary = '#1a1a1a'; tAccent = '#d97706'; }
-  else if (templateId === 'classic-elegant') { tPrimary = '#27272a'; tAccent = '#059669'; }
+  else if (templateId === 'gold') { tPrimary = '#1a1a1a'; tAccent = '#d97706'; }
+  else if (templateId === 'corporate') { tPrimary = '#27272a'; tAccent = '#059669'; }
   else if (templateId === 'minimal') { tPrimary = '#000000'; tAccent = '#000000'; tText = '#000000'; }
   else if (templateId === 'professional') { tPrimary = '#1e3a8a'; tAccent = '#1d4ed8'; }
   else if (templateId === 'retail') { tPrimary = '#0f172a'; tAccent = '#eab308'; }
@@ -367,6 +368,9 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
   else if (templateId === 'tailor') { tPrimary = '#1e1b4b'; tAccent = '#6366f1'; }
   else if (templateId === 'teacher') { tPrimary = '#064e3b'; tAccent = '#10b981'; }
 
+  const isDarkHeader = templateId === 'modern' || templateId === 'gold';
+  const hasCorporateBorder = templateId === 'corporate';
+
   const useA5 = pageSize === 'A5';
   const pageStyle = useA5 ? styles.pageA5 : styles.page;
 
@@ -375,23 +379,23 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
       <Page size={pageSize} style={[pageStyle, { color: tText }]}>
         
         {/* Header: Brand & Invoice Info */}
-        <View style={[styles.headerRow, templateId === 'modern' ? { backgroundColor: tPrimary, padding: useA5 ? 12 : 20, color: '#fff', marginHorizontal: useA5 ? -24 : -36, marginTop: useA5 ? -24 : -36, marginBottom: useA5 ? 24 : 40 } : {}]}>
+        <View style={[styles.headerRow, isDarkHeader ? { backgroundColor: templateId === 'gold' ? '#111827' : tPrimary, padding: useA5 ? 12 : 20, color: templateId === 'gold' ? '#fef3c7' : '#fff', marginHorizontal: useA5 ? -24 : -36, marginTop: useA5 ? -24 : -36, marginBottom: useA5 ? 24 : 40, borderBottomWidth: templateId === 'gold' ? 1 : 0, borderBottomColor: 'rgba(245, 158, 11, 0.3)' } : hasCorporateBorder ? { borderBottomColor: '#064e3b', borderBottomWidth: 4 } : templateId === 'minimal' ? { borderBottomColor: '#000' } : {}]}>
           <View style={styles.brandContainer}>
             {businessPrefs.logoUrl ? (
-              <Image src={businessPrefs.logoUrl} style={useA5 ? { ...styles.logo, width: 36, height: 36 } : styles.logo} />
+              <Image src={businessPrefs.logoUrl} style={useA5 ? { ...styles.logo, width: 36, height: 36, borderRadius: templateId === 'minimal' ? 0 : 8 } : { ...styles.logo, borderRadius: templateId === 'minimal' ? 0 : 8 }} />
             ) : (
-              <View style={[styles.logoFallback, { backgroundColor: tAccent }, useA5 ? { width: 36, height: 36, fontSize: 18 } : {}]}>
-                <Text>{businessPrefs.businessName?.charAt(0) || 'B'}</Text>
+              <View style={[styles.logoFallback, { backgroundColor: tAccent, borderRadius: templateId === 'minimal' ? 0 : 8 }, useA5 ? { width: 36, height: 36, fontSize: 18 } : {}]}>
+                <Text style={{ color: '#fff' }}>{businessPrefs.businessName?.charAt(0) || 'B'}</Text>
               </View>
             )}
             <View>
-              <Text style={[styles.businessName, useA5 ? { fontSize: 15 } : {}, templateId === 'modern' ? { color: '#fff' } : { color: tPrimary }]}>{businessPrefs.businessName}</Text>
+              <Text style={[styles.businessName, useA5 ? { fontSize: 15 } : {}, isDarkHeader ? { color: templateId === 'gold' ? '#f59e0b' : '#fff' } : hasCorporateBorder ? { color: '#064e3b' } : { color: tPrimary }]}>{businessPrefs.businessName}</Text>
               {businessPrefs.gstNumber ? (
-                <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>{regionalPrefs.taxLabel}: {businessPrefs.gstNumber}</Text>
+                <Text style={[styles.metaText, isDarkHeader ? { color: templateId === 'gold' ? 'rgba(254, 243, 199, 0.7)' : '#cbd5e1' } : {}]}>{regionalPrefs.taxLabel}: {businessPrefs.gstNumber}</Text>
               ) : null}
-              {businessPrefs.address ? <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>{businessPrefs.address}</Text> : null}
-              <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>Ph: {businessPrefs.phone}</Text>
-              <Text style={[styles.metaText, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>{businessPrefs.email}</Text>
+              {businessPrefs.address ? <Text style={[styles.metaText, isDarkHeader ? { color: templateId === 'gold' ? 'rgba(254, 243, 199, 0.7)' : '#cbd5e1' } : {}]}>{businessPrefs.address}</Text> : null}
+              <Text style={[styles.metaText, isDarkHeader ? { color: templateId === 'gold' ? 'rgba(254, 243, 199, 0.7)' : '#cbd5e1' } : {}]}>Ph: {businessPrefs.phone}</Text>
+              <Text style={[styles.metaText, isDarkHeader ? { color: templateId === 'gold' ? 'rgba(254, 243, 199, 0.7)' : '#cbd5e1' } : {}]}>{businessPrefs.email}</Text>
             </View>
           </View>
 
@@ -406,18 +410,18 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
               </View>
             )}
             <View style={styles.invoiceRow}>
-              <Text style={[styles.invoiceLabel, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>
+              <Text style={[styles.invoiceLabel, isDarkHeader ? { color: templateId === 'gold' ? 'rgba(254, 243, 199, 0.7)' : '#cbd5e1' } : {}]}>
                 {invoice.billType === 'Estimate' ? 'Estimate:' : invoice.billType === 'Quotation' ? 'Quote:' : 'Invoice:'}
               </Text>
-              <Text style={[styles.invoiceValue, templateId === 'modern' ? { color: '#fff' } : { color: tPrimary }]}>{invoice.invoiceNumber}</Text>
+              <Text style={[styles.invoiceValue, isDarkHeader ? { color: templateId === 'gold' ? '#fef3c7' : '#fff' } : { color: tPrimary }]}>{invoice.invoiceNumber}</Text>
             </View>
             <View style={styles.invoiceRow}>
-              <Text style={[styles.invoiceLabel, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>Date:</Text>
-              <Text style={[styles.invoiceValue, templateId === 'modern' ? { color: '#fff' } : { color: tPrimary }]}>{invoice.date}</Text>
+              <Text style={[styles.invoiceLabel, isDarkHeader ? { color: templateId === 'gold' ? 'rgba(254, 243, 199, 0.7)' : '#cbd5e1' } : {}]}>Date:</Text>
+              <Text style={[styles.invoiceValue, isDarkHeader ? { color: templateId === 'gold' ? '#fef3c7' : '#fff' } : { color: tPrimary }]}>{invoice.date}</Text>
             </View>
             <View style={styles.invoiceRow}>
-              <Text style={[styles.invoiceLabel, templateId === 'modern' ? { color: '#cbd5e1' } : {}]}>Due Date:</Text>
-              <Text style={[styles.invoiceValue, templateId === 'modern' ? { color: '#fff' } : { color: tPrimary }]}>{invoice.dueDate}</Text>
+              <Text style={[styles.invoiceLabel, isDarkHeader ? { color: templateId === 'gold' ? 'rgba(254, 243, 199, 0.7)' : '#cbd5e1' } : {}]}>Due Date:</Text>
+              <Text style={[styles.invoiceValue, isDarkHeader ? { color: templateId === 'gold' ? '#fef3c7' : '#fff' } : { color: tPrimary }]}>{invoice.dueDate}</Text>
             </View>
           </View>
         </View>
@@ -465,27 +469,61 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
         {/* Items Table */}
         <View style={styles.table}>
           <View style={[styles.tableHeaderRow, templateId === 'minimal' ? { borderTopWidth: 1, borderTopColor: '#000', paddingTop: 6, borderBottomColor: '#000' } : { borderBottomColor: tAccent }]}>
-            <Text style={[styles.tableHeaderCell, styles.colDesc]}>{categoryWords.items}</Text>
-            <Text style={[styles.tableHeaderCell, styles.colQty]}>{categoryWords.qty}</Text>
-            <Text style={[styles.tableHeaderCell, styles.colRate]}>{categoryWords.price}</Text>
-            <Text style={[styles.tableHeaderCell, styles.colAmt]}>Total</Text>
+            {getInvoiceColumns(invoice, businessSettings).map((col) => (
+              <Text key={col.id} style={[styles.tableHeaderCell, { width: col.width, textAlign: col.align === 'center' ? 'center' : col.align === 'right' ? 'right' : 'left' }]}>
+                {col.label}
+              </Text>
+            ))}
           </View>
           
           {(invoice.items || []).map((item, idx) => (
             <View key={idx} style={[styles.tableRow, templateId === 'minimal' ? { borderBottomColor: '#ccc' } : {}]} wrap={false}>
-              <View style={styles.colDesc}>
-                <Text style={{ fontWeight: 'bold', color: tPrimary, marginBottom: 2 }}>
-                  {item.description || item.name || item.productName || item.serviceName || item.itemService || item.designNo || 'Item'}
-                </Text>
-                {item.workType && <Text style={[(templateId === 'embroidery' || templateId === 'tailor') ? { fontSize: 8, fontWeight: 'bold', color: '#be185d', marginTop: 2 } : { fontSize: 7.5, color: '#64748b' }]}>Work Type: {item.workType}</Text>}
-                {item.size && <Text style={[(templateId === 'embroidery' || templateId === 'tailor') ? { fontSize: 8, fontWeight: 'bold', color: '#4338ca', marginTop: 1 } : { fontSize: 7.5, color: '#64748b' }]}>Size: {item.size}</Text>}
-                {item.sizeVariant && <Text style={{ fontSize: 7.5, color: '#64748b' }}>Variant: {item.sizeVariant}</Text>}
-              </View>
-              <Text style={[styles.tableCell, styles.colQty]}>
-                {item.qty !== undefined ? item.qty : item.quantity} {item.unit ? item.unit.toUpperCase() : ''}
-              </Text>
-              <Text style={[styles.tableCell, styles.colRate]}>{formatCurrency(item.rate !== undefined ? item.rate : item.price, currencySymbol, regionalPrefs.numberFormat)}</Text>
-              <Text style={[styles.tableCell, styles.colAmt]}>{formatCurrency(item.amount !== undefined ? item.amount : item.total, currencySymbol, regionalPrefs.numberFormat)}</Text>
+              {getInvoiceColumns(invoice, businessSettings).map((col) => {
+                const val = getItemValue(item, col.id, invoice, businessSettings);
+                
+                if (col.id === 'item') {
+                  return (
+                    <View key={col.id} style={{ width: col.width, paddingRight: 4 }}>
+                      <Text style={{ fontWeight: 'bold', color: tPrimary, marginBottom: 2 }}>
+                        {item.description || item.name || item.productName || item.serviceName || item.itemService || item.designNo || 'Item'}
+                      </Text>
+                      {item.workType && <Text style={[(templateId === 'embroidery' || templateId === 'tailor') ? { fontSize: 8, fontWeight: 'bold', color: '#be185d', marginTop: 2 } : { fontSize: 7.5, color: '#64748b' }]}>Work Type: {item.workType}</Text>}
+                      {item.size && <Text style={[(templateId === 'embroidery' || templateId === 'tailor') ? { fontSize: 8, fontWeight: 'bold', color: '#4338ca', marginTop: 1 } : { fontSize: 7.5, color: '#64748b' }]}>Size: {item.size}</Text>}
+                      {item.sizeVariant && <Text style={{ fontSize: 7.5, color: '#64748b' }}>Variant: {item.sizeVariant}</Text>}
+                    </View>
+                  );
+                }
+
+                if (col.id === 'amount') {
+                  return (
+                    <Text key={col.id} style={[styles.tableCell, { width: col.width, textAlign: col.align === 'center' ? 'center' : col.align === 'right' ? 'right' : 'left', fontWeight: 'bold', color: '#0f172a' }]}>
+                      {formatCurrency(val, currencySymbol, regionalPrefs.numberFormat)}
+                    </Text>
+                  );
+                }
+
+                if (col.id === 'rate' || col.id === 'discount' || col.id === 'tax') {
+                  return (
+                    <Text key={col.id} style={[styles.tableCell, { width: col.width, textAlign: col.align === 'center' ? 'center' : col.align === 'right' ? 'right' : 'left' }]}>
+                      {col.id === 'discount' && val > 0 ? '-' : ''}{formatCurrency(val, currencySymbol, regionalPrefs.numberFormat)}
+                    </Text>
+                  );
+                }
+                
+                if (col.id === 'qty') {
+                  return (
+                    <Text key={col.id} style={[styles.tableCell, { width: col.width, textAlign: col.align === 'center' ? 'center' : col.align === 'right' ? 'right' : 'left', fontWeight: 'bold', color: '#64748b' }]}>
+                      {val} {item.unit ? item.unit.toUpperCase() : ''}
+                    </Text>
+                  );
+                }
+
+                return (
+                  <Text key={col.id} style={[styles.tableCell, { width: col.width, textAlign: col.align === 'center' ? 'center' : col.align === 'right' ? 'right' : 'left' }]}>
+                    {val}
+                  </Text>
+                );
+              })}
             </View>
           ))}
 

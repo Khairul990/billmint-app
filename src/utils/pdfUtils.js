@@ -1,6 +1,6 @@
 import React from 'react';
 import { pdf } from '@react-pdf/renderer';
-import { PDFInvoice } from '../components/PDFInvoice';
+import PdfDocument from '../components/PdfDocument';
 import { toast } from 'react-hot-toast';
 import QRCode from 'qrcode';
 
@@ -33,7 +33,13 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
       }
     }
 
-    const doc = React.createElement(PDFInvoice, { invoice, businessSettings, isPremium, qrCodeDataUrl });
+    const pageSize = businessSettings?.pdfPageSize || 'A4';
+    const doc = React.createElement(PdfDocument, { 
+      invoice, 
+      businessSettings, 
+      qrCodeBase64: qrCodeDataUrl,
+      pageSize
+    });
     
     // Add a 15-second timeout to prevent silent hangs in case of font or network issues
     const pdfPromise = pdf(doc).toBlob();
