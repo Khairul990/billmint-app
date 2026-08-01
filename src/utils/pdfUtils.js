@@ -33,11 +33,31 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
       }
     }
 
+    let safeLogoBase64 = null;
+    if (businessSettings?.logoUrl) {
+      try {
+        // Attempt to fetch and convert the logo to base64 to avoid React-PDF 'Failed to fetch' crashes
+        const response = await fetch(businessSettings.logoUrl);
+        if (response.ok) {
+          const blob = await response.blob();
+          safeLogoBase64 = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch (err) {
+        console.warn('Could not fetch logo for PDF (CORS/Network error). Rendering without logo.', err);
+      }
+    }
+
     const pageSize = businessSettings?.pdfPageSize || 'A4';
     const doc = React.createElement(PdfDocument, { 
       invoice, 
       businessSettings, 
       qrCodeBase64: qrCodeDataUrl,
+      safeLogoBase64,
       pageSize
     });
     

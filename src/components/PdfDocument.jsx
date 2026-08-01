@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
 import { getCategoryWording } from '../config/businessPresets';
 import { getTemplateLayoutFamily } from '../services/TemplateEngine';
 
-const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' }) => {
+const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, pageSize = 'A4' }) => {
   if (!invoice) return null;
 
   const rawTemplateId = (businessSettings?.selectedPdfTemplate || invoice.pdfTemplate || 'classic').toLowerCase();
@@ -380,8 +380,8 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
         {/* Header: Brand & Invoice Info */}
         <View style={[styles.headerRow, isDarkHeader ? { backgroundColor: templateId === 'gold' ? '#111827' : tPrimary, padding: useA5 ? 12 : 20, color: templateId === 'gold' ? '#fef3c7' : '#fff', marginHorizontal: useA5 ? -24 : -36, marginTop: useA5 ? -24 : -36, marginBottom: useA5 ? 24 : 40, borderBottomWidth: templateId === 'gold' ? 1 : 0, borderBottomColor: 'rgba(245, 158, 11, 0.3)' } : hasCorporateBorder ? { borderBottomColor: '#064e3b', borderBottomWidth: 4 } : templateId === 'minimal' ? { borderBottomColor: '#000' } : {}]}>
           <View style={styles.brandContainer}>
-            {businessPrefs.logoUrl ? (
-              <Image src={businessPrefs.logoUrl} style={useA5 ? { ...styles.logo, width: 36, height: 36, borderRadius: templateId === 'minimal' ? 0 : 8 } : { ...styles.logo, borderRadius: templateId === 'minimal' ? 0 : 8 }} />
+            {safeLogoBase64 ? (
+              <Image src={safeLogoBase64} style={useA5 ? { ...styles.logo, width: 36, height: 36, borderRadius: templateId === 'minimal' ? 0 : 8 } : { ...styles.logo, borderRadius: templateId === 'minimal' ? 0 : 8 }} />
             ) : (
               <View style={[styles.logoFallback, { backgroundColor: tAccent, borderRadius: templateId === 'minimal' ? 0 : 8 }, useA5 ? { width: 36, height: 36, fontSize: 18 } : {}]}>
                 <Text style={{ color: '#fff' }}>{businessPrefs.businessName?.charAt(0) || 'B'}</Text>
