@@ -234,8 +234,9 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
                               type="text"
                               value={col.name}
                               onChange={(e) => {
-                                const newCols = [...invoiceCustomColumns];
-                                newCols[index].name = e.target.value;
+                                const newCols = invoiceCustomColumns.map((c, i) => 
+                                  i === index ? { ...c, name: e.target.value } : c
+                                );
                                 handleUpdateBuilderSettings({ customColumns: newCols });
                               }}
                               className="flex-1 min-w-[120px] px-3 py-2 text-sm bg-theme-card border border-theme-border-soft rounded-lg text-theme-primary font-bold focus:outline-none focus:border-theme-accent"
@@ -244,8 +245,9 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
                             <select
                               value={col.type}
                               onChange={(e) => {
-                                const newCols = [...invoiceCustomColumns];
-                                newCols[index].type = e.target.value;
+                                const newCols = invoiceCustomColumns.map((c, i) => 
+                                  i === index ? { ...c, type: e.target.value } : c
+                                );
                                 handleUpdateBuilderSettings({ customColumns: newCols });
                               }}
                               className="px-3 py-2 text-sm bg-theme-card border border-theme-border-soft rounded-lg text-theme-primary font-bold focus:outline-none focus:border-theme-accent"
