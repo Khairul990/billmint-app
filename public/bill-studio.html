@@ -975,8 +975,20 @@
         if (event.data && event.data.type === 'LOAD_INVOICE') {
             const invoice = event.data.payload;
             if (invoice) {
-                document.getElementById('invoiceNo').value = invoice.invoiceNumber || invoice.id || generateId();
-                if (invoice.date) document.getElementById('invoiceDate').value = invoice.date;
+                state.invoiceNumber = invoice.invoiceNumber || invoice.id || `INV-${Math.floor(1000 + Math.random() * 9000)}`;
+                document.getElementById('invoice-no-display').textContent = state.invoiceNumber;
+                
+                if (invoice.date) {
+                    state.invoiceDate = invoice.date;
+                    const dateInput = document.getElementById('invoiceDateInput');
+                    if (dateInput) {
+                        const d = new Date(invoice.date);
+                        if (!isNaN(d.getTime())) {
+                            dateInput.value = d.toISOString().split('T')[0];
+                        }
+                    }
+                }
+                
                 if (invoice.customerName) {
                     document.getElementById('customerName').value = invoice.customerName;
                     state.customer.name = invoice.customerName;

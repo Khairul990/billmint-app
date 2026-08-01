@@ -76,13 +76,14 @@ const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessS
                   bgApp: rootStyle.getPropertyValue('--theme-app'),
                 }
               }
-            }, '*');
-            if (editingInvoice) {
-              iframeRef.current.contentWindow.postMessage({
-                type: 'LOAD_INVOICE',
-                payload: editingInvoice
-              }, '*');
             }
+          }
+          
+          if (editingInvoice) {
+            iframeRef.current.contentWindow.postMessage({
+              type: 'LOAD_INVOICE',
+              payload: editingInvoice
+            }, '*');
           }
         }
       }
