@@ -4,21 +4,14 @@ import { formatCurrency } from '../utils/invoiceUtils';
 import { t } from '../utils/i18n';
 import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
 
-// Register Fonts
-Font.register({
-  family: 'Roboto',
-  fonts: [
-    { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf', fontWeight: 400 }, // Regular
-    { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlvAx05IsDqlA.ttf', fontWeight: 700 } // Bold
-  ]
-});
+// Using standard Helvetica to prevent network/CORS font fetch failures
 
 // Styles mapping tailwind-like utility classes to React-PDF styles
 const styles = StyleSheet.create({
   page: {
     padding: 36,
     paddingBottom: 80,
-    fontFamily: 'Roboto',
+    fontFamily: 'Helvetica',
     fontSize: 9.5,
     color: '#334155',
     backgroundColor: '#ffffff',
