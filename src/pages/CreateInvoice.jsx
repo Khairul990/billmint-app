@@ -29,7 +29,9 @@ const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessS
           balanceDue: parseCurrency(payload.totals.grandTotal),
           items: payload.items.map(i => ({
              sNo: i.sNo,
-             description: i.name,
+             itemService: i.name,
+             name: i.name,
+             description: '', // Leave description empty to prevent unwanted Details column in PDF
              qty: i.qty,
              rate: i.price,
              amount: i.total,
