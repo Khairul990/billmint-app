@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
  * @param {Object} invoice - Invoice object
  * @param {Object} businessSettings - Company's active profile settings
  */
-const InvoicePreview = ({ invoice, businessSettings }) => {
+const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
   if (!invoice) return null;
 
   const businessPrefs = invoice.businessSnapshot || {
@@ -564,6 +564,19 @@ const InvoicePreview = ({ invoice, businessSettings }) => {
           Disclaimer: This document is for billing purposes only and does not constitute medical advice or a formal prescription unless explicitly signed by a registered practitioner.
         </div>
       )}
+
+      {/* Live Link Extra Section (Payment) */}
+      {isLiveLink && (
+        <div className="mt-12 p-6 rounded-2xl border-2 text-center bg-theme-surface/50 border-theme-accent/50 dark:bg-theme-surface dark:border-theme-accent/30 shadow-lg relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
+          <h3 className="text-lg font-black mb-2 text-theme-accent dark:text-theme-accent relative z-10">Secure Payment Gateway</h3>
+          <p className="text-sm mb-6 text-theme-muted relative z-10">Please complete your payment below to settle this invoice.</p>
+          <button className="px-8 py-3 rounded-xl font-bold text-white shadow-xl transition-transform hover:scale-105 bg-theme-accent hover:bg-theme-accent-dark relative z-10">
+            Pay {formatCurrency((invoice.balanceDue !== undefined && invoice.balanceDue !== null && invoice.balanceDue !== 0) ? invoice.balanceDue : invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)} Now
+          </button>
+        </div>
+      )}
+
       <div className={`flex justify-center items-center gap-1.5 border-t pt-8 mt-8 text-[10px] text-theme-muted dark:text-theme-muted font-bold uppercase tracking-wider ${templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft/80'}`}>
         <ShieldCheck className="w-4 h-4 text-theme-accent dark:text-theme-accent" />
         <span>Generated Securely via BillQyro Invoicing SaaS</span>

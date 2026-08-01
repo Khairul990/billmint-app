@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   FileText, LayoutTemplate, Columns, Droplet, ArrowUp, ArrowDown, Eye, EyeOff, 
   Trash2, Building, DollarSign, Palette, Settings2, ShieldCheck 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PdfTemplateStudio from '../PdfTemplateStudio';
-import UniversalInvoiceTemplate from '../../components/invoice/UniversalInvoiceTemplate';
+import InvoicePreview from '../../components/InvoicePreview';
 
 const DEFAULT_COLUMNS = [
   { id: 'item', label: 'Item/Service', visible: true, order: 1 },
@@ -140,7 +140,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
             {/* TEMPLATES TAB */}
             {activeTab === 'templates' && (
               <div className="card-premium p-6">
-                <PdfTemplateStudio businessSettings={settings} setSettings={onUpdate} />
+                <PdfTemplateStudio businessSettings={settings} setSettings={onUpdate} viewMode={viewMode} setViewMode={setViewMode} />
               </div>
             )}
 
@@ -441,7 +441,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
           <div className="bg-theme-app border-b border-theme-border-soft px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4 text-theme-accent" />
-              <span className="text-xs font-black text-theme-primary uppercase tracking-widest">Live Preview</span>
+              <span className="text-xs font-black text-theme-primary uppercase tracking-widest">{viewMode === 'livelink' ? 'Live Link Preview' : 'PDF Preview'}</span>
             </div>
             <div className="flex gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-theme-border-soft"></div>
@@ -449,13 +449,31 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
               <div className="w-2.5 h-2.5 rounded-full bg-theme-border-soft"></div>
             </div>
           </div>
-          <div className="p-4 bg-gray-100 overflow-y-auto custom-scrollbar h-[calc(100vh-200px)] flex justify-center">
-            <div className="transform scale-[0.55] origin-top w-[210mm] shadow-lg rounded-sm overflow-hidden bg-white shrink-0 h-max">
-              <UniversalInvoiceTemplate 
-                invoice={DUMMY_INVOICE}
-                businessSettings={previewBusinessSettings}
-              />
-            </div>
+          <div className={`p-4 bg-gray-100 overflow-y-auto custom-scrollbar flex justify-center ${viewMode === 'livelink' ? 'h-[calc(100vh-200px)] items-start' : 'h-[calc(100vh-200px)]'}`}>
+            {viewMode === 'livelink' ? (
+              <div className="w-full max-w-[375px] shrink-0 h-max">
+                {/* Mobile Phone Mockup Frame for Live Link */}
+                <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden border-[8px] border-slate-900 mx-auto relative h-[700px]">
+                  {/* Notch */}
+                  <div className="absolute top-0 inset-x-0 h-6 bg-slate-900 rounded-b-3xl w-40 mx-auto z-50"></div>
+                  <div className="h-full overflow-y-auto custom-scrollbar pb-12 w-[140%] origin-top-left scale-[0.714]">
+                    <InvoicePreview 
+                      invoice={DUMMY_INVOICE}
+                      businessSettings={{ ...previewBusinessSettings, showQrInPreview: true }}
+                      isLiveLink={true}
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className={`transform origin-top w-[210mm] shadow-lg rounded-sm overflow-hidden bg-white shrink-0 h-max ${viewMode === 'print' ? 'scale-[0.5]' : 'scale-[0.55]'}`}>
+                <InvoicePreview 
+                  invoice={DUMMY_INVOICE}
+                  businessSettings={previewBusinessSettings}
+                  isLiveLink={false}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -72,7 +72,7 @@ const brandPresetIcons = {
   billing_only: 'FileText'
 };
 
-const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subscription }) => {
+const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subscription, viewMode, setViewMode }) => {
   const [previewTemplate, setPreviewTemplate] = useState(null);
   const [filterCategory, setFilterCategory] = useState('All');
   const [useAnimId, setUseAnimId] = useState(null);
@@ -84,7 +84,10 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
   const [showOptions, setShowOptions] = useState(false);
   const [showBrandPresets, setShowBrandPresets] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null);
-  const [viewMode, setViewMode] = useState('pdf'); // 'pdf' | 'livelink' | 'print'
+  const [internalViewMode, setInternalViewMode] = useState('pdf');
+
+  const activeViewMode = viewMode || internalViewMode;
+  const handleSetViewMode = setViewMode || setInternalViewMode;
 
   const activeTemplate = businessSettings?.selectedPdfTemplate || 'classic';
   const isPremium = subscription?.status === 'premium';
@@ -355,20 +358,20 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
           </p>
           <div className="flex bg-theme-app border border-theme-border-soft rounded-lg p-1 w-full xl:w-auto shrink-0 overflow-x-auto hide-scrollbar">
             <button
-              onClick={() => { setViewMode('pdf'); setPreviewSize('A4'); }}
-              className={`flex-1 xl:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${viewMode === 'pdf' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
+              onClick={() => { handleSetViewMode('pdf'); setPreviewSize('A4'); }}
+              className={`flex-1 xl:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${activeViewMode === 'pdf' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
             >
               PDF View
             </button>
             <button
-              onClick={() => setViewMode('livelink')}
-              className={`flex-1 xl:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${viewMode === 'livelink' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
+              onClick={() => handleSetViewMode('livelink')}
+              className={`flex-1 xl:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${activeViewMode === 'livelink' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
             >
               Live Link
             </button>
             <button
-              onClick={() => { setViewMode('print'); setPreviewSize('A5'); }}
-              className={`flex-1 xl:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${viewMode === 'print' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
+              onClick={() => { handleSetViewMode('print'); setPreviewSize('A5'); }}
+              className={`flex-1 xl:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${activeViewMode === 'print' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
             >
               Print Bill
             </button>
