@@ -372,7 +372,7 @@ const PublicInvoice = ({ initialInvoice }) => {
   
   // Use specific logic for templates that have dedicated Live Link styles, otherwise fallback to family
   const activeTemplate = ['mobile', 'boutique', 'clinic', 'repair', 'cartoon'].includes(rawActiveTemplate) 
-    ? rawTemplateId 
+    ? rawActiveTemplate 
     : activeTemplateFamily;
 
   const getTemplateStyles = () => {
