@@ -273,7 +273,7 @@ const StudioLayout = ({
               exit="exit"
               className="w-full h-full"
             >
-              <div className="w-full min-h-full bg-theme-app p-2 sm:p-4 relative overflow-hidden">
+              <div className="w-full min-h-full bg-theme-app p-2 sm:p-4 relative">
                 <Suspense fallback={<div className="p-12 text-center text-theme-muted"><div className="animate-spin w-8 h-8 border-2 border-theme-accent border-t-transparent rounded-full mx-auto mb-4"></div>Loading Studio...</div>}>
                   {activeStudio === 'business' && <BusinessStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
                   {activeStudio === 'theme' && <ThemeStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
