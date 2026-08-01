@@ -7,7 +7,8 @@ import ClassicLoader from '../ClassicLoader';
 
 export default function CustomerPortalLogin({ onVerificationSuccess, prefillId }) {
   const [customerId, setCustomerId] = useState(prefillId || '');
-  const [phone, setPhone] = useState('+91 ');
+  const [countryCode, setCountryCode] = useState('+91');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -19,10 +20,11 @@ export default function CustomerPortalLogin({ onVerificationSuccess, prefillId }
 
     setLoading(true);
     try {
-      const isVerified = await portalEngine.verifyCustomerPortal(customerId, phone);
+      const fullPhone = `${countryCode}${phone}`;
+      const isVerified = await portalEngine.verifyCustomerPortal(customerId, fullPhone);
       if (isVerified) {
         toast.success('Verification successful!');
-        onVerificationSuccess(customerId, phone);
+        onVerificationSuccess(customerId, fullPhone);
       } else {
         toast.error('Verification failed. Invalid Customer ID or Phone Number.');
       }
@@ -72,14 +74,22 @@ export default function CustomerPortalLogin({ onVerificationSuccess, prefillId }
 
           <div>
             <label className="block text-xs font-bold text-theme-muted uppercase mb-1">Phone Number</label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-theme-muted" />
+            <div className="flex gap-2 relative">
+              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-theme-muted z-10" />
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                className="w-24 bg-theme-main border border-theme-border-soft text-theme-primary rounded-xl py-3 pl-10 pr-2 focus:outline-none focus:border-theme-accent transition-colors appearance-none cursor-pointer"
+              >
+                <option value="+91">+91 (IN)</option>
+                <option value="+880">+880 (BD)</option>
+              </select>
               <input 
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-theme-main border border-theme-border-soft text-theme-primary rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-theme-accent transition-colors"
-                placeholder="+91 9876543210"
+                className="flex-1 bg-theme-main border border-theme-border-soft text-theme-primary rounded-xl py-3 px-4 focus:outline-none focus:border-theme-accent transition-colors"
+                placeholder="Local Phone Number"
                 required
               />
             </div>

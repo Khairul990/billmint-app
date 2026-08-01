@@ -38,8 +38,8 @@ const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessS
         };
 
         if (onSaveInvoice) {
-           // true = saveCustomerAsNew
-           onSaveInvoice(mappedPayload, true, false);
+           // false = do not saveCustomerAsNew (prevents duplicate customers on dropdown selection)
+           onSaveInvoice(mappedPayload, false, false);
         }
       }
       
