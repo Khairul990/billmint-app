@@ -237,9 +237,15 @@ const styles = StyleSheet.create({
   compactColAmt: { width: '14%', textAlign: 'right' },
 });
 
-export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, isPremium }) => {
-  const activeSettings = invoice?.businessSnapshot || liveBusinessSettings;
-  const activePaymentSettings = invoice?.paymentSettingsSnapshot || activeSettings;
+export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, isPremium, qrCodeDataUrl }) => {
+  const activeSettings = {
+    ...liveBusinessSettings,
+    ...(invoice?.businessSnapshot || {})
+  };
+  const activePaymentSettings = {
+    ...liveBusinessSettings,
+    ...(invoice?.paymentSettingsSnapshot || {})
+  };
   
   const businessSettings = {
     ...activeSettings,
@@ -257,7 +263,8 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
   };
 
   const currencySymbol = regionalPrefs.currency || '\u20b9';
-  const templateId = businessSettings?.invoiceTemplate || 'modern';
+  const rawTemplateId = (businessSettings?.selectedPdfTemplate || invoice?.pdfTemplate || businessSettings?.invoiceTemplate || 'classic').toLowerCase();
+  const templateId = rawTemplateId === 'modern' ? 'modern' : 'classic';
   
   const themePreset = businessSettings?.themePreset || 'light';
   let brandColor = '#19C3A3'; 
@@ -282,7 +289,15 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
     totalHighlightBg = '#ECFDF5';
   }
 
-  const dynamicFont = regionalPrefs.country === 'Bangladesh' ? 'Noto Sans Bengali' : 'Noto Sans';
+  const hasBengali = (text) => /[\u0980-\u09FF]/.test(text || '');
+  const needsBengaliFont = 
+    hasBengali(businessSettings?.businessName) || 
+    hasBengali(businessSettings?.address) || 
+    hasBengali(invoice?.customerName) ||
+    hasBengali(invoice?.customerAddress) ||
+    (invoice?.items || []).some(i => hasBengali(i.name) || hasBengali(i.description));
+
+  const dynamicFont = (regionalPrefs.country === 'Bangladesh' || needsBengaliFont) ? 'Noto Sans Bengali' : 'Noto Sans';
 
   const formatVal = (num) => {
     const numericAmount = parseFloat(num || 0);
@@ -593,19 +608,19 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
 
       <View style={styles.totalsContainer}>
         <View style={styles.notesBox}>
-          {qrCodeUrl ? (
+          {qrCodeDataUrl ? (
             <View style={{ flexDirection: 'row', gap: 12 }}>
-              <Image src={qrCodeUrl} style={{ width: 65, height: 65, borderRadius: 4 }} />
-              <View style={{ flex: 1, fontSize: 9 }}>
-                <Text style={[styles.notesHeader, { fontSize: 10 }]}>Scan to Pay with {paymentMethod}</Text>
+              <Image src={qrCodeDataUrl} style={{ width: 55, height: 55, borderRadius: 3 }} />
+              <View style={{ flex: 1, fontSize: 8 }}>
+                <Text style={[styles.notesHeader, { fontSize: 9 }]}>Scan to Pay with {paymentMethod}</Text>
                 {paymentMethod === 'UPI' && businessSettings.upiId && (
-                  <Text style={{ marginTop: 3 }}>UPI ID: <Text style={{ fontWeight: 'bold' }}>{businessSettings.upiId}</Text></Text>
+                  <Text style={{ marginTop: 2 }}>UPI ID: <Text style={{ fontWeight: 'bold' }}>{businessSettings.upiId}</Text></Text>
                 )}
                 {paymentMethod === 'bKash' && businessSettings.bkashNumber && (
-                  <Text style={{ marginTop: 3 }}>bKash: <Text style={{ fontWeight: 'bold' }}>{businessSettings.bkashNumber}</Text></Text>
+                  <Text style={{ marginTop: 2 }}>bKash: <Text style={{ fontWeight: 'bold' }}>{businessSettings.bkashNumber}</Text></Text>
                 )}
                 {paymentMethod === 'Nagad' && businessSettings.nagadNumber && (
-                  <Text style={{ marginTop: 3 }}>Nagad: <Text style={{ fontWeight: 'bold' }}>{businessSettings.nagadNumber}</Text></Text>
+                  <Text style={{ marginTop: 2 }}>Nagad: <Text style={{ fontWeight: 'bold' }}>{businessSettings.nagadNumber}</Text></Text>
                 )}
                 {paymentMethod === 'Manual' && businessSettings.customPaymentLink && (
                   <Text style={{ fontSize: 8, marginTop: 3 }}>Details: {businessSettings.customPaymentLink}</Text>

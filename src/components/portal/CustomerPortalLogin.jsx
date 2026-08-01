@@ -7,7 +7,7 @@ import ClassicLoader from '../ClassicLoader';
 
 export default function CustomerPortalLogin({ onVerificationSuccess, prefillId }) {
   const [customerId, setCustomerId] = useState(prefillId || '');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('+91 ');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {

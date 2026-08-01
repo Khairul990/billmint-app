@@ -183,15 +183,13 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                 >
                   <Eye className="w-4 h-4" />
                 </button>
-                {invoice.paymentStatus !== 'Paid' && (
-                  <button
-                    onClick={() => onEdit(invoice)}
-                    title="Edit Invoice"
-                    className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light rounded-xl transition-all cursor-pointer"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                )}
+                <button
+                  onClick={() => onEdit(invoice)}
+                  title="Edit Invoice"
+                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light rounded-xl transition-all cursor-pointer"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
                 <button
                   onClick={() => onDownload(invoice)}
                   title="Download PDF"
@@ -208,14 +206,14 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                       return;
                     }
                     try {
-                      const customerId = invoice.customerId || invoice.customer?.id;
+                      const customerId = invoice.customerId || invoice.customer?.id || invoice.customerPhone;
                       if (!customerId) {
                         toast.error('Please assign a customer to share the Portal.');
                         return;
                       }
                       const isEdu = isEducationCategory(businessSettings?.businessCategory);
                       const portalPath = isEdu ? '/student-portal' : '/portal';
-                      const liveLink = `${window.location.origin}${portalPath}/${customerId}`;
+                      const liveLink = `${window.location.origin}${portalPath}/${encodeURIComponent(customerId)}`;
                       await navigator.clipboard.writeText(liveLink);
                       toast.success('Live Invoice Link copied to clipboard!');
                     } catch (err) {

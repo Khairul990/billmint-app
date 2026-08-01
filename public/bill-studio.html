@@ -464,7 +464,10 @@
     <div class="header-row">
         <h1>Invoice Builder</h1>
         <div class="invoice-badge">
-            <div id="invoice-date-display">Date: </div>
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; margin-bottom: 0.25rem;">
+                <label for="invoiceDateInput" style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Date:</label>
+                <input type="date" id="invoiceDateInput" onchange="updateDate(this.value)" style="padding: 0.2rem; font-size: 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); max-width: 130px; background: transparent;">
+            </div>
             <div>Invoice No: <span id="invoice-no-display">INV-0001</span></div>
         </div>
     </div>
@@ -620,7 +623,15 @@
 
     // Initialize
     function init() {
-        document.getElementById('invoice-date-display').textContent = `Date: ${state.invoiceDate}`;
+        // Initialize date input
+        const dateInput = document.getElementById('invoiceDateInput');
+        if (dateInput) {
+            // Format state.invoiceDate (which might be localized) into YYYY-MM-DD for the input
+            const d = new Date(state.invoiceDate);
+            if (!isNaN(d.getTime())) {
+                dateInput.value = d.toISOString().split('T')[0];
+            }
+        }
         document.getElementById('invoice-no-display').textContent = state.invoiceNumber;
         
         // Add one initial row
@@ -651,7 +662,7 @@
 
         thHTML += `
             <th width="100">Qty</th>
-            <th width="150">Price</th>
+            <th width="150">Rate (Price)</th>
             <th width="120">Total</th>
             <th width="100" style="text-align: right;">Actions</th>
         `;
@@ -793,7 +804,22 @@
             const matchedProduct = availableProducts.find(p => p.name.toLowerCase() === value.toLowerCase());
             if (matchedProduct) {
                 updateItem(id, 'price', matchedProduct.price);
-                // Also could update default qty if we had it, but standard is keep existing qty
+                // Also update the input field visually
+                const row = document.getElementById(`row-${id}`);
+                if (row) {
+                    const priceInput = row.querySelector('input[type="number"][step="0.01"]');
+                    if (priceInput) priceInput.value = matchedProduct.price;
+                }
+            }
+        }
+    }
+
+    function updateDate(newDate) {
+        if (newDate) {
+            // Convert from YYYY-MM-DD to localized string if needed, or just store it
+            const d = new Date(newDate);
+            if (!isNaN(d.getTime())) {
+                state.invoiceDate = d.toLocaleDateString();
             }
         }
     }

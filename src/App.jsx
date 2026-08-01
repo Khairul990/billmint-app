@@ -349,22 +349,22 @@ function App() {
     
     const newPath = window.location.pathname;
 
-    const studentMatchLegacy = newPath.match(/^\/student\/([a-zA-Z0-9_-]+)/);
-    const customerMatch = newPath.match(/^\/customer\/([a-zA-Z0-9_-]+)/);
-    const portalMatch = newPath.match(/^\/portal\/([a-zA-Z0-9_-]+)/);
-    const billingMatch = newPath.match(/^\/billing\/([a-zA-Z0-9_-]+)/);
-    const eduPortalMatch = newPath.match(/^\/student-portal\/([a-zA-Z0-9_-]+)/);
+    const studentMatchLegacy = newPath.match(/^\/student\/(.+)/);
+    const customerMatch = newPath.match(/^\/customer\/(.+)/);
+    const portalMatch = newPath.match(/^\/portal\/(.+)/);
+    const billingMatch = newPath.match(/^\/billing\/(.+)/);
+    const eduPortalMatch = newPath.match(/^\/student-portal\/(.+)/);
     
     if (eduPortalMatch) {
-      setEduPortalId(eduPortalMatch[1]);
+      setEduPortalId(decodeURIComponent(eduPortalMatch[1]));
     } else if (customerMatch) {
-      setPortalId(customerMatch[1]);
+      setPortalId(decodeURIComponent(customerMatch[1]));
     } else if (portalMatch) {
-      setPortalId(portalMatch[1]);
+      setPortalId(decodeURIComponent(portalMatch[1]));
     } else if (billingMatch) {
-      setPortalId(billingMatch[1]);
+      setPortalId(decodeURIComponent(billingMatch[1]));
     } else if (studentMatchLegacy) {
-      setPortalId(studentMatchLegacy[1]);
+      setPortalId(decodeURIComponent(studentMatchLegacy[1]));
     } else if (newPath === '/customer' || newPath === '/portal') {
       // Allow access without ID, CustomerWorkspace handles prompt
       setPortalId('verification-pending'); 
@@ -971,6 +971,35 @@ function App() {
       setProducts(currentProducts);
     }
 
+    // --- Customer Linking Logic ---
+    if (saveCustomerAsNew && payload.customerName && !isSilent) {
+      // Check if customer already exists
+      const existingCustomer = customers.find(c => 
+        c.name.toLowerCase() === payload.customerName.toLowerCase() || 
+        (payload.customerPhone && c.phone === payload.customerPhone)
+      );
+      
+      if (existingCustomer) {
+        payload.customerId = existingCustomer.id;
+      } else {
+        const newCustomer = {
+          id: 'cust-' + Date.now(),
+          name: payload.customerName,
+          phone: payload.customerPhone || '',
+          email: payload.customerEmail || '',
+          address: payload.customerAddress || '',
+        };
+        handleSaveCustomer(newCustomer, true);
+        payload.customerId = newCustomer.id;
+      }
+    } else if (!payload.customerId && payload.customerPhone) {
+      // Fallback for missing customer ID if phone is provided
+      const existingCustomer = customers.find(c => c.phone === payload.customerPhone || c.name === payload.customerName);
+      if (existingCustomer) {
+        payload.customerId = existingCustomer.id;
+      }
+    }
+
     // Fire and forget saveInvoice for Layer 2 persistence
     invoiceEngine.saveInvoice(payload).then(({ updatedInvoices, firebaseStatus }) => {
       setInvoices(updatedInvoices);
@@ -1041,19 +1070,6 @@ function App() {
         setCurrentTab('invoices');
       }
     }).catch(e => console.error("Error saving invoice locally:", e));
-
-    if (saveCustomerAsNew && payload.customerName && !isSilent) {
-      const newCustomer = {
-        id: 'cust-' + Date.now(),
-        name: payload.customerName,
-        phone: payload.customerPhone || '',
-        email: payload.customerEmail || '',
-        address: payload.customerAddress || ''
-      };
-      customerEngine.saveCustomer(newCustomer).then(({ updatedCustomers }) => {
-        setCustomers(updatedCustomers);
-      }).catch(e => console.error("Error saving customer:", e));
-    }
 
     return payload;
   };
@@ -1730,6 +1746,8 @@ function App() {
             setCurrentTab={setCurrentTab}
           />
         );
+      case 'customer-portal-config':
+        return <CustomerPortalConfig />;
       case 'marketplace':
         return (
           <TemplateMarketplace

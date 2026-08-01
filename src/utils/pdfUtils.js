@@ -2,6 +2,7 @@ import React from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { PDFInvoice } from '../components/PDFInvoice';
 import { toast } from 'react-hot-toast';
+import QRCode from 'qrcode';
 
 let isDownloadingPDF = false;
 
@@ -17,7 +18,22 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
   if (!invoice) return false;
   isDownloadingPDF = true;
   try {
-    const doc = React.createElement(PDFInvoice, { invoice, businessSettings, isPremium });
+    let qrCodeDataUrl = null;
+    const upiId = invoice?.businessSnapshot?.upiId || businessSettings?.upiId;
+    const enableQr = invoice?.paymentSettingsSnapshot?.paymentQrEnabled ?? businessSettings?.paymentQrEnabled;
+    const amountDue = invoice?.balanceDue || 0;
+    
+    if (enableQr && upiId && amountDue > 0) {
+      const businessName = encodeURIComponent(invoice?.businessSnapshot?.businessName || businessSettings?.businessName || 'Business');
+      const upiUrl = `upi://pay?pa=${upiId}&pn=${businessName}&am=${amountDue}&cu=INR`;
+      try {
+        qrCodeDataUrl = await QRCode.toDataURL(upiUrl, { errorCorrectionLevel: 'H', margin: 1, width: 120 });
+      } catch (err) {
+        console.error('Failed to generate QR code for PDF:', err);
+      }
+    }
+
+    const doc = React.createElement(PDFInvoice, { invoice, businessSettings, isPremium, qrCodeDataUrl });
     
     // Add a 15-second timeout to prevent silent hangs in case of font or network issues
     const pdfPromise = pdf(doc).toBlob();

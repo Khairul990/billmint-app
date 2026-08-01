@@ -53,8 +53,8 @@ export default function CustomerPortalConfig() {
     <motion.div
       variants={pageVariants}
       initial="initial"
-      animate="in"
-      exit="out"
+      animate="animate"
+      exit="exit"
       className="max-w-4xl mx-auto space-y-6 pb-20"
     >
       <div className="bg-theme-card border border-theme-border-soft rounded-3xl p-6 shadow-xl relative overflow-hidden">

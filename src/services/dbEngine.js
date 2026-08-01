@@ -3495,11 +3495,19 @@ export const getCustomerPortalInvoices = async (customerId, phone) => {
   try {
     const q = query(
       collection(db, 'publicInvoices'),
-      where('customerId', '==', customerId),
-      where('customerPhone', '==', phone)
+      where('customerId', '==', customerId)
     );
     const snap = await getDocs(q);
-    return snap.docs.map(doc => doc.data());
+    const allInvoices = snap.docs.map(doc => doc.data());
+    
+    if (!phone) return allInvoices;
+    
+    const cleanInputPhone = phone.replace(/[\s\-\+]/g, '');
+    return allInvoices.filter(inv => {
+      if (!inv.customerPhone) return false;
+      const cleanDbPhone = inv.customerPhone.replace(/[\s\-\+]/g, '');
+      return cleanDbPhone === cleanInputPhone || cleanDbPhone.includes(cleanInputPhone) || cleanInputPhone.includes(cleanDbPhone);
+    });
   } catch (err) {
     console.error("Failed to fetch customer portal invoices:", err);
     return [];
@@ -3509,8 +3517,42 @@ export const getCustomerPortalInvoices = async (customerId, phone) => {
 export const verifyCustomerPortal = async (customerId, phone) => {
   if (!firebaseReady) return false;
   try {
+    const cleanInputPhone = phone.replace(/[\s\-\+]/g, '');
+    
+    // 1. Try checking via publicInvoices
     const invoices = await getCustomerPortalInvoices(customerId, phone);
-    return invoices.length > 0;
+    if (invoices.length > 0) return true;
+
+    // 2. Fallback: Local Storage (Works for shop owner testing locally)
+    try {
+      const localCustomers = JSON.parse(localStorage.getItem('billqyro_customers') || '[]');
+      const localCustomer = localCustomers.find(c => c.id === customerId);
+      if (localCustomer && localCustomer.phone) {
+         const cleanLocalPhone = localCustomer.phone.replace(/[\s\-\+]/g, '');
+         if (cleanLocalPhone === cleanInputPhone || cleanLocalPhone.includes(cleanInputPhone) || cleanInputPhone.includes(cleanLocalPhone)) {
+             return true;
+         }
+      }
+    } catch(e) {}
+
+    // 3. Fallback: Try querying Firestore customers (may fail if rules are strict, but worth a shot)
+    try {
+      const q = query(collection(db, 'customers'), where('id', '==', customerId));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const custData = snap.docs[0].data();
+        if (custData.phone) {
+           const cleanDbPhone = custData.phone.replace(/[\s\-\+]/g, '');
+           if (cleanDbPhone === cleanInputPhone || cleanDbPhone.includes(cleanInputPhone) || cleanInputPhone.includes(cleanDbPhone)) {
+               return true;
+           }
+        }
+      }
+    } catch (e) {
+      // Ignore permission denied errors
+    }
+
+    return false;
   } catch (err) {
     console.error("Verification failed:", err);
     return false;

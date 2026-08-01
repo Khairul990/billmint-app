@@ -56,8 +56,8 @@ export function generateInvoiceShareText(invoice, currencySymbol = '₹', busine
   // Construct the secure live link using Portal Architecture
   const customerId = invoice.customerId || invoice.customer?.id;
   const isEdu = isEducationCategory(businessPrefs?.businessCategory) || isEducationCategory(businessPrefs?.defaultBillingTemplate);
-  const portalPath = isEdu ? '/student-portal' : '/billing';
-  const liveLink = customerId ? `${window.location.origin}${portalPath}/${customerId}` : '';
+  const portalPath = isEdu ? '/student-portal' : '/portal';
+  const liveLink = customerId ? `${window.location.origin}${portalPath}/${encodeURIComponent(customerId)}` : '';
 
   let message = `Your invoice is ready.
 Invoice No: ${invoiceNo}
