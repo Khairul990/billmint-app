@@ -132,11 +132,11 @@ const StudioLayout = ({
             <div className="w-10 h-10 rounded-xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center">
               {React.createElement(STUDIO_ROUTES.find(r => r.id === activeStudio)?.icon || Building2, { className: 'w-5 h-5 text-theme-accent' })}
             </div>
-            <div>
+            <div className="relative">
               <select 
                 value={activeStudio}
                 onChange={(e) => setActiveStudio(e.target.value)}
-                className="text-sm font-black text-theme-primary bg-transparent border-none p-0 outline-none cursor-pointer hover:text-theme-accent transition-colors focus:ring-0 appearance-none"
+                className="text-sm font-black text-theme-primary bg-theme-surface border border-theme-border-soft rounded-lg pl-3 pr-8 py-1.5 outline-none cursor-pointer hover:border-theme-accent transition-colors focus:ring-2 focus:ring-theme-accent/20 appearance-none shadow-sm"
                 title="Switch Studio Module"
                 style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
               >
@@ -146,7 +146,10 @@ const StudioLayout = ({
                   </option>
                 ))}
               </select>
-              <div className="text-[10px] text-theme-secondary font-bold flex items-center gap-2">
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-theme-muted">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+              <div className="text-[10px] text-theme-secondary font-bold flex items-center gap-2 mt-1 px-1">
                 {isDirty ? (
                   <span className="flex items-center gap-1 text-theme-warning"><span className="w-1.5 h-1.5 rounded-full bg-theme-warning animate-pulse" /> Unsaved Changes Draft</span>
                 ) : (
