@@ -1,9 +1,12 @@
 import { useState, useCallback } from 'react';
 
 export const useSettingsHistory = (initialSettings) => {
-  const [history, setHistory] = useState([initialSettings || {}]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [state, setState] = useState({
+    history: [initialSettings || {}],
+    currentIndex: 0
+  });
 
+  const { history, currentIndex } = state;
   const draftSettings = history[currentIndex];
   const isDirty = currentIndex > 0 || (history.length > 1 && JSON.stringify(history[currentIndex]) !== JSON.stringify(initialSettings));
   
@@ -11,46 +14,57 @@ export const useSettingsHistory = (initialSettings) => {
   const canRedo = currentIndex < history.length - 1;
 
   const handleUpdateDraft = useCallback((partialUpdate) => {
-    setHistory((prevHistory) => {
-      const current = prevHistory[currentIndex];
+    setState((prevState) => {
+      const { history: prevHistory, currentIndex: prevIndex } = prevState;
+      const current = prevHistory[prevIndex];
       const nextState = { ...current, ...partialUpdate };
       
       // If nothing changed, don't add to history
       if (JSON.stringify(current) === JSON.stringify(nextState)) {
-        return prevHistory;
+        return prevState;
       }
 
       // Slice the history to remove any "future" redo states
-      const newHistory = prevHistory.slice(0, currentIndex + 1);
+      const newHistory = prevHistory.slice(0, prevIndex + 1);
       newHistory.push(nextState);
       
       // Keep max 50 states to prevent memory leaks
+      let nextIndex = prevIndex + 1;
       if (newHistory.length > 50) {
         newHistory.shift();
-        setCurrentIndex(newHistory.length - 1);
-        return newHistory;
+        nextIndex = newHistory.length - 1;
       }
 
-      return newHistory;
+      return {
+        history: newHistory,
+        currentIndex: nextIndex
+      };
     });
-    setCurrentIndex((prev) => Math.min(prev + 1, 50));
-  }, [currentIndex]);
+  }, []);
 
   const undo = useCallback(() => {
-    if (canUndo) {
-      setCurrentIndex((prev) => prev - 1);
-    }
-  }, [canUndo]);
+    setState((prevState) => {
+      if (prevState.currentIndex > 0) {
+        return { ...prevState, currentIndex: prevState.currentIndex - 1 };
+      }
+      return prevState;
+    });
+  }, []);
 
   const redo = useCallback(() => {
-    if (canRedo) {
-      setCurrentIndex((prev) => prev + 1);
-    }
-  }, [canRedo]);
+    setState((prevState) => {
+      if (prevState.currentIndex < prevState.history.length - 1) {
+        return { ...prevState, currentIndex: prevState.currentIndex + 1 };
+      }
+      return prevState;
+    });
+  }, []);
 
   const reset = useCallback((newInitialSettings) => {
-    setHistory([newInitialSettings || {}]);
-    setCurrentIndex(0);
+    setState({
+      history: [newInitialSettings || {}],
+      currentIndex: 0
+    });
   }, []);
 
   return {

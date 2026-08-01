@@ -603,8 +603,20 @@
         invoiceNumber: `INV-${Math.floor(1000 + Math.random() * 9000)}`,
         itemLabel: 'Item',
         customColumns: [], // { id, name, type, options }
-        items: [], // { id, name, qty, price, customFields: {} }
+        items: [], // { id, sNo, name, qty, price, customFields: {} }
     };
+
+    function generateNextSNo() {
+        if (state.items.length === 0) return '1';
+        const lastSNo = state.items[state.items.length - 1].sNo || '';
+        const match = lastSNo.toString().match(/^(.*?)(\\d+)$/);
+        if (match) {
+            const prefix = match[1];
+            const num = parseInt(match[2]) + 1;
+            return prefix + num;
+        }
+        return (state.items.length + 1).toString();
+    }
 
     // Initialize
     function init() {
@@ -623,6 +635,7 @@
 
         // Render Header
         let thHTML = `
+            <th width="70">S.No</th>
             <th>
                 <div class="item-label-display">${state.itemLabel}</div>
             </th>
@@ -668,6 +681,7 @@
             });
 
             tr.innerHTML = `
+                <td><input type="text" value="${item.sNo || ''}" oninput="updateItem('${item.id}', 'sNo', this.value)" style="width: 100%; min-width: 50px;"></td>
                 <td><input type="text" value="${item.name}" placeholder="Item description" ${studioFeatures.enableProductAutocomplete !== false ? 'list="productList"' : ''} oninput="handleProductSelect('${item.id}', this.value)" style="width: 100%; min-width: 200px;"></td>
                 ${customColsHTML}
                 <td><input type="number" value="${item.qty}" min="1" oninput="updateItem('${item.id}', 'qty', this.value)" style="width: 100%;"></td>
@@ -688,7 +702,8 @@
 
     function addRow(animate = true) {
         const id = 'item_' + Date.now() + Math.random().toString(36).substr(2, 5);
-        const newItem = { id, name: '', qty: 1, price: 0, customFields: {} };
+        const sNo = generateNextSNo();
+        const newItem = { id, sNo, name: '', qty: 1, price: 0, customFields: {} };
         state.customColumns.forEach(col => {
             newItem.customFields[col.id] = '';
         });
@@ -708,6 +723,7 @@
             const newId = 'item_' + Date.now();
             const copy = JSON.parse(JSON.stringify(original));
             copy.id = newId;
+            copy.sNo = generateNextSNo(); // Give it a new serial number
             state.items.splice(itemIndex + 1, 0, copy);
             renderTable();
             
@@ -728,7 +744,7 @@
     function updateItem(id, field, value) {
         const item = state.items.find(i => i.id === id);
         if(item) {
-            item[field] = field === 'name' ? value : parseFloat(value) || 0;
+            item[field] = (field === 'name' || field === 'sNo') ? value : parseFloat(value) || 0;
             if(field === 'qty' || field === 'price') {
                 const tr = document.getElementById(`row-${id}`);
                 if (tr) {
@@ -930,7 +946,7 @@
         }
         
         if (event.data && event.data.type === 'SET_THEME') {
-            const { brandColor, isDarkMode, currencySymbol: passedCurrency, features } = event.data.payload;
+            const { brandColor, isDarkMode, currencySymbol: passedCurrency, features, themeVars } = event.data.payload;
             if (features) {
                 studioFeatures = features;
                 if (studioFeatures.enableDigitalSignature) {
@@ -962,12 +978,23 @@
                 document.documentElement.style.setProperty('--primary-dark', brandColor);
                 document.documentElement.style.setProperty('--danger', brandColor);
             }
-            if (isDarkMode) {
+            
+            if (themeVars) {
+                if(themeVars.surface) document.documentElement.style.setProperty('--surface-color', themeVars.surface);
+                if(themeVars.border) document.documentElement.style.setProperty('--border-color', themeVars.border);
+                if(themeVars.textMain) document.documentElement.style.setProperty('--text-main', themeVars.textMain);
+                if(themeVars.textMuted) document.documentElement.style.setProperty('--text-muted', themeVars.textMuted);
+                if(themeVars.bgApp) document.documentElement.style.setProperty('--bg-color', themeVars.bgApp);
+                document.body.style.backgroundColor = 'var(--bg-color)';
+            } else if (isDarkMode) {
                 document.documentElement.style.setProperty('--surface-color', '#1c1c1e');
                 document.documentElement.style.setProperty('--text-main', '#ffffff');
                 document.documentElement.style.setProperty('--text-muted', '#a1a1aa');
                 document.documentElement.style.setProperty('--border-color', '#3f3f46');
+                document.documentElement.style.setProperty('--bg-color', '#000000');
+                document.body.style.backgroundColor = 'var(--bg-color)';
             }
+
             if (passedCurrency) {
                 currencySymbol = passedCurrency;
                 document.getElementById('discountFixedSymbol').textContent = currencySymbol;

@@ -76,6 +76,7 @@ const UniversalInvoiceTemplate = ({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b-2" style={{ borderColor: borderSoft }}>
+              <th className="py-3 px-2 text-sm font-black uppercase tracking-wider" style={{ color: themeColor }}>S.No</th>
               <th className="py-3 px-2 text-sm font-black uppercase tracking-wider" style={{ color: themeColor }}>{itemLabel}</th>
               <th className="py-3 px-2 text-sm font-black uppercase tracking-wider" style={{ color: themeColor }}>Qty</th>
               <th className="py-3 px-2 text-sm font-black uppercase tracking-wider" style={{ color: themeColor }}>Rate</th>
@@ -86,8 +87,9 @@ const UniversalInvoiceTemplate = ({
             </tr>
           </thead>
           <tbody>
-            {(invoiceData?.items || [{ description: 'Example Service', qty: 1, rate: 100, amount: 100 }]).map((item, idx) => (
+            {(invoiceData?.items || [{ sNo: '1', description: 'Example Service', qty: 1, rate: 100, amount: 100 }]).map((item, idx) => (
               <tr key={idx} className="border-b" style={{ borderColor: borderSoft }}>
+                <td className="py-4 px-2 font-bold text-sm text-theme-muted">{item.sNo || (idx + 1)}</td>
                 <td className="py-4 px-2 font-bold">{item.description}</td>
                 <td className="py-4 px-2">{item.qty}</td>
                 <td className="py-4 px-2">{businessSettings?.currency || '$'}{item.rate}</td>

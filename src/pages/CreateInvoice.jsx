@@ -25,6 +25,7 @@ const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessS
           amountPaid: 0,
           balanceDue: parseCurrency(payload.totals.grandTotal),
           items: payload.items.map(i => ({
+             sNo: i.sNo,
              description: i.name,
              qty: i.qty,
              rate: i.price,
@@ -51,13 +52,21 @@ const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessS
           }, '*');
           
           if (businessSettings) {
+            const rootStyle = getComputedStyle(document.documentElement);
             iframeRef.current.contentWindow.postMessage({ 
               type: 'SET_THEME', 
               payload: {
                 brandColor: businessSettings.brandColor || businessSettings.themeColor || '#C9A227',
                 isDarkMode: businessSettings.darkMode,
                 currencySymbol: businessSettings.currency || '$',
-                features: businessSettings.invoiceBuilderSettings || {}
+                features: businessSettings.invoiceBuilderSettings || {},
+                themeVars: {
+                  surface: rootStyle.getPropertyValue('--theme-surface'),
+                  border: rootStyle.getPropertyValue('--theme-border-soft'),
+                  textMain: rootStyle.getPropertyValue('--theme-primary'),
+                  textMuted: rootStyle.getPropertyValue('--theme-muted'),
+                  bgApp: rootStyle.getPropertyValue('--theme-app'),
+                }
               }
             }, '*');
           }
