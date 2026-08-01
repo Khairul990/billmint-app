@@ -108,7 +108,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
     <div className="flex flex-col lg:flex-row gap-8 min-h-[calc(100vh-120px)]">
       
       {/* LEFT PANEL: Settings */}
-      <div className="flex-1 space-y-6 lg:max-w-2xl">
+      <div className="flex-1 space-y-6 lg:w-[55%] xl:w-[60%] max-w-4xl">
         
         {/* Navigation Tabs */}
         <div className="flex overflow-x-auto no-scrollbar gap-2 p-1 bg-theme-surface/50 border border-theme-border-soft rounded-2xl">
@@ -436,7 +436,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
       </div>
 
       {/* RIGHT PANEL: Live Preview */}
-      <div className="hidden lg:block flex-1 sticky top-6 h-[calc(100vh-120px)] pb-8 min-w-[450px]">
+      <div className="hidden lg:block flex-1 sticky top-6 h-[calc(100vh-120px)] pb-8 min-w-[450px] self-start">
         <div className="card-premium overflow-hidden border-2 border-theme-border-soft shadow-2xl flex flex-col h-full bg-theme-card">
           <div className="bg-theme-app border-b border-theme-border-soft px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">

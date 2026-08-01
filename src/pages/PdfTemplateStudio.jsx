@@ -349,26 +349,26 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
       )}
 
       <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-6">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-4 gap-4">
           <p className="text-sm font-semibold text-theme-muted">
             Select a design. It will automatically apply to your PDF invoices, Online Live Links, and Print bills.
           </p>
-          <div className="flex bg-theme-app border border-theme-border-soft rounded-lg p-1 w-full md:w-auto">
+          <div className="flex bg-theme-app border border-theme-border-soft rounded-lg p-1 w-full xl:w-auto shrink-0 overflow-x-auto hide-scrollbar">
             <button
               onClick={() => { setViewMode('pdf'); setPreviewSize('A4'); }}
-              className={`flex-1 md:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all ${viewMode === 'pdf' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
+              className={`flex-1 xl:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${viewMode === 'pdf' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
             >
               PDF View
             </button>
             <button
               onClick={() => setViewMode('livelink')}
-              className={`flex-1 md:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all ${viewMode === 'livelink' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
+              className={`flex-1 xl:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${viewMode === 'livelink' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
             >
               Live Link
             </button>
             <button
               onClick={() => { setViewMode('print'); setPreviewSize('A5'); }}
-              className={`flex-1 md:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all ${viewMode === 'print' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
+              className={`flex-1 xl:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${viewMode === 'print' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
             >
               Print Bill
             </button>
@@ -383,7 +383,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
             </button>
           </div>
         ) : (
-          <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
             {filteredTemplates.map((tpl) => {
               const isActive = activeTemplate === tpl.id;
               const isLocked = tpl.type === 'PRO' && !isPremium;
