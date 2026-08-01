@@ -49,6 +49,7 @@ const DUMMY_BUSINESS = {
 
 const InvoiceStudio = ({ settings, onUpdate }) => {
   const [activeTab, setActiveTab] = useState('templates');
+  const [viewMode, setViewMode] = useState('pdf');
 
   const handleChange = (key, value) => {
     onUpdate({ [key]: value });
