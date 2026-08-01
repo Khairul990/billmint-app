@@ -171,14 +171,12 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         {/* Desktop: Full featured header. Mobile: Compact 2-row */}
         <header className="sticky top-0 z-40 bg-theme-app/95 backdrop-blur-xl text-theme-primary shadow-sm border-b border-theme-border-soft transition-all">
 
-          {/* ===== DESKTOP HEADER (unchanged) ===== */}
+          {/* ===== DESKTOP HEADER ===== */}
           <div className="max-w-full w-full mx-auto px-4 lg:px-6 hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10 py-2.5 md:py-3">
             
-            {/* PORTAL TARGET FOR STUDIO HEADERS */}
-            <div id="studio-header-portal" className="flex-1 flex items-center justify-between"></div>
-
-            {/* NORMAL LEFT SECTION (Hidden in Studio Mode) */}
-            {!['settings', 'create-invoice'].includes(currentTab) && (
+            {['settings', 'create-invoice'].includes(currentTab) ? (
+              <div id="studio-header-portal" className="flex items-center flex-1 min-w-[280px]"></div>
+            ) : (
               <div className="flex items-start md:items-center gap-3 flex-1">
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2 mb-1">
@@ -255,9 +253,9 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               </div>
             )}
 
-            {!['settings', 'create-invoice'].includes(currentTab) && (
-              <div className="flex-1 max-w-xl hidden md:block px-4">
-                <div className="relative group">
+            {/* SEARCH BAR (Center) */}
+            <div className="flex-1 max-w-xl hidden md:block px-4">
+              <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <Search className="h-4 w-4 text-theme-muted group-focus-within:text-theme-primary transition-colors duration-300" />
                 </div>
@@ -275,11 +273,12 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   </span>
                 </div>
               </div>
-              </div>
-            )}
+            </div>
 
-            <div className="flex items-center justify-end">
-              {!['settings', 'create-invoice'].includes(currentTab) && <PremiumClock />}
+            <div className="flex items-center justify-end shrink-0">
+              <div id="studio-header-actions-portal" className="flex items-center"></div>
+              
+              <PremiumClock />
               
               <div className="flex items-center gap-2 p-1.5 ml-3 bg-theme-surface/40 backdrop-blur-xl border border-theme-border-soft rounded-full shadow-sm">
               <button title="Search" aria-label="Search" className="md:hidden w-[38px] h-[38px] rounded-full bg-theme-card border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-accent hover:text-white hover:border-theme-accent hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-300 relative group overflow-hidden">
