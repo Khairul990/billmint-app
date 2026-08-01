@@ -3523,9 +3523,9 @@ export const verifyCustomerPortal = async (customerId, phone) => {
     const invoices = await getCustomerPortalInvoices(customerId, phone);
     if (invoices.length > 0) return true;
 
-    // 2. Fallback: Local Storage (Works for shop owner testing locally)
+    // 2. Fallback: Local Storage (Works for shop owner testing locally via IndexedDB)
     try {
-      const localCustomers = JSON.parse(localStorage.getItem('billqyro_customers') || '[]');
+      const localCustomers = await BillQyroDB.getAll('customers');
       const localCustomer = localCustomers.find(c => c.id === customerId);
       if (localCustomer && localCustomer.phone) {
          const cleanLocalPhone = localCustomer.phone.replace(/[\s\-\+]/g, '');

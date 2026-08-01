@@ -21,10 +21,11 @@ export default function CustomerPortalLogin({ onVerificationSuccess, prefillId }
     setLoading(true);
     try {
       const fullPhone = `${countryCode}${phone}`;
-      const isVerified = await portalEngine.verifyCustomerPortal(customerId, fullPhone);
+      const cleanCustomerId = customerId.replace(/[#\s]/g, '');
+      const isVerified = await portalEngine.verifyCustomerPortal(cleanCustomerId, fullPhone);
       if (isVerified) {
         toast.success('Verification successful!');
-        onVerificationSuccess(customerId, fullPhone);
+        onVerificationSuccess(cleanCustomerId, fullPhone);
       } else {
         toast.error('Verification failed. Invalid Customer ID or Phone Number.');
       }
