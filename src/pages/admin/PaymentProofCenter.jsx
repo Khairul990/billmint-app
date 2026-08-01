@@ -45,6 +45,7 @@ const PaymentProofCenter = () => {
 
   const handleAction = async (proof, status) => {
     setProcessingId(proof.id);
+    const note = getAdminNote(proof.id);
     try {
       let success = false;
       if (proof.proofType === 'Premium') {

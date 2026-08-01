@@ -332,7 +332,10 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
     gstNumber: businessSettings?.gstNumber || '',
   };
 
-  const currencySymbol = regionalPrefs.currency || '₹';
+  let currencySymbol = regionalPrefs.currency || '₹';
+  // PDF standard fonts (Helvetica) do not support Unicode symbols like ₹ or ৳. Fallback to ASCII text.
+  if (currencySymbol === '₹') currencySymbol = 'Rs. ';
+  else if (currencySymbol === '৳') currencySymbol = 'Tk. ';
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -473,6 +476,14 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
               {getInvoiceColumns(invoice, businessSettings).map((col) => {
                 const val = getItemValue(item, col.id, invoice, businessSettings);
                 
+                if (col.id === 'sn') {
+                  return (
+                    <Text key={col.id} style={[styles.tableCell, { width: col.width, textAlign: col.align === 'center' ? 'center' : col.align === 'right' ? 'right' : 'left' }]}>
+                      {idx + 1}
+                    </Text>
+                  );
+                }
+
                 if (col.id === 'item') {
                   return (
                     <View key={col.id} style={{ width: col.width, paddingRight: 4 }}>
