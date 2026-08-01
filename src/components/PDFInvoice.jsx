@@ -18,31 +18,31 @@ Font.register({
 // Register a clean, premium font hierarchy if desired, otherwise use standard helvetica
 const styles = StyleSheet.create({
   page: {
-    padding: 35,
+    padding: 40,
     fontSize: 10,
     fontFamily: 'Noto Sans',
-    color: '#1e293b',
+    color: '#334155',
     backgroundColor: '#ffffff',
   },
   watermark: {
     position: 'absolute',
-    bottom: 18,
+    bottom: 25,
     left: 0,
     right: 0,
     textAlign: 'center',
     fontSize: 8,
-    color: '#94a3b8',
+    color: '#cbd5e1',
     fontWeight: 'bold',
-    letterSpacing: 1,
+    letterSpacing: 1.5,
   },
   footerText: {
     position: 'absolute',
-    bottom: 30,
-    left: 30,
-    right: 30,
+    bottom: 35,
+    left: 40,
+    right: 40,
     textAlign: 'center',
     fontSize: 8,
-    color: '#64748b',
+    color: '#94a3b8',
     lineHeight: 1.5,
   },
   
@@ -50,37 +50,39 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    borderBottomWidth: 2,
-    borderBottomColor: '#cbd5e1',
-    paddingBottom: 18,
-    marginBottom: 18,
+    paddingBottom: 25,
+    marginBottom: 25,
   },
   businessInfo: {
     flex: 1,
   },
   businessName: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#0a1128',
+    color: '#0f172a',
+    marginBottom: 4,
   },
   businessSub: {
     fontSize: 9,
     color: '#64748b',
-    marginTop: 3,
+    marginTop: 2,
+    lineHeight: 1.4,
   },
   invoiceMeta: {
     alignItems: 'right',
-    width: 150,
+    width: 180,
   },
   invoiceTitle: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#0f172a',
+    letterSpacing: 1,
+    marginBottom: 8,
   },
   metaText: {
-    fontSize: 9,
+    fontSize: 9.5,
     color: '#475569',
-    marginTop: 3,
+    marginTop: 4,
   },
 
   // CLIENT REGISTRY
@@ -88,51 +90,57 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: '#f8fafc',
-    padding: 14,
+    padding: 18,
     borderRadius: 8,
-    marginBottom: 18,
+    marginBottom: 25,
   },
   clientBox: {
     flex: 1,
   },
   sectionTitle: {
-    fontSize: 9,
+    fontSize: 8.5,
     color: '#94a3b8',
     fontWeight: 'bold',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 4,
+    letterSpacing: 0.8,
+    marginBottom: 6,
   },
   clientName: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: 'bold',
-    color: '#0f172a',
+    color: '#1e293b',
+    marginBottom: 3,
   },
   clientInfo: {
-    fontSize: 9,
+    fontSize: 9.5,
     color: '#475569',
     marginTop: 2,
+    lineHeight: 1.4,
   },
 
   // SMART TABLE
   table: {
     width: '100%',
-    marginBottom: 18,
+    marginBottom: 25,
   },
   tableHeader: {
     flexDirection: 'row',
     color: '#ffffff',
-    padding: 8,
+    padding: 10,
     fontWeight: 'bold',
     fontSize: 9,
-    borderRadius: 4,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
   },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#f1f5f9',
-    padding: 7,
+    padding: 9,
     alignItems: 'center',
+  },
+  tableRowAlt: {
+    backgroundColor: '#fbfbfb',
   },
   colSN: { width: '5%', textAlign: 'center' },
   colDesign: { width: '11%' },
@@ -147,63 +155,61 @@ const styles = StyleSheet.create({
   totalsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 15,
+    marginTop: 20,
   },
   notesBox: {
-    width: '55%',
-    padding: 14,
+    width: '50%',
+    padding: 16,
     backgroundColor: '#f8fafc',
     borderRadius: 8,
     fontSize: 9,
     color: '#64748b',
-    lineHeight: 1.5,
+    lineHeight: 1.6,
   },
   notesHeader: {
     fontWeight: 'bold',
     color: '#475569',
-    marginBottom: 5,
+    marginBottom: 6,
+    fontSize: 9.5,
   },
   totalsBox: {
-    width: '40%',
+    width: '45%',
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 4,
+    paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: '#f1f5f9',
   },
   grandTotalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    paddingVertical: 10,
     backgroundColor: '#eff6ff',
-    paddingHorizontal: 10,
-    borderRadius: 6,
-    marginTop: 6,
-    borderTopWidth: 2,
-    borderTopColor: '#cbd5e1',
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginTop: 8,
     fontWeight: 'bold',
-    fontSize: 11,
+    fontSize: 12,
   },
   dueRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#fee2e2',
+    paddingVertical: 8,
     color: '#dc2626',
     fontWeight: 'bold',
-    fontSize: 10,
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    marginTop: 4,
+    fontSize: 11,
+    paddingHorizontal: 12,
+    backgroundColor: '#fef2f2',
+    borderRadius: 6,
+    marginTop: 6,
   },
 
   // TEMPLATE 1 OVERRIDES (COMPACT)
   compactPage: {
-    padding: 18,
-    fontSize: 9,
+    padding: 24,
+    fontSize: 9.5,
     fontFamily: 'Noto Sans',
     color: '#1e293b',
     backgroundColor: '#ffffff',
@@ -212,24 +218,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     textAlign: 'center',
     borderBottomWidth: 1.5,
-    borderBottomColor: '#e2e8f0',
-    paddingBottom: 12,
-    marginBottom: 12,
+    borderBottomColor: '#f1f5f9',
+    paddingBottom: 16,
+    marginBottom: 16,
   },
   compactTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#0f172a',
-    marginTop: 5,
+    marginTop: 6,
+    letterSpacing: 0.5,
   },
   compactTableHeader: {
     flexDirection: 'row',
     backgroundColor: '#475569',
     color: '#ffffff',
-    padding: 5,
+    padding: 7,
     fontWeight: 'bold',
-    fontSize: 8,
-    borderRadius: 3,
+    fontSize: 8.5,
+    borderRadius: 4,
   },
   compactColSN: { width: '8%', textAlign: 'center' },
   compactColDesc: { width: '52%' },
@@ -427,7 +434,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
           </View>
 
         {(invoice.items || []).map((item, idx) => (
-          <View key={idx} style={styles.tableRow}>
+          <View key={idx} style={[styles.tableRow, idx % 2 !== 0 ? styles.tableRowAlt : null]}>
             {getInvoiceColumns(invoice, businessSettings).map(col => {
               const val = getItemValue(item, col.id, invoice.billType);
               let align = col.align === 'left' ? 'left' : (col.align === 'right' ? 'right' : 'center');
@@ -597,7 +604,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
         </View>
 
         {(invoice.items || []).map((item, idx) => (
-          <View key={idx} style={styles.tableRow}>
+          <View key={idx} style={[styles.tableRow, idx % 2 !== 0 ? styles.tableRowAlt : null]}>
             {getInvoiceColumns(invoice, businessSettings).map(col => {
               const val = getItemValue(item, col.id, invoice.billType);
               let align = col.align === 'left' ? 'left' : (col.align === 'right' ? 'right' : 'center');
