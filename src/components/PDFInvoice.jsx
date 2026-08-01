@@ -432,7 +432,14 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
               const val = getItemValue(item, col.id, invoice.billType);
               let align = col.align === 'left' ? 'left' : (col.align === 'right' ? 'right' : 'center');
               
-              if (col.id === 'col1') {
+              if (col.id === 'sn') {
+                return (
+                  <Text key={col.id} style={{ width: col.width, textAlign: align, color: '#475569' }}>
+                    {val || (idx + 1)}
+                  </Text>
+                );
+              }
+              if (col.id === 'item' || col.id === 'col1') {
                 return (
                   <Text key={col.id} style={{ width: col.width, textAlign: align, fontWeight: 'bold', color: '#0f172a' }}>
                     {val}
@@ -595,7 +602,14 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
               const val = getItemValue(item, col.id, invoice.billType);
               let align = col.align === 'left' ? 'left' : (col.align === 'right' ? 'right' : 'center');
               
-              if (col.id === 'col1') {
+              if (col.id === 'sn') {
+                return (
+                  <Text key={col.id} style={{ width: col.width, textAlign: align, color: '#475569' }}>
+                    {val || (idx + 1)}
+                  </Text>
+                );
+              }
+              if (col.id === 'item' || col.id === 'col1') {
                 return (
                   <View key={col.id} style={{ width: col.width, paddingRight: 4 }}>
                     <Text style={[styles.itemName, { textAlign: align }]}>{val}</Text>

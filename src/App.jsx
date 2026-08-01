@@ -855,6 +855,14 @@ function App() {
       payload.customerAddress = payload.customer.address || payload.customerAddress;
       delete payload.customer;
     }
+
+    // CRITICAL FIX: Merge payload with existing invoice to preserve fields like createdAt, publicToken, paymentHistory that sparse payloads drop
+    if (payload.id) {
+      const existing = invoices.find(inv => inv.id === payload.id);
+      if (existing) {
+        payload = { ...existing, ...payload };
+      }
+    }
     if (payload.totals && typeof payload.totals === 'object') {
       payload.subtotal = payload.totals.subtotal || payload.subtotal || 0;
       payload.taxPercentage = payload.totals.taxPercentage ?? payload.taxPercentage ?? 18;
