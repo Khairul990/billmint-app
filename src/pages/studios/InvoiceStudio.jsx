@@ -464,4 +464,4 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
   );
 };
 
-export default InvoiceStudio;
+export default React.memo(InvoiceStudio);
