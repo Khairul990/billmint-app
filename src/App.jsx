@@ -1746,8 +1746,6 @@ function App() {
             setCurrentTab={setCurrentTab}
           />
         );
-      case 'customer-portal-config':
-        return <CustomerPortalConfig />;
       case 'marketplace':
         return (
           <TemplateMarketplace
