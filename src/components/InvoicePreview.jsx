@@ -48,10 +48,13 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
     numberFormat: businessSettings?.numberFormat || 'Indian'
   };
 
+  const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
+  const bankDetails = invoiceBuilderSettings.bankDetails || {};
+
   const paymentPrefs = invoice.paymentSettingsSnapshot || {
-    paymentQrEnabled: businessSettings?.paymentQrEnabled || false,
-    paymentMethod: businessSettings?.paymentMethod || 'Manual',
-    upiId: businessSettings?.upiId || '',
+    paymentQrEnabled: bankDetails?.showQr || businessSettings?.paymentQrEnabled || false,
+    paymentMethod: (bankDetails?.upiId ? 'UPI' : businessSettings?.paymentMethod) || 'Manual',
+    upiId: bankDetails?.upiId || businessSettings?.upiId || '',
     bkashNumber: businessSettings?.bkashNumber || '',
     nagadNumber: businessSettings?.nagadNumber || '',
     rocketNumber: businessSettings?.rocketNumber || '',
@@ -60,10 +63,6 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
     customPaymentLink: businessSettings?.customPaymentLink || '',
     showQrInPreview: businessSettings?.showQrInPreview !== undefined ? businessSettings?.showQrInPreview : true
   };
-
-  const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
-  const bankDetails = invoiceBuilderSettings.bankDetails;
-
   const currencySymbol = regionalPrefs.currency || '₹';
 
   const getStatusBadgeStyle = (status) => {

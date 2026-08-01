@@ -298,8 +298,11 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
     })}`;
   };
   
-  const qrEnabled = businessSettings?.paymentQrEnabled && businessSettings?.showQrInPdf;
-  const paymentMethod = businessSettings?.paymentMethod || 'UPI';
+  const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
+  const bankDetails = invoiceBuilderSettings.bankDetails || {};
+
+  const qrEnabled = bankDetails?.showQr || (businessSettings?.paymentQrEnabled && businessSettings?.showQrInPdf);
+  const paymentMethod = (bankDetails?.upiId ? 'UPI' : businessSettings?.paymentMethod) || 'UPI';
   
   const dueAmount = (invoice.balanceDue !== undefined && invoice.balanceDue !== null && invoice.balanceDue !== 0)
     ? invoice.balanceDue
@@ -309,7 +312,7 @@ export const PDFInvoice = ({ invoice, businessSettings: liveBusinessSettings, is
   if (qrEnabled) {
     const verifStr = invoice.verificationCode ? ` [Code: ${invoice.verificationCode}]` : '';
     if (paymentMethod === 'UPI') {
-      const upiId = businessSettings.upiId || '';
+      const upiId = bankDetails?.upiId || businessSettings.upiId || '';
       const payeeName = businessSettings.payeeName || businessSettings.businessName || '';
       const txnNote = `Invoice ${invoice.invoiceNumber}${verifStr}`;
       qrText = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${dueAmount}&cu=${regionalPrefs.currencyCode || 'INR'}&tn=${encodeURIComponent(txnNote)}`;

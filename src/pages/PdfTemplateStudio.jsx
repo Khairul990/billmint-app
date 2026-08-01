@@ -523,9 +523,8 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
         )}
       </div>
 
-      {/* Live Invoice Preview Modal */}
       {previewTemplate && (() => {
-        const tpl = templates.find(t => t.id === previewTemplate);
+        const tpl = UNIVERSAL_TEMPLATES.find(t => t.id === previewTemplate);
         if (!tpl) return null;
 
         return (

@@ -368,25 +368,48 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
                     <div>
                       <input 
                         type="text" 
-                        value={bankDetails.name} 
+                        value={bankDetails.name || ''} 
                         onChange={(e) => handleUpdateBuilderSettings({ bankDetails: { ...bankDetails, name: e.target.value } })} 
                         placeholder="Bank Name (e.g. State Bank of India)"
                         className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-info transition-colors mb-3" 
                       />
                       <input 
                         type="text" 
-                        value={bankDetails.account} 
+                        value={bankDetails.account || ''} 
                         onChange={(e) => handleUpdateBuilderSettings({ bankDetails: { ...bankDetails, account: e.target.value } })} 
                         placeholder="Account Number"
                         className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-info transition-colors mb-3" 
                       />
                       <input 
                         type="text" 
-                        value={bankDetails.ifsc} 
+                        value={bankDetails.ifsc || ''} 
                         onChange={(e) => handleUpdateBuilderSettings({ bankDetails: { ...bankDetails, ifsc: e.target.value } })} 
                         placeholder="IFSC / Routing Code"
-                        className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-info transition-colors" 
+                        className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-info transition-colors mb-4" 
                       />
+                      
+                      <div className="border-t border-theme-border-soft pt-4 mb-3">
+                        <h3 className="text-sm font-bold text-theme-primary mb-3">UPI Payment Integration</h3>
+                        <input 
+                          type="text" 
+                          value={bankDetails.upiId || ''} 
+                          onChange={(e) => handleUpdateBuilderSettings({ bankDetails: { ...bankDetails, upiId: e.target.value } })} 
+                          placeholder="Your UPI ID (e.g. business@ybl)"
+                          className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-info transition-colors mb-3" 
+                        />
+                        <div className="flex items-center gap-3 p-4 bg-theme-surface border border-theme-border-soft rounded-xl">
+                          <input 
+                            type="checkbox" 
+                            id="showQr"
+                            checked={bankDetails.showQr || false}
+                            onChange={(e) => handleUpdateBuilderSettings({ bankDetails: { ...bankDetails, showQr: e.target.checked } })} 
+                            className="w-4 h-4 rounded text-theme-info focus:ring-theme-info bg-theme-surface border-theme-border-soft"
+                          />
+                          <label htmlFor="showQr" className="text-sm font-bold text-theme-primary cursor-pointer select-none">
+                            Generate & Show UPI QR Code on Invoices
+                          </label>
+                        </div>
+                      </div>
                     </div>
                     
                     <div className="flex items-start gap-2 bg-theme-info/5 p-4 rounded-xl border border-theme-info/20 text-theme-info text-xs font-bold mt-4">
