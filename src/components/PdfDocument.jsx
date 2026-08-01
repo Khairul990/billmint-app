@@ -276,7 +276,6 @@ const styles = StyleSheet.create({
   thanksText: {
     fontSize: 10,
     color: '#64748b',
-    fontStyle: 'italic',
     lineHeight: 1.6,
   },
   balanceDueRow: {
@@ -541,7 +540,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
               <>
                 <Text style={styles.sectionTitle}>{categoryWords.noteLabel}</Text>
                 <View style={styles.notesBox}>
-                  <Text style={{ fontSize: 9, color: '#64748b', fontStyle: 'italic', lineHeight: 1.6 }}>
+                  <Text style={{ fontSize: 9, color: '#64748b', lineHeight: 1.6 }}>
                     {invoice.notes}
                   </Text>
                 </View>
@@ -596,7 +595,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
         {/* Doctor Disclaimer */}
         {templateId === 'doctor' && (
           <View style={{ marginTop: 16, padding: 8, borderLeftWidth: 3, borderStyle: 'solid', borderLeftColor: tAccent, backgroundColor: tBg }}>
-            <Text style={{ fontSize: 7.5, color: tPrimary, fontStyle: 'italic', lineHeight: 1.5 }}>
+            <Text style={{ fontSize: 7.5, color: tPrimary, lineHeight: 1.5 }}>
               Disclaimer: This document is for billing purposes only and does not constitute medical advice or a formal prescription unless explicitly signed by a registered practitioner.
             </Text>
           </View>
@@ -612,7 +611,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, pageSize = 'A4' 
               <Text style={styles.metaText}>Due: {formatCurrency(invoice.balanceDue || invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
               <Text style={styles.metaText}>Invoice: {invoice.invoiceNumber}</Text>
               {paymentPrefs.paymentNote && (
-                <Text style={{ fontSize: 7.5, color: '#64748b', marginTop: 3, fontStyle: 'italic' }}>Note: {paymentPrefs.paymentNote}</Text>
+                <Text style={{ fontSize: 7.5, color: '#64748b', marginTop: 3 }}>Note: {paymentPrefs.paymentNote}</Text>
               )}
             </View>
           </View>
