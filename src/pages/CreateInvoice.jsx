@@ -4,7 +4,7 @@ import { ArrowLeft, Save, LayoutTemplate } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import studioHtml from '../../public/bill-studio.html?raw';
 
-const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessSettings, onBack }) => {
+const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessSettings, editingInvoice, onBack }) => {
   const iframeRef = useRef(null);
 
   useEffect(() => {
@@ -36,6 +36,10 @@ const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessS
              customFields: i.customFields || {}
           }))
         };
+
+        if (editingInvoice && editingInvoice.id) {
+          mappedPayload.id = editingInvoice.id;
+        }
 
         if (onSaveInvoice) {
            // false = do not saveCustomerAsNew (prevents duplicate customers on dropdown selection)
@@ -73,13 +77,19 @@ const CreateInvoice = ({ onSaveInvoice, customers = [], products = [], businessS
                 }
               }
             }, '*');
+            if (editingInvoice) {
+              iframeRef.current.contentWindow.postMessage({
+                type: 'LOAD_INVOICE',
+                payload: editingInvoice
+              }, '*');
+            }
           }
         }
       }
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [onSaveInvoice, customers, products, businessSettings]);
+  }, [onSaveInvoice, customers, products, businessSettings, editingInvoice]);
 
   const triggerSave = () => {
     if (iframeRef.current) {

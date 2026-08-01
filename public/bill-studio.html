@@ -971,6 +971,46 @@
                 });
             }
         }
+
+        if (event.data && event.data.type === 'LOAD_INVOICE') {
+            const invoice = event.data.payload;
+            if (invoice) {
+                document.getElementById('invoiceNo').value = invoice.invoiceNumber || invoice.id || generateId();
+                if (invoice.date) document.getElementById('invoiceDate').value = invoice.date;
+                if (invoice.customerName) {
+                    document.getElementById('customerName').value = invoice.customerName;
+                    state.customer.name = invoice.customerName;
+                }
+                if (invoice.customerPhone) {
+                    document.getElementById('customerId').value = invoice.customerPhone;
+                    state.customer.id = invoice.customerPhone;
+                }
+                if (invoice.notes) document.getElementById('invoiceNotes').value = invoice.notes;
+                
+                if (invoice.discountAmount > 0) {
+                    document.getElementById('discountType').value = 'fixed';
+                    document.getElementById('discountValue').value = invoice.discountAmount;
+                }
+                
+                if (invoice.taxAmount > 0 && invoice.subtotal > 0) {
+                    const taxPercent = (invoice.taxAmount / invoice.subtotal) * 100;
+                    document.getElementById('taxValue').value = parseFloat(taxPercent.toFixed(2));
+                }
+
+                if (invoice.items && Array.isArray(invoice.items)) {
+                    state.items = invoice.items.map((i, index) => ({
+                        id: Date.now() + index,
+                        name: i.description || i.name || '',
+                        qty: i.qty || 1,
+                        price: i.rate || i.price || 0,
+                        total: i.amount || i.total || 0,
+                        customFields: i.customFields || {}
+                    }));
+                }
+                calculateTotals();
+                renderTable();
+            }
+        }
         
         if (event.data && event.data.type === 'TRIGGER_SAVE') {
             saveInvoice();
