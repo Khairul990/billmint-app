@@ -112,82 +112,7 @@ const StudioLayout = ({
   });
 
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-gradient-to-br from-theme-main via-theme-main to-theme-surface text-theme-primary">
-      {/* Premium Glass Sidebar */}
-      <div className={`${isSidebarCollapsed ? 'w-20' : 'w-72'} transition-all duration-300 bg-theme-surface/30 backdrop-blur-xl border-r border-theme-border-soft flex flex-col shrink-0 z-20 shadow-premium`}>
-        <div className="p-4 border-b border-theme-border-soft backdrop-blur-md">
-          <div className="flex items-center justify-between mb-4">
-            {!isSidebarCollapsed && (
-              <div>
-                <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-theme-primary to-theme-accent mb-1">Platform Studio</h2>
-                <p className="text-[10px] text-theme-muted font-bold uppercase tracking-widest">Premium Control Center</p>
-              </div>
-            )}
-            <button 
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="p-2 rounded-xl bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-theme-primary hover:bg-theme-card transition-colors shrink-0 mx-auto"
-              title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-            >
-              {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
-            </button>
-          </div>
-          {!isSidebarCollapsed && (
-            <div className="relative group">
-              <Input 
-                isSearch
-                placeholder="Search modules..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-theme-surface/50 border-theme-border-soft"
-              />
-            </div>
-          )}
-        </div>
-        
-        <div className="flex-1 overflow-y-auto p-4 pb-12 space-y-1.5 custom-scrollbar">
-          {filteredRoutes.map((route, idx) => {
-            if (route.type === 'label') {
-              if (isSidebarCollapsed) {
-                return <div key={`label-${idx}`} className="h-4"></div>;
-              }
-              return (
-                <div key={`label-${idx}`} className="pt-4 pb-1 px-3">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-theme-muted">{route.label}</p>
-                </div>
-              );
-            }
-            const Icon = route.icon;
-            const isActive = activeStudio === route.id;
-            return (
-              <button
-                key={route.id}
-                onClick={() => setActiveStudio(route.id)}
-                title={isSidebarCollapsed ? route.label : ''}
-                className={`w-full flex items-center p-3 rounded-xl transition-all duration-300 relative overflow-hidden group ${isSidebarCollapsed ? 'justify-center' : ''} ${
-                  isActive 
-                    ? 'bg-gradient-to-r from-theme-accent/20 to-transparent border border-theme-accent/30 shadow-lg' 
-                    : 'border border-transparent hover:bg-white/5 hover:border-white/10'
-                }`}
-              >
-                {isActive && (
-                  <motion.div 
-                    layoutId="activeTabIndicator" 
-                    className="absolute left-0 top-0 bottom-0 w-1 bg-theme-accent rounded-r-full shadow-[0_0_10px_var(--accent)]" 
-                  />
-                )}
-                <Icon className={`w-5 h-5 z-10 transition-colors ${isSidebarCollapsed ? '' : 'mr-3'} ${isActive ? 'text-theme-accent drop-shadow-md' : 'text-theme-secondary group-hover:text-theme-primary'}`} />
-                {!isSidebarCollapsed && (
-                  <div className="text-left z-10">
-                    <div className={`text-xs font-bold transition-colors ${isActive ? 'text-theme-primary' : 'text-theme-secondary group-hover:text-theme-primary'}`}>{route.label}</div>
-                    <div className={`text-[9px] transition-colors ${isActive ? 'text-theme-accent' : 'text-theme-muted group-hover:text-theme-secondary'}`}>{route.desc}</div>
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
+    <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-theme-app text-theme-primary">
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 relative">
         {/* Decorative Background Elements */}
@@ -208,7 +133,19 @@ const StudioLayout = ({
               {React.createElement(STUDIO_ROUTES.find(r => r.id === activeStudio)?.icon || Building2, { className: 'w-5 h-5 text-theme-accent' })}
             </div>
             <div>
-              <div className="text-sm font-black text-theme-primary">{STUDIO_ROUTES.find(r => r.id === activeStudio)?.label || 'Studio'}</div>
+              <select 
+                value={activeStudio}
+                onChange={(e) => setActiveStudio(e.target.value)}
+                className="text-sm font-black text-theme-primary bg-transparent border-none p-0 outline-none cursor-pointer hover:text-theme-accent transition-colors focus:ring-0 appearance-none"
+                title="Switch Studio Module"
+                style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
+              >
+                {STUDIO_ROUTES.filter(r => r.id).map(route => (
+                  <option key={route.id} value={route.id} className="bg-theme-surface text-theme-primary font-bold">
+                    {route.label}
+                  </option>
+                ))}
+              </select>
               <div className="text-[10px] text-theme-secondary font-bold flex items-center gap-2">
                 {isDirty ? (
                   <span className="flex items-center gap-1 text-theme-warning"><span className="w-1.5 h-1.5 rounded-full bg-theme-warning animate-pulse" /> Unsaved Changes Draft</span>
@@ -263,7 +200,7 @@ const StudioLayout = ({
         )}
 
         {/* Dynamic Studio Renderer */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 z-0 relative custom-scrollbar">
+        <div className="flex-1 overflow-y-auto z-0 relative custom-scrollbar">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeStudio}
@@ -271,9 +208,9 @@ const StudioLayout = ({
               initial="initial"
               animate="animate"
               exit="exit"
-              className="max-w-6xl mx-auto w-full"
+              className="w-full h-full"
             >
-              <div className="w-full bg-theme-surface border border-theme-border-soft shadow-glass-lg rounded-3xl p-2 sm:p-8 relative overflow-hidden">
+              <div className="w-full min-h-full bg-theme-app p-4 sm:p-6 lg:p-8 relative overflow-hidden">
                 <Suspense fallback={<div className="p-12 text-center text-theme-muted"><div className="animate-spin w-8 h-8 border-2 border-theme-accent border-t-transparent rounded-full mx-auto mb-4"></div>Loading Studio...</div>}>
                   {activeStudio === 'business' && <BusinessStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
                   {activeStudio === 'theme' && <ThemeStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
