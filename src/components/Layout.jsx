@@ -252,6 +252,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   )}
                 </div>
               </div>
+              </div>
             )}
 
             {!['settings', 'create-invoice'].includes(currentTab) && (
@@ -273,6 +274,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                     Ctrl K
                   </span>
                 </div>
+              </div>
               </div>
             )}
 
