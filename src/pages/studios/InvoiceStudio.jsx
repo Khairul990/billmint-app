@@ -48,7 +48,7 @@ const DUMMY_BUSINESS = {
   currency: '$'
 };
 
-const InvoiceStudio = ({ settings, onUpdate }) => {
+const InvoiceStudio = ({ settings, onUpdate, subscription }) => {
   const [activeTab, setActiveTab] = useState('templates');
   const [viewMode, setViewMode] = useState('pdf');
   const portalLabel = getPortalLabelByType(settings?.businessType);
@@ -143,7 +143,7 @@ const InvoiceStudio = ({ settings, onUpdate }) => {
             {/* TEMPLATES TAB */}
             {activeTab === 'templates' && (
               <div className="card-premium p-6">
-                <PdfTemplateStudio businessSettings={settings} setSettings={onUpdate} viewMode={viewMode} setViewMode={setViewMode} />
+                <PdfTemplateStudio businessSettings={settings} setSettings={onUpdate} viewMode={viewMode} setViewMode={setViewMode} subscription={subscription} />
               </div>
             )}
 

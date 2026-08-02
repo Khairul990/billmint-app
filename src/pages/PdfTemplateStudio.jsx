@@ -92,7 +92,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
   const activeTemplate = businessSettings?.selectedPdfTemplate || 'classic';
   const [pendingTemplate, setPendingTemplate] = useState(activeTemplate);
   const isDirty = pendingTemplate !== activeTemplate;
-  const isPremium = subscription?.status === 'premium';
+  const isPremium = subscription?.status === 'premium' || businessSettings?.planStatus === 'premium' || businessSettings?.planStatus === 'Monthly' || businessSettings?.plan === 'Monthly';
   const categories = ['All', 'Classic', 'Modern', 'Business', 'Professional'];
 
   const filteredTemplates = UNIVERSAL_TEMPLATES.filter(t => {
