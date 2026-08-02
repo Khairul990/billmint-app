@@ -697,7 +697,7 @@
                 ${customColsHTML}
                 <td><input type="number" value="${item.qty}" min="1" oninput="updateItem('${item.id}', 'qty', this.value)" style="width: 100%;"></td>
                 <td><input type="number" value="${item.price}" min="0" step="0.01" oninput="updateItem('${item.id}', 'price', this.value)" style="width: 100%;"></td>
-                <td style="font-weight: 500; vertical-align: middle;">${formatCurrency(item.qty * item.price)}</td>
+                <td class="row-total" style="font-weight: 500; vertical-align: middle;">${formatCurrency(item.qty * item.price)}</td>
                 <td style="text-align: right; vertical-align: middle;">
                     <button class="icon-btn" onclick="duplicateRow('${item.id}')" title="Duplicate">${document.getElementById('icon-copy').innerHTML}</button>
                     <button class="icon-btn delete" onclick="deleteRow('${item.id}')" title="Delete">${document.getElementById('icon-trash').innerHTML}</button>
@@ -750,6 +750,7 @@
         }
         state.items = state.items.filter(i => i.id !== id);
         renderTable();
+        calculateTotals();
     }
 
     function updateItem(id, field, value) {
@@ -759,8 +760,8 @@
             if(field === 'qty' || field === 'price') {
                 const tr = document.getElementById(`row-${id}`);
                 if (tr) {
-                    const totalCellIndex = 4 + state.customColumns.length;
-                    tr.cells[totalCellIndex].textContent = formatCurrency(item.qty * item.price);
+                    const totalCell = tr.querySelector('.row-total');
+                    if (totalCell) totalCell.textContent = formatCurrency(item.qty * item.price);
                 }
                 calculateTotals();
             }
