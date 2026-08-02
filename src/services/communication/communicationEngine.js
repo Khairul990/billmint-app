@@ -10,9 +10,9 @@
 import { invoiceEngine } from '../../services/invoiceEngine';
 import { customerEngine } from '../../services/customerEngine';
 import { settingsEngine } from '../../services/settingsEngine';
-import { dbEngine } from '../../services/dbEngine';
+import { getRealUserId } from '../../services/dbEngine';
 import { messageTemplateEngine } from './messageTemplateEngine';
-import { messageComposer } from './messageComposer';
+import { composeMessage } from './messageComposer';
 import { attachmentEngine } from './attachmentEngine';
 import { generateWhatsAppReminderLink } from '../../utils/shareUtils';
 import { v4 as uuidv4 } from 'uuid';
@@ -42,7 +42,7 @@ export async function prepareCommunication({ workspaceId, userId, invoiceId, ove
   }
 
   // Isolation check – ensure the user belongs to the workspace
-  const realUserId = await dbEngine.getRealUserId();
+  const realUserId = await getRealUserId();
   if (realUserId !== userId) {
     throw new Error('User/workspace isolation violation');
   }
@@ -72,7 +72,7 @@ export async function prepareCommunication({ workspaceId, userId, invoiceId, ove
     paymentLink: mergedSettings.paymentLink || ''
   };
 
-  const message = messageComposer.composeMessage(template?.content || '', ctx);
+  const message = composeMessage(template?.content || '', ctx);
 
   // Prepare attachments based on settings toggles
   const attachments = await attachmentEngine.prepareAttachments({

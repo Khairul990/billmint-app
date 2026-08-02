@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/Button'; // Assuming a generic Button component exists
+import toast from 'react-hot-toast'; // For user feedback
 import { Modal } from '../ui/Modal';
 import { communicationEngine } from '../../services/communication/communicationEngine';
 import { whatsappShareAdapter } from '../../services/communication/whatsappShareAdapter';
@@ -46,22 +47,29 @@ export default function WhatsAppCommunicationPreview({ workspaceId, userId, invo
   }, [workspaceId, userId, invoiceId]);
 
   const openWhatsApp = async () => {
-    if (!payload) return;
-    setLoading(true);
-    try {
-      const result = await whatsappShareAdapter.shareViaWhatsApp({
-        recipient: payload.recipientPhone,
-        message: editableMessage,
-        attachments: payload.attachments
-      });
-      console.log('[WhatsAppCommunicationPreview] share result', result);
-    } catch (e) {
-      console.error(e);
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!payload) return;
+  // Demo mode guard
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    toast.error('WhatsApp sharing is disabled in Demo mode.');
+    return;
+  }
+  setLoading(true);
+  try {
+    const result = await whatsappShareAdapter.shareViaWhatsApp({
+      recipient: payload.recipientPhone,
+      message: editableMessage,
+      attachments: payload.attachments
+    });
+    console.log('[WhatsAppCommunicationPreview] share result', result);
+    toast.success('WhatsApp opened');
+  } catch (e) {
+    console.error(e);
+    setError(e.message);
+    toast.error(e.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const downloadPdf = () => {
     if (!payload || !payload.attachments) return;
@@ -79,7 +87,7 @@ export default function WhatsAppCommunicationPreview({ workspaceId, userId, invo
     <Modal isOpen={true} onClose={onClose} title="WhatsApp Reminder Preview">
         {error && <p className="text-red-600 mb-2">Error: {error}</p>}
         {loading && <p className="mb-2">Loading…</p>}
-        {payload && (
+{payload && (
           <>
             <div className="grid grid-cols-2 gap-2 mb-4 text-sm text-gray-700 dark:text-gray-300">
               <div><strong>Customer:</strong> {payload.customer?.name || ''}</div>
@@ -90,23 +98,42 @@ export default function WhatsAppCommunicationPreview({ workspaceId, userId, invo
               <div><strong>Due:</strong> {payload.invoice?.balanceDue ?? ''}</div>
               <div><strong>Due Date:</strong> {payload.invoice?.dueDate ?? ''}</div>
               {payload.attachments?.some(a => a.type === 'pdf') && (
-                <div className="col-span-2 text-green-600">PDF: Enabled</div>
+                (() => {
+                  const pdf = payload.attachments.find(a => a.type === 'pdf');
+                  return pdf.ready ? (
+                    <div className="col-span-2 text-green-600">PDF: Ready</div>
+                  ) : (
+                    <div className="col-span-2 text-red-600">PDF: Failed</div>
+                  );
+                })()
               )}
               {payload.attachments?.some(a => a.type === 'image') && (
-                <div className="col-span-2 text-green-600">Business Image: Enabled</div>
+                (() => {
+                  const img = payload.attachments.find(a => a.type === 'image');
+                  return img.ready ? (
+                    <div className="col-span-2 text-green-600">Business Image: Ready</div>
+                  ) : (
+                    <div className="col-span-2 text-red-600">Business Image: Failed</div>
+                  );
+                })()
               )}
               {payload.portalLink && (
                 <div className="col-span-2 text-green-600">Customer Portal Link: Enabled</div>
               )}
             </div>
             <div className="border rounded p-3 mb-4 bg-gray-50 dark:bg-gray-700">
-              <pre className="whitespace-pre-wrap" style={{ wordBreak: 'break-word' }}>{editableMessage}</pre>
+              <textarea
+                className="w-full h-32 p-2 border rounded"
+                value={editableMessage}
+                onChange={(e) => setEditableMessage(e.target.value)}
+                disabled={loading}
+              />
             </div>
             <div className="flex justify-end space-x-2">
               <Button onClick={onClose} disabled={loading}>Cancel</Button>
               <Button onClick={() => setEditableMessage(prev => prompt('Edit Message', prev) || prev)} disabled={loading}>Edit</Button>
               {payload.attachments?.some(a => a.type === 'pdf') && (
-                <Button onClick={downloadPdf} disabled={loading}>Download PDF</Button>
+                <Button onClick={downloadPdf} disabled={loading || !(payload.attachments.find(a => a.type === 'pdf')?.ready)}>Download PDF</Button>
               )}
               <Button onClick={openWhatsApp} disabled={loading}>Open WhatsApp</Button>
             </div>

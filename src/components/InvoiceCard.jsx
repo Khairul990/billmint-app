@@ -12,6 +12,11 @@ import {
 import { invoiceEngine } from '../services/invoiceEngine';
 import { isEducationCategory } from '../utils/categoryChecks';
 import { getPortalLabelByType } from '../config/businessPresets';
+// Button component not needed in this file; removed import.
+import WhatsAppCommunicationPreview from './communication/WhatsAppCommunicationPreview';
+import { communicationEngine } from '../services/communication/communicationEngine';
+
+
 
 // Premium WhatsApp Icon SVG Component
 const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
@@ -37,6 +42,39 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
   const [showShareMenu, setShowShareMenu] = useState(false);
   const menuRef = useRef(null);
   const portalLabel = getPortalLabelByType(businessSettings?.businessType);
+  const [showWhatsAppPreview, setShowWhatsAppPreview] = useState(false);
+  const [previewPayload, setPreviewPayload] = useState(null);
+  const [isSendingReminder, setIsSendingReminder] = useState(false);
+
+  const handleSendReminder = async () => {
+    if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+      toast.error('Reminder is disabled in Demo mode.');
+      return;
+    }
+    if (!navigator.onLine) {
+      toast.error('Cannot send reminder while offline.');
+      return;
+    }
+    if (isSendingReminder) return;
+    setIsSendingReminder(true);
+    try {
+      const workspaceId = businessSettings?.workspaceId || null;
+      const userId = businessSettings?.userId || null;
+      const payload = await communicationEngine.prepareCommunication({
+        workspaceId,
+        userId,
+        invoiceId: invoice.id,
+        overrides: {}
+      });
+      setPreviewPayload(payload);
+      setShowWhatsAppPreview(true);
+    } catch (e) {
+      console.error(e);
+      toast.error(e.message || 'Failed to prepare reminder.');
+    } finally {
+      setIsSendingReminder(false);
+    }
+  };
 
   // Close sharing popover on click outside
   useEffect(() => {
@@ -278,21 +316,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
 
                         {invoice.paymentStatus !== 'Paid' && (
                           <button
-                            onClick={async () => {
-                              try {
-                                const customerId = invoice.customerId || invoice.customer?.id;
-                                if (!customerId) {
-                                  toast.error('Please assign a customer to share the Portal.');
-                                  return;
-                                }
-                                const updatedInvoice = { ...invoice };
-                                const link = generateWhatsAppReminderLink(updatedInvoice, currencySymbol, businessSettings);
-                                window.open(link, '_blank');
-                                setShowShareMenu(false);
-                              } catch (err) {
-                                toast.error('Could not create live link. Please try again.');
-                              }
-                            }}
+                            onClick={handleSendReminder}
                             className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-danger/5 dark:hover:bg-rose-950/20 hover:text-rose-700 dark:hover:text-theme-danger rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
                           >
                             <WhatsAppIcon className="w-3.5 h-3.5 text-theme-danger" />
@@ -403,6 +427,14 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
   );
 };
 
+{showWhatsAppPreview && previewPayload && (
+  <WhatsAppCommunicationPreview
+    workspaceId={previewPayload.workspaceId}
+    userId={previewPayload.userId}
+    invoiceId={previewPayload.invoiceId}
+    onClose={() => setShowWhatsAppPreview(false)}
+  />
+)}
 export default React.memo(InvoiceCard, (prevProps, nextProps) => {
   return (
     prevProps.invoice?.updatedAt === nextProps.invoice?.updatedAt &&
