@@ -24,8 +24,11 @@ service cloud.firestore {
 
     // Helper to validate public invoice fields (no sensitive internal data)
     function isValidPublicInvoiceData() {
-      let allowedKeys = ['paymentProofs', 'paymentStatus', 'updatedAt'];
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedKeys);
+      let diff = request.resource.data.diff(resource.data);
+      let allowedKeysOnly = diff.affectedKeys().hasOnly(['paymentProofs', 'paymentStatus', 'updatedAt']);
+      let allowedStatusUpdate = !diff.affectedKeys().hasAny(['paymentStatus']) || 
+                                request.resource.data.paymentStatus == 'Pending Verification';
+      return allowedKeysOnly && allowedStatusUpdate;
     }
 
     // -------------------------------------------------------------------------
@@ -33,31 +36,45 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /invoices/{userId}/items/{itemId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
     }
 
     match /customers/{userId}/items/{itemId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
     }
 
     match /products/{userId}/items/{itemId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
     }
 
     match /students/{userId}/items/{itemId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
     }
 
     match /expenses/{userId}/items/{itemId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
     }
 
     match /auditLogs/{userId}/items/{itemId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
     }
 
     match /errorLogs/{userId}/items/{itemId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
     }
 
     // -------------------------------------------------------------------------
@@ -65,7 +82,10 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /settings/{userId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'role', 'subscription']);
     }
     
     match /invoice_counters/{userId} {
@@ -73,7 +93,8 @@ service cloud.firestore {
     }
 
     match /subscription/{userId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
     }
 
     // UsersList - Role escalation protection
@@ -102,18 +123,20 @@ service cloud.firestore {
       allow read: if true;
       
       // Only authenticated owners can create or delete public invoices fully
-      allow create, delete: if isAuth();
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuth() && resource.data.userId == request.auth.uid;
       
       // Unauthenticated users (customers) can only update payment proofs
       // Validates that only allowed fields are modified
-      allow update: if isAuth() || isValidPublicInvoiceData();
+      allow update: if (isAuth() && resource.data.userId == request.auth.uid) || isValidPublicInvoiceData();
     }
 
     // Legacy fallback
     match /public_invoices/{publicToken} {
       allow read: if true;
-      allow create, delete: if isAuth();
-      allow update: if isAuth() || isValidPublicInvoiceData();
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuth() && resource.data.userId == request.auth.uid;
+      allow update: if (isAuth() && resource.data.userId == request.auth.uid) || isValidPublicInvoiceData();
     }
 
     // -------------------------------------------------------------------------
@@ -132,7 +155,8 @@ service cloud.firestore {
       allow create: if (isAuth() && request.resource.data.ownerId == request.auth.uid) || 
                        (!isAuth() && request.resource.data.status == 'pending' && request.resource.data.publicInvoiceId != null);
       allow read: if isAuth() && (resource.data.ownerId == request.auth.uid || isAdmin());
-      allow update, delete: if isAdmin();
+      allow update: if isAuth() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
     }
     
     match /platformConfig/{configId} {

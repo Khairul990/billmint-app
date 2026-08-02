@@ -1,4 +1,5 @@
 import React from 'react';
+import { toast } from 'react-hot-toast';
 import { Shield, Key, Smartphone, Clock, AlertTriangle } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
@@ -34,12 +35,12 @@ const SecurityStudio = ({ settings, onUpdate }) => {
               <p className="text-xs font-bold text-theme-primary">Authenticator App</p>
               <p className="text-[10px] text-theme-secondary mt-1">Google Auth, Authy</p>
             </div>
-            <button className="relative w-10 h-5 bg-theme-surface rounded-full border border-theme-border-strong transition-all flex items-center p-0.5">
+            <button onClick={() => toast('Premium feature locked', { icon: '🔒' })} className="relative w-10 h-5 bg-theme-surface rounded-full border border-theme-border-strong transition-all flex items-center p-0.5">
               <span className="w-4 h-4 bg-theme-muted rounded-full shadow-md" />
             </button>
           </div>
           
-          <Button variant="secondary" className="w-full">
+          <Button onClick={() => toast('Premium feature locked', { icon: '🔒' })} variant="secondary" className="w-full">
             Configure 2FA
           </Button>
         </div>
@@ -81,11 +82,11 @@ const SecurityStudio = ({ settings, onUpdate }) => {
                   </p>
                 </div>
               </div>
-              <button className="text-[10px] font-bold text-theme-danger hover:text-white uppercase tracking-wider">Revoke</button>
+              <button onClick={() => toast('Premium feature locked', { icon: '🔒' })} className="text-[10px] font-bold text-theme-danger hover:text-white uppercase tracking-wider">Revoke</button>
             </div>
           </div>
 
-          <Button variant="danger" className="w-full" leftIcon={AlertTriangle}>
+          <Button onClick={() => toast('Premium feature locked', { icon: '🔒' })} variant="danger" className="w-full" leftIcon={AlertTriangle}>
             Sign Out All Other Devices
           </Button>
         </div>

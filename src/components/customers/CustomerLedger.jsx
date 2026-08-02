@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { invoiceEngine } from '../../services/invoiceEngine';
+import { toast } from 'react-hot-toast';
 
 /**
  * Customer Ledger Modal
@@ -85,10 +86,10 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
       setPaymentNote('');
       // We don't have a direct way to trigger a re-render of App.jsx invoices here unless we pass a callback, 
       // but dbEngine's onSnapshot handles live updates if online, or the user can refresh/re-open.
-      alert('Payment updated successfully! The ledger will reflect changes shortly.');
+      toast.success('Payment updated successfully! The ledger will reflect changes shortly.');
     } catch (err) {
       console.error(err);
-      alert('Failed to update payment');
+      toast.error('Failed to update payment');
     } finally {
       setIsSaving(false);
     }
@@ -101,7 +102,7 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
     if (phone) {
       window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
     } else {
-      alert("No phone number found for this customer.");
+      toast.error("No phone number found for this customer.");
     }
   };
 

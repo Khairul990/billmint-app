@@ -451,7 +451,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
           {(invoice.items || []).map((item, idx) => (
             <View key={idx} style={[styles.tableRow, templateId === 'minimal' ? { borderBottomColor: '#ccc' } : {}]} wrap={false}>
               {getInvoiceColumns(invoice, businessSettings).map((col) => {
-                const val = getItemValue(item, col.id, invoice, businessSettings);
+                const val = getItemValue(item, col.id, invoice.billType);
                 
                 if (col.id === 'sn') {
                   return (

@@ -321,6 +321,7 @@ const _runSyncOfflineTransactions = async () => {
       return;
     }
     const queue = await BillQyroDB.getAll('syncQueue');
+    if (getRealUserId() !== userId) return; // Prevent race
     const userQueue = queue.filter(tx => tx.userId === userId);
     
     if (userQueue.length === 0) return;
@@ -332,6 +333,10 @@ const _runSyncOfflineTransactions = async () => {
 
     const MAX_RETRIES = 10;
     for (const tx of sortedQueue) {
+      if (getRealUserId() !== userId) {
+        console.warn('[SYNC QUEUE] Aborting sync, user changed mid-process.');
+        return;
+      }
       if ((tx.retryCount || 0) >= MAX_RETRIES) {
         console.warn(`[SYNC QUEUE] Dropping TX ${tx.id}: exceeded max retries (${MAX_RETRIES})`);
         toast.error('Failed to sync some offline data permanently. Check your connection.');
@@ -1032,6 +1037,8 @@ export const getAuthSession = () => {
 
 
 export const logout = async () => {
+  const currentUserId = getRealUserId();
+  
   // Clear known scoped keys
   localStorage.removeItem(KEYS.AUTH);
   localStorage.removeItem(KEYS.SETTINGS);
@@ -1046,7 +1053,10 @@ export const logout = async () => {
   const keysToRemove = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith('billqyro_') && key !== 'billqyro_admin_default_theme' && key !== 'billqyro_admin_default_mode') {
+    if (key && key.startsWith('billqyro_') && 
+        key !== 'billqyro_admin_default_theme' && 
+        key !== 'billqyro_admin_default_mode' &&
+        key !== 'billqyro_device_id') {
       keysToRemove.push(key);
     }
   }
@@ -1058,7 +1068,16 @@ export const logout = async () => {
     await BillQyroDB.clear('customers');
     await BillQyroDB.clear('products');
     await BillQyroDB.clear('expenses');
-    await BillQyroDB.clear('syncQueue');
+    
+    // For syncQueue, delete only the active user's items
+    if (currentUserId) {
+        const queue = await BillQyroDB.getAll('syncQueue');
+        const userItems = queue.filter(tx => tx.userId === currentUserId);
+        for (const item of userItems) {
+            await BillQyroDB.delete('syncQueue', item.id);
+        }
+    }
+    
     await BillQyroDB.clear('auditLogs');
     await BillQyroDB.clear('errorLogs');
   } catch (e) {

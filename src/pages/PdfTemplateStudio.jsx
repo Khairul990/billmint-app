@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   CheckCircle2,
   Lock,
@@ -120,7 +120,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
     // Also update Live Link settings to match
     updated.customerLiveLinkSettings = {
       ...(updated.customerLiveLinkSettings || {}),
-      selectedLiveLinkTemplate: templateId
+      selectedLiveLinkTemplate: pendingTemplate
     };
 
     if (enableWatermark) updated.pdfWatermark = true;

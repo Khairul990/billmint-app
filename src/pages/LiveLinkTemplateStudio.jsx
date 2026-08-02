@@ -214,7 +214,7 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, setCurrentTab, userS
   const [selectedPreset, setSelectedPreset] = useState(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
-  const isProUser = subscription?.status === 'active';
+  const isProUser = userSubscription?.status === 'active';
   const categories = ['All', 'Classic', 'Modern', 'Mobile-first', 'Corporate'];
 
   const filteredTemplates = liveLinkTemplates.filter(t => {

@@ -1,3 +1,4 @@
+import { toast } from 'react-hot-toast';
 import React from 'react';
 import { Copy, Users, Check, LayoutTemplate, Box, ArrowRight } from 'lucide-react';
 
@@ -17,7 +18,7 @@ const BusinessTemplateStudio = ({ settings, onUpdate }) => {
     // In a real scenario, this would import specific preset configurations.
     // Here we just set the businessType.
     onUpdate({ businessType: presetId });
-    alert(`Preset ${presetId} logic mapped. Save changes to apply fully.`);
+    toast.success(`Preset ${presetId} logic mapped. Save changes to apply fully.`);
   };
 
   return (

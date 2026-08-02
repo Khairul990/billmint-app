@@ -1,3 +1,4 @@
+import { toast } from 'react-hot-toast';
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -174,7 +175,7 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
   }, [invoices, dateRange, customStart, customEnd, docType, paymentStatus]);
 
   const exportCSV = () => {
-    if (filteredData.length === 0) return alert("No data to export.");
+    if (filteredData.length === 0) return toast.error("No data to export.");
     
     const escapeCSV = (val) => {
       const str = String(val ?? '').replace(/\n/g, ' ').replace(/\r/g, ' ');

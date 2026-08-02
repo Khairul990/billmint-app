@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Check } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const PdfFieldsModal = ({ 
   showPdfSettings, setShowPdfSettings, pdfVisibleFields, setPdfVisibleFields, togglePdfField, billType, ALL_FIELDS_BY_TEMPLATE 

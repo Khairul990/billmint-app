@@ -1,3 +1,4 @@
+import { toast } from 'react-hot-toast';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Image as ImageIcon, Scissors, FileText, FileDown, Lock, Code, Crop } from 'lucide-react';
@@ -21,7 +22,7 @@ export default function QuickToolsCenter() {
         {TOOLS.map(tool => (
           <button
             key={tool.id}
-            onClick={() => alert('Tool interface launching soon...')}
+            onClick={() => toast.error('Tool interface launching soon...')}
             className="text-left bg-theme-card border border-theme-border-soft p-5 rounded-2xl hover:border-theme-accent hover:shadow-lg transition-all group"
           >
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 border ${tool.color}`}>

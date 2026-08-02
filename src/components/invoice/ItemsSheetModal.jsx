@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Plus, Trash2, Calculator, Copy, CheckCircle2 } from 'lucide-react';
+import { X, Plus, Trash2, Calculator, Copy, CheckCircle2, Maximize2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ItemsSheetModal = ({ 

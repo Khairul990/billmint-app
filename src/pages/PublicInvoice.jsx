@@ -325,6 +325,7 @@ const PublicInvoice = ({ initialInvoice }) => {
       showPaymentQr: true,
       allowCustomerPdfDownload: true,
       allowPaymentProofSubmit: true,
+      allowWhatsappProofSubmit: false,
       showPaidDueAmount: true,
       showContactButton: true,
       requireTransactionId: true,
@@ -337,6 +338,7 @@ const PublicInvoice = ({ initialInvoice }) => {
     showPaymentQr: true,
     allowCustomerPdfDownload: true,
     allowPaymentProofSubmit: true,
+    allowWhatsappProofSubmit: false,
     showPaidDueAmount: true,
     showContactButton: true,
     requireTransactionId: true,
@@ -1129,11 +1131,18 @@ const PublicInvoice = ({ initialInvoice }) => {
                       <label className="block mb-1 text-theme-muted font-bold uppercase text-[8px] md:text-[9px] tracking-wider">Note (Optional)</label>
                       <textarea value={customerNote} onChange={e => setCustomerNote(e.target.value)} placeholder="Any details for the verification" rows="2" className="input-premium premium-focus resize-none" />
                     </div>
-                    <div className="flex items-center gap-2 md:gap-3 pt-1 md:pt-2">
-                      <button type="button" onClick={() => setShowPaymentModal(false)} className="btn-premium-outline flex-1 py-2.5 md:py-3 text-[11px] md:text-xs">Back</button>
-                      <button type="submit" disabled={isSubmitting} className="btn-premium flex-1 py-2.5 md:py-3 text-[11px] md:text-xs disabled:opacity-50">
-                        {isSubmitting ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <span>Submit Proof</span>}
-                      </button>
+                    <div className="flex flex-col sm:flex-row items-stretch gap-2 md:gap-3 pt-1 md:pt-2">
+                      <button type="button" onClick={() => setShowPaymentModal(false)} className="btn-premium-outline flex-1 py-2.5 md:py-3 text-[11px] md:text-xs order-last sm:order-first">Back</button>
+                      <div className="flex flex-col sm:flex-row flex-[2] gap-2 md:gap-3">
+                        {liveLinkPrefs.allowWhatsappProofSubmit && business.whatsapp && (
+                          <a href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I want to submit payment proof for Invoice ' + invoice.invoiceNumber + '. Amount: ' + payAmount + ' ' + payMethod + ' ' + (txnId ? 'TxnID: ' + txnId : ''))}`} target="_blank" rel="noopener noreferrer" className="flex-1 py-2.5 md:py-3 text-[11px] md:text-xs flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-all shadow-md active:scale-95 text-center">
+                            <MessageCircle className="w-3.5 md:w-4 h-3.5 md:h-4" /> Send via WA
+                          </a>
+                        )}
+                        <button type="submit" disabled={isSubmitting} className="btn-premium flex-1 py-2.5 md:py-3 text-[11px] md:text-xs disabled:opacity-50 flex items-center justify-center">
+                          {isSubmitting ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <span>Submit Proof</span>}
+                        </button>
+                      </div>
                     </div>
                   </form>
                 </div>

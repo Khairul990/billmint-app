@@ -69,7 +69,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
     e.preventDefault();
     if (isSaving) return;
     if (!name) {
-      alert('Please specify a client name.');
+      toast.error('Please specify a client name.');
       return;
     }
     setIsSaving(true);
@@ -84,7 +84,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
       await onSaveCustomer(payload);
       setIsModalOpen(false);
     } catch (err) {
-      alert('Failed to save. Please try again.');
+      toast.error('Failed to save. Please try again.');
     } finally {
       setIsSaving(false);
     }

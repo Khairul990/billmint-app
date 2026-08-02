@@ -195,6 +195,7 @@ const SettingsStudioV2 = ({
   const [showPaymentQrOnLink, setShowPaymentQrOnLink] = useState(true);
   const [allowPdfDownload, setAllowPdfDownload] = useState(true);
   const [allowPaymentProofSubmit, setAllowPaymentProofSubmit] = useState(true);
+  const [allowWhatsappProofSubmit, setAllowWhatsappProofSubmit] = useState(false);
   const [showPaidDueAmount, setShowPaidDueAmount] = useState(true);
   const [showContactButton, setShowContactButton] = useState(true);
   const [requireTransactionId, setRequireTransactionId] = useState(true);
@@ -284,6 +285,7 @@ const SettingsStudioV2 = ({
         setShowPaymentQrOnLink(settings.customerLiveLinkSettings.showPaymentQr !== undefined ? settings.customerLiveLinkSettings.showPaymentQr : true);
         setAllowPdfDownload(settings.customerLiveLinkSettings.allowCustomerPdfDownload !== undefined ? settings.customerLiveLinkSettings.allowCustomerPdfDownload : true);
         setAllowPaymentProofSubmit(settings.customerLiveLinkSettings.allowPaymentProofSubmit !== undefined ? settings.customerLiveLinkSettings.allowPaymentProofSubmit : true);
+        setAllowWhatsappProofSubmit(settings.customerLiveLinkSettings.allowWhatsappProofSubmit !== undefined ? settings.customerLiveLinkSettings.allowWhatsappProofSubmit : false);
         setShowPaidDueAmount(settings.customerLiveLinkSettings.showPaidDueAmount !== undefined ? settings.customerLiveLinkSettings.showPaidDueAmount : true);
         setShowContactButton(settings.customerLiveLinkSettings.showContactButton !== undefined ? settings.customerLiveLinkSettings.showContactButton : true);
         setRequireTransactionId(settings.customerLiveLinkSettings.requireTransactionId !== undefined ? settings.customerLiveLinkSettings.requireTransactionId : true);
@@ -347,7 +349,7 @@ const SettingsStudioV2 = ({
     invoicePrefix, defaultTax, defaultNotes, terms, pdfFooter, brandColor, invoiceTemplate, defaultBillingTemplate,
     upiId, bkashNumber, nagadNumber, rocketNumber, payeeName, paymentNote, paymentQrEnabled, paymentMethod,
     customPaymentLink, showQrInPdf, showQrInPreview,
-    enableLiveLink, showPaymentQrOnLink, allowPdfDownload, allowPaymentProofSubmit,
+    enableLiveLink, showPaymentQrOnLink, allowPdfDownload, allowPaymentProofSubmit, allowWhatsappProofSubmit,
     showPaidDueAmount, showContactButton, requireTransactionId, requirePaymentScreenshot,
     themeId, darkMode, logoUrl, cornerRadius, shadowIntensity, animationSpeed, fontDensity,
     emailNotifications, whatsappNotifications, dueDateReminders, paymentConfirmation, marketingEmails, securityAlerts,
@@ -439,7 +441,7 @@ const SettingsStudioV2 = ({
         customerLiveLinkSettings: {
           ...settings?.customerLiveLinkSettings, enableLiveInvoiceLink: enableLiveLink,
           showPaymentQr: showPaymentQrOnLink, allowCustomerPdfDownload: allowPdfDownload,
-          allowPaymentProofSubmit: allowPaymentProofSubmit, showPaidDueAmount: showPaidDueAmount,
+          allowPaymentProofSubmit: allowPaymentProofSubmit, allowWhatsappProofSubmit: allowWhatsappProofSubmit, showPaidDueAmount: showPaidDueAmount,
           showContactButton: showContactButton, requireTransactionId, requirePaymentScreenshot,
           selectedLiveLinkTemplate: settings?.customerLiveLinkSettings?.selectedLiveLinkTemplate || 'classic',
           themePreset: settings?.customerLiveLinkSettings?.themePreset || themeId,
@@ -522,6 +524,7 @@ const SettingsStudioV2 = ({
       setShowPaymentQrOnLink(settings.customerLiveLinkSettings.showPaymentQr !== undefined ? settings.customerLiveLinkSettings.showPaymentQr : true);
       setAllowPdfDownload(settings.customerLiveLinkSettings.allowCustomerPdfDownload !== undefined ? settings.customerLiveLinkSettings.allowCustomerPdfDownload : true);
       setAllowPaymentProofSubmit(settings.customerLiveLinkSettings.allowPaymentProofSubmit !== undefined ? settings.customerLiveLinkSettings.allowPaymentProofSubmit : true);
+      setAllowWhatsappProofSubmit(settings.customerLiveLinkSettings.allowWhatsappProofSubmit !== undefined ? settings.customerLiveLinkSettings.allowWhatsappProofSubmit : false);
       setShowPaidDueAmount(settings.customerLiveLinkSettings.showPaidDueAmount !== undefined ? settings.customerLiveLinkSettings.showPaidDueAmount : true);
       setShowContactButton(settings.customerLiveLinkSettings.showContactButton !== undefined ? settings.customerLiveLinkSettings.showContactButton : true);
       setRequireTransactionId(settings.customerLiveLinkSettings.requireTransactionId !== undefined ? settings.customerLiveLinkSettings.requireTransactionId : true);

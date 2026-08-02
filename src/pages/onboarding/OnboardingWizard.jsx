@@ -1,3 +1,4 @@
+import { toast } from 'react-hot-toast';
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -350,7 +351,7 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
       utterance.lang = langCode;
       window.speechSynthesis.speak(utterance);
     } else {
-      alert("Text-to-speech is not supported in your browser.");
+      toast.error("Text-to-speech is not supported in your browser.");
     }
   };
 

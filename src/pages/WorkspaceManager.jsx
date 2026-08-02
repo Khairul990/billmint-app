@@ -1,3 +1,4 @@
+import { toast } from 'react-hot-toast';
 import React, { useState } from 'react';
 import AnimatedPage from '../components/AnimatedPage';
 import { 
@@ -91,7 +92,7 @@ const WorkspaceManager = ({
 
   const handleToggleArchive = (ws) => {
     if (ws.id === activeWorkspaceId) {
-      alert("Cannot archive the currently active workspace.");
+      toast.error("Cannot archive the currently active workspace.");
       return;
     }
     

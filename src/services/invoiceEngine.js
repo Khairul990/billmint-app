@@ -196,9 +196,6 @@ export const invoiceEngine = {
       }
     }
     
-    if (changed) {
-      localStorage.setItem('billqyro_invoices', JSON.stringify(updatedInvoices));
-    }
     return { changed, updatedInvoices };
   },
 

@@ -38,7 +38,7 @@ import { paymentEngine } from './services/paymentEngine';
 import { downloadInvoicePDF } from './utils/pdfUtils';
 import { auth, firebaseReady } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
-import { triggerSuccessFeedback, triggerPaymentSuccessFeedback, triggerPopFeedback, triggerDeleteFeedback } from './utils/feedback';
+import { triggerSuccessFeedback, triggerPaymentSuccessFeedback, triggerPopFeedback, triggerDeleteFeedback, triggerVoiceFeedback } from './utils/feedback';
 import { sendEmpireEvent, sendEmpireError, sendEmpireHealth } from './services/empireAgent';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from './services/firebaseConfig';
@@ -1359,7 +1359,7 @@ function App() {
   // --- PDF GENERATOR WORKER ---
   const handleDownloadPDF = (invoice) => {
     if (!settings || !settings.businessName) {
-      alert('⚠️ Business settings are incomplete. Please complete your business settings first.');
+      toast.error('⚠️ Business settings are incomplete. Please complete your business settings first.');
       setCurrentTab('settings');
       return;
     }

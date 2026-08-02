@@ -23,7 +23,8 @@ import {
   Link,
   AlertTriangle,
   Upload,
-  Trash2
+  Trash2,
+  Loader2
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { formatCurrency } from '../utils/invoiceUtils';

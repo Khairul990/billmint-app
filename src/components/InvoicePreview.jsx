@@ -252,7 +252,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
                   const val = getItemValue(item, col.id, invoice.billType);
                   
                   // Primary Column 1 gets slightly richer UI in preview
-                  if (col.id === 'col1') {
+                  if (col.id === 'item') {
                     return (
                       <td key={col.id} className={`py-4 font-semibold text-theme-primary dark:text-theme-primary dark:text-theme-secondary text-${col.align}`}>
                         <div className="flex flex-wrap items-center gap-2 mb-1">

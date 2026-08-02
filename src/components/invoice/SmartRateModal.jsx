@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Check } from 'lucide-react';
+import { X, Check, Calculator } from 'lucide-react';
 
 const SmartRateModal = ({ 
   showSmartRate, setShowSmartRate, activeItemIndex, setActiveItemIndex, items, 

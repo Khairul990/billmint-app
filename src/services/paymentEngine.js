@@ -1,5 +1,7 @@
 import { invoiceEngine } from './invoiceEngine';
-import * as dbEngine from './dbEngine';
+
+import { db, firebaseReady } from './firebaseConfig';
+import { doc, runTransaction } from 'firebase/firestore';
 import {  submitPlatformPaymentProof as dbSubmitPlatformPaymentProof, getUserPaymentProofs as dbGetUserPaymentProofs, getUserRevenueState as dbGetUserRevenueState  } from './dbEngine';
 
 class PaymentEngine {
@@ -97,6 +99,166 @@ class PaymentEngine {
 
   async submitPlatformPaymentProof(proofData) {
     return await dbSubmitPlatformPaymentProof(proofData);
+  }
+
+  // Atomically approve a payment proof
+  async approvePaymentProof(payment) {
+    if (!firebaseReady || !db) throw new Error("Database not initialized");
+
+    const proofRef = doc(db, 'payment_proofs', payment.id);
+
+    await runTransaction(db, async (transaction) => {
+      const proofDoc = await transaction.get(proofRef);
+      if (!proofDoc.exists()) {
+        throw new Error('Payment proof not found.');
+      }
+      const proofData = proofDoc.data();
+      if (proofData.status === 'approved') {
+        throw new Error('This payment has already been approved.');
+      }
+
+      transaction.update(proofRef, { 
+        status: 'approved',
+        updatedAt: new Date().toISOString()
+      });
+
+      if (payment.invoiceId) {
+        const localInvoices = await invoiceEngine.getInvoices();
+        const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
+        
+        if (existingInvoice && existingInvoice.publicToken) {
+          const publicInvRef = doc(db, 'publicInvoices', existingInvoice.publicToken);
+          const pInvDoc = await transaction.get(publicInvRef);
+          if (pInvDoc.exists()) {
+            const pData = pInvDoc.data();
+            const grandTotal = pData.grandTotal || 0;
+            const currentPaid = parseFloat(pData.amountPaid) || 0;
+            const paymentAmount = parseFloat(payment.amount) || 0;
+            const newPaid = currentPaid + paymentAmount;
+            const newBalance = Math.max(0, grandTotal - newPaid);
+            let newStatus;
+            if (newBalance <= 0) newStatus = 'Paid';
+            else if (newPaid > 0) newStatus = 'Partially Paid';
+            else newStatus = pData.paymentStatus;
+            
+            transaction.update(publicInvRef, { 
+              paymentStatus: newStatus,
+              status: newStatus,
+              amountPaid: newPaid,
+              balanceDue: newBalance
+            });
+          }
+        }
+      }
+    });
+
+    if (payment.invoiceId) {
+      const localInvoices = await invoiceEngine.getInvoices();
+      const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
+      
+      if (existingInvoice) {
+        const paymentAmount = parseFloat(payment.amount) || 0;
+        const currentPaid = parseFloat(existingInvoice.amountPaid) || 0;
+        const newPaidAmount = currentPaid + paymentAmount;
+        const grandTotal = parseFloat(existingInvoice.grandTotal) || 0;
+        const newBalance = Math.max(0, grandTotal - newPaidAmount);
+        
+        let newStatus;
+        if (newBalance <= 0) newStatus = 'Paid';
+        else if (newPaidAmount > 0) newStatus = 'Partially Paid';
+        else newStatus = existingInvoice.status;
+
+        await invoiceEngine.saveInvoice({
+          ...existingInvoice,
+          status: newStatus,
+          paymentStatus: newStatus,
+          amountPaid: newPaidAmount,
+          balanceDue: newBalance,
+          paymentMethod: payment.paymentMethod || existingInvoice.paymentMethod || 'UPI'
+        });
+        if (typeof window !== 'undefined') window.dispatchEvent(new Event('billqyro_sync'));
+      }
+    }
+  }
+
+  // Atomically reject a payment proof
+  async rejectPaymentProof(payment) {
+    if (!firebaseReady || !db) throw new Error("Database not initialized");
+
+    const proofRef = doc(db, 'payment_proofs', payment.id);
+
+    await runTransaction(db, async (transaction) => {
+      const proofDoc = await transaction.get(proofRef);
+      if (!proofDoc.exists()) {
+        throw new Error('Payment proof not found.');
+      }
+      const proofData = proofDoc.data();
+      if (proofData.status === 'rejected') {
+        throw new Error('This payment has already been rejected.');
+      }
+      if (proofData.status === 'approved') {
+        throw new Error('This payment has already been approved and cannot be rejected.');
+      }
+
+      transaction.update(proofRef, { 
+        status: 'rejected',
+        updatedAt: new Date().toISOString()
+      });
+
+      if (payment.invoiceId) {
+        const localInvoices = await invoiceEngine.getInvoices();
+        const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
+        
+        if (existingInvoice && existingInvoice.publicToken) {
+          const publicInvRef = doc(db, 'publicInvoices', existingInvoice.publicToken);
+          const pInvDoc = await transaction.get(publicInvRef);
+          if (pInvDoc.exists()) {
+            const pData = pInvDoc.data();
+            const grandTotal = pData.grandTotal || 0;
+            const currentPaid = parseFloat(pData.amountPaid) || 0;
+            const paymentAmount = parseFloat(payment.amount) || 0;
+            const revertedPaid = Math.max(0, currentPaid - paymentAmount);
+            const revertedBalance = Math.max(0, grandTotal - revertedPaid);
+            let revertedStatus;
+            if (revertedBalance <= 0 && revertedPaid > 0) revertedStatus = 'Paid';
+            else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
+            else revertedStatus = 'Partially Paid';
+
+            transaction.update(publicInvRef, {
+              paymentStatus: revertedStatus,
+              status: revertedStatus,
+              amountPaid: revertedPaid,
+              balanceDue: revertedBalance
+            });
+          }
+        }
+      }
+    });
+
+    if (payment.invoiceId) {
+      const localInvoices = await invoiceEngine.getInvoices();
+      const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
+      if (existingInvoice) {
+        const grandTotal = parseFloat(existingInvoice.grandTotal) || 0;
+        const currentPaid = parseFloat(existingInvoice.amountPaid) || 0;
+        const paymentAmount = parseFloat(payment.amount) || 0;
+        const revertedPaid = Math.max(0, currentPaid - paymentAmount);
+        const revertedBalance = Math.max(0, grandTotal - revertedPaid);
+        let revertedStatus;
+        if (revertedBalance <= 0 && revertedPaid > 0) revertedStatus = 'Paid';
+        else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
+        else revertedStatus = 'Partially Paid';
+
+        await invoiceEngine.saveInvoice({
+          ...existingInvoice,
+          status: revertedStatus,
+          paymentStatus: revertedStatus,
+          amountPaid: revertedPaid,
+          balanceDue: revertedBalance
+        });
+        if (typeof window !== 'undefined') window.dispatchEvent(new Event('billqyro_sync'));
+      }
+    }
   }
 
   async getUserPaymentProofs(userId) {

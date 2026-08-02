@@ -383,7 +383,7 @@ const AdminConsoleTab = (props) => {
                         <div className="flex items-center justify-between p-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl">
                           <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-theme-primary">Maintenance Lockout</span>
                           <button
-                            onClick={() => alert('Use global announcements for maintenance.')}
+                            onClick={() => toast.error('Use global announcements for maintenance.')}
                             className={`w-10 h-5 rounded-full relative transition-all duration-500 ease-in-out shadow-inner flex items-center p-0.5 focus:outline-none ${(globalSettings?.maintenanceMode) ? 'bg-[image:var(--accent-gradient)] shadow-sm shadow-theme-accent/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5'}`}
                           >
                             <div className={`w-4 h-4 bg-white rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ${(globalSettings?.maintenanceMode) ? 'translate-x-5' : 'translate-x-0'}`}></div>
