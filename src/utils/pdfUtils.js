@@ -3,6 +3,7 @@ import { pdf } from '@react-pdf/renderer';
 import PdfDocument from '../components/PdfDocument';
 import { toast } from 'react-hot-toast';
 import QRCode from 'qrcode';
+import { buildCanonicalRenderModel } from './normalizeInvoiceModel';
 
 let isDownloadingPDF = false;
 
@@ -19,17 +20,29 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
   isDownloadingPDF = true;
   try {
     let qrCodeDataUrl = null;
-    const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
-    const bankDetails = invoiceBuilderSettings.bankDetails || {};
-    const upiId = invoice?.paymentSettingsSnapshot?.upiId || bankDetails?.upiId || invoice?.businessSnapshot?.upiId || businessSettings?.upiId;
-    const enableQr = invoice?.paymentSettingsSnapshot?.paymentQrEnabled ?? bankDetails?.showQr ?? businessSettings?.paymentQrEnabled;
+    const { paymentPrefs, regionalPrefs } = buildCanonicalRenderModel(invoice, businessSettings) || {};
+    const enableQr = paymentPrefs?.paymentQrEnabled && paymentPrefs?.showQrInPreview;
+    const paymentMethod = paymentPrefs?.paymentMethod || 'Manual';
     const amountDue = invoice?.balanceDue !== undefined ? invoice.balanceDue : (invoice?.grandTotal || 0);
     
-    if (enableQr && upiId && amountDue > 0) {
-      const businessName = encodeURIComponent(invoice?.businessSnapshot?.businessName || businessSettings?.businessName || 'Business');
-      const upiUrl = `upi://pay?pa=${upiId}&pn=${businessName}&am=${amountDue}&cu=INR`;
+    if (enableQr && amountDue > 0) {
+      const payeeName = paymentPrefs?.payeeName || businessSettings?.businessName || '';
+      let qrText = '';
+      if (paymentMethod === 'UPI') {
+        const upiId = paymentPrefs?.upiId || '';
+        qrText = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amountDue}&cu=${regionalPrefs?.currencyCode || 'INR'}&tn=${invoice.invoiceNumber}`;
+      } else if (paymentMethod === 'bKash') {
+        const bkashNumber = paymentPrefs?.bkashNumber || '';
+        qrText = `bKash Payment\nMerchant/Personal Number: ${bkashNumber}\nAmount: ${amountDue}\nInvoice: ${invoice.invoiceNumber}`;
+      } else if (paymentMethod === 'Nagad') {
+        const nagadNumber = paymentPrefs?.nagadNumber || '';
+        qrText = `Nagad Payment\nNumber: ${nagadNumber}\nAmount: ${amountDue}\nInvoice: ${invoice.invoiceNumber}`;
+      } else {
+        qrText = `${window.location.origin}/invoice/${invoice.publicToken || invoice.id}`;
+      }
+
       try {
-        qrCodeDataUrl = await QRCode.toDataURL(upiUrl, { errorCorrectionLevel: 'H', margin: 1, width: 120 });
+        qrCodeDataUrl = await QRCode.toDataURL(qrText, { errorCorrectionLevel: 'H', margin: 1, width: 150 });
       } catch (err) {
         console.error('Failed to generate QR code for PDF:', err);
       }
