@@ -316,10 +316,15 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
     numberFormat: businessSettings?.numberFormat || 'Indian'
   };
 
+  const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
+  const bankDetails = invoiceBuilderSettings.bankDetails || {};
+
   const paymentPrefs = invoice.paymentSettingsSnapshot || {
-    paymentQrEnabled: businessSettings?.paymentQrEnabled || false,
-    paymentMethod: businessSettings?.paymentMethod || 'Manual',
+    paymentQrEnabled: bankDetails?.showQr || businessSettings?.paymentQrEnabled || false,
+    paymentMethod: (bankDetails?.upiId ? 'UPI' : businessSettings?.paymentMethod) || 'Manual',
+    upiId: bankDetails?.upiId || businessSettings?.upiId || '',
     payeeName: businessSettings?.payeeName || businessSettings?.businessName || '',
+    paymentNote: businessSettings?.paymentNote || '',
     showQrInPreview: businessSettings?.showQrInPreview !== undefined ? businessSettings?.showQrInPreview : true
   };
 
