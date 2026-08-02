@@ -156,6 +156,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
   };
 
   return (
+    <>
     <div className="bg-theme-card dark:bg-theme-card rounded-2xl p-5 md:p-5 border border-theme-border-soft dark:border-theme-border-soft/80 shadow-premium hover:shadow-2xl hover:border-theme-accent/30 dark:hover:border-theme-accent/40 transition-all duration-500 group">
       <div className={`flex flex-col ${compact ? '' : 'md:flex-row md:items-center'} justify-between gap-4`}>
         {/* Top/Left Section: Metadata */}
@@ -424,17 +425,18 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
         </div>
       </div>
     </div>
+      {showWhatsAppPreview && previewPayload && (
+        <WhatsAppCommunicationPreview
+          workspaceId={previewPayload.workspaceId}
+          userId={previewPayload.userId}
+          invoiceId={previewPayload.invoiceId}
+          onClose={() => setShowWhatsAppPreview(false)}
+        />
+      )}
+    </>
   );
 };
 
-{showWhatsAppPreview && previewPayload && (
-  <WhatsAppCommunicationPreview
-    workspaceId={previewPayload.workspaceId}
-    userId={previewPayload.userId}
-    invoiceId={previewPayload.invoiceId}
-    onClose={() => setShowWhatsAppPreview(false)}
-  />
-)}
 export default React.memo(InvoiceCard, (prevProps, nextProps) => {
   return (
     prevProps.invoice?.updatedAt === nextProps.invoice?.updatedAt &&

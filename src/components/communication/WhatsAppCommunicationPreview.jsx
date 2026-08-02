@@ -1,9 +1,22 @@
 // src/components/communication/WhatsAppCommunicationPreview.jsx
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '../ui/Button'; // Assuming a generic Button component exists
-import toast from 'react-hot-toast'; // For user feedback
+import { Button } from '../ui/Button';
+import toast from 'react-hot-toast';
 import { Modal } from '../ui/Modal';
+import {
+  FileText,
+  Image as ImageIcon,
+  Copy,
+  Check,
+  Download,
+  Send,
+  Smartphone,
+  MessageCircle,
+  ExternalLink,
+  Link as LinkIcon,
+  Info
+} from 'lucide-react';
 import { communicationEngine } from '../../services/communication/communicationEngine';
 import { whatsappShareAdapter } from '../../services/communication/whatsappShareAdapter';
 
@@ -17,9 +30,11 @@ import { whatsappShareAdapter } from '../../services/communication/whatsappShare
  */
 export default function WhatsAppCommunicationPreview({ workspaceId, userId, invoiceId, onClose }) {
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const [error, setError] = useState(null);
   const [payload, setPayload] = useState(null);
   const [editableMessage, setEditableMessage] = useState('');
+  const [copied, setCopied] = useState(false);
 
   // Prepare the communication payload once on mount
   useEffect(() => {
@@ -34,11 +49,14 @@ export default function WhatsAppCommunicationPreview({ workspaceId, userId, invo
           invoiceId,
           overrides: {}
         });
+        if (comm && comm.status === 'offline_prepared') {
+          throw new Error(comm.reason || 'Network offline – cannot prepare WhatsApp communication');
+        }
         setPayload(comm);
-        setEditableMessage(comm.message);
+        setEditableMessage(comm.message || '');
       } catch (e) {
         console.error(e);
-        setError(e.message);
+        setError(e.message || 'Failed to prepare WhatsApp reminder.');
       } finally {
         setLoading(false);
       }
@@ -46,99 +64,240 @@ export default function WhatsAppCommunicationPreview({ workspaceId, userId, invo
     prepare();
   }, [workspaceId, userId, invoiceId]);
 
+  const pdf = (payload?.attachments || []).find(a => a.type === 'pdf');
+  const image = (payload?.attachments || []).find(a => a.type === 'image');
+  const readyCount = (payload?.attachments || []).filter(a => a.ready).length;
+  const selectedCount = (payload?.attachments || []).length;
+  const currency = payload?.currency || '₹';
+
+  const formatAmount = (value) => {
+    if (value == null) return '—';
+    return `${currency}${Number(value).toFixed(2)}`;
+  };
+
+  const formatSize = (bytes) => {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   const openWhatsApp = async () => {
-  if (!payload) return;
-  // Demo mode guard
-  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
-    toast.error('WhatsApp sharing is disabled in Demo mode.');
-    return;
-  }
-  setLoading(true);
-  try {
-    const result = await whatsappShareAdapter.shareViaWhatsApp({
-      recipient: payload.recipientPhone,
-      message: editableMessage,
-      attachments: payload.attachments
-    });
-    console.log('[WhatsAppCommunicationPreview] share result', result);
-    toast.success('WhatsApp opened');
-  } catch (e) {
-    console.error(e);
-    setError(e.message);
-    toast.error(e.message);
-  } finally {
-    setLoading(false);
-  }
-};
+    if (!payload || sending) return;
+    if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+      toast.error('WhatsApp sharing is disabled in Demo mode.');
+      return;
+    }
+    // Never silently drop a failed PDF – warn before sharing.
+    if (payload.includePdf !== false && pdf && !pdf.ready) {
+      toast.error('Invoice PDF could not be generated – your message will be sent without the PDF.');
+    }
+    setSending(true);
+    setError(null);
+    try {
+      const result = await whatsappShareAdapter.shareViaWhatsApp({
+        recipient: payload.recipientPhone,
+        message: editableMessage,
+        attachments: payload.attachments
+      });
+      console.log('[WhatsAppCommunicationPreview] share result', result);
+
+      if (result.status === 'cancelled') {
+        toast.info('Share cancelled – nothing was sent.');
+      } else if (result.method === 'webshare' && result.filesShared) {
+        toast.success(`WhatsApp opened with ${result.filesCount} attachment${result.filesCount > 1 ? 's' : ''} (PDF + message).`);
+      } else if (result.method === 'webshare') {
+        toast.success('WhatsApp opened with your message.');
+      } else {
+        toast(
+          <span>
+            <strong>WhatsApp opened with your message.</strong>
+            <br />
+            Your PDF/image could not be attached automatically on this device. Please attach the files manually before sending.
+          </span>,
+          { duration: 6000, icon: <Info className="w-4 h-4" /> }
+        );
+      }
+    } catch (e) {
+      console.error(e);
+      setError(e.message || 'Failed to open WhatsApp.');
+      toast.error(e.message || 'Failed to open WhatsApp.');
+    } finally {
+      setSending(false);
+    }
+  };
 
   const downloadPdf = () => {
-    if (!payload || !payload.attachments) return;
-    const pdf = payload.attachments.find(a => a.type === 'pdf');
-    if (pdf && pdf.blob) {
+    if (pdf && pdf.ready && pdf.blob) {
       const link = document.createElement('a');
       link.href = pdf.blobUrl || URL.createObjectURL(pdf.blob);
       link.download = pdf.name || 'invoice.pdf';
       link.click();
+    } else {
+      toast.error('PDF is not ready yet.');
     }
   };
 
-  // UI rendering
+  const copyMessage = async () => {
+    try {
+      await navigator.clipboard.writeText(editableMessage || '');
+      setCopied(true);
+      toast.success('Message copied to clipboard.');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (e) {
+      toast.error('Could not copy message.');
+    }
+  };
+
+  // Attachment chip: Ready / Failed / Disabled per attachment type.
+  const AttachmentChip = ({ kind, state, name, size }) => {
+    const styles = {
+      ready: 'bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400',
+      failed: 'bg-rose-500/5 border-rose-500/20 text-rose-600 dark:text-rose-400',
+      disabled: 'bg-theme-app dark:bg-theme-surface border-theme-border-soft text-theme-muted'
+    };
+    const label = state === 'ready' ? '✓ Ready' : state === 'failed' ? 'Failed' : 'Disabled';
+    const chipName = name || (kind === 'pdf' ? 'Invoice PDF' : 'Business Image');
+    return (
+      <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold ${styles[state]}`}>
+        {kind === 'pdf' ? <FileText className="w-4 h-4 shrink-0" /> : <ImageIcon className="w-4 h-4 shrink-0" />}
+        <div className="min-w-0">
+          <div className="truncate">{chipName}</div>
+          {size ? <div className="text-[10px] opacity-70">{formatSize(size)}</div> : null}
+        </div>
+        <span className="ml-auto shrink-0">{label}</span>
+      </div>
+    );
+  };
+
+  const pdfState = payload?.includePdf === false ? 'disabled' : (pdf?.ready ? 'ready' : 'failed');
+  const imageState = payload?.includeImage === false || !image ? 'disabled' : (image.ready ? 'ready' : 'failed');
+
   return (
-    <Modal isOpen={true} onClose={onClose} title="WhatsApp Reminder Preview">
-        {error && <p className="text-red-600 mb-2">Error: {error}</p>}
-        {loading && <p className="mb-2">Loading…</p>}
-{payload && (
-          <>
-            <div className="grid grid-cols-2 gap-2 mb-4 text-sm text-gray-700 dark:text-gray-300">
-              <div><strong>Customer:</strong> {payload.customer?.name || ''}</div>
-              <div><strong>Customer ID:</strong> {payload.customer?.id || ''}</div>
-              <div><strong>Invoice #:</strong> {payload.invoice?.invoiceNumber || ''}</div>
-              <div><strong>Total:</strong> {payload.invoice?.grandTotal ?? ''}</div>
-              <div><strong>Paid:</strong> {payload.invoice?.amountPaid ?? ''}</div>
-              <div><strong>Due:</strong> {payload.invoice?.balanceDue ?? ''}</div>
-              <div><strong>Due Date:</strong> {payload.invoice?.dueDate ?? ''}</div>
-              {payload.attachments?.some(a => a.type === 'pdf') && (
-                (() => {
-                  const pdf = payload.attachments.find(a => a.type === 'pdf');
-                  return pdf.ready ? (
-                    <div className="col-span-2 text-green-600">PDF: Ready</div>
-                  ) : (
-                    <div className="col-span-2 text-red-600">PDF: Failed</div>
-                  );
-                })()
-              )}
-              {payload.attachments?.some(a => a.type === 'image') && (
-                (() => {
-                  const img = payload.attachments.find(a => a.type === 'image');
-                  return img.ready ? (
-                    <div className="col-span-2 text-green-600">Business Image: Ready</div>
-                  ) : (
-                    <div className="col-span-2 text-red-600">Business Image: Failed</div>
-                  );
-                })()
-              )}
-              {payload.portalLink && (
-                <div className="col-span-2 text-green-600">Customer Portal Link: Enabled</div>
+    <Modal isOpen={true} onClose={onClose} title="Send WhatsApp Reminder">
+      {error && (
+        <div className="m-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-2">
+          <Info className="w-4 h-4 shrink-0" /> {error}
+        </div>
+      )}
+
+      {loading && (
+        <div className="flex flex-col items-center justify-center py-16 text-theme-muted">
+          <Send className="w-8 h-8 animate-bounce mb-3 text-theme-accent" />
+          <p className="text-xs font-bold uppercase tracking-wider">Preparing professional reminder…</p>
+          <p className="text-[11px] mt-1 opacity-70">Generating your invoice PDF for WhatsApp</p>
+        </div>
+      )}
+
+      {payload && !loading && (
+        <div className="space-y-4 p-5">
+          {/* Summary: customer (name + id), invoice # (+ due date), total / paid / due */}
+          <div className="grid grid-cols-2 gap-2 text-xs text-theme-secondary">
+            <div className="p-3 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft">
+              <div className="text-[9px] uppercase tracking-wider text-theme-muted font-bold">Customer</div>
+              <div className="font-extrabold text-theme-primary">{payload.customer?.name || '—'}</div>
+              {payload.customer?.id && (
+                <div className="text-[10px] text-theme-muted mt-0.5 truncate">ID: {payload.customer.id}</div>
               )}
             </div>
-            <div className="border rounded p-3 mb-4 bg-gray-50 dark:bg-gray-700">
-              <textarea
-                className="w-full h-32 p-2 border rounded"
-                value={editableMessage}
-                onChange={(e) => setEditableMessage(e.target.value)}
-                disabled={loading}
-              />
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button onClick={onClose} disabled={loading}>Cancel</Button>
-              <Button onClick={() => setEditableMessage(prev => prompt('Edit Message', prev) || prev)} disabled={loading}>Edit</Button>
-              {payload.attachments?.some(a => a.type === 'pdf') && (
-                <Button onClick={downloadPdf} disabled={loading || !(payload.attachments.find(a => a.type === 'pdf')?.ready)}>Download PDF</Button>
+            <div className="p-3 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft">
+              <div className="text-[9px] uppercase tracking-wider text-theme-muted font-bold">Invoice #</div>
+              <div className="font-extrabold text-theme-primary">{payload.invoice?.invoiceNumber || '—'}</div>
+              {payload.invoice?.dueDate && (
+                <div className="text-[10px] text-theme-muted mt-0.5">Due: {payload.invoice.dueDate}</div>
               )}
-              <Button onClick={openWhatsApp} disabled={loading}>Open WhatsApp</Button>
             </div>
-          </>
-        )}
-      </Modal>
+            <div className="p-3 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft">
+              <div className="text-[9px] uppercase tracking-wider text-theme-muted font-bold">Total</div>
+              <div className="font-extrabold text-theme-primary">{formatAmount(payload.invoice?.grandTotal)}</div>
+            </div>
+            <div className="p-3 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft">
+              <div className="text-[9px] uppercase tracking-wider text-theme-muted font-bold">Paid</div>
+              <div className="font-extrabold text-emerald-500">{formatAmount(payload.invoice?.amountPaid)}</div>
+            </div>
+            <div className="p-3 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft">
+              <div className="text-[9px] uppercase tracking-wider text-theme-muted font-bold">Due</div>
+              <div className="font-extrabold text-rose-500">{formatAmount(payload.invoice?.balanceDue)}</div>
+            </div>
+            <div className="p-3 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft">
+              <div className="text-[9px] uppercase tracking-wider text-theme-muted font-bold">Due Date</div>
+              <div className="font-extrabold text-theme-primary">{payload.invoice?.dueDate || '—'}</div>
+            </div>
+          </div>
+
+          {/* WhatsApp-style message bubble */}
+          <div className="rounded-2xl bg-[#DCF8C6] dark:bg-[#1f2c33] p-4 shadow-inner border border-black/5">
+            <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
+              <MessageCircle className="w-3.5 h-3.5" /> WhatsApp Message Preview
+            </div>
+            <pre className="whitespace-pre-wrap text-[13px] leading-relaxed text-gray-800 dark:text-gray-100 font-sans">{editableMessage}</pre>
+            <div className="text-right text-[10px] text-gray-500 dark:text-gray-400 mt-2">
+              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ✓✓
+            </div>
+          </div>
+
+          {/* Attachment status chips + portal link status */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <AttachmentChip kind="pdf" state={pdfState} name={pdf?.name} size={pdf?.size} />
+            <AttachmentChip kind="image" state={imageState} name={image?.name} size={image?.size} />
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold ${
+              payload.portalLink
+                ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                : 'bg-theme-app dark:bg-theme-surface border-theme-border-soft text-theme-muted'
+            }`}>
+              <LinkIcon className="w-4 h-4 shrink-0" />
+              <span className="truncate">{payload.portalLink ? 'Portal Link Ready' : 'Portal Link Disabled'}</span>
+              <span className="ml-auto shrink-0">{payload.portalLink ? '✓ Ready' : 'Disabled'}</span>
+            </div>
+          </div>
+
+          {/* Attachment count */}
+          <div className="text-[11px] font-semibold text-theme-muted">
+            {readyCount > 0
+              ? `${readyCount} attachment${readyCount > 1 ? 's' : ''} ready to share${selectedCount > readyCount ? ` · ${selectedCount - readyCount} unavailable` : ''}`
+              : selectedCount > 0
+                ? 'Attachments could not be generated.'
+                : 'No attachments selected for this message.'}
+          </div>
+
+          {/* Device note */}
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-sky-500/5 border border-sky-500/20 text-[11px] text-sky-700 dark:text-sky-300">
+            <Smartphone className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>
+              On <strong>mobile</strong>, WhatsApp opens with the PDF &amp; message attached automatically. On <strong>desktop</strong>, WhatsApp Web opens with the message – download the PDF and attach it manually if needed.
+            </span>
+          </div>
+
+          {/* Editable message */}
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-theme-muted font-bold mb-1.5">Edit Message</div>
+            <textarea
+              className="w-full h-28 p-3 rounded-xl border border-theme-border-soft bg-theme-app dark:bg-theme-surface text-sm text-theme-primary resize-y no-scrollbar"
+              value={editableMessage}
+              onChange={(e) => setEditableMessage(e.target.value)}
+              disabled={sending}
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button variant="secondary" size="sm" onClick={copyMessage} disabled={sending} leftIcon={copied ? Check : Copy}>
+              {copied ? 'Copied' : 'Copy'}
+            </Button>
+            {pdf && pdf.ready && (
+              <Button variant="outline" size="sm" onClick={downloadPdf} disabled={sending} leftIcon={Download}>
+                Download PDF
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={onClose} disabled={sending}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="sm" onClick={openWhatsApp} isLoading={sending} leftIcon={ExternalLink}>
+              Open WhatsApp
+            </Button>
+          </div>
+        </div>
+      )}
+    </Modal>
   );
 }

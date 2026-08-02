@@ -21,20 +21,74 @@ import { collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, limit 
 
 const TEMPLATES_COLLECTION = 'communicationTemplates';
 
+// Built-in professional templates used as a fallback when Firestore is not
+// configured or no custom template exists yet. Emoji-rich & WhatsApp-friendly.
+const BUILT_IN_TEMPLATES = {
+  reminder: {
+    id: 'reminder',
+    type: 'reminder',
+    version: 1,
+    enabled: true,
+    content: [
+      'Hello {{customerName}} 👋',
+      '',
+      'This is a friendly payment reminder from *{{businessName}}* 💼',
+      '',
+      '🧾 Invoice #: {{invoiceNumber}}',
+      '💰 Outstanding Balance: *{{dueAmount}}*',
+      '📅 Due Date: {{dueDate}}',
+      '',
+      'You can view your invoice & pay securely online here 👇',
+      '🔗 {{portalLink}}',
+      '',
+      'If you have already paid, please kindly ignore this message 🙏',
+      '',
+      'Thank you for choosing *{{businessName}}* 😊',
+      '📞 {{businessPhone}}'
+    ].join('\n')
+  },
+  invoice: {
+    id: 'invoice',
+    type: 'invoice',
+    version: 1,
+    enabled: true,
+    content: [
+      'Hello {{customerName}} 👋',
+      '',
+      'Thank you for your business! Your invoice is ready 🎉',
+      '',
+      '🧾 Invoice #: {{invoiceNumber}}',
+      '💵 Total: *{{totalAmount}}*',
+      '✅ Paid: {{paidAmount}}',
+      '⏳ Balance Due: {{dueAmount}}',
+      '',
+      'Please find your invoice details attached & pay securely online here 👇',
+      '🔗 {{portalLink}}',
+      '',
+      'Need any help? Just reply to this message 💬',
+      '',
+      'Warm regards,',
+      '*{{businessName}}* 📞 {{businessPhone}}'
+    ].join('\n')
+  }
+};
+
 export const messageTemplateEngine = {
   /**
-   * Get a template by id (latest version).
+   * Get a template by id (latest version). Falls back to a built-in
+   * professional template when Firestore is unavailable or the doc is missing.
    */
   async getTemplate(id) {
-    if (!firebaseReady) return null;
-    try {
-      const tmplRef = doc(db, TEMPLATES_COLLECTION, id);
-      const snap = await getDoc(tmplRef);
-      return snap.exists() ? snap.data() : null;
-    } catch (e) {
-      console.error('[TemplateEngine] getTemplate error:', e);
-      return null;
+    if (firebaseReady) {
+      try {
+        const tmplRef = doc(db, TEMPLATES_COLLECTION, id);
+        const snap = await getDoc(tmplRef);
+        if (snap.exists() && snap.data().enabled !== false) return snap.data();
+      } catch (e) {
+        console.error('[TemplateEngine] getTemplate error:', e);
+      }
     }
+    return BUILT_IN_TEMPLATES[id] || null;
   },
 
   /**

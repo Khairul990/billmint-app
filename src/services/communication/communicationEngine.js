@@ -41,9 +41,11 @@ export async function prepareCommunication({ workspaceId, userId, invoiceId, ove
     return { status: 'offline_prepared', reason: 'Network offline' };
   }
 
-  // Isolation check – ensure the user belongs to the workspace
+  // Isolation check – ensure the user belongs to the workspace.
+  // Fall back to the real user id / active workspace when the caller omits them.
   const realUserId = await getRealUserId();
-  if (realUserId !== userId) {
+  const effectiveUserId = userId || realUserId;
+  if (!effectiveUserId || (realUserId && userId && realUserId !== userId)) {
     throw new Error('User/workspace isolation violation');
   }
 
@@ -58,12 +60,17 @@ export async function prepareCommunication({ workspaceId, userId, invoiceId, ove
   const mergedSettings = applyOverrides(workspaceSettings, overrides);
 
   // Choose template – default to reminder if enabled, else generic invoice
-  const templateType = mergedSettings.whatsappReminderEnabled ? 'reminder' : 'invoice';
+  const reminderEnabled = mergedSettings.whatsappReminderEnabled !== false;
+  const templateType = reminderEnabled ? 'reminder' : 'invoice';
   const template = await messageTemplateEngine.getTemplate(templateType);
+
+  // Settings are stored flat (businessName, logoUrl, phone, ...) so we pass the
+  // whole merged settings object as the business context.
+  const businessContext = mergedSettings || {};
 
   // Build context for composer
   const ctx = {
-    business: mergedSettings.business || {},
+    business: businessContext,
     customer,
     invoice,
     settings: mergedSettings,
@@ -74,26 +81,32 @@ export async function prepareCommunication({ workspaceId, userId, invoiceId, ove
 
   const message = composeMessage(template?.content || '', ctx);
 
-  // Prepare attachments based on settings toggles
+  // Prepare attachments (PDF + business image) based on settings toggles,
+  // enabled by default so invoices are always shareable with a PDF.
+  const includePdf = mergedSettings.includeInvoicePdf !== false;
+  const includeImage = mergedSettings.includeBusinessImage !== false;
   const attachments = await attachmentEngine.prepareAttachments({
-    includePdf: mergedSettings.includeInvoicePdf,
-    includeImage: mergedSettings.includeBusinessImage,
+    includePdf,
+    includeImage,
     invoice,
-    business: mergedSettings.business
+    business: businessContext
   });
 
   // Build WhatsApp deep link (reminder style)
-  const waLink = generateWhatsAppReminderLink(invoice, ctx.currency, mergedSettings.business);
+  const waLink = generateWhatsAppReminderLink(invoice, ctx.currency, businessContext);
 
   const payload = {
-    workspaceId,
-    userId,
+    workspaceId: effectiveUserId ? (workspaceId || mergedSettings.activeWorkspaceId || 'default') : workspaceId,
+    userId: effectiveUserId,
     invoiceId,
     invoice,
     customer,
-    businessSettings: mergedSettings.business,
+    businessSettings: businessContext,
+    currency: ctx.currency,
     message,
     portalLink: ctx.portalLink,
+    includePdf,
+    includeImage,
     attachments,
     recipientPhone: customer.phone,
     whatsappLink: waLink,

@@ -307,6 +307,25 @@ export const syncOfflineTransactions = async () => {
   });
 };
 
+const markLocalRecordSynced = async (storeName, docId) => {
+  if (!docId) return;
+  let key = null;
+  if (storeName === 'invoices') key = KEYS.INVOICES;
+  else if (storeName === 'customers') key = KEYS.CUSTOMERS;
+  else if (storeName === 'products') key = KEYS.PRODUCTS;
+  else if (storeName === 'expenses') key = KEYS.EXPENSES;
+  if (!key) return;
+
+  const items = JSON.parse(localStorage.getItem(key) || '[]');
+  const localIdx = items.findIndex(item => item.id === docId);
+  if (localIdx !== -1) {
+    items[localIdx].syncStatus = 'synced';
+    if (storeName === 'invoices') items[localIdx].updatedAt = new Date().toISOString();
+    updateLocalCache(key, items);
+    await BillQyroDB.put(storeName, items[localIdx]);
+  }
+};
+
 const _runSyncOfflineTransactions = async () => {
   if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
     console.warn('Blocked real data operation during Demo Mode: syncOfflineTransactions');
@@ -365,6 +384,7 @@ const _runSyncOfflineTransactions = async () => {
               if (cloudVersion > localVersion) {
                 console.warn(`[SYNC QUEUE] Skipping TX ${tx.id}: cloud version ${cloudVersion} > local ${localVersion}`);
                 syncSuccess = true; // Consider it "synced" since cloud is ahead
+                await markLocalRecordSynced(tx.storeName, tx.docId);
                 await BillQyroDB.delete('syncQueue', tx.id);
                 continue;
               }
@@ -385,22 +405,7 @@ const _runSyncOfflineTransactions = async () => {
 
           // Update local syncStatus to 'synced' on success
           if (syncSuccess && tx.data && tx.data.id) {
-            let key = null;
-            if (tx.storeName === 'invoices') key = KEYS.INVOICES;
-            else if (tx.storeName === 'customers') key = KEYS.CUSTOMERS;
-            else if (tx.storeName === 'products') key = KEYS.PRODUCTS;
-            else if (tx.storeName === 'expenses') key = KEYS.EXPENSES;
-
-            if (key) {
-              const items = JSON.parse(localStorage.getItem(key) || '[]');
-              const localIdx = items.findIndex(item => item.id === tx.data.id);
-              if (localIdx !== -1) {
-                items[localIdx].syncStatus = 'synced';
-                if (tx.storeName === 'invoices') items[localIdx].updatedAt = new Date().toISOString();
-                updateLocalCache(key, items);
-                await BillQyroDB.put(tx.storeName, items[localIdx]);
-              }
-            }
+            await markLocalRecordSynced(tx.storeName, tx.data.id);
           }
         } else if (tx.action === 'delete') {
           let docRef;

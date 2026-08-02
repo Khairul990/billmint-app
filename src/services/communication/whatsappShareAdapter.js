@@ -2,44 +2,96 @@
 
 /**
  * WhatsApp Share Adapter – handles real‑world sharing constraints.
- * Uses the Web Share API when available to share files + text.
- * Falls back to a wa.me deep link (text only) when file sharing is not supported.
+ * Primary path: Web Share API with the prepared files (PDF + business image),
+ * which on mobile opens WhatsApp with the invoice PDF actually attached.
+ * Fallback: wa.me deep link (text only) when file sharing is unsupported.
+ *
+ * Honesty contract: `filesShared` is only ever `true` when the files were
+ * genuinely handed to the OS share sheet. The deep-link fallback always
+ * reports `filesShared: false` so callers never claim the PDF was attached.
  */
 
+const isMobileDevice = () => {
+  if (typeof navigator === 'undefined') return false;
+  return /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAgent || '');
+};
+
 export async function shareViaWhatsApp(preparedComm) {
-  const { recipient, message, attachments } = preparedComm;
-  const phone = recipient.replace(/\D/g, ''); // clean digits
+  const { recipient, message, attachments } = preparedComm || {};
+  const phone = (recipient || '').replace(/\D/g, '');
   if (!phone) {
     throw new Error('Recipient phone number is missing or invalid');
   }
 
-  // Build WA deep link (text only) – always available.
-  const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  // Text-only deep link – always available as the final fallback.
+  const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(message || '')}`;
 
-  // Check for Web Share API support.
-  if (navigator.canShare && navigator.share) {
-    const files = attachments?.map(a => a.blob) ?? [];
-    // canShare may reject if file types unsupported.
-    if (files.length && navigator.canShare({ files })) {
+  // Gather real, shareable files (skip failed/unready attachments).
+  const files = (attachments || [])
+    .filter(a => a && a.ready && a.blob)
+    .map(a => a.blob);
+
+  const shareApiSupported = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  const filesShareSupported = shareApiSupported && typeof navigator.canShare === 'function';
+
+  // Primary path: Web Share API with files. On Android/iOS this hands the
+  // PDF + image + message to WhatsApp together.
+  if (shareApiSupported && files.length > 0 && filesShareSupported) {
+    let canShareFiles = false;
+    try {
+      canShareFiles = navigator.canShare({ files });
+    } catch (e) {
+      canShareFiles = false;
+    }
+    if (canShareFiles) {
       try {
         await navigator.share({
           title: 'Invoice Reminder',
-          text: message,
+          text: message || '',
           files
         });
-        // Success – we cannot know if user actually sent, but mark opened.
-        return { status: 'whatsapp_opened', method: 'webshare', link: null };
+        return { status: 'whatsapp_opened', method: 'webshare', filesShared: true, link: null, filesCount: files.length };
       } catch (e) {
-        console.warn('[WhatsAppShareAdapter] Web Share cancelled or failed', e);
-        // Continue to fallback.
+        if (e && e.name === 'AbortError') {
+          return { status: 'cancelled', method: 'webshare', filesShared: false, link: null, filesCount: 0 };
+        }
+        console.warn('[WhatsAppShareAdapter] Web Share failed', e);
+        // Fall through to the deep link below.
       }
     }
   }
 
-  // Fallback – open WhatsApp with pre‑filled text.
+  // No shareable files but share sheet available – share text only.
+  if (shareApiSupported && files.length === 0) {
+    try {
+      if (navigator.canShare && !navigator.canShare({ text: message || '' })) {
+        throw new Error('Text sharing unsupported');
+      }
+      await navigator.share({
+        title: 'Invoice Reminder',
+        text: message || ''
+      });
+      return { status: 'whatsapp_opened', method: 'webshare', filesShared: false, link: null, filesCount: 0 };
+    } catch (e) {
+      if (e && e.name === 'AbortError') {
+        return { status: 'cancelled', method: 'webshare', filesShared: false, link: null, filesCount: 0 };
+      }
+      console.warn('[WhatsAppShareAdapter] Web Share text failed', e);
+    }
+  }
+
+  // Fallback – open WhatsApp with the pre-filled message. Files cannot be
+  // auto-attached here, so we report filesShared: false (never claim otherwise).
   const win = window.open(waLink, '_blank');
   if (win) win.focus();
-  return { status: 'whatsapp_opened', method: 'deep_link', link: waLink };
+  return {
+    status: 'whatsapp_opened',
+    method: 'deep_link',
+    filesShared: false,
+    filesCount: 0,
+    link: waLink,
+    deviceIsMobile: isMobileDevice()
+  };
 }
 
 export const whatsappShareAdapter = {
