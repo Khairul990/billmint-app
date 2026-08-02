@@ -19,9 +19,11 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
   isDownloadingPDF = true;
   try {
     let qrCodeDataUrl = null;
-    const upiId = invoice?.businessSnapshot?.upiId || businessSettings?.upiId;
-    const enableQr = invoice?.paymentSettingsSnapshot?.paymentQrEnabled ?? businessSettings?.paymentQrEnabled;
-    const amountDue = invoice?.balanceDue || 0;
+    const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
+    const bankDetails = invoiceBuilderSettings.bankDetails || {};
+    const upiId = invoice?.paymentSettingsSnapshot?.upiId || bankDetails?.upiId || invoice?.businessSnapshot?.upiId || businessSettings?.upiId;
+    const enableQr = invoice?.paymentSettingsSnapshot?.paymentQrEnabled ?? bankDetails?.showQr ?? businessSettings?.paymentQrEnabled;
+    const amountDue = invoice?.balanceDue !== undefined ? invoice.balanceDue : (invoice?.grandTotal || 0);
     
     if (enableQr && upiId && amountDue > 0) {
       const businessName = encodeURIComponent(invoice?.businessSnapshot?.businessName || businessSettings?.businessName || 'Business');

@@ -25,9 +25,26 @@ export const useGeneratePDF = () => {
 
     if (!isQrEnabled || !isQrPreviewEnabled) return null;
 
-    const liveLink = `${window.location.origin}/invoice/${invoice.publicToken || invoice.id}`;
+    const paymentMethod = (bankDetails?.upiId ? 'UPI' : businessSettings?.paymentMethod) || invoice?.paymentSettingsSnapshot?.paymentMethod || 'Manual';
+    const dueAmount = invoice.balanceDue !== undefined ? invoice.balanceDue : invoice.grandTotal;
+    const payeeName = businessSettings?.payeeName || businessSettings?.businessName || '';
+    
+    let qrText = '';
+    if (paymentMethod === 'UPI') {
+      const upiId = bankDetails?.upiId || businessSettings?.upiId || invoice?.paymentSettingsSnapshot?.upiId || '';
+      qrText = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${dueAmount}&cu=INR&tn=${invoice.invoiceNumber}`;
+    } else if (paymentMethod === 'bKash') {
+      const bkashNumber = businessSettings?.bkashNumber || invoice?.paymentSettingsSnapshot?.bkashNumber || '';
+      qrText = `bKash Payment\nMerchant/Personal Number: ${bkashNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
+    } else if (paymentMethod === 'Nagad') {
+      const nagadNumber = businessSettings?.nagadNumber || invoice?.paymentSettingsSnapshot?.nagadNumber || '';
+      qrText = `Nagad Payment\nNumber: ${nagadNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
+    } else {
+      qrText = `${window.location.origin}/invoice/${invoice.publicToken || invoice.id}`;
+    }
+
     try {
-      return await QRCode.toDataURL(liveLink, { margin: 1, width: 150 });
+      return await QRCode.toDataURL(qrText, { margin: 1, width: 150 });
     } catch (err) {
       console.error('QR Generate Error:', err);
       return null;

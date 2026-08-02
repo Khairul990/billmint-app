@@ -587,7 +587,9 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
           <View style={[styles.paymentSection, templateId === 'minimal' ? { backgroundColor: 'transparent', borderColor: '#000000' } : {}]} wrap={false}>
             <Image src={qrCodeBase64} style={useA5 ? { ...styles.qrCode, width: 70, height: 70 } : styles.qrCode} />
             <View style={styles.paymentDetails}>
-              <Text style={[styles.sectionTitle, { color: tAccent }]}>Scan to View Live Invoice</Text>
+              <Text style={[styles.sectionTitle, { color: tAccent }]}>
+                {paymentPrefs?.paymentMethod === 'Manual' ? 'Scan to View Live Invoice' : `Scan to Pay with ${paymentPrefs?.paymentMethod || 'UPI'}`}
+              </Text>
               <Text style={[styles.paymentTitle, useA5 ? { fontSize: 10 } : {}, { color: tPrimary }]}>{paymentPrefs.payeeName}</Text>
               <Text style={styles.metaText}>Due: {formatCurrency(invoice.balanceDue || invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
               <Text style={styles.metaText}>Invoice: {invoice.invoiceNumber}</Text>
