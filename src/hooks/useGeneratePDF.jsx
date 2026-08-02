@@ -9,8 +9,21 @@ export const useGeneratePDF = () => {
 
   // Helper to fetch QR code image and convert to Base64
   const getQrBase64 = async (invoice, businessSettings) => {
-    const paymentPrefs = invoice.paymentSettingsSnapshot || businessSettings;
-    if (!paymentPrefs?.paymentQrEnabled || !paymentPrefs?.showQrInPreview) return null;
+    const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
+    const bankDetails = invoiceBuilderSettings.bankDetails || {};
+    
+    let isQrEnabled = false;
+    let isQrPreviewEnabled = true;
+    
+    if (invoice.paymentSettingsSnapshot) {
+       isQrEnabled = invoice.paymentSettingsSnapshot.paymentQrEnabled;
+       isQrPreviewEnabled = invoice.paymentSettingsSnapshot.showQrInPreview;
+    } else {
+       isQrEnabled = bankDetails?.showQr || businessSettings?.paymentQrEnabled || false;
+       isQrPreviewEnabled = businessSettings?.showQrInPreview !== undefined ? businessSettings?.showQrInPreview : true;
+    }
+
+    if (!isQrEnabled || !isQrPreviewEnabled) return null;
 
     const liveLink = `${window.location.origin}/invoice/${invoice.publicToken || invoice.id}`;
     try {
