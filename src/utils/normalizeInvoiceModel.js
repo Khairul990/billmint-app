@@ -25,45 +25,50 @@ export const buildCanonicalRenderModel = (invoice, businessSettings, previewOver
   const isDarkTheme = templateId === 'modern' || templateId === 'gold' || templateId === 'corporate';
 
   // 2. Business Information Resolution
-  const businessPrefs = invoice.businessSnapshot || {
-    businessName: businessSettings?.businessName || 'BillQyro Store',
-    logoUrl: businessSettings?.logoUrl || '',
-    ownerName: businessSettings?.ownerName || 'Manager',
-    phone: businessSettings?.phone || '',
-    whatsapp: businessSettings?.whatsapp || '',
-    email: businessSettings?.email || '',
-    address: businessSettings?.address || '',
-    gstNumber: businessSettings?.gstNumber || '',
-    currency: businessSettings?.currency || '₹',
-    taxLabel: businessSettings?.invoiceBuilderSettings?.taxLabel || businessSettings?.taxLabel || 'GST'
+  // Prefer live businessSettings so user updates (logo, name) reflect immediately on all previews and PDFs.
+  // Fallback to snapshot if live settings are missing.
+  const snap = invoice.businessSnapshot || {};
+  const businessPrefs = {
+    businessName: businessSettings?.businessName || snap.businessName || 'BillQyro Store',
+    logoUrl: businessSettings?.logoUrl !== undefined ? businessSettings.logoUrl : snap.logoUrl || '',
+    ownerName: businessSettings?.ownerName || snap.ownerName || 'Manager',
+    phone: businessSettings?.phone || snap.phone || '',
+    whatsapp: businessSettings?.whatsapp || snap.whatsapp || '',
+    email: businessSettings?.email || snap.email || '',
+    address: businessSettings?.address || snap.address || '',
+    gstNumber: businessSettings?.gstNumber || snap.gstNumber || '',
+    currency: businessSettings?.currency || snap.currency || '₹',
+    taxLabel: businessSettings?.invoiceBuilderSettings?.taxLabel || businessSettings?.taxLabel || snap.taxLabel || 'GST'
   };
 
   // 3. Regional Settings
-  const regionalPrefs = invoice.regionalSettingsSnapshot || {
-    country: businessSettings?.country || 'India',
-    currency: businessSettings?.currency || '₹',
-    currencyCode: businessSettings?.currencyCode || 'INR',
-    language: businessSettings?.language || 'English',
-    taxLabel: businessSettings?.invoiceBuilderSettings?.taxLabel || businessSettings?.taxLabel || 'GST',
-    dateFormat: businessSettings?.dateFormat || 'DD/MM/YYYY',
-    numberFormat: businessSettings?.numberFormat || 'Indian'
+  const regSnap = invoice.regionalSettingsSnapshot || {};
+  const regionalPrefs = {
+    country: businessSettings?.country || regSnap.country || 'India',
+    currency: businessSettings?.currency || regSnap.currency || '₹',
+    currencyCode: businessSettings?.currencyCode || regSnap.currencyCode || 'INR',
+    language: businessSettings?.language || regSnap.language || 'English',
+    taxLabel: businessSettings?.invoiceBuilderSettings?.taxLabel || businessSettings?.taxLabel || regSnap.taxLabel || 'GST',
+    dateFormat: businessSettings?.dateFormat || regSnap.dateFormat || 'DD/MM/YYYY',
+    numberFormat: businessSettings?.numberFormat || regSnap.numberFormat || 'Indian'
   };
 
   // 4. Payment & QR Code Resolution
   const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
   const bankDetails = invoiceBuilderSettings.bankDetails || {};
 
-  const paymentPrefs = invoice.paymentSettingsSnapshot || {
-    paymentQrEnabled: bankDetails?.showQr || businessSettings?.paymentQrEnabled || false,
-    paymentMethod: (bankDetails?.upiId ? 'UPI' : businessSettings?.paymentMethod) || 'Manual',
-    upiId: bankDetails?.upiId || businessSettings?.upiId || '',
-    bkashNumber: businessSettings?.bkashNumber || '',
-    nagadNumber: businessSettings?.nagadNumber || '',
-    rocketNumber: businessSettings?.rocketNumber || '',
-    payeeName: businessSettings?.payeeName || businessSettings?.businessName || '',
-    paymentNote: businessSettings?.paymentNote || '',
-    customPaymentLink: businessSettings?.customPaymentLink || '',
-    showQrInPreview: businessSettings?.showQrInPreview !== undefined ? businessSettings?.showQrInPreview : true
+  const paySnap = invoice.paymentSettingsSnapshot || {};
+  const paymentPrefs = {
+    paymentQrEnabled: bankDetails?.showQr ?? businessSettings?.paymentQrEnabled ?? paySnap.paymentQrEnabled ?? false,
+    paymentMethod: (bankDetails?.upiId ? 'UPI' : businessSettings?.paymentMethod) || paySnap.paymentMethod || 'Manual',
+    upiId: bankDetails?.upiId || businessSettings?.upiId || paySnap.upiId || '',
+    bkashNumber: businessSettings?.bkashNumber || paySnap.bkashNumber || '',
+    nagadNumber: businessSettings?.nagadNumber || paySnap.nagadNumber || '',
+    rocketNumber: businessSettings?.rocketNumber || paySnap.rocketNumber || '',
+    payeeName: businessSettings?.payeeName || businessSettings?.businessName || paySnap.payeeName || '',
+    paymentNote: businessSettings?.paymentNote || paySnap.paymentNote || '',
+    customPaymentLink: businessSettings?.customPaymentLink || paySnap.customPaymentLink || '',
+    showQrInPreview: businessSettings?.showQrInPreview !== undefined ? businessSettings.showQrInPreview : (paySnap.showQrInPreview !== undefined ? paySnap.showQrInPreview : true)
   };
 
   const currencySymbol = regionalPrefs.currency || '₹';
