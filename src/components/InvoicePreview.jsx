@@ -51,10 +51,6 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
   };
 
   const currentStepIdx = getStepIndex(invoice.orderStatus);
-
-  const billType = invoice.billType || 'default';
-  const categoryWords = getCategoryWording(billType);
-
   return (
     <div 
       id="invoice-preview-capture" 
