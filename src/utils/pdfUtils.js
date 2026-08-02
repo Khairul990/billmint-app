@@ -3,7 +3,6 @@ import { pdf } from '@react-pdf/renderer';
 import PdfDocument from '../components/PdfDocument';
 import { toast } from 'react-hot-toast';
 import QRCode from 'qrcode';
-import { buildCanonicalRenderModel } from './normalizeInvoiceModel';
 
 let isDownloadingPDF = false;
 
@@ -20,25 +19,33 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
   isDownloadingPDF = true;
   try {
     let qrCodeDataUrl = null;
-    const { paymentPrefs, regionalPrefs } = buildCanonicalRenderModel(invoice, businessSettings) || {};
-    const enableQr = paymentPrefs?.paymentQrEnabled && paymentPrefs?.showQrInPreview;
-    const paymentMethod = paymentPrefs?.paymentMethod || 'Manual';
+    const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
+    const bankDetails = invoiceBuilderSettings.bankDetails || {};
+    
+    // Exact same logic as normalizeInvoiceModel but extracted manually to avoid circular dependencies
+    const paySnap = invoice?.paymentSettingsSnapshot || {};
+    const paymentQrEnabled = bankDetails?.showQr ?? businessSettings?.paymentQrEnabled ?? paySnap.paymentQrEnabled ?? false;
+    const showQrInPreview = businessSettings?.showQrInPreview !== undefined ? businessSettings.showQrInPreview : (paySnap.showQrInPreview !== undefined ? paySnap.showQrInPreview : true);
+    const paymentMethod = (bankDetails?.upiId ? 'UPI' : businessSettings?.paymentMethod) || paySnap.paymentMethod || 'Manual';
+    const upiId = bankDetails?.upiId || businessSettings?.upiId || paySnap.upiId || '';
+    const bkashNumber = businessSettings?.bkashNumber || paySnap.bkashNumber || '';
+    const nagadNumber = businessSettings?.nagadNumber || paySnap.nagadNumber || '';
+    const payeeName = businessSettings?.payeeName || businessSettings?.businessName || paySnap.payeeName || '';
+    const currencyCode = businessSettings?.currencyCode || invoice?.regionalSettingsSnapshot?.currencyCode || 'INR';
+
+    const enableQr = paymentQrEnabled && showQrInPreview;
     const amountDue = invoice?.balanceDue !== undefined ? invoice.balanceDue : (invoice?.grandTotal || 0);
     
     if (enableQr && amountDue > 0) {
-      const payeeName = paymentPrefs?.payeeName || businessSettings?.businessName || '';
       let qrText = '';
       if (paymentMethod === 'UPI') {
-        const upiId = paymentPrefs?.upiId || '';
-        qrText = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amountDue}&cu=${regionalPrefs?.currencyCode || 'INR'}&tn=${invoice.invoiceNumber}`;
+        qrText = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amountDue}&cu=${currencyCode}&tn=${invoice?.invoiceNumber || ''}`;
       } else if (paymentMethod === 'bKash') {
-        const bkashNumber = paymentPrefs?.bkashNumber || '';
-        qrText = `bKash Payment\nMerchant/Personal Number: ${bkashNumber}\nAmount: ${amountDue}\nInvoice: ${invoice.invoiceNumber}`;
+        qrText = `bKash Payment\nMerchant/Personal Number: ${bkashNumber}\nAmount: ${amountDue}\nInvoice: ${invoice?.invoiceNumber || ''}`;
       } else if (paymentMethod === 'Nagad') {
-        const nagadNumber = paymentPrefs?.nagadNumber || '';
-        qrText = `Nagad Payment\nNumber: ${nagadNumber}\nAmount: ${amountDue}\nInvoice: ${invoice.invoiceNumber}`;
+        qrText = `Nagad Payment\nNumber: ${nagadNumber}\nAmount: ${amountDue}\nInvoice: ${invoice?.invoiceNumber || ''}`;
       } else {
-        qrText = `${window.location.origin}/invoice/${invoice.publicToken || invoice.id}`;
+        qrText = `${window.location.origin}/invoice/${invoice?.publicToken || invoice?.id || ''}`;
       }
 
       try {
@@ -99,6 +106,7 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
   } catch (error) {
     console.error('Vector PDF generation failed:', error);
     toast.error(`PDF Error: ${error?.message || error?.toString() || 'Unknown error'}`);
+    toast.error(`Stack: ${error?.stack?.substring(0, 100) || ''}`);
     return false;
   } finally {
     isDownloadingPDF = false;
