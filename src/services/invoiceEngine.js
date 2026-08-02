@@ -12,8 +12,10 @@ import {
   ensureInvoicePublicToken as dbEnsureInvoicePublicToken,
   syncFromFirestore as dbSyncFromFirestore,
   retrySyncInvoice as dbRetrySyncInvoice,
-  
-  generateSecureToken as dbGenerateSecureToken} from './dbEngine';
+  generateSecureToken as dbGenerateSecureToken
+} from './dbEngine';
+
+import { determinePaymentStatus } from '../utils/invoiceMath';
 
 import { db, firebaseReady } from './firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
@@ -84,12 +86,8 @@ export const invoiceEngine = {
   },
 
   calculatePaymentStatus(invoice) {
-    if (!invoice) return 'unknown';
-    const totalDue = invoice.grandTotal || 0;
-    const paid = invoice.paidAmount || 0;
-    if (paid >= totalDue) return 'paid';
-    if (paid > 0) return 'partial';
-    return 'unpaid';
+    if (!invoice) return 'Unknown';
+    return determinePaymentStatus(invoice.paidAmount || invoice.amountPaid || 0, invoice.grandTotal || 0, invoice.paymentStatus);
   },
 
   calculateDueLedger(invoices) {
@@ -149,8 +147,8 @@ export const invoiceEngine = {
       stats.totalRevenue += paid;
       stats.totalOutstanding += (gt - paid);
       const status = this.calculatePaymentStatus(inv);
-      if (status === 'paid') stats.paid++;
-      else if (status === 'partial') stats.partial++;
+      if (status === 'Paid') stats.paid++;
+      else if (status === 'Partially Paid') stats.partial++;
       else stats.unpaid++;
     });
     return stats;

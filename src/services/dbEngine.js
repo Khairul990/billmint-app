@@ -3066,14 +3066,9 @@ export const syncFromFirestore = async (force = false) => {
       safeFetch(getDocFromServer(doc(db, 'subscription', userId)), emptyDoc, 'subscription')
     ]);
 
-    // 3. Clear current scoped device cache before applying cloud data
-    // This prevents old device data from lingering and mixing with Cloud truth
+    // 3. We will no longer clear the entire cache blindly.
+    // Instead, we will merge the cloud data with the local data, ensuring newer local data is preserved.
     clearCacheOnly();
-    await BillQyroDB.clear('customers');
-    await BillQyroDB.clear('products');
-    await BillQyroDB.clear('invoices');
-    await BillQyroDB.clear('expenses');
-    await BillQyroDB.clear('students');
 
     // 4. Apply Settings
     let activeWorkspaceId = 'default';
@@ -3083,74 +3078,51 @@ export const syncFromFirestore = async (force = false) => {
       localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settingsData));
     }
 
-    // 5. Apply Customers
-    const customers = [];
-    customersSnap.forEach(docSnap => {
-      const data = docSnap.data();
-      data.syncStatus = 'synced';
-      customers.push(data);
-    });
-    if (customers.length > 0) {
-      for(const c of customers) await BillQyroDB.put('customers', c);
-      const activeCustomers = customers.filter(c => !c.workspaceId || c.workspaceId === activeWorkspaceId);
-      updateLocalCache(KEYS.CUSTOMERS, activeCustomers);
-    }
-
-    // 6. Apply Invoices — coerce numeric fields to prevent string-concatenation bugs
-    const invoicesMap = new Map();
-    invoicesSnap.forEach(docSnap => {
-      const data = docSnap.data();
-      data.syncStatus = 'synced';
-      ['grandTotal', 'amountPaid', 'balanceDue', 'subtotal', 'tax', 'discount', 'shipping'].forEach(f => {
-        if (typeof data[f] === 'string') data[f] = parseFloat(data[f]) || 0;
+    // Generic Merge Helper
+    const mergeData = async (storeName, snap, storageKey, formatInvoice = false) => {
+      const cloudItems = [];
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        if (formatInvoice) {
+          ['grandTotal', 'amountPaid', 'balanceDue', 'subtotal', 'tax', 'discount', 'shipping'].forEach(f => {
+            if (typeof data[f] === 'string') data[f] = parseFloat(data[f]) || 0;
+          });
+        }
+        data.syncStatus = 'synced';
+        cloudItems.push(data);
       });
-      invoicesMap.set(docSnap.id, data);
-    });
-    const invoices = Array.from(invoicesMap.values());
-    if (invoices.length > 0) {
-      for(const i of invoices) await BillQyroDB.put('invoices', i);
-      const activeInvoices = invoices.filter(i => !i.workspaceId || i.workspaceId === activeWorkspaceId);
-      updateLocalCache(KEYS.INVOICES, activeInvoices);
-    }
+      
+      const localItems = await BillQyroDB.getAll(storeName);
+      const mergedMap = new Map();
+      
+      for (const item of localItems) {
+        mergedMap.set(item.id, item);
+      }
+      
+      for (const cItem of cloudItems) {
+        const lItem = mergedMap.get(cItem.id);
+        if (!lItem || cloudWins(lItem, cItem)) {
+          mergedMap.set(cItem.id, cItem);
+        }
+      }
+      
+      const finalItems = Array.from(mergedMap.values());
+      await BillQyroDB.clear(storeName);
+      for (const item of finalItems) {
+        await BillQyroDB.put(storeName, item);
+      }
+      
+      const activeItems = finalItems.filter(item => !item.workspaceId || item.workspaceId === activeWorkspaceId);
+      updateLocalCache(storageKey, activeItems);
+      return finalItems;
+    };
 
-    // 7. Apply Products
-    const products = [];
-    productsSnap.forEach(docSnap => {
-      const data = docSnap.data();
-      data.syncStatus = 'synced';
-      products.push(data);
-    });
-    if (products.length > 0) {
-      for(const p of products) await BillQyroDB.put('products', p);
-      const activeProducts = products.filter(p => !p.workspaceId || p.workspaceId === activeWorkspaceId);
-      updateLocalCache(KEYS.PRODUCTS, activeProducts);
-    }
-
-    // 8. Apply Expenses
-    const expenses = [];
-    expensesSnap.forEach(docSnap => {
-      const data = docSnap.data();
-      data.syncStatus = 'synced';
-      expenses.push(data);
-    });
-    if (expenses.length > 0) {
-      for(const e of expenses) await BillQyroDB.put('expenses', e);
-      const activeExpenses = expenses.filter(e => !e.workspaceId || e.workspaceId === activeWorkspaceId);
-      updateLocalCache(KEYS.EXPENSES, activeExpenses);
-    }
-
-    // 9. Apply Students
-    const students = [];
-    studentsSnap.forEach(docSnap => {
-      const data = docSnap.data();
-      data.syncStatus = 'synced';
-      students.push(data);
-    });
-    if (students.length > 0) {
-      for(const s of students) await BillQyroDB.put('students', s);
-      const activeStudents = students.filter(s => !s.workspaceId || s.workspaceId === activeWorkspaceId);
-      updateLocalCache(KEYS.STUDENTS, activeStudents);
-    }
+    // 5-9. Apply merged data
+    await mergeData('customers', customersSnap, KEYS.CUSTOMERS);
+    await mergeData('invoices', invoicesSnap, KEYS.INVOICES, true);
+    await mergeData('products', productsSnap, KEYS.PRODUCTS);
+    await mergeData('expenses', expensesSnap, KEYS.EXPENSES);
+    await mergeData('students', studentsSnap, KEYS.STUDENTS);
 
     // 10. Apply Subscription
     if (subDoc.exists()) {

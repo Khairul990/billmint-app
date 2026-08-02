@@ -29,7 +29,7 @@ export async function shareViaWhatsApp(preparedComm) {
   // Gather real, shareable files (skip failed/unready attachments).
   const files = (attachments || [])
     .filter(a => a && a.ready && a.blob)
-    .map(a => a.blob);
+    .map(a => new File([a.blob], a.name || 'document.pdf', { type: a.mimeType || a.blob.type || 'application/pdf' }));
 
   const shareApiSupported = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
   const filesShareSupported = shareApiSupported && typeof navigator.canShare === 'function';

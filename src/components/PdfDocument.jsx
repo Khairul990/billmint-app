@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   pageA5: {
     padding: 24,
     paddingBottom: 60,
-    fontFamily: 'Roboto',
+    fontFamily: 'Helvetica',
     fontSize: 8,
     color: '#334155',
     backgroundColor: '#ffffff',

@@ -117,7 +117,7 @@ export async function prepareInvoicePdf(invoice, businessSettings) {
     const blob = await generateInvoicePdfBlob(invoice, businessSettings);
     const url = URL.createObjectURL(blob);
     const safeBusinessName = (businessSettings?.businessName || 'Business').replace(/[^a-zA-Z0-9]/g, '-');
-    const name = `Invoice-${invoice.invoiceNumber || 'unknown'}-${safeBusinessName}.pdf`;
+    const name = `BillQyro-Invoice-${invoice.invoiceNumber || 'unknown'}.pdf`;
     return {
       type: 'pdf',
       name,
@@ -151,7 +151,7 @@ export async function prepareBusinessImage(businessSettings) {
   if (!logoUrl) return null;
   try {
     const blob = await urlToBlob(logoUrl);
-    const name = logoUrl.split('/').pop()?.split('?')[0] || 'business-logo.png';
+    const name = 'BillQyro-Business-Logo.png';
     const mimeType = blob.type || 'image/png';
     const blobUrl = URL.createObjectURL(blob);
     return { type: 'image', name, mimeType, size: blob.size, blobUrl, blob, ready: true, error: null };

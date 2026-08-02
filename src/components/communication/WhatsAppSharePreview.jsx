@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Button } from '../ui/Button'; // Assuming a generic Button component exists
 import { shareViaWhatsApp } from '../../services/communication/whatsappShareAdapter';
 import { communicationEngine } from '../../services/communication/communicationEngine';
+import { toast } from 'react-hot-toast';
 
 /**
  * Props:
@@ -27,15 +28,23 @@ export default function WhatsAppSharePreview({
     setLoading(true);
     setError(null);
     try {
-      const comm = await communicationEngine.prepareInvoiceReminder({
+      const comm = await communicationEngine.prepareCommunication({
         workspaceId,
         userId,
-        customerId,
-        invoiceId,
-        paymentId
+        invoiceId
       });
-      setMessage(comm.message);
-      setPrepared(comm);
+      
+      const adaptedComm = {
+        ...comm,
+        recipient: comm.recipientPhone || comm.customer?.phone,
+        metadata: {
+          customerId: comm.customer?.name || comm.customer?.id || customerId,
+          invoiceId: comm.invoice?.invoiceNumber || invoiceId
+        }
+      };
+      
+      setMessage(adaptedComm.message);
+      setPrepared(adaptedComm);
     } catch (e) {
       console.error(e);
       setError(e.message);
@@ -45,16 +54,37 @@ export default function WhatsAppSharePreview({
   };
 
   const openWhatsApp = async () => {
-    if (!prepared) return;
+    if (!prepared || loading) return;
     setLoading(true);
     try {
-      const result = await shareViaWhatsApp(prepared);
+      const finalPrepared = { ...prepared, message };
+      const result = await shareViaWhatsApp(finalPrepared);
       console.log('[WhatsAppSharePreview] share result', result);
+      
+      if (!result.filesShared && prepared.attachments && prepared.attachments.length > 0) {
+        toast('WhatsApp opened, but this device/browser cannot attach files automatically. Please attach the downloaded PDF manually.', {
+          icon: 'ℹ️',
+          duration: 6000
+        });
+        // Do NOT auto close so they can use the Download PDF button
+      } else {
+        onClose(); // Auto close the preview when sharing completes fully
+      }
     } catch (e) {
       console.error(e);
       setError(e.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownloadPdf = () => {
+    const pdfAttachment = prepared?.attachments?.find(a => a.type === 'pdf');
+    if (pdfAttachment && pdfAttachment.blobUrl) {
+      const a = document.createElement('a');
+      a.href = pdfAttachment.blobUrl;
+      a.download = pdfAttachment.name || 'Invoice.pdf';
+      a.click();
     }
   };
 
@@ -91,8 +121,11 @@ export default function WhatsAppSharePreview({
             </div>
             <div className="flex justify-end space-x-2">
               <Button onClick={onClose} disabled={loading}>Cancel</Button>
+              {prepared.attachments?.some(a => a.type === 'pdf') && (
+                <Button onClick={handleDownloadPdf} disabled={loading} className="bg-blue-600 text-white hover:bg-blue-700">Download PDF</Button>
+              )}
               <Button onClick={() => setMessage(prev => prompt('Edit Message', prev) || prev)} disabled={loading}>Edit Message</Button>
-              <Button onClick={openWhatsApp} disabled={loading}>Open WhatsApp</Button>
+              <Button onClick={openWhatsApp} disabled={loading} className="bg-green-600 text-white hover:bg-green-700">Open WhatsApp</Button>
             </div>
           </>
         )}

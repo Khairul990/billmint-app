@@ -58,6 +58,7 @@ const BUILT_IN_TEMPLATES = {
       'Thank you for your business! Your invoice is ready 🎉',
       '',
       '🧾 Invoice #: {{invoiceNumber}}',
+      '📅 Due Date: {{dueDate}}',
       '💵 Total: *{{totalAmount}}*',
       '✅ Paid: {{paidAmount}}',
       '⏳ Balance Due: {{dueAmount}}',
