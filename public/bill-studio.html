@@ -1010,7 +1010,7 @@
 
                 if (invoice.items && Array.isArray(invoice.items)) {
                     state.items = invoice.items.map((i, index) => ({
-                        id: Date.now() + index,
+                        id: 'item_' + Date.now() + '_' + index,
                         sNo: i.sNo || (index + 1).toString(),
                         name: i.description || i.name || '',
                         qty: i.qty || 1,
