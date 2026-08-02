@@ -5,6 +5,7 @@ import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
 import { ShieldCheck, Calendar, Hash, FileText, Phone, Mail, Globe, MapPin, Building2, Receipt, CheckCircle2, Zap, Scissors, Briefcase, QrCode } from 'lucide-react';
 import { getCategoryWording } from '../config/businessPresets';
 import { getTemplateLayoutFamily } from '../services/TemplateEngine';
+import { buildCanonicalRenderModel } from '../utils/normalizeInvoiceModel';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
@@ -13,57 +14,16 @@ import { motion, AnimatePresence } from 'framer-motion';
  * @param {Object} businessSettings - Company's active profile settings
  */
 const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
-  if (!invoice) return null;
-
-  const businessPrefs = invoice.businessSnapshot || {
-    businessName: businessSettings?.businessName || 'BillQyro Store',
-    logoUrl: businessSettings?.logoUrl || '',
-    ownerName: businessSettings?.ownerName || 'Manager',
-    phone: businessSettings?.phone || '',
-    whatsapp: businessSettings?.whatsapp || '',
-    email: businessSettings?.email || '',
-    address: businessSettings?.address || '',
-    gstNumber: businessSettings?.gstNumber || '',
-    currency: businessSettings?.currency || '₹',
-    taxLabel: businessSettings?.invoiceBuilderSettings?.taxLabel || businessSettings?.taxLabel || 'GST'
-  };
-
-  const rawTemplateId = (businessSettings?.selectedPdfTemplate || invoice.pdfTemplate || 'classic').toLowerCase();
-  // Map templates to their layout families so rendering is robust for all templates
-  const templateFamily = getTemplateLayoutFamily(rawTemplateId);
-  const templateId = (rawTemplateId === 'repair' || rawTemplateId === 'teacher' || rawTemplateId === 'doctor') 
-    ? rawTemplateId 
-    : templateFamily;
-
-  const isDarkTheme = templateId === 'modern' || templateId === 'gold' || templateId === 'corporate';
-
-  // Destructure Snapshots with Fallbacks
-  const regionalPrefs = invoice.regionalSettingsSnapshot || {
-    country: businessSettings?.country || 'India',
-    currency: businessSettings?.currency || '₹',
-    currencyCode: businessSettings?.currencyCode || 'INR',
-    language: businessSettings?.language || 'English',
-    taxLabel: businessSettings?.invoiceBuilderSettings?.taxLabel || businessSettings?.taxLabel || 'GST',
-    dateFormat: businessSettings?.dateFormat || 'DD/MM/YYYY',
-    numberFormat: businessSettings?.numberFormat || 'Indian'
-  };
-
-  const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
-  const bankDetails = invoiceBuilderSettings.bankDetails || {};
-
-  const paymentPrefs = invoice.paymentSettingsSnapshot || {
-    paymentQrEnabled: bankDetails?.showQr || businessSettings?.paymentQrEnabled || false,
-    paymentMethod: (bankDetails?.upiId ? 'UPI' : businessSettings?.paymentMethod) || 'Manual',
-    upiId: bankDetails?.upiId || businessSettings?.upiId || '',
-    bkashNumber: businessSettings?.bkashNumber || '',
-    nagadNumber: businessSettings?.nagadNumber || '',
-    rocketNumber: businessSettings?.rocketNumber || '',
-    payeeName: businessSettings?.payeeName || businessSettings?.businessName || '',
-    paymentNote: businessSettings?.paymentNote || '',
-    customPaymentLink: businessSettings?.customPaymentLink || '',
-    showQrInPreview: businessSettings?.showQrInPreview !== undefined ? businessSettings?.showQrInPreview : true
-  };
-  const currencySymbol = regionalPrefs.currency || '₹';
+  const {
+    templateId,
+    isDarkTheme,
+    businessPrefs,
+    regionalPrefs,
+    paymentPrefs,
+    bankDetails,
+    currencySymbol,
+    categoryWords
+  } = buildCanonicalRenderModel(invoice, businessSettings, businessSettings?.selectedPdfTemplate);
 
   const getStatusBadgeStyle = (status) => {
     switch (status) {

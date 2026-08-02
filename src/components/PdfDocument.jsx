@@ -294,50 +294,22 @@ const styles = StyleSheet.create({
 
 import { getCategoryWording } from '../config/businessPresets';
 import { getTemplateLayoutFamily } from '../services/TemplateEngine';
+import { buildCanonicalRenderModel } from '../utils/normalizeInvoiceModel';
 
 const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, pageSize = 'A4' }) => {
   if (!invoice) return null;
 
-  const rawTemplateId = (businessSettings?.selectedPdfTemplate || invoice.pdfTemplate || 'classic').toLowerCase();
-  const templateFamily = getTemplateLayoutFamily(rawTemplateId);
-  const templateId = (rawTemplateId === 'repair' || rawTemplateId === 'teacher' || rawTemplateId === 'doctor') 
-    ? rawTemplateId 
-    : templateFamily;
-  const billType = invoice.billType || 'default';
-  const categoryWords = getCategoryWording(billType);
-
-  const regionalPrefs = invoice.regionalSettingsSnapshot || {
-    country: businessSettings?.country || 'India',
-    currency: businessSettings?.currency || '₹',
-    currencyCode: businessSettings?.currencyCode || 'INR',
-    language: businessSettings?.language || 'English',
-    taxLabel: businessSettings?.taxLabel || 'GST',
-    dateFormat: businessSettings?.dateFormat || 'DD/MM/YYYY',
-    numberFormat: businessSettings?.numberFormat || 'Indian'
-  };
-
-  const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
-  const bankDetails = invoiceBuilderSettings.bankDetails || {};
-
-  const paymentPrefs = invoice.paymentSettingsSnapshot || {
-    paymentQrEnabled: bankDetails?.showQr || businessSettings?.paymentQrEnabled || false,
-    paymentMethod: (bankDetails?.upiId ? 'UPI' : businessSettings?.paymentMethod) || 'Manual',
-    upiId: bankDetails?.upiId || businessSettings?.upiId || '',
-    payeeName: businessSettings?.payeeName || businessSettings?.businessName || '',
-    paymentNote: businessSettings?.paymentNote || '',
-    showQrInPreview: businessSettings?.showQrInPreview !== undefined ? businessSettings?.showQrInPreview : true
-  };
-
-  const businessPrefs = invoice.businessSnapshot || {
-    businessName: businessSettings?.businessName || 'BillQyro Store',
-    logoUrl: businessSettings?.logoUrl || '',
-    phone: businessSettings?.phone || '',
-    email: businessSettings?.email || '',
-    address: businessSettings?.address || '',
-    gstNumber: businessSettings?.gstNumber || '',
-  };
-
-  let currencySymbol = regionalPrefs.currency || '₹';
+  const {
+    templateId,
+    isDarkTheme,
+    businessPrefs,
+    regionalPrefs,
+    paymentPrefs,
+    bankDetails,
+    currencySymbol: rawCurrencySymbol,
+    categoryWords
+  } = buildCanonicalRenderModel(invoice, businessSettings, businessSettings?.selectedPdfTemplate);
+  let currencySymbol = rawCurrencySymbol || '₹';
   // PDF standard fonts (Helvetica) do not support Unicode symbols like ₹ or ৳. Fallback to ASCII text.
   if (currencySymbol === '₹') currencySymbol = 'Rs. ';
   else if (currencySymbol === '৳') currencySymbol = 'Tk. ';

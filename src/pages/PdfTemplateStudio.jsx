@@ -90,6 +90,8 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
   const handleSetViewMode = setViewMode || setInternalViewMode;
 
   const activeTemplate = businessSettings?.selectedPdfTemplate || 'classic';
+  const [pendingTemplate, setPendingTemplate] = useState(activeTemplate);
+  const isDirty = pendingTemplate !== activeTemplate;
   const isPremium = subscription?.status === 'premium';
   const categories = ['All', 'Classic', 'Modern', 'Business', 'Professional'];
 
@@ -101,14 +103,19 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
     return matchesCategory && matchesSearch;
   });
 
-  const handleApply = async (templateId, type) => {
+  const handleApply = (templateId, type) => {
     if (type === 'PRO' && !isPremium) {
       setCurrentTab?.('subscription');
       toast('Upgrade to Premium to unlock this template!', { icon: '👑' });
       return;
     }
+    setPendingTemplate(templateId);
+  };
 
-    const updated = { ...businessSettings, selectedPdfTemplate: templateId, defaultBillingTemplate: templateId };
+  const handleSaveAndApply = async () => {
+    if (!pendingTemplate) return;
+    
+    const updated = { ...businessSettings, selectedPdfTemplate: pendingTemplate, defaultBillingTemplate: pendingTemplate };
     
     // Also update Live Link settings to match
     updated.customerLiveLinkSettings = {
@@ -123,6 +130,10 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
     await settingsEngine.saveSettings(updated);
     if (setSettings) setSettings(updated);
     toast.success('Universal template applied to all formats!');
+  };
+
+  const handleDiscard = () => {
+    setPendingTemplate(activeTemplate);
   };
 
   const handlePresetSelect = (preset) => {
@@ -378,6 +389,36 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
           </div>
         </div>
 
+        {/* Dirty State Action Bar */}
+        <AnimatePresence>
+          {isDirty && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+              animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
+              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+              className="bg-theme-warning/10 border border-theme-warning/30 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-theme-warning/20 flex items-center justify-center">
+                  <Palette className="w-4 h-4 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-amber-700 dark:text-amber-500">Unsaved Template Selection</p>
+                  <p className="text-xs text-amber-600/80 dark:text-amber-500/80">You have selected a new design. Save to apply.</p>
+                </div>
+              </div>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button onClick={handleDiscard} className="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold text-theme-muted bg-theme-app hover:bg-theme-border-soft transition-colors border border-theme-border-soft">
+                  Discard
+                </button>
+                <button onClick={handleSaveAndApply} className="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold text-white bg-theme-accent hover:bg-theme-accent/90 transition-all shadow-md flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" /> Save & Apply
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {filteredTemplates.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-sm text-theme-muted font-semibold">No templates matching your search.</p>
@@ -389,6 +430,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
             {filteredTemplates.map((tpl) => {
               const isActive = activeTemplate === tpl.id;
+              const isPending = pendingTemplate === tpl.id;
               const isLocked = tpl.type === 'PRO' && !isPremium;
               const tags = tpl.tags || [];
               const features = getTemplateFeatures(tpl.id);
@@ -399,7 +441,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                   key={tpl.id}
                   variants={staggerItem}
                   whileHover={{ y: -6, scale: 1.02 }}
-                  className={`relative rounded-2xl overflow-hidden border-2 transition-all flex flex-col card-premium ${isActive ? 'border-theme-accent shadow-glow' : 'border-theme-border-soft hover:border-theme-accent/50'
+                  className={`relative rounded-2xl overflow-hidden border-2 transition-all flex flex-col card-premium ${isPending ? 'border-theme-accent shadow-glow' : 'border-theme-border-soft hover:border-theme-accent/50'
                     }`}
                 >
                   {/* Status Badges */}
@@ -489,15 +531,15 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                     <div className="mt-auto flex gap-2">
                       <button
                         onClick={() => { handleApply(tpl.id, tpl.type); setUseAnimId(tpl.id); setTimeout(() => setUseAnimId(null), 1500); }}
-                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 btn-premium ${isActive
+                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 btn-premium ${isPending
                             ? 'bg-emerald-500/10 text-emerald-600 cursor-default'
                             : isLocked
                               ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md hover:scale-[1.02]'
                               : 'bg-theme-accent text-white shadow-md hover:scale-[1.02]'
                           }`}
                       >
-                        {isActive ? (
-                          <><CheckCircle2 className="w-3.5 h-3.5" /> Active</>
+                        {isPending ? (
+                          <><CheckCircle2 className="w-3.5 h-3.5" /> Selected</>
                         ) : isLocked ? (
                           <><Lock className="w-3.5 h-3.5" /> Unlock Pro</>
                         ) : useAnimId === tpl.id ? (
