@@ -30,12 +30,12 @@ import { createPortal } from 'react-dom';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
 import { 
-  generateWhatsAppShareLink, 
   generateWhatsAppReminderLink,
   generateEmailShareLink, 
   generateInvoiceShareText 
 } from '../utils/shareUtils';
 import { invoiceEngine } from '../services/invoiceEngine';
+import { shareOnWhatsApp } from '../services/invoiceShareService';
 import PullToRefresh from '../components/PullToRefresh';
 import { addNotification } from '../services/notificationsService';
 import PremiumEmptyState from '../components/PremiumEmptyState';
@@ -655,8 +655,7 @@ const Invoices = ({
                          return;
                        }
                        const updatedInvoice = { ...viewingInvoice, publicToken: token };
-                       const link = generateWhatsAppShareLink(updatedInvoice, currencySymbol, businessSettings);
-                       window.open(link, '_blank');
+                       await shareOnWhatsApp(null, updatedInvoice, businessSettings);
                      } catch (err) {
                        toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                      }
@@ -836,8 +835,7 @@ const Invoices = ({
                     const token = await invoiceEngine.ensurePublicToken(viewingInvoice);
                     if (!token) { toast.error('Could not create live link.'); return; }
                     const updatedInvoice = { ...viewingInvoice, publicToken: token };
-                    const link = generateWhatsAppShareLink(updatedInvoice, currencySymbol, businessSettings);
-                    window.open(link, '_blank');
+                    await shareOnWhatsApp(null, updatedInvoice, businessSettings);
                   } catch (err) { toast.error(`Could not create ${portalLabel.toLowerCase()}.`); }
                 }}
                 className="flex flex-col items-center gap-1 min-w-[60px]"

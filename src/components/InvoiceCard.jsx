@@ -4,12 +4,11 @@ import { FileText, Eye, Edit2, Trash2, Download, Share2, Mail, Copy, Check, Link
 import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
 import {
-  generateWhatsAppShareLink,
-  generateWhatsAppReminderLink,
   generateEmailShareLink,
   generateInvoiceShareText
 } from '../utils/shareUtils';
 import { invoiceEngine } from '../services/invoiceEngine';
+import { shareOnWhatsApp } from '../services/invoiceShareService';
 import { isEducationCategory } from '../utils/categoryChecks';
 import { getPortalLabelByType } from '../config/businessPresets';
 // Button component not needed in this file; removed import.
@@ -45,6 +44,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
   const [showWhatsAppPreview, setShowWhatsAppPreview] = useState(false);
   const [previewPayload, setPreviewPayload] = useState(null);
   const [isSendingReminder, setIsSendingReminder] = useState(false);
+  const [isSharingWhatsApp, setIsSharingWhatsApp] = useState(false);
 
   const handleSendReminder = async () => {
     if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
@@ -295,24 +295,23 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
 
                         <button
                           onClick={async () => {
+                            if (isSharingWhatsApp) return;
+                            setIsSharingWhatsApp(true);
                             try {
-                              const customerId = invoice.customerId || invoice.customer?.id;
-                              if (!customerId) {
-                                toast.error('Please assign a customer to share the Portal.');
-                                return;
-                              }
                               const updatedInvoice = { ...invoice };
-                              const link = generateWhatsAppShareLink(updatedInvoice, currencySymbol, businessSettings);
-                              window.open(link, '_blank');
+                              await shareOnWhatsApp(null, updatedInvoice, businessSettings);
                               setShowShareMenu(false);
                             } catch (err) {
-                              toast.error(err.message || 'Could not create live link. Please try again.');
+                              toast.error(err.message || 'Could not create WhatsApp share. Please try again.');
+                            } finally {
+                              setIsSharingWhatsApp(false);
                             }
                           }}
-                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/20 hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                          disabled={isSharingWhatsApp}
+                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/20 hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                         >
                           <WhatsAppIcon className="w-3.5 h-3.5 text-theme-accent" />
-                          <span>WhatsApp Share</span>
+                          <span>{isSharingWhatsApp ? 'Preparing...' : 'WhatsApp Share'}</span>
                         </button>
 
                         {invoice.paymentStatus !== 'Paid' && (
