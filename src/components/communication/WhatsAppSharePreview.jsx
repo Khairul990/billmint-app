@@ -62,10 +62,17 @@ export default function WhatsAppSharePreview({
       console.log('[WhatsAppSharePreview] share result', result);
       
       if (!result.filesShared && prepared.attachments && prepared.attachments.length > 0) {
-        toast('WhatsApp opened, but this device/browser cannot attach files automatically. Please attach the downloaded PDF manually.', {
-          icon: 'ℹ️',
-          duration: 6000
-        });
+        if (result.pdfDownloaded) {
+          toast.success('PDF downloaded! Attach it manually in WhatsApp.', {
+            icon: '📎',
+            duration: 6000
+          });
+        } else {
+          toast('WhatsApp opened. Use the "Download PDF" button to get the invoice, then attach it manually.', {
+            icon: 'ℹ️',
+            duration: 6000
+          });
+        }
         // Do NOT auto close so they can use the Download PDF button
       } else {
         onClose(); // Auto close the preview when sharing completes fully
@@ -117,14 +124,19 @@ export default function WhatsAppSharePreview({
               )}
             </div>
             <div className="border rounded p-3 mb-4 bg-gray-50 dark:bg-gray-700">
-              <pre className="whitespace-pre-wrap" style={{ wordBreak: 'break-word' }}>{message}</pre>
+              <textarea
+                className="w-full min-h-40 p-2 bg-transparent text-gray-800 dark:text-gray-100 font-mono text-sm resize-y focus:outline-none"
+                style={{ wordBreak: 'break-word' }}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                aria-label="WhatsApp message"
+              />
             </div>
             <div className="flex justify-end space-x-2">
               <Button onClick={onClose} disabled={loading}>Cancel</Button>
               {prepared.attachments?.some(a => a.type === 'pdf') && (
                 <Button onClick={handleDownloadPdf} disabled={loading} className="bg-blue-600 text-white hover:bg-blue-700">Download PDF</Button>
               )}
-              <Button onClick={() => setMessage(prev => prompt('Edit Message', prev) || prev)} disabled={loading}>Edit Message</Button>
               <Button onClick={openWhatsApp} disabled={loading} className="bg-green-600 text-white hover:bg-green-700">Open WhatsApp</Button>
             </div>
           </>

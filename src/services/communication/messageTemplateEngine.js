@@ -30,16 +30,18 @@ const BUILT_IN_TEMPLATES = {
     version: 1,
     enabled: true,
     content: [
-      'Hello {{customerName}} 👋',
+      '👋 Hello {{customerName}},',
       '',
       'This is a friendly payment reminder from *{{businessName}}* 💼',
       '',
       '🧾 Invoice #: {{invoiceNumber}}',
-      '💰 Outstanding Balance: *{{dueAmount}}*',
+      '💰 Total: *{{totalAmount}}*',
+      '✅ Paid: {{paidAmount}}',
+      '🔴 Balance Due: *{{dueAmount}}*',
       '📅 Due Date: {{dueDate}}',
       '',
-      'You can view your invoice & pay securely online here 👇',
-      '🔗 {{portalLink}}',
+      '🔗 View Invoice & Pay Securely:',
+      '{{portalLink}}',
       '',
       'If you have already paid, please kindly ignore this message 🙏',
       '',
@@ -53,23 +55,23 @@ const BUILT_IN_TEMPLATES = {
     version: 1,
     enabled: true,
     content: [
-      'Hello {{customerName}} 👋',
+      '👋 Hello {{customerName}},',
       '',
-      'Thank you for your business! Your invoice is ready 🎉',
+      'Thank you for your business! Your invoice is ready. 🎉',
       '',
       '🧾 Invoice #: {{invoiceNumber}}',
-      '📅 Due Date: {{dueDate}}',
-      '💵 Total: *{{totalAmount}}*',
+      '💰 Total: *{{totalAmount}}*',
       '✅ Paid: {{paidAmount}}',
-      '⏳ Balance Due: {{dueAmount}}',
+      '🔴 Balance Due: *{{dueAmount}}*',
+      '📅 Due Date: {{dueDate}}',
       '',
-      'Please find your invoice details attached & pay securely online here 👇',
-      '🔗 {{portalLink}}',
+      '🔗 View Invoice & Pay Securely:',
+      '{{portalLink}}',
       '',
       'Need any help? Just reply to this message 💬',
       '',
-      'Warm regards,',
-      '*{{businessName}}* 📞 {{businessPhone}}'
+      'Thank you,',
+      '*{{businessName}}*'
     ].join('\n')
   }
 };
@@ -84,7 +86,19 @@ export const messageTemplateEngine = {
       try {
         const tmplRef = doc(db, TEMPLATES_COLLECTION, id);
         const snap = await getDoc(tmplRef);
-        if (snap.exists() && snap.data().enabled !== false) return snap.data();
+        if (snap.exists() && snap.data().enabled !== false) {
+          const stored = snap.data();
+          // Guard against corrupted stored templates: if the stored content
+          // contains Unicode replacement/noncharacter code points
+          // (U+FFFD/U+FFFE/U+FFFF) they would render as broken glyphs in the
+          // final WhatsApp message. In that case fall back to the clean
+          // built-in template so customers always receive the intended Unicode
+          // emojis.
+          if (!stored.content || /[\uFFFD\uFFFE\uFFFF]/.test(String(stored.content))) {
+            return BUILT_IN_TEMPLATES[id] || stored;
+          }
+          return stored;
+        }
       } catch (e) {
         console.error('[TemplateEngine] getTemplate error:', e);
       }

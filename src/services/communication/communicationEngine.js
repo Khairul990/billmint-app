@@ -14,7 +14,7 @@ import { getRealUserId } from '../../services/dbEngine';
 import { messageTemplateEngine } from './messageTemplateEngine';
 import { composeMessage } from './messageComposer';
 import { attachmentEngine } from './attachmentEngine';
-import { generateWhatsAppReminderLink } from '../../utils/shareUtils';
+import { generateWhatsAppReminderLink, getAppBaseUrl } from '../../utils/shareUtils';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -75,7 +75,7 @@ export async function prepareCommunication({ workspaceId, userId, invoiceId, ove
     invoice,
     settings: mergedSettings,
     currency: mergedSettings.currency || '₹',
-    portalLink: invoice.publicToken ? `${window.location.origin}/invoice/${invoice.publicToken}` : '',
+    portalLink: invoice.publicToken ? `${getAppBaseUrl()}/invoice/${invoice.publicToken}` : '',
     paymentLink: mergedSettings.paymentLink || ''
   };
 

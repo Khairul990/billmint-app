@@ -3,24 +3,34 @@ import { db } from './firebaseConfig';
 import { isEducationCategory } from '../utils/categoryChecks';
 
 /**
- * Generate a shareable payment link for an invoice
+ * Build the canonical customer portal URL for an invoice.
+ * This is the single source of truth for portal link construction.
  * @param {Object} invoiceData - Complete invoice object
- * @returns {Promise<string>} - Public URL
+ * @returns {string} - Public portal URL, or '' when no customer is assigned
  */
-export const generatePaymentLink = async (invoiceData) => {
+export const buildPortalUrl = (invoiceData) => {
   // Use customerId to generate the permanent portal link
-  const customerId = invoiceData.customerId || invoiceData.customer?.id;
-  if (!customerId) {
-    throw new Error('Please assign a student/customer to this invoice to generate a portal link.');
-  }
-  
+  const customerId = invoiceData?.customerId || invoiceData?.customer?.id;
+  if (!customerId) return '';
+
   // No Firestore write on copy/share. We solely use the permanent Live Link.
   const baseUrl = window.location.origin;
   const category = invoiceData.businessSnapshot?.businessCategory || invoiceData.businessCategory || invoiceData.businessSnapshot?.defaultBillingTemplate;
   const isEdu = isEducationCategory(category);
   const portalPath = isEdu ? '/student-portal' : '/billing';
-  const publicUrl = `${baseUrl}${portalPath}/${customerId}`;
-  
+  return `${baseUrl}${portalPath}/${customerId}`;
+};
+
+/**
+ * Generate a shareable payment link for an invoice
+ * @param {Object} invoiceData - Complete invoice object
+ * @returns {Promise<string>} - Public URL
+ */
+export const generatePaymentLink = async (invoiceData) => {
+  const publicUrl = buildPortalUrl(invoiceData);
+  if (!publicUrl) {
+    throw new Error('Please assign a student/customer to this invoice to generate a portal link.');
+  }
   return publicUrl;
 };
 

@@ -253,7 +253,7 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                         return;
                       }
                       const isEdu = isEducationCategory(businessSettings?.businessCategory);
-                      const portalPath = isEdu ? '/student-portal' : '/portal';
+                      const portalPath = isEdu ? '/student-portal' : '/billing';
                       const liveLink = `${window.location.origin}${portalPath}/${encodeURIComponent(customerId)}`;
                       await navigator.clipboard.writeText(liveLink);
                       toast.success(`${portalLabel} Link copied to clipboard!`);

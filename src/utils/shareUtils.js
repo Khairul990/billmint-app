@@ -3,7 +3,16 @@
  */
 
 import { formatCurrency } from './invoiceUtils';
-import { isEducationCategory } from './categoryChecks';
+import { buildPortalUrl } from '../services/paymentLinkService';
+
+/**
+ * Gets the base URL for public customer-facing links.
+ * Uses the app's current canonical origin so links always point to wherever
+ * the BillQyro app is actually hosted (never an old BillMint domain).
+ */
+export function getAppBaseUrl() {
+  return window.location.origin;
+}
 
 /**
  * Cleans a phone number for the WhatsApp API deep links.
@@ -53,24 +62,27 @@ export function generateInvoiceShareText(invoice, currencySymbol = '₹', busine
   const balanceDue = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), activeSymbol, activeNumberFormat);
   const paymentStatus = invoice.paymentStatus || 'Pending';
   
-  // Construct the secure live link using Portal Architecture
-  const customerId = invoice.customerId || invoice.customer?.id;
-  const isEdu = isEducationCategory(businessPrefs?.businessCategory) || isEducationCategory(businessPrefs?.defaultBillingTemplate);
-  const portalPath = isEdu ? '/student-portal' : '/portal';
-  const liveLink = customerId ? `${window.location.origin}${portalPath}/${encodeURIComponent(customerId)}` : '';
+  // Construct the secure live link using the canonical portal URL logic
+  const liveLink = buildPortalUrl(invoice);
 
-  let message = `Your invoice is ready.
-Invoice No: ${invoiceNo}
-Total: ${grandTotal}
-Paid: ${amountPaid}
-Balance Due: ${balanceDue}
-Status: ${paymentStatus}`;
+  let message = `👋 Hello ${invoice.customerName || 'there'},
 
-  if (liveLink) {
-    message += `\nView & Pay: ${liveLink}`;
+Thank you for your business! Your invoice is ready. 🎉
+
+🧾 Invoice #: ${invoiceNo}
+💰 Total: *${grandTotal}*
+✅ Paid: ${amountPaid}
+🔴 Balance Due: *${balanceDue}*`;
+
+  if (invoice.dueDate) {
+    message += `\n📅 Due Date: ${invoice.dueDate}`;
   }
 
-  message += `\n\nThank you for your business!\n*${businessName}*`;
+  if (liveLink) {
+    message += `\n\n🔗 View Invoice & Pay Securely:\n${liveLink}`;
+  }
+
+  message += `\n\nNeed any help? Just reply to this message 💬\n\nThank you,\n*${businessName}*`;
   
   return message;
 }
@@ -106,7 +118,7 @@ export function generateWhatsAppReminderLink(invoice, currencySymbol = '₹', bu
   const businessName = invoice.businessSnapshot?.businessName || businessSettings?.businessName || 'Our Business';
   const balanceDue = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), activeSymbol, activeNumberFormat);
   
-  const liveLink = invoice.publicToken ? `${window.location.origin}/invoice/${invoice.publicToken}` : '';
+  const liveLink = invoice.publicToken ? `${getAppBaseUrl()}/invoice/${invoice.publicToken}` : '';
   
   let text = `Hi ${invoice.customerName || 'there'},\n\nJust a gentle reminder from ${businessName} that Invoice #${invoice.invoiceNumber || 'N/A'} has a pending balance of *${balanceDue}*.\n\n`;
   if (liveLink) {
