@@ -172,17 +172,17 @@ export async function shareOnWhatsApp(customer, invoice, businessSettings = {}) 
 
   const liveLinkUrl = buildPortalUrl(invoice);
 
+  // Always pre-open a blank tab inside the synchronous click gesture so the
+  // browser never treats the later window.open() as an unsolicited popup.
+  const win = window.open('', '_blank');
+
   let pdfUrl;
   if (invoice.pdfUrl || invoice.invoicePdfUrl) {
     pdfUrl = invoice.pdfUrl || invoice.invoicePdfUrl;
   } else {
-    // PDF must be generated + uploaded first – show a loading toast and pre-open
-    // a blank tab inside the click gesture (dodges popup blockers), then point it
-    // at the final wa.me URL once everything is ready.
+    // PDF needs to be generated/uploaded first – show a loading toast while we wait.
     const toastId = toast.loading('Preparing your invoice...', { duration: 60000 });
-    let win = null;
     try {
-      win = window.open('', '_blank');
       pdfUrl = await ensureInvoicePdfUrl(invoice, businessSettings);
     } catch (e) {
       console.warn('[InvoiceShareService] PDF link unavailable, sharing without it:', e);
@@ -190,22 +190,22 @@ export async function shareOnWhatsApp(customer, invoice, businessSettings = {}) 
     } finally {
       toast.dismiss(toastId);
     }
-    const waUrl = buildWaUrl({ phone, message: buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, liveLinkUrl) });
-    if (win && !win.closed) {
-      try {
-        win.location.href = waUrl;
-      } catch {
-        window.open(waUrl, '_blank');
-      }
-    } else {
-      window.open(waUrl, '_blank');
-    }
-    return { message: buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, liveLinkUrl), waUrl, pdfUrl, liveLinkUrl };
   }
 
   const message = buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, liveLinkUrl);
   const waUrl = buildWaUrl({ phone, message });
-  window.open(waUrl, '_blank');
+
+  // Point the pre-opened tab at the final WhatsApp deep-link URL.
+  if (win && !win.closed) {
+    try {
+      win.location.href = waUrl;
+    } catch {
+      window.open(waUrl, '_blank');
+    }
+  } else {
+    window.open(waUrl, '_blank');
+  }
+
   return { message, waUrl, pdfUrl, liveLinkUrl };
 }
 
