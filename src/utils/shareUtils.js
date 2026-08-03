@@ -21,7 +21,7 @@ export function getAppBaseUrl() {
  * @param {string} currencySymbol 
  * @returns {string} Cleaned digits (e.g. "8801700000000" or "919999999999")
  */
-export function cleanPhoneNumber(phone, currencySymbol = '₹') {
+export function cleanPhoneNumber(phone, _currencySymbol = '₹') {
   if (!phone) return '';
   
   // Remove all non-digits
@@ -60,7 +60,6 @@ export function generateInvoiceShareText(invoice, currencySymbol = '₹', busine
   const grandTotal = formatCurrency(invoice.grandTotal, activeSymbol, activeNumberFormat);
   const amountPaid = formatCurrency(invoice.amountPaid || 0, activeSymbol, activeNumberFormat);
   const balanceDue = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), activeSymbol, activeNumberFormat);
-  const paymentStatus = invoice.paymentStatus || 'Pending';
   
   // Construct the secure live link using the canonical portal URL logic
   const liveLink = buildPortalUrl(invoice);
