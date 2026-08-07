@@ -178,8 +178,8 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 section-header">
         <div>
-          <h2 className="text-base font-extrabold text-theme-primary tracking-tight flex items-center gap-2">
-            <Palette className="w-5 h-5 text-theme-accent" />
+          <h2 className="text-sm font-bold text-theme-primary tracking-tight flex items-center gap-2">
+            <Palette className="w-4 h-4 text-theme-accent" />
             PDF Template Studio
           </h2>
           <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">
@@ -196,7 +196,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
           placeholder="Search templates..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 rounded-xl bg-theme-card border border-theme-border-soft text-theme-primary text-sm font-semibold placeholder:text-theme-muted/60 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent/30 transition-all input-premium"
+          className="w-full pl-10 pr-4 py-2 rounded-xl bg-theme-surface border border-theme-border-soft text-theme-primary text-sm font-semibold placeholder:text-theme-muted/60 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent/30 transition-all shadow-sm"
         />
         {searchQuery && (
           <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">
@@ -211,9 +211,9 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
           <button
             key={cat}
             onClick={() => setFilterCategory(cat)}
-            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all chip-premium ${filterCategory === cat
-                ? 'bg-theme-accent text-white shadow-md'
-                : 'bg-theme-app dark:bg-theme-surface text-theme-muted hover:bg-theme-card border border-theme-border-soft'
+            className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all shadow-sm ${filterCategory === cat
+                ? 'bg-theme-accent text-white border-theme-accent'
+                : 'bg-theme-surface text-theme-muted hover:text-theme-primary border border-theme-border-soft'
               }`}
           >
             {cat}
@@ -449,8 +449,10 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                   variants={staggerItem}
                   whileHover={{ y: -6, scale: 1.02 }}
                   onClick={() => { if(!isLocked) { handleApply(tpl.id, tpl.type); setUseAnimId(tpl.id); setTimeout(() => setUseAnimId(null), 1500); } }}
-                  className={`relative rounded-2xl overflow-hidden border-2 transition-all flex flex-col card-premium cursor-pointer ${isPending ? 'border-theme-accent shadow-glow' : 'border-theme-border-soft hover:border-theme-accent/50'
-                    }`}
+                  className={`relative rounded-2xl overflow-hidden border transition-all flex flex-col bg-theme-surface cursor-pointer ${
+                    isActive ? 'border-theme-accent shadow-[0_0_0_1px_var(--accent)]' :
+                    isPending ? 'border-theme-accent/50 border-dashed' : 'border-theme-border-soft hover:border-theme-accent/30 hover:shadow-md hover:-translate-y-1'
+                  }`}
                 >
                   {/* Status Badges */}
                   <div className="absolute top-3 left-3 z-10 flex gap-1">

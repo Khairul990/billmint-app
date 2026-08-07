@@ -115,7 +115,7 @@ const StudioLayout = ({
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-theme-app text-theme-primary">
       {/* Premium Glass Sidebar */}
-      <div className={`${isSidebarCollapsed ? 'w-20' : 'w-72'} transition-all duration-300 bg-theme-surface/30 backdrop-blur-xl border-r border-theme-border-soft flex flex-col shrink-0 z-20 shadow-premium`}>
+      <div className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} transition-all duration-300 bg-theme-surface/30 backdrop-blur-xl border-r border-theme-border-soft flex flex-col shrink-0 z-20 shadow-sm`}>
         <div className="p-4 border-b border-theme-border-soft backdrop-blur-md">
           <div className="flex items-center justify-between mb-4">
             {!isSidebarCollapsed && (
@@ -164,19 +164,19 @@ const StudioLayout = ({
                 key={route.id}
                 onClick={() => setActiveStudio(route.id)}
                 title={isSidebarCollapsed ? route.label : ''}
-                className={`w-full flex items-center p-3 rounded-xl transition-all duration-300 relative overflow-hidden group ${isSidebarCollapsed ? 'justify-center' : ''} ${
+                className={`w-full flex items-center p-2.5 rounded-xl transition-all duration-300 relative overflow-hidden group ${isSidebarCollapsed ? 'justify-center' : ''} ${
                   isActive 
-                    ? 'bg-gradient-to-r from-theme-accent/20 to-transparent border border-theme-accent/30 shadow-lg' 
+                    ? 'bg-theme-accent/5 border border-theme-accent/20 shadow-sm' 
                     : 'border border-transparent hover:bg-white/5 hover:border-white/10'
                 }`}
               >
                 {isActive && (
                   <motion.div 
                     layoutId="activeTabIndicator" 
-                    className="absolute left-0 top-0 bottom-0 w-1 bg-theme-accent rounded-r-full shadow-[0_0_10px_var(--accent)]" 
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-2/3 w-1 bg-theme-accent rounded-r-full shadow-[0_0_8px_var(--accent)]" 
                   />
                 )}
-                <Icon className={`w-5 h-5 z-10 transition-colors ${isSidebarCollapsed ? '' : 'mr-3'} ${isActive ? 'text-theme-accent drop-shadow-md' : 'text-theme-secondary group-hover:text-theme-primary'}`} />
+                <Icon className={`w-[18px] h-[18px] z-10 transition-colors ${isSidebarCollapsed ? '' : 'mr-3'} ${isActive ? 'text-theme-accent' : 'text-theme-secondary group-hover:text-theme-primary'}`} />
                 {!isSidebarCollapsed && (
                   <div className="text-left z-10">
                     <div className={`text-xs font-bold transition-colors ${isActive ? 'text-theme-primary' : 'text-theme-secondary group-hover:text-theme-primary'}`}>{route.label}</div>

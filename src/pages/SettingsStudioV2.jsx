@@ -25,7 +25,7 @@ import {
   Sun, Moon, Undo2, ChevronLeft, ChevronRight, Eye, CheckSquare,
   Clock, AlertTriangle, ArrowLeft, Layers, PaintBucket, Briefcase,
   Hash, ImageIcon as ImageIconLucide, HelpCircle, Monitor,
-  BookOpen, DollarSign, Percent, Printer, Share2, Send
+  BookOpen, DollarSign, Percent, Printer, Share2, Send, Box, PackageSearch
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { adminEngine } from '../services/adminEngine';
@@ -60,6 +60,12 @@ const NAV_GROUPS = [
       { id: 'business', label: 'Business Profile', icon: Building2, description: 'Company details & logo' },
       { id: 'workspace', label: 'Workspace', icon: Globe, description: 'Regional & language' },
       { id: 'theme-engine', label: 'Theme Engine', icon: Palette, description: 'Colors & appearance' }
+    ]
+  },
+  {
+    group: 'Inventory', icon: Box,
+    items: [
+      { id: 'inventory-settings', label: 'Inventory Settings', icon: PackageSearch, description: 'Products, Variants & Tracking' }
     ]
   },
   {
@@ -225,6 +231,12 @@ const SettingsStudioV2 = ({
   const [invoiceItemLabel, setInvoiceItemLabel] = useState('Item');
   const [invoiceCustomColumns, setInvoiceCustomColumns] = useState([]);
 
+  // Inventory states
+  const [enableVariantTracking, setEnableVariantTracking] = useState(false);
+  const [enableWarehouseTracking, setEnableWarehouseTracking] = useState(false);
+  const [enableBatchExpiry, setEnableBatchExpiry] = useState(false);
+  const [enableBarcodeSku, setEnableBarcodeSku] = useState(true);
+
   const [isDragging, setIsDragging] = useState(false);
   const [dbProvider, setDbProvider] = useState(() => localStorage.getItem('billmint_db_provider') || 'firebase');
   const session = authEngine.getAuthSession();
@@ -317,6 +329,13 @@ const SettingsStudioV2 = ({
         setInvoiceItemLabel(settings.invoiceBuilderSettings.itemLabel || 'Item');
         setInvoiceCustomColumns(settings.invoiceBuilderSettings.customColumns || []);
       }
+
+      if (settings.inventorySettings) {
+        setEnableVariantTracking(settings.inventorySettings.enableVariantTracking === true);
+        setEnableWarehouseTracking(settings.inventorySettings.enableWarehouseTracking === true);
+        setEnableBatchExpiry(settings.inventorySettings.enableBatchExpiry === true);
+        setEnableBarcodeSku(settings.inventorySettings.enableBarcodeSku !== false);
+      }
     }
   }, [settings]);
 
@@ -354,7 +373,8 @@ const SettingsStudioV2 = ({
     themeId, darkMode, logoUrl, cornerRadius, shadowIntensity, animationSpeed, fontDensity,
     emailNotifications, whatsappNotifications, dueDateReminders, paymentConfirmation, marketingEmails, securityAlerts,
     cyberPortals, removeBgApiKey, enablePhotoMaker,
-    invoiceItemLabel, invoiceCustomColumns
+    invoiceItemLabel, invoiceCustomColumns,
+    enableVariantTracking, enableWarehouseTracking, enableBatchExpiry, enableBarcodeSku
   ]);
 
   // Theme application
@@ -460,6 +480,12 @@ const SettingsStudioV2 = ({
           enableLivePreview,
           itemLabel: invoiceItemLabel,
           customColumns: invoiceCustomColumns
+        },
+        inventorySettings: {
+          enableVariantTracking,
+          enableWarehouseTracking,
+          enableBatchExpiry,
+          enableBarcodeSku
         }
       };
       onSaveSettings(payload);
@@ -564,6 +590,18 @@ const SettingsStudioV2 = ({
       setEnableDragAndDrop(true);
       setEnableDigitalSignature(true);
       setEnableLivePreview(true);
+    }
+    
+    if (settings.inventorySettings) {
+      setEnableVariantTracking(settings.inventorySettings.enableVariantTracking === true);
+      setEnableWarehouseTracking(settings.inventorySettings.enableWarehouseTracking === true);
+      setEnableBatchExpiry(settings.inventorySettings.enableBatchExpiry === true);
+      setEnableBarcodeSku(settings.inventorySettings.enableBarcodeSku !== false);
+    } else {
+      setEnableVariantTracking(false);
+      setEnableWarehouseTracking(false);
+      setEnableBatchExpiry(false);
+      setEnableBarcodeSku(true);
     }
   };
 
@@ -1095,6 +1133,49 @@ const SettingsStudioV2 = ({
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        );
+
+      case 'inventory-settings':
+        return (
+          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+            <div className="section-header border-b border-gray-200 dark:border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0">
+                  <PackageSearch className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="section-header-title">Inventory Configuration</h2>
+                  <p className="section-header-subtitle">Enable advanced tracking features for products</p>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ToggleSwitch
+                enabled={enableBarcodeSku}
+                onChange={setEnableBarcodeSku}
+                label="SKU & Barcode Fields"
+                description="Show SKU and Barcode inputs for products"
+              />
+              <ToggleSwitch
+                enabled={enableVariantTracking}
+                onChange={setEnableVariantTracking}
+                label="Variant Tracking (Size/Color)"
+                description="Manage product variants like size and color"
+              />
+              <ToggleSwitch
+                enabled={enableWarehouseTracking}
+                onChange={setEnableWarehouseTracking}
+                label="Warehouse & Shelf Tracking"
+                description="Track inventory across shelves and locations"
+              />
+              <ToggleSwitch
+                enabled={enableBatchExpiry}
+                onChange={setEnableBatchExpiry}
+                label="Batch & Expiry Dates"
+                description="Essential for Pharmacy or FMCG businesses"
+              />
             </div>
           </div>
         );

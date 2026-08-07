@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, Save, LayoutTemplate, Plus, Trash2, Copy, FileText, Eye, X, Check, ChevronDown, Palette, Columns, DollarSign } from 'lucide-react';
+import { ArrowLeft, Save, LayoutTemplate, Plus, Trash2, Copy, FileText, Eye, EyeOff, Maximize, X, Check, ChevronDown, Palette, Columns, DollarSign } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,6 +15,8 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
   const [selectedTemplate, setSelectedTemplate] = useState(businessSettings?.selectedPdfTemplate || defaultTemplate);
   const [viewMode, setViewMode] = useState('pdf');
   const [activeTab, setActiveTab] = useState('listing');
+  const [showPreviewPanel, setShowPreviewPanel] = useState(true);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [draftBusinessSettings, setDraftBusinessSettings] = useState(businessSettings || {});
   const [invoiceNumber, setInvoiceNumber] = useState(`INV-${Math.floor(1000 + Math.random() * 9000)}`);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -30,13 +32,32 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
   const [previewQrCode, setPreviewQrCode] = useState(null);
   const [enableQrCode, setEnableQrCode] = useState(true);
   
-  const [invoiceColumns, setInvoiceColumns] = useState([
-    { id: 'sNo', label: 'S.No', visible: true, order: 1 },
-    { id: 'description', label: 'Description', visible: true, order: 2 },
-    { id: 'qty', label: 'Qty', visible: true, order: 3 },
-    { id: 'rate', label: 'Rate', visible: true, order: 4 },
-    { id: 'total', label: 'Total', visible: true, order: 5 }
-  ]);
+  const [invoiceColumns, setInvoiceColumns] = useState(() => {
+    const settingsCols = businessSettings?.invoiceColumns;
+    if (!settingsCols || !Array.isArray(settingsCols)) {
+      return [
+        { id: 'sNo', label: 'S.No', visible: true, order: 1 },
+        { id: 'description', label: 'Description', visible: true, order: 2 },
+        { id: 'qty', label: 'Qty', visible: true, order: 3 },
+        { id: 'rate', label: 'Rate', visible: true, order: 4 },
+        { id: 'total', label: 'Total', visible: true, order: 5 }
+      ];
+    }
+    
+    const colMap = { 'item': 'description', 'qty': 'qty', 'rate': 'rate', 'amount': 'total' };
+    const localCols = [{ id: 'sNo', label: 'S.No', visible: true, order: 0 }];
+    
+    settingsCols.forEach(col => {
+      if (colMap[col.id]) {
+        localCols.push({ id: colMap[col.id], label: col.label, visible: col.visible, order: col.order });
+      } else {
+        // Custom column
+        localCols.push({ id: col.id, label: col.label, visible: col.visible, order: col.order });
+      }
+    });
+    
+    return localCols.sort((a, b) => a.order - b.order);
+  });
 
   const [bankDetails, setBankDetails] = useState({
     bankName: '',
@@ -113,6 +134,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
           name: it.itemService || it.name || '',
           qty: parseFloat(it.qty) || 1,
           price: parseFloat(it.rate) || 0,
+          customFields: it.customFields || {}
         })));
       }
       setDiscountAmount(parseFloat(editingInvoice.discountAmount) || 0);
@@ -152,9 +174,12 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
     setItems([...items, { id: Date.now().toString(), sNo: isNaN(sNo) ? '' : sNo, name: '', qty: 1, price: 0 }]);
   };
 
-  const handleUpdateItem = (id, field, value) => {
+  const handleUpdateItem = (id, field, value, isCustom = false) => {
     setItems(items.map(item => {
       if (item.id === id) {
+        if (isCustom) {
+          return { ...item, customFields: { ...(item.customFields || {}), [field]: value } };
+        }
         return { ...item, [field]: field === 'name' || field === 'sNo' ? value : (parseFloat(value) || 0) };
       }
       return item;
@@ -197,7 +222,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
         qty: i.qty,
         rate: i.price,
         amount: i.qty * i.price,
-        customFields: {}
+        customFields: i.customFields || {}
       })),
       selectedTemplate
     };
@@ -252,21 +277,65 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
       )}
       {getStudioHeaderTarget('studio-header-actions-portal') && createPortal(
         <div className="flex items-center gap-3 pr-4">
-          <button onClick={handleSave} className="btn-premium">
+          <button onClick={() => setShowPreviewModal(true)} className="p-2 rounded-xl border border-theme-border-soft hover:bg-theme-surface transition-colors flex items-center gap-2 text-sm font-bold text-theme-primary bg-theme-card shadow-sm">
+            <Maximize className="w-4 h-4" /> <span className="hidden sm:inline">Popup</span>
+          </button>
+          <button onClick={() => setShowPreviewPanel(!showPreviewPanel)} className="p-2 rounded-xl border border-theme-border-soft hover:bg-theme-surface transition-colors flex items-center gap-2 text-sm font-bold text-theme-primary bg-theme-card shadow-sm">
+            {showPreviewPanel ? <><EyeOff className="w-4 h-4" /> <span className="hidden sm:inline">Hide</span></> : <><Eye className="w-4 h-4" /> <span className="hidden sm:inline">Show Preview</span></>}
+          </button>
+          <button onClick={handleSave} className="btn-premium ml-2">
             <Save className="w-4 h-4" /> Save Invoice
           </button>
         </div>,
         getStudioHeaderTarget('studio-header-actions-portal')
       )}
 
-      <div className="max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6 items-start">
+      {/* PREVIEW MODAL */}
+      <AnimatePresence>
+        {showPreviewModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 md:p-8">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-gray-100 w-full max-w-[1000px] h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative"
+            >
+              <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200">
+                <h3 className="font-black text-lg text-theme-primary">Live Preview</h3>
+                <button onClick={() => setShowPreviewModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-theme-muted">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center items-start bg-gray-100 custom-scrollbar">
+                {(() => {
+                  const SelectedLayout = LivePreviewLayouts[selectedTemplate];
+                  if (SelectedLayout) {
+                    return (
+                      <div className="w-[595px] shrink-0 bg-white shadow-xl h-max" style={{ transformOrigin: 'top center' }}>
+                        <SelectedLayout data={previewData} />
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="w-full max-w-[800px] bg-white shadow-lg rounded-xl overflow-hidden shrink-0 h-max">
+                      <InvoicePreview invoice={{ ...previewData, orderStatus: 'Pending', subtotal: previewData.totals.subtotal, taxAmount: previewData.totals.tax, discountAmount: previewData.totals.discount, grandTotal: previewData.totals.grandTotal }} businessSettings={{ ...previewData.businessSettings, selectedPdfTemplate: selectedTemplate }} isLiveLink={false} />
+                    </div>
+                  );
+                })()}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <div className={`max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 ${showPreviewPanel ? 'xl:grid-cols-[1.2fr_0.8fr]' : 'xl:max-w-6xl xl:mx-auto'} gap-6 items-start transition-all duration-300`}>
+
         {/* LEFT COLUMN: FORM */}
         <div className="glass-panel p-6 shadow-premium-sm min-w-0">
           <div className="flex overflow-x-auto no-scrollbar gap-2 mb-6 p-1 bg-theme-surface/50 border border-theme-border-soft rounded-xl shadow-inner max-w-full">
             {[
               { id: 'listing', label: 'Bill Listing', icon: FileText },
               { id: 'templates', label: 'Templates', icon: Palette },
-              { id: 'columns', label: 'Columns & Tables', icon: Columns },
               { id: 'branding', label: 'Branding & Text', icon: LayoutTemplate },
               { id: 'financial', label: 'Bank & Payments', icon: DollarSign },
             ].map(tab => (
@@ -322,11 +391,11 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                 <table className="w-full text-left border-collapse min-w-[600px]">
                   <thead>
                     <tr>
-                      {invoiceColumns.find(c => c.id === 'sNo')?.visible && <th className="pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft w-16">S.No</th>}
-                      {invoiceColumns.find(c => c.id === 'description')?.visible && <th className="pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft">Description</th>}
-                      {invoiceColumns.find(c => c.id === 'qty')?.visible && <th className="pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft w-24">Qty</th>}
-                      {invoiceColumns.find(c => c.id === 'rate')?.visible && <th className="pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft w-32">Rate</th>}
-                      {invoiceColumns.find(c => c.id === 'total')?.visible && <th className="pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft w-32">Total</th>}
+                      {invoiceColumns.map(c => {
+                        if (!c.visible) return null;
+                        const widthClass = c.id === 'sNo' ? 'w-16' : c.id === 'qty' ? 'w-24' : (c.id === 'rate' || c.id === 'total') ? 'w-32' : '';
+                        return <th key={c.id} className={`pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft ${widthClass}`}>{c.label}</th>;
+                      })}
                       <th className="pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft w-24 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -340,31 +409,40 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                           exit={{ opacity: 0, x: -20 }}
                           className="group border-b border-theme-border-soft/50 last:border-0"
                         >
-                          {invoiceColumns.find(c => c.id === 'sNo')?.visible && (
-                            <td className="py-2 pr-2">
-                              <input type="text" className="input-premium bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface text-center" value={item.sNo} onChange={(e) => handleUpdateItem(item.id, 'sNo', e.target.value)} />
-                            </td>
-                          )}
-                          {invoiceColumns.find(c => c.id === 'description')?.visible && (
-                            <td className="py-2 pr-2">
-                              <input type="text" className="input-premium bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" placeholder="Item description" value={item.name} onChange={(e) => handleUpdateItem(item.id, 'name', e.target.value)} list="products-list" />
-                            </td>
-                          )}
-                          {invoiceColumns.find(c => c.id === 'qty')?.visible && (
-                            <td className="py-2 pr-2">
-                              <input type="number" min="1" className="input-premium bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.qty} onChange={(e) => handleUpdateItem(item.id, 'qty', e.target.value)} />
-                            </td>
-                          )}
-                          {invoiceColumns.find(c => c.id === 'rate')?.visible && (
-                            <td className="py-2 pr-2">
-                              <input type="number" min="0" step="0.01" className="input-premium bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.price} onChange={(e) => handleUpdateItem(item.id, 'price', e.target.value)} />
-                            </td>
-                          )}
-                          {invoiceColumns.find(c => c.id === 'total')?.visible && (
-                            <td className="py-2 font-bold tabular-nums text-theme-primary">
-                              {formatCurrency(item.qty * item.price)}
-                            </td>
-                          )}
+                          {invoiceColumns.map(c => {
+                            if (!c.visible) return null;
+                            if (c.id === 'sNo') return (
+                              <td key={c.id} className="py-2 pr-2">
+                                <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface text-center" value={item.sNo} onChange={(e) => handleUpdateItem(item.id, 'sNo', e.target.value)} />
+                              </td>
+                            );
+                            if (c.id === 'description') return (
+                              <td key={c.id} className="py-2 pr-2">
+                                <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" placeholder="Item description" value={item.name} onChange={(e) => handleUpdateItem(item.id, 'name', e.target.value)} list="products-list" />
+                              </td>
+                            );
+                            if (c.id === 'qty') return (
+                              <td key={c.id} className="py-2 pr-2">
+                                <input type="number" min="1" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.qty} onChange={(e) => handleUpdateItem(item.id, 'qty', e.target.value)} />
+                              </td>
+                            );
+                            if (c.id === 'rate') return (
+                              <td key={c.id} className="py-2 pr-2">
+                                <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.price} onChange={(e) => handleUpdateItem(item.id, 'price', e.target.value)} />
+                              </td>
+                            );
+                            if (c.id === 'total') return (
+                              <td key={c.id} className="py-2 font-bold tabular-nums text-theme-primary">
+                                {formatCurrency(item.qty * item.price)}
+                              </td>
+                            );
+                            // custom column
+                            return (
+                              <td key={c.id} className="py-2 pr-2">
+                                <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.customFields?.[c.id] || ''} onChange={(e) => handleUpdateItem(item.id, c.id, e.target.value, true)} />
+                              </td>
+                            );
+                          })}
                           <td className="py-2 text-right">
                             <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button onClick={() => handleDuplicateItem(item.id)} className="p-1.5 text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 rounded-lg transition-colors"><Copy className="w-4 h-4" /></button>
@@ -412,8 +490,9 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
         </div>
 
         {/* RIGHT COLUMN: LIVE PREVIEW */}
-        <div className="bg-white text-slate-900 rounded-2xl shadow-premium-xl xl:sticky xl:top-24 border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
-          {/* Mock Browser Header */}
+        {showPreviewPanel && (
+          <div className="bg-white text-slate-900 rounded-2xl shadow-premium-xl xl:sticky xl:top-24 border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+            {/* Mock Browser Header */}
           <div className="bg-slate-100 border-b border-slate-200 px-4 py-3 flex items-center gap-2 shrink-0">
             <div className="flex gap-1.5">
               <div className="w-3 h-3 rounded-full bg-red-400"></div>
@@ -454,7 +533,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                 <div className="w-full flex justify-center items-start">
                   {SelectedLayout ? (
                     <div className="w-full flex justify-center pb-8">
-                      <div className="transform origin-top scale-[0.55] sm:scale-[0.7] md:scale-[0.85] xl:scale-[1] transition-transform" style={{ transformOrigin: 'top center' }}>
+                      <div className="transform origin-top scale-[0.55] sm:scale-[0.7] md:scale-[0.85] xl:scale-[0.85] 2xl:scale-[0.95] transition-transform" style={{ transformOrigin: 'top center' }}>
                         <SelectedLayout data={previewData} />
                       </div>
                     </div>
@@ -467,7 +546,8 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
               );
             })()}
           </div>
-        </div>
+          </div>
+        )}
       </div>
       
       <datalist id="products-list">

@@ -19,7 +19,7 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
   const extraCols = builderSettings.customColumns || invoice.settings?.extraColumns || businessSettings?.extraColumns || [];
   
   // Use user's configured columns or fallback to default visibility logic
-  const configuredColumns = invoice.settings?.invoiceColumns || businessSettings?.invoiceColumns;
+  const configuredColumns = invoice.invoiceColumns || invoice.settings?.invoiceColumns || businessSettings?.invoiceColumns;
 
   const col1Label = builderSettings.itemLabel || customCols.col1 || (bType === 'grocery' || bType === 'retail' ? 'Product' : bType === 'repair' ? 'Service' : bType === 'custom' ? 'Item' : categoryWords.items || 'Item Name');
   const col2Label = customCols.col2 || categoryWords.qty || 'Qty';
@@ -48,37 +48,64 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
 
   const columns = [];
 
-  // SN is always first
-  columns.push(baseSchema.sn);
-
   if (configuredColumns) {
     // If studio columns are configured, follow their visibility and order
     const sortedConfig = [...configuredColumns].sort((a, b) => a.order - b.order);
     
+    // The builder UI uses slightly different IDs, map them to the baseSchema
+    const aliasMap = {
+      'sNo': 'sn',
+      'description': 'item', // In the builder, the product name column is called 'description'
+      'total': 'amount'
+    };
+    
     sortedConfig.forEach(conf => {
-      if (conf.visible && baseSchema[conf.id]) {
-        columns.push(baseSchema[conf.id]);
-        
-        // Add description right after item if configured
-        if (conf.id === 'item') {
-          const hasDescription = (invoice.items || []).some(item => item.description || (bType !== 'custom' && item.workType));
-          if (hasDescription) {
-            columns.push(baseSchema.description);
+      if (!conf.visible) return;
+      
+      const schemaId = aliasMap[conf.id] || conf.id;
+      
+      if (baseSchema[schemaId]) {
+        // Inject custom columns before qty or rate
+        if (schemaId === 'qty' || (schemaId === 'rate' && !sortedConfig.find(c => aliasMap[c.id] === 'qty' || c.id === 'qty'))) {
+          // Only push if not already added to prevent duplicates
+          if (!columns.some(c => c.isExtra)) {
+            columns.push(...dynamicExtraCols);
           }
-          // Also insert custom columns after item
-          columns.push(...dynamicExtraCols);
         }
         
+        // Use the base schema but respect the user's custom label
+        columns.push({
+          ...baseSchema[schemaId],
+          label: conf.label || baseSchema[schemaId].label
+        });
+        
         // If unit data exists, inject it after qty
-        if (conf.id === 'qty') {
+        if (schemaId === 'qty') {
           const hasUnit = (invoice.items || []).some(item => item.unit);
-          if (hasUnit) {
+          if (hasUnit && !sortedConfig.find(c => c.id === 'unit')) {
             columns.push(baseSchema.unit);
           }
         }
+      } else {
+        // It's a custom column from configuredColumns
+        columns.push({
+          id: conf.id,
+          label: conf.label,
+          align: 'center',
+          width: '10%',
+          isExtra: true
+        });
       }
     });
+    
+    // Fallback: If custom columns weren't added (e.g. qty/rate missing), append them at the end
+    if (!columns.some(c => c.isExtra)) {
+      columns.push(...dynamicExtraCols);
+    }
   } else {
+    // SN is always first in legacy fallback
+    columns.push(baseSchema.sn);
+    
     // Fallback legacy logic
     columns.push(baseSchema.item);
     
