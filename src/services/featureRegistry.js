@@ -391,5 +391,30 @@ export const FEATURE_REGISTRY = {
     dependencies: [],
     settingsSchema: {},
     version: 1
+  },
+
+  // --- INTERNAL BANK / TREASURY FEATURES ---
+  'bank': {
+    id: 'bank',
+    category: FEATURE_CATEGORIES.TREASURY,
+    name: 'Internal Bank',
+    description: 'Track money in, money out, balance and a running ledger.',
+    defaultEnabled: true,
+    dependencies: [],
+    settingsSchema: {
+      autoPostPayments: true,
+      allowNegativeBalance: false
+    },
+    version: 1
+  },
+  'bank.credit': {
+    id: 'bank.credit',
+    category: FEATURE_CATEGORIES.TREASURY,
+    name: 'Customer Credit',
+    description: 'Manage per-customer credit limits and outstanding liability.',
+    defaultEnabled: true,
+    dependencies: ['bank', 'customer'],
+    settingsSchema: {},
+    version: 1
   }
 };

@@ -26,7 +26,7 @@ const SupportCenter = () => {
         const featureList = await adminEngine.getFeatureRequests();
         setFeatures(featureList);
       }
-    } catch (e) {
+    } catch {
       toast.error('Failed to load platform data');
     } finally {
       setIsLoading(false);
@@ -47,7 +47,7 @@ const SupportCenter = () => {
       } else {
         toast.error('Failed to update ticket');
       }
-    } catch (e) {
+    } catch {
       toast.error('Error updating ticket status');
     }
   };
@@ -62,7 +62,7 @@ const SupportCenter = () => {
       } else {
         toast.error('Failed to update feature request');
       }
-    } catch (e) {
+    } catch {
       toast.error('Error updating feature status');
     }
   };

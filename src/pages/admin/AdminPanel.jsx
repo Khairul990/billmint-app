@@ -8,6 +8,7 @@ import PaymentProofCenter from './PaymentProofCenter';
 import GlobalSettings from './GlobalSettings';
 import OwnerTestLab from './OwnerTestLab';
 import PremiumControlCenter from './PremiumControlCenter';
+import SubscriptionStudio from './SubscriptionStudio';
 import FeatureSwitchCenter from './FeatureSwitchCenter';
 import AppHealthCenter from './AppHealthCenter';
 import SecurityCenter from './SecurityCenter';
@@ -35,6 +36,7 @@ const AdminPanel = ({ currentTab, setCurrentTab }) => {
         {activeAdminTab === 'users' && <UserManager />}
         {activeAdminTab === 'workspaces' && <WorkspaceAdmin />}
         {activeAdminTab === 'premium' && <PremiumControlCenter />}
+        {activeAdminTab === 'subscriptions' && <SubscriptionStudio />}
         {activeAdminTab === 'payments' && <PaymentProofCenter />}
         {activeAdminTab === 'settings' && <GlobalSettings />}
         {activeAdminTab === 'features' && <FeatureSwitchCenter />}

@@ -8,8 +8,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'sans-serif'],
-        display: ['Sora', 'sans-serif'],
+        sans: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['Outfit', 'Inter', 'sans-serif'],
+        numbers: ['"Space Grotesk"', 'JetBrains Mono', 'monospace'],
+        mono: ['"Space Grotesk"', 'monospace'],
       },
       colors: {
         theme: {
@@ -35,6 +37,12 @@ export default {
           success: 'var(--status-success)',
           warning: 'var(--status-warning)',
           danger: 'var(--status-danger)',
+        },
+        brand: {
+          pink: '#C81E5C',
+          gold: '#D4AF7A',
+          cream: '#FAF7F2',
+          charcoal: '#1F1B1D'
         }
       },
       backgroundImage: {
@@ -79,6 +87,7 @@ export default {
         "shimmer": "shimmer 2s infinite linear",
         "skeleton": "skeleton 1.5s ease-in-out infinite",
         "count-up": "countUp 0.6s ease-out",
+        "blob": "blob 10s infinite alternate ease-in-out",
       },
       keyframes: {
         "spin-around": {
@@ -128,6 +137,24 @@ export default {
           "0%": { transform: "translateY(8px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
         },
+        blob: {
+          "0%": {
+            transform: "translate(0px, 0px) scale(1)",
+            borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%"
+          },
+          "33%": {
+            transform: "translate(30px, -50px) scale(1.1)",
+            borderRadius: "30% 60% 70% 40% / 50% 60% 30% 60%"
+          },
+          "66%": {
+            transform: "translate(-20px, 20px) scale(0.9)",
+            borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%"
+          },
+          "100%": {
+            transform: "translate(0px, 0px) scale(1)",
+            borderRadius: "40% 60% 70% 30% / 40% 50% 60% 50%"
+          }
+        }
       }
     },
   },

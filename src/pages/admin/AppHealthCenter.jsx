@@ -28,7 +28,7 @@ const AppHealthCenter = () => {
         let localQueue = 0;
         try {
           await window.indexedDB.databases();
-        } catch(e) {
+        } catch {
           localQueue = 1;
         }
 

@@ -204,6 +204,8 @@ export const generateSmartDemoData = (personaName) => {
       paymentStatus: paymentStatus,
       date: invoiceDate,
       dueDate: new Date(new Date(invoiceDate).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10),
+      createdAt: new Date(invoiceDate).toISOString(),
+      updatedAt: new Date(invoiceDate).toISOString(),
       items,
       isTestData: true
     });

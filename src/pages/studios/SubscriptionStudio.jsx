@@ -578,3 +578,11 @@ const SubscriptionStudio = ({ settings, onUpdate }) => {
 };
 
 export default SubscriptionStudio;
+
+Section1PremiumHero.displayName = 'Section1PremiumHero';
+Section2UsageAnalytics.displayName = 'Section2UsageAnalytics';
+Section3PricingCards.displayName = 'Section3PricingCards';
+Section4FeatureComparison.displayName = 'Section4FeatureComparison';
+Section5PaymentHistory.displayName = 'Section5PaymentHistory';
+Section7UpgradeJourney.displayName = 'Section7UpgradeJourney';
+Section8PremiumBenefits.displayName = 'Section8PremiumBenefits';

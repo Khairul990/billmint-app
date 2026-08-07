@@ -10,6 +10,7 @@ import {
   X, 
   Printer, 
   Download, 
+  ImageDown,
   Edit,
   Mail,
   Copy,
@@ -45,6 +46,7 @@ const Estimates = ({
   onEditInvoice, 
   onDeleteInvoice,
   onDownloadPDF, 
+  onDownloadImage, 
   setCurrentTab,
   businessSettings,
   onSaveInvoice
@@ -389,6 +391,13 @@ const Estimates = ({
                   title="Download PDF"
                 >
                   <Download className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onDownloadImage && onDownloadImage(viewingEstimate)}
+                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all"
+                  title="Download Image (PNG)"
+                >
+                  <ImageDown className="w-4 h-4" />
                 </button>
                 
                 <button

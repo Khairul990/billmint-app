@@ -1,6 +1,27 @@
 /**
  * Haptic and Audio Feedback Utilities for premium experience
  */
+import confetti from 'canvas-confetti';
+
+export const triggerPremiumConfetti = () => {
+  const count = 200;
+  const defaults = {
+    origin: { y: 0.7 },
+    zIndex: 10000,
+  };
+
+  function fire(particleRatio, opts) {
+    confetti(Object.assign({}, defaults, opts, {
+      particleCount: Math.floor(count * particleRatio)
+    }));
+  }
+
+  fire(0.25, { spread: 26, startVelocity: 55 });
+  fire(0.2, { spread: 60 });
+  fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+  fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+  fire(0.1, { spread: 120, startVelocity: 45 });
+};
 
 export const triggerSuccessFeedback = () => {
   // Read settings
@@ -112,7 +133,7 @@ export const triggerDeleteFeedback = () => {
   try {
     const settings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
     if (settings.enableSounds === false) enableSounds = false;
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in feedback.js:', e); }
 
   if (enableSounds) {
     try {
@@ -135,7 +156,7 @@ export const triggerDeleteFeedback = () => {
         osc.start();
         osc.stop(ctx.currentTime + 0.3);
       }
-    } catch (e) {}
+    } catch (e) { console.warn('Ignored error in feedback.js:', e); }
   }
 };
 
@@ -144,7 +165,7 @@ export const triggerPopFeedback = () => {
   try {
     const settings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
     if (settings.enableSounds === false) enableSounds = false;
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in feedback.js:', e); }
 
   if (enableSounds) {
     try {
@@ -168,7 +189,7 @@ export const triggerPopFeedback = () => {
         playTone(600, 'sine', 0.1, now, 0.1);
         playTone(800, 'sine', 0.15, now + 0.05, 0.05);
       }
-    } catch (e) {}
+    } catch (e) { console.warn('Ignored error in feedback.js:', e); }
   }
 };
 
@@ -177,7 +198,7 @@ export const triggerVoiceFeedback = (text = "Payment received successfully") => 
   try {
     const settings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
     if (settings.enableSounds === false) enableSounds = false;
-  } catch (e) {}
+  } catch (e) { console.warn('Ignored error in feedback.js:', e); }
 
   if (enableSounds && typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {

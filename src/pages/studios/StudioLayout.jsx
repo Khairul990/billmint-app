@@ -11,6 +11,7 @@ import { toast } from 'react-hot-toast';
 import { useSettingsHistory } from '../../hooks/useSettingsHistory';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { getStudioHeaderTarget } from '../../utils/portalTargets';
 
 // Placeholder imports for individual studios (to be created)
 const BusinessStudio = React.lazy(() => import('./BusinessStudio'));
@@ -83,7 +84,7 @@ const StudioLayout = ({
     try {
       await onSaveSettings(draftSettings);
       reset(draftSettings);
-    } catch (e) {
+    } catch {
       // App.jsx handles the toast error
     } finally {
       setIsSaving(false);
@@ -195,7 +196,7 @@ const StudioLayout = ({
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-theme-accent-dark/5 rounded-full blur-[120px] pointer-events-none" />
 
         {/* Sticky Header via Portal (Left Side) */}
-        {document.getElementById('studio-header-portal') && createPortal(
+        {getStudioHeaderTarget('studio-header-portal') && createPortal(
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setCurrentTab('dashboard')} 
@@ -222,7 +223,7 @@ const StudioLayout = ({
         )}
 
         {/* Sticky Header via Portal (Right Side Actions) */}
-        {document.getElementById('studio-header-actions-portal') && createPortal(
+        {getStudioHeaderTarget('studio-header-actions-portal') && createPortal(
           <div className="flex items-center gap-3 mr-3 pr-3 border-r border-theme-border-soft">
             <div className="flex items-center gap-1 bg-theme-surface-elevated border border-theme-border-soft rounded-xl p-1 backdrop-blur-md">
               <Button 
@@ -259,7 +260,7 @@ const StudioLayout = ({
               {isSaving ? 'Publishing...' : 'Publish'}
             </Button>
           </div>,
-          document.getElementById('studio-header-actions-portal')
+          getStudioHeaderTarget('studio-header-actions-portal')
         )}
 
         {/* Dynamic Studio Renderer */}

@@ -80,7 +80,7 @@ export const authEngine = {
     try {
       const settingsSnap = await getDoc(doc(db, 'settings', user.uid));
       return settingsSnap.exists() && settingsSnap.data().profileSetupCompleted === true;
-    } catch (e) {
+    } catch {
       return false;
     }
   },

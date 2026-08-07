@@ -28,7 +28,7 @@ const AnnouncementManager = () => {
     try {
       const list = await adminEngine.getAnnouncements();
       setAnnouncements(list);
-    } catch (e) {
+    } catch {
       toast.error('Failed to load announcements');
     } finally {
       setIsLoading(false);
@@ -67,7 +67,7 @@ const AnnouncementManager = () => {
         });
         loadData();
       }
-    } catch (e) {
+    } catch {
       toast.error('Error creating announcement');
     }
   };
@@ -77,7 +77,7 @@ const AnnouncementManager = () => {
       await adminEngine.toggleAnnouncement(id, !currentStatus);
       toast.success(`Announcement ${!currentStatus ? 'activated' : 'deactivated'}`);
       loadData();
-    } catch (e) {
+    } catch {
       toast.error('Error toggling announcement status');
     }
   };

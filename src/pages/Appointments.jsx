@@ -77,17 +77,17 @@ const Appointments = ({ invoices, customers = [], businessSettings, setCurrentTa
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
           if (raw) stored = JSON.parse(raw);
-        } catch (e) { /* ignore */ }
+        } catch { /* ignore */ }
 
         try {
           const { appointmentEngine } = await import('../services/appointmentEngine');
           await appointmentEngine.syncFromCloud();
-        } catch (e) { /* engine not available */ }
+        } catch { /* engine not available */ }
 
         if (!cancelled) {
           setAppointments(Array.isArray(stored) ? stored : []);
         }
-      } catch (e) {
+      } catch {
         if (!cancelled) setAppointments([]);
       } finally {
         if (!cancelled) setLoading(false);
@@ -101,7 +101,7 @@ const Appointments = ({ invoices, customers = [], businessSettings, setCurrentTa
     setAppointments(updated);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch (e) { /* storage full */ }
+    } catch { /* storage full */ }
   };
 
   const getStatusBadge = (status) => {

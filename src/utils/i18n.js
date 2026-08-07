@@ -101,7 +101,7 @@ export const getLanguage = () => {
   try {
     const settings = JSON.parse(localStorage.getItem('billqyro_settings') || '{}');
     return settings.language || 'en';
-  } catch (e) {
+  } catch {
     return 'en';
   }
 };

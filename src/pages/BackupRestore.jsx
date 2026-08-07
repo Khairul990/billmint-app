@@ -77,7 +77,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
       localStorage.setItem('last_export_date', now);
       
       toast.success('Backup exported successfully!');
-    } catch (err) {
+    } catch {
       toast.error('Failed to export backup.');
     } finally {
       setIsExporting(false);
@@ -138,7 +138,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
       toast.success('Data restored successfully!');
       setShowConfirmModal(false);
       setPendingImportData(null);
-    } catch (err) {
+    } catch {
       toast.error('Failed to restore data.');
     } finally {
       setIsImporting(false);

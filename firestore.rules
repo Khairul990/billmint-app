@@ -14,7 +14,7 @@ service cloud.firestore {
 
     // Helper to check if user is Super Admin
     function isAdmin() {
-      return isAuth() && request.auth.token.email == 'khairul2052007@gmail.com';
+      return isAuth() && request.auth.token.superAdmin == true;
     }
 
     // Helper to validate workspace isolation: user can only access their own workspace
@@ -60,6 +60,24 @@ service cloud.firestore {
     }
 
     match /expenses/{userId}/items/{itemId} {
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /bankLedger/{userId}/items/{itemId} {
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /bankCredit/{userId}/items/{itemId} {
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /bankMeta/{userId}/items/{docId} {
       allow read, delete: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
       allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;

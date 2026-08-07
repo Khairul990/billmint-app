@@ -133,6 +133,25 @@ export const invoiceEngine = {
     invoice.paymentStatus = this.calculatePaymentStatus(invoice);
     const result = await dbSaveInvoice(invoice);
     logAudit('payment_recorded', 'invoice', invoice.id, { oldPaid: invoices[idx].paidAmount }, { newPaid: invoice.paidAmount });
+
+    // Additive: mirror payment into Internal Bank ledger (idempotent, failure-isolated).
+    try {
+      const { bankEngine } = await import('./bankEngine');
+      await bankEngine.autoPostPayment({
+        id: paymentEntry.id,
+        amount: paymentEntry.amount,
+        method: paymentEntry.method,
+        date: paymentEntry.date,
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        customerId: invoice.customer?.id || invoice.customerId || null,
+        customerName: invoice.customer?.name || invoice.customerName || '',
+        note: paymentEntry.note
+      });
+    } catch (e) {
+      console.warn('[BANK] auto-post payment skipped (non-blocking):', e);
+    }
+
     return result;
   },
 

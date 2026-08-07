@@ -53,6 +53,14 @@ import {
   saveGlobalRevenueSettings
 } from './platformRevenueService';
 
+const memoryCache = {
+  revenueStates: { data: null, time: 0 },
+  paymentProofs: { data: null, time: 0 },
+  usersList: { data: null, time: 0 },
+  totalStats: { data: null, time: 0 }
+};
+const CACHE_TTL = 30000; // 30 seconds
+
 export const adminEngine = {
   async getAnalytics() {
     const [invoices, customers, products, expenses] = await Promise.all([
@@ -159,11 +167,21 @@ export const adminEngine = {
   },
 
   async getRevenueStates() {
-    return getAdminPlatformRevenueStates();
+    if (memoryCache.revenueStates.data && Date.now() - memoryCache.revenueStates.time < CACHE_TTL) {
+      return memoryCache.revenueStates.data;
+    }
+    const data = await getAdminPlatformRevenueStates();
+    memoryCache.revenueStates = { data, time: Date.now() };
+    return data;
   },
 
   async getPaymentProofs() {
-    return getAdminAllPaymentProofs();
+    if (memoryCache.paymentProofs.data && Date.now() - memoryCache.paymentProofs.time < CACHE_TTL) {
+      return memoryCache.paymentProofs.data;
+    }
+    const data = await getAdminAllPaymentProofs();
+    memoryCache.paymentProofs = { data, time: Date.now() };
+    return data;
   },
 
   async getSystemHealth() {
@@ -176,11 +194,21 @@ export const adminEngine = {
   },
 
   async getUsersList() {
-    return dbGetAdminUsersList();
+    if (memoryCache.usersList.data && Date.now() - memoryCache.usersList.time < CACHE_TTL) {
+      return memoryCache.usersList.data;
+    }
+    const data = await dbGetAdminUsersList();
+    memoryCache.usersList = { data, time: Date.now() };
+    return data;
   },
 
   async getTotalStats() {
-    return dbGetAdminTotalStats();
+    if (memoryCache.totalStats.data && Date.now() - memoryCache.totalStats.time < CACHE_TTL) {
+      return memoryCache.totalStats.data;
+    }
+    const data = await dbGetAdminTotalStats();
+    memoryCache.totalStats = { data, time: Date.now() };
+    return data;
   },
 
   async getGlobalSettings() {
@@ -243,9 +271,7 @@ export const adminEngine = {
   async migrateGlobalToScopedStorage() { return dbMigrateGlobalToScopedStorage(); },
 
   isAdminUser(session) {
-    const adminEmail = 'khairul2052007@gmail.com';
     if (!session) return false;
-    const email = session.userEmail || session.email || '';
-    return email.toLowerCase() === adminEmail.toLowerCase();
+    return session.isSuperAdmin === true;
   }
 };

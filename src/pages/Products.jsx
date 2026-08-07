@@ -106,7 +106,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
     try {
       await onSaveProduct(payload);
       setIsModalOpen(false);
-    } catch (err) {
+    } catch {
       toast.error('Failed to save product');
     }
   };

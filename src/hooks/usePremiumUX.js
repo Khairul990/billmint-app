@@ -47,7 +47,7 @@ export const usePremiumUX = () => {
         // Two quick, sharp vibrations
         navigator.vibrate([50, 50, 50]);
       }
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
   }, []);
 
   const vibrateError = useCallback(() => {
@@ -59,7 +59,7 @@ export const usePremiumUX = () => {
         // One long, heavy vibration
         navigator.vibrate(200);
       }
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
   }, []);
 
   const triggerSuccess = useCallback(() => {

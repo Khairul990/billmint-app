@@ -1209,6 +1209,7 @@ const Dashboard = ({
                     trend={parseFloat(revenueGrowth) > 0 ? `+${revenueGrowth}%` : `${revenueGrowth}%`}
                     trendUp={parseFloat(revenueGrowth) >= 0}
                     subtitle="Revenue across all invoices"
+                    isPremium={subscription?.planStatus === 'premium' || (subscription?.planId && subscription.planId.toLowerCase() !== 'free')}
                   />
                   <StatCard
                     title="Total Invoices"
@@ -1217,6 +1218,7 @@ const Dashboard = ({
                     trend={invoiceCountGrowth}
                     trendUp={!invoiceCountGrowth.startsWith('-')}
                     subtitle="Total invoices generated"
+                    isPremium={subscription?.planStatus === 'premium' || (subscription?.planId && subscription.planId.toLowerCase() !== 'free')}
                   />
                   <StatCard
                     title="Pending Due"
@@ -1225,6 +1227,7 @@ const Dashboard = ({
                     trend={pendingDueTrend}
                     trendUp={false}
                     subtitle="Outstanding collections"
+                    isPremium={subscription?.planStatus === 'premium' || (subscription?.planId && subscription.planId.toLowerCase() !== 'free')}
                   />
                   <StatCard
                     title="Active Customers"
@@ -1233,6 +1236,7 @@ const Dashboard = ({
                     trend={customerGrowth}
                     trendUp={!customerGrowth.startsWith('-')}
                     subtitle="Registered customers"
+                    isPremium={subscription?.planStatus === 'premium' || (subscription?.planId && subscription.planId.toLowerCase() !== 'free')}
                   />
                 </>
               )}

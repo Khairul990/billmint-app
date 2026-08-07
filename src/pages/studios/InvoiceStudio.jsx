@@ -6,6 +6,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import PdfTemplateStudio from '../PdfTemplateStudio';
 import InvoicePreview from '../../components/InvoicePreview';
+import { LivePreviewLayouts } from '../../components/invoice-templates/layouts/LivePreviewLayouts';
 import { getPortalLabelByType } from '../../config/businessPresets';
 
 const DEFAULT_COLUMNS = [
@@ -484,22 +485,42 @@ const InvoiceStudio = ({ settings, onUpdate, subscription }) => {
                 <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden border-[8px] border-slate-900 mx-auto relative h-[700px]">
                   {/* Notch */}
                   <div className="absolute top-0 inset-x-0 h-6 bg-slate-900 rounded-b-3xl w-40 mx-auto z-50"></div>
-                  <div className="h-full overflow-y-auto custom-scrollbar pb-12 w-[140%] origin-top-left scale-[0.714]">
-                    <InvoicePreview 
-                      invoice={DUMMY_INVOICE}
-                      businessSettings={{ ...previewBusinessSettings, showQrInPreview: true }}
-                      isLiveLink={true}
-                    />
-                  </div>
+                                    {(() => {
+                    const tId = previewBusinessSettings.selectedPdfTemplate || 'classic';
+                    const Layout = LivePreviewLayouts[tId];
+                    if (Layout) {
+                      return (
+                        <div className="h-full overflow-y-auto custom-scrollbar pb-24 w-[595px] origin-top-left scale-[0.7]">
+                          <Layout data={{ invoiceNumber: DUMMY_INVOICE.invoiceNumber, date: DUMMY_INVOICE.date, customerName: DUMMY_INVOICE.customerName, items: DUMMY_INVOICE.items, totals: { subtotal: DUMMY_INVOICE.subtotal, tax: DUMMY_INVOICE.taxAmount, discount: DUMMY_INVOICE.discountAmount, grandTotal: DUMMY_INVOICE.grandTotal }, businessSettings: previewBusinessSettings, invoiceColumns: previewBusinessSettings.invoiceColumns, qrCodeBase64: null }} />
+                        </div>
+                      );
+                    }
+                    return (
+                      <div className="h-full overflow-y-auto custom-scrollbar pb-24 w-[800px] origin-top-left scale-[0.43]">
+                        <InvoicePreview invoice={DUMMY_INVOICE} businessSettings={{ ...previewBusinessSettings, showQrInPreview: true }} isLiveLink={true} />
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             ) : (
-              <div className={`transform origin-top w-[210mm] shadow-lg rounded-sm overflow-hidden bg-white shrink-0 h-max ${viewMode === 'print' ? 'scale-[0.5]' : 'scale-[0.55]'}`}>
-                <InvoicePreview 
-                  invoice={DUMMY_INVOICE}
-                  businessSettings={previewBusinessSettings}
-                  isLiveLink={false}
-                />
+                            <div className="w-full overflow-hidden flex justify-center bg-transparent">
+                {(() => {
+                  const tId = previewBusinessSettings.selectedPdfTemplate || 'classic';
+                  const Layout = LivePreviewLayouts[tId];
+                  if (Layout) {
+                    return (
+                      <div className="transform origin-top scale-[0.8] lg:scale-[0.85] xl:scale-[0.95] print-only-preview" style={{ marginBottom: '-10%' }}>
+                        <Layout data={{ invoiceNumber: DUMMY_INVOICE.invoiceNumber, date: DUMMY_INVOICE.date, customerName: DUMMY_INVOICE.customerName, items: DUMMY_INVOICE.items, totals: { subtotal: DUMMY_INVOICE.subtotal, tax: DUMMY_INVOICE.taxAmount, discount: DUMMY_INVOICE.discountAmount, grandTotal: DUMMY_INVOICE.grandTotal }, businessSettings: previewBusinessSettings, invoiceColumns: previewBusinessSettings.invoiceColumns, qrCodeBase64: null }} />
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className={`w-[800px] transform origin-top ${viewMode === 'print' ? 'scale-[0.5]' : 'scale-[0.55]'} bg-white print-only-preview`}>
+                      <InvoicePreview invoice={DUMMY_INVOICE} businessSettings={previewBusinessSettings} isLiveLink={false} />
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>

@@ -244,7 +244,7 @@ const ItemsSelectionStep = ({ products = [] }) => {
       });
       const result = safeEval(evaluated);
       return isNaN(result) ? 0 : result;
-    } catch (e) {
+    } catch {
       return 0;
     }
   };
@@ -276,7 +276,7 @@ const ItemsSelectionStep = ({ products = [] }) => {
     const generateId = () => {
       try {
         return crypto.randomUUID();
-      } catch (e) {
+      } catch {
         return `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       }
     };

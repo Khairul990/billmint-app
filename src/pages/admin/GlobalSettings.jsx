@@ -21,6 +21,9 @@ const GlobalSettings = () => {
   const [lockBehavior, setLockBehavior] = useState('bill_creation');
   const [upiId, setUpiId] = useState('khairul2052007@okaxis');
   const [payeeName, setPayeeName] = useState('BillQyro Platform');
+  const [defaultTheme, setDefaultTheme] = useState('obsidian-gold');
+  const [defaultTemplate, setDefaultTemplate] = useState('standard');
+  const [defaultCurrency, setDefaultCurrency] = useState('₹');
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -37,7 +40,10 @@ const GlobalSettings = () => {
         setLockBehavior(s.lockBehavior ?? 'bill_creation');
         setUpiId(s.upiId || 'khairul2052007@okaxis');
         setPayeeName(s.payeeName || 'BillQyro Platform');
-      } catch (e) {
+        setDefaultTheme(s.defaultTheme || 'obsidian-gold');
+        setDefaultTemplate(s.defaultTemplate || 'standard');
+        setDefaultCurrency(s.defaultCurrency || '₹');
+      } catch {
         toast.error('Failed to load global revenue settings');
       } finally {
         setLoading(false);
@@ -60,7 +66,10 @@ const GlobalSettings = () => {
       maxUnpaidBillCount: parseInt(maxUnpaidBillCount) || 20,
       lockBehavior,
       upiId,
-      payeeName
+      payeeName,
+      defaultTheme,
+      defaultTemplate,
+      defaultCurrency
     };
 
     try {
@@ -251,6 +260,56 @@ const GlobalSettings = () => {
               <option value="bill_creation">Lock New Bill Creation Only</option>
               <option value="none">No Lock (Warning Only)</option>
             </select>
+          </div>
+        </div>
+
+        {/* Platform Defaults */}
+        <div className="bg-theme-surface-elevated p-6 rounded-2xl border border-theme-border-soft lg:col-span-2 space-y-6">
+          <div className="border-b border-theme-border-soft pb-4 mb-0">
+            <h3 className="text-lg font-bold text-theme-primary flex items-center">
+              <SettingsIcon className="w-5 h-5 mr-2 text-theme-accent" /> Platform Defaults (New Users)
+            </h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+              <label className="block text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Default Theme</label>
+              <select
+                value={defaultTheme}
+                onChange={(e) => setDefaultTheme(e.target.value)}
+                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent cursor-pointer text-sm font-bold"
+              >
+                <option value="obsidian-gold">Obsidian Gold (Luxury)</option>
+                <option value="arctic-teal">Arctic Teal (Corporate)</option>
+                <option value="rose-gold">Rose Gold (Premium)</option>
+                <option value="neon-cyber">Neon Cyber (Modern)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Default Template</label>
+              <select
+                value={defaultTemplate}
+                onChange={(e) => setDefaultTemplate(e.target.value)}
+                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent cursor-pointer text-sm font-bold"
+              >
+                <option value="standard">Standard Professional</option>
+                <option value="modern">Modern Minimal</option>
+                <option value="classic">Classic Corporate</option>
+                <option value="elegant">Elegant Serif</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Default Currency Symbol</label>
+              <input 
+                type="text" 
+                value={defaultCurrency}
+                onChange={(e) => setDefaultCurrency(e.target.value)}
+                placeholder="e.g. ₹, $, €"
+                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all text-sm font-numbers"
+              />
+            </div>
           </div>
         </div>
 

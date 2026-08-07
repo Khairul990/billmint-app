@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Trash2, AlertTriangle, Lock } from 'lucide-react';
+import { Trash2, AlertTriangle, Lock, ServerCrash } from 'lucide-react';
 import ClassicLoader from './components/ClassicLoader';
 import PostLoginWelcome from './components/PostLoginWelcome';
 import Layout from './components/Layout';
@@ -35,7 +35,7 @@ import { backupEngine } from './services/backupEngine';
 import { subscriptionEngine } from './services/subscriptionEngine';
 import { paymentEngine } from './services/paymentEngine';
 
-import { downloadInvoicePDF } from './utils/pdfUtils';
+import { downloadInvoicePDF, downloadInvoiceImage } from './utils/pdfUtils';
 import { auth, firebaseReady } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { triggerSuccessFeedback, triggerPaymentSuccessFeedback, triggerPopFeedback, triggerDeleteFeedback, triggerVoiceFeedback } from './utils/feedback';
@@ -80,6 +80,7 @@ const DataDeletion = React.lazy(() => import('./pages/DataDeletion'));
 const Support = React.lazy(() => import('./pages/Support'));
 const SystemHealth = React.lazy(() => import('./pages/SystemHealth'));
 const AuditLogs = React.lazy(() => import('./pages/AuditLogs'));
+const InternalBank = React.lazy(() => import('./pages/InternalBank'));
 const WorkspaceManager = React.lazy(() => import('./pages/WorkspaceManager'));
 const Appointments = React.lazy(() => import('./pages/Appointments'));
 const Orders = React.lazy(() => import('./pages/Orders'));
@@ -162,13 +163,8 @@ const AdminRouteGuard = ({ setCurrentTab, children }) => {
     localStorage.getItem('billqyro_admin_unlocked') === 'true'
   );
 
-  useEffect(() => {
-    // Only block access if the user is not an admin and hasn't unlocked the admin panel via PIN
-    if (!adminEngine.isAdminUser(session) && !isUnlocked) {
-      toast.error('Unauthorized access. Owner privileges required.');
-      setCurrentTab('dashboard');
-    }
-  }, [session, setCurrentTab, isUnlocked]);
+  // The user is prompted for a PIN if they are not a superadmin.
+  // The AdminPINLogin handles the lockout and cancel logic.
 
   // If not admin and not unlocked, show PIN login
   if (!adminEngine.isAdminUser(session) && !isUnlocked) {
@@ -402,7 +398,7 @@ function App() {
 
   const [expenses, setExpenses] = useState([]);
   const [students, setStudents] = useState([]);
-  const [subscription, setSubscription] = useState(() => subscriptionEngine.getSubscriptionDetails());
+  const [subscription, setSubscription] = useState(() => subscriptionEngine.getSubscriptionDetailsSync({}));
   const [revenueStatus, setRevenueStatus] = useState({
     totalBillsCreated: 0,
     freeBillsUsed: 0,
@@ -421,7 +417,9 @@ function App() {
       const session = authEngine.getAuthSession();
       const userId = session?.uid || authEngine.getRealUserId() || 'local-user';
       try {
-        const status = await paymentEngine.getUserRevenueState(userId, invoices, subscription);
+        const subDetails = await subscriptionEngine.getSubscriptionDetails();
+        setSubscription(subDetails);
+        const status = await paymentEngine.getUserRevenueState(userId, invoices, subDetails);
         setRevenueStatus(status);
       } catch (e) {
         console.error('Failed to load user revenue status:', e);
@@ -557,7 +555,8 @@ function App() {
             setSettings(latestSettings);
           }
         }
-        setSubscription(subscriptionEngine.getSubscriptionDetails());
+        const updatedSub = await subscriptionEngine.getSubscriptionDetails();
+        setSubscription(updatedSub);
       } catch (err) {
         console.error("Error reloading data on sync:", err);
       }
@@ -574,6 +573,9 @@ function App() {
       if (col === 'customers') setCustomers(await customerEngine.getCustomers() || []);
       if (col === 'products') setProducts(await productEngine.getProducts() || []);
       if (col === 'students') setStudents(await customerEngine.getCustomers() || []);
+      if (col === 'bankLedger' || col === 'bankCredit') {
+        window.dispatchEvent(new CustomEvent('billqyro_bank_updated'));
+      }
     };
     const handleSyncStatus = (e) => {
       if (e.detail) setSyncStatus(e.detail);
@@ -657,12 +659,14 @@ function App() {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         // Firebase auth state updated
         if (user) {
+          const tokenResult = await user.getIdTokenResult();
           const session = authEngine.getAuthSession();
           const newSession = {
             timestamp: Date.now(),
             token: 'billqyro-secure-session',
             userEmail: user.email || '',
-            uid: user.uid
+            uid: user.uid,
+            isSuperAdmin: !!tokenResult.claims.superAdmin
           };
           localStorage.setItem('billqyro_auth', JSON.stringify(newSession));
           setIsAuthenticated(true);
@@ -708,6 +712,11 @@ function App() {
         try {
           const synced = await invoiceEngine.syncFromCloud();
           
+          // Additive: pull + merge Internal Bank data (fire-and-forget, failure-isolated).
+          import('./services/bankEngine').then(({ bankEngine }) => bankEngine.syncFromCloud(true)).catch((e) => {
+            console.warn('[BANK SYNC] Startup pull skipped:', e);
+          });
+          
           if (currentUserId !== authEngine.getAuthSession()?.uid) {
             console.warn('[Session Guard] Stale sync aborted due to session change');
             return;
@@ -740,7 +749,7 @@ function App() {
                 }
               }
             }
-          } catch (e) { console.warn('Could not fetch admin settings on boot.'); }
+          } catch { console.warn('Could not fetch admin settings on boot.'); }
 
           try {
             const ann = await adminEngine.getActiveAnnouncement();
@@ -749,7 +758,7 @@ function App() {
             } else {
               setGlobalMaintenanceMode(false);
             }
-          } catch (e) { console.warn('Could not fetch active announcement on boot.'); }
+          } catch { console.warn('Could not fetch active announcement on boot.'); }
 
           // Enable real-time multi-device sync via new Sync Engine
           import('./services/syncEngine').then(({ startRealTimeSync }) => {
@@ -760,7 +769,7 @@ function App() {
               });
             }
           });
-        } catch (e) {
+        } catch {
           sendEmpireError({ errorType: "sync_failed", message: "Could not sync Firestore on startup", severity: "Medium" });
           console.warn('Could not sync Firestore on startup. Falling back to LocalStorage.', e);
         } finally {
@@ -818,7 +827,7 @@ function App() {
     setExpenses([]);
     setPendingPayments([]);
     setStudents([]);
-    setSubscription(subscriptionEngine.getSubscriptionDetails());
+    subscriptionEngine.getSubscriptionDetails().then(setSubscription);
     
     // RESET GLOBAL DOM THEME
     window.dispatchEvent(new CustomEvent('billqyro:settings-updated', { detail: {} }));
@@ -832,19 +841,7 @@ function App() {
 
   // Invoices
   const handleSaveInvoice = async (payload, saveCustomerAsNew = false, isSilent = false) => {
-    if (isDemoSessionActive) {
-      if (!payload.id) {
-        payload.id = 'demo-inv-' + Date.now();
-        if (!payload.invoiceNumber) payload.invoiceNumber = 'DEMO-INV-' + (1000 + demoInvoices.length);
-      }
-      saveDemoInvoice(payload);
-      if (!isSilent) {
-        toast.success('Saved to Demo Session');
-        setEditingInvoice(null);
-        setCurrentTab('dashboard'); // Redirect to dashboard to see real-time updates!
-      }
-      return;
-    }
+    const targetInvoices = isDemoSessionActive ? demoInvoices : invoices;
 
     // Flatten nested InvoiceContext state if present
     if (payload.customer && typeof payload.customer === 'object') {
@@ -858,7 +855,7 @@ function App() {
 
     // CRITICAL FIX: Merge payload with existing invoice to preserve fields like createdAt, publicToken, paymentHistory that sparse payloads drop
     if (payload.id) {
-      const existing = invoices.find(inv => inv.id === payload.id);
+      const existing = targetInvoices.find(inv => inv.id === payload.id);
       if (existing) {
         payload = { ...existing, ...payload };
       }
@@ -910,7 +907,7 @@ function App() {
       }
     }
 
-    const isNew = !payload.id || !invoices.some(inv => inv.id === payload.id);
+    const isNew = !payload.id || !targetInvoices.some(inv => inv.id === payload.id);
     if (isNew && revenueStatus.lockStatus === 'locked') {
       toast.error('New invoice creation is locked. Please clear your platform dues.');
       return;
@@ -929,7 +926,7 @@ function App() {
     const updatedProductIds = new Set();
 
     // 1. If editing an existing invoice, reverse previous stock deduction
-    const oldInvoice = payload.id ? invoices.find(inv => inv.id === payload.id) : null;
+    const oldInvoice = payload.id ? targetInvoices.find(inv => inv.id === payload.id) : null;
     if (oldInvoice && oldInvoice.items) {
       for (const oldItem of oldInvoice.items) {
         const itemName = (oldItem.description || oldItem.productName || oldItem.serviceName || oldItem.itemService || '').trim().toLowerCase();
@@ -1008,6 +1005,32 @@ function App() {
       }
     }
 
+    // --- Save Logic ---
+    if (isDemoSessionActive) {
+      if (!payload.id) {
+        payload.id = 'demo-inv-' + Date.now();
+        if (!payload.invoiceNumber) payload.invoiceNumber = 'DEMO-INV-' + (1000 + demoInvoices.length);
+        payload.createdAt = new Date().toISOString();
+        payload.updatedAt = payload.createdAt;
+      } else {
+        payload.updatedAt = new Date().toISOString();
+      }
+      
+      saveDemoInvoice(payload);
+      
+      if (!isSilent) {
+        toast.success('Saved to Demo Session');
+        setEditingInvoice(null);
+        setCurrentTab('dashboard'); 
+        
+        // Trigger Confetti in Sandbox!
+        if (subscription?.planStatus === 'premium' || (subscription?.planId && subscription.planId.toLowerCase() !== 'free')) {
+          import('./utils/feedback').then(({ triggerPremiumConfetti }) => triggerPremiumConfetti()).catch(console.error);
+        }
+      }
+      return payload;
+    }
+
     // Fire and forget saveInvoice for Layer 2 persistence
     invoiceEngine.saveInvoice(payload).then(({ updatedInvoices, firebaseStatus }) => {
       setInvoices(updatedInvoices);
@@ -1025,6 +1048,13 @@ function App() {
           page: "create-invoice",
           metadata: { feature: "invoice", action: "created", privateDataIncluded: false }
         });
+
+        // Trigger Premium Celebration Confetti
+        if (subscription?.planStatus === 'premium' || (subscription?.planId && subscription.planId.toLowerCase() !== 'free')) {
+          import('./utils/feedback').then(({ triggerPremiumConfetti }) => {
+            triggerPremiumConfetti();
+          }).catch(console.error);
+        }
 
         // Trigger haptic & audio feedback
         if (payload.paymentStatus === 'Paid' && (!oldInvoice || oldInvoice.paymentStatus !== 'Paid')) {
@@ -1386,6 +1416,35 @@ function App() {
       });
   };
 
+  // --- IMAGE GENERATOR WORKER ---
+  const handleDownloadImage = (invoice) => {
+    if (!settings || !settings.businessName) {
+      toast.error('⚠️ Business settings are incomplete. Please complete your business settings first.');
+      setCurrentTab('settings');
+      return;
+    }
+    downloadInvoiceImage(invoice, settings)
+      .then((ok) => {
+        if (ok) {
+          sendEmpireEvent({
+            eventType: "image_downloaded",
+            message: "Invoice image generated",
+            page: "invoice",
+            metadata: { feature: "image", action: "downloaded", privateDataIncluded: false }
+          });
+        }
+      })
+      .catch((err) => {
+        sendEmpireError({
+          errorType: "image_failed",
+          message: err?.toString() || "Image generation failed",
+          severity: "Medium",
+          page: "invoice"
+        });
+        toast.error(`Image Error: ${err?.toString() || "Unknown error generating image"}`);
+      });
+  };
+
   // HARD DEMO MODE ISOLATION SWITCH
   const activeInvoices = isDemoSessionActive ? demoInvoices : invoices;
   const activeCustomers = isDemoSessionActive ? demoCustomers : customers;
@@ -1410,7 +1469,7 @@ function App() {
     'invoices': 'invoice', 'create-invoice': 'invoice', 'estimates': 'invoice',
     'customers': 'customer', 'patients': 'customer', 'students': 'customer', 'clients': 'customer',
     'due-ledger': 'treasury', 'pending-payments': 'payment', 'reports': 'reports',
-    'expenses': 'treasury.moneyOut', 'products': 'product', 'orders': 'product',
+    'expenses': 'treasury.moneyOut', 'products': 'product', 'orders': 'product', 'bank': 'bank',
     'appointments': 'customer', 'delivery': 'product', 'measurements': 'product',
     'designBook': 'product', 'devices': 'product', 'serviceJobs': 'product', 'projects': 'product'
   };
@@ -1516,6 +1575,14 @@ function App() {
             businessSettings={activeSettings}
           />
         );
+      case 'bank':
+        return (
+          <InternalBank
+            customers={activeCustomers}
+            invoices={activeInvoices}
+            businessSettings={activeSettings}
+          />
+        );
       case 'reports':
         return (
           <Reports 
@@ -1532,6 +1599,7 @@ function App() {
             onEditInvoice={setEditingInvoice}
             onDeleteInvoice={handleDeleteInvoice}
             onDownloadPDF={handleDownloadPDF}
+            onDownloadImage={handleDownloadImage}
             setCurrentTab={setCurrentTab}
             businessSettings={activeSettings}
           />
@@ -1544,6 +1612,7 @@ function App() {
             onEditInvoice={setEditingInvoice}
             onDeleteInvoice={handleDeleteInvoice}
             onDownloadPDF={handleDownloadPDF}
+            onDownloadImage={handleDownloadImage}
             setCurrentTab={setCurrentTab}
             businessSettings={activeSettings}
             onSaveInvoice={handleSaveInvoice}
@@ -1597,6 +1666,7 @@ function App() {
               setCurrentTab('dashboard');
             }}
             onQuickBillOpen={() => setIsQuickBillOpen(true)}
+            subscription={subscription}
           />
         );
       case 'guide':
@@ -1987,6 +2057,24 @@ function App() {
   }
 
   // Root level maintenance mode interceptor removed to allow access to dashboard, invoices view, and backups.
+  // Wait, the owner requested global maintenance block for NON-admins!
+  const isMaintenanceMode = localStorage.getItem('billqyro_global_maintenance') === 'true';
+  const isAdminSession = adminEngine.isAdminUser(authEngine.getAuthSession()) || localStorage.getItem('billqyro_admin_unlocked') === 'true';
+
+  if (isMaintenanceMode && !isAdminSession) {
+    return (
+      <div className="h-screen w-full bg-theme-main flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-theme-danger/5 pointer-events-none" />
+        <div className="p-4 rounded-full bg-theme-danger/20 mb-6">
+          <ServerCrash className="w-12 h-12 text-theme-danger" />
+        </div>
+        <h1 className="text-4xl font-black text-theme-primary mb-4 tracking-tight">System Under Maintenance</h1>
+        <p className="text-theme-secondary mb-8 max-w-md mx-auto">
+          We are currently upgrading our servers to bring you a better experience. Please check back shortly.
+        </p>
+      </div>
+    );
+  }
 
   const path = window.location.pathname;
   const showAdminRoute = path === '/km-admin' || currentTab === 'admin-panel';

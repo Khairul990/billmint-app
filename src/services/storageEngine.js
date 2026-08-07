@@ -23,7 +23,7 @@ class StorageEngine {
         // Save base64 string to a mock map or local storage
         try {
           localStorage.setItem(`storage_${workspaceId}_${path}`, reader.result);
-        } catch (e) {
+        } catch {
           console.warn('Local storage full');
         }
         resolve({

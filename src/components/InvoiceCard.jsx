@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FileText, Eye, Edit2, Trash2, Download, Share2, Mail, Copy, Check, Link, RefreshCw } from 'lucide-react';
+import { FileText, Eye, Edit2, Trash2, Download, ImageDown, Share2, Mail, Copy, Check, Link, RefreshCw } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
 import {
@@ -36,8 +36,9 @@ const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
  * @param {Function} onEdit - Edit callback
  * @param {Function} onDelete - Delete callback
  * @param {Function} onDownload - Download PDF callback
+ * @param {Function} onDownloadImage - Download Image (PNG) callback
  */
-const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, compact = false, onView, onEdit, onDelete, onDownload, onRestore, onDownloadBackup, isDeleted }) => {
+const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, compact = false, onView, onEdit, onDelete, onDownload, onDownloadImage, onRestore, onDownloadBackup, isDeleted }) => {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const menuRef = useRef(null);
   const portalLabel = getPortalLabelByType(businessSettings?.businessType);
@@ -238,6 +239,15 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                 >
                   <Download className="w-4 h-4" />
                 </button>
+                {onDownloadImage && (
+                  <button
+                    onClick={() => onDownloadImage(invoice)}
+                    title="Download Image (PNG)"
+                    className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/30 rounded-xl transition-all cursor-pointer"
+                  >
+                    <ImageDown className="w-4 h-4" />
+                  </button>
+                )}
 
                 <button
                   onClick={async () => {

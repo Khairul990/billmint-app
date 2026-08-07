@@ -468,7 +468,7 @@ const SettingsStudioV2 = ({
       setLastSaved(new Date());
       toast.success('Settings saved successfully');
       setTimeout(() => setSaveState('idle'), 2000);
-    } catch (err) {
+    } catch {
       setSaveState('error');
       toast.error('Failed to save settings');
     }

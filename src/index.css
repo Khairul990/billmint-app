@@ -1,6 +1,67 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@300;400;500;600;700;800&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@300;400;500;600;700;800&display=swap');
 @import './premium-design.css';
+
+/* ================= ANIMATIONS FROM REDESIGN ================= */
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes drawLine { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
+@keyframes fadeArea { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+/* Premium Shimmer Effect */
+@keyframes premium-shimmer {
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  50% { transform: translateX(250%) skewX(-20deg); }
+  100% { transform: translateX(250%) skewX(-20deg); }
+}
+
+/* VIP Pro+ Animations */
+@keyframes vip-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes border-rotate {
+  100% { transform: rotate(360deg); }
+}
+.vip-text-glow {
+  background: linear-gradient(to right, #B8860B 20%, #F59E0B 40%, #92400E 60%, #B8860B 80%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: vip-shimmer 3s linear infinite;
+}
+.vip-border-glow::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, transparent 0 340deg, #D4AF7A 360deg);
+  animation: border-rotate 3s linear infinite;
+  z-index: -1;
+}
+
+.premium-shimmer-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+.premium-shimmer-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg) translateX(-150%);
+  animation: premium-shimmer 6s infinite;
+  pointer-events: none;
+  z-index: 10;
+}
 
 @tailwind base;
 @tailwind components;
@@ -39,60 +100,97 @@ body, body *, ::before, ::after {
   transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-.tabular-nums {
+/* =========================================
+   BILLQYRO REDESIGN — GLASS DESIGN TOKENS
+   (from design-reference/billqyro-redesign.html)
+   ========================================= */
+:root {
+  --bg-gradient: radial-gradient(1200px at 10% 10%, #FFF7ED 0%, #FAF5FF 40%, #F1F5F9 100%);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-card: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-subtle: rgba(226, 232, 240, 0.8);
+  --glass-shadow: 0 16px 32px rgba(0, 0, 0, 0.06);
+  --accent-hover: #966D09;
+  --text-main: #0F172A;
+}
+.dark {
+  --bg-gradient: radial-gradient(1200px at 10% 10%, #0F172A 0%, #090D16 50%, #030712 100%);
+  --glass-bg: rgba(15, 23, 42, 0.75);
+  --glass-card: rgba(21, 29, 45, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-subtle: rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+  --accent-hover: #B8860B;
+  --text-main: #F8FAFC;
+}
+
+/* Global gradient backdrop (anchored so scrolling does not shift it) */
+body {
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+}
+
+/* Typography — Outfit is the primary face from the premium upgrade */
+body {
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+}
+
+.font-numbers, .tabular-nums, .price-display, .stat-value {
+  font-family: 'Space Grotesk', 'JetBrains Mono', monospace;
   font-variant-numeric: tabular-nums;
 }
 
 @layer base {
-  /* 1. Obsidian Gold */
+  /* 1. Brand Guidelines (formerly Obsidian Gold) */
   :root, [data-theme="obsidian-gold"] {
-    --app-bg: #F8F3E7;
-    --app-bg-soft: #FFF9EC;
+    --app-bg: #FAF7F2;
+    --app-bg-soft: #FFFFFF;
     --surface: #FFFFFF;
     --surface-elevated: #FFFFFF;
     --card-bg: #FFFFFF;
-    --text-primary: #1A1A1A;
-    --text-secondary: #1A1A1A;
-    --text-muted: #6B5B3E;
+    --text-primary: #1F1B1D;
+    --text-secondary: #1F1B1D;
+    --text-muted: #5C4B51;
     --button-text: #FFFFFF;
-    --border-soft: rgba(184,134,11,0.25);
-    --border-strong: rgba(184,134,11,0.5);
-    --accent: #B8860B;
-    --accent-light: rgba(184,134,11,0.08);
-    --accent-dark: #1F2937;
-    --accent-gradient: linear-gradient(135deg, #B8860B, #1F2937);
-    --accent-glow: rgba(184,134,11,0.25);
-    --sidebar-bg: #F8F3E7;
-    --sidebar-active: rgba(184,134,11,0.1);
-    --sidebar-text: #1A1A1A;
+    --border-soft: rgba(212,175,122,0.25);
+    --border-strong: rgba(212,175,122,0.5);
+    --accent: #D4AF7A;
+    --accent-light: rgba(212,175,122,0.12);
+    --accent-dark: #C81E5C;
+    --accent-gradient: linear-gradient(135deg, #D4AF7A, #C81E5C);
+    --accent-glow: rgba(212,175,122,0.25);
+    --sidebar-bg: #FAF7F2;
+    --sidebar-active: rgba(200,30,92,0.08);
+    --sidebar-text: #1F1B1D;
     --input-bg: #FFFFFF;
-    --chart-primary: #B8860B;
+    --chart-primary: #D4AF7A;
     --status-success: #10B981;
     --status-warning: #F59E0B;
     --status-danger: #EF4444;
   }
   .dark, .dark[data-theme="obsidian-gold"], [data-theme="obsidian-gold"].dark {
-    --app-bg: #0B1118;
-    --app-bg-soft: #111827;
-    --surface: #111827;
-    --surface-elevated: #162131;
-    --card-bg: #111827;
-    --text-primary: #F9FAFB;
-    --text-secondary: #AAB7C4;
-    --text-muted: #7A8896;
-    --button-text: #000000;
-    --border-soft: rgba(201,168,76,0.22);
-    --border-strong: rgba(201,168,76,0.45);
-    --accent: #C9A84C;
-    --accent-light: rgba(201,168,76,0.08);
-    --accent-dark: #E8C97A;
-    --accent-gradient: linear-gradient(135deg, #C9A84C, #E8C97A);
-    --accent-glow: rgba(201,168,76,0.25);
-    --sidebar-bg: #0B1118;
-    --sidebar-active: rgba(201,168,76,0.1);
-    --sidebar-text: #F9FAFB;
-    --input-bg: #111827;
-    --chart-primary: #C9A84C;
+    --app-bg: #1F1B1D;
+    --app-bg-soft: #2A2528;
+    --surface: #2A2528;
+    --surface-elevated: #362F33;
+    --card-bg: #2A2528;
+    --text-primary: #FAF7F2;
+    --text-secondary: #E0DAD5;
+    --text-muted: #A3969C;
+    --button-text: #FFFFFF;
+    --border-soft: rgba(212,175,122,0.22);
+    --border-strong: rgba(212,175,122,0.45);
+    --accent: #D4AF7A;
+    --accent-light: rgba(212,175,122,0.15);
+    --accent-dark: #C81E5C;
+    --accent-gradient: linear-gradient(135deg, #D4AF7A, #C81E5C);
+    --accent-glow: rgba(212,175,122,0.25);
+    --sidebar-bg: #1F1B1D;
+    --sidebar-active: rgba(212,175,122,0.1);
+    --sidebar-text: #FAF7F2;
+    --input-bg: #2A2528;
+    --chart-primary: #D4AF7A;
   }
 
   /* 2. Arctic Teal */
@@ -1488,43 +1586,39 @@ body {
    ========================================= */
 
 @layer utilities {
-  /* 1. Glassmorphism Panels */
+  /* 1. Glassmorphism Panels (redesign reference) */
   .glass-panel {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+    background: var(--glass-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow);
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .dark .glass-panel {
-    background: rgba(17, 24, 39, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  .glass-panel:hover {
+    transform: translateY(-2px);
   }
 
   .glass-card {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
+    background: var(--glass-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow);
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
   }
-  .dark .glass-card {
-    background: rgba(17, 24, 39, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  .glass-card:hover {
+    transform: translateY(-2px);
   }
 
   .glass-header {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  }
-  .dark .glass-header {
-    background: rgba(11, 17, 24, 0.8);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
   }
 
   /* 2. Micro-Animations */
@@ -1547,6 +1641,55 @@ body {
     0% { box-shadow: 0 0 0 0 var(--accent-glow); }
     70% { box-shadow: 0 0 0 10px rgba(0,0,0,0); }
     100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+  }
+
+  /* 2b. Redesign Animation Keyframes */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes popIn {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes gentleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 var(--accent-glow); }
+    70% { box-shadow: 0 0 0 12px rgba(0,0,0,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+  }
+  @keyframes drawLine {
+    from { stroke-dashoffset: 1000; }
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes fadeArea {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Staggered entry animation (apply per-card with animation-delay) */
+  .stagger {
+    opacity: 0;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-pop-in {
+    animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-gentle-float {
+    animation: gentleFloat 5s ease-in-out infinite;
+  }
+  .animate-pulse-glow {
+    animation: pulseGlow 2.5s infinite;
   }
 
   /* 3. Premium Shadows */
@@ -2028,4 +2171,23 @@ button:active {
   box-shadow: 0 15px 30px -5px var(--accent-glow), 0 0 10px 0px var(--accent-glow);
   border-color: var(--accent);
   z-index: 10;
+}
+
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-only-preview, .print-only-preview * {
+    visibility: visible;
+  }
+  .print-only-preview {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: scale(1) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+  }
 }

@@ -814,9 +814,14 @@ const BusinessProfileTab = (props) => {
                   onChange={(e) => setInvoiceTemplate(e.target.value)}
                   className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface dark:bg-theme-card border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent text-theme-primary dark:text-theme-primary dark:text-theme-primary font-bold"
                 >
-                  <option value="modern">Modern A4 Template Layout</option>
-                  <option value="classic">Classic A5 Template Layout</option>
-                  <option value="cartoon">Cartoon Premium Template Layout</option>
+                  <option value="minimal-classic">Minimal Classic</option>
+                  <option value="modern-corporate">Modern Corporate</option>
+                  <option value="teal-bold-header">Teal Bold Header</option>
+                  <option value="sage-green-curved">Sage Green Curved</option>
+                  <option value="creative-agency">Creative Agency</option>
+                  <option value="modern">Modern A4 Template Layout (Legacy)</option>
+                  <option value="classic">Classic A5 Template Layout (Legacy)</option>
+                  <option value="cartoon">Cartoon Premium Template Layout (Legacy)</option>
                 </select>
               </div>
 

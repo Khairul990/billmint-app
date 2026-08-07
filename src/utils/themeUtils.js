@@ -1,5 +1,6 @@
 export const ALL_THEME_COLORS = {
-  'obsidian-gold': { L: '#F8F3E7', D: '#08080C', S: '#F8F3E7', SD: '#08080C', C: '#FFFFFF', CD: '#131318', T: '#1A1A1A', TD: '#F5F0E8', M: '#6B5B3E', MD: '#B8A98D', A: '#B8860B', AD: '#C9A84C', B: 'rgba(184,134,11,0.25)', BD: 'rgba(201,168,76,0.22)', BF: '#B8860B', BFD: '#C9A84C', BT: '#1F2937', BTD: '#E8C97A', H: '#1A1A1A', HD: '#F5F0E8', TH: '#FFF9EC', THD: '#0F0F14', TB: '#FFFFFF', TBD: '#08080C' },
+  'brand-premium': { L: '#FFFFFF', D: '#1A0F14', S: '#FFFFFF', SD: '#1A0F14', C: '#FFFFFF', CD: '#2A1A22', T: '#1F1B1D', TD: '#F9F4F6', M: '#6B5E62', MD: '#B0A3A8', A: '#C81E5C', AD: '#D4AF7A', B: 'rgba(200,30,92,0.15)', BD: 'rgba(212,175,122,0.15)', BF: '#C81E5C', BFD: '#D4AF7A', BT: '#A01548', BTD: '#B8925A', H: '#1F1B1D', HD: '#1A0F14', TH: '#FFFFFF', THD: '#1A0F14', TB: '#FAFAFA', TBD: '#1A0F14' },
+  'obsidian-gold': { L: '#FAF7F2', D: '#1F1B1D', S: '#FAF7F2', SD: '#1F1B1D', C: '#FFFFFF', CD: '#2A2528', T: '#1F1B1D', TD: '#FAF7F2', M: '#5C4B51', MD: '#A3969C', A: '#D4AF7A', AD: '#D4AF7A', B: 'rgba(212,175,122,0.25)', BD: 'rgba(212,175,122,0.22)', BF: '#C81E5C', BFD: '#C81E5C', BT: '#1F1B1D', BTD: '#D4AF7A', H: '#1F1B1D', HD: '#FAF7F2', TH: '#FFFFFF', THD: '#2A2528', TB: '#FFFFFF', TBD: '#1F1B1D' },
   'arctic-teal': { L: '#EAF7F5', D: '#050D0F', S: '#EAF7F5', SD: '#050D0F', C: '#FFFFFF', CD: '#0C1518', T: '#10201D', TD: '#E8F5F2', M: '#4B6F68', MD: '#7CB8A8', A: '#009E7F', AD: '#00C896', B: 'rgba(0,158,127,0.24)', BD: 'rgba(0,200,150,0.22)', BF: '#009E7F', BFD: '#00C896', BT: '#0F766E', BTD: '#34E8B0', H: '#10201D', HD: '#E8F5F2', TH: '#F4FFFD', THD: '#080F12', TB: '#FFFFFF', TBD: '#050D0F' },
   'sapphire-noir': { L: '#EEF4FF', D: '#04060F', S: '#EEF4FF', SD: '#04060F', C: '#FFFFFF', CD: '#0A0E1A', T: '#0F172A', TD: '#E8EEFF', M: '#4B5D7A', MD: '#8EA6D9', A: '#2563EB', AD: '#4F8EF7', B: 'rgba(37,99,235,0.22)', BD: 'rgba(79,142,247,0.22)', BF: '#2563EB', BFD: '#4F8EF7', BT: '#1E3A8A', BTD: '#82B1FF', H: '#0F172A', HD: '#E8EEFF', TH: '#F7FAFF', THD: '#060914', TB: '#FFFFFF', TBD: '#04060F' },
   'rose-platinum': { L: '#FFF1F5', D: '#0C080A', S: '#FFF1F5', SD: '#0C080A', C: '#FFFFFF', CD: '#180F13', T: '#2A1118', TD: '#F5EEF0', M: '#7A4B58', MD: '#B98A98', A: '#C75C75', AD: '#E8A0B0', B: 'rgba(199,92,117,0.24)', BD: 'rgba(232,160,176,0.22)', BF: '#C75C75', BFD: '#E8A0B0', BT: '#8B3A4A', BTD: '#F5C6D2', H: '#2A1118', HD: '#F5EEF0', TH: '#FFF7FA', THD: '#120C0F', TB: '#FFFFFF', TBD: '#0C080A' },
@@ -55,7 +56,8 @@ export const getThemePreviewColors = (preset, forceMode = null) => {
 };
 
 export const THEME_INFO = {
-  'obsidian-gold': { name: 'Obsidian Gold', category: 'Premium', colors: ['#B8860B', '#1F2937', '#FFF9EC', '#1A1A1A', '#6B5B3E'] },
+  'brand-premium': { name: 'BillQyro Premium', category: 'Official', colors: ['#C81E5C', '#D4AF7A', '#1A0F14', '#FFFFFF'] },
+  'obsidian-gold': { name: 'Brand Standard', category: 'Premium', colors: ['#C81E5C', '#D4AF7A', '#FAF7F2', '#1F1B1D', '#5C4B51'] },
   'arctic-teal': { name: 'Arctic Teal', category: 'Business', colors: ['#009E7F', '#0F766E', '#F4FFFD', '#10201D', '#4B6F68'] },
   'sapphire-noir': { name: 'Sapphire Noir', category: 'Business', colors: ['#2563EB', '#1E3A8A', '#F7FAFF', '#0F172A', '#4B5D7A'] },
   'rose-platinum': { name: 'Rose Platinum', category: 'Premium', colors: ['#C75C75', '#8B3A4A', '#FFF7FA', '#2A1118', '#7A4B58'] },

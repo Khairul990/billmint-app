@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PremiumClock from './PremiumClock';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
-import { Search, Bell, Settings as SettingsIcon, Sparkles, ShieldCheck, User, Briefcase, Activity, HelpCircle, LogOut, Cloud, CloudOff, RefreshCw } from 'lucide-react';
+import { Search, Bell, Settings as SettingsIcon, Sparkles, ShieldCheck, User, Briefcase, Activity, HelpCircle, LogOut, Cloud, CloudOff, RefreshCw, Crown } from 'lucide-react';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import Logo from './Logo';
 import { settingsEngine } from '../services/settingsEngine';
@@ -140,6 +140,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         setCurrentTab={setCurrentTab}
         onLogout={onLogout}
         businessSettings={businessSettings}
+        subscription={subscription}
         isAuthenticated={isAuthenticated}
         userRole={userRole}
         userEmail={userEmail}
@@ -151,7 +152,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         flushSyncQueue={flushSyncQueue}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 w-full max-w-full pb-[calc(64px+env(safe-area-inset-bottom))] lg:pb-0 overflow-y-auto overflow-x-hidden bg-theme-app transition-colors duration-300 relative z-10">
+      <div className="flex-1 flex flex-col min-w-0 w-full max-w-full pb-[calc(64px+env(safe-area-inset-bottom))] lg:pb-0 overflow-y-auto overflow-x-hidden scroll-smooth bg-theme-app transition-colors duration-300 relative z-10" style={{ WebkitOverflowScrolling: 'touch' }}>
         
         {localStorage.getItem('billqyro_demo_session_active') === 'true' && (
           <div className="bg-amber-500 text-amber-950 font-black text-xs py-1.5 text-center uppercase tracking-widest z-50 relative shadow-md flex items-center justify-center gap-2">
@@ -160,7 +161,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
           </div>
         )}
 
-        {businessSettings?.maintenanceMode && userRole !== 'admin' && userEmail !== 'khairul2052007@gmail.com' && (
+        {businessSettings?.maintenanceMode && userRole !== 'admin' && (
           <div className="bg-rose-600 text-white font-black text-xs py-1.5 text-center uppercase tracking-widest z-50 relative shadow-md flex items-center justify-center gap-2">
             <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
             SYSTEM MAINTENANCE ACTIVE — Invoice creation, live links, and premium upgrades are temporarily disabled.
@@ -623,6 +624,14 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               </div>
             </div>
           </div>
+
+          {/* ===== MOBILE STUDIO TOOLBAR (md:hidden) ===== */}
+          {['settings', 'create-invoice'].includes(currentTab) && (
+            <div className="md:hidden flex items-center justify-between gap-2 px-3 py-2 border-t border-theme-border-soft bg-theme-surface/60 backdrop-blur-md">
+              <div id="studio-header-portal-mobile" className="flex items-center gap-2 min-w-0 flex-1" />
+              <div id="studio-header-actions-portal-mobile" className="flex items-center gap-2 shrink-0" />
+            </div>
+          )}
         </header>
 
         <main className={`flex-1 min-w-0 w-full mx-auto ${['create-invoice', 'settings'].includes(currentTab) ? 'p-0 max-w-none' : 'max-w-full p-3 md:px-6 md:py-6'}`}>

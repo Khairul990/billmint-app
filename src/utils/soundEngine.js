@@ -10,7 +10,7 @@ class SoundEngine {
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         this.context = new AudioContext();
-      } catch (e) {
+      } catch {
         console.warn('AudioContext not supported');
       }
     }

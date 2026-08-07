@@ -83,7 +83,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
       };
       await onSaveCustomer(payload);
       setIsModalOpen(false);
-    } catch (err) {
+    } catch {
       toast.error('Failed to save. Please try again.');
     } finally {
       setIsSaving(false);

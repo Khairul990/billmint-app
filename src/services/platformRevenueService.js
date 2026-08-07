@@ -299,7 +299,7 @@ export const getUserPaymentProofs = async (userId) => {
   try {
     const cached = JSON.parse(localStorage.getItem('billqyro_platform_payment_proofs') || '[]');
     return cached.filter(p => p.userId === userId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  } catch (e) {
+  } catch {
     return [];
   }
 };
@@ -318,7 +318,7 @@ export const getAdminAllPaymentProofs = async () => {
 
   try {
     return JSON.parse(localStorage.getItem('billqyro_platform_payment_proofs') || '[]');
-  } catch (e) {
+  } catch {
     return [];
   }
 };

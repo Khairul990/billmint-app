@@ -54,7 +54,7 @@ export const workspaceEngine = {
         };
       });
       return workspaces;
-    } catch (e) {
+    } catch {
       return [{ id: 'default', name: 'Default Workspace' }];
     }
   },
@@ -62,9 +62,7 @@ export const workspaceEngine = {
   getPermissionLevel() {
     const session = getAuthSession();
     if (!session) return 'none';
-    const adminEmail = 'khairul2052007@gmail.com';
-    const email = session.userEmail || session.email || '';
-    if (email.toLowerCase() === adminEmail.toLowerCase()) return 'owner';
+    if (session.isSuperAdmin === true) return 'owner';
     return 'user';
   },
 

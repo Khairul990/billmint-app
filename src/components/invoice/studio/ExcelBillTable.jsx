@@ -558,7 +558,7 @@ const ExcelBillTable = ({ products }) => {
             globalSettings.customColumns = cols;
             globalSettings.extraColumns = extras;
             localStorage.setItem('billqyro_settings', JSON.stringify(globalSettings));
-          } catch(e) {}
+          } catch (e) { console.warn(e); }
         }}
       />
     </div>
@@ -566,3 +566,6 @@ const ExcelBillTable = ({ products }) => {
 };
 
 export default ExcelBillTable;
+
+MemoizedBillRow.displayName = 'MemoizedBillRow';
+MemoizedMobileBillRow.displayName = 'MemoizedMobileBillRow';

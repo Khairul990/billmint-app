@@ -32,6 +32,7 @@ import { BUSINESS_PRESETS } from '../config/businessPresets';
 import InvoicePreview from '../components/InvoicePreview';
 import LazyPreview from '../components/LazyPreview';
 import { getDemoInvoice } from '../utils/demoDataGenerator';
+import { LivePreviewLayouts } from '../components/invoice-templates/layouts/LivePreviewLayouts';
 import PublicInvoice from './PublicInvoice';
 import { UNIVERSAL_TEMPLATES, getTemplateFeatures, getTemplateGradient } from '../services/TemplateEngine';
 
@@ -39,7 +40,12 @@ const templateStyles = {
   classic: 'Clean', cartoon: 'Modern', modern: 'Modern', minimal: 'Minimal',
   retail: 'Thermal', 'premium-gold': 'Luxury', 'classic-elegant': 'Corporate',
   corporate: 'Corporate', boutique: 'Fashion', clinic: 'Clean', repair: 'Utility',
-  executive: 'Luxury', saas: 'Modern', teacher: 'Clean', medical: 'Clean', tailor: 'Fashion', embroidery: 'Clean'
+  executive: 'Luxury', saas: 'Modern', teacher: 'Clean', medical: 'Clean', tailor: 'Fashion', embroidery: 'Clean',
+  'minimal-classic': 'Minimal', 'modern-corporate': 'Corporate', 'teal-bold-header': 'Modern',
+  'sage-green-curved': 'Modern', 'creative-agency': 'Creative', 'purple-corporate': 'Corporate',
+  'orange-gradient-modern': 'Modern', 'orange-geometric': 'Modern', 'black-orange-bold': 'Bold',
+  'luxury-gold-black': 'Luxury', 'black-header-professional': 'Professional', 'blue-rounded-modern': 'Modern',
+  'red-corporate-clean': 'Corporate', 'clean-two-column': 'Modern'
 };
 
 const pageVariants = {
@@ -72,7 +78,7 @@ const brandPresetIcons = {
   billing_only: 'FileText'
 };
 
-const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subscription, viewMode, setViewMode }) => {
+const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subscription, viewMode, setViewMode, templateOverride, onSelectTemplate }) => {
   const [previewTemplate, setPreviewTemplate] = useState(null);
   const [filterCategory, setFilterCategory] = useState('All');
   const [useAnimId, setUseAnimId] = useState(null);
@@ -89,10 +95,10 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
   const activeViewMode = viewMode || internalViewMode;
   const handleSetViewMode = setViewMode || setInternalViewMode;
 
-  const activeTemplate = businessSettings?.selectedPdfTemplate || 'classic';
+  const activeTemplate = templateOverride || businessSettings?.selectedPdfTemplate || 'classic';
   const [pendingTemplate, setPendingTemplate] = useState(activeTemplate);
   const isDirty = pendingTemplate !== activeTemplate;
-  const isPremium = subscription?.status === 'premium' || businessSettings?.planStatus === 'premium' || businessSettings?.planStatus === 'Monthly' || businessSettings?.plan === 'Monthly';
+  const isPremium = subscription?.features?.includes('premiumTemplates') || subscription?.status === 'premium' || businessSettings?.planStatus === 'premium' || businessSettings?.planStatus === 'Monthly' || businessSettings?.plan === 'Monthly';
   const categories = ['All', 'Classic', 'Modern', 'Business', 'Professional'];
 
   const filteredTemplates = UNIVERSAL_TEMPLATES.filter(t => {
@@ -110,6 +116,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
       return;
     }
     setPendingTemplate(templateId);
+    onSelectTemplate?.(templateId);
   };
 
   const handleSaveAndApply = async () => {
@@ -441,7 +448,8 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                   key={tpl.id}
                   variants={staggerItem}
                   whileHover={{ y: -6, scale: 1.02 }}
-                  className={`relative rounded-2xl overflow-hidden border-2 transition-all flex flex-col card-premium ${isPending ? 'border-theme-accent shadow-glow' : 'border-theme-border-soft hover:border-theme-accent/50'
+                  onClick={() => { if(!isLocked) { handleApply(tpl.id, tpl.type); setUseAnimId(tpl.id); setTimeout(() => setUseAnimId(null), 1500); } }}
+                  className={`relative rounded-2xl overflow-hidden border-2 transition-all flex flex-col card-premium cursor-pointer ${isPending ? 'border-theme-accent shadow-glow' : 'border-theme-border-soft hover:border-theme-accent/50'
                     }`}
                 >
                   {/* Status Badges */}
@@ -494,7 +502,27 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                         </div>
                       ) : (
                         <div className={`w-[800px] ${previewSize === 'A5' ? 'h-[600px]' : 'h-[1000px]'} transform origin-top-left scale-[0.35] lg:scale-[0.4] pointer-events-none mt-20 ml-20 bg-white shadow-xl`}>
-                          <InvoicePreview invoice={getDemoInvoice(businessSettings?.businessCategory)} businessSettings={{ ...businessSettings, selectedPdfTemplate: tpl.id }} />
+                          {(() => {
+                            const demoInv = getDemoInvoice(businessSettings?.businessCategory);
+                            const Layout = LivePreviewLayouts[tpl.id];
+                            if (Layout) {
+                              return (
+                                <div className="w-[595px] origin-top-left scale-[1.34]">
+                                  <Layout data={{
+                                    invoiceNumber: demoInv.invoiceNumber,
+                                    date: demoInv.date,
+                                    customerName: demoInv.customerName,
+                                    items: demoInv.items,
+                                    totals: { subtotal: demoInv.subtotal, tax: demoInv.taxAmount, discount: demoInv.discountAmount, grandTotal: demoInv.grandTotal },
+                                    businessSettings: { ...businessSettings, selectedPdfTemplate: tpl.id },
+                                    invoiceColumns: businessSettings?.invoiceColumns || [],
+                                    qrCodeBase64: null
+                                  }} />
+                                </div>
+                              );
+                            }
+                            return <InvoicePreview invoice={demoInv} businessSettings={{ ...businessSettings, selectedPdfTemplate: tpl.id }} />;
+                          })()}
                         </div>
                       )}
                     </LazyPreview>
@@ -529,28 +557,22 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                     </div>
 
                     <div className="mt-auto flex gap-2">
-                      <button
-                        onClick={() => { handleApply(tpl.id, tpl.type); setUseAnimId(tpl.id); setTimeout(() => setUseAnimId(null), 1500); }}
-                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 btn-premium ${isPending
-                            ? 'bg-emerald-500/10 text-emerald-600 cursor-default'
-                            : isLocked
-                              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md hover:scale-[1.02]'
-                              : 'bg-theme-accent text-white shadow-md hover:scale-[1.02]'
-                          }`}
-                      >
-                        {isPending ? (
-                          <><CheckCircle2 className="w-3.5 h-3.5" /> Selected</>
-                        ) : isLocked ? (
-                          <><Lock className="w-3.5 h-3.5" /> Unlock Pro</>
-                        ) : useAnimId === tpl.id ? (
-                          <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Applied!</motion.span>
-                        ) : (
-                          <>Use Template</>
-                        )}
-                      </button>
+                      {isLocked ? (
+                        <button
+                          className="flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md hover:scale-[1.02]"
+                        >
+                          <Lock className="w-3.5 h-3.5" /> Unlock Pro
+                        </button>
+                      ) : (
+                        <div className="flex-1">
+                          {useAnimId === tpl.id && (
+                            <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center justify-center gap-1 text-theme-accent font-bold text-xs py-2"><CheckCircle2 className="w-3.5 h-3.5" /> Applied!</motion.span>
+                          )}
+                        </div>
+                      )}
                       {!isLocked && (
                         <button
-                          onClick={() => setPreviewTemplate(tpl.id)}
+                          onClick={(e) => { e.stopPropagation(); setPreviewTemplate(tpl.id); }}
                           className="py-2 px-3 rounded-xl text-xs font-bold transition-all bg-theme-app border border-theme-border-soft text-theme-muted hover:bg-theme-accent hover:text-white flex items-center gap-1"
                         >
                           <Eye className="w-3.5 h-3.5" />

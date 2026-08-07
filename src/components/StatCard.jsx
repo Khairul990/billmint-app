@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { cardHover } from '../utils/animations';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
-const StatCard = ({ title, value, icon: Icon, trend, trendUp = true, accentColor, subtitle, onClick, loading = false }) => {
+const StatCard = ({ title, value, icon: Icon, trend, trendUp = true, accentColor, subtitle, onClick, loading = false, isPremium = false }) => {
   if (loading) {
     return (
-      <div className="stat-premium">
+      <div className={`stat-premium ${isPremium ? 'premium-shimmer-wrapper ring-1 ring-yellow-500/30' : ''}`}>
         <div className="flex items-center justify-between mb-3">
           <div className="skeleton-block" style={{ width: '2.5rem', height: '2.5rem' }} />
           <div className="skeleton-block" style={{ width: '3.5rem', height: '1rem', borderRadius: '9999px' }} />
@@ -24,10 +24,10 @@ const StatCard = ({ title, value, icon: Icon, trend, trendUp = true, accentColor
       animate="rest"
       whileHover="hover"
       whileTap="tap"
-      className="stat-premium group cursor-pointer"
+      className={`stat-premium group cursor-pointer overflow-hidden ${isPremium ? 'premium-shimmer-wrapper ring-1 ring-yellow-500/20' : ''}`}
       onClick={onClick}
     >
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-3 relative z-10">
         <div className="icon-premium shrink-0 group-hover:scale-105 transition-transform duration-200">
           {Icon && <Icon className="w-4 h-4" />}
         </div>

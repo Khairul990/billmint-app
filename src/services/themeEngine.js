@@ -32,7 +32,7 @@ export const themeEngine = {
     const root = document.documentElement;
     
     const { themeColor, brandColor, darkMode, cornerRadius, shadowIntensity, animationSpeed } = settings;
-    const themeId = themeColor || 'obsidian-gold';
+    const themeId = themeColor || 'brand-premium';
 
     if (darkMode) {
       root.classList.add('dark');
@@ -89,11 +89,11 @@ export const themeEngine = {
   getLocalThemePreference() {
     try {
       return {
-        themeColor: localStorage.getItem('billqyro_theme_color') || 'obsidian-gold',
+        themeColor: localStorage.getItem('billqyro_theme_color') || 'brand-premium',
         darkMode: localStorage.getItem('billqyro_dark_mode') === 'true'
       };
-    } catch (e) {
-      return { themeColor: 'obsidian-gold', darkMode: false };
+    } catch {
+      return { themeColor: 'brand-premium', darkMode: false };
     }
   },
 

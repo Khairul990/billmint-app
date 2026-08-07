@@ -5,6 +5,8 @@ import { ArrowRight, CheckCircle2, FileSpreadsheet, ShieldCheck, TrendingUp, Use
 import Logo from '../components/Logo';
 import Login from './Login';
 import CustomerPortalLogin from '../components/portal/CustomerPortalLogin';
+import HeroBackground from '../components/HeroBackground';
+import ScrollReveal from '../components/ScrollReveal';
 const Landing = ({ onLoginSuccess }) => {
   const [faqOpen, setFaqOpen] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -66,11 +68,8 @@ const Landing = ({ onLoginSuccess }) => {
 
   return (
     <div className="min-h-screen bg-theme-app text-theme-primary font-sans selection:bg-theme-accent selection:text-white flex flex-col relative">
-      {/* ===== ANIMATED BACKGROUND BLOBS ===== */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-40 -right-40 w-96 h-96 bg-theme-accent/20 rounded-full blur-[100px]" />
-        <motion.div animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.4, 0.2] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }} className="absolute top-[40%] -left-40 w-[500px] h-[500px] bg-theme-accent/10 rounded-full blur-[120px]" />
-      </div>
+      {/* ===== HERO BACKGROUND ===== */}
+      <HeroBackground />
 
       {/* ===== PREMIUM GLASS NAVBAR ===== */}
       <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-theme-card/80 backdrop-blur-xl border-b border-theme-border-soft shadow-lg py-1' : 'bg-transparent border-b border-theme-border-soft/50 py-2'}`}>
@@ -89,7 +88,10 @@ const Landing = ({ onLoginSuccess }) => {
 
           <div className="flex items-center gap-4">
             <button onClick={() => scrollTo('login')} className="text-sm font-bold text-theme-muted hover:text-theme-primary transition-colors hidden sm:block">Log in</button>
-            <button onClick={() => scrollTo('login')} className="btn-premium px-6 py-2.5 text-sm">Get Started Free</button>
+            <a href="/BillQyro-Setup.exe" download className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border border-theme-border-soft hover:bg-theme-surface hover:text-theme-primary text-theme-muted text-sm font-bold transition-all shadow-sm">
+              <Download className="w-4 h-4" /> Windows App
+            </a>
+            <button onClick={() => scrollTo('login')} className="btn-premium px-6 py-2.5 text-sm">Get Started</button>
 
             {/* Mobile hamburger */}
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-theme-primary">
@@ -114,78 +116,94 @@ const Landing = ({ onLoginSuccess }) => {
       </nav>
 
       {/* ===== HERO ===== */}
-      <motion.section variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-theme-accent opacity-[0.03] dark:opacity-[0.05] blur-[120px] rounded-full pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto px-6 py-16 lg:py-28 flex flex-col lg:flex-row items-center gap-12 relative z-10">
-          <div className="flex-1 text-center lg:text-left space-y-8">
-            <motion.div initial={{ rotate: -10 }} animate={{ rotate: 0 }} transition={{ duration: 0.8, ease: "easeOut" }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-theme-surface border border-theme-border-soft shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-theme-accent animate-pulse"></span>
-              <span className="badge-premium text-[10px] tracking-wide">The future of billing is here</span>
+      <ScrollReveal className="relative overflow-hidden min-h-[90vh] flex items-center pt-16">
+        {/* Massive Luxury Glow Orb */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-theme-primary/10 to-theme-accent/10 blur-[120px] rounded-full pointer-events-none opacity-50"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-theme-primary/5 via-theme-app to-theme-app -z-10"></div>
+        
+        {/* Floating 3D Elements */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <motion.div animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/4 left-[10%] w-24 h-24 rounded-3xl bg-gradient-to-br from-theme-primary/20 to-theme-accent/20 backdrop-blur-xl border border-white/10 shadow-2xl flex items-center justify-center -rotate-12"><FileSpreadsheet className="w-10 h-10 text-theme-primary opacity-50" /></motion.div>
+          <motion.div animate={{ y: [0, 30, 0], rotate: [0, -15, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="absolute bottom-1/4 right-[5%] w-32 h-32 rounded-full bg-gradient-to-br from-theme-accent/10 to-theme-primary/10 backdrop-blur-3xl border border-white/5 shadow-2xl flex items-center justify-center rotate-45"><TrendingUp className="w-12 h-12 text-theme-accent opacity-40" /></motion.div>
+          <motion.div animate={{ x: [0, 20, 0], rotate: [0, 45, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }} className="absolute top-1/3 right-[15%] w-16 h-16 rounded-2xl bg-gradient-to-br from-theme-accent/20 to-theme-primary/20 backdrop-blur-xl border border-white/10 shadow-xl flex items-center justify-center rotate-12"><Zap className="w-8 h-8 text-theme-accent opacity-60" /></motion.div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 py-16 lg:py-28 flex flex-col lg:flex-row items-center gap-16 relative z-10 w-full">
+          <div className="flex-1 text-center lg:text-left space-y-8 lg:pr-8">
+            <motion.div initial={{ rotate: -10, opacity: 0, scale: 0.8 }} animate={{ rotate: 0, opacity: 1, scale: 1 }} transition={{ duration: 0.8, type: "spring", bounce: 0.5 }} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-theme-surface/80 backdrop-blur-md border border-theme-border-soft shadow-glass">
+              <span className="w-2.5 h-2.5 rounded-full bg-theme-accent animate-pulse shadow-[0_0_8px_var(--accent-glow)]"></span>
+              <span className="text-[10px] sm:text-xs font-black tracking-widest uppercase text-theme-primary">The Future of Enterprise Billing</span>
             </motion.div>
-            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight text-theme-primary leading-[1.1]">
+            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.8, ease: "easeOut" }} className="text-5xl sm:text-6xl lg:text-[5.5rem] font-black tracking-tight text-theme-primary leading-[1.05]">
               Smart billing for <br className="hidden lg:block" />
-              <span className="text-gradient-premium">modern business.</span>
+              <span className="text-transparent bg-clip-text bg-[image:var(--accent-gradient)] animate-gradient-x">modern business.</span>
             </motion.h1>
-            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-base sm:text-lg text-theme-muted max-w-2xl mx-auto lg:mx-0 font-medium leading-relaxed">
+            <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.8 }} className="text-lg sm:text-xl text-theme-muted max-w-2xl mx-auto lg:mx-0 font-medium leading-relaxed">
               Streamline your invoicing process, manage customers effortlessly, and get paid faster with BillQyro's premium SaaS platform.
             </motion.p>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-              <motion.button variants={buttonTap} initial="rest" whileHover="hover" whileTap="tap" onClick={() => scrollTo('login')} className="btn-premium w-full sm:w-auto px-8 py-4 text-base">
-                Start Invoicing Now
-                <ArrowRight className="w-5 h-5" />
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.8 }} className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+              <motion.button variants={buttonTap} initial="rest" whileHover="hover" whileTap="tap" onClick={() => scrollTo('login')} className="group relative overflow-hidden rounded-2xl bg-theme-primary text-white w-full sm:w-auto px-10 py-5 text-lg font-bold shadow-[0_8px_30px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_8px_40px_rgba(var(--primary-rgb),0.5)] transition-all">
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                <div className="relative flex items-center justify-center gap-2">
+                  Start Invoicing Now
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </div>
               </motion.button>
-              <motion.button variants={buttonTap} initial="rest" whileHover="hover" whileTap="tap" onClick={() => scrollTo('features')} className="btn-premium-outline w-full sm:w-auto px-8 py-4 text-base">
-                Explore Features
-              </motion.button>
+              <motion.a href="/BillQyro-Setup.exe" download variants={buttonTap} initial="rest" whileHover="hover" whileTap="tap" className="flex items-center justify-center gap-2 rounded-2xl bg-theme-surface border-2 border-theme-border-soft hover:border-theme-primary text-theme-primary w-full sm:w-auto px-10 py-4.5 text-lg font-bold shadow-sm transition-all hover:shadow-glass">
+                <Download className="w-5 h-5" /> Download (.exe)
+              </motion.a>
             </motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="pt-4 flex flex-wrap items-center gap-6 justify-center lg:justify-start text-theme-muted text-sm font-semibold">
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-theme-accent" /> No credit card required</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-theme-accent" /> 15 free invoices</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-theme-accent" /> PWA offline mode</div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 1 }} className="pt-6 flex flex-wrap items-center gap-6 justify-center lg:justify-start text-theme-muted text-sm font-bold">
+              <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-theme-accent/20 flex items-center justify-center"><CheckCircle2 className="w-3.5 h-3.5 text-theme-accent" /></div> No credit card required</div>
+              <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-theme-accent/20 flex items-center justify-center"><CheckCircle2 className="w-3.5 h-3.5 text-theme-accent" /></div> 15 free invoices</div>
+              <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-theme-accent/20 flex items-center justify-center"><CheckCircle2 className="w-3.5 h-3.5 text-theme-accent" /></div> PWA offline mode</div>
             </motion.div>
           </div>
 
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0, y: [0, -10, 0] }} transition={{ opacity: {delay: 0.4, duration: 0.8}, x: {delay: 0.4, duration: 0.8}, y: {duration: 6, repeat: Infinity, ease: "easeInOut"} }} className="flex-1 w-full relative">
-            <div className="card-premium rounded-3xl overflow-hidden border border-theme-border-soft shadow-2xl bg-theme-card">
-              <div className="aspect-video bg-theme-surface w-full p-2 flex flex-col">
-                <div className="flex gap-1.5 p-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-rose-400"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-theme-warning"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+          <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0, y: [0, -15, 0] }} transition={{ opacity: {delay: 0.4, duration: 1}, x: {delay: 0.4, duration: 1, type: "spring"}, y: {duration: 6, repeat: Infinity, ease: "easeInOut"} }} className="flex-1 w-full relative perspective-1000">
+            <div className="rounded-[2.5rem] overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.3)] bg-gradient-to-br from-theme-surface/90 to-theme-surface/50 backdrop-blur-2xl transform rotate-y-[-10deg] rotate-x-[5deg] hover:rotate-0 transition-transform duration-700 ease-out">
+              <div className="aspect-video bg-theme-app/50 w-full p-4 flex flex-col">
+                <div className="flex gap-2 p-2">
+                  <div className="w-3 h-3 rounded-full bg-rose-400/80 shadow-inner"></div>
+                  <div className="w-3 h-3 rounded-full bg-amber-400/80 shadow-inner"></div>
+                  <div className="w-3 h-3 rounded-full bg-emerald-400/80 shadow-inner"></div>
                 </div>
-                <div className="flex-1 bg-theme-app rounded-xl border border-theme-border-soft p-4 sm:p-6 flex flex-col gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-[image:var(--accent-gradient)]"></div>
-                    <div className="h-8 w-40 bg-theme-surface rounded border border-theme-border-soft"></div>
+                <div className="flex-1 bg-theme-surface/80 backdrop-blur-md rounded-2xl border border-white/10 p-6 flex flex-col gap-4 shadow-inner">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-theme-primary to-blue-500 shadow-lg"></div>
+                    <div className="h-6 w-48 bg-theme-muted/10 rounded-full"></div>
                   </div>
-                  <div className="flex gap-3">
-                    <div className="flex-1 h-20 bg-theme-surface rounded-xl border border-theme-border-soft p-3 flex flex-col justify-between">
-                      <div className="h-3 w-16 bg-theme-accent/30 rounded"></div>
-                      <div className="h-6 w-24 bg-theme-accent/40 rounded"></div>
+                  <div className="flex gap-4">
+                    <div className="flex-1 h-24 bg-gradient-to-br from-theme-primary/10 to-transparent rounded-2xl border border-theme-primary/20 p-4 flex flex-col justify-between">
+                      <div className="h-4 w-20 bg-theme-primary/30 rounded-full"></div>
+                      <div className="h-8 w-32 bg-theme-primary/40 rounded-lg"></div>
                     </div>
-                    <div className="flex-1 h-20 bg-theme-surface rounded-xl border border-theme-border-soft p-3 flex flex-col justify-between">
-                      <div className="h-3 w-12 bg-theme-muted/20 rounded"></div>
-                      <div className="h-6 w-20 bg-theme-muted/30 rounded"></div>
+                    <div className="flex-1 h-24 bg-theme-muted/5 rounded-2xl border border-white/5 p-4 flex flex-col justify-between">
+                      <div className="h-4 w-16 bg-theme-muted/20 rounded-full"></div>
+                      <div className="h-8 w-24 bg-theme-muted/30 rounded-lg"></div>
                     </div>
                   </div>
-                  <div className="flex-1 bg-theme-surface rounded-xl border border-theme-border-soft p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="h-3 w-3 rounded-full bg-theme-accent"></div>
-                      <div className="h-3 w-32 bg-theme-muted/20 rounded"></div>
-                      <div className="h-3 w-16 bg-theme-muted/20 rounded ml-auto"></div>
+                  <div className="flex-1 bg-theme-muted/5 rounded-2xl border border-white/5 p-4 flex flex-col justify-center gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-4 w-4 rounded-full bg-theme-primary/50"></div>
+                      <div className="h-4 w-full bg-theme-muted/10 rounded-full"></div>
                     </div>
-                    <div className="h-3 w-full bg-theme-muted/10 rounded"></div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-4 w-4 rounded-full bg-theme-primary/30"></div>
+                      <div className="h-4 w-3/4 bg-theme-muted/10 rounded-full"></div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="absolute -bottom-4 -left-4 bg-theme-card p-3 sm:p-4 rounded-2xl border border-theme-border-soft shadow-premium flex items-center gap-3 sm:gap-4" style={{ animation: 'bounce 3s ease-in-out infinite' }}>
-              <div className="w-10 h-10 rounded-full bg-theme-accent/10 flex items-center justify-center"><TrendingUp className="w-5 h-5 text-theme-accent" /></div>
-              <div><p className="text-[10px] uppercase font-bold text-theme-muted">Total Revenue</p><p className="text-base sm:text-lg font-black text-theme-primary">{'\u20B9'}12,450</p></div>
-            </div>
+            {/* Floating Earnings Widget */}
+            <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="absolute -bottom-8 -left-8 bg-theme-surface/90 backdrop-blur-2xl p-5 rounded-3xl border border-white/20 shadow-[0_15px_35px_rgba(0,0,0,0.2)] flex items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg"><TrendingUp className="w-7 h-7 text-white" /></div>
+              <div><p className="text-xs uppercase font-black tracking-wider text-theme-muted mb-1">Total Revenue</p><p className="text-2xl font-black text-theme-primary font-numbers tracking-tight">{'\u20B9'}1,24,450</p></div>
+            </motion.div>
           </motion.div>
         </div>
-      </motion.section>
+      </ScrollReveal>
 
       {/* ===== LOGIN SECTION ===== */}
       <motion.section id="login" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="border-t border-theme-border-soft bg-theme-surface/50 relative z-10 py-12">
@@ -218,19 +236,28 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== FEATURES ===== */}
-      <motion.section id="features" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <motion.span animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Powerful Features</motion.span>
-            <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Everything you need to run your billing.</h2>
-            <p className="text-theme-muted font-medium max-w-2xl mx-auto">Powerful features wrapped in an elegant interface, designed specifically for modern teams and growing businesses.</p>
+      <motion.section id="features" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-white/5 bg-theme-surface/50 py-24 lg:py-32 relative">
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-theme-primary/5 via-transparent to-transparent"></div>
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="text-center mb-20">
+            <motion.div animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-flex items-center gap-2 badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light/50 px-5 py-2 rounded-full mb-6 border border-theme-accent/20">
+              <Sparkles className="w-3.5 h-3.5" /> Powerful Features
+            </motion.div>
+            <h2 className="text-4xl md:text-5xl font-black text-theme-primary tracking-tight mb-6">Everything you need to <br className="hidden md:block"/>run your <span className="text-transparent bg-clip-text bg-[image:var(--accent-gradient)]">billing operations.</span></h2>
+            <p className="text-theme-muted font-medium text-lg max-w-2xl mx-auto">Powerful features wrapped in an elegant interface, designed specifically for modern teams and growing businesses.</p>
           </div>
-          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, idx) => (
-              <motion.div key={idx} variants={staggerItem} whileHover="hover" whileTap="tap" className="card-premium p-6 sm:p-8 rounded-3xl hover:border-theme-accent/30 transition-all duration-300 group hover:shadow-2xl hover:shadow-theme-accent/10">
-                <motion.div variants={scaleOnHover} className="w-12 h-12 rounded-2xl bg-theme-card border border-theme-border-soft flex items-center justify-center mb-5 group-hover:bg-theme-accent/10 group-hover:border-theme-accent/30"><feature.icon className="w-6 h-6 text-theme-accent" /></motion.div>
-                <h3 className="text-lg font-bold text-theme-primary mb-2">{feature.title}</h3>
-                <p className="text-sm text-theme-muted font-medium leading-relaxed">{feature.desc}</p>
+              <motion.div key={idx} variants={staggerItem} whileHover={{ y: -10, scale: 1.02 }} className="group relative rounded-[2rem] bg-theme-card/80 backdrop-blur-xl border border-white/10 p-8 hover:bg-theme-surface transition-all duration-500 shadow-glass">
+                <div className="absolute inset-0 rounded-[2rem] bg-[image:var(--accent-gradient)] opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none"></div>
+                
+                <div className="relative z-10 flex flex-col h-full">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-theme-surface to-theme-app border border-white/10 shadow-inner flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 ease-out">
+                    <feature.icon className="w-7 h-7 text-theme-accent" />
+                  </div>
+                  <h3 className="text-xl font-black text-theme-primary mb-3 group-hover:text-theme-accent transition-colors">{feature.title}</h3>
+                  <p className="text-sm text-theme-muted font-medium leading-relaxed">{feature.desc}</p>
+                </div>
               </motion.div>
             ))}
           </motion.div>
@@ -245,52 +272,10 @@ const Landing = ({ onLoginSuccess }) => {
             <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">See BillQyro in <span className="text-gradient-premium">action.</span></h2>
             <p className="text-theme-muted font-medium max-w-2xl mx-auto">A clean, powerful dashboard that puts you in control of your entire billing workflow.</p>
           </div>
-          <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="card-premium rounded-3xl overflow-hidden border border-theme-border-soft shadow-2xl bg-theme-card max-w-5xl mx-auto">
-            <div className="aspect-video bg-theme-surface w-full p-3 flex flex-col">
-              <div className="flex gap-1.5 p-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-rose-400"></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-theme-warning"></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
-              </div>
-              <div className="flex-1 bg-theme-app rounded-xl border border-theme-border-soft p-4 sm:p-6 grid grid-cols-3 gap-4">
-                {/* Sidebar */}
-                <div className="col-span-1 space-y-3">
-                  <div className="h-8 w-full bg-theme-surface rounded-lg border border-theme-border-soft"></div>
-                  <div className="h-8 w-full bg-theme-accent/10 rounded-lg border border-theme-accent/20"></div>
-                  <div className="h-8 w-full bg-theme-surface rounded-lg border border-theme-border-soft"></div>
-                  <div className="h-8 w-full bg-theme-surface rounded-lg border border-theme-border-soft"></div>
-                  <div className="h-8 w-full bg-theme-surface rounded-lg border border-theme-border-soft"></div>
-                </div>
-                {/* Main Content */}
-                <div className="col-span-2 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="h-6 w-40 bg-theme-muted/10 rounded"></div>
-                    <div className="h-8 w-28 bg-theme-accent/20 rounded-lg"></div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="h-24 bg-theme-surface rounded-xl border border-theme-border-soft p-3 flex flex-col justify-between">
-                      <div className="h-3 w-16 bg-theme-muted/20 rounded"></div>
-                      <div className="h-7 w-28 bg-theme-accent/30 rounded"></div>
-                    </div>
-                    <div className="h-24 bg-theme-surface rounded-xl border border-theme-border-soft p-3 flex flex-col justify-between">
-                      <div className="h-3 w-16 bg-theme-muted/20 rounded"></div>
-                      <div className="h-7 w-24 bg-emerald-400/30 rounded"></div>
-                    </div>
-                  </div>
-                  <div className="flex-1 bg-theme-surface rounded-xl border border-theme-border-soft p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="h-3 w-3 rounded-full bg-theme-accent"></div>
-                      <div className="h-3 w-40 bg-theme-muted/20 rounded"></div>
-                      <div className="h-3 w-20 bg-theme-muted/20 rounded ml-auto"></div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-3 w-full bg-theme-muted/10 rounded"></div>
-                      <div className="h-3 w-5/6 bg-theme-muted/10 rounded"></div>
-                      <div className="h-3 w-4/6 bg-theme-muted/10 rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="card-premium rounded-3xl overflow-hidden border-2 border-theme-border-soft shadow-premium-xl bg-theme-card max-w-5xl mx-auto group">
+            <div className="relative">
+              <div className="absolute inset-0 bg-[image:var(--accent-gradient)] opacity-0 group-hover:opacity-10 mix-blend-overlay transition-opacity duration-500 z-10 pointer-events-none"></div>
+              <img src="/dashboard-preview.png" alt="BillQyro Premium Dashboard" className="w-full h-auto object-cover block" />
             </div>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex flex-wrap items-center justify-center gap-6 mt-10 text-theme-muted text-sm font-semibold">
@@ -401,19 +386,25 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== TEMPLATES ===== */}
-      <motion.section id="templates" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <motion.span animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Category Templates</motion.span>
-            <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Templates for every <span className="text-gradient-premium">business type.</span></h2>
-            <p className="text-theme-muted font-medium max-w-2xl mx-auto">Pre-built templates with custom fields tailored for each industry.</p>
+      <motion.section id="templates" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-white/5 bg-theme-surface/50 py-24 lg:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_right,_var(--tw-gradient-stops))] from-theme-accent/5 via-transparent to-transparent"></div>
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="text-center mb-20">
+            <motion.div animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-flex items-center gap-2 badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent/10 px-5 py-2 rounded-full mb-6 border border-theme-accent/20">
+              <Sparkles className="w-3.5 h-3.5" /> Category Templates
+            </motion.div>
+            <h2 className="text-4xl md:text-5xl font-black text-theme-primary tracking-tight mb-6">Templates for every <br className="hidden md:block"/><span className="text-transparent bg-clip-text bg-[image:var(--accent-gradient)]">business type.</span></h2>
+            <p className="text-theme-muted font-medium text-lg max-w-2xl mx-auto">Pre-built templates with custom fields tailored for each industry.</p>
           </div>
-          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {templates.map((tpl, idx) => (
-              <motion.div key={idx} variants={staggerItem} whileHover="hover" whileTap="tap" className="card-premium p-5 sm:p-6 rounded-2xl hover:border-theme-accent/30 hover:shadow-2xl hover:shadow-theme-accent/10 transition-all duration-300 group cursor-default">
-                <motion.div variants={scaleOnHover} className="text-3xl mb-3">{tpl.icon}</motion.div>
-                <h3 className="text-lg font-bold text-theme-primary mb-1">{tpl.name}</h3>
-                <p className="text-sm text-theme-muted font-medium">{tpl.desc}</p>
+              <motion.div key={idx} variants={staggerItem} whileHover={{ y: -5, scale: 1.02 }} className="group relative rounded-3xl bg-theme-card/80 backdrop-blur-xl border border-white/10 p-6 hover:bg-theme-surface transition-all duration-500 shadow-glass overflow-hidden cursor-default">
+                <div className="absolute -inset-2 bg-[image:var(--accent-gradient)] opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500 pointer-events-none"></div>
+                <div className="relative z-10">
+                  <motion.div variants={scaleOnHover} className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-500 origin-left">{tpl.icon}</motion.div>
+                  <h3 className="text-xl font-black text-theme-primary mb-2 group-hover:text-theme-accent transition-colors">{tpl.name}</h3>
+                  <p className="text-sm text-theme-muted font-medium">{tpl.desc}</p>
+                </div>
               </motion.div>
             ))}
           </motion.div>
@@ -504,34 +495,42 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== PRICING ===== */}
-      <motion.section id="pricing" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-theme-border-soft bg-theme-surface py-20 lg:py-28">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <motion.span animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-4 py-1.5 rounded-full mb-4">Simple Pricing</motion.span>
-            <h2 className="text-3xl md:text-4xl font-black text-theme-primary tracking-tight mb-4">Transparent plans for <span className="text-gradient-premium">every business.</span></h2>
-            <p className="text-theme-muted font-medium max-w-2xl mx-auto">Start free, upgrade when you need more. No hidden fees.</p>
+      <motion.section id="pricing" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="border-t border-white/5 bg-theme-surface/30 py-24 lg:py-32 relative">
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-theme-accent/5 via-transparent to-transparent"></div>
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="text-center mb-20">
+            <motion.div animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-flex items-center gap-2 badge-premium text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent/10 px-5 py-2 rounded-full mb-6 border border-theme-accent/20">
+              <Sparkles className="w-3.5 h-3.5" /> Simple Pricing
+            </motion.div>
+            <h2 className="text-4xl md:text-5xl font-black text-theme-primary tracking-tight mb-6">Transparent plans for <br className="hidden md:block"/>every <span className="text-transparent bg-clip-text bg-[image:var(--accent-gradient)] animate-gradient-x">business.</span></h2>
+            <p className="text-theme-muted font-medium text-lg max-w-2xl mx-auto">Start free, upgrade when you need more. No hidden fees.</p>
           </div>
-          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
+          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {pricingPlans.map((plan, idx) => (
-              <motion.div key={idx} variants={staggerItem} whileHover="hover" whileTap="tap" className={`relative p-6 sm:p-8 rounded-3xl border-2 transition-all duration-300 ${
-                plan.popular ? 'border-theme-accent bg-theme-accent/5 shadow-xl shadow-theme-accent/10 md:scale-105 z-10' : 'card-premium hover:border-theme-accent/30'
+              <motion.div key={idx} variants={staggerItem} whileHover={plan.popular ? { y: -15, scale: 1.05 } : { y: -10, scale: 1.02 }} className={`relative p-8 rounded-[2rem] transition-all duration-500 ${
+                plan.popular ? 'border-2 border-theme-accent bg-gradient-to-b from-theme-surface to-theme-app shadow-[0_20px_50px_rgba(var(--accent-rgb),0.15)] md:scale-105 z-10' : 'bg-theme-card/80 backdrop-blur-xl border border-white/10 shadow-glass hover:bg-theme-surface'
               }`}>
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[image:var(--accent-gradient)] text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">Most Popular</div>
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 bg-[image:var(--accent-gradient)] text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg flex items-center gap-1"><Star className="w-3 h-3 fill-white" /> Most Popular</div>
                 )}
-                <h3 className="text-lg font-bold text-theme-primary mb-1">{plan.name}</h3>
-                <div className="flex items-baseline gap-1 my-4">
-                  <span className="text-4xl font-black text-theme-primary">{plan.price}</span>
-                  <span className="text-sm text-theme-muted font-semibold">{plan.period}</span>
+                
+                <h3 className="text-xl font-black text-theme-primary mb-2">{plan.name}</h3>
+                <div className="flex items-baseline gap-1 my-6">
+                  <span className="text-5xl font-black text-theme-primary font-numbers tracking-tight">{plan.price}</span>
+                  <span className="text-sm text-theme-muted font-bold">{plan.period}</span>
                 </div>
-                <ul className="space-y-3 my-6">
+                
+                <ul className="space-y-4 my-8">
                   {plan.features.map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm font-medium text-theme-muted"><CheckCircle2 className="w-4 h-4 text-theme-accent shrink-0" />{f}</li>
+                    <li key={i} className="flex items-start gap-3 text-sm font-medium text-theme-primary/80"><div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${plan.popular ? 'bg-theme-accent/20' : 'bg-white/5 border border-white/10'}`}><CheckCircle2 className={`w-3.5 h-3.5 ${plan.popular ? 'text-theme-accent' : 'text-theme-muted'}`} /></div>{f}</li>
                   ))}
                 </ul>
-                <motion.button variants={buttonTap} initial="rest" whileHover="hover" whileTap="tap" onClick={() => scrollTo('login')} className={`w-full py-3.5 rounded-xl font-black text-sm transition-all ${
-                  plan.popular ? 'bg-[image:var(--accent-gradient)] text-white shadow-lg hover:opacity-90' : 'bg-theme-surface border border-theme-border-soft text-theme-primary hover:bg-theme-accent hover:text-white hover:border-theme-accent'
-                }`}>{plan.cta}</motion.button>
+                
+                <div className="mt-auto pt-4">
+                  <motion.button variants={buttonTap} initial="rest" whileHover="hover" whileTap="tap" onClick={() => scrollTo('login')} className={`w-full py-4 rounded-2xl font-black text-base transition-all ${
+                    plan.popular ? 'bg-theme-primary text-white shadow-[0_8px_30px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_8px_40px_rgba(var(--primary-rgb),0.5)]' : 'bg-theme-app/50 border-2 border-white/10 text-theme-primary hover:border-theme-primary hover:bg-theme-surface'
+                  }`}>{plan.cta}</motion.button>
+                </div>
               </motion.div>
             ))}
           </motion.div>

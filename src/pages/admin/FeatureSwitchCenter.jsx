@@ -46,7 +46,7 @@ const FeatureSwitchCenter = () => {
     
     try {
       await adminEngine.updateGlobalSettings({ features: nextState });
-    } catch (e) {
+    } catch {
       toast.error('Failed to sync global settings to cloud.');
     }
   };

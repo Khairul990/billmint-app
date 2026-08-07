@@ -291,7 +291,7 @@ const SmartBillItemsList = ({ products = [], invoices = [], wsType }) => {
             globalSettings.customColumns = cols;
             globalSettings.extraColumns = extras;
             localStorage.setItem('billqyro_settings', JSON.stringify(globalSettings));
-          } catch(e) {}
+          } catch (e) { console.warn(e); }
         }}
       />
     </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, FileText, Globe, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, FileText, Globe, ChevronDown, Landmark, Crown } from 'lucide-react';
 import { authEngine } from '../services/authEngine';
 import { t } from '../utils/i18n';
 import { triggerLightHaptic } from '../utils/feedback';
@@ -16,9 +16,9 @@ import { useFeatureControl } from '../hooks/useFeatureControl';
  * - Collapsed: 72px with icons only + tooltips
  * - Persists collapsed state via localStorage
  */
-const Sidebar = ({ 
-  currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userEmail, pendingPaymentsCount = 0,
-  businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncStatus, flushSyncQueue 
+const Sidebar = ({
+  currentTab, setCurrentTab, onLogout, businessSettings, subscription, isAuthenticated, userEmail, pendingPaymentsCount = 0,
+  businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncStatus, flushSyncQueue
 }) => {
   // Determine active workspace and its enabled modules
   const activeWsId = businessSettings?.activeWorkspaceId;
@@ -32,7 +32,7 @@ const Sidebar = ({
       return false;
     }
   });
-  
+
   const [expandedGroups, setExpandedGroups] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
@@ -76,6 +76,7 @@ const Sidebar = ({
     { type: 'label', label: 'Collections' },
     { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen, featureId: 'treasury' },
     { id: 'pending-payments', label: 'Payment Proofs', icon: Bell, featureId: 'payment' },
+    { id: 'bank', label: 'Internal Bank', icon: Landmark, featureId: 'bank' },
 
     { type: 'label', label: 'Analytics' },
     { id: 'reports', label: 'Reports', icon: PieChart, featureId: 'reports' },
@@ -150,7 +151,7 @@ const Sidebar = ({
   // Transform into structured grouped menu
   const structuredMenu = [];
   let currentGroup = null;
-  
+
   menuItems.forEach(item => {
     if (item.type === 'label') {
       currentGroup = {
@@ -196,11 +197,13 @@ const Sidebar = ({
       setIsCollapsed(false);
       setExpandedGroups(prev => prev.includes(groupId) ? prev : [...prev, groupId]);
     } else {
-      setExpandedGroups(prev => 
+      setExpandedGroups(prev =>
         prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
       );
     }
   };
+
+  const isPremium = subscription?.planStatus === 'premium' || (subscription?.planId && subscription.planId.toLowerCase() !== 'free');
 
   return (
     <aside
@@ -211,59 +214,81 @@ const Sidebar = ({
         transition: isMounted ? 'width 200ms cubic-bezier(0.25,0.1,0.25,1), min-width 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none',
       }}
     >
-      {/* Brand Header */}
-      <div className="shrink-0 border-b border-theme-accent/50 flex items-center justify-between overflow-hidden"
-        style={{ padding: isCollapsed ? '16px 12px' : '20px 20px', transition: isMounted ? 'padding 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none' }}
+      {/* Brand Header & Identity Card */}
+      <div className="shrink-0 relative z-20"
+        style={{ padding: isCollapsed ? '16px 8px' : '20px 16px', transition: isMounted ? 'padding 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none' }}
       >
-        {isCollapsed ? (
-          <div className="w-full flex justify-center">
-            <Logo type="icon" className="w-9 h-9" />
-          </div>
-        ) : (
-          <Logo type="horizontal" forceWhiteText={false} />
-        )}
-      </div>
-
-      {/* User Card & Collapse Toggle */}
-      <div className={`shrink-0 border-b border-theme-accent/50 flex ${isCollapsed ? 'flex-col items-center py-2 gap-2' : 'flex-row items-center justify-between px-3 py-2'}`}>
-        {/* User Card */}
-        <div className={`flex items-center rounded-xl overflow-hidden ${
-          isCollapsed ? 'justify-center p-1' : 'gap-2.5 p-1 min-w-0 flex-1'
-        }`}
-          style={{ transition: isMounted ? 'all 200ms cubic-bezier(0.25,0.1,0.25,1)' : 'none' }}
-        >
-          {businessSettings?.logoUrl ? (
-            <img
-              src={businessSettings.logoUrl}
-              alt="Logo"
-              className="w-8 h-8 rounded-lg object-cover shadow-sm bg-theme-card shrink-0"
-            />
+        {/* Premium Glass Panel Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-theme-surface to-theme-surface/80 border-b border-theme-border-soft shadow-[0_8px_30px_rgb(0,0,0,0.02)] backdrop-blur-xl -z-10" />
+        
+        {/* Logo & Toggle Row */}
+        <div className={`flex items-center justify-between overflow-hidden ${isCollapsed ? 'mb-4' : 'mb-6 px-1'}`}>
+          {isCollapsed ? (
+            <div className="w-full flex justify-center hover:scale-105 transition-transform duration-300" onClick={toggleCollapsed} title="Expand Sidebar" style={{cursor: 'pointer'}}>
+              <Logo type="icon" className="w-9 h-9" />
+            </div>
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-[image:var(--accent-gradient)] text-theme-button-text font-bold flex items-center justify-center text-xs shrink-0 shadow-sm">
-              {businessSettings?.businessName?.charAt(0) || 'B'}
+            <div className="hover:opacity-90 transition-opacity duration-300">
+              <Logo type="horizontal" forceWhiteText={false} />
             </div>
           )}
+          
+          {/* Collapse Toggle */}
           {!isCollapsed && (
-            <div className="min-w-0 flex-1">
-              <h4 className="text-[11px] font-bold text-theme-sidebar-text truncate leading-tight">
-                {businessSettings?.businessName || 'My Business'}
-              </h4>
-              <p className="text-[9px] text-theme-sidebar-text/55 font-medium truncate leading-tight">
-                {businessSettings?.email || userEmail || 'No email'}
-              </p>
-            </div>
+            <button
+              onClick={toggleCollapsed}
+              className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-theme-muted hover:text-theme-primary bg-theme-surface hover:bg-theme-app border border-transparent hover:border-theme-border-soft hover:shadow-sm transition-all duration-300 cursor-pointer group"
+              title="Collapse sidebar"
+            >
+              <ChevronsLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            </button>
           )}
         </div>
 
-        {/* Collapse Toggle */}
-        <div className="shrink-0 flex items-center justify-center">
-          <button
-            onClick={toggleCollapsed}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light/15 transition-all duration-200 cursor-pointer"
-            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {isCollapsed ? <ChevronsRight className="w-4 h-4" /> : <ChevronsLeft className="w-4 h-4" />}
-          </button>
+        {/* User Profile Block */}
+        <div className={`relative overflow-hidden flex items-center rounded-2xl bg-theme-surface/50 border hover:shadow-md hover:bg-theme-surface transition-all duration-300 ${isCollapsed ? 'justify-center p-1.5' : 'p-2'} ${isPremium ? 'border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'border-theme-border-soft hover:border-theme-primary/20'}`}
+        >
+          {isPremium && (
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent opacity-100 pointer-events-none animate-pulse" />
+          )}
+          {!isPremium && (
+            <div className="absolute inset-0 bg-gradient-to-br from-theme-primary/5 to-transparent opacity-50 pointer-events-none" />
+          )}
+          
+          <div className="relative z-10 flex items-center gap-3 w-full">
+            {/* Avatar */}
+            <div className={`relative shrink-0 ${isPremium ? 'ring-2 ring-yellow-500 ring-offset-2 ring-offset-theme-surface rounded-[14px]' : ''}`}>
+              {businessSettings?.logoUrl ? (
+                <img
+                  src={businessSettings.logoUrl}
+                  alt="Logo"
+                  className={`${isCollapsed ? 'w-9 h-9' : 'w-10 h-10'} rounded-[14px] object-cover shadow-sm bg-theme-card transition-all duration-300`}
+                />
+              ) : (
+                <div className={`${isCollapsed ? 'w-9 h-9' : 'w-10 h-10'} rounded-[14px] bg-gradient-to-br from-theme-primary to-blue-600 p-[1px] shadow-sm transition-all duration-300`}>
+                  <div className="w-full h-full bg-theme-surface/90 rounded-[13px] flex items-center justify-center text-theme-primary font-black text-sm backdrop-blur-sm">
+                    {businessSettings?.businessName?.charAt(0) || 'B'}
+                  </div>
+                </div>
+              )}
+              {!isCollapsed && (
+                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-theme-success border-2 border-theme-surface rounded-full z-20" title="Online" />
+              )}
+            </div>
+            
+            {/* User Info */}
+            {!isCollapsed && (
+              <div className="min-w-0 flex-1 flex flex-col justify-center py-0.5 pr-1">
+                <h4 className="text-xs font-black text-theme-primary truncate leading-tight mb-0.5 tracking-tight flex items-center gap-1.5">
+                  <span className="truncate">{businessSettings?.businessName || 'My Business'}</span>
+                  {isPremium && <Crown className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500/20 shrink-0" title="Premium Member" />}
+                </h4>
+                <p className="text-[10px] font-semibold text-theme-muted truncate leading-tight">
+                  {businessSettings?.email || userEmail || 'No email'}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -284,18 +309,15 @@ const Sidebar = ({
                   <motion.button
                     whileTap={{ scale: 0.98 }}
                     onClick={() => toggleGroup(item.id)}
-                    className={`relative w-full flex items-center justify-between rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer overflow-hidden group/header ${
-                      isCollapsed ? 'px-0 py-2.5 justify-center' : 'px-3.5 py-2.5'
-                    } ${
-                      isActiveGroup && !isExpanded
+                    className={`relative w-full flex items-center justify-between rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer overflow-hidden group/header ${isCollapsed ? 'px-0 py-2.5 justify-center' : 'px-3.5 py-2.5'
+                      } ${isActiveGroup && !isExpanded
                         ? 'bg-theme-accent-light/15 text-theme-accent shadow-sm'
                         : 'text-theme-sidebar-text/75 hover:text-theme-sidebar-text hover:bg-theme-accent-light/10'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3">
-                      <GroupIcon className={`relative z-10 w-[18px] h-[18px] shrink-0 transition-transform duration-200 ${
-                        isActiveGroup && !isExpanded ? 'text-theme-accent' : 'group-hover/header:scale-110 group-hover/header:text-theme-accent'
-                      }`} />
+                      <GroupIcon className={`relative z-10 w-[18px] h-[18px] shrink-0 transition-transform duration-200 ${isActiveGroup && !isExpanded ? 'text-theme-accent' : 'group-hover/header:scale-110 group-hover/header:text-theme-accent'
+                        }`} />
                       {!isCollapsed && (
                         <span className="truncate whitespace-nowrap text-[12px] uppercase tracking-wider font-black">
                           {item.label}
@@ -306,7 +328,7 @@ const Sidebar = ({
                       <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                     )}
                   </motion.button>
-                  
+
                   {/* Tooltip for group when collapsed */}
                   {isCollapsed && (
                     <div className="absolute left-full top-0 ml-2 px-3 py-1.5 bg-theme-card text-theme-primary text-xs font-bold rounded-lg shadow-xl border border-theme-border-soft whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-[100]">
@@ -326,46 +348,44 @@ const Sidebar = ({
                         className="overflow-hidden"
                       >
                         <div className="pl-6 pr-2 py-1 space-y-0.5 relative mt-1">
-                           {/* Tree branch line */}
-                           <div className="absolute left-[20px] top-0 bottom-3 w-px bg-theme-border-soft/60" />
-                           
-                           {item.items.map(subItem => {
-                             const isSubActive = currentTab === subItem.id || (subItem.id === 'invoices' && currentTab === 'create-invoice');
-                             const SubIcon = subItem.icon;
-                             return (
-                               <motion.button
-                                 key={subItem.id}
-                                 whileTap={{ scale: 0.97 }}
-                                 onClick={() => {
-                                   triggerLightHaptic();
-                                   setCurrentTab(subItem.id);
-                                 }}
-                                 className={`relative w-full flex items-center rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer overflow-hidden gap-3 px-3 py-2 group/sub ${
-                                   isSubActive
-                                     ? 'text-theme-accent bg-theme-accent/10 font-bold'
-                                     : 'text-theme-sidebar-text/65 hover:text-theme-sidebar-text hover:bg-theme-accent-light/10'
-                                 }`}
-                               >
-                                  
-                                  {isSubActive && (
-                                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3 bg-theme-accent rounded-r-full shadow-sm z-10" />
-                                  )}
-                                  
-                                  <SubIcon className={`relative z-10 w-[14px] h-[14px] shrink-0 transition-transform duration-200 ${
-                                    isSubActive ? 'text-theme-accent' : 'group-hover/sub:scale-110 group-hover/sub:text-theme-accent'
+                          {/* Tree branch line */}
+                          <div className="absolute left-[20px] top-0 bottom-3 w-px bg-theme-border-soft/60" />
+
+                          {item.items.map(subItem => {
+                            const isSubActive = currentTab === subItem.id || (subItem.id === 'invoices' && currentTab === 'create-invoice');
+                            const SubIcon = subItem.icon;
+                            return (
+                              <motion.button
+                                key={subItem.id}
+                                whileTap={{ scale: 0.97 }}
+                                onClick={() => {
+                                  triggerLightHaptic();
+                                  setCurrentTab(subItem.id);
+                                }}
+                                className={`relative w-full flex items-center rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer overflow-hidden gap-3 px-3 py-2 group/sub ${isSubActive
+                                  ? 'text-theme-accent bg-theme-accent/10 font-bold'
+                                  : 'text-theme-sidebar-text/65 hover:text-theme-sidebar-text hover:bg-theme-accent-light/10'
+                                  }`}
+                              >
+
+                                {isSubActive && (
+                                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3 bg-theme-accent rounded-r-full shadow-sm z-10" />
+                                )}
+
+                                <SubIcon className={`relative z-10 w-[14px] h-[14px] shrink-0 transition-transform duration-200 ${isSubActive ? 'text-theme-accent' : 'group-hover/sub:scale-110 group-hover/sub:text-theme-accent'
                                   }`} />
-                                  <span className="relative z-10 truncate whitespace-nowrap">
-                                    {subItem.label}
+                                <span className="relative z-10 truncate whitespace-nowrap">
+                                  {subItem.label}
+                                </span>
+
+                                {subItem.id === 'pending-payments' && pendingPaymentsCount > 0 && (
+                                  <span className="relative z-10 ml-auto px-1.5 py-0.5 bg-red-500 text-white text-[9px] font-black rounded-full shadow-lg shadow-red-500/30 animate-pulse">
+                                    {pendingPaymentsCount}
                                   </span>
-                                  
-                                  {subItem.id === 'pending-payments' && pendingPaymentsCount > 0 && (
-                                    <span className="relative z-10 ml-auto px-1.5 py-0.5 bg-red-500 text-white text-[9px] font-black rounded-full shadow-lg shadow-red-500/30 animate-pulse">
-                                      {pendingPaymentsCount}
-                                    </span>
-                                  )}
-                               </motion.button>
-                             );
-                           })}
+                                )}
+                              </motion.button>
+                            );
+                          })}
                         </div>
                       </motion.div>
                     )}
@@ -386,13 +406,11 @@ const Sidebar = ({
                     triggerLightHaptic();
                     setCurrentTab(item.id);
                   }}
-                  className={`relative w-full flex items-center rounded-xl text-sm font-semibold transition-all duration-200 ease-[cubic-bezier(0.25,0.1,0.25,1)] cursor-pointer overflow-hidden ${
-                    isCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3.5 py-2.5'
-                  } ${
-                    isActive
+                  className={`relative w-full flex items-center rounded-xl text-sm font-semibold transition-all duration-200 ease-[cubic-bezier(0.25,0.1,0.25,1)] cursor-pointer overflow-hidden ${isCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3.5 py-2.5'
+                    } ${isActive
                       ? 'text-theme-button-text shadow-lg'
                       : 'text-theme-sidebar-text/65 hover:text-theme-sidebar-text hover:bg-theme-accent-light/10'
-                  }`}
+                    }`}
                 >
                   {/* Active gradient background pill */}
                   {isActive && (
@@ -415,9 +433,8 @@ const Sidebar = ({
                     />
                   )}
 
-                  <Icon className={`relative z-10 w-[18px] h-[18px] shrink-0 transition-transform duration-200 ${
-                    isActive ? 'text-theme-button-text' : 'group-hover:scale-110 group-hover:text-theme-accent'
-                  }`} />
+                  <Icon className={`relative z-10 w-[18px] h-[18px] shrink-0 transition-transform duration-200 ${isActive ? 'text-theme-button-text' : 'group-hover:scale-110 group-hover:text-theme-accent'
+                    }`} />
 
                   {/* Label - only show when expanded */}
                   {!isCollapsed && (
@@ -430,9 +447,8 @@ const Sidebar = ({
 
                   {/* Badge */}
                   {item.id === 'pending-payments' && pendingPaymentsCount > 0 && (
-                    <span className={`relative z-10 px-1.5 py-0.5 bg-red-500 text-white text-[9px] font-black rounded-full shadow-lg shadow-red-500/30 animate-pulse ${
-                      isCollapsed ? 'absolute top-1 right-1' : 'ml-auto'
-                    }`}>
+                    <span className={`relative z-10 px-1.5 py-0.5 bg-red-500 text-white text-[9px] font-black rounded-full shadow-lg shadow-red-500/30 animate-pulse ${isCollapsed ? 'absolute top-1 right-1' : 'ml-auto'
+                      }`}>
                       {pendingPaymentsCount}
                     </span>
                   )}

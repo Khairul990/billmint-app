@@ -12,6 +12,7 @@ import {
   X, 
   Printer, 
   Download, 
+  ImageDown,
   Edit,
   ArrowDownWideNarrow,
   FileDown,
@@ -58,6 +59,7 @@ const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
  * @param {Function} onEditInvoice
  * @param {Function} onDeleteInvoice
  * @param {Function} onDownloadPDF
+ * @param {Function} onDownloadImage
  * @param {Function} setCurrentTab
  * @param {Object} businessSettings
  */
@@ -67,6 +69,7 @@ const Invoices = ({
   onEditInvoice, 
   onDeleteInvoice, // Used for both soft and permanent delete now
   onDownloadPDF, 
+  onDownloadImage, 
   setCurrentTab,
   businessSettings 
 }) => {
@@ -427,6 +430,7 @@ const Invoices = ({
                   });
                 } : null}
                 onDownload={onDownloadPDF}
+                onDownloadImage={onDownloadImage}
                 onDownloadBackup={() => handleDownloadBackup(invoice)}
                 isDeleted={viewMode === 'trash'}
               />
@@ -596,6 +600,13 @@ const Invoices = ({
                   <Download className="w-4 h-4" />
                 </button>
                 <button
+                  onClick={() => onDownloadImage && onDownloadImage(viewingInvoice)}
+                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all"
+                  title="Download Image (PNG)"
+                >
+                  <ImageDown className="w-4 h-4" />
+                </button>
+                <button
                   onClick={async () => {
                     const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
                     if (!isLiveLinkEnabled) {
@@ -620,7 +631,7 @@ const Invoices = ({
                       setLinkCache(prev => ({ ...prev, [invoiceId]: liveLink }));
                       await navigator.clipboard.writeText(liveLink);
                       toast.success(`${portalLabel} Link copied to clipboard!`);
-                    } catch (err) {
+                    } catch {
                       toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                     } finally {
                       setGeneratingLink(false);
@@ -656,7 +667,7 @@ const Invoices = ({
                        }
                        const updatedInvoice = { ...viewingInvoice, publicToken: token };
                        await shareOnWhatsApp(null, updatedInvoice, businessSettings);
-                     } catch (err) {
+                     } catch {
                        toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                      }
                    }}
@@ -677,7 +688,7 @@ const Invoices = ({
                          const updatedInvoice = { ...viewingInvoice, publicToken: token };
                          const link = generateWhatsAppReminderLink(updatedInvoice, currencySymbol, businessSettings);
                          window.open(link, '_blank');
-                       } catch (err) {
+                       } catch {
                          toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                        }
                      }}
@@ -698,7 +709,7 @@ const Invoices = ({
                        const updatedInvoice = { ...viewingInvoice, publicToken: token };
                        const { mailto } = generateEmailShareLink(updatedInvoice, currencySymbol, businessSettings);
                        window.open(mailto, '_blank');
-                     } catch (err) {
+                     } catch {
                        toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                      }
                    }}
@@ -719,7 +730,7 @@ const Invoices = ({
                        const text = generateInvoiceShareText(updatedInvoice, currencySymbol, businessSettings);
                        await navigator.clipboard.writeText(text);
                        toast.success('Invoicing summary copied to clipboard!');
-                     } catch (err) {
+                     } catch {
                        toast.error(`Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                      }
                    }}
@@ -836,7 +847,7 @@ const Invoices = ({
                     if (!token) { toast.error('Could not create live link.'); return; }
                     const updatedInvoice = { ...viewingInvoice, publicToken: token };
                     await shareOnWhatsApp(null, updatedInvoice, businessSettings);
-                  } catch (err) { toast.error(`Could not create ${portalLabel.toLowerCase()}.`); }
+                  } catch { toast.error(`Could not create ${portalLabel.toLowerCase()}.`); }
                 }}
                 className="flex flex-col items-center gap-1 min-w-[60px]"
               >
@@ -854,6 +865,17 @@ const Invoices = ({
                 </div>
                 <span className="text-[9px] font-bold text-theme-muted">PDF</span>
               </button>
+              {onDownloadImage && (
+                <button
+                  onClick={() => onDownloadImage(viewingInvoice)}
+                  className="flex flex-col items-center gap-1 min-w-[60px]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+                    <ImageDown className="w-5 h-5" />
+                  </div>
+                  <span className="text-[9px] font-bold text-theme-muted">Image</span>
+                </button>
+              )}
               <button
                 onClick={async () => {
                   const isLiveLinkEnabled = businessSettings?.customerLiveLinkSettings?.enableLiveInvoiceLink !== false;
@@ -864,7 +886,7 @@ const Invoices = ({
                     const liveLink = `${window.location.origin}/invoice/${token}`;
                     await navigator.clipboard.writeText(liveLink);
                     toast.success(`${portalLabel} Link copied!`);
-                  } catch (err) { toast.error(`Could not create ${portalLabel.toLowerCase()}.`); }
+                  } catch { toast.error(`Could not create ${portalLabel.toLowerCase()}.`); }
                 }}
                 className="flex flex-col items-center gap-1 min-w-[60px]"
               >

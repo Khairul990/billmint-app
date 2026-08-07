@@ -102,7 +102,7 @@ export const notificationEngine = {
       );
       const snap = await getDocs(q);
       return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) {
+    } catch {
       return [];
     }
   },

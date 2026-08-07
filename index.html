@@ -10,15 +10,18 @@
       });
     </script>
     <meta charset="UTF-8" />
-    <link id="favicon-32" rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
-    <link id="favicon-16" rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
-    <link id="apple-touch-icon" rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link id="favicon-ico" rel="shortcut icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/app-icon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#071B3A" />
+    <meta name="theme-color" content="#C81E5C" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- Premium Fonts Setup -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- SEO Optimization Meta Tags -->
     <title>BillQyro - Smart Billing. Premium Invoices.</title>
@@ -313,11 +316,11 @@
         }
 
         .splash-title {
-          font-family: 'Inter', system-ui, sans-serif;
+          font-family: 'Outfit', system-ui, sans-serif;
           font-size: 1.8rem;
           font-weight: 900;
           letter-spacing: -0.03em;
-          color: var(--text-primary, #0f172a);
+          color: var(--text-primary, #1F1B1D);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -328,7 +331,7 @@
         }
 
         .splash-title span {
-          color: var(--accent, #10b981);
+          color: var(--accent, #D4AF7A);
         }
 
         .splash-subtitle {
@@ -422,38 +425,24 @@
           <!-- Logo & Glow -->
           <div class="splash-logo-wrapper">
             <div class="splash-logo-glow"></div>
-            <!-- Official BillQyro SVG Logo (from Logo.jsx) -->
+            <!-- Official BillQyro SVG Logo (Dynamic Theme) -->
             <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="splash-logo">
               <defs>
-                <linearGradient id="foldGradient" x1="0" y1="1" x2="1" y2="0">
-                  <stop offset="0%" stop-color="#cbd5e1" />
-                  <stop offset="100%" stop-color="#ffffff" />
-                </linearGradient>
-                <linearGradient id="foldGradientDark" x1="0" y1="1" x2="1" y2="0">
-                  <stop offset="0%" stop-color="#334155" />
-                  <stop offset="100%" stop-color="#1e293b" />
+                <linearGradient id="splashThemeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="var(--accent, #D4AF7A)" />
+                  <stop offset="100%" stop-color="var(--accent-dark, #C81E5C)" />
                 </linearGradient>
               </defs>
-              
-              <!-- 1. The Accent Q Ring -->
-              <circle cx="45" cy="45" r="32" fill="none" stroke-width="16" class="logo-back-ring" />
-              
-              <!-- 2. Premium Invoicing Document Sheet -->
-              <path d="M30 15 H55 L70 30 V70 C70 73 67 76 64 76 H30 C27 76 24 73 24 70 V21 C24 18 27 15 30 15 Z" class="logo-sheet" />
-              
-              <!-- Folded paper corner -->
-              <path d="M55 15 V30 H70 Z" class="logo-fold" />
-              
-              <!-- Three premium horizontal invoice lines -->
-              <rect x="35" y="32" width="22" height="4" rx="2" class="logo-accent-rect" style="animation-delay: 0.3s;" />
-              <rect x="35" y="42" width="26" height="4" rx="2" class="logo-accent-rect" style="animation-delay: 0.4s;" />
-              <rect x="35" y="52" width="14" height="4" rx="2" class="logo-accent-rect" style="animation-delay: 0.5s;" />
-              
-              <!-- Bold Rupee ₹ Symbol -->
-              <path class="logo-rupee" style="animation-delay: 0.6s;" d="M19.5,14 H10 V11 H13.5 C15.5,11 17,10 17,8 C17,6.5 15.5,5.5 13.5,5.5 H10 V3 H20 V0 H6 V3 H10 C12,3 13,4 13,5.5 C13,7 12,8 10,8 H6 V11 H10 V14 H6 V17 H10.5 L19.5,28 H24 L14.5,17 H19.5 V14 Z" />
-              
-              <!-- 3. The Accent Q Tail -->
-              <path d="M 50 50 L 78 80 C 80 82 78 85 75 85 L 62 85 C 60 85 58 84 56 82 L 36 60 Z" class="logo-front-tail" style="animation-delay: 0.7s;" />
+              <!-- 1. Dynamic Document Outline -->
+              <path class="logo-back-ring" style="animation-delay: 0.1s;" d="M 38,20 L 62,20 L 80,38 L 80,72 A 8 8 0 0 1 72,80 L 38,80 A 8 8 0 0 1 30,72 L 30,28 A 8 8 0 0 1 38,20 Z" stroke="url(#splashThemeGrad)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+              <!-- 2. Document Fold -->
+              <path class="logo-front-tail" style="animation-delay: 0.2s;" d="M 62,20 L 62,38 L 80,38" stroke="url(#splashThemeGrad)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+              <!-- Inner lines -->
+              <line x1="42" y1="40" x2="52" y2="40" stroke="var(--accent, #D4AF7A)" stroke-width="4" stroke-linecap="round" opacity="0.6" style="animation: slideInTail 0.8s forwards; animation-delay: 0.3s; opacity: 0;" class="logo-front-tail" />
+              <line x1="42" y1="52" x2="68" y2="52" stroke="var(--accent, #D4AF7A)" stroke-width="4" stroke-linecap="round" opacity="0.6" style="animation: slideInTail 0.8s forwards; animation-delay: 0.4s; opacity: 0;" class="logo-front-tail" />
+              <line x1="42" y1="64" x2="58" y2="64" stroke="var(--accent, #D4AF7A)" stroke-width="4" stroke-linecap="round" opacity="0.6" style="animation: slideInTail 0.8s forwards; animation-delay: 0.5s; opacity: 0;" class="logo-front-tail" />
+              <!-- 3. The "Q" Tail -->
+              <path class="logo-front-tail" style="animation-delay: 0.6s;" d="M 66,66 L 86,86" stroke="url(#splashThemeGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </div>
 

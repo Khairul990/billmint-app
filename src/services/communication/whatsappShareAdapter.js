@@ -69,7 +69,7 @@ export async function shareViaWhatsApp(preparedComm) {
     let canShareFiles = false;
     try {
       canShareFiles = navigator.canShare({ files });
-    } catch (e) {
+    } catch {
       canShareFiles = false;
     }
     if (canShareFiles) {

@@ -32,7 +32,7 @@ export const backupEngine = {
           const data = JSON.parse(e.target.result);
           await this.restore(data);
           resolve(data);
-        } catch (err) {
+        } catch {
           reject(new Error('Invalid backup file format.'));
         }
       };

@@ -55,8 +55,8 @@ const LiveInvoicePreview = () => {
           <span className="text-xs font-bold text-theme-muted px-2 py-1.5 bg-theme-app rounded-lg border border-theme-border-soft hidden sm:inline-block">A4 Size</span>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-theme-app dark:bg-theme-card flex justify-center custom-scrollbar">
-        <div className="w-full max-w-[800px] origin-top scale-[0.6] sm:scale-[0.7] md:scale-[0.85] lg:scale-90 xl:scale-100 transition-transform">
+      <div className="flex-1 overflow-auto p-4 md:p-6 bg-theme-app dark:bg-theme-card flex justify-center custom-scrollbar">
+        <div className="min-w-[700px] max-w-[800px] w-full origin-top transition-transform shadow-premium-lg rounded-xl">
           <InvoicePreview invoice={previewInvoice} isPreviewMode={true} businessSettings={businessSettings} />
         </div>
       </div>

@@ -32,7 +32,7 @@ service firebase.storage {
     // Admin-only bucket for platform assets
     match /admin_assets/{fileName} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.token.email == 'khairul2052007@gmail.com';
+      allow write: if request.auth != null && request.auth.token.superAdmin == true;
     }
 
     // Generic catch-all — explicitly deny by default to prevent unauthorized access

@@ -63,7 +63,7 @@ const FeatureControlStudio = ({ workspaceId }) => {
       await featureControlEngine.toggleFeature(workspaceId, featureId, !currentValue);
       toast.success('Feature updated.');
       loadData(); // Re-sync to get correct effective states
-    } catch (err) {
+    } catch {
       toast.error('Update failed.');
       loadData();
     }
@@ -78,7 +78,7 @@ const FeatureControlStudio = ({ workspaceId }) => {
       await featureControlEngine.toggleCategory(workspaceId, categoryId, !currentValue);
       toast.success('Category updated.');
       loadData();
-    } catch (err) {
+    } catch {
       toast.error('Update failed.');
       loadData();
     }

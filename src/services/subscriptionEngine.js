@@ -1,5 +1,7 @@
 import * as dbEngine from './dbEngine';
-import {  submitPremiumRequest as dbSubmitPremiumRequest  } from './dbEngine';
+import { submitPremiumRequest as dbSubmitPremiumRequest } from './dbEngine';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from './firebaseConfig';
 
 const SUBSCRIPTION_PLANS = {
   FREE: {
@@ -38,20 +40,55 @@ const SUBSCRIPTION_PLANS = {
 };
 
 class SubscriptionEngine {
-  async getSubscriptionDetails(workspaceId) {
-    // In a real app, this queries dbEngine for the workspace's subscription doc
-    // For now, returning a mock or fetched setting
-    const settings = await dbEngine.getSettings(workspaceId);
+  getSubscriptionDetailsSync(settings) {
     const planId = settings?.plan || 'free';
     const planDetails = SUBSCRIPTION_PLANS[planId.toUpperCase()] || SUBSCRIPTION_PLANS.FREE;
+    return {
+      planId: planDetails.id,
+      name: planDetails.name,
+      status: settings?.subscriptionStatus || 'active',
+      renewalDate: settings?.renewalDate || null,
+      limits: planDetails.limits,
+      features: planDetails.features
+    };
+  }
+
+  async getSubscriptionDetails(workspaceId) {
+    const settings = await dbEngine.getSettings(workspaceId);
+    const planId = settings?.plan || 'free';
+    
+    let planDetails = SUBSCRIPTION_PLANS[planId.toUpperCase()] || SUBSCRIPTION_PLANS.FREE;
+    
+    try {
+      const planDoc = await getDoc(doc(db, 'subscriptionPlans', planId.toLowerCase()));
+      if (planDoc.exists()) {
+        const data = planDoc.data();
+        planDetails = {
+          id: data.id || data.slug || planId,
+          name: data.name,
+          limits: {
+            invoices: data.limits.maxInvoices === -1 ? Infinity : data.limits.maxInvoices,
+            maxInvoices: data.limits.maxInvoices,
+            customers: data.limits.maxCustomers === -1 ? Infinity : data.limits.maxCustomers,
+            products: data.limits.maxProducts === -1 ? Infinity : data.limits.maxProducts,
+            users: data.limits.maxTeamMembers === -1 ? Infinity : data.limits.maxTeamMembers
+          },
+          features: Object.keys(data.toggles).filter(k => data.toggles[k]),
+          ...data
+        };
+      }
+    } catch(e) {
+      console.error("Failed to fetch dynamic plan", e);
+    }
     
     return {
       planId: planDetails.id,
       name: planDetails.name,
-      status: settings?.subscriptionStatus || 'active', // active, past_due, canceled
+      status: settings?.subscriptionStatus || 'active',
       renewalDate: settings?.renewalDate || null,
       limits: planDetails.limits,
-      features: planDetails.features
+      features: planDetails.features,
+      rawPlan: planDetails
     };
   }
 

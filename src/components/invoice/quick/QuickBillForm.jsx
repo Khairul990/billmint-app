@@ -60,7 +60,7 @@ const QuickBillForm = ({ customers, products, onSaveInvoice }) => {
     const generateId = () => {
       try {
         return crypto.randomUUID();
-      } catch (e) {
+      } catch {
         return `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       }
     };

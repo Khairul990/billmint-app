@@ -3,6 +3,7 @@ import { Page, Text, View, Document, StyleSheet, Font, Image } from '@react-pdf/
 import { formatCurrency } from '../utils/invoiceUtils';
 import { t } from '../utils/i18n';
 import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
+import { PdfTemplateLayouts } from './invoice-templates/pdf-layouts/PdfTemplateLayouts';
 
 // Using standard Helvetica to prevent network/CORS font fetch failures
 
@@ -298,6 +299,23 @@ import { buildCanonicalRenderModel } from '../utils/normalizeInvoiceModel';
 
 const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, pageSize = 'A4' }) => {
   if (!invoice) return null;
+
+  const selectedTemplate = invoice.selectedTemplate;
+  if (selectedTemplate && PdfTemplateLayouts[selectedTemplate]) {
+    const SelectedPdfLayout = PdfTemplateLayouts[selectedTemplate];
+    return (
+      <Document>
+        <Page size={pageSize} wrap>
+          <SelectedPdfLayout 
+            invoice={invoice} 
+            businessSettings={businessSettings} 
+            safeLogoBase64={safeLogoBase64} 
+            qrCodeBase64={qrCodeBase64}
+          />
+        </Page>
+      </Document>
+    );
+  }
 
   const {
     templateId,

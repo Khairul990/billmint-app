@@ -50,7 +50,7 @@ export const getAdminAllSupportTickets = async () => {
 
   try {
     return JSON.parse(localStorage.getItem('billqyro_platform_support_tickets') || '[]');
-  } catch (e) {
+  } catch {
     return [];
   }
 };
@@ -139,7 +139,7 @@ export const getAdminAllFeatureRequests = async () => {
 
   try {
     return JSON.parse(localStorage.getItem('billqyro_platform_feature_requests') || '[]');
-  } catch (e) {
+  } catch {
     return [];
   }
 };
@@ -225,7 +225,7 @@ export const getAdminAllAnnouncements = async () => {
 
   try {
     return JSON.parse(localStorage.getItem('billqyro_platform_announcements') || '[]');
-  } catch (e) {
+  } catch {
     return [];
   }
 };
@@ -311,7 +311,7 @@ export const getAdminAllChangelogs = async () => {
 
   try {
     return JSON.parse(localStorage.getItem('billqyro_platform_changelogs') || '[]');
-  } catch (e) {
+  } catch {
     return [];
   }
 };

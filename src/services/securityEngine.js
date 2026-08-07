@@ -40,7 +40,7 @@ export const securityEngine = {
         return snap.data().role || ROLES.USER;
       }
       return ROLES.USER;
-    } catch (e) {
+    } catch {
       return ROLES.USER;
     }
   },
@@ -106,7 +106,7 @@ export const securityEngine = {
       }
       const storedUid = getRealUserId();
       return storedUid === userId;
-    } catch (e) {
+    } catch {
       return false;
     }
   },
@@ -120,7 +120,7 @@ export const securityEngine = {
       let logs = await BillQyroDB.getAll('auditLogs');
       if (userId) logs = logs.filter(l => l.userId === userId);
       return logs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-    } catch (e) {
+    } catch {
       return [];
     }
   },
@@ -130,9 +130,7 @@ export const securityEngine = {
   },
 
   isOwner(session) {
-    const adminEmail = 'khairul2052007@gmail.com';
     if (!session) return false;
-    const email = session.userEmail || session.email || '';
-    return email.toLowerCase() === adminEmail.toLowerCase();
+    return session.isSuperAdmin === true;
   }
 };

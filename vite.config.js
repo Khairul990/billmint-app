@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.ico', 'favicon-16x16.png', 'favicon-32x32.png', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'app-icon.svg'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         maximumFileSizeToCacheInBytes: 5000000,
@@ -43,16 +43,14 @@ export default defineConfig(({ mode }) => ({
         name: 'BillQyro',
         short_name: 'BillQyro',
         description: 'Modern Billing & Invoicing Platform',
-        theme_color: '#071B3A',
-        background_color: '#f8fafc',
+        theme_color: '#C81E5C',
+        background_color: '#1F1B1D',
         display: 'standalone',
         start_url: '/',
         scope: '/',
         icons: [
-          { src: 'icon-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: 'icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-          { src: 'icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-          { src: 'apple-touch-icon.png', sizes: '180x180', type: 'image/png', purpose: 'any' }
+          { src: 'app-icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          { src: 'app-icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' }
         ]
       },
       devOptions: {

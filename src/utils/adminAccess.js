@@ -23,7 +23,7 @@ export function isAdminUser(user) {
   
   if (!userEmail) return false;
 
-  if (userEmail === 'khairul2052007@gmail.com') return true;
+  if (user.isSuperAdmin === true) return true;
   
   const adminEmail = getAdminEmail();
   

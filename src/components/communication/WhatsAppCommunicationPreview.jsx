@@ -144,7 +144,7 @@ export default function WhatsAppCommunicationPreview({ workspaceId, userId, invo
       setCopied(true);
       toast.success('Message copied to clipboard.');
       setTimeout(() => setCopied(false), 2000);
-    } catch (e) {
+    } catch {
       toast.error('Could not copy message.');
     }
   };

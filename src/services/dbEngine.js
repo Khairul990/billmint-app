@@ -1,7 +1,7 @@
 import { db, firebaseReady, auth } from './firebaseConfig';
 import { toast } from 'react-hot-toast';
 import JSZip from 'jszip';
-import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where, getCountFromServer } from 'firebase/firestore';
 import { getAdminEmail, isAdminUser } from '../utils/adminAccess';
 import { BillQyroDB } from './localDb';
 import { generateVerificationCode } from './verificationCodeService';
@@ -314,6 +314,8 @@ const markLocalRecordSynced = async (storeName, docId) => {
   else if (storeName === 'customers') key = KEYS.CUSTOMERS;
   else if (storeName === 'products') key = KEYS.PRODUCTS;
   else if (storeName === 'expenses') key = KEYS.EXPENSES;
+  else if (storeName === 'bankLedger') key = KEYS.BANK_LEDGER;
+  else if (storeName === 'bankCredit') key = KEYS.BANK_CREDIT;
   if (!key) return;
 
   const items = JSON.parse(localStorage.getItem(key) || '[]');
@@ -466,6 +468,9 @@ export const GLOBAL_KEYS = {
   EXPENSES: 'billqyro_expenses',
   STUDENTS: 'billqyro_students',
   SUBSCRIPTION: 'billqyro_subscription',
+  BANK_LEDGER: 'billqyro_bank_ledger',
+  BANK_CREDIT: 'billqyro_bank_credit',
+  BANK_SETTINGS: 'billqyro_bank_settings',
 };
 
 export const getScopedKey = (baseKey) => {
@@ -474,7 +479,7 @@ export const getScopedKey = (baseKey) => {
   if (!uid) return baseKey;
 
   // Add workspace isolation for data collections
-  if ([GLOBAL_KEYS.INVOICES, GLOBAL_KEYS.CUSTOMERS, GLOBAL_KEYS.PRODUCTS, GLOBAL_KEYS.EXPENSES, GLOBAL_KEYS.STUDENTS].includes(baseKey)) {
+  if ([GLOBAL_KEYS.INVOICES, GLOBAL_KEYS.CUSTOMERS, GLOBAL_KEYS.PRODUCTS, GLOBAL_KEYS.EXPENSES, GLOBAL_KEYS.STUDENTS, GLOBAL_KEYS.BANK_LEDGER, GLOBAL_KEYS.BANK_CREDIT, GLOBAL_KEYS.BANK_SETTINGS].includes(baseKey)) {
     const settingsStr = localStorage.getItem(`${GLOBAL_KEYS.SETTINGS}_${uid}`);
     if (settingsStr) {
       try {
@@ -499,6 +504,9 @@ export const KEYS = {
   get EXPENSES() { return getScopedKey(GLOBAL_KEYS.EXPENSES); },
   get STUDENTS() { return getScopedKey(GLOBAL_KEYS.STUDENTS); },
   get SUBSCRIPTION() { return getScopedKey(GLOBAL_KEYS.SUBSCRIPTION); },
+  get BANK_LEDGER() { return getScopedKey(GLOBAL_KEYS.BANK_LEDGER); },
+  get BANK_CREDIT() { return getScopedKey(GLOBAL_KEYS.BANK_CREDIT); },
+  get BANK_SETTINGS() { return getScopedKey(GLOBAL_KEYS.BANK_SETTINGS); },
 };
 
 export const migrateGlobalToScopedStorage = async () => {
@@ -795,7 +803,7 @@ export const getRealUserId = () => {
       if (data && data.uid) {
         return data.uid;
       }
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
   }
   return null;
 };
@@ -882,7 +890,7 @@ export const initializeStorage = () => {
   try {
     const stored = localStorage.getItem(KEYS.INVOICES);
     if (stored) currentInvoices = JSON.parse(stored);
-  } catch(e) { /* ignore */ }
+  } catch { /* ignore */ }
   
   if (!Array.isArray(currentInvoices)) {
     currentInvoices = [];
@@ -905,7 +913,7 @@ export const initializeStorage = () => {
         }
         localStorage.removeItem(oldKey);
       }
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
   });
 
   // Migrate legacy invoices lacking an invoiceNumber
@@ -1034,7 +1042,7 @@ export const getAuthSession = () => {
       return null;
     }
     return data;
-  } catch (e) {
+  } catch {
     return null;
   }
 };
@@ -1301,7 +1309,7 @@ export const getSubscriptionStatus = () => {
       return expiredSub;
     }
     return sub;
-  } catch (e) {
+  } catch {
     return DEFAULT_SUBSCRIPTION;
   }
 };
@@ -1435,19 +1443,14 @@ export const getAdminUsersList = async () => {
 export const getAdminTotalStats = async () => {
   if (!firebaseReady) return { invoices: 0, customers: 0, products: 0, expenses: 0 };
   try {
-    // For MVP client-side admin, we query group collections. 
-    // WARNING: Can be heavy for large datasets. In production, use Firebase Cloud Functions + Counters.
-    const invSnap = await getDocs(collection(db, 'publicInvoices')); // Fast proxy for total invoices created
-    const custSnap = await getDocs(query(collection(db, 'usersList'))); // We can't easily query all subcollections securely without collectionGroup + proper indexes.
+    const invSnap = await getCountFromServer(collection(db, 'publicInvoices'));
+    const custSnap = await getCountFromServer(collection(db, 'usersList'));
     
-    // Instead of raw massive collectionGroup queries which fail without indexes,
-    // we rely on the usersList aggregations if available, otherwise just mock these specific totals for the MVP UI
-    // and rely on the actual Users/Workspaces counts from usersList.
     return {
-      invoices: invSnap.size || 0,
-      customers: custSnap.size * 5, // Placeholder ratio
-      products: custSnap.size * 12,
-      expenses: custSnap.size * 3
+      invoices: invSnap.data().count || 0,
+      customers: custSnap.data().count * 5, // Placeholder ratio
+      products: custSnap.data().count * 12,
+      expenses: custSnap.data().count * 3
     };
   } catch (e) {
     console.error('Failed to getAdminTotalStats:', e);
@@ -1466,7 +1469,7 @@ export const deleteEnterpriseUser = async (targetUserId) => {
         const deletePromises = [];
         snap.forEach(d => deletePromises.push(deleteDoc(d.ref)));
         await Promise.all(deletePromises);
-      } catch (e) { console.warn(`Skipped deleting ${coll} for ${targetUserId}`); }
+      } catch { console.warn(`Skipped deleting ${coll} for ${targetUserId}`); }
     }
     
     await deleteDoc(doc(db, 'settings', targetUserId));
@@ -1491,7 +1494,7 @@ export const resetEnterpriseWorkspace = async (targetUserId) => {
         const deletePromises = [];
         snap.forEach(d => deletePromises.push(deleteDoc(d.ref)));
         await Promise.all(deletePromises);
-      } catch (e) { console.warn(`Skipped resetting ${coll} for ${targetUserId}`); }
+      } catch { console.warn(`Skipped resetting ${coll} for ${targetUserId}`); }
     }
     return true;
   } catch (e) {
@@ -2678,7 +2681,7 @@ export const restoreInvoice = async (id) => {
           invoices[idx].syncStatus = 'synced';
           updateLocalCache(KEYS.INVOICES, invoices);
           await BillQyroDB.put('invoices', invoices[idx]);
-        } catch (e) {
+        } catch {
           firebaseStatus = 'failed';
         }
       } else {
@@ -3401,6 +3404,22 @@ export const startRealTimeSync = (userId) => {
   syncCollection('customers');
   syncCollection('products');
   syncCollection('expenses');
+  syncCollection('bankLedger');
+  syncCollection('bankCredit');
+
+  // 3. Internal Bank settings listener (single doc: bankMeta/{userId}/items/settings)
+  const bankMetaUnsub = onSnapshot(doc(db, 'bankMeta', userId, 'items', 'settings'), (docSnap) => {
+    if (docSnap.exists()) {
+      const cloudSettings = docSnap.data();
+      if (cloudSettings.updatedByDeviceId === deviceId && cloudSettings.source === 'localUserAction') {
+        const age = Date.now() - new Date(cloudSettings.updatedAt).getTime();
+        if (age < 5000) return;
+      }
+      window.dispatchEvent(new CustomEvent('billqyro:bank-settings-updated', { detail: cloudSettings }));
+      window.dispatchEvent(new CustomEvent('billqyro_bank_updated'));
+    }
+  });
+  syncEngineUnsubscribes.push(bankMetaUnsub);
   
   // Process any offline queue on start
   flushSyncQueue();
@@ -3498,10 +3517,10 @@ export const getCustomerPortalInvoices = async (customerId, phone) => {
     
     if (!phone) return allInvoices;
     
-    const cleanInputPhone = phone.replace(/[\s\-\+]/g, '');
+    const cleanInputPhone = phone.replace(/[\s\-+]/g, '');
     return allInvoices.filter(inv => {
       if (!inv.customerPhone) return false;
-      const cleanDbPhone = inv.customerPhone.replace(/[\s\-\+]/g, '');
+      const cleanDbPhone = inv.customerPhone.replace(/[\s\-+]/g, '');
       return cleanDbPhone === cleanInputPhone || cleanDbPhone.includes(cleanInputPhone) || cleanInputPhone.includes(cleanDbPhone);
     });
   } catch (err) {
@@ -3513,7 +3532,7 @@ export const getCustomerPortalInvoices = async (customerId, phone) => {
 export const verifyCustomerPortal = async (customerId, phone) => {
   if (!firebaseReady) return false;
   try {
-    const cleanInputPhone = phone.replace(/[\s\-\+]/g, '');
+    const cleanInputPhone = phone.replace(/[\s\-+]/g, '');
     
     // 1. Try checking via publicInvoices
     const invoices = await getCustomerPortalInvoices(customerId, phone);
@@ -3524,12 +3543,12 @@ export const verifyCustomerPortal = async (customerId, phone) => {
       const localCustomers = await BillQyroDB.getAll('customers');
       const localCustomer = localCustomers.find(c => c.id === customerId);
       if (localCustomer && localCustomer.phone) {
-         const cleanLocalPhone = localCustomer.phone.replace(/[\s\-\+]/g, '');
+         const cleanLocalPhone = localCustomer.phone.replace(/[\s\-+]/g, '');
          if (cleanLocalPhone === cleanInputPhone || cleanLocalPhone.includes(cleanInputPhone) || cleanInputPhone.includes(cleanLocalPhone)) {
              return true;
          }
       }
-    } catch(e) {}
+    } catch(e) { console.warn('Ignored local db error', e); }
 
     // 3. Fallback: Try querying Firestore customers (may fail if rules are strict, but worth a shot)
     try {
@@ -3538,14 +3557,14 @@ export const verifyCustomerPortal = async (customerId, phone) => {
       if (!snap.empty) {
         const custData = snap.docs[0].data();
         if (custData.phone) {
-           const cleanDbPhone = custData.phone.replace(/[\s\-\+]/g, '');
+           const cleanDbPhone = custData.phone.replace(/[\s\-+]/g, '');
            if (cleanDbPhone === cleanInputPhone || cleanDbPhone.includes(cleanInputPhone) || cleanInputPhone.includes(cleanDbPhone)) {
                return true;
            }
         }
       }
     } catch (e) {
-      // Ignore permission denied errors
+      console.warn('Ignore permission denied errors', e);
     }
 
     return false;

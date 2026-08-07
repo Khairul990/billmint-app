@@ -18,7 +18,7 @@ const ChangelogManager = () => {
     try {
       const list = await adminEngine.getChangelogs();
       setChangelogs(list);
-    } catch (e) {
+    } catch {
       toast.error('Failed to load changelogs');
     } finally {
       setIsLoading(false);
@@ -43,7 +43,7 @@ const ChangelogManager = () => {
       setNotes('');
       setType('new');
       fetchChangelogs();
-    } catch (e) {
+    } catch {
       toast.error('Failed to publish changelog');
     }
   };

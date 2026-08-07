@@ -58,7 +58,7 @@ const BusinessStudio = ({ settings, onUpdate }) => {
                 if (f && f.type.startsWith('image/')) handleChange('logoUrl', await compressImage(f)); 
               }}
             >
-              <input type="file" accept="image/*" onChange={async (e) => { const f = e.target.files[0]; if (f && f.type.startsWith('image/')) handleChange('logoUrl', await compressImage(f)); }} className="absolute inset-0 opacity-0 cursor-pointer" />
+              <input type="file" accept="image/*" onChange={async (e) => { const f = e.target.files[0]; if (f && f.type.startsWith('image/')) handleChange('logoUrl', await compressImage(f)); }} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
               {settings?.logoUrl ? (
                 <div className="relative inline-block group">
                   <img src={settings.logoUrl} alt="Logo" className="h-16 w-auto object-contain rounded-lg border border-theme-border-soft bg-white p-1" />
@@ -153,7 +153,7 @@ const BusinessStudio = ({ settings, onUpdate }) => {
                   if (f && f.type.startsWith('image/')) handleChange('signatureUrl', await compressImage(f)); 
                 }}
               >
-                <input type="file" accept="image/*" onChange={async (e) => { const f = e.target.files[0]; if (f && f.type.startsWith('image/')) handleChange('signatureUrl', await compressImage(f)); }} className="absolute inset-0 opacity-0 cursor-pointer" />
+                <input type="file" accept="image/*" onChange={async (e) => { const f = e.target.files[0]; if (f && f.type.startsWith('image/')) handleChange('signatureUrl', await compressImage(f)); }} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
                 {settings?.signatureUrl ? (
                   <div className="relative inline-block group">
                     <img src={settings.signatureUrl} alt="Signature" className="h-12 w-auto object-contain rounded-lg bg-white/10" />

@@ -34,7 +34,7 @@ export const sendEmpireEvent = async ({ eventType, message, severity = 'Low', pa
       createdAt: new Date().toISOString()
     };
     await addDoc(collection(db, 'control_website_events'), payload);
-  } catch (error) {
+  } catch {
     // Silently fail so BillQyro isn't interrupted
   }
 };
@@ -52,7 +52,7 @@ export const sendEmpireError = async ({ errorType, message, severity = 'High', p
       createdAt: new Date().toISOString()
     };
     await addDoc(collection(db, 'control_website_errors'), payload);
-  } catch (error) {
+  } catch {
     // Silently fail
   }
 };
@@ -68,7 +68,7 @@ export const sendEmpireHealth = async ({ status = 'Healthy', healthScore = 100, 
       lastPingAt: new Date().toISOString()
     };
     await addDoc(collection(db, 'control_website_health'), payload);
-  } catch (error) {
+  } catch {
     // Silently fail
   }
 };

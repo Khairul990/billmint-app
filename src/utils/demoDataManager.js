@@ -20,31 +20,31 @@ export const isDemoModeActive = () => {
 export const getDemoCustomers = () => {
   try {
     return JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [];
-  } catch (e) { return []; }
+  } catch { return []; }
 };
 
 export const getDemoProducts = () => {
   try {
     return JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [];
-  } catch (e) { return []; }
+  } catch { return []; }
 };
 
 export const getDemoInvoices = () => {
   try {
     return JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [];
-  } catch (e) { return []; }
+  } catch { return []; }
 };
 
 export const getDemoPayments = () => {
   try {
     return JSON.parse(localStorage.getItem(KEYS.PAYMENTS)) || [];
-  } catch (e) { return []; }
+  } catch { return []; }
 };
 
 export const getDemoReports = () => {
   try {
     return JSON.parse(localStorage.getItem(KEYS.REPORTS)) || {};
-  } catch (e) { return {}; }
+  } catch { return {}; }
 };
 
 export const saveDemoInvoice = (invoice) => {
@@ -162,7 +162,7 @@ export const generateFakeAdminData = () => {
 export const getFakeAdminData = () => {
   try {
     return JSON.parse(localStorage.getItem(KEYS.ADMIN_DATA)) || null;
-  } catch (e) {
+  } catch {
     return null;
   }
 };
