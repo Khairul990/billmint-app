@@ -160,12 +160,18 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false, onC
         <IconSVG sizeClass="w-3/5 h-3/5" />
         <div className="mt-5 flex flex-col items-center select-none text-center">
           <motion.span
-            className="text-2xl font-black text-theme-primary tracking-tight transition-colors duration-300"
-            style={{ fontFamily: "'Outfit', sans-serif" }}
+            className="text-[28px] tracking-tighter transition-colors duration-300 flex items-baseline justify-center"
+            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
             animate={{ scale: isClicked ? [1, 1.05, 1] : 1 }}
             transition={{ duration: 1.5 }}
           >
-            Bill<span className="text-theme-accent">Qyro</span>
+            <span className="text-theme-primary font-bold">Bill</span>
+            <span className="font-extrabold" style={{ 
+              backgroundImage: 'var(--accent-gradient)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.1))'
+            }}>Qyro</span>
           </motion.span>
           <span className="text-[7px] font-black uppercase text-theme-muted tracking-[0.1em] mt-2 flex flex-col items-center gap-0.5 leading-tight">
             <span>SMART BILLING.</span>
@@ -187,10 +193,10 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false, onC
 
       <div className="flex flex-col select-none">
         {/* Brand name row */}
-        <div className="flex items-baseline leading-none">
+        <div className="flex items-baseline leading-none pt-0.5">
           <motion.span
-            className={`text-[24px] font-black tracking-tight leading-none ${forceWhiteText ? 'text-white' : 'text-theme-primary'}`}
-            style={{ fontFamily: "'Outfit', sans-serif" }}
+            className={`text-[26px] font-bold tracking-tighter leading-none ${forceWhiteText ? 'text-white' : 'text-theme-primary'}`}
+            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
             animate={{
               color: isClicked ? 'var(--accent)' : (forceWhiteText ? '#ffffff' : 'var(--text-primary)'),
               transition: { duration: 1.5 }
@@ -200,8 +206,14 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false, onC
           </motion.span>
 
           <motion.span
-            className="text-[24px] font-black tracking-tight relative pr-4 leading-none"
-            style={{ color: 'var(--accent)', fontFamily: "'Outfit', sans-serif" }}
+            className="text-[26px] font-extrabold tracking-tighter relative pr-4 leading-none"
+            style={{ 
+              backgroundImage: 'var(--accent-gradient)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontFamily: "'Inter', system-ui, sans-serif",
+              filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.05))'
+            }}
           >
             Qyro
             {/* Floating leaf superscript */}
