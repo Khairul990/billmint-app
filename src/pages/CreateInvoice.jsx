@@ -72,18 +72,21 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
 
   const totals = useMemo(() => {
     const subtotal = items.reduce((sum, item) => sum + ((parseFloat(item.qty) || 0) * (parseFloat(item.price) || 0)), 0);
+    const discountAmt = parseFloat(discountAmount) || 0;
     let discount = 0;
     if (discountType === 'percent') {
-      discount = subtotal * (discountAmount / 100);
+      discount = subtotal * (discountAmt / 100);
     } else if (discountType === 'flat') {
-      discount = discountAmount;
+      discount = discountAmt;
     }
     const afterDiscount = Math.max(0, subtotal - discount);
-    const tax = afterDiscount * (taxPercent / 100);
-    const grandTotal = afterDiscount + tax + shipping;
-    const totalDue = grandTotal + oldDue;
+    const tax = afterDiscount * ((parseFloat(taxPercent) || 0) / 100);
+    const shippingVal = parseFloat(shipping) || 0;
+    const oldDueVal = parseFloat(oldDue) || 0;
+    const grandTotal = afterDiscount + tax + shippingVal;
+    const totalDue = grandTotal + oldDueVal;
 
-    return { subtotal, discount, tax, grandTotal, oldDue, totalDue };
+    return { subtotal, discount, tax, grandTotal, oldDue: oldDueVal, totalDue };
   }, [items, discountType, discountAmount, taxPercent, shipping, oldDue]);
 
   useEffect(() => {
@@ -509,7 +512,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                         type="number" min="0" 
                         className="w-24 px-3 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-sm text-right font-semibold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
                         value={discountAmount} 
-                        onChange={(e) => setDiscountAmount(parseFloat(e.target.value) || 0)} 
+                        onChange={(e) => setDiscountAmount(e.target.value)} 
                       />
                     ) : (
                       <span className="text-theme-muted">-</span>
@@ -524,7 +527,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                       type="number" min="0" 
                       className="w-24 px-3 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-sm text-right font-semibold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
                       value={taxPercent} 
-                      onChange={(e) => setTaxPercent(parseFloat(e.target.value) || 0)} 
+                      onChange={(e) => setTaxPercent(e.target.value)} 
                     />
                   </div>
                 )}
@@ -536,7 +539,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                       type="number" min="0" 
                       className="w-24 px-3 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-sm text-right font-semibold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
                       value={shipping} 
-                      onChange={(e) => setShipping(parseFloat(e.target.value) || 0)} 
+                      onChange={(e) => setShipping(e.target.value)} 
                     />
                   </div>
                 )}
@@ -548,7 +551,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                       type="number" min="0" 
                       className="w-24 px-3 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-sm text-right font-semibold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
                       value={oldDue} 
-                      onChange={(e) => setOldDue(parseFloat(e.target.value) || 0)} 
+                      onChange={(e) => setOldDue(e.target.value)} 
                     />
                   </div>
                 )}
