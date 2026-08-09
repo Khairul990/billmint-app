@@ -33,9 +33,34 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
   const [previewQrCode, setPreviewQrCode] = useState(null);
   const [enableQrCode, setEnableQrCode] = useState(true);
 
-  const invoiceColumns = useMemo(() => {
-    return getInvoiceColumns({ settings: { invoiceBuilderSettings: businessSettings?.invoiceBuilderSettings } }, businessSettings).sort((a, b) => a.order - b.order);
-  }, [businessSettings]);
+  const [invoiceColumns, setInvoiceColumns] = useState([]);
+
+  useEffect(() => {
+    if (businessSettings) {
+      const sourceInvoice = editingInvoice || { settings: { invoiceBuilderSettings: businessSettings?.invoiceBuilderSettings } };
+      setInvoiceColumns(
+        getInvoiceColumns(sourceInvoice, businessSettings).sort((a, b) => a.order - b.order)
+      );
+    }
+  }, [businessSettings, editingInvoice]);
+
+  useEffect(() => {
+    const builderSettings = draftBusinessSettings?.invoiceBuilderSettings || {};
+    const customCols = builderSettings.customColumns || [];
+    const itemLabel = builderSettings.itemLabel || 'Item';
+    const taxLabel = builderSettings.taxLabel || 'Tax';
+    
+    setInvoiceColumns(cols => cols.map(c => {
+      let label = c.label;
+      if (c.id === 'item' && itemLabel) label = itemLabel;
+      else if (c.id === 'tax' && taxLabel) label = taxLabel;
+      else if (c.isExtra) {
+        const customCol = customCols.find(cc => cc.id === c.id);
+        if (customCol) label = customCol.name;
+      }
+      return { ...c, label };
+    }));
+  }, [draftBusinessSettings]);
 
   const [bankDetails, setBankDetails] = useState({
     bankName: '',
@@ -45,7 +70,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
   });
 
   const totals = useMemo(() => {
-    const subtotal = items.reduce((sum, item) => sum + (item.qty * item.price), 0);
+    const subtotal = items.reduce((sum, item) => sum + ((parseFloat(item.qty) || 0) * (parseFloat(item.price) || 0)), 0);
     let discount = 0;
     if (discountType === 'percent') {
       discount = subtotal * (discountAmount / 100);
@@ -135,7 +160,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
     date: date ? new Date(date).toLocaleDateString() : '-',
     customerName: customer ? customer.name : 'Walk-in Customer',
     customerPhone: customer?.phone || '',
-    items: items.map(i => ({ ...i, description: i.name, rate: i.price, amount: i.qty * i.price })),
+    items: items.map(i => ({ ...i, description: i.name, rate: parseFloat(i.price) || 0, qty: parseFloat(i.qty) || 0, amount: (parseFloat(i.qty) || 0) * (parseFloat(i.price) || 0) })),
     totals: { ...totals, tax: totals.tax },
     notes,
     businessSettings: {
@@ -158,7 +183,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
         if (isCustom) {
           return { ...item, customFields: { ...(item.customFields || {}), [field]: value } };
         }
-        return { ...item, [field]: field === 'name' || field === 'sNo' ? value : (parseFloat(value) || 0) };
+        return { ...item, [field]: value };
       }
       return item;
     }));
@@ -197,17 +222,18 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
         itemService: i.name,
         name: i.name,
         description: '',
-        qty: i.qty,
-        rate: i.price,
-        amount: i.qty * i.price,
+        qty: parseFloat(i.qty) || 0,
+        rate: parseFloat(i.price) || 0,
+        amount: (parseFloat(i.qty) || 0) * (parseFloat(i.price) || 0),
         customFields: i.customFields || {}
-      })),
-      selectedTemplate
-    };
-    if (editingInvoice?.id) payload.id = editingInvoice.id;
-    
-    if (onSaveInvoice) {
-      onSaveInvoice(payload, false, false);
+    })),
+    selectedTemplate,
+    invoiceColumns
+  };
+  if (editingInvoice?.id) payload.id = editingInvoice.id;
+  
+  if (onSaveInvoice) {
+    onSaveInvoice(payload, false, false);
     }
   };
 

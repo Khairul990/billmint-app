@@ -55,13 +55,17 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
     amount: { id: 'amount', label: 'Total', align: 'right', width: '15%' }
   };
 
-  const dynamicExtraCols = extraCols.map((col) => ({
-    id: col.id, // e.g. col_123
-    label: col.name,
-    align: 'center',
-    width: '10%',
-    isExtra: true
-  }));
+  const dynamicExtraCols = extraCols.map((col) => {
+    const existingConfig = configuredColumns.find(c => c.id === col.id);
+    return {
+      id: col.id, // e.g. col_123
+      label: col.name,
+      align: 'center',
+      width: '10%',
+      isExtra: true,
+      visible: existingConfig !== undefined ? existingConfig.visible : true
+    };
+  });
 
   const legacyMap = { 'sNo': 'sn', 'description': 'item', 'total': 'amount' };
   
@@ -102,9 +106,10 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
       }
     } else {
       // It's a custom column from configuredColumns
+      const updatedExtraCol = dynamicExtraCols.find(c => c.id === conf.id);
       columns.push({
         id: conf.id,
-        label: conf.label,
+        label: updatedExtraCol ? updatedExtraCol.label : conf.label,
         align: 'center',
         width: '10%',
         isExtra: true,
@@ -118,7 +123,7 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
     columns.push(...dynamicExtraCols);
   }
 
-  const fixedWidths = { 'sn': 5, 'amount': 15, 'qty': 8, 'rate': 12 };
+  const fixedWidths = { 'sn': 8, 'amount': 20, 'qty': 12, 'rate': 16 };
   let remainingWidth = 100 - Object.values(fixedWidths).reduce((a, b) => a + b, 0);
   
   const flexibleCols = columns.filter(c => !fixedWidths[c.id]);

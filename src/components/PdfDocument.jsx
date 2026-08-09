@@ -147,6 +147,8 @@ const styles = StyleSheet.create({
     color: '#475569',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    paddingRight: 4,
+    paddingLeft: 4,
   },
   tableRow: {
     flexDirection: 'row',
@@ -158,6 +160,8 @@ const styles = StyleSheet.create({
   tableCell: {
     fontSize: 9.5,
     color: '#334155',
+    paddingRight: 4,
+    paddingLeft: 4,
   },
   colDesc: { width: '45%', paddingRight: 10 },
   colQty: { width: '15%', textAlign: 'center' },
