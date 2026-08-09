@@ -474,6 +474,42 @@ const InvoiceStudio = ({ settings, onUpdate, subscription }) => {
                         Show Discount Row on Invoices
                       </label>
                     </div>
+                    <div className="flex items-center gap-3 p-4 bg-theme-surface/50 border border-theme-border-soft rounded-xl">
+                      <input 
+                        type="checkbox" 
+                        id="showOldDue"
+                        checked={invoiceBuilderSettings.showOldDue || false}
+                        onChange={(e) => handleUpdateBuilderSettings({ showOldDue: e.target.checked })} 
+                        className="w-4 h-4 rounded text-theme-success focus:ring-theme-success bg-theme-surface border-theme-border-soft"
+                      />
+                      <label htmlFor="showOldDue" className="text-sm font-bold text-theme-primary cursor-pointer select-none">
+                        Show Old Due Field
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-3 p-4 bg-theme-surface/50 border border-theme-border-soft rounded-xl">
+                      <input 
+                        type="checkbox" 
+                        id="showTax"
+                        checked={invoiceBuilderSettings.showTax !== false}
+                        onChange={(e) => handleUpdateBuilderSettings({ showTax: e.target.checked })} 
+                        className="w-4 h-4 rounded text-theme-success focus:ring-theme-success bg-theme-surface border-theme-border-soft"
+                      />
+                      <label htmlFor="showTax" className="text-sm font-bold text-theme-primary cursor-pointer select-none">
+                        Show Tax Input
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-3 p-4 bg-theme-surface/50 border border-theme-border-soft rounded-xl">
+                      <input 
+                        type="checkbox" 
+                        id="showShipping"
+                        checked={invoiceBuilderSettings.showShipping || false}
+                        onChange={(e) => handleUpdateBuilderSettings({ showShipping: e.target.checked })} 
+                        className="w-4 h-4 rounded text-theme-success focus:ring-theme-success bg-theme-surface border-theme-border-soft"
+                      />
+                      <label htmlFor="showShipping" className="text-sm font-bold text-theme-primary cursor-pointer select-none">
+                        Show Shipping Input
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>

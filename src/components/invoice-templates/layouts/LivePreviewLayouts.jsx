@@ -64,6 +64,12 @@ const MinimalClassic = ({ data }) => (
         <div className="flex justify-between py-1 text-sm"><span className="text-gray-600">Tax:</span><span>{formatCurrency(data.totals?.tax)}</span></div>
         <div className="flex justify-between py-3 text-lg font-bold border-t-2 border-gray-900 mt-2">
           <span>Total:</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+          {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+            <>
+                        <span>Old Due:</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                        <span>Total Due:</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -164,6 +170,12 @@ const ModernCorporate = ({ data }) => (
           <div className="flex justify-between py-1 text-sm"><span className="text-gray-600">Tax</span><span className="font-medium">{formatCurrency(data.totals?.tax)}</span></div>
           <div className="flex justify-between py-3 text-lg font-black text-blue-600 border-t border-gray-200 mt-2">
             <span>Total</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -267,6 +279,12 @@ const TealBoldHeader = ({ data }) => (
           <div className="flex justify-between py-1.5 text-sm border-b border-gray-200 pb-3"><span className="text-gray-500">Tax</span><span className="font-medium text-gray-800">{formatCurrency(data.totals?.tax)}</span></div>
           <div className="flex justify-between py-4 text-xl font-black text-teal-900">
             <span>Total</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -374,6 +392,12 @@ const SageGreenCurved = ({ data }) => (
           <div className="flex justify-between py-1.5 text-sm"><span className="text-gray-500">Tax</span><span className="font-medium">{formatCurrency(data.totals?.tax)}</span></div>
           <div className="flex justify-between py-4 text-xl font-bold text-[#3d5a49] border-t border-gray-100 mt-2">
             <span>Total</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -460,6 +484,12 @@ const CreativeAgency = ({ data }) => (
             <div className="flex justify-between py-1 text-sm"><span className="text-gray-500">Tax</span><span className="text-gray-300">{formatCurrency(data.totals?.tax)}</span></div>
             <div className="flex justify-between py-4 mt-4 border-t border-gray-800 text-xl font-black text-white">
               <span className="text-[#ff4a6e]">Total</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+              {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+                <>
+                                <span className="text-[#ff4a6e]">Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                                <span className="text-[#ff4a6e]">Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -522,6 +552,12 @@ const PurpleCorporate = ({ data }) => (
       <div className="text-right">
         <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1">Amount Due</h3>
         <p className="text-2xl font-bold text-[#6A5ACD]">{formatCurrency(data.totals?.grandTotal)}</p>
+        {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+          <>
+                    <p className="text-2xl font-bold text-[#6A5ACD]">{formatCurrency(data.totals?.oldDue)}</p>
+                    <p className="text-2xl font-bold text-[#6A5ACD]">{formatCurrency(data.totals?.totalDue)}</p>
+          </>
+        )}
       </div>
     </div>
 
@@ -590,6 +626,12 @@ const PurpleCorporate = ({ data }) => (
           <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Tax</span><span className="font-medium">{formatCurrency(data.totals?.tax)}</span></div>
           <div className="flex justify-between py-4 px-5 mt-4 text-[15px] font-bold text-white bg-gradient-to-br from-[#6A5ACD] to-[#7B68EE] rounded-lg shadow-lg">
             <span>TOTAL DUE</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -648,6 +690,12 @@ const OrangeGradientModern = ({ data }) => (
       <div>
         <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">Amount Due</p>
         <p className="text-[16px] font-black text-[#FF8C00]">{formatCurrency(data.totals?.grandTotal)}</p>
+        {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+          <>
+                    <p className="text-[16px] font-black text-[#FF8C00]">{formatCurrency(data.totals?.oldDue)}</p>
+                    <p className="text-[16px] font-black text-[#FF8C00]">{formatCurrency(data.totals?.totalDue)}</p>
+          </>
+        )}
       </div>
     </div>
 
@@ -716,6 +764,12 @@ const OrangeGradientModern = ({ data }) => (
           <div className="flex justify-between py-2 text-[13px] mb-4"><span className="text-gray-500">Tax</span><span className="font-bold">{formatCurrency(data.totals?.tax)}</span></div>
           <div className="flex justify-between py-4 px-5 text-lg font-black text-white bg-gradient-to-br from-[#FF8C00] to-[#FFA500] rounded-xl shadow-md">
             <span>Total</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -748,6 +802,12 @@ const OrangeGeometricCorner = ({ data }) => (
       <div className="text-right">
         <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1">Amount Due</h3>
         <p className="text-3xl font-bold text-[#FF8C00]">{formatCurrency(data.totals?.grandTotal)}</p>
+        {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+          <>
+                    <p className="text-3xl font-bold text-[#FF8C00]">{formatCurrency(data.totals?.oldDue)}</p>
+                    <p className="text-3xl font-bold text-[#FF8C00]">{formatCurrency(data.totals?.totalDue)}</p>
+          </>
+        )}
       </div>
     </div>
 
@@ -816,6 +876,12 @@ const OrangeGeometricCorner = ({ data }) => (
           <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Tax</span><span>{formatCurrency(data.totals?.tax)}</span></div>
           <div className="flex justify-between py-4 px-4 mt-4 text-lg font-bold text-[#FF8C00] bg-gradient-to-r from-[#FF8C00]/10 to-[#FFA500]/5 border-l-4 border-[#FF8C00]">
             <span>TOTAL DUE</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -924,6 +990,12 @@ const BlackOrangeBold = ({ data }) => (
           <div className="flex justify-between py-2 text-[13px] border-b border-[#333]"><span className="text-gray-400">Tax</span><span>{formatCurrency(data.totals?.tax)}</span></div>
           <div className="flex justify-between py-4 px-5 mt-4 text-lg font-black text-white bg-gradient-to-br from-[#FF8C00] to-[#FFA500] rounded-md shadow-lg shadow-[#FF8C00]/30">
             <span>TOTAL</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -1033,6 +1105,12 @@ const LuxuryGoldBlack = ({ data }) => (
           <div className="flex justify-between py-2 text-[13px] border-b border-[#333]"><span className="text-gray-400">Tax</span><span>{formatCurrency(data.totals?.tax)}</span></div>
           <div className="flex justify-between py-4 px-5 mt-4 text-lg font-bold text-[#1a1a1a] bg-gradient-to-br from-[#D4AF37] to-[#E6C200] shadow-lg shadow-[#D4AF37]/20 rounded-sm">
             <span>GRAND TOTAL</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -1137,6 +1215,12 @@ const BlackHeaderProfessional = ({ data }) => (
           <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Tax</span><span>{formatCurrency(data.totals?.tax)}</span></div>
           <div className="flex justify-between py-4 px-4 mt-4 text-lg font-black text-[#1a1a1a] bg-gray-100 border-2 border-[#1a1a1a] rounded-sm shadow-sm">
             <span>TOTAL DUE</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -1233,6 +1317,12 @@ const BlueRoundedModern = ({ data }) => (
           <div className="flex justify-between py-1.5 text-[13px] mb-4"><span className="text-gray-500">Tax</span><span className="font-medium text-gray-800">{formatCurrency(data.totals?.tax)}</span></div>
           <div className="flex justify-between py-4 px-5 text-lg font-black text-white bg-gradient-to-r from-[#1e90ff] to-[#4169e1] rounded-xl shadow-lg shadow-[#1e90ff]/30">
             <span>TOTAL</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -1346,6 +1436,12 @@ const RedCorporateClean = ({ data }) => (
           <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Tax</span><span className="font-medium text-gray-900">{formatCurrency(data.totals?.tax)}</span></div>
           <div className="flex justify-between py-4 px-5 mt-4 text-lg font-black text-white bg-gradient-to-br from-[#DC143C] to-[#FF1744] shadow-lg shadow-[#DC143C]/30 rounded-sm">
             <span>TOTAL DUE</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -1445,6 +1541,12 @@ const CleanTwoColumnModern = ({ data }) => (
         <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-500">Tax</span><span className="font-medium text-gray-800">{formatCurrency(data.totals?.tax)}</span></div>
         <div className="flex justify-between py-4 mt-4 text-lg font-black text-gray-900 border-l-4 border-gray-900 pl-4 bg-gray-50">
           <span>AMOUNT DUE</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
+          {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+            <>
+                        <span>AMOUNT DUE</span><span>{formatCurrency(data.totals?.oldDue)}</span>
+                        <span>AMOUNT DUE</span><span>{formatCurrency(data.totals?.totalDue)}</span>
+            </>
+          )}
         </div>
       </div>
     </div>

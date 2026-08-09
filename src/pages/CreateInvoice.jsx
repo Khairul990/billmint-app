@@ -29,6 +29,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
   const [discountAmount, setDiscountAmount] = useState(0);
   const [taxPercent, setTaxPercent] = useState(0);
   const [shipping, setShipping] = useState(0);
+  const [oldDue, setOldDue] = useState(0);
   const [notes, setNotes] = useState('Thank you for your business!');
   const [previewQrCode, setPreviewQrCode] = useState(null);
   const [enableQrCode, setEnableQrCode] = useState(true);
@@ -80,9 +81,10 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
     const afterDiscount = Math.max(0, subtotal - discount);
     const tax = afterDiscount * (taxPercent / 100);
     const grandTotal = afterDiscount + tax + shipping;
+    const totalDue = grandTotal + oldDue;
 
-    return { subtotal, discount, tax, grandTotal };
-  }, [items, discountType, discountAmount, taxPercent, shipping]);
+    return { subtotal, discount, tax, grandTotal, oldDue, totalDue };
+  }, [items, discountType, discountAmount, taxPercent, shipping, oldDue]);
 
   useEffect(() => {
     const generateQr = async () => {
@@ -143,6 +145,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
       setDiscountAmount(parseFloat(editingInvoice.discountAmount) || 0);
       setDiscountType(parseFloat(editingInvoice.discountAmount) > 0 ? 'flat' : 'none');
       setTaxPercent(parseFloat(editingInvoice.taxAmount) ? (parseFloat(editingInvoice.taxAmount) / (parseFloat(editingInvoice.subtotal) || 1)) * 100 : 0);
+      setOldDue(parseFloat(editingInvoice.oldDue) || 0);
       setNotes(editingInvoice.notes || '');
     }
   }, [editingInvoice, customers]);
@@ -215,8 +218,8 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
       taxAmount: totals.tax,
       discountAmount: totals.discount,
       grandTotal: totals.grandTotal,
-      amountPaid: 0,
-      balanceDue: totals.grandTotal,
+      oldDue: oldDue,
+      balanceDue: totals.totalDue,
       items: items.map((i, idx) => ({
         sNo: i.sNo || (idx + 1).toString(),
         itemService: i.name,
@@ -322,7 +325,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                   }
                   return (
                     <div className="w-full max-w-[800px] bg-white shadow-lg rounded-xl overflow-hidden shrink-0 h-max">
-                      <InvoicePreview invoice={{ ...previewData, orderStatus: 'Pending', subtotal: previewData.totals.subtotal, taxAmount: previewData.totals.tax, discountAmount: previewData.totals.discount, grandTotal: previewData.totals.grandTotal }} businessSettings={{ ...previewData.businessSettings, selectedPdfTemplate: selectedTemplate }} isLiveLink={false} />
+                      <InvoicePreview invoice={{ ...previewData, orderStatus: 'Pending', subtotal: previewData.totals.subtotal, taxAmount: previewData.totals.tax, discountAmount: previewData.totals.discount, grandTotal: previewData.totals.grandTotal, oldDue: previewData.totals.oldDue, totalDue: previewData.totals.totalDue }} businessSettings={{ ...previewData.businessSettings, selectedPdfTemplate: selectedTemplate }} isLiveLink={false} />
                     </div>
                   );
                 })()}
@@ -479,6 +482,83 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
               </button>
             </section>
 
+            {/* 3. Totals & Adjustments */}
+            <section className="mt-8 flex justify-end">
+              <div className="w-full md:w-1/2 lg:w-2/3 xl:w-1/2 space-y-3 bg-white p-6 rounded-2xl border border-theme-border-soft shadow-sm">
+                <div className="flex justify-between items-center text-sm font-semibold text-theme-muted">
+                  <span>Subtotal</span>
+                  <span className="text-theme-primary">{formatCurrency(totals.subtotal)}</span>
+                </div>
+
+                {draftBusinessSettings?.invoiceBuilderSettings?.showDiscount !== false && (
+                  <div className="flex justify-between items-center text-sm font-semibold text-theme-muted gap-4">
+                    <div className="flex gap-2 items-center">
+                      <span>Discount</span>
+                      <select 
+                        className="px-2 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-[10px] font-bold uppercase tracking-wider text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
+                        value={discountType} 
+                        onChange={(e) => setDiscountType(e.target.value)}
+                      >
+                        <option value="none">None</option>
+                        <option value="flat">Flat</option>
+                        <option value="percent">%</option>
+                      </select>
+                    </div>
+                    {discountType !== 'none' ? (
+                      <input 
+                        type="number" min="0" 
+                        className="w-24 px-3 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-sm text-right font-semibold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
+                        value={discountAmount} 
+                        onChange={(e) => setDiscountAmount(parseFloat(e.target.value) || 0)} 
+                      />
+                    ) : (
+                      <span className="text-theme-muted">-</span>
+                    )}
+                  </div>
+                )}
+
+                {draftBusinessSettings?.invoiceBuilderSettings?.showTax !== false && (
+                  <div className="flex justify-between items-center text-sm font-semibold text-theme-muted gap-4">
+                    <span>{draftBusinessSettings?.invoiceBuilderSettings?.taxLabel || draftBusinessSettings?.taxLabel || 'Tax'} (%)</span>
+                    <input 
+                      type="number" min="0" 
+                      className="w-24 px-3 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-sm text-right font-semibold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
+                      value={taxPercent} 
+                      onChange={(e) => setTaxPercent(parseFloat(e.target.value) || 0)} 
+                    />
+                  </div>
+                )}
+
+                {draftBusinessSettings?.invoiceBuilderSettings?.showShipping && (
+                  <div className="flex justify-between items-center text-sm font-semibold text-theme-muted gap-4">
+                    <span>Shipping</span>
+                    <input 
+                      type="number" min="0" 
+                      className="w-24 px-3 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-sm text-right font-semibold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
+                      value={shipping} 
+                      onChange={(e) => setShipping(parseFloat(e.target.value) || 0)} 
+                    />
+                  </div>
+                )}
+
+                {draftBusinessSettings?.invoiceBuilderSettings?.showOldDue && (
+                  <div className="flex justify-between items-center text-sm font-semibold text-theme-muted gap-4">
+                    <span>Old Due</span>
+                    <input 
+                      type="number" min="0" 
+                      className="w-24 px-3 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-sm text-right font-semibold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
+                      value={oldDue} 
+                      onChange={(e) => setOldDue(parseFloat(e.target.value) || 0)} 
+                    />
+                  </div>
+                )}
+
+                <div className="pt-3 mt-3 border-t border-theme-border-soft/50 flex justify-between items-center">
+                  <span className="text-base font-black text-theme-primary">Total Due</span>
+                  <span className="text-xl font-black text-theme-accent">{formatCurrency(totals.totalDue)}</span>
+                </div>
+              </div>
+            </section>
 
               </div>
             ) : (
@@ -495,6 +575,8 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                 setDiscountType={setDiscountType}
                 discountAmount={discountAmount}
                 setDiscountAmount={setDiscountAmount}
+                oldDue={oldDue}
+                setOldDue={setOldDue}
                 taxPercent={taxPercent}
                 setTaxPercent={setTaxPercent}
                 shipping={shipping}
@@ -540,7 +622,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                         </div>
                       ) : (
                         <div style={{ width: '800px', transformOrigin: 'top left', transform: 'scale(0.43)', height: '100%', overflow: 'hidden auto' }}>
-                          <InvoicePreview invoice={{ ...previewData, orderStatus: 'Pending', subtotal: previewData.totals.subtotal, taxAmount: previewData.totals.tax, discountAmount: previewData.totals.discount, grandTotal: previewData.totals.grandTotal }} businessSettings={{ ...previewData.businessSettings, selectedPdfTemplate: selectedTemplate }} isLiveLink={true} />
+                          <InvoicePreview invoice={{ ...previewData, orderStatus: 'Pending', subtotal: previewData.totals.subtotal, taxAmount: previewData.totals.tax, discountAmount: previewData.totals.discount, grandTotal: previewData.totals.grandTotal, oldDue: previewData.totals.oldDue, totalDue: previewData.totals.totalDue }} businessSettings={{ ...previewData.businessSettings, selectedPdfTemplate: selectedTemplate }} isLiveLink={true} />
                         </div>
                       )}
                     </div>
@@ -558,7 +640,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                     </div>
                   ) : (
                     <div className="w-full max-w-[800px] bg-white shadow-lg overflow-hidden rounded-xl">
-                      <InvoicePreview invoice={{ ...previewData, orderStatus: 'Pending', subtotal: previewData.totals.subtotal, taxAmount: previewData.totals.tax, discountAmount: previewData.totals.discount, grandTotal: previewData.totals.grandTotal }} businessSettings={{ ...previewData.businessSettings, selectedPdfTemplate: selectedTemplate }} isLiveLink={false} />
+                      <InvoicePreview invoice={{ ...previewData, orderStatus: 'Pending', subtotal: previewData.totals.subtotal, taxAmount: previewData.totals.tax, discountAmount: previewData.totals.discount, grandTotal: previewData.totals.grandTotal, oldDue: previewData.totals.oldDue, totalDue: previewData.totals.totalDue }} businessSettings={{ ...previewData.businessSettings, selectedPdfTemplate: selectedTemplate }} isLiveLink={false} />
                     </div>
                   )}
                 </div>

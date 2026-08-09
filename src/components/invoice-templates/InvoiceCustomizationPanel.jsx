@@ -22,6 +22,8 @@ const InvoiceCustomizationPanel = ({
   setTaxPercent,
   shipping,
   setShipping,
+  oldDue,
+  setOldDue,
   invoiceColumns = [],
   setInvoiceColumns,
   notes,
@@ -375,6 +377,19 @@ const InvoiceCustomizationPanel = ({
                       />
                     </div>
                   </div>
+                  {businessSettings?.invoiceBuilderSettings?.showOldDue && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Old Due</label>
+                        <input 
+                          type="number" min="0" 
+                          className="w-full px-4 py-3 bg-white border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
+                          value={oldDue} 
+                          onChange={(e) => setOldDue(parseFloat(e.target.value) || 0)} 
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

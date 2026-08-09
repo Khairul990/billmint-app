@@ -88,6 +88,12 @@ const MinimalClassicPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeBa
           <View style={[s.row, s.justifyBetween, s.mb8]}><Text style={{ fontSize: 10, color: '#666' }}>Tax:</Text><Text style={{ fontSize: 10 }}>{formatCurrency(totals.tax)}</Text></View>
           <View style={[s.row, s.justifyBetween, s.bold, { fontSize: 14, borderTopWidth: 2, borderTopColor: '#111', paddingTop: 8 }]}>
             <Text>Total:</Text><Text>{formatCurrency(totals.grandTotal)}</Text>
+            {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <Text>Old Due:</Text><Text>{formatCurrency(totals.oldDue)}</Text>
+                            <Text>Total Due:</Text><Text>{formatCurrency(totals.totalDue)}</Text>
+              </>
+            )}
           </View>
         </View>
       </View>
@@ -170,6 +176,12 @@ const ModernCorporatePdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
             <View style={[s.row, s.justifyBetween, s.mb8]}><Text style={{ fontSize: 10, color: '#666' }}>Tax</Text><Text style={{ fontSize: 10 }}>{formatCurrency(invoice.taxAmount)}</Text></View>
             <View style={[s.row, s.justifyBetween, s.bold, { fontSize: 14, color: '#2563eb', borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingTop: 8 }]}>
               {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Total</Text>}<Text>{formatCurrency(invoice.grandTotal)}</Text>
+              {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+                <>
+                                {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Old Due</Text>}<Text>{formatCurrency(invoice.oldDue)}</Text>
+                                {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Total Due</Text>}<Text>{formatCurrency(invoice.totalDue)}</Text>
+                </>
+              )}
             </View>
           </View>
         </View>
@@ -253,6 +265,12 @@ const TealBoldHeaderPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeBa
             <View style={[s.row, s.justifyBetween, { marginBottom: 12, borderBottomWidth: 1, borderBottomColor: '#e5e5e5', paddingBottom: 8 }]}><Text style={{ fontSize: 10, color: '#666' }}>Tax</Text><Text style={[s.bold, { fontSize: 10, color: '#333' }]}>{formatCurrency(invoice.taxAmount)}</Text></View>
             <View style={[s.row, s.justifyBetween, s.bold, { fontSize: 16, color: '#134e4a', paddingTop: 8 }]}>
               {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Total</Text>}<Text>{formatCurrency(invoice.grandTotal)}</Text>
+              {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+                <>
+                                {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Old Due</Text>}<Text>{formatCurrency(invoice.oldDue)}</Text>
+                                {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Total Due</Text>}<Text>{formatCurrency(invoice.totalDue)}</Text>
+                </>
+              )}
             </View>
           </View>
         </View>
@@ -339,6 +357,12 @@ const SageGreenCurvedPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
             <View style={[s.row, s.justifyBetween, s.mb8]}><Text style={{ fontSize: 10, color: '#666' }}>Tax</Text><Text style={{ fontSize: 10 }}>{formatCurrency(invoice.taxAmount)}</Text></View>
             <View style={[s.row, s.justifyBetween, s.bold, { fontSize: 14, color: '#3d5a49', borderTopWidth: 1, borderTopColor: '#e8efe9', paddingTop: 8 }]}>
               {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Total</Text>}<Text>{formatCurrency(invoice.grandTotal)}</Text>
+              {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+                <>
+                                {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Old Due</Text>}<Text>{formatCurrency(invoice.oldDue)}</Text>
+                                {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Total Due</Text>}<Text>{formatCurrency(invoice.totalDue)}</Text>
+                </>
+              )}
             </View>
           </View>
         </View>
@@ -419,6 +443,12 @@ const CreativeAgencyPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeBa
             <View style={[s.row, s.justifyBetween, s.mb8]}><Text style={{ fontSize: 10, color: '#6b7280' }}>Tax</Text><Text style={{ fontSize: 10, color: '#d1d5db' }}>{formatCurrency(invoice.taxAmount)}</Text></View>
             <View style={[s.row, s.justifyBetween, s.bold, { fontSize: 14, color: '#fff', borderTopWidth: 1, borderTopColor: '#374151', paddingTop: 12, marginTop: 4 }]}>
               {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ color: '#ff4a6e' }}>Total</Text>}<Text>{formatCurrency(invoice.grandTotal)}</Text>
+              {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+                <>
+                                {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ color: "#666" }}>Old Due</Text>}<Text>{formatCurrency(invoice.oldDue)}</Text>
+                                {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ color: '#ff4a6e' }}>Total Due</Text>}<Text>{formatCurrency(invoice.totalDue)}</Text>
+                </>
+              )}
             </View>
           </View>
         </View>
@@ -473,6 +503,12 @@ const PurpleCorporatePdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
       <View style={[s.wHalf, { alignItems: 'flex-end', justifyContent: 'center' }]}>
         <Text style={{ fontSize: 8, color: '#555', textTransform: 'uppercase', marginBottom: 2, fontWeight: 'bold' }}>Amount Due</Text>
         <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#6A5ACD' }}>{formatCurrency(invoice.totals?.grandTotal)}</Text>
+        {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+          <>
+                    <Text style={{ fontSize: 18, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.totals?.oldDue)}</Text>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#6A5ACD' }}>{formatCurrency(invoice.totals?.totalDue)}</Text>
+          </>
+        )}
       </View>
     </View>
 
@@ -532,6 +568,12 @@ const PurpleCorporatePdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
         <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 8, marginTop: 8, backgroundColor: '#6A5ACD', borderRadius: 4 }]}>
           <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>TOTAL DUE</Text>
           <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency(invoice.totals?.grandTotal)}</Text>
+          {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+            <>
+                        <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.totals?.oldDue)}</Text>
+                        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency(invoice.totals?.totalDue)}</Text>
+            </>
+          )}
         </View>
       </View>
     </View>
@@ -581,6 +623,12 @@ const OrangeGradientModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
       <View style={{ flex: 1 }}>
         <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>Amount Due</Text>
         <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#FF8C00' }}>{formatCurrency(invoice.totals?.grandTotal)}</Text>
+        {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+          <>
+                    <Text style={{ fontSize: 12, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.totals?.oldDue)}</Text>
+                    <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#FF8C00' }}>{formatCurrency(invoice.totals?.totalDue)}</Text>
+          </>
+        )}
       </View>
     </View>
 
@@ -636,6 +684,12 @@ const OrangeGradientModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
           <View style={[s.row, s.justifyBetween, { paddingVertical: 10, paddingHorizontal: 10, backgroundColor: '#FF8C00', borderRadius: 6 }]}>
             {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>Total</Text>}
             <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>{formatCurrency(invoice.totals?.grandTotal)}</Text>
+            {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <Text style={{ fontSize: 12, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.totals?.oldDue)}</Text>
+                            <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>{formatCurrency(invoice.totals?.totalDue)}</Text>
+              </>
+            )}
           </View>
         </View>
       </View>
@@ -671,6 +725,12 @@ const OrangeGeometricCornerPdf = ({ invoice, businessSettings, safeLogoBase64, q
       <View style={[s.wHalf, { alignItems: 'flex-end' }]}>
         <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', textTransform: 'uppercase', marginBottom: 2 }}>Amount Due</Text>
         <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#FF8C00' }}>{formatCurrency(invoice.totals?.grandTotal)}</Text>
+        {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+          <>
+                    <Text style={{ fontSize: 18, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.totals?.oldDue)}</Text>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#FF8C00' }}>{formatCurrency(invoice.totals?.totalDue)}</Text>
+          </>
+        )}
       </View>
     </View>
 
@@ -730,6 +790,12 @@ const OrangeGeometricCornerPdf = ({ invoice, businessSettings, safeLogoBase64, q
         <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 6, marginTop: 8, backgroundColor: '#fff7ed', borderLeftWidth: 3, borderLeftColor: '#FF8C00' }]}>
           <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#FF8C00' }}>TOTAL DUE</Text>
           <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#FF8C00' }}>{formatCurrency(invoice.totals?.grandTotal)}</Text>
+          {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+            <>
+                        <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.totals?.oldDue)}</Text>
+                        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#FF8C00' }}>{formatCurrency(invoice.totals?.totalDue)}</Text>
+            </>
+          )}
         </View>
       </View>
     </View>
@@ -819,6 +885,12 @@ const BlackOrangeBoldPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
         <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 8, marginTop: 8, backgroundColor: '#FF8C00', borderRadius: 4 }]}>
           <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>TOTAL</Text>
           <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency(invoice.totals?.grandTotal)}</Text>
+          {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+            <>
+                        <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.totals?.oldDue)}</Text>
+                        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency(invoice.totals?.totalDue)}</Text>
+            </>
+          )}
         </View>
       </View>
     </View>
@@ -908,6 +980,12 @@ const LuxuryGoldBlackPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
           <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 8, marginTop: 8, backgroundColor: '#D4AF37', borderRadius: 2 }]}>
             <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1a1a1a' }}>GRAND TOTAL</Text>
             <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1a1a1a' }}>{formatCurrency(invoice.totals?.grandTotal)}</Text>
+            {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.totals?.oldDue)}</Text>
+                            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1a1a1a' }}>{formatCurrency(invoice.totals?.totalDue)}</Text>
+              </>
+            )}
           </View>
         </View>
       </View>
@@ -993,6 +1071,12 @@ const BlackHeaderProfessionalPdf = ({ invoice, businessSettings, safeLogoBase64,
         <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 8, marginTop: 8, backgroundColor: '#f5f5f5', border: '1pt solid #1a1a1a' }]}>
           <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1a1a1a' }}>TOTAL DUE</Text>
           <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1a1a1a' }}>{formatCurrency(invoice.totals?.grandTotal)}</Text>
+          {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+            <>
+                        <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.totals?.oldDue)}</Text>
+                        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1a1a1a' }}>{formatCurrency(invoice.totals?.totalDue)}</Text>
+            </>
+          )}
         </View>
       </View>
     </View>
@@ -1074,6 +1158,12 @@ const BlueRoundedModernPdf = ({ invoice, businessSettings, safeLogoBase64, qrCod
           <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 10, backgroundColor: '#1e90ff', borderRadius: 8 }]}>
             <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>TOTAL</Text>
             <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency(invoice.totals?.grandTotal)}</Text>
+            {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+              <>
+                            <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.totals?.oldDue)}</Text>
+                            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency(invoice.totals?.totalDue)}</Text>
+              </>
+            )}
           </View>
         </View>
       </View>
@@ -1177,6 +1267,12 @@ const RedCorporateCleanPdf = ({ invoice, businessSettings, safeLogoBase64, qrCod
         <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 8, marginTop: 8, backgroundColor: '#DC143C', borderRadius: 2 }]}>
           <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>TOTAL DUE</Text>
           <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency(invoice.totals?.grandTotal)}</Text>
+          {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+            <>
+                        <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.totals?.oldDue)}</Text>
+                        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency(invoice.totals?.totalDue)}</Text>
+            </>
+          )}
         </View>
       </View>
     </View>
@@ -1258,6 +1354,12 @@ const CleanTwoColumnModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
         <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 10, marginTop: 8, backgroundColor: '#f9f9f9', borderLeftWidth: 4, borderLeftColor: '#222' }]}>
           <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#222' }}>AMOUNT DUE</Text>
           <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#222' }}>{formatCurrency(invoice.totals?.grandTotal)}</Text>
+          {((invoice.totals?.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
+            <>
+                        <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.totals?.oldDue)}</Text>
+                        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#222' }}>{formatCurrency(invoice.totals?.totalDue)}</Text>
+            </>
+          )}
         </View>
       </View>
     </View>
