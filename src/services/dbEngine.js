@@ -328,6 +328,21 @@ const markLocalRecordSynced = async (storeName, docId) => {
   }
 };
 
+const cleanUndefined = (obj) => {
+  if (Array.isArray(obj)) {
+    return obj.map(v => (v === undefined ? null : typeof v === 'object' && v !== null ? cleanUndefined(v) : v));
+  } else if (typeof obj === 'object' && obj !== null) {
+    const res = {};
+    for (const key in obj) {
+      if (obj[key] !== undefined) {
+        res[key] = typeof obj[key] === 'object' && obj[key] !== null ? cleanUndefined(obj[key]) : obj[key];
+      }
+    }
+    return res;
+  }
+  return obj;
+};
+
 const _runSyncOfflineTransactions = async () => {
   if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
     console.warn('Blocked real data operation during Demo Mode: syncOfflineTransactions');
@@ -396,13 +411,29 @@ const _runSyncOfflineTransactions = async () => {
             console.warn('[SYNC QUEUE] Could not check cloud version, proceeding with write:', e);
           }
           
-          await setDoc(docRef, tx.data, { merge: true });
+          const cleanData = cleanUndefined(tx.data);
+          
+          try {
+            await setDoc(docRef, cleanData, { merge: true });
+          } catch (docErr) {
+            if (docErr.code === 'permission-denied') {
+              console.warn('[SYNC QUEUE] Permission denied on update, attempting to replace legacy document...', docRef.path);
+              // Legacy documents without userId fail the update rule. Delete doesn't check resource.data.userId.
+              await deleteDoc(docRef);
+              await setDoc(docRef, cleanData); // Try again without merge (create rule)
+            } else {
+              throw docErr;
+            }
+          }
           syncSuccess = true;
 
           if (tx.storeName === 'invoices') {
-            // Also save to publicInvoices directly
-            const publicDocRef = doc(db, 'publicInvoices', tx.data.publicToken);
-            await setDoc(publicDocRef, tx.data, { merge: true });
+            try {
+              const publicDocRef = doc(db, 'publicInvoices', cleanData.publicToken);
+              await setDoc(publicDocRef, cleanData, { merge: true });
+            } catch (pubErr) {
+              console.warn('[SYNC QUEUE] Failed to update publicInvoice, possibly legacy. Ignoring.', pubErr);
+            }
           }
 
           // Update local syncStatus to 'synced' on success
@@ -435,6 +466,7 @@ const _runSyncOfflineTransactions = async () => {
         }
       } catch (err) {
         console.error('[SYNC QUEUE] Failed to sync transaction:', tx.id, err);
+        toast.error('Sync Error: ' + (err.message || 'Unknown error'));
         tx.retryCount = (tx.retryCount || 0) + 1;
         tx.lastRetryAt = Date.now();
         await BillQyroDB.put('syncQueue', tx);

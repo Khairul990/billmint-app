@@ -70,10 +70,11 @@ const Landing = ({ onLoginSuccess }) => {
     <div className="min-h-screen bg-theme-app text-theme-primary font-sans selection:bg-theme-accent selection:text-white flex flex-col relative">
       {/* ===== HERO BACKGROUND ===== */}
       <HeroBackground />
+      <div className="absolute inset-0 bg-gradient-to-b from-theme-app/40 via-transparent to-theme-app -z-10 pointer-events-none"></div>
 
       {/* ===== PREMIUM GLASS NAVBAR ===== */}
-      <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-theme-card/80 backdrop-blur-xl border-b border-theme-border-soft shadow-lg py-1' : 'bg-transparent border-b border-theme-border-soft/50 py-2'}`}>
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <nav className={`fixed w-full top-4 z-50 transition-all duration-500 flex justify-center px-4`}>
+        <div className={`w-full max-w-7xl rounded-full transition-all duration-500 px-6 h-16 flex items-center justify-between ${isScrolled ? 'bg-theme-card/80 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]' : 'bg-transparent border border-transparent'}`}>
           <Logo type="horizontal" forceWhiteText={false} />
 
           {/* Desktop Nav */}

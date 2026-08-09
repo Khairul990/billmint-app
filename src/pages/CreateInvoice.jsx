@@ -219,9 +219,11 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
       notes,
       subtotal: totals.subtotal,
       taxAmount: totals.tax,
+      taxPercentage: parseFloat(taxPercent) || 0,
       discountAmount: totals.discount,
+      shipping: parseFloat(shipping) || 0,
       grandTotal: totals.grandTotal,
-      oldDue: oldDue,
+      oldDue: totals.oldDue,
       balanceDue: totals.totalDue,
       items: items.map((i, idx) => ({
         sNo: i.sNo || (idx + 1).toString(),

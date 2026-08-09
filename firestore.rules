@@ -38,25 +38,25 @@ service cloud.firestore {
     match /invoices/{userId}/items/{itemId} {
       allow read, delete: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
-      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && (!("userId" in resource.data) || resource.data.userId == request.auth.uid) && request.resource.data.userId == request.auth.uid;
     }
 
     match /customers/{userId}/items/{itemId} {
       allow read, delete: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
-      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && (!("userId" in resource.data) || resource.data.userId == request.auth.uid) && request.resource.data.userId == request.auth.uid;
     }
 
     match /products/{userId}/items/{itemId} {
       allow read, delete: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
-      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && (!("userId" in resource.data) || resource.data.userId == request.auth.uid) && request.resource.data.userId == request.auth.uid;
     }
 
     match /students/{userId}/items/{itemId} {
       allow read, delete: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.userId == request.auth.uid;
-      allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(userId) && (!("userId" in resource.data) || resource.data.userId == request.auth.uid) && request.resource.data.userId == request.auth.uid;
     }
 
     match /expenses/{userId}/items/{itemId} {
@@ -146,7 +146,7 @@ service cloud.firestore {
       
       // Unauthenticated users (customers) can only update payment proofs
       // Validates that only allowed fields are modified
-      allow update: if (isAuth() && resource.data.userId == request.auth.uid) || isValidPublicInvoiceData();
+      allow update: if (isAuth() && (!("userId" in resource.data) || resource.data.userId == request.auth.uid)) || isValidPublicInvoiceData();
     }
 
     // Legacy fallback
@@ -154,7 +154,7 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
       allow delete: if isAuth() && resource.data.userId == request.auth.uid;
-      allow update: if (isAuth() && resource.data.userId == request.auth.uid) || isValidPublicInvoiceData();
+      allow update: if (isAuth() && (!("userId" in resource.data) || resource.data.userId == request.auth.uid)) || isValidPublicInvoiceData();
     }
 
     // -------------------------------------------------------------------------
