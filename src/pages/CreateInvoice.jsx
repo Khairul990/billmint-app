@@ -10,6 +10,7 @@ import InvoicePreview from '../components/InvoicePreview';
 import { LivePreviewLayouts } from '../components/invoice-templates/layouts/LivePreviewLayouts';
 import { UNIVERSAL_TEMPLATES } from '../services/TemplateEngine';
 import { getStudioHeaderTarget } from '../utils/portalTargets';
+import { getInvoiceColumns } from '../utils/invoiceSchema';
 
 const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products = [], businessSettings, editingInvoice, onBack, defaultTemplate = 'minimal-classic', subscription }) => {
   const [selectedTemplate, setSelectedTemplate] = useState(businessSettings?.selectedPdfTemplate || defaultTemplate);
