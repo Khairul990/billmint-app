@@ -11,15 +11,7 @@ import { LivePreviewLayouts } from '../../components/invoice-templates/layouts/L
 import { getPortalLabelByType } from '../../config/businessPresets';
 import { getStudioHeaderTarget } from '../../utils/portalTargets';
 
-const DEFAULT_COLUMNS = [
-  { id: 'item', label: 'Item/Service', visible: true, order: 1 },
-  { id: 'hsn', label: 'HSN/SAC', visible: false, order: 2 },
-  { id: 'qty', label: 'Quantity', visible: true, order: 3 },
-  { id: 'rate', label: 'Rate', visible: true, order: 4 },
-  { id: 'discount', label: 'Discount', visible: true, order: 5 },
-  { id: 'tax', label: 'Tax', visible: true, order: 6 },
-  { id: 'amount', label: 'Amount', visible: true, order: 7 }
-];
+import { DEFAULT_INVOICE_COLUMNS } from '../../utils/invoiceSchema';
 
 // Dummy data for Live Preview
 const DUMMY_INVOICE = {
@@ -86,7 +78,7 @@ const InvoiceStudio = ({ settings, onUpdate, subscription }) => {
     onUpdate({ [key]: value });
   };
 
-  const columns = settings?.invoiceColumns || DEFAULT_COLUMNS;
+  const columns = settings?.invoiceColumns || DEFAULT_INVOICE_COLUMNS;
   const invoiceBuilderSettings = settings?.invoiceBuilderSettings || {};
   const invoiceItemLabel = invoiceBuilderSettings.itemLabel !== undefined ? invoiceBuilderSettings.itemLabel : 'Item';
   const invoiceCustomColumns = invoiceBuilderSettings.customColumns || [];

@@ -8,6 +8,17 @@ import { getCategoryWording } from '../config/businessPresets';
  * @param {Object} businessSettings - The global business settings as a fallback.
  * @returns {Array} - Array of column definitions
  */
+export const DEFAULT_INVOICE_COLUMNS = [
+  { id: 'sn', label: 'S.No', visible: true, order: 1 },
+  { id: 'item', label: 'Item/Service', visible: true, order: 2 },
+  { id: 'hsn', label: 'HSN/SAC', visible: false, order: 3 },
+  { id: 'qty', label: 'Quantity', visible: true, order: 4 },
+  { id: 'rate', label: 'Rate', visible: true, order: 5 },
+  { id: 'discount', label: 'Discount', visible: false, order: 6 },
+  { id: 'tax', label: 'Tax', visible: false, order: 7 },
+  { id: 'amount', label: 'Amount', visible: true, order: 8 }
+];
+
 export const getInvoiceColumns = (invoice, businessSettings = {}) => {
   if (!invoice) return [];
 
@@ -19,127 +30,64 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
   const extraCols = builderSettings.customColumns || invoice.settings?.extraColumns || businessSettings?.extraColumns || [];
   
   // Use user's configured columns or fallback to default visibility logic
-  const configuredColumns = invoice.invoiceColumns || invoice.settings?.invoiceColumns || businessSettings?.invoiceColumns;
-
-  const col1Label = builderSettings.itemLabel || customCols.col1 || (bType === 'grocery' || bType === 'retail' ? 'Product' : bType === 'repair' ? 'Service' : bType === 'custom' ? 'Item' : categoryWords.items || 'Item Name');
-  const col2Label = customCols.col2 || categoryWords.qty || 'Qty';
-  const col3Label = customCols.col3 || categoryWords.price || 'Rate';
-
-  const baseSchema = {
-    sn: { id: 'sn', label: '#', align: 'center', width: '5%' },
-    item: { id: 'item', label: col1Label, align: 'left', width: '25%' },
-    hsn: { id: 'hsn', label: 'HSN/SAC', align: 'center', width: '10%' },
-    description: { id: 'description', label: 'Details', align: 'left', width: '20%' },
-    qty: { id: 'qty', label: col2Label, align: 'center', width: '10%' },
-    unit: { id: 'unit', label: 'Unit', align: 'center', width: '8%' },
-    rate: { id: 'rate', label: col3Label, align: 'right', width: '12%' },
-    discount: { id: 'discount', label: 'Disc', align: 'right', width: '8%' },
-    tax: { id: 'tax', label: 'Tax', align: 'right', width: '8%' },
-    amount: { id: 'amount', label: 'Total', align: 'right', width: '15%' }
-  };
-
-  const dynamicExtraCols = extraCols.map((col) => ({
-    id: col.id, // e.g. col_123
-    label: col.name,
-    align: 'center',
-    width: '10%',
-    isExtra: true
-  }));
+  let configuredColumns = invoice.invoiceColumns || invoice.settings?.invoiceColumns || businessSettings?.invoiceColumns;
+  if (!configuredColumns || !Array.isArray(configuredColumns) || configuredColumns.length === 0) {
+    configuredColumns = DEFAULT_INVOICE_COLUMNS;
+  }
 
   const columns = [];
+  const sortedConfig = [...configuredColumns].sort((a, b) => a.order - b.order);
 
-  if (configuredColumns) {
-    // If studio columns are configured, follow their visibility and order
-    const sortedConfig = [...configuredColumns].sort((a, b) => a.order - b.order);
+  // The builder UI might have old legacy columns like 'sNo', 'description', 'total'
+  const legacyMap = { 'sNo': 'sn', 'description': 'item', 'total': 'amount' };
+  
+  sortedConfig.forEach(conf => {
+    if (!conf.visible) return;
     
-    // The builder UI uses slightly different IDs, map them to the baseSchema
-    const aliasMap = {
-      'sNo': 'sn',
-      'description': 'item', // In the builder, the product name column is called 'description'
-      'total': 'amount'
-    };
+    const schemaId = legacyMap[conf.id] || conf.id;
     
-    sortedConfig.forEach(conf => {
-      if (!conf.visible) return;
-      
-      const schemaId = aliasMap[conf.id] || conf.id;
-      
-      if (baseSchema[schemaId]) {
-        // Inject custom columns before qty or rate
-        if (schemaId === 'qty' || (schemaId === 'rate' && !sortedConfig.find(c => aliasMap[c.id] === 'qty' || c.id === 'qty'))) {
-          // Only push if not already added to prevent duplicates
-          if (!columns.some(c => c.isExtra)) {
-            columns.push(...dynamicExtraCols);
-          }
+    if (baseSchema[schemaId]) {
+      // Inject custom columns before qty or rate
+      if (schemaId === 'qty' || (schemaId === 'rate' && !sortedConfig.find(c => (legacyMap[c.id] || c.id) === 'qty'))) {
+        if (!columns.some(c => c.isExtra)) {
+          columns.push(...dynamicExtraCols);
         }
-        
-        // Use the base schema but respect the user's custom label, prioritizing builderSettings.itemLabel
-        let finalLabel = conf.label || baseSchema[schemaId].label;
-        if (schemaId === 'item' && builderSettings.itemLabel) {
-          finalLabel = builderSettings.itemLabel;
-        }
-        
-        columns.push({
-          ...baseSchema[schemaId],
-          label: finalLabel
-        });
-        
-        // If unit data exists, inject it after qty
-        if (schemaId === 'qty') {
-          const hasUnit = (invoice.items || []).some(item => item.unit);
-          if (hasUnit && !sortedConfig.find(c => c.id === 'unit')) {
-            columns.push(baseSchema.unit);
-          }
-        }
-      } else {
-        // It's a custom column from configuredColumns
-        columns.push({
-          id: conf.id,
-          label: conf.label,
-          align: 'center',
-          width: '10%',
-          isExtra: true
-        });
       }
-    });
-    
-    // Fallback: If custom columns weren't added (e.g. qty/rate missing), append them at the end
-    if (!columns.some(c => c.isExtra)) {
-      columns.push(...dynamicExtraCols);
+      
+      let finalLabel = conf.label || baseSchema[schemaId].label;
+      if (schemaId === 'item' && builderSettings.itemLabel) {
+        finalLabel = builderSettings.itemLabel;
+      }
+      if (schemaId === 'tax' && builderSettings.taxLabel) {
+        finalLabel = builderSettings.taxLabel;
+      }
+      
+      columns.push({
+        ...baseSchema[schemaId],
+        label: finalLabel
+      });
+      
+      // If unit data exists, inject it after qty
+      if (schemaId === 'qty') {
+        const hasUnit = (invoice.items || []).some(item => item.unit);
+        if (hasUnit && !sortedConfig.find(c => c.id === 'unit')) {
+          columns.push(baseSchema.unit);
+        }
+      }
+    } else {
+      // It's a custom column from configuredColumns
+      columns.push({
+        id: conf.id,
+        label: conf.label,
+        align: 'center',
+        width: '10%',
+        isExtra: true
+      });
     }
-  } else {
-    // SN is always first in legacy fallback
-    columns.push(baseSchema.sn);
-    
-    // Fallback legacy logic
-    columns.push(baseSchema.item);
-    
-    const hasDescription = (invoice.items || []).some(item => item.description || (bType !== 'custom' && item.workType));
-    if (hasDescription) {
-      columns.push(baseSchema.description);
-    }
-    
+  });
+  
+  if (!columns.some(c => c.isExtra)) {
     columns.push(...dynamicExtraCols);
-    columns.push(baseSchema.qty);
-    
-    const hasUnit = (invoice.items || []).some(item => item.unit);
-    if (hasUnit) {
-      columns.push(baseSchema.unit);
-    }
-    
-    columns.push(baseSchema.rate);
-    
-    const hasDiscount = (invoice.items || []).some(item => parseFloat(item.discount || 0) > 0);
-    if (hasDiscount) {
-      columns.push(baseSchema.discount);
-    }
-    
-    const hasTax = (invoice.items || []).some(item => parseFloat(item.tax || 0) > 0);
-    if (hasTax) {
-      columns.push(baseSchema.tax);
-    }
-    
-    columns.push(baseSchema.amount);
   }
 
   const fixedWidths = { 'sn': 5, 'amount': 15, 'qty': 8, 'rate': 12 };
@@ -188,8 +136,11 @@ export const getItemValue = (item, colId, bType) => {
     case 'amount':
       return item.amount !== undefined ? item.amount : (item.total !== undefined ? item.total : 0);
       
+    case 'sn':
+      return item.sNo !== undefined ? item.sNo : (item.sn !== undefined ? item.sn : '');
+
     default:
       // Includes 'unit', 'discount', 'tax', 'hsn', and extra custom columns
-      return item[colId] || item.customFields?.[colId] || '';
+      return item[colId] !== undefined ? item[colId] : (item.customFields?.[colId] || '');
   }
 };

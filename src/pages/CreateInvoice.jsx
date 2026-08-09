@@ -31,38 +31,10 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
   const [notes, setNotes] = useState('Thank you for your business!');
   const [previewQrCode, setPreviewQrCode] = useState(null);
   const [enableQrCode, setEnableQrCode] = useState(true);
-  
-  const [invoiceColumns, setInvoiceColumns] = useState(() => {
-    const settingsCols = businessSettings?.invoiceColumns;
-    if (!settingsCols || !Array.isArray(settingsCols)) {
-      return [
-        { id: 'sNo', label: 'S.No', visible: true, order: 1 },
-        { id: 'description', label: 'Description', visible: true, order: 2 },
-        { id: 'qty', label: 'Qty', visible: true, order: 3 },
-        { id: 'rate', label: 'Rate', visible: true, order: 4 },
-        { id: 'total', label: 'Total', visible: true, order: 5 }
-      ];
-    }
-    
-    const colMap = { 'item': 'description', 'qty': 'qty', 'rate': 'rate', 'amount': 'total' };
-    const localCols = [{ id: 'sNo', label: 'S.No', visible: true, order: 0 }];
-    
-    settingsCols.forEach(col => {
-      let finalLabel = col.label;
-      if (col.id === 'item' && businessSettings?.invoiceBuilderSettings?.itemLabel) {
-        finalLabel = businessSettings.invoiceBuilderSettings.itemLabel;
-      }
 
-      if (colMap[col.id]) {
-        localCols.push({ id: colMap[col.id], label: finalLabel, visible: col.visible, order: col.order });
-      } else {
-        // Custom column
-        localCols.push({ id: col.id, label: finalLabel, visible: col.visible, order: col.order });
-      }
-    });
-    
-    return localCols.sort((a, b) => a.order - b.order);
-  });
+  const invoiceColumns = useMemo(() => {
+    return getInvoiceColumns({ settings: { invoiceBuilderSettings: businessSettings?.invoiceBuilderSettings } }, businessSettings).sort((a, b) => a.order - b.order);
+  }, [businessSettings]);
 
   const [bankDetails, setBankDetails] = useState({
     bankName: '',
@@ -398,7 +370,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                     <tr>
                       {invoiceColumns.map(c => {
                         if (!c.visible) return null;
-                        const widthClass = c.id === 'sNo' ? 'w-16' : c.id === 'qty' ? 'w-24' : (c.id === 'rate' || c.id === 'total') ? 'w-32' : '';
+                        const widthClass = c.id === 'sn' ? 'w-16' : c.id === 'qty' ? 'w-24' : (c.id === 'rate' || c.id === 'amount') ? 'w-32' : '';
                         return <th key={c.id} className={`pb-3 px-2 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft ${widthClass}`}>{c.label}</th>;
                       })}
                       <th className="pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft w-24 text-right">Actions</th>
@@ -416,14 +388,19 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                         >
                           {invoiceColumns.map(c => {
                             if (!c.visible) return null;
-                            if (c.id === 'sNo') return (
+                            if (c.id === 'sn') return (
                               <td key={c.id} className="py-2 px-2">
                                 <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface text-center" value={item.sNo} onChange={(e) => handleUpdateItem(item.id, 'sNo', e.target.value)} />
                               </td>
                             );
-                            if (c.id === 'description') return (
+                            if (c.id === 'item') return (
                               <td key={c.id} className="py-2 px-2">
                                 <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" placeholder="Item description" value={item.name} onChange={(e) => handleUpdateItem(item.id, 'name', e.target.value)} list="products-list" />
+                              </td>
+                            );
+                            if (c.id === 'hsn') return (
+                              <td key={c.id} className="py-2 px-2">
+                                <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" placeholder="HSN/SAC" value={item.hsn || ''} onChange={(e) => handleUpdateItem(item.id, 'hsn', e.target.value)} />
                               </td>
                             );
                             if (c.id === 'qty') return (
@@ -436,7 +413,17 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                                 <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.price} onChange={(e) => handleUpdateItem(item.id, 'price', e.target.value)} />
                               </td>
                             );
-                            if (c.id === 'total') return (
+                            if (c.id === 'discount') return (
+                              <td key={c.id} className="py-2 px-2">
+                                <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.discount || ''} onChange={(e) => handleUpdateItem(item.id, 'discount', e.target.value)} />
+                              </td>
+                            );
+                            if (c.id === 'tax') return (
+                              <td key={c.id} className="py-2 px-2">
+                                <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.tax || ''} onChange={(e) => handleUpdateItem(item.id, 'tax', e.target.value)} />
+                              </td>
+                            );
+                            if (c.id === 'amount') return (
                               <td key={c.id} className="py-2 px-2 font-bold tabular-nums text-theme-primary">
                                 {formatCurrency(item.qty * item.price)}
                               </td>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { getInvoiceColumns, getItemValue } from '../../../utils/invoiceSchema';
 import { formatCurrency } from '../../../utils/invoiceUtils';
 
 const MinimalClassic = ({ data }) => (
@@ -28,19 +29,29 @@ const MinimalClassic = ({ data }) => (
     <table className="w-full text-left mb-8 text-sm">
       <thead>
         <tr className="border-b-2 border-gray-900 text-gray-900">
-          <th className="py-3 px-2 font-bold">Item</th>
-          {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-3 px-2 font-bold text-right">Qty</th>}
-          {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-3 px-2 font-bold text-right">Price</th>}
-          {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-3 px-2 font-bold text-right">Total</th>}
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-3 px-2 font-bold text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
         </tr>
       </thead>
       <tbody>
         {data.items?.map((item, i) => (
           <tr key={i} className="border-b border-gray-200">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-3 px-2">{item.name || 'Item'}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-3 px-2 text-right">{item.qty}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-3 px-2 text-right">{formatCurrency(item.price)}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-3 px-2 text-right">{formatCurrency(item.qty * item.price)}</td>}
+            {getInvoiceColumns(data, data.businessSettings).map(col => {
+              const val = getItemValue(item, col.id, data.billType);
+              const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              return (
+                <td key={col.id} className={`py-3 px-2 text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                  {displayVal}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -117,23 +128,33 @@ const ModernCorporate = ({ data }) => (
 
       <table className="w-full text-left mb-8 text-sm border-collapse">
         <thead>
-          <tr className="bg-gray-100 text-gray-600 text-xs uppercase tracking-wider">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <th className="py-3 px-4 font-bold rounded-l">Description</th>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-3 px-4 font-bold text-center">Qty</th>}
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-3 px-4 font-bold text-right">Price</th>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-3 px-4 font-bold text-right rounded-r">Total</th>}
-          </tr>
-        </thead>
+        <tr className="bg-gray-100 text-gray-600 text-xs uppercase tracking-wider">
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-3 px-4 font-bold text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
+        </tr>
+      </thead>
         <tbody>
-          {data.items?.map((item, i) => (
-            <tr key={i} className="border-b border-gray-100">
-              {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-4 font-medium">{item.name || 'Item'}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-4 text-center">{item.qty}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-4 px-4 text-right">{formatCurrency(item.price)}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-4 text-right font-bold">{formatCurrency(item.qty * item.price)}</td>}
-            </tr>
-          ))}
-        </tbody>
+        {data.items?.map((item, i) => (
+          <tr key={i} className="border-b border-gray-100">
+            {getInvoiceColumns(data, data.businessSettings).map(col => {
+              const val = getItemValue(item, col.id, data.billType);
+              const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              return (
+                <td key={col.id} className={`py-4 px-4 text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                  {displayVal}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
       </table>
 
       <div className="flex justify-end mb-10">
@@ -210,21 +231,33 @@ const TealBoldHeader = ({ data }) => (
 
       <table className="w-full text-left text-sm border-collapse">
         <thead>
-          <tr className="border-b-2 border-teal-800 text-teal-900">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <th className="py-3 px-4 font-black">Description</th>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-3 px-4 font-black text-center">Qty</th>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-3 px-4 font-black text-right">Amount</th>}
-          </tr>
-        </thead>
+        <tr className="border-b-2 border-teal-800 text-teal-900">
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-3 px-4 font-black text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
+        </tr>
+      </thead>
         <tbody>
-          {data.items?.map((item, i) => (
-            <tr key={i} className="border-b border-gray-200/60">
-              {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-4 font-medium text-gray-700">{item.name || 'Item'}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-4 text-center text-gray-500">{item.qty}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-4 text-right font-bold text-teal-900">{formatCurrency(item.qty * item.price)}</td>}
-            </tr>
-          ))}
-        </tbody>
+        {data.items?.map((item, i) => (
+          <tr key={i} className="border-b border-gray-200/60">
+            {getInvoiceColumns(data, data.businessSettings).map(col => {
+              const val = getItemValue(item, col.id, data.billType);
+              const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              return (
+                <td key={col.id} className={`py-4 px-4 text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                  {displayVal}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
       </table>
 
       <div className="flex justify-end mt-8">
@@ -305,23 +338,33 @@ const SageGreenCurved = ({ data }) => (
 
       <table className="w-full text-left text-sm mb-10">
         <thead>
-          <tr className="border-b-2 border-[#6b8e7b] text-[#3d5a49]">
-            <th className="py-3 px-4 font-bold">Service / Item</th>
-            <th className="py-3 px-4 font-bold text-center">Hrs/Qty</th>
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-3 px-4 font-bold text-right">Rate</th>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-3 px-4 font-bold text-right">Amount</th>}
-          </tr>
-        </thead>
+        <tr className="border-b-2 border-[#6b8e7b] text-[#3d5a49]">
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-3 px-4 font-bold text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
+        </tr>
+      </thead>
         <tbody>
-          {data.items?.map((item, i) => (
-            <tr key={i} className="border-b border-gray-200">
-              {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-4 font-medium">{item.name || 'Item'}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-4 text-center">{item.qty}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-4 px-4 text-right">{formatCurrency(item.price)}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-4 text-right font-bold text-[#4a6d59]">{formatCurrency(item.qty * item.price)}</td>}
-            </tr>
-          ))}
-        </tbody>
+        {data.items?.map((item, i) => (
+          <tr key={i} className="border-b border-gray-200">
+            {getInvoiceColumns(data, data.businessSettings).map(col => {
+              const val = getItemValue(item, col.id, data.billType);
+              const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              return (
+                <td key={col.id} className={`py-4 px-4 text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                  {displayVal}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
       </table>
 
       <div className="flex justify-end">
@@ -503,19 +546,29 @@ const PurpleCorporate = ({ data }) => (
     <table className="w-full text-left mb-8 border-collapse">
       <thead>
         <tr className="bg-gradient-to-br from-[#6A5ACD] to-[#7B68EE] text-white shadow-md">
-          {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <th className="py-4 px-3 text-[11px] font-bold uppercase tracking-wide rounded-l-md">Description</th>}
-          {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-4 px-3 text-[11px] font-bold uppercase tracking-wide text-center">Qty</th>}
-          {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-4 px-3 text-[11px] font-bold uppercase tracking-wide text-right">Price</th>}
-          {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-4 px-3 text-[11px] font-bold uppercase tracking-wide text-right rounded-r-md">Total</th>}
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-4 px-3 text-[11px] font-bold uppercase tracking-wide text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
         </tr>
       </thead>
       <tbody>
         {data.items?.map((item, i) => (
           <tr key={i} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-3 text-[13px]">{item.name || 'Item'}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-3 text-[13px] text-center">{item.qty}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-4 px-3 text-[13px] text-right">{formatCurrency(item.price)}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-3 text-[13px] text-right font-bold">{formatCurrency(item.qty * item.price)}</td>}
+            {getInvoiceColumns(data, data.businessSettings).map(col => {
+              const val = getItemValue(item, col.id, data.billType);
+              const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              return (
+                <td key={col.id} className={`py-4 px-3 text-[13px] text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                  {displayVal}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -601,19 +654,29 @@ const OrangeGradientModern = ({ data }) => (
     <table className="w-full text-left mb-10 border-collapse">
       <thead>
         <tr className="bg-gradient-to-br from-[#FF8C00] to-[#FFA500] text-white shadow-sm">
-          <th className="py-4 px-4 text-[11px] font-bold uppercase tracking-wider rounded-l-xl">Item Description</th>
-          {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-4 px-4 text-[11px] font-bold uppercase tracking-wider text-center">Qty</th>}
-          {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-4 px-4 text-[11px] font-bold uppercase tracking-wider text-right">Rate</th>}
-          {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-4 px-4 text-[11px] font-bold uppercase tracking-wider text-right rounded-r-xl">Amount</th>}
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-4 px-4 text-[11px] font-bold uppercase tracking-wider text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
         </tr>
       </thead>
       <tbody>
         {data.items?.map((item, i) => (
           <tr key={i} className="border-b border-gray-100 bg-white">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-4 text-[13px] font-medium">{item.name || 'Item'}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-4 text-[13px] text-center text-gray-500">{item.qty}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-4 px-4 text-[13px] text-right text-gray-500">{formatCurrency(item.price)}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-4 text-[13px] text-right font-bold">{formatCurrency(item.qty * item.price)}</td>}
+            {getInvoiceColumns(data, data.businessSettings).map(col => {
+              const val = getItemValue(item, col.id, data.billType);
+              const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              return (
+                <td key={col.id} className={`py-4 px-4 text-[13px] text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                  {displayVal}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -709,19 +772,29 @@ const OrangeGeometricCorner = ({ data }) => (
     <table className="w-full text-left mb-10 border-collapse">
       <thead>
         <tr className="border-b-[3px] border-[#FF8C00]">
-          <th className="py-3 px-2 text-[12px] font-bold text-[#FF8C00] uppercase tracking-wider">Item</th>
-          {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-3 px-2 text-[12px] font-bold text-[#FF8C00] uppercase tracking-wider text-center">Qty</th>}
-          <th className="py-3 px-2 text-[12px] font-bold text-[#FF8C00] uppercase tracking-wider text-right">Unit Price</th>
-          {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-3 px-2 text-[12px] font-bold text-[#FF8C00] uppercase tracking-wider text-right">Total</th>}
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-3 px-2 text-[12px] font-bold text-[#FF8C00] uppercase tracking-wider text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
         </tr>
       </thead>
       <tbody>
         {data.items?.map((item, i) => (
           <tr key={i} className="border-b border-gray-100">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-2 text-[13px] text-gray-800">{item.name || 'Item'}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-2 text-[13px] text-center text-gray-600">{item.qty}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-4 px-2 text-[13px] text-right text-gray-600">{formatCurrency(item.price)}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-2 text-[13px] text-right font-bold text-gray-800">{formatCurrency(item.qty * item.price)}</td>}
+            {getInvoiceColumns(data, data.businessSettings).map(col => {
+              const val = getItemValue(item, col.id, data.billType);
+              const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              return (
+                <td key={col.id} className={`py-4 px-2 text-[13px] text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                  {displayVal}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -807,19 +880,29 @@ const BlackOrangeBold = ({ data }) => (
     <table className="w-full text-left mb-10 border-collapse">
       <thead>
         <tr className="bg-gradient-to-br from-[#FF8C00] to-[#FFA500] text-white shadow-md shadow-[#FF8C00]/20">
-          {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <th className="py-4 px-4 text-[12px] font-bold uppercase tracking-wider rounded-l-md">Description</th>}
-          {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-4 px-4 text-[12px] font-bold uppercase tracking-wider text-center">Qty</th>}
-          {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-4 px-4 text-[12px] font-bold uppercase tracking-wider text-right">Price</th>}
-          {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-4 px-4 text-[12px] font-bold uppercase tracking-wider text-right rounded-r-md">Total</th>}
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-4 px-4 text-[12px] font-bold uppercase tracking-wider text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
         </tr>
       </thead>
       <tbody>
         {data.items?.map((item, i) => (
           <tr key={i} className="border-b border-[#333]">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-4 text-[13px] text-gray-200">{item.name || 'Item'}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-4 text-[13px] text-center text-gray-400">{item.qty}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-4 px-4 text-[13px] text-right text-gray-400">{formatCurrency(item.price)}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-4 text-[13px] text-right font-bold text-white">{formatCurrency(item.qty * item.price)}</td>}
+            {getInvoiceColumns(data, data.businessSettings).map(col => {
+              const val = getItemValue(item, col.id, data.billType);
+              const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              return (
+                <td key={col.id} className={`py-4 px-4 text-[13px] text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                  {displayVal}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -904,19 +987,29 @@ const LuxuryGoldBlack = ({ data }) => (
     <table className="w-full text-left mb-10 border-collapse font-sans relative z-10">
       <thead>
         <tr className="border-t-2 border-b-2 border-[#D4AF37]/60">
-          {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <th className="py-4 px-2 text-[11px] font-bold text-[#D4AF37] uppercase tracking-[2px]">Description</th>}
-          {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-4 px-2 text-[11px] font-bold text-[#D4AF37] uppercase tracking-[2px] text-center">Qty</th>}
-          {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-4 px-2 text-[11px] font-bold text-[#D4AF37] uppercase tracking-[2px] text-right">Rate</th>}
-          {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-4 px-2 text-[11px] font-bold text-[#D4AF37] uppercase tracking-[2px] text-right">Total</th>}
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-4 px-2 text-[11px] font-bold text-[#D4AF37] uppercase tracking-[2px] text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
         </tr>
       </thead>
       <tbody>
         {data.items?.map((item, i) => (
           <tr key={i} className="border-b border-[#333]">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-2 text-[13px] text-gray-200">{item.name || 'Item'}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-2 text-[13px] text-center text-gray-400">{item.qty}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-4 px-2 text-[13px] text-right text-gray-400">{formatCurrency(item.price)}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-2 text-[13px] text-right font-bold text-white">{formatCurrency(item.qty * item.price)}</td>}
+            {getInvoiceColumns(data, data.businessSettings).map(col => {
+              const val = getItemValue(item, col.id, data.billType);
+              const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              return (
+                <td key={col.id} className={`py-4 px-2 text-[13px] text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                  {displayVal}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -1000,19 +1093,29 @@ const BlackHeaderProfessional = ({ data }) => (
     <table className="w-full text-left mb-10 border-collapse">
       <thead>
         <tr className="border-b-[3px] border-dashed border-[#1a1a1a]">
-          {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <th className="py-4 px-2 text-[12px] font-bold text-[#1a1a1a] uppercase tracking-wider">Description</th>}
-          {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-4 px-2 text-[12px] font-bold text-[#1a1a1a] uppercase tracking-wider text-center">Qty</th>}
-          {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-4 px-2 text-[12px] font-bold text-[#1a1a1a] uppercase tracking-wider text-right">Price</th>}
-          {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-4 px-2 text-[12px] font-bold text-[#1a1a1a] uppercase tracking-wider text-right">Total</th>}
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-4 px-2 text-[12px] font-bold text-[#1a1a1a] uppercase tracking-wider text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
         </tr>
       </thead>
       <tbody>
         {data.items?.map((item, i) => (
           <tr key={i} className="border-b border-gray-100">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-2 text-[13px] text-gray-800">{item.name || 'Item'}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-2 text-[13px] text-center text-gray-600">{item.qty}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-4 px-2 text-[13px] text-right text-gray-600">{formatCurrency(item.price)}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-2 text-[13px] text-right font-bold text-gray-800">{formatCurrency(item.qty * item.price)}</td>}
+            {getInvoiceColumns(data, data.businessSettings).map(col => {
+              const val = getItemValue(item, col.id, data.billType);
+              const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              return (
+                <td key={col.id} className={`py-4 px-2 text-[13px] text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                  {displayVal}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -1091,13 +1194,18 @@ const BlueRoundedModern = ({ data }) => (
 
       <table className="w-full text-left mb-10 border-collapse">
         <thead>
-          <tr className="bg-gradient-to-r from-[#1e90ff] to-[#4169e1] text-white shadow-md rounded-xl overflow-hidden block w-full table-row-group">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <th className="py-4 px-4 text-[11px] font-bold uppercase tracking-wider rounded-l-xl">Description</th>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-4 px-4 text-[11px] font-bold uppercase tracking-wider text-center">Qty</th>}
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-4 px-4 text-[11px] font-bold uppercase tracking-wider text-right">Price</th>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-4 px-4 text-[11px] font-bold uppercase tracking-wider text-right rounded-r-xl">Total</th>}
-          </tr>
-        </thead>
+        <tr className="bg-gradient-to-r from-[#1e90ff] to-[#4169e1] text-white shadow-md rounded-xl overflow-hidden block w-full table-row-group">
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-4 px-4 text-[11px] font-bold uppercase tracking-wider text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
+        </tr>
+      </thead>
         <tbody className="table-row-group block w-full mt-2">
           {data.items?.map((item, i) => (
             <tr key={i} className="border-b border-gray-100">
@@ -1194,19 +1302,29 @@ const RedCorporateClean = ({ data }) => (
     <table className="w-full text-left mb-10 border-collapse">
       <thead>
         <tr className="bg-gradient-to-br from-[#DC143C] to-[#FF1744] text-white shadow-md">
-          {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <th className="py-4 px-4 text-[11px] font-bold uppercase tracking-wider rounded-l-sm">Description</th>}
-          {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-4 px-4 text-[11px] font-bold uppercase tracking-wider text-center">Qty</th>}
-          {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-4 px-4 text-[11px] font-bold uppercase tracking-wider text-right">Price</th>}
-          {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-4 px-4 text-[11px] font-bold uppercase tracking-wider text-right rounded-r-sm">Total</th>}
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-4 px-4 text-[11px] font-bold uppercase tracking-wider text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
         </tr>
       </thead>
       <tbody>
         {data.items?.map((item, i) => (
           <tr key={i} className="border-b border-gray-100 even:bg-[#DC143C]/5">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-4 text-[13px] text-gray-800">{item.name || 'Item'}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-4 text-[13px] text-center text-gray-600">{item.qty}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-4 px-4 text-[13px] text-right text-gray-600">{formatCurrency(item.price)}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-4 text-[13px] text-right font-bold text-gray-800">{formatCurrency(item.qty * item.price)}</td>}
+            {getInvoiceColumns(data, data.businessSettings).map(col => {
+              const val = getItemValue(item, col.id, data.billType);
+              const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              return (
+                <td key={col.id} className={`py-4 px-4 text-[13px] text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                  {displayVal}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -1284,19 +1402,29 @@ const CleanTwoColumnModern = ({ data }) => (
     <table className="w-full text-left mb-12 border-collapse">
       <thead>
         <tr className="border-b-[3px] border-gray-200">
-          {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <th className="py-3 px-2 text-[12px] font-bold text-gray-900 uppercase tracking-wider">Description</th>}
-          {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-3 px-2 text-[12px] font-bold text-gray-900 uppercase tracking-wider text-center">Qty</th>}
-          {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-3 px-2 text-[12px] font-bold text-gray-900 uppercase tracking-wider text-right">Price</th>}
-          {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-3 px-2 text-[12px] font-bold text-gray-900 uppercase tracking-wider text-right">Total</th>}
+          {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
+            const isFirst = index === 0;
+            const isLast = index === arr.length - 1;
+            return (
+              <th key={col.id} className={`py-3 px-2 text-[12px] font-bold text-gray-900 uppercase tracking-wider text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+                {col.label}
+              </th>
+            );
+          })}
         </tr>
       </thead>
       <tbody>
         {data.items?.map((item, i) => (
           <tr key={i} className="border-b border-gray-100">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-2 text-[13px] text-gray-800">{item.name || 'Item'}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-2 text-[13px] text-center text-gray-600">{item.qty}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-4 px-2 text-[13px] text-right text-gray-600">{formatCurrency(item.price)}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-2 text-[13px] text-right font-bold text-gray-800">{formatCurrency(item.qty * item.price)}</td>}
+            {getInvoiceColumns(data, data.businessSettings).map(col => {
+              const val = getItemValue(item, col.id, data.billType);
+              const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              return (
+                <td key={col.id} className={`py-4 px-2 text-[13px] text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                  {displayVal}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
