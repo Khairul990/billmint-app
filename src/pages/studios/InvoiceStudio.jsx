@@ -88,9 +88,9 @@ const InvoiceStudio = ({ settings, onUpdate, subscription }) => {
 
   const columns = settings?.invoiceColumns || DEFAULT_COLUMNS;
   const invoiceBuilderSettings = settings?.invoiceBuilderSettings || {};
-  const invoiceItemLabel = invoiceBuilderSettings.itemLabel || 'Item';
+  const invoiceItemLabel = invoiceBuilderSettings.itemLabel !== undefined ? invoiceBuilderSettings.itemLabel : 'Item';
   const invoiceCustomColumns = invoiceBuilderSettings.customColumns || [];
-  const taxLabel = invoiceBuilderSettings.taxLabel || settings?.taxLabel || 'Tax';
+  const taxLabel = invoiceBuilderSettings.taxLabel !== undefined ? invoiceBuilderSettings.taxLabel : (settings?.taxLabel !== undefined ? settings.taxLabel : 'Tax');
   const showDiscount = invoiceBuilderSettings.showDiscount !== false;
   const bankDetails = invoiceBuilderSettings.bankDetails || { name: '', account: '', ifsc: '' };
 
