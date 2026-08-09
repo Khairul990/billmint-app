@@ -225,11 +225,23 @@ export const AnimatedThemeToggler = ({
       type="button"
       ref={buttonRef}
       onClick={toggleTheme}
-      className={className}
+      className={`relative inline-flex h-10 w-20 shrink-0 cursor-pointer items-center rounded-full border border-theme-border-soft bg-theme-surface shadow-glass transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-accent focus-visible:ring-offset-2 overflow-hidden ${className}`}
       {...props}
     >
       {children}
-      {isDark ? <Sun className="w-5 h-5 text-amber-400 animate-pulse relative z-10" /> : <Moon className="w-5 h-5 relative z-10" />}
+      <div className="absolute inset-0 flex items-center justify-between px-3 pointer-events-none z-10">
+        <Sun className={`w-4 h-4 transition-colors duration-300 ${!isDark ? 'text-theme-muted/30' : 'text-theme-muted'}`} />
+        <Moon className={`w-4 h-4 transition-colors duration-300 ${isDark ? 'text-theme-muted/30' : 'text-theme-muted'}`} />
+      </div>
+      <div
+        className={`absolute left-1 top-1 flex h-8 w-8 items-center justify-center rounded-full shadow-sm transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-20 ${
+          isDark 
+            ? 'translate-x-10 bg-theme-surface-elevated text-theme-primary border border-theme-border-soft shadow-glass' 
+            : 'translate-x-0 bg-gradient-to-tr from-amber-300 to-yellow-500 text-white shadow-[0_0_10px_rgba(251,191,36,0.6)]'
+        }`}
+      >
+        {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+      </div>
       <span className="sr-only">Toggle theme</span>
     </button>
   )

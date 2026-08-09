@@ -10,7 +10,7 @@ export const springGentle = { type: 'spring', stiffness: 200, damping: 30 };
 
 // Page transition variants
 export const pageVariants = {
-  initial: { opacity: 0, y: 15, scale: 0.98, filter: 'blur(4px)' },
+  initial: { opacity: 1, y: 15, scale: 0.98, filter: 'blur(4px)' },
   animate: { 
     opacity: 1, 
     y: 0,
@@ -24,7 +24,7 @@ export const pageVariants = {
     }
   },
   exit: { 
-    opacity: 0, 
+    opacity: 1, 
     y: -10,
     scale: 0.98,
     filter: 'blur(2px)',
@@ -43,7 +43,7 @@ export const pageTransition = {
 
 // Stagger container for lists
 export const staggerContainer = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 1 },
   visible: {
     opacity: 1,
     transition: {
@@ -54,7 +54,7 @@ export const staggerContainer = {
 };
 
 export const staggerItem = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  hidden: { opacity: 1, y: 20, scale: 0.95 },
   visible: { 
     opacity: 1, 
     y: 0,
@@ -68,7 +68,7 @@ export const staggerItem = {
 };
 
 export const fadeInUp = {
-  hidden: { opacity: 0, y: 30, filter: 'blur(5px)' },
+  hidden: { opacity: 1, y: 30, filter: 'blur(5px)' },
   visible: { 
     opacity: 1, 
     y: 0,
@@ -78,7 +78,7 @@ export const fadeInUp = {
 };
 
 export const fadeInDown = {
-  hidden: { opacity: 0, y: -30, filter: 'blur(5px)' },
+  hidden: { opacity: 1, y: -30, filter: 'blur(5px)' },
   visible: { 
     opacity: 1, 
     y: 0,
@@ -88,7 +88,7 @@ export const fadeInDown = {
 };
 
 export const fadeIn = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 1 },
   visible: { 
     opacity: 1,
     transition: { duration: 0.3, ease: easeFluid }
@@ -96,7 +96,7 @@ export const fadeIn = {
 };
 
 export const scaleIn = {
-  hidden: { opacity: 0, scale: 0.9 },
+  hidden: { opacity: 1, scale: 0.9 },
   visible: { 
     opacity: 1, 
     scale: 1,
@@ -105,7 +105,7 @@ export const scaleIn = {
 };
 
 export const slideUp = {
-  hidden: { opacity: 0, y: 60 },
+  hidden: { opacity: 1, y: 60 },
   visible: { 
     opacity: 1, 
     y: 0,
@@ -114,7 +114,7 @@ export const slideUp = {
 };
 
 export const slideInRight = {
-  hidden: { opacity: 0, x: 40, filter: 'blur(3px)' },
+  hidden: { opacity: 1, x: 40, filter: 'blur(3px)' },
   visible: { 
     opacity: 1, 
     x: 0,
@@ -124,7 +124,7 @@ export const slideInRight = {
 };
 
 export const slideInLeft = {
-  hidden: { opacity: 0, x: -40, filter: 'blur(3px)' },
+  hidden: { opacity: 1, x: -40, filter: 'blur(3px)' },
   visible: { 
     opacity: 1, 
     x: 0,
@@ -135,13 +135,13 @@ export const slideInLeft = {
 
 // Modal animation
 export const modalOverlayVariants = {
-  hidden: { opacity: 0, backdropFilter: 'blur(0px)' },
+  hidden: { opacity: 1, backdropFilter: 'blur(0px)' },
   visible: { opacity: 1, backdropFilter: 'blur(4px)', transition: { duration: 0.3 } },
-  exit: { opacity: 0, backdropFilter: 'blur(0px)', transition: { duration: 0.2 } }
+  exit: { opacity: 1, backdropFilter: 'blur(0px)', transition: { duration: 0.2 } }
 };
 
 export const modalContentVariants = {
-  hidden: { opacity: 0, scale: 0.9, y: 20 },
+  hidden: { opacity: 1, scale: 0.9, y: 20 },
   visible: { 
     opacity: 1, 
     scale: 1, 
@@ -149,7 +149,7 @@ export const modalContentVariants = {
     transition: { ...springSmooth, delay: 0.05 }
   },
   exit: { 
-    opacity: 0, 
+    opacity: 1, 
     scale: 0.95, 
     y: 10,
     transition: { duration: 0.2, ease: easePremium }
@@ -158,9 +158,9 @@ export const modalContentVariants = {
 
 // Bottom sheet animation
 export const sheetOverlayVariants = {
-  hidden: { opacity: 0, backdropFilter: 'blur(0px)' },
+  hidden: { opacity: 1, backdropFilter: 'blur(0px)' },
   visible: { opacity: 1, backdropFilter: 'blur(4px)', transition: { duration: 0.3 } },
-  exit: { opacity: 0, backdropFilter: 'blur(0px)', transition: { duration: 0.2 } }
+  exit: { opacity: 1, backdropFilter: 'blur(0px)', transition: { duration: 0.2 } }
 };
 
 export const sheetContentVariants = {
@@ -180,7 +180,7 @@ export const sheetContentVariants = {
 
 // Success checkmark animation
 export const successCheckVariants = {
-  hidden: { pathLength: 0, opacity: 0 },
+  hidden: { pathLength: 0, opacity: 1 },
   visible: { 
     pathLength: 1, 
     opacity: 1,
@@ -192,7 +192,7 @@ export const successCheckVariants = {
 };
 
 export const successCircleVariants = {
-  hidden: { scale: 0, opacity: 0 },
+  hidden: { scale: 0, opacity: 1 },
   visible: { 
     scale: 1, 
     opacity: 1,
@@ -202,7 +202,7 @@ export const successCircleVariants = {
 
 // Notification animation
 export const notificationVariants = {
-  hidden: { opacity: 0, x: 100, scale: 0.9, filter: 'blur(4px)' },
+  hidden: { opacity: 1, x: 100, scale: 0.9, filter: 'blur(4px)' },
   visible: { 
     opacity: 1, 
     x: 0, 
@@ -211,7 +211,7 @@ export const notificationVariants = {
     transition: springBouncy
   },
   exit: { 
-    opacity: 0, 
+    opacity: 1, 
     x: 50, 
     scale: 0.95,
     filter: 'blur(2px)',
@@ -265,7 +265,7 @@ export const iconSpinHover = {
 
 // Individual list item animation with slide + fade
 export const listItem = {
-  hidden: { opacity: 0, x: -15, filter: 'blur(2px)' },
+  hidden: { opacity: 1, x: -15, filter: 'blur(2px)' },
   visible: {
     opacity: 1,
     x: 0,
@@ -277,7 +277,7 @@ export const listItem = {
     }
   },
   exit: {
-    opacity: 0,
+    opacity: 1,
     x: 10,
     transition: { duration: 0.2, ease: easePremium }
   }
@@ -308,7 +308,7 @@ export const countUp = (start, end, duration = 800) => {
 
 // Stagger animation for grid items
 export const gridStagger = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 1 },
   visible: {
     opacity: 1,
     transition: {
@@ -319,7 +319,7 @@ export const gridStagger = {
 };
 
 export const gridItem = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  hidden: { opacity: 1, y: 20, scale: 0.95 },
   visible: {
     opacity: 1,
     y: 0,

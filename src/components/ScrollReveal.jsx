@@ -11,7 +11,7 @@ const ScrollReveal = ({ children, className = '', delay = 0, yOffset = 20, durat
   const shouldReduceMotion = useReducedMotion();
 
   // If user prefers reduced motion, disable the Y translation
-  const initial = { opacity: 0, y: shouldReduceMotion ? 0 : yOffset };
+  const initial = { opacity: 1, y: shouldReduceMotion ? 0 : yOffset };
   const whileInView = { opacity: 1, y: 0 };
 
   return (

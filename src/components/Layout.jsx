@@ -341,7 +341,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               </div>
 
               <AnimatedThemeToggler
-                className="w-[38px] h-[38px] rounded-full bg-theme-card border border-theme-border-soft flex items-center justify-center text-theme-primary hover:bg-theme-accent hover:text-white hover:border-theme-accent hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-300 relative group overflow-hidden"
+                className="rounded-full bg-theme-card border border-theme-border-soft flex items-center text-theme-primary hover:border-theme-accent hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-300 relative group overflow-hidden"
                 variant="circle"
                 theme={isDarkMode ? "dark" : "light"}
                 onThemeChange={(newTheme) => {
@@ -578,7 +578,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 )}
               </div>
               <AnimatedThemeToggler
-                className="w-9 h-9 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary active:scale-95 transition-all"
+                className="rounded-full bg-theme-surface border border-theme-border-soft flex items-center text-theme-primary active:scale-95 transition-all"
                 variant="circle"
                 theme={isDarkMode ? "dark" : "light"}
                 onThemeChange={(newTheme) => {

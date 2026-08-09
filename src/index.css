@@ -144,10 +144,10 @@ body {
 @layer base {
   /* 1. Brand Guidelines (formerly Obsidian Gold) */
   :root, [data-theme="obsidian-gold"] {
-    --app-bg: #FAF7F2;
-    --app-bg-soft: #FFFFFF;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --app-bg: #0a0b10;
+    --app-bg-soft: #11131a;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FFFFFF;
     --text-primary: #1F1B1D;
     --text-secondary: #1F1B1D;
@@ -197,8 +197,8 @@ body {
   [data-theme="arctic-teal"] {
     --app-bg: #EAF7F5;
     --app-bg-soft: #F4FFFD;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FFFFFF;
     --text-primary: #10201D;
     --text-secondary: #10201D;
@@ -248,8 +248,8 @@ body {
   [data-theme="sapphire-noir"] {
     --app-bg: #EEF4FF;
     --app-bg-soft: #F7FAFF;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FFFFFF;
     --text-primary: #0F172A;
     --text-secondary: #0F172A;
@@ -299,8 +299,8 @@ body {
   [data-theme="rose-platinum"] {
     --app-bg: #FFF1F5;
     --app-bg-soft: #FFF7FA;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FFFFFF;
     --text-primary: #2A1118;
     --text-secondary: #2A1118;
@@ -350,8 +350,8 @@ body {
   [data-theme="carbon-violet"] {
     --app-bg: #F3EFFF;
     --app-bg-soft: #FAF7FF;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FFFFFF;
     --text-primary: #1E1238;
     --text-secondary: #1E1238;
@@ -401,8 +401,8 @@ body {
   [data-theme="graphite-copper"] {
     --app-bg: #FFF2E8;
     --app-bg-soft: #FFF8F2;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FFFFFF;
     --text-primary: #24130C;
     --text-secondary: #24130C;
@@ -452,8 +452,8 @@ body {
   [data-theme="arctic-diamond"] {
     --app-bg: #F0F6FF;
     --app-bg-soft: #F8FBFF;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FFFFFF;
     --text-primary: #0F172A;
     --text-secondary: #0F172A;
@@ -503,8 +503,8 @@ body {
   [data-theme="emerald-royal"] {
     --app-bg: #EEFBF3;
     --app-bg-soft: #F7FCF9;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FFFFFF;
     --text-primary: #052E16;
     --text-secondary: #052E16;
@@ -554,8 +554,8 @@ body {
   [data-theme="midnight-ruby"] {
     --app-bg: #FFF0F0;
     --app-bg-soft: #FFF8F8;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FFFFFF;
     --text-primary: #2B0D0D;
     --text-secondary: #2B0D0D;
@@ -605,8 +605,8 @@ body {
   [data-theme="titanium-blue"] {
     --app-bg: #ECF2FA;
     --app-bg-soft: #F4F8FC;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FFFFFF;
     --text-primary: #0F172A;
     --text-secondary: #0F172A;
@@ -1114,9 +1114,9 @@ body {
   }    /* Premium Themes with Light/Dark Modes */
   [data-theme="obsidian-black"] {
     --app-bg: #F1F5F9;
-    --app-bg-soft: #FFFFFF;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --app-bg-soft: #11131a;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FFFFFF;
     --text-primary: #0F172A;
     --text-secondary: #0F172A;
@@ -1167,8 +1167,8 @@ body {
   [data-theme="wine-ash"] {
     --app-bg: #F5F1F3;
     --app-bg-soft: #FCFAFB;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FCFAFB;
     --text-primary: #2B1D28;
     --text-secondary: #2B1D28;
@@ -1219,8 +1219,8 @@ body {
   [data-theme="sunlit-yellow"] {
     --app-bg: #FFFDF0;
     --app-bg-soft: #FFFEFA;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FFFEFA;
     --text-primary: #3D2D0B;
     --text-secondary: #3D2D0B;
@@ -1271,8 +1271,8 @@ body {
   [data-theme="turquoise"] {
     --app-bg: #F0FBF9;
     --app-bg-soft: #FAFEFD;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FAFEFD;
     --text-primary: #0F3D39;
     --text-secondary: #0F3D39;
@@ -1323,8 +1323,8 @@ body {
   [data-theme="midnight-blue-premium"] {
     --app-bg: #F1F5F9;
     --app-bg-soft: #F8FAFC;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #F8FAFC;
     --text-primary: #0F172A;
     --text-secondary: #0F172A;
@@ -1375,8 +1375,8 @@ body {
   [data-theme="jet-black"] {
     --app-bg: #F5F5F5;
     --app-bg-soft: #FAFAFA;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FAFAFA;
     --text-primary: #111111;
     --text-secondary: #111111;
@@ -1427,8 +1427,8 @@ body {
   [data-theme="orchid"] {
     --app-bg: #FDF5FA;
     --app-bg-soft: #FEFAFD;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FEFAFD;
     --text-primary: #3D2235;
     --text-secondary: #3D2235;
@@ -1479,8 +1479,8 @@ body {
   [data-theme="blush-onyx"] {
     --app-bg: #FAFAFA;
     --app-bg-soft: #FDFBFB;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FDFBFB;
     --text-primary: #1C1C1C;
     --text-secondary: #1C1C1C;
@@ -1531,8 +1531,8 @@ body {
   [data-theme="violet-slate"] {
     --app-bg: #F7F8FA;
     --app-bg-soft: #FCFCFD;
-    --surface: #FFFFFF;
-    --surface-elevated: #FFFFFF;
+    --surface: #171923;
+    --surface-elevated: #1e2028;
     --card-bg: #FCFCFD;
     --text-primary: #1E1218;
     --text-secondary: #1E1218;
@@ -1732,8 +1732,8 @@ button:active {
 
   [data-theme="obsidian-black"] {
     --app-bg: #F1F5F9;
-    --app-bg-soft: #FFFFFF;
-    --surface: #FFFFFF;
+    --app-bg-soft: #11131a;
+    --surface: #171923;
     --surface-elevated: #F8FAFC;
     --card-bg: #F8FAFC;
     --text-primary: #0F172A;
@@ -1780,8 +1780,8 @@ button:active {
 
   [data-theme="wine-ash"] {
     --app-bg: #F5F1F3;
-    --app-bg-soft: #FFFFFF;
-    --surface: #FFFFFF;
+    --app-bg-soft: #11131a;
+    --surface: #171923;
     --surface-elevated: #FCFAFB;
     --card-bg: #FCFAFB;
     --text-primary: #2B1D28;
@@ -1828,8 +1828,8 @@ button:active {
 
   [data-theme="sunlit-yellow"] {
     --app-bg: #FFFDF0;
-    --app-bg-soft: #FFFFFF;
-    --surface: #FFFFFF;
+    --app-bg-soft: #11131a;
+    --surface: #171923;
     --surface-elevated: #FFFEFA;
     --card-bg: #FFFEFA;
     --text-primary: #3D2D0B;
@@ -1876,8 +1876,8 @@ button:active {
 
   [data-theme="turquoise"] {
     --app-bg: #F0FBF9;
-    --app-bg-soft: #FFFFFF;
-    --surface: #FFFFFF;
+    --app-bg-soft: #11131a;
+    --surface: #171923;
     --surface-elevated: #FAFEFD;
     --card-bg: #FAFEFD;
     --text-primary: #0F3D39;
@@ -1924,8 +1924,8 @@ button:active {
 
   [data-theme="midnight-blue-premium"] {
     --app-bg: #F1F5F9;
-    --app-bg-soft: #FFFFFF;
-    --surface: #FFFFFF;
+    --app-bg-soft: #11131a;
+    --surface: #171923;
     --surface-elevated: #F8FAFC;
     --card-bg: #F8FAFC;
     --text-primary: #0F172A;
@@ -1972,8 +1972,8 @@ button:active {
 
   [data-theme="jet-black"] {
     --app-bg: #F5F5F5;
-    --app-bg-soft: #FFFFFF;
-    --surface: #FFFFFF;
+    --app-bg-soft: #11131a;
+    --surface: #171923;
     --surface-elevated: #FAFAFA;
     --card-bg: #FAFAFA;
     --text-primary: #111111;
@@ -2020,8 +2020,8 @@ button:active {
 
   [data-theme="orchid"] {
     --app-bg: #FDF5FA;
-    --app-bg-soft: #FFFFFF;
-    --surface: #FFFFFF;
+    --app-bg-soft: #11131a;
+    --surface: #171923;
     --surface-elevated: #FEFAFD;
     --card-bg: #FEFAFD;
     --text-primary: #3D2235;
@@ -2068,8 +2068,8 @@ button:active {
 
   [data-theme="blush-onyx"] {
     --app-bg: #FAFAFA;
-    --app-bg-soft: #FFFFFF;
-    --surface: #FFFFFF;
+    --app-bg-soft: #11131a;
+    --surface: #171923;
     --surface-elevated: #FDFBFB;
     --card-bg: #FDFBFB;
     --text-primary: #1C1C1C;
@@ -2116,8 +2116,8 @@ button:active {
 
   [data-theme="violet-slate"] {
     --app-bg: #F7F8FA;
-    --app-bg-soft: #FFFFFF;
-    --surface: #FFFFFF;
+    --app-bg-soft: #11131a;
+    --surface: #171923;
     --surface-elevated: #FCFCFD;
     --card-bg: #FCFCFD;
     --text-primary: #1E1218;
