@@ -813,7 +813,13 @@ function App() {
     } catch (err) {
       console.error('Firebase sign out error', err);
     }
-    await authEngine.logout();
+    
+    try {
+      await authEngine.logout();
+    } catch (err) {
+      console.error('Auth engine logout error', err);
+    }
+    
     localStorage.removeItem('billqyro_user_role');
     localStorage.removeItem('billqyro_admin_unlocked');
     
