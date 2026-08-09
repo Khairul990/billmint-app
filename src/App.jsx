@@ -806,6 +806,12 @@ function App() {
   }, [isAuthenticated, isAppBooting, settings, cloudSyncDone]);
 
   const handleLogout = async () => {
+    // 1. Instantly log out visually
+    setUserRole('user');
+    setIsAuthenticated(false);
+    setCurrentTab('landing');
+    
+    // 2. Perform slow background network/db cleanup
     try {
       if (firebaseReady && auth) {
         await auth.signOut();
@@ -815,7 +821,9 @@ function App() {
     }
     
     try {
-      await authEngine.logout();
+      // NOTE: IndexedDB operations can hang indefinitely if other tabs hold locks.
+      // This is now non-blocking for the UI.
+      authEngine.logout().catch(err => console.error('Auth engine logout error', err));
     } catch (err) {
       console.error('Auth engine logout error', err);
     }
@@ -837,10 +845,6 @@ function App() {
     
     // RESET GLOBAL DOM THEME
     window.dispatchEvent(new CustomEvent('billqyro:settings-updated', { detail: {} }));
-    
-    setUserRole('user');
-    setIsAuthenticated(false);
-    setCurrentTab('landing');
   };
 
   // --- DATA SYNCHRONIZERS ---
