@@ -38,7 +38,31 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
   const columns = [];
   const sortedConfig = [...configuredColumns].sort((a, b) => a.order - b.order);
 
-  // The builder UI might have old legacy columns like 'sNo', 'description', 'total'
+  const col1Label = builderSettings.itemLabel || customCols.col1 || (bType === 'grocery' || bType === 'retail' ? 'Product' : bType === 'repair' ? 'Service' : bType === 'custom' ? 'Item' : categoryWords.items || 'Item Name');
+  const col2Label = customCols.col2 || categoryWords.qty || 'Qty';
+  const col3Label = customCols.col3 || categoryWords.price || 'Rate';
+
+  const baseSchema = {
+    sn: { id: 'sn', label: '#', align: 'center', width: '5%' },
+    item: { id: 'item', label: col1Label, align: 'left', width: '25%' },
+    hsn: { id: 'hsn', label: 'HSN/SAC', align: 'center', width: '10%' },
+    description: { id: 'description', label: 'Details', align: 'left', width: '20%' },
+    qty: { id: 'qty', label: col2Label, align: 'center', width: '10%' },
+    unit: { id: 'unit', label: 'Unit', align: 'center', width: '8%' },
+    rate: { id: 'rate', label: col3Label, align: 'right', width: '12%' },
+    discount: { id: 'discount', label: 'Disc', align: 'right', width: '8%' },
+    tax: { id: 'tax', label: 'Tax', align: 'right', width: '8%' },
+    amount: { id: 'amount', label: 'Total', align: 'right', width: '15%' }
+  };
+
+  const dynamicExtraCols = extraCols.map((col) => ({
+    id: col.id, // e.g. col_123
+    label: col.name,
+    align: 'center',
+    width: '10%',
+    isExtra: true
+  }));
+
   const legacyMap = { 'sNo': 'sn', 'description': 'item', 'total': 'amount' };
   
   sortedConfig.forEach(conf => {
