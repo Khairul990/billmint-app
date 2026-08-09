@@ -379,7 +379,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 </button>
 
                 {isAccountMenuOpen && (
-                  <div className="absolute top-12 right-0 w-64 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-y-auto max-h-[85vh] py-2 flex flex-col custom-scrollbar">
+                  <div className="absolute top-12 right-0 w-64 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-y-auto max-h-[65vh] py-2 flex flex-col custom-scrollbar">
                       
                       <div className="p-5 bg-theme-surface/50 border-b border-theme-border-soft flex items-center gap-3">
                         <div className="w-12 h-12 rounded-xl bg-theme-card shadow-sm border border-theme-border-soft flex items-center justify-center overflow-hidden shrink-0">
@@ -602,7 +602,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 )}
               </button>
               {isAccountMenuOpen && (
-                <div className="absolute top-12 right-0 w-64 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-y-auto max-h-[85vh] py-2 flex flex-col custom-scrollbar">
+                <div className="absolute top-12 right-0 w-64 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-y-auto max-h-[65vh] py-2 flex flex-col custom-scrollbar">
                   <div className="px-3 pb-3 space-y-1 border-b border-theme-border-soft">
                     <button onClick={() => { setCurrentTab('dashboard'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
                       <User className="w-4 h-4 text-theme-muted" /> Profile
