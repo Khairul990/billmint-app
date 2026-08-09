@@ -1,4 +1,4 @@
-import { getCategoryWording } from '../config/businessPresets';
+const getCategoryWording = () => ({});
 
 /**
  * Provides a unified schema for rendering invoice columns across all output views
@@ -8,7 +8,7 @@ import { getCategoryWording } from '../config/businessPresets';
  * @param {Object} businessSettings - The global business settings as a fallback.
  * @returns {Array} - Array of column definitions
  */
-export const DEFAULT_INVOICE_COLUMNS = [
+const DEFAULT_INVOICE_COLUMNS = [
   { id: 'sn', label: 'S.No', visible: true, order: 1 },
   { id: 'item', label: 'Item/Service', visible: true, order: 2 },
   { id: 'hsn', label: 'HSN/SAC', visible: false, order: 3 },
@@ -19,7 +19,7 @@ export const DEFAULT_INVOICE_COLUMNS = [
   { id: 'amount', label: 'Amount', visible: true, order: 8 }
 ];
 
-export const getInvoiceColumns = (invoice, businessSettings = {}) => {
+const getInvoiceColumns = (invoice, businessSettings = {}) => {
   if (!invoice) return [];
 
   const bType = invoice.billType || 'default';
@@ -88,9 +88,7 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
       
       columns.push({
         ...baseSchema[schemaId],
-        label: finalLabel,
-        visible: conf.visible,
-        order: conf.order
+        label: finalLabel
       });
       
       // If unit data exists, inject it after qty
@@ -107,9 +105,7 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
         label: conf.label,
         align: 'center',
         width: '10%',
-        isExtra: true,
-        visible: conf.visible,
-        order: conf.order
+        isExtra: true
       });
     }
   });
@@ -133,7 +129,7 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
 /**
  * Unified item value getter
  */
-export const getItemValue = (item, colId, bType) => {
+const getItemValue = (item, colId, bType) => {
   if (!item) return '';
 
   switch (colId) {
@@ -172,3 +168,6 @@ export const getItemValue = (item, colId, bType) => {
       return item[colId] !== undefined ? item[colId] : (item.customFields?.[colId] || '');
   }
 };
+
+
+console.log(getInvoiceColumns({ settings: {} }));
