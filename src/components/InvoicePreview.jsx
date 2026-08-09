@@ -266,21 +266,35 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
             <span>Subtotal</span>
             <span className="text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-bold">{formatCurrency(invoice.subtotal, currencySymbol, regionalPrefs.numberFormat)}</span>
           </div>
-          {invoice.discountAmount > 0 && (
+          {(businessSettings?.invoiceBuilderSettings?.showDiscount !== false) && invoice.discountAmount > 0 && (
             <div className="flex justify-between text-theme-danger dark:text-rose-450 font-bold">
               <span>Discount</span>
               <span>-{formatCurrency(invoice.discountAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
-          <div className="flex justify-between">
-            <span>{regionalPrefs.taxLabel || 'Tax'} ({invoice.taxPercentage}%)</span>
-            <span className="text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-bold">{formatCurrency(invoice.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
-          </div>
+          {(businessSettings?.invoiceBuilderSettings?.showTax !== false) && (
+            <div className="flex justify-between">
+              <span>{regionalPrefs.taxLabel || 'Tax'} ({invoice.taxPercentage || 0}%)</span>
+              <span className="text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-bold">{formatCurrency(invoice.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
+            </div>
+          )}
+          {(businessSettings?.invoiceBuilderSettings?.showShipping) && invoice.shipping > 0 && (
+            <div className="flex justify-between text-theme-primary dark:text-theme-secondary font-bold">
+              <span>Shipping</span>
+              <span>{formatCurrency(invoice.shipping, currencySymbol, regionalPrefs.numberFormat)}</span>
+            </div>
+          )}
+          {((businessSettings?.invoiceBuilderSettings?.showOldDue) || invoice.oldDue > 0) && (
+            <div className="flex justify-between text-theme-warning font-bold">
+              <span>Old Due</span>
+              <span>{formatCurrency(invoice.oldDue || 0, currencySymbol, regionalPrefs.numberFormat)}</span>
+            </div>
+          )}
           
           <div className={`flex justify-between items-center border-t pt-3 text-theme-primary dark:text-theme-primary dark:text-theme-primary ${templateId === 'classic-elegant' ? 'border-emerald-800/50' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
             <span className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Grand Total</span>
             <span className="text-lg font-black text-theme-accent dark:text-theme-accent">
-              {formatCurrency(invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}
+              {formatCurrency(invoice.totalDue || invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}
             </span>
           </div>
         </div>
