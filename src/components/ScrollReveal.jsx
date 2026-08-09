@@ -18,8 +18,8 @@ const ScrollReveal = ({ children, className = '', delay = 0, yOffset = 20, durat
     <motion.div
       className={className}
       initial={initial}
-      whileInView={whileInView}
-      viewport={{ once: true, margin: "-10%" }}
+      animate={whileInView}
+      viewport={{ once: true, amount: 0.1 }}
       transition={{ 
         duration, 
         delay, 
