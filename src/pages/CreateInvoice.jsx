@@ -48,11 +48,16 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
     const localCols = [{ id: 'sNo', label: 'S.No', visible: true, order: 0 }];
     
     settingsCols.forEach(col => {
+      let finalLabel = col.label;
+      if (col.id === 'item' && businessSettings?.invoiceBuilderSettings?.itemLabel) {
+        finalLabel = businessSettings.invoiceBuilderSettings.itemLabel;
+      }
+
       if (colMap[col.id]) {
-        localCols.push({ id: colMap[col.id], label: col.label, visible: col.visible, order: col.order });
+        localCols.push({ id: colMap[col.id], label: finalLabel, visible: col.visible, order: col.order });
       } else {
         // Custom column
-        localCols.push({ id: col.id, label: col.label, visible: col.visible, order: col.order });
+        localCols.push({ id: col.id, label: finalLabel, visible: col.visible, order: col.order });
       }
     });
     

@@ -73,10 +73,15 @@ export const getInvoiceColumns = (invoice, businessSettings = {}) => {
           }
         }
         
-        // Use the base schema but respect the user's custom label
+        // Use the base schema but respect the user's custom label, prioritizing builderSettings.itemLabel
+        let finalLabel = conf.label || baseSchema[schemaId].label;
+        if (schemaId === 'item' && builderSettings.itemLabel) {
+          finalLabel = builderSettings.itemLabel;
+        }
+        
         columns.push({
           ...baseSchema[schemaId],
-          label: conf.label || baseSchema[schemaId].label
+          label: finalLabel
         });
         
         // If unit data exists, inject it after qty
