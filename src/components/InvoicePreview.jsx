@@ -172,7 +172,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
           <thead>
             <tr className={`border-b text-theme-muted dark:text-theme-muted font-bold uppercase tracking-wider ${templateId === 'classic-elegant' ? 'border-emerald-800 text-emerald-900' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
               {getInvoiceColumns(invoice, businessSettings).map(col => (
-                <th key={col.id} className={`pb-3 text-${col.align}`} style={{ width: col.width }}>
+                <th key={col.id} className={`pb-3 px-2 text-${col.align}`} style={{ width: col.width }}>
                   {col.label}
                 </th>
               ))}
@@ -182,14 +182,14 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
             {invoice.items && invoice.items.map((item, idx) => (
               <tr key={idx} className="text-theme-primary dark:text-theme-muted hover:bg-theme-app dark:bg-theme-surface/50 dark:hover:bg-theme-card/20">
                 {getInvoiceColumns(invoice, businessSettings).map(col => {
-                  if (col.id === 'sn') return <td key={col.id} className={`py-4 text-${col.align} text-theme-muted font-bold`}>{idx + 1}</td>;
+                  if (col.id === 'sn') return <td key={col.id} className={`py-4 px-2 text-${col.align} text-theme-muted font-bold`}>{idx + 1}</td>;
                   
                   const val = getItemValue(item, col.id, invoice.billType);
                   
                   // Primary Column 1 gets slightly richer UI in preview
                   if (col.id === 'item') {
                     return (
-                      <td key={col.id} className={`py-4 font-semibold text-theme-primary dark:text-theme-primary dark:text-theme-secondary text-${col.align}`}>
+                      <td key={col.id} className={`py-4 px-2 font-semibold text-theme-primary dark:text-theme-primary dark:text-theme-secondary text-${col.align}`}>
                         <div className="flex flex-wrap items-center gap-2 mb-1">
                           {item.designNo && item.designNo !== 'N/A' && (
                             <span className="inline-block px-2 py-0.5 bg-theme-accent-light dark:bg-theme-accent-light text-theme-accent dark:text-theme-accent rounded text-[9px] font-black tracking-wider uppercase border border-theme-border-soft/10">
@@ -212,7 +212,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
                   
                   if (col.id === 'qty') {
                     return (
-                      <td key={col.id} className={`py-4 text-${col.align} font-bold text-theme-muted dark:text-theme-muted`}>
+                      <td key={col.id} className={`py-4 px-2 text-${col.align} font-bold text-theme-muted dark:text-theme-muted`}>
                         {val}
                         {item.unit && <span className="text-[10px] ml-1 uppercase">{item.unit}</span>}
                       </td>
@@ -221,14 +221,14 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
                   
                   if (col.id === 'amount' || col.id === 'rate' || col.id === 'discount' || col.id === 'tax') {
                     return (
-                      <td key={col.id} className={`py-4 text-${col.align} ${col.id === 'amount' ? 'font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-primary' : col.id === 'discount' && val > 0 ? 'text-theme-danger dark:text-theme-danger font-semibold' : 'font-semibold text-theme-muted dark:text-theme-muted'}`}>
+                      <td key={col.id} className={`py-4 px-2 text-${col.align} ${col.id === 'amount' ? 'font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-primary' : col.id === 'discount' && val > 0 ? 'text-theme-danger dark:text-theme-danger font-semibold' : 'font-semibold text-theme-muted dark:text-theme-muted'}`}>
                         {col.id === 'discount' && val > 0 ? '-' : ''}{formatCurrency(val, currencySymbol, regionalPrefs.numberFormat)}
                       </td>
                     );
                   }
                   
                   return (
-                    <td key={col.id} className={`py-4 text-${col.align} text-theme-muted dark:text-theme-muted font-medium`}>
+                    <td key={col.id} className={`py-4 px-2 text-${col.align} text-theme-muted dark:text-theme-muted font-medium`}>
                       {val}
                     </td>
                   );

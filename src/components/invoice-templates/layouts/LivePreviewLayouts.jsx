@@ -28,19 +28,19 @@ const MinimalClassic = ({ data }) => (
     <table className="w-full text-left mb-8 text-sm">
       <thead>
         <tr className="border-b-2 border-gray-900 text-gray-900">
-          <th className="py-3 font-bold">Item</th>
-          {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-3 font-bold text-right">Qty</th>}
-          {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-3 font-bold text-right">Price</th>}
-          {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-3 font-bold text-right">Total</th>}
+          <th className="py-3 px-2 font-bold">Item</th>
+          {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-3 px-2 font-bold text-right">Qty</th>}
+          {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-3 px-2 font-bold text-right">Price</th>}
+          {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-3 px-2 font-bold text-right">Total</th>}
         </tr>
       </thead>
       <tbody>
         {data.items?.map((item, i) => (
           <tr key={i} className="border-b border-gray-200">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-3">{item.name || 'Item'}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-3 text-right">{item.qty}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-3 text-right">{formatCurrency(item.price)}</td>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-3 text-right">{formatCurrency(item.qty * item.price)}</td>}
+            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-3 px-2">{item.name || 'Item'}</td>}
+            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-3 px-2 text-right">{item.qty}</td>}
+            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-3 px-2 text-right">{formatCurrency(item.price)}</td>}
+            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-3 px-2 text-right">{formatCurrency(item.qty * item.price)}</td>}
           </tr>
         ))}
       </tbody>
@@ -211,17 +211,17 @@ const TealBoldHeader = ({ data }) => (
       <table className="w-full text-left text-sm border-collapse">
         <thead>
           <tr className="border-b-2 border-teal-800 text-teal-900">
-            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <th className="py-3 font-black">Description</th>}
-            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-3 font-black text-center">Qty</th>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-3 font-black text-right">Amount</th>}
+            {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <th className="py-3 px-4 font-black">Description</th>}
+            {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <th className="py-3 px-4 font-black text-center">Qty</th>}
+            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-3 px-4 font-black text-right">Amount</th>}
           </tr>
         </thead>
         <tbody>
           {data.items?.map((item, i) => (
             <tr key={i} className="border-b border-gray-200/60">
-              {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 font-medium text-gray-700">{item.name || 'Item'}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 text-center text-gray-500">{item.qty}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 text-right font-bold text-teal-900">{formatCurrency(item.qty * item.price)}</td>}
+              {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-4 font-medium text-gray-700">{item.name || 'Item'}</td>}
+              {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-4 text-center text-gray-500">{item.qty}</td>}
+              {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-4 text-right font-bold text-teal-900">{formatCurrency(item.qty * item.price)}</td>}
             </tr>
           ))}
         </tbody>
@@ -306,19 +306,19 @@ const SageGreenCurved = ({ data }) => (
       <table className="w-full text-left text-sm mb-10">
         <thead>
           <tr className="border-b-2 border-[#6b8e7b] text-[#3d5a49]">
-            <th className="py-3 font-bold">Service / Item</th>
-            <th className="py-3 font-bold text-center">Hrs/Qty</th>
-            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-3 font-bold text-right">Rate</th>}
-            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-3 font-bold text-right">Amount</th>}
+            <th className="py-3 px-4 font-bold">Service / Item</th>
+            <th className="py-3 px-4 font-bold text-center">Hrs/Qty</th>
+            {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <th className="py-3 px-4 font-bold text-right">Rate</th>}
+            {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <th className="py-3 px-4 font-bold text-right">Amount</th>}
           </tr>
         </thead>
         <tbody>
           {data.items?.map((item, i) => (
             <tr key={i} className="border-b border-gray-200">
-              {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 font-medium">{item.name || 'Item'}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 text-center">{item.qty}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-4 text-right">{formatCurrency(item.price)}</td>}
-              {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 text-right font-bold text-[#4a6d59]">{formatCurrency(item.qty * item.price)}</td>}
+              {data.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <td className="py-4 px-4 font-medium">{item.name || 'Item'}</td>}
+              {data.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <td className="py-4 px-4 text-center">{item.qty}</td>}
+              {data.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <td className="py-4 px-4 text-right">{formatCurrency(item.price)}</td>}
+              {data.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <td className="py-4 px-4 text-right font-bold text-[#4a6d59]">{formatCurrency(item.qty * item.price)}</td>}
             </tr>
           ))}
         </tbody>

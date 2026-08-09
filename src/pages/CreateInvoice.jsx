@@ -394,7 +394,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                       {invoiceColumns.map(c => {
                         if (!c.visible) return null;
                         const widthClass = c.id === 'sNo' ? 'w-16' : c.id === 'qty' ? 'w-24' : (c.id === 'rate' || c.id === 'total') ? 'w-32' : '';
-                        return <th key={c.id} className={`pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft ${widthClass}`}>{c.label}</th>;
+                        return <th key={c.id} className={`pb-3 px-2 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft ${widthClass}`}>{c.label}</th>;
                       })}
                       <th className="pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft w-24 text-right">Actions</th>
                     </tr>
@@ -412,33 +412,33 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
                           {invoiceColumns.map(c => {
                             if (!c.visible) return null;
                             if (c.id === 'sNo') return (
-                              <td key={c.id} className="py-2 pr-2">
+                              <td key={c.id} className="py-2 px-2">
                                 <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface text-center" value={item.sNo} onChange={(e) => handleUpdateItem(item.id, 'sNo', e.target.value)} />
                               </td>
                             );
                             if (c.id === 'description') return (
-                              <td key={c.id} className="py-2 pr-2">
+                              <td key={c.id} className="py-2 px-2">
                                 <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" placeholder="Item description" value={item.name} onChange={(e) => handleUpdateItem(item.id, 'name', e.target.value)} list="products-list" />
                               </td>
                             );
                             if (c.id === 'qty') return (
-                              <td key={c.id} className="py-2 pr-2">
+                              <td key={c.id} className="py-2 px-2">
                                 <input type="number" min="1" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.qty} onChange={(e) => handleUpdateItem(item.id, 'qty', e.target.value)} />
                               </td>
                             );
                             if (c.id === 'rate') return (
-                              <td key={c.id} className="py-2 pr-2">
+                              <td key={c.id} className="py-2 px-2">
                                 <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.price} onChange={(e) => handleUpdateItem(item.id, 'price', e.target.value)} />
                               </td>
                             );
                             if (c.id === 'total') return (
-                              <td key={c.id} className="py-2 font-bold tabular-nums text-theme-primary">
+                              <td key={c.id} className="py-2 px-2 font-bold tabular-nums text-theme-primary">
                                 {formatCurrency(item.qty * item.price)}
                               </td>
                             );
                             // custom column
                             return (
-                              <td key={c.id} className="py-2 pr-2">
+                              <td key={c.id} className="py-2 px-2">
                                 <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.customFields?.[c.id] || ''} onChange={(e) => handleUpdateItem(item.id, c.id, e.target.value, true)} />
                               </td>
                             );
