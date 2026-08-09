@@ -116,9 +116,9 @@ const GlobalSettings = () => {
       animate="animate"
       className="space-y-6"
     >
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-gradient-to-r from-theme-accent/20 via-transparent to-transparent p-6 rounded-3xl border border-theme-accent/10">
         <div>
-          <h2 className="text-3xl font-black text-theme-primary flex items-center tracking-tight">
+          <h2 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-theme-primary to-theme-accent flex items-center tracking-tight">
             <Sliders className="w-8 h-8 mr-3 text-theme-accent" /> Revenue Settings (Owner)
           </h2>
           <p className="text-sm text-theme-secondary mt-1">Configure global monetization parameters and limits.</p>
@@ -136,8 +136,9 @@ const GlobalSettings = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Core Settings */}
-        <div className="bg-theme-surface-elevated p-6 rounded-2xl border border-theme-border-soft space-y-6">
-          <div className="border-b border-theme-border-soft pb-4 mb-0">
+        <div className="glass-card p-8 rounded-3xl border border-theme-border-soft/50 shadow-premium space-y-6 relative overflow-hidden group hover:border-theme-accent/30 transition-all">
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-theme-accent/5 rounded-full blur-3xl group-hover:bg-theme-accent/10 transition-colors pointer-events-none"></div>
+          <div className="border-b border-theme-border-soft/50 pb-5 mb-2 relative">
             <h3 className="text-lg font-bold text-theme-primary flex items-center">
               <Globe className="w-5 h-5 mr-2 text-theme-accent" /> Monetization Modes
             </h3>
@@ -153,8 +154,9 @@ const GlobalSettings = () => {
         </div>
 
         {/* UPI Payments */}
-        <div className="bg-theme-surface-elevated p-6 rounded-2xl border border-theme-border-soft space-y-5">
-          <div className="border-b border-theme-border-soft pb-4 mb-0">
+        <div className="glass-card p-8 rounded-3xl border border-theme-border-soft/50 shadow-premium space-y-6 relative overflow-hidden group hover:border-theme-accent/30 transition-all">
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-theme-accent/5 rounded-full blur-3xl group-hover:bg-theme-accent/10 transition-colors pointer-events-none"></div>
+          <div className="border-b border-theme-border-soft/50 pb-5 mb-2 relative">
             <h3 className="text-lg font-bold text-theme-primary flex items-center">
               <CreditCard className="w-5 h-5 mr-2 text-theme-accent" /> UPI Payment Details
             </h3>
@@ -165,7 +167,7 @@ const GlobalSettings = () => {
               type="text"
               value={upiId}
               onChange={(e) => setUpiId(e.target.value)}
-              className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all font-mono text-sm"
+              className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all font-mono text-sm shadow-inner"
             />
           </div>
           <div>
@@ -174,14 +176,15 @@ const GlobalSettings = () => {
               type="text"
               value={payeeName}
               onChange={(e) => setPayeeName(e.target.value)}
-              className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all text-sm"
+              className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all text-sm shadow-inner"
             />
           </div>
         </div>
 
         {/* Business Limits */}
-        <div className="bg-theme-surface-elevated p-6 rounded-2xl border border-theme-border-soft lg:col-span-2 space-y-6">
-          <div className="border-b border-theme-border-soft pb-4 mb-0">
+        <div className="glass-card p-8 rounded-3xl border border-theme-border-soft/50 shadow-premium lg:col-span-2 space-y-6 relative overflow-hidden group hover:border-theme-warning/30 transition-all">
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-theme-warning/5 rounded-full blur-3xl group-hover:bg-theme-warning/10 transition-colors pointer-events-none"></div>
+          <div className="border-b border-theme-border-soft/50 pb-5 mb-2 relative">
             <h3 className="text-lg font-bold text-theme-primary flex items-center">
               <Zap className="w-5 h-5 mr-2 text-theme-warning" /> Pricing & Lock Parameters
             </h3>
@@ -194,7 +197,7 @@ const GlobalSettings = () => {
                 type="number" 
                 value={freeBillLimit}
                 onChange={(e) => setFreeBillLimit(e.target.value)}
-                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning transition-all text-sm"
+                className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-warning focus:ring-2 focus:ring-theme-warning/20 transition-all text-sm font-bold shadow-inner"
               />
             </div>
             
@@ -204,7 +207,7 @@ const GlobalSettings = () => {
                 type="number" 
                 value={chargePerBill}
                 onChange={(e) => setChargePerBill(e.target.value)}
-                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning transition-all text-sm"
+                className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-warning focus:ring-2 focus:ring-theme-warning/20 transition-all text-sm font-bold shadow-inner"
               />
             </div>
 
@@ -215,7 +218,7 @@ const GlobalSettings = () => {
                 value={percentageChargeSetting}
                 onChange={(e) => setPercentageChargeSetting(e.target.value)}
                 placeholder="e.g. 1% of bill value"
-                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning transition-all text-sm"
+                className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-warning focus:ring-2 focus:ring-theme-warning/20 transition-all text-sm font-bold shadow-inner"
               />
             </div>
 
@@ -225,7 +228,7 @@ const GlobalSettings = () => {
                 type="number" 
                 value={monthlyGraceLimit}
                 onChange={(e) => setMonthlyGraceLimit(e.target.value)}
-                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning transition-all text-sm"
+                className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-warning focus:ring-2 focus:ring-theme-warning/20 transition-all text-sm font-bold shadow-inner"
               />
             </div>
 
@@ -235,7 +238,7 @@ const GlobalSettings = () => {
                 type="number" 
                 value={maxPendingDue}
                 onChange={(e) => setMaxPendingDue(e.target.value)}
-                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning transition-all text-sm"
+                className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-warning focus:ring-2 focus:ring-theme-warning/20 transition-all text-sm font-bold shadow-inner"
               />
             </div>
 
@@ -245,7 +248,7 @@ const GlobalSettings = () => {
                 type="number" 
                 value={maxUnpaidBillCount}
                 onChange={(e) => setMaxUnpaidBillCount(e.target.value)}
-                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning transition-all text-sm"
+                className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-warning focus:ring-2 focus:ring-theme-warning/20 transition-all text-sm font-bold shadow-inner"
               />
             </div>
           </div>
@@ -255,7 +258,7 @@ const GlobalSettings = () => {
             <select
               value={lockBehavior}
               onChange={(e) => setLockBehavior(e.target.value)}
-              className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-warning focus:ring-1 focus:ring-theme-warning cursor-pointer text-sm"
+              className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-warning focus:ring-2 focus:ring-theme-warning/20 cursor-pointer text-sm font-bold shadow-inner"
             >
               <option value="bill_creation">Lock New Bill Creation Only</option>
               <option value="none">No Lock (Warning Only)</option>
@@ -264,8 +267,9 @@ const GlobalSettings = () => {
         </div>
 
         {/* Platform Defaults */}
-        <div className="bg-theme-surface-elevated p-6 rounded-2xl border border-theme-border-soft lg:col-span-2 space-y-6">
-          <div className="border-b border-theme-border-soft pb-4 mb-0">
+        <div className="glass-card p-8 rounded-3xl border border-theme-border-soft/50 shadow-premium lg:col-span-2 space-y-6 relative overflow-hidden group hover:border-theme-accent/30 transition-all">
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-theme-accent/5 rounded-full blur-3xl group-hover:bg-theme-accent/10 transition-colors pointer-events-none"></div>
+          <div className="border-b border-theme-border-soft/50 pb-5 mb-2 relative">
             <h3 className="text-lg font-bold text-theme-primary flex items-center">
               <SettingsIcon className="w-5 h-5 mr-2 text-theme-accent" /> Platform Defaults (New Users)
             </h3>
@@ -277,7 +281,7 @@ const GlobalSettings = () => {
               <select
                 value={defaultTheme}
                 onChange={(e) => setDefaultTheme(e.target.value)}
-                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent cursor-pointer text-sm font-bold"
+                className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 cursor-pointer text-sm font-bold shadow-inner"
               >
                 <option value="obsidian-gold">Obsidian Gold (Luxury)</option>
                 <option value="arctic-teal">Arctic Teal (Corporate)</option>
@@ -291,7 +295,7 @@ const GlobalSettings = () => {
               <select
                 value={defaultTemplate}
                 onChange={(e) => setDefaultTemplate(e.target.value)}
-                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent cursor-pointer text-sm font-bold"
+                className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 cursor-pointer text-sm font-bold shadow-inner"
               >
                 <option value="standard">Standard Professional</option>
                 <option value="modern">Modern Minimal</option>
@@ -307,18 +311,21 @@ const GlobalSettings = () => {
                 value={defaultCurrency}
                 onChange={(e) => setDefaultCurrency(e.target.value)}
                 placeholder="e.g. ₹, $, €"
-                className="w-full bg-theme-app text-theme-primary border border-theme-border-soft rounded-xl px-4 py-3 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all text-sm font-numbers"
+                className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all text-sm font-numbers shadow-inner"
               />
             </div>
           </div>
         </div>
 
         {/* Info Control */}
-        <div className="bg-theme-danger/5 border border-theme-danger/20 rounded-2xl p-6 lg:col-span-2 flex items-start space-x-4">
-          <ShieldAlert className="w-6 h-6 text-theme-danger shrink-0 mt-0.5" />
-          <div>
-            <h4 className="text-theme-danger font-bold text-sm">Security & Enforcement Note</h4>
-            <p className="text-theme-secondary text-xs mt-1 leading-relaxed">
+        <div className="glass-card bg-theme-danger/5 border border-theme-danger/20 rounded-3xl p-8 lg:col-span-2 flex items-start space-x-5 shadow-premium relative overflow-hidden group">
+          <div className="absolute -left-12 top-0 bottom-0 w-24 bg-theme-danger/10 blur-3xl group-hover:bg-theme-danger/20 transition-colors pointer-events-none"></div>
+          <div className="bg-theme-danger/10 p-3 rounded-2xl shrink-0">
+            <ShieldAlert className="w-6 h-6 text-theme-danger" />
+          </div>
+          <div className="relative">
+            <h4 className="text-theme-danger font-black tracking-wide text-sm">SECURITY & ENFORCEMENT PROTOCOL</h4>
+            <p className="text-theme-secondary text-sm mt-2 leading-relaxed max-w-4xl">
               When lock enforcement is active, users exceeding their free bill limit, unpaid count, or max dues threshold will be restricted from saving new invoices. However, login, existing invoice viewing, downloads, and backups will remain fully operational.
             </p>
           </div>
