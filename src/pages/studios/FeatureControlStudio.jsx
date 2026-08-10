@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 const CATEGORY_ICONS = {
   invoice: FileText,
   customers: Users,
+  staff: Briefcase,
   products: Box,
   payments: CreditCard,
   liveLink: LinkIcon,
@@ -44,9 +45,7 @@ const FeatureControlStudio = ({ workspaceId }) => {
   };
 
   useEffect(() => {
-    if (workspaceId) {
-      loadData();
-    }
+    loadData();
   }, [workspaceId]);
 
   const handleToggleFeature = async (featureId, currentValue) => {
@@ -98,16 +97,6 @@ const FeatureControlStudio = ({ workspaceId }) => {
   return (
     <div className="space-y-6">
       <div className="card-premium p-6">
-        <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
-          <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
-            <Zap className="w-5 h-5" />
-          </div>
-          <div>
-            <h2 className="text-lg font-black text-theme-primary">Module Manager</h2>
-            <p className="text-xs text-theme-muted">Enable or disable core modules and advanced capabilities.</p>
-          </div>
-        </div>
-
         <div className="space-y-8">
           {Object.entries(featuresByCategory).map(([categoryId, catFeatures]) => {
             const cat = categories[categoryId] || { enabled: true };

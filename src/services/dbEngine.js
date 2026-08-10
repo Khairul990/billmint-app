@@ -1,4 +1,151 @@
-import { db, firebaseReady, auth } from './firebaseConfig';
+import { db, firebaseReady, auth } from './firebaseConfig'
+
+
+// ==========================================
+// STAFF MODULE
+// ==========================================
+export const getStaffs = async (includeDeleted = false) => {
+  try {
+    const data = await BillQyroDB.getAll('staff');
+    if (data && Array.isArray(data)) {
+      let filtered = data;
+      const settings = getSettings();
+      const userId = getRealUserId();
+      const workspaceId = settings?.activeWorkspaceId;
+
+      if (!includeDeleted) {
+        filtered = data.filter(c => !c.isDeleted);
+      }
+      if (userId) filtered = filtered.filter(c => c.userId === userId);
+      if (workspaceId) filtered = filtered.filter(c => c.workspaceId === workspaceId);
+      return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+    }
+  } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
+  return [];
+};
+
+export const saveStaff = async (staff) => {
+  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+    return { updatedStaffs: [], firebaseStatus: 'blocked' };
+  }
+  
+  staff.userId = getRealUserId() || 'local-user';
+  const settings = getSettings();
+  staff.workspaceId = settings?.activeWorkspaceId || 'default';
+  
+  const staffs = await getStaffs();
+  if (staff.id) {
+    const index = staffs.findIndex(c => c.id === staff.id);
+    if (index !== -1) {
+      const existing = staffs[index];
+      staff.__version = Math.max(staff.__version || 0, existing.__version || 0);
+      staffs[index] = stampRecord(staff, staff.userId);
+      logAudit('staff_updated', 'staff', staff.id, null, staffs[index]);
+    } else {
+      staffs.push(stampRecord(staff, staff.userId));
+      logAudit('staff_created', 'staff', staff.id, null, staff);
+    }
+  } else {
+    staff.id = 'stf-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    staffs.push(stampRecord(staff, staff.userId));
+    logAudit('staff_created', 'staff', staff.id, null, staff);
+  }
+
+  let firebaseStatus = 'pending';
+  const stamped = staffs.find(c => c.id === staff.id);
+  updateLocalCache(KEYS.STAFF, staffs);
+  await BillQyroDB.put('staff', stamped);
+
+  await queueSyncTransaction('save', 'staff', staff.id, stamped);
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+
+  if (firebaseReady) {
+    if (navigator.onLine) {
+      syncOfflineTransactions().catch(e => console.error(e));
+    } else {
+      firebaseStatus = 'failed';
+    }
+  } else {
+    firebaseStatus = 'offline';
+  }
+  return { updatedStaffs: staffs, firebaseStatus };
+};
+
+export const deleteStaff = async (id, permanent = false) => {
+  const staffs = await getStaffs(true);
+  const idx = staffs.findIndex(c => c.id === id);
+  if (idx === -1) return { updatedStaffs: staffs.filter(c => !c.isDeleted), firebaseStatus: 'failed' };
+  
+  const staffToDelete = staffs[idx];
+
+  if (!permanent) {
+    staffs[idx].isDeleted = true;
+    staffs[idx].deletedAt = new Date().toISOString();
+    staffs[idx].syncStatus = 'pending';
+    const filtered = staffs.filter(c => !c.isDeleted);
+    updateLocalCache(KEYS.STAFF, staffs);
+    await BillQyroDB.put('staff', staffs[idx]);
+    logAudit('staff_deleted', 'staff', id, staffToDelete, null);
+
+    let firebaseStatus = 'pending';
+    await queueSyncTransaction('save', 'staff', id, staffs[idx]);
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+
+    if (firebaseReady && navigator.onLine) {
+      syncOfflineTransactions().catch(e => console.error(e));
+    } else {
+      firebaseStatus = firebaseReady ? 'failed' : 'offline';
+    }
+    return { updatedStaffs: filtered, firebaseStatus };
+  }
+
+  const filtered = staffs.filter(c => c.id !== id);
+  updateLocalCache(KEYS.STAFF, filtered);
+  await BillQyroDB.delete('staff', id);
+  logAudit('staff_permanently_deleted', 'staff', id, staffToDelete, null);
+
+  let firebaseStatus = 'pending';
+  await queueSyncTransaction('delete', 'staff', id, staffToDelete);
+
+  if (firebaseReady && navigator.onLine) {
+    syncOfflineTransactions().catch(e => console.error(e));
+  } else {
+    firebaseStatus = firebaseReady ? 'failed' : 'offline';
+  }
+  return { updatedStaffs: filtered.filter(c => !c.isDeleted), firebaseStatus };
+};
+
+export const restoreStaff = async (id) => {
+  const staffs = await getStaffs(true);
+  const idx = staffs.findIndex(c => c.id === id);
+  if (idx === -1) return { updatedStaffs: staffs.filter(c => !c.isDeleted), firebaseStatus: 'failed' };
+  
+  staffs[idx].isDeleted = false;
+  staffs[idx].deletedAt = null;
+  staffs[idx].syncStatus = 'pending';
+  const filtered = staffs.filter(c => !c.isDeleted);
+  updateLocalCache(KEYS.STAFF, staffs);
+  await BillQyroDB.put('staff', staffs[idx]);
+
+  let firebaseStatus = 'pending';
+  await queueSyncTransaction('save', 'staff', id, staffs[idx]);
+  window.dispatchEvent(new CustomEvent('billqyro_sync'));
+
+  if (firebaseReady && navigator.onLine) {
+    syncOfflineTransactions().catch(e => console.error(e));
+  } else {
+    firebaseStatus = 'offline';
+  }
+  return { updatedStaffs: filtered, firebaseStatus };
+};
+
+export const clearStaffs = async () => { 
+  localStorage.setItem(KEYS.STAFF, JSON.stringify([])); 
+  await BillQyroDB.clear('staff'); 
+  window.dispatchEvent(new CustomEvent('billqyro_sync')); 
+  return { status: 'success' }; 
+};
+;
 import { toast } from 'react-hot-toast';
 import JSZip from 'jszip';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where, getCountFromServer } from 'firebase/firestore';
@@ -495,6 +642,7 @@ export const GLOBAL_KEYS = {
   AUTH: 'billqyro_auth',
   SETTINGS: 'billqyro_settings',
   CUSTOMERS: 'billqyro_customers',
+  STAFF: 'billqyro_staff',
   PRODUCTS: 'billqyro_products',
   INVOICES: 'billqyro_invoices',
   EXPENSES: 'billqyro_expenses',
@@ -531,6 +679,7 @@ export const KEYS = {
   get AUTH() { return GLOBAL_KEYS.AUTH; },
   get SETTINGS() { return getScopedKey(GLOBAL_KEYS.SETTINGS); },
   get CUSTOMERS() { return getScopedKey(GLOBAL_KEYS.CUSTOMERS); },
+  get STAFF() { return getScopedKey(GLOBAL_KEYS.STAFF); },
   get PRODUCTS() { return getScopedKey(GLOBAL_KEYS.PRODUCTS); },
   get INVOICES() { return getScopedKey(GLOBAL_KEYS.INVOICES); },
   get EXPENSES() { return getScopedKey(GLOBAL_KEYS.EXPENSES); },
@@ -547,7 +696,7 @@ export const migrateGlobalToScopedStorage = async () => {
 
 
 
-  const collections = ['invoices', 'customers', 'products', 'expenses', 'settings', 'subscription'];
+  const collections = ['invoices', 'customers', 'staff', 'products', 'expenses', 'settings', 'subscription'];
   let migratedCount = 0;
 
   for (const col of collections) {
@@ -1242,7 +1391,7 @@ export const clearAllLocalData = async () => {
 export const wipeUserFirestoreData = async (userId) => {
   if (!firebaseReady) return;
   try {
-    const collectionsToEmpty = ['invoices', 'customers', 'products', 'expenses', 'students'];
+    const collectionsToEmpty = ['invoices', 'customers', 'staff', 'products', 'expenses', 'students'];
     for (const colName of collectionsToEmpty) {
       const itemsRef = collection(db, colName, userId, 'items');
       const snapshot = await getDocs(itemsRef);
@@ -1494,7 +1643,7 @@ export const deleteEnterpriseUser = async (targetUserId) => {
   if (!firebaseReady || !targetUserId) return false;
   try {
     // Client-side best-effort deletion. Production requires Cloud Functions to recursively delete subcollections.
-    const collectionsToClear = ['invoices', 'customers', 'products', 'expenses', 'students'];
+    const collectionsToClear = ['invoices', 'customers', 'staff', 'products', 'expenses', 'students'];
     for (const coll of collectionsToClear) {
       try {
         const snap = await getDocs(collection(db, coll, targetUserId, 'items'));
@@ -1519,7 +1668,7 @@ export const deleteEnterpriseUser = async (targetUserId) => {
 export const resetEnterpriseWorkspace = async (targetUserId) => {
   if (!firebaseReady || !targetUserId) return false;
   try {
-    const collectionsToClear = ['invoices', 'customers', 'products', 'expenses', 'students'];
+    const collectionsToClear = ['invoices', 'customers', 'staff', 'products', 'expenses', 'students'];
     for (const coll of collectionsToClear) {
       try {
         const snap = await getDocs(collection(db, coll, targetUserId, 'items'));
@@ -2887,7 +3036,7 @@ export const importRestore = async (backupData) => {
     throw new Error('Invalid backup file structure.');
   }
 
-  const requiredKeys = ['settings', 'customers', 'products', 'invoices', 'expenses', 'students', 'subscription'];
+  const requiredKeys = ['settings', 'customers', 'staff', 'products', 'invoices', 'expenses', 'students', 'subscription'];
   for (const k of requiredKeys) {
     if (!Object.prototype.hasOwnProperty.call(backupData, k)) {
       throw new Error(`Missing database key: ${k}`);
@@ -3019,6 +3168,7 @@ export const enableRealTimeSync = () => {
 
   syncCollection('invoices', KEYS.INVOICES);
   syncCollection('customers', KEYS.CUSTOMERS);
+  syncCollection('staff', KEYS.STAFF);
   syncCollection('products', KEYS.PRODUCTS);
   syncCollection('expenses', KEYS.EXPENSES);
   syncCollection('students', KEYS.STUDENTS);
@@ -3094,6 +3244,7 @@ export const syncFromFirestore = async (force = false) => {
     ] = await Promise.all([
       safeFetch(getDocFromServer(doc(db, 'settings', userId)), emptyDoc, 'settings'),
       safeFetch(getDocsFromServer(collection(db, 'customers', userId, 'items')), emptySnap, 'customers'),
+      safeFetch(getDocsFromServer(collection(db, 'staff', userId, 'items')), emptySnap, 'staff'),
       safeFetch(getDocsFromServer(collection(db, 'invoices', userId, 'items')), emptySnap, 'invoices'),
       safeFetch(getDocsFromServer(collection(db, 'products', userId, 'items')), emptySnap, 'products'),
       safeFetch(getDocsFromServer(collection(db, 'expenses', userId, 'items')), emptySnap, 'expenses'),
@@ -3182,7 +3333,7 @@ export const syncFromFirestore = async (force = false) => {
     toast.error('Sync failed: ' + error.message);
     // Restore from backup
     try {
-      const backupKeys = ['settings', 'customers', 'products', 'invoices', 'expenses', 'students', 'subscription'].map(k => `billqyro_${k}_backup`);
+      const backupKeys = ['settings', 'customers', 'staff', 'products', 'invoices', 'expenses', 'students', 'subscription'].map(k => `billqyro_${k}_backup`);
       backupKeys.forEach(k => {
         const backup = localStorage.getItem(k);
         if (backup) {
@@ -3434,6 +3585,7 @@ export const startRealTimeSync = (userId) => {
 
   syncCollection('invoices');
   syncCollection('customers');
+  syncCollection('staff');
   syncCollection('products');
   syncCollection('expenses');
   syncCollection('bankLedger');

@@ -44,7 +44,7 @@ export const BANK_CATEGORIES = {
     'Credit Sale (Customer)',
     'Withdrawal',
     'Other Expense'
-  ]
+  , 'Staff Payment', 'Staff Advance', 'Customer Refund']
 };
 
 /**

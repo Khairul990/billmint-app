@@ -12,7 +12,7 @@ import { UNIVERSAL_TEMPLATES } from '../services/TemplateEngine';
 import { getStudioHeaderTarget } from '../utils/portalTargets';
 import { getInvoiceColumns } from '../utils/invoiceSchema';
 
-const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products = [], businessSettings, editingInvoice, onBack, defaultTemplate = 'minimal-classic', subscription }) => {
+const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = [], products = [], businessSettings, editingInvoice, onBack, defaultTemplate = 'minimal-classic', subscription }) => {
   const [selectedTemplate, setSelectedTemplate] = useState(businessSettings?.selectedPdfTemplate || defaultTemplate);
   const [viewMode, setViewMode] = useState('pdf');
   const [activeTab, setActiveTab] = useState('listing');
@@ -22,6 +22,8 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
   const [invoiceNumber, setInvoiceNumber] = useState(`INV-${Math.floor(1000 + Math.random() * 9000)}`);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [selectedStaffId, setSelectedStaffId] = useState('');
+  const [billingTarget, setBillingTarget] = useState('customer');
   const [items, setItems] = useState([
     { id: Date.now().toString(), sNo: '1', name: '', qty: 1, price: 0 }
   ]);
@@ -154,6 +156,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
   }, [editingInvoice, customers]);
 
   const customer = customers.find(c => c.id === selectedCustomerId);
+  const staff = staffs.find(s => s.id === selectedStaffId);
 
   const currentTemplateName = useMemo(
     () => UNIVERSAL_TEMPLATES.find(t => t.id === selectedTemplate)?.name || 'Template',
@@ -164,8 +167,9 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
   const previewData = useMemo(() => ({
     invoiceNumber: invoiceNumber || 'INV-XXXX',
     date: date ? new Date(date).toLocaleDateString() : '-',
-    customerName: customer ? customer.name : 'Walk-in Customer',
-    customerPhone: customer?.phone || '',
+    customerName: billingTarget === 'staff' ? (staff?.name || 'Walk-in Staff') : (customer ? customer.name : 'Walk-in Customer'),
+    customerPhone: billingTarget === 'staff' ? (staff?.phone || '') : (customer?.phone || ''),
+    billingTarget,
     items: items.map(i => ({ ...i, description: i.name, rate: parseFloat(i.price) || 0, qty: parseFloat(i.qty) || 0, amount: (parseFloat(i.qty) || 0) * (parseFloat(i.price) || 0) })),
     totals: { ...totals, tax: totals.tax },
     notes,
@@ -377,11 +381,40 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], products 
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-group col-span-1 md:col-span-2">
-                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Select Customer</label>
+                  
+                  {/* Billing Target Toggle */}
+                  <div className="flex gap-2 mb-4 bg-theme-border p-1 rounded-lg">
+                    <button 
+                      onClick={() => setBillingTarget('customer')}
+                      className={`flex-1 py-1.5 text-xs font-bold rounded ${billingTarget === 'customer' ? 'bg-theme-surface text-theme-text shadow-sm' : 'text-theme-muted hover:text-theme-text'}`}
+                    >
+                      Customer
+                    </button>
+                    <button 
+                      onClick={() => setBillingTarget('staff')}
+                      className={`flex-1 py-1.5 text-xs font-bold rounded ${billingTarget === 'staff' ? 'bg-theme-surface text-theme-text shadow-sm' : 'text-theme-muted hover:text-theme-text'}`}
+                    >
+                      Staff
+                    </button>
+                  </div>
+
+                  {billingTarget === 'customer' ? (
+                    <>
+                      <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Select Customer</label>
                   <select className="input-premium bg-theme-surface" value={selectedCustomerId} onChange={(e) => setSelectedCustomerId(e.target.value)}>
                     <option value="">Walk-in Customer</option>
                     {customers.map(c => <option key={c.id} value={c.id}>{c.name} {c.phone ? `(${c.phone})` : ''}</option>)}
                   </select>
+                    </>
+                  ) : (
+                    <>
+                      <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Select Staff</label>
+                      <select className="input-premium bg-theme-surface" value={selectedStaffId} onChange={(e) => setSelectedStaffId(e.target.value)}>
+                        <option value="">Select Staff...</option>
+                        {staffs.map(s => <option key={s.id} value={s.id}>{s.name} {s.phone ? `(${s.phone})` : ''}</option>)}
+                      </select>
+                    </>
+                  )}
                 </div>
                 <div className="form-group">
                   <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Invoice Number</label>

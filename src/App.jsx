@@ -29,6 +29,7 @@ import { adminEngine } from './services/adminEngine';
 
 import { invoiceEngine } from './services/invoiceEngine';
 import { customerEngine } from './services/customerEngine';
+import { staffEngine } from './services/staffEngine';
 import { productEngine } from './services/productEngine';
 import { expenseEngine } from './services/expenseEngine';
 import { backupEngine } from './services/backupEngine';
@@ -69,6 +70,7 @@ const MoreMenu = React.lazy(() => import('./pages/MoreMenu'));
 const PublicInvoice = React.lazy(() => import('./pages/PublicInvoice'));
 const PendingPayments = React.lazy(() => import('./pages/PendingPayments'));
 const DueLedger = React.lazy(() => import('./pages/DueLedger'));
+const StaffLedger = React.lazy(() => import('./pages/StaffLedger'));
 const TemplateMarketplace = React.lazy(() => import('./pages/TemplateMarketplace'));
 const DesignStudio = React.lazy(() => import('./pages/DesignStudio'));
 const BackupRestore = React.lazy(() => import('./pages/BackupRestore'));
@@ -216,6 +218,7 @@ function App() {
   
   const [demoInvoices, setDemoInvoices] = useState([]);
   const [demoCustomers, setDemoCustomers] = useState([]);
+  const [demoStaffs, setDemoStaffs] = useState([]);
   const [demoProducts, setDemoProducts] = useState([]);
   const [demoExpenses] = useState([]);
   const [demoSettings, setDemoSettings] = useState(null);
@@ -370,6 +373,7 @@ function App() {
   // Storage states
   const [invoices, setInvoices] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [staffs, setStaffs] = useState([]);
   const [products, setProducts] = useState([]);
   // Settings with workspace support
   const [settings, setSettings] = useState(() => {
@@ -523,6 +527,7 @@ function App() {
       try {
         setInvoices(await invoiceEngine.getInvoices() || []);
         setCustomers(await customerEngine.getCustomers() || []);
+        setStaffs(await staffEngine.getStaffs() || []);
         setProducts(await productEngine.getProducts() || []);
         setStudents(await customerEngine.getCustomers() || []);
         setExpenses(await expenseEngine.getExpenses() || []);
@@ -541,6 +546,7 @@ function App() {
       try {
         setInvoices(await invoiceEngine.getInvoices() || []);
         setCustomers(await customerEngine.getCustomers() || []);
+        setStaffs(await staffEngine.getStaffs() || []);
         setProducts(await productEngine.getProducts() || []);
         setStudents(await customerEngine.getCustomers() || []);
         setExpenses(await expenseEngine.getExpenses() || []);
@@ -571,6 +577,7 @@ function App() {
       const col = e.detail?.collectionName;
       if (col === 'invoices') setInvoices(await invoiceEngine.getInvoices() || []);
       if (col === 'customers') setCustomers(await customerEngine.getCustomers() || []);
+        setStaffs(await staffEngine.getStaffs() || []);
       if (col === 'products') setProducts(await productEngine.getProducts() || []);
       if (col === 'students') setStudents(await customerEngine.getCustomers() || []);
       if (col === 'bankLedger' || col === 'bankCredit') {
@@ -1458,6 +1465,7 @@ function App() {
   // HARD DEMO MODE ISOLATION SWITCH
   const activeInvoices = isDemoSessionActive ? demoInvoices : invoices;
   const activeCustomers = isDemoSessionActive ? demoCustomers : customers;
+  const activeStaffs = isDemoSessionActive ? demoStaffs : staffs;
   const activeProducts = isDemoSessionActive ? demoProducts : products;
   const activeExpenses = isDemoSessionActive ? demoExpenses : expenses;
   
@@ -1528,6 +1536,7 @@ function App() {
           <Dashboard
             invoices={activeInvoices}
             customers={activeCustomers}
+            staffs={activeStaffs}
             products={activeProducts}
             expenses={activeExpenses}
             onViewInvoice={(inv) => {
@@ -1580,7 +1589,8 @@ function App() {
       case 'due-ledger':
         return (
           <DueLedger 
-            customers={activeCustomers} 
+            customers={activeCustomers}
+            staffs={activeStaffs} 
             invoices={activeInvoices} 
             businessSettings={activeSettings}
           />
@@ -1589,6 +1599,7 @@ function App() {
         return (
           <InternalBank
             customers={activeCustomers}
+            staffs={activeStaffs}
             invoices={activeInvoices}
             businessSettings={activeSettings}
           />
@@ -1597,7 +1608,8 @@ function App() {
         return (
           <Reports 
             invoices={activeInvoices} 
-            customers={activeCustomers} 
+            customers={activeCustomers}
+            staffs={activeStaffs} 
             businessSettings={activeSettings}
           />
         );
@@ -1665,6 +1677,7 @@ function App() {
           <CreateInvoice
             invoices={activeInvoices}
             customers={activeCustomers}
+            staffs={activeStaffs}
             products={activeProducts}
             businessSettings={activeSettings}
             onSaveInvoice={handleSaveInvoice}
@@ -1688,6 +1701,7 @@ function App() {
         return (
           <Customers
             customers={activeCustomers}
+            staffs={activeStaffs}
             invoices={activeInvoices}
             onSaveCustomer={handleSaveCustomer}
             onDeleteCustomer={handleDeleteCustomer}
@@ -1722,7 +1736,8 @@ function App() {
       case 'appointments':
         return <Appointments />;
       case 'orders':
-        return <Orders invoices={activeInvoices} customers={activeCustomers} businessSettings={activeSettings} setCurrentTab={setCurrentTab} />;
+        return <Orders invoices={activeInvoices} customers={activeCustomers}
+            staffs={activeStaffs} businessSettings={activeSettings} setCurrentTab={setCurrentTab} />;
       case 'patients':
         return <Patients />;
       case 'students':
@@ -1901,6 +1916,7 @@ function App() {
             onImportBackup={handleImportBackup}
             invoices={activeInvoices}
             customers={activeCustomers}
+            staffs={activeStaffs}
             installPromptEvent={installPromptEvent}
             isAppInstalled={isAppInstalled}
             onInstallApp={handleInstallApp}

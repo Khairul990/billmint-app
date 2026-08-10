@@ -3,6 +3,7 @@
 export const FEATURE_CATEGORIES = {
   INVOICE: 'invoice',
   CUSTOMERS: 'customers',
+  STAFF: 'staff',
   PRODUCTS_INVENTORY: 'products',
   PAYMENTS: 'payments',
   LIVE_LINK: 'liveLink',
@@ -20,6 +21,7 @@ export const FEATURE_CATEGORIES = {
 export const DEFAULT_CATEGORY_STATE = {
   [FEATURE_CATEGORIES.INVOICE]: true,
   [FEATURE_CATEGORIES.CUSTOMERS]: true,
+  [FEATURE_CATEGORIES.STAFF]: false,
   [FEATURE_CATEGORIES.PRODUCTS_INVENTORY]: true,
   [FEATURE_CATEGORIES.PAYMENTS]: true,
   [FEATURE_CATEGORIES.LIVE_LINK]: true,
@@ -138,6 +140,28 @@ export const FEATURE_REGISTRY = {
     settingsSchema: {
       reminderDays: [3, 7]
     },
+    version: 1
+  },
+
+  // --- STAFF FEATURES ---
+  'staff': {
+    id: 'staff',
+    category: FEATURE_CATEGORIES.STAFF,
+    name: 'Staff Management & Billing',
+    description: 'Manage staff, track payables, and issue payments.',
+    defaultEnabled: false,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+  'staff.ledger': {
+    id: 'staff.ledger',
+    category: FEATURE_CATEGORIES.STAFF,
+    name: 'Staff Ledger',
+    description: 'Track individual staff earnings, advances, and payments.',
+    defaultEnabled: false,
+    dependencies: ['staff'],
+    settingsSchema: {},
     version: 1
   },
 
