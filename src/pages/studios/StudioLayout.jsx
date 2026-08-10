@@ -4,7 +4,7 @@ import { pageVariants } from '../../utils/animations';
 import { createPortal } from 'react-dom';
 import { 
   Building2, Palette, FileText, Globe, LayoutDashboard, 
-  LayoutTemplate, Zap, Shield, Copy, Save, X, Search, Database, Undo, Redo, RotateCcw,
+  LayoutTemplate, Zap, Blocks, Shield, Copy, Save, X, Search, Database, Undo, Redo, RotateCcw,
   Crown, Lock, HardDrive, Globe2, Bell, ArrowLeft, PanelLeftClose, PanelLeftOpen
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -34,7 +34,7 @@ const FeatureControlStudio = React.lazy(() => import('./FeatureControlStudio'));
 const STUDIO_ROUTES = [
   { type: 'label', label: 'Core Platform' },
   { id: 'business', label: 'Business Studio', icon: Building2, desc: 'Brand & Identity' },
-  { id: 'features', label: 'Module Manager', icon: Zap, desc: 'Toggle Sidebar Features' },
+  { id: 'features', label: 'Module Manager', icon: Blocks, desc: 'Toggle Sidebar Features' },
   { id: 'subscription', label: 'Subscription Studio', icon: Crown, desc: 'Plans & Limits' },
 
   { type: 'label', label: 'Customization' },
@@ -225,7 +225,7 @@ const StudioLayout = ({
         {/* Sticky Header via Portal (Right Side Actions) */}
         {getStudioHeaderTarget('studio-header-actions-portal') && createPortal(
           <div className="flex items-center gap-3 mr-3 pr-3 border-r border-theme-border-soft">
-            <div className="flex items-center gap-1 bg-theme-surface-elevated border border-theme-border-soft rounded-xl p-1 backdrop-blur-md">
+            <div className="flex items-center gap-1 bg-white/50 dark:bg-theme-surface-elevated border border-theme-border-soft rounded-xl p-1 backdrop-blur-md">
               <Button 
                 variant="ghost" size="icon"
                 onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)"

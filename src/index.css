@@ -144,10 +144,10 @@ body {
 @layer base {
   /* 1. Brand Guidelines (formerly Obsidian Gold) */
   :root, [data-theme="obsidian-gold"] {
-    --app-bg: #0a0b10;
-    --app-bg-soft: #11131a;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --app-bg: #FAF7F2;
+    --app-bg-soft: #FDFBF7;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFFFF;
     --text-primary: #1F1B1D;
     --text-secondary: #1F1B1D;
@@ -197,8 +197,8 @@ body {
   [data-theme="arctic-teal"] {
     --app-bg: #EAF7F5;
     --app-bg-soft: #F4FFFD;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFFFF;
     --text-primary: #10201D;
     --text-secondary: #10201D;
@@ -248,8 +248,8 @@ body {
   [data-theme="sapphire-noir"] {
     --app-bg: #EEF4FF;
     --app-bg-soft: #F7FAFF;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFFFF;
     --text-primary: #0F172A;
     --text-secondary: #0F172A;
@@ -299,8 +299,8 @@ body {
   [data-theme="rose-platinum"] {
     --app-bg: #FFF1F5;
     --app-bg-soft: #FFF7FA;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFFFF;
     --text-primary: #2A1118;
     --text-secondary: #2A1118;
@@ -350,8 +350,8 @@ body {
   [data-theme="carbon-violet"] {
     --app-bg: #F3EFFF;
     --app-bg-soft: #FAF7FF;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFFFF;
     --text-primary: #1E1238;
     --text-secondary: #1E1238;
@@ -401,8 +401,8 @@ body {
   [data-theme="graphite-copper"] {
     --app-bg: #FFF2E8;
     --app-bg-soft: #FFF8F2;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFFFF;
     --text-primary: #24130C;
     --text-secondary: #24130C;
@@ -452,8 +452,8 @@ body {
   [data-theme="arctic-diamond"] {
     --app-bg: #F0F6FF;
     --app-bg-soft: #F8FBFF;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFFFF;
     --text-primary: #0F172A;
     --text-secondary: #0F172A;
@@ -503,8 +503,8 @@ body {
   [data-theme="emerald-royal"] {
     --app-bg: #EEFBF3;
     --app-bg-soft: #F7FCF9;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFFFF;
     --text-primary: #052E16;
     --text-secondary: #052E16;
@@ -554,8 +554,8 @@ body {
   [data-theme="midnight-ruby"] {
     --app-bg: #FFF0F0;
     --app-bg-soft: #FFF8F8;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFFFF;
     --text-primary: #2B0D0D;
     --text-secondary: #2B0D0D;
@@ -605,8 +605,8 @@ body {
   [data-theme="titanium-blue"] {
     --app-bg: #ECF2FA;
     --app-bg-soft: #F4F8FC;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFFFF;
     --text-primary: #0F172A;
     --text-secondary: #0F172A;
@@ -795,7 +795,7 @@ body {
     --accent: #EC4899;
     --accent-dark: #BE185D;
     --accent-light: #FBCFE8;
-    --surface: #FFF1F2;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #1F2937;
@@ -818,7 +818,7 @@ body {
     --accent: #0284C7;
     --accent-dark: #0369A1;
     --accent-light: #BAE6FD;
-    --surface: #F0F9FF;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #1E293B;
@@ -841,7 +841,7 @@ body {
     --accent: #EA580C;
     --accent-dark: #C2410C;
     --accent-light: #FED7AA;
-    --surface: #FFF7ED;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #1C1917;
@@ -864,7 +864,7 @@ body {
     --accent: #7C3AED;
     --accent-dark: #5B21B6;
     --accent-light: #DDD6FE;
-    --surface: #FAF5FF;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #1E1B4B;
@@ -887,7 +887,7 @@ body {
     --accent: #0D9488;
     --accent-dark: #0F766E;
     --accent-light: #99F6E4;
-    --surface: #F0FDFA;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #111827;
@@ -910,7 +910,7 @@ body {
     --accent: #A78BFA;
     --accent-dark: #7C3AED;
     --accent-light: #EDE9FE;
-    --surface: #FAF5FF;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #1E1B4B;
@@ -933,7 +933,7 @@ body {
     --accent: #D97706;
     --accent-dark: #B45309;
     --accent-light: #FDE68A;
-    --surface: #FFFBEB;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #1C1917;
@@ -957,7 +957,7 @@ body {
     --accent: #1D4ED8;
     --accent-dark: #1E3A8A;
     --accent-light: #DBEAFE;
-    --surface: #EFF6FF;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #0F172A;
@@ -980,7 +980,7 @@ body {
     --accent: #BE123C;
     --accent-dark: #881337;
     --accent-light: #FFE4E6;
-    --surface: #FFF1F2;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #1C1917;
@@ -1003,7 +1003,7 @@ body {
     --accent: #334155;
     --accent-dark: #0F172A;
     --accent-light: #F1F5F9;
-    --surface: #F8FAFC;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #0F172A;
@@ -1026,7 +1026,7 @@ body {
     --accent: #B45309;
     --accent-dark: #78350F;
     --accent-light: #FEF3C7;
-    --surface: #FFFBEB;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #1C1917;
@@ -1049,7 +1049,7 @@ body {
     --accent: #0284C7;
     --accent-dark: #075985;
     --accent-light: #E0F2FE;
-    --surface: #F0F9FF;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #0F172A;
@@ -1072,7 +1072,7 @@ body {
     --accent: #166534;
     --accent-dark: #14532D;
     --accent-light: #DCFCE7;
-    --surface: #F0FDF4;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #022C22;
@@ -1095,7 +1095,7 @@ body {
     --accent: #E11D48;
     --accent-dark: #9F1239;
     --accent-light: #FFE4E6;
-    --surface: #FFF1F2;
+    --surface: #FFFFFF;
     --card-bg: #FFFFFF;
     --app-bg: #FAFAFA;
     --text-primary: #4C0519;
@@ -1115,8 +1115,8 @@ body {
   [data-theme="obsidian-black"] {
     --app-bg: #F1F5F9;
     --app-bg-soft: #11131a;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFFFF;
     --text-primary: #0F172A;
     --text-secondary: #0F172A;
@@ -1167,8 +1167,8 @@ body {
   [data-theme="wine-ash"] {
     --app-bg: #F5F1F3;
     --app-bg-soft: #FCFAFB;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FCFAFB;
     --text-primary: #2B1D28;
     --text-secondary: #2B1D28;
@@ -1219,8 +1219,8 @@ body {
   [data-theme="sunlit-yellow"] {
     --app-bg: #FFFDF0;
     --app-bg-soft: #FFFEFA;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFEFA;
     --text-primary: #3D2D0B;
     --text-secondary: #3D2D0B;
@@ -1271,8 +1271,8 @@ body {
   [data-theme="turquoise"] {
     --app-bg: #F0FBF9;
     --app-bg-soft: #FAFEFD;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FAFEFD;
     --text-primary: #0F3D39;
     --text-secondary: #0F3D39;
@@ -1323,8 +1323,8 @@ body {
   [data-theme="midnight-blue-premium"] {
     --app-bg: #F1F5F9;
     --app-bg-soft: #F8FAFC;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #F8FAFC;
     --text-primary: #0F172A;
     --text-secondary: #0F172A;
@@ -1375,8 +1375,8 @@ body {
   [data-theme="jet-black"] {
     --app-bg: #F5F5F5;
     --app-bg-soft: #FAFAFA;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FAFAFA;
     --text-primary: #111111;
     --text-secondary: #111111;
@@ -1427,8 +1427,8 @@ body {
   [data-theme="orchid"] {
     --app-bg: #FDF5FA;
     --app-bg-soft: #FEFAFD;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FEFAFD;
     --text-primary: #3D2235;
     --text-secondary: #3D2235;
@@ -1479,8 +1479,8 @@ body {
   [data-theme="blush-onyx"] {
     --app-bg: #FAFAFA;
     --app-bg-soft: #FDFBFB;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FDFBFB;
     --text-primary: #1C1C1C;
     --text-secondary: #1C1C1C;
@@ -1531,8 +1531,8 @@ body {
   [data-theme="violet-slate"] {
     --app-bg: #F7F8FA;
     --app-bg-soft: #FCFCFD;
-    --surface: #171923;
-    --surface-elevated: #1e2028;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FCFCFD;
     --text-primary: #1E1218;
     --text-secondary: #1E1218;
@@ -1733,7 +1733,7 @@ button:active {
   [data-theme="obsidian-black"] {
     --app-bg: #F1F5F9;
     --app-bg-soft: #11131a;
-    --surface: #171923;
+    --surface: #FFFFFF;
     --surface-elevated: #F8FAFC;
     --card-bg: #F8FAFC;
     --text-primary: #0F172A;
@@ -1781,8 +1781,8 @@ button:active {
   [data-theme="wine-ash"] {
     --app-bg: #F5F1F3;
     --app-bg-soft: #11131a;
-    --surface: #171923;
-    --surface-elevated: #FCFAFB;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FCFAFB;
     --text-primary: #2B1D28;
     --text-secondary: #2B1D28;
@@ -1829,8 +1829,8 @@ button:active {
   [data-theme="sunlit-yellow"] {
     --app-bg: #FFFDF0;
     --app-bg-soft: #11131a;
-    --surface: #171923;
-    --surface-elevated: #FFFEFA;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FFFEFA;
     --text-primary: #3D2D0B;
     --text-secondary: #3D2D0B;
@@ -1877,8 +1877,8 @@ button:active {
   [data-theme="turquoise"] {
     --app-bg: #F0FBF9;
     --app-bg-soft: #11131a;
-    --surface: #171923;
-    --surface-elevated: #FAFEFD;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FAFEFD;
     --text-primary: #0F3D39;
     --text-secondary: #0F3D39;
@@ -1925,7 +1925,7 @@ button:active {
   [data-theme="midnight-blue-premium"] {
     --app-bg: #F1F5F9;
     --app-bg-soft: #11131a;
-    --surface: #171923;
+    --surface: #FFFFFF;
     --surface-elevated: #F8FAFC;
     --card-bg: #F8FAFC;
     --text-primary: #0F172A;
@@ -1973,8 +1973,8 @@ button:active {
   [data-theme="jet-black"] {
     --app-bg: #F5F5F5;
     --app-bg-soft: #11131a;
-    --surface: #171923;
-    --surface-elevated: #FAFAFA;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FAFAFA;
     --text-primary: #111111;
     --text-secondary: #111111;
@@ -2021,8 +2021,8 @@ button:active {
   [data-theme="orchid"] {
     --app-bg: #FDF5FA;
     --app-bg-soft: #11131a;
-    --surface: #171923;
-    --surface-elevated: #FEFAFD;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FEFAFD;
     --text-primary: #3D2235;
     --text-secondary: #3D2235;
@@ -2069,8 +2069,8 @@ button:active {
   [data-theme="blush-onyx"] {
     --app-bg: #FAFAFA;
     --app-bg-soft: #11131a;
-    --surface: #171923;
-    --surface-elevated: #FDFBFB;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FDFBFB;
     --text-primary: #1C1C1C;
     --text-secondary: #1C1C1C;
@@ -2117,8 +2117,8 @@ button:active {
   [data-theme="violet-slate"] {
     --app-bg: #F7F8FA;
     --app-bg-soft: #11131a;
-    --surface: #171923;
-    --surface-elevated: #FCFCFD;
+    --surface: #FFFFFF;
+    --surface-elevated: #F8FAFC;
     --card-bg: #FCFCFD;
     --text-primary: #1E1218;
     --text-secondary: #1E1218;

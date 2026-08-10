@@ -9,7 +9,7 @@ export const Switch = ({ checked, onChange, disabled, ...props }) => {
       onClick={() => !disabled && onChange(!checked)}
       disabled={disabled}
       className={`w-11 h-6 shrink-0 rounded-full transition-colors relative focus:outline-none focus:ring-2 focus:ring-theme-accent focus:ring-offset-2 focus:ring-offset-theme-main ${
-        checked ? 'bg-theme-accent' : 'bg-theme-surface-hover border border-theme-border-soft'
+        checked ? 'bg-theme-accent' : 'bg-black/10 dark:bg-white/10 border border-theme-border-soft'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       {...props}
     >
