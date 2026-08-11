@@ -3196,13 +3196,8 @@ export const syncFromFirestore = async (force = false) => {
   if (!userId) return;
 
   try {
-    // Backup local data before clearing cache
-    const backupSuccess = await backupLocalData();
-    if (!backupSuccess) {
-      toast.error('Backup failed, sync cancelled');
-      console.error('Backup of local data failed. Aborting sync.');
-      return;
-    }
+    // Backup local data before clearing cache (non-blocking)
+    await backupLocalData();
     
     // Check for UID drift / stale caching
     const lastUid = localStorage.getItem('billqyro_last_uid');
@@ -3405,20 +3400,20 @@ export const clearCacheOnly = () => {
 
 // Backup local scoped data before destructive operations
 export const backupLocalData = async () => {
-  try {
-    // Create backups for each scoped key
-    const keys = [KEYS.SETTINGS, KEYS.CUSTOMERS, KEYS.PRODUCTS, KEYS.INVOICES, KEYS.EXPENSES, KEYS.SUBSCRIPTION];
-    keys.forEach(k => {
+  // Backup local data - silently skip items that exceed quota
+  const keys = [KEYS.SETTINGS, KEYS.CUSTOMERS, KEYS.PRODUCTS, KEYS.INVOICES, KEYS.EXPENSES, KEYS.SUBSCRIPTION];
+  keys.forEach(k => {
+    try {
       const data = localStorage.getItem(k);
       if (data !== null) {
         localStorage.setItem(`${k}_backup`, data);
       }
-    });
-    return true;
-  } catch (e) {
-    console.error('Backup local data error:', e);
-    return false;
-  }
+    } catch (e) {
+      // Quota exceeded for this key - skip silently
+      console.warn('[dbEngine] Could not backup key (quota full):', k);
+    }
+  });
+  return true; // Always succeed so sync is never blocked
 };
 
 export {

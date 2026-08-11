@@ -1,4 +1,4 @@
-// src/services/invoiceShareService.js
+// src/services/invoiceShareService.js  [v2.1 - emoji fix via String.fromCodePoint]
 
 /**
  * Invoice Share Service – powers the "Share on WhatsApp" flow with real
@@ -183,9 +183,9 @@ export function buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, l
     `${e.red} Balance Due: *${balanceDue}*`
   ];
 
-  if (dueDate) {
-    lines.push(`${e.calendar} Due Date: ${dueDate}`);
-  }
+  // Always show due date
+  lines.push(`${e.calendar} Due Date: ${dueDate || 'N/A'}`);
+
   
   lines.push('');
 
