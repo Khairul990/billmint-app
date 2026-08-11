@@ -158,35 +158,49 @@ export function buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, l
   }
   */
 
+  // Emoji characters generated via String.fromCodePoint() to prevent any file-encoding corruption
+  const e = {
+    wave: String.fromCodePoint(0x1F44B),      // 👋
+    party: String.fromCodePoint(0x1F389),     // 🎉
+    receipt: String.fromCodePoint(0x1F9FE),   // 🧾
+    money: String.fromCodePoint(0x1F4B0),     // 💰
+    check: String.fromCodePoint(0x2705),      // ✅
+    red: String.fromCodePoint(0x1F534),       // 🔴
+    calendar: String.fromCodePoint(0x1F4C5),  // 📅
+    doc: String.fromCodePoint(0x1F4C4),       // 📄
+    link: String.fromCodePoint(0x1F517),      // 🔗
+    chat: String.fromCodePoint(0x1F4AC),      // 💬
+  };
+
   const lines = [
-    `\u{1F44B} Hello ${customerName},`,
+    `${e.wave} Hello ${customerName},`,
     '',
-    `Thank you for your business! Your invoice is ready. \u{1F389}`,
+    `Thank you for your business! Your invoice is ready. ${e.party}`,
     '',
-    `\u{1F9FE} Invoice #: ${invoiceNo}`,
-    `\u{1F4B0} Total Amount: *${grandTotal}*`,
-    `\u{2705} Amount Paid: ${amountPaid}`,
-    `\u{1F534} Balance Due: *${balanceDue}*`
+    `${e.receipt} Invoice #: ${invoiceNo}`,
+    `${e.money} Total Amount: *${grandTotal}*`,
+    `${e.check} Amount Paid: ${amountPaid}`,
+    `${e.red} Balance Due: *${balanceDue}*`
   ];
 
   if (dueDate) {
-    lines.push(`\u{1F4C5} Due Date: ${dueDate}`);
+    lines.push(`${e.calendar} Due Date: ${dueDate}`);
   }
   
   lines.push('');
 
   if (finalPdfUrl) {
-    lines.push(`\u{1F4C4} View/Download PDF:`);
+    lines.push(`${e.doc} View/Download PDF:`);
     lines.push(finalPdfUrl);
     lines.push('');
   }
   if (finalLiveLinkUrl) {
-    lines.push(`\u{1F517} View Invoice & Pay Securely:`);
+    lines.push(`${e.link} View Invoice & Pay Securely:`);
     lines.push(finalLiveLinkUrl);
     lines.push('');
   }
 
-  lines.push('Need any help? Just reply to this message \u{1F4AC}');
+  lines.push(`Need any help? Just reply to this message ${e.chat}`);
   lines.push('');
   lines.push('Thank you,');
   lines.push(`*${businessName}*`);
