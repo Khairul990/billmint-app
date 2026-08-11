@@ -3330,6 +3330,22 @@ export const syncFromFirestore = async (force = false) => {
     };
   } catch (error) {
     console.error("Error syncing from Firestore:", error);
+    
+    // Handle localStorage quota exceeded silently - just clear some cache and move on
+    if (error.name === 'QuotaExceededError' || error.code === 22 || (error.message && error.message.toLowerCase().includes('quota'))) {
+      console.warn('[dbEngine] Storage quota exceeded. Clearing cached data to free space...');
+      try {
+        const largeCacheKeys = Object.keys(localStorage)
+          .filter(k => k.startsWith('billqyro_products') || k.startsWith('billqyro_invoices'))
+          .sort((a, b) => (localStorage.getItem(b) || '').length - (localStorage.getItem(a) || '').length);
+        if (largeCacheKeys.length > 0) {
+          localStorage.removeItem(largeCacheKeys[0]);
+          console.warn('[dbEngine] Cleared:', largeCacheKeys[0]);
+        }
+      } catch (e) { /* ignore */ }
+      return { settings: null, customers: [], products: [], invoices: [], expenses: [], students: [], subscription: null };
+    }
+    
     toast.error('Sync failed: ' + error.message);
     // Restore from backup
     try {
