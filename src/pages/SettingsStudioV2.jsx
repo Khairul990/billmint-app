@@ -10,6 +10,7 @@ import LiveLinkTemplateStudio from './LiveLinkTemplateStudio';
 import DesignStudio from './DesignStudio';
 import TemplateMarketplace from './TemplateMarketplace';
 import BackupRestore from './BackupRestore';
+import MessageTemplateStudio, { DEFAULT_WHATSAPP_TEMPLATE } from './studios/MessageTemplateStudio';
 import { applyTheme } from '../hooks/useThemeEngine';
 import { getThemePreviewColors, ALL_THEMES, THEME_INFO } from '../utils/themeUtils';
 import { getCustomerLabelByType, isEducationBusiness, BUSINESS_PRESETS } from '../config/businessPresets';
@@ -78,7 +79,13 @@ const NAV_GROUPS = [
   {
     group: 'Payment', icon: CreditCard,
     items: [
-      { id: 'payment', label: 'Payment Methods', icon: QrCode, description: 'UPI, bKash, Nagad' },
+      { id: 'payment', label: 'Payment Methods', icon: QrCode, description: 'UPI, bKash, Nagad' }
+    ]
+  },
+  {
+    group: 'Communication', icon: MessageCircle,
+    items: [
+      { id: 'whatsapp-template', label: 'Message Template', icon: MessageCircle, description: 'Customize WhatsApp messages' },
       { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Reminders & alerts' }
     ]
   },
@@ -214,6 +221,7 @@ const SettingsStudioV2 = ({
   const [paymentConfirmation, setPaymentConfirmation] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
   const [securityAlerts, setSecurityAlerts] = useState(true);
+  const [whatsappMessageTemplate, setWhatsappMessageTemplate] = useState('');
 
   // Cyber Cafe states
   const [cyberPortals, setCyberPortals] = useState([]);
@@ -311,6 +319,7 @@ const SettingsStudioV2 = ({
         setMarketingEmails(settings.notifications.marketing || false);
         setSecurityAlerts(settings.notifications.securityAlerts !== false);
       }
+      setWhatsappMessageTemplate(settings.whatsappMessageTemplate || DEFAULT_WHATSAPP_TEMPLATE);
 
       if (settings.cyberCafeConfig) {
         setCyberPortals(settings.cyberCafeConfig.portals || []);
@@ -372,6 +381,7 @@ const SettingsStudioV2 = ({
     showPaidDueAmount, showContactButton, requireTransactionId, requirePaymentScreenshot,
     themeId, darkMode, logoUrl, cornerRadius, shadowIntensity, animationSpeed, fontDensity,
     emailNotifications, whatsappNotifications, dueDateReminders, paymentConfirmation, marketingEmails, securityAlerts,
+    whatsappMessageTemplate,
     cyberPortals, removeBgApiKey, enablePhotoMaker,
     invoiceItemLabel, invoiceCustomColumns,
     enableVariantTracking, enableWarehouseTracking, enableBatchExpiry, enableBarcodeSku
@@ -395,7 +405,7 @@ const SettingsStudioV2 = ({
   const getDynamicNav = () => {
     let baseNav = [...NAV_GROUPS];
     if (businessType === 'cybercafe') {
-      baseNav = baseNav.filter(g => g.group !== 'Invoice' && g.group !== 'Payment');
+      // Just add the Cyber Cafe group, don't hide anything else so the user has full access
       baseNav.splice(1, 0, {
         group: 'Cyber Cafe', icon: Monitor,
         items: [
@@ -468,6 +478,7 @@ const SettingsStudioV2 = ({
           ctaPreset: settings?.customerLiveLinkSettings?.ctaPreset || 'payNow',
           conversionLayout: settings?.customerLiveLinkSettings?.conversionLayout || 'modern'
         },
+        whatsappMessageTemplate,
         notifications: { email: emailNotifications, whatsapp: whatsappNotifications, dueDateReminders, paymentConfirmation, marketing: marketingEmails, securityAlerts },
         cyberCafeConfig: { portals: cyberPortals, removeBgApiKey, enablePhotoMaker },
         invoiceBuilderSettings: {
@@ -564,6 +575,7 @@ const SettingsStudioV2 = ({
       setMarketingEmails(settings.notifications.marketing || false);
       setSecurityAlerts(settings.notifications.securityAlerts !== false);
     }
+    setWhatsappMessageTemplate(settings.whatsappMessageTemplate || DEFAULT_WHATSAPP_TEMPLATE);
     if (settings.cyberCafeConfig) {
       setCyberPortals(settings.cyberCafeConfig.portals || []);
       setRemoveBgApiKey(settings.cyberCafeConfig.removeBgApiKey || '');
@@ -1211,6 +1223,15 @@ const SettingsStudioV2 = ({
             </div>
             <p className="text-sm text-gray-500">Team management coming soon. Currently, accounts are managed through Firebase Auth.</p>
           </div>
+        );
+
+      case 'whatsapp-template':
+        return (
+          <MessageTemplateStudio 
+            settings={settings}
+            whatsappMessageTemplate={whatsappMessageTemplate}
+            setWhatsappMessageTemplate={setWhatsappMessageTemplate}
+          />
         );
 
       case 'advanced':

@@ -2,6 +2,7 @@ import React from 'react';
 import { toast } from 'react-hot-toast';
 import { Bell, Mail, MessageSquare, Send } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import MessageTemplateStudio from './MessageTemplateStudio';
 
 const NotificationStudio = ({ settings, onUpdate }) => {
   return (
@@ -86,6 +87,14 @@ const NotificationStudio = ({ settings, onUpdate }) => {
             Configure Gateways
           </Button>
         </div>
+      </div>
+      
+      <div className="mt-8">
+        <MessageTemplateStudio 
+          settings={settings}
+          whatsappMessageTemplate={settings?.whatsappMessageTemplate || ''}
+          setWhatsappMessageTemplate={(val) => onUpdate({ whatsappMessageTemplate: val })}
+        />
       </div>
     </div>
   );

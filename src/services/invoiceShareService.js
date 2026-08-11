@@ -124,23 +124,70 @@ export function buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, l
   const symbol = regionalPrefs.currency || businessSettings?.currency || '₹';
   const numberFormat = regionalPrefs.numberFormat || businessSettings?.numberFormat || 'Indian';
   const grandTotal = formatCurrency(invoice.grandTotal, symbol, numberFormat);
+  const amountPaid = formatCurrency(invoice.amountPaid || 0, symbol, numberFormat);
+  const balanceDue = formatCurrency(
+    invoice.balanceDue !== undefined 
+      ? invoice.balanceDue 
+      : (invoice.grandTotal - (invoice.amountPaid || 0)), 
+    symbol, 
+    numberFormat
+  );
+
+  const businessName = invoice.businessSnapshot?.businessName || businessSettings?.businessName || 'BillQyro';
+  const dueDate = invoice.dueDate || '';
+  const finalPdfUrl = pdfUrl || '';
+  const finalLiveLinkUrl = liveLinkUrl || '';
+
+  const template = businessSettings?.whatsappMessageTemplate ? String(businessSettings.whatsappMessageTemplate) : '';
+  const isCorrupted = template.includes('\uFFFD') || template.includes('??');
+
+  if (template && !isCorrupted) {
+    let message = String(businessSettings.whatsappMessageTemplate);
+    message = message.replace(/\{\{customerName\}\}/g, customerName)
+                     .replace(/\{\{invoiceNo\}\}/g, invoiceNo)
+                     .replace(/\{\{grandTotal\}\}/g, grandTotal)
+                     .replace(/\{\{amountPaid\}\}/g, amountPaid)
+                     .replace(/\{\{balanceDue\}\}/g, balanceDue)
+                     .replace(/\{\{dueDate\}\}/g, dueDate)
+                     .replace(/\{\{pdfUrl\}\}/g, finalPdfUrl)
+                     .replace(/\{\{liveLinkUrl\}\}/g, finalLiveLinkUrl)
+                     .replace(/\{\{businessName\}\}/g, businessName);
+    return message.trim();
+  }
 
   const lines = [
-    `প্রিয় ${customerName},`,
+    `\u{1F44B} Hello ${customerName},`,
     '',
-    `আপনার ইনভয়েস #${invoiceNo} তৈরি হয়েছে।`,
-    `মোট পরিমাণ: ${grandTotal}`,
-    ''
+    `Thank you for your business! Your invoice is ready. \u{1F389}`,
+    '',
+    `\u{1F9FE} Invoice #: ${invoiceNo}`,
+    `\u{1F4B0} Total Amount: *${grandTotal}*`,
+    `\u{2705} Amount Paid: ${amountPaid}`,
+    `\u{1F534} Balance Due: *${balanceDue}*`
   ];
 
-  if (pdfUrl) {
-    lines.push(`📄 PDF দেখুন/ডাউনলোড করুন: ${pdfUrl}`);
+  if (dueDate) {
+    lines.push(`\u{1F4C5} Due Date: ${dueDate}`);
   }
-  if (liveLinkUrl) {
-    lines.push(`🔗 অনলাইনে বিল দেখুন ও পেমেন্ট করুন: ${liveLinkUrl}`);
+  
+  lines.push('');
+
+  if (finalPdfUrl) {
+    lines.push(`\u{1F4C4} View/Download PDF:`);
+    lines.push(finalPdfUrl);
+    lines.push('');
+  }
+  if (finalLiveLinkUrl) {
+    lines.push(`\u{1F517} View Invoice & Pay Securely:`);
+    lines.push(finalLiveLinkUrl);
+    lines.push('');
   }
 
-  lines.push('', 'ধন্যবাদ,', 'BillQyro');
+  lines.push('Need any help? Just reply to this message \u{1F4AC}');
+  lines.push('');
+  lines.push('Thank you,');
+  lines.push(`*${businessName}*`);
+  
   return lines.join('\n');
 }
 
@@ -180,12 +227,20 @@ export async function shareOnWhatsApp(customer, invoice, businessSettings = {}) 
   if (invoice.pdfUrl || invoice.invoicePdfUrl) {
     pdfUrl = invoice.pdfUrl || invoice.invoicePdfUrl;
   } else {
-    // PDF needs to be generated/uploaded first – show a loading toast while we wait.
-    const toastId = toast.loading('Preparing your invoice...', { duration: 60000 });
+    // PDF needs to be generated/uploaded first.
+    // Browsers will block win.location.href if we await longer than ~2 seconds.
+    // So we race the PDF generation against a 1.5s timeout.
+    const toastId = toast.loading('Preparing your invoice...', { duration: 2000 });
     try {
-      pdfUrl = await ensureInvoicePdfUrl(invoice, businessSettings);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('PDF generation took too long for sync popup')), 1500)
+      );
+      pdfUrl = await Promise.race([
+        ensureInvoicePdfUrl(invoice, businessSettings),
+        timeoutPromise
+      ]);
     } catch (e) {
-      console.warn('[InvoiceShareService] PDF link unavailable, sharing without it:', e);
+      console.warn('[InvoiceShareService] PDF link skipped to prevent popup blocker:', e.message);
       pdfUrl = '';
     } finally {
       toast.dismiss(toastId);
