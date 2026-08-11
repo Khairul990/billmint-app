@@ -1,4 +1,4 @@
-// src/services/invoiceShareService.js  [v2.1 - emoji fix via String.fromCodePoint]
+// src/services/invoiceShareService.js  [v2.2 - balanceDue fix, URLSearchParams encoding, template guard]
 
 /**
  * Invoice Share Service – powers the "Share on WhatsApp" flow with real
@@ -125,11 +125,11 @@ export function buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, l
   const numberFormat = regionalPrefs.numberFormat || businessSettings?.numberFormat || 'Indian';
   const grandTotal = formatCurrency(invoice.grandTotal, symbol, numberFormat);
   const amountPaid = formatCurrency(invoice.amountPaid || 0, symbol, numberFormat);
+  // Always compute balanceDue from live values – never trust a stored field
+  // that may be stale (e.g. created before a partial payment was recorded).
   const balanceDue = formatCurrency(
-    invoice.balanceDue !== undefined 
-      ? invoice.balanceDue 
-      : (invoice.grandTotal - (invoice.amountPaid || 0)), 
-    symbol, 
+    Math.max(0, Number(invoice.grandTotal || 0) - Number(invoice.amountPaid || 0)),
+    symbol,
     numberFormat
   );
 
@@ -138,25 +138,30 @@ export function buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, l
   const finalPdfUrl = pdfUrl || '';
   const finalLiveLinkUrl = liveLinkUrl || '';
 
-  // Bypass custom templates completely for now to guarantee emojis
-  /*
-  const template = businessSettings?.whatsappMessageTemplate ? String(businessSettings.whatsappMessageTemplate) : '';
-  const isCorrupted = template.includes('\uFFFD') || template.includes('??');
+  // Use the custom WhatsApp template if one is saved and not corrupted.
+  // Corruption markers (\uFFFD replacement char or literal "??") indicate
+  // the template was saved with a broken encoding and must be skipped.
+  const rawTemplate = businessSettings?.whatsappMessageTemplate
+    ? String(businessSettings.whatsappMessageTemplate)
+    : '';
+  const isCorrupted =
+    rawTemplate.includes('\uFFFD') ||
+    rawTemplate.includes('??') ||
+    rawTemplate.includes('\\u');
 
-  if (template && !isCorrupted) {
-    let message = String(businessSettings.whatsappMessageTemplate);
-    message = message.replace(/\{\{customerName\}\}/g, customerName)
-                     .replace(/\{\{invoiceNo\}\}/g, invoiceNo)
-                     .replace(/\{\{grandTotal\}\}/g, grandTotal)
-                     .replace(/\{\{amountPaid\}\}/g, amountPaid)
-                     .replace(/\{\{balanceDue\}\}/g, balanceDue)
-                     .replace(/\{\{dueDate\}\}/g, dueDate)
-                     .replace(/\{\{pdfUrl\}\}/g, finalPdfUrl)
-                     .replace(/\{\{liveLinkUrl\}\}/g, finalLiveLinkUrl)
-                     .replace(/\{\{businessName\}\}/g, businessName);
+  if (rawTemplate && !isCorrupted) {
+    const message = rawTemplate
+      .replace(/\{\{customerName\}\}/g, customerName)
+      .replace(/\{\{invoiceNo\}\}/g, invoiceNo)
+      .replace(/\{\{grandTotal\}\}/g, grandTotal)
+      .replace(/\{\{amountPaid\}\}/g, amountPaid)
+      .replace(/\{\{balanceDue\}\}/g, balanceDue)
+      .replace(/\{\{dueDate\}\}/g, dueDate || 'N/A')
+      .replace(/\{\{pdfUrl\}\}/g, finalPdfUrl)
+      .replace(/\{\{liveLinkUrl\}\}/g, finalLiveLinkUrl)
+      .replace(/\{\{businessName\}\}/g, businessName);
     return message.trim();
   }
-  */
 
   // Emoji characters generated via String.fromCodePoint() to prevent any file-encoding corruption
   const e = {
@@ -232,7 +237,7 @@ export async function shareOnWhatsApp(customer, invoice, businessSettings = {}) 
 
   const resolvedCustomer = resolveCustomer(invoice, customer);
   const symbol = businessSettings?.currency || invoice.regionalSettingsSnapshot?.currency || '₹';
-  const phone = cleanPhoneNumber(resolvedCustomer?.phone || '', symbol);
+  const phone = cleanPhoneNumber(resolvedCustomer?.phone || '');
 
   const liveLinkUrl = buildPortalUrl(invoice);
 
@@ -286,10 +291,16 @@ export async function shareOnWhatsApp(customer, invoice, businessSettings = {}) 
  * the phone number is missing so the message still opens.
  */
 function buildWaUrl({ phone, message }) {
-  const encoded = encodeURIComponent(message);
+  // URLSearchParams uses browser-native UTF-8 encoding which correctly
+  // handles multi-byte characters (emoji, ₹, etc.) better than a manual
+  // encodeURIComponent call whose output can vary across JS engines.
+  const params = new URLSearchParams();
+  params.set('text', message);
+  const qs = params.toString();
+
   return phone
-    ? `https://wa.me/${phone}?text=${encoded}`
-    : `https://api.whatsapp.com/send?text=${encoded}`;
+    ? `https://wa.me/${phone}?${qs}`
+    : `https://api.whatsapp.com/send?${qs}`;
 }
 
 export const invoiceShareService = {
