@@ -138,6 +138,8 @@ export function buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, l
   const finalPdfUrl = pdfUrl || '';
   const finalLiveLinkUrl = liveLinkUrl || '';
 
+  // Bypass custom templates completely for now to guarantee emojis
+  /*
   const template = businessSettings?.whatsappMessageTemplate ? String(businessSettings.whatsappMessageTemplate) : '';
   const isCorrupted = template.includes('\uFFFD') || template.includes('??');
 
@@ -154,6 +156,7 @@ export function buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, l
                      .replace(/\{\{businessName\}\}/g, businessName);
     return message.trim();
   }
+  */
 
   const lines = [
     `\u{1F44B} Hello ${customerName},`,
