@@ -78,35 +78,45 @@ export function buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, l
   const finalPdfUrl   = pdfUrl       || '';
   const finalLiveLink = liveLinkUrl  || '';
 
-  const CHECK   = String.fromCodePoint(0x2705);  // check mark (BMP)
-  const WARNING = String.fromCodePoint(0x26A0);  // warning sign (BMP)
+  // Using literal raw emoji characters (UTF-8) as they are often more resilient 
+  // than surrogate pairs constructed at runtime in some JS engine / native bridge handoffs
+  const WAVE     = '👋';
+  const PARTY    = '🎉';
+  const RECEIPT  = '🧾';
+  const MONEY    = '💰';
+  const CHECK    = '✅';
+  const RED_DOT  = '🔴';
+  const CALENDAR = '📅';
+  const DOC      = '📄';
+  const LINK     = '🔗';
+  const CHAT     = '💬';
 
   const lines = [
-    'Hello ' + customerName + ',',
+    WAVE + ' Hello ' + customerName + ',',
     '',
-    'Thank you for your business! Your invoice is ready.',
+    'Thank you for your business! Your invoice is ready. ' + PARTY,
     '',
-    'Invoice #: ' + invoiceNo,
-    'Total Amount: *' + grandTotal + '*',
-    CHECK + ' Amount Paid: ' + amountPaid,
-    WARNING + ' Balance Due: *' + balanceDue + '*',
-    'Due Date: ' + (dueDate || 'N/A'),
+    RECEIPT + ' Invoice #: ' + invoiceNo,
+    MONEY   + ' Total Amount: *' + grandTotal + '*',
+    CHECK   + ' Amount Paid: ' + amountPaid,
+    RED_DOT + ' Balance Due: *' + balanceDue + '*',
+    CALENDAR+ ' Due Date: ' + (dueDate || 'N/A'),
     '',
   ];
 
   if (finalPdfUrl) {
-    lines.push('View/Download PDF:');
+    lines.push(DOC + ' View/Download PDF:');
     lines.push(finalPdfUrl);
     lines.push('');
   }
 
   if (finalLiveLink) {
-    lines.push('View Invoice & Pay Securely:');
+    lines.push(LINK + ' View Invoice & Pay Securely:');
     lines.push(finalLiveLink);
     lines.push('');
   }
 
-  lines.push('Need any help? Just reply to this message.');
+  lines.push('Need any help? Just reply to this message ' + CHAT);
   lines.push('');
   lines.push('Thank you,');
   lines.push('*' + businessName + '*');
@@ -153,9 +163,19 @@ export async function shareOnWhatsApp(customer, invoice, businessSettings = {}) 
 }
 
 function buildWaUrl({ phone, message }) {
-  // encodeURIComponent: spaces -> %20 (NOT +)
-  // URLSearchParams:   spaces -> + (WhatsApp treats this as literal +, garbling text)
   const encoded = encodeURIComponent(message);
+  
+  // For Capacitor / Mobile WebViews, direct deep link is often safer 
+  // to avoid intermediary wa.me browser intent decoding bugs.
+  // Using direct whatsapp:// protocol bypasses the browser intent parsing that might mangle surrogate pairs.
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  if (isMobile) {
+    return phone 
+      ? 'whatsapp://send?phone=' + phone + '&text=' + encoded
+      : 'whatsapp://send?text=' + encoded;
+  }
+  
   return phone
     ? 'https://wa.me/' + phone + '?text=' + encoded
     : 'https://api.whatsapp.com/send?text=' + encoded;
