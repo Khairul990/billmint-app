@@ -1,19 +1,13 @@
-// src/services/invoiceShareService.js  [v2.2 - balanceDue fix, URLSearchParams encoding, template guard]
+﻿// src/services/invoiceShareService.js  [v3.0 - emoji via codePoint, encodeURIComponent URL]
 
 /**
- * Invoice Share Service – powers the "Share on WhatsApp" flow with real
- * download links.
- *
- * WhatsApp's deep-link API cannot auto-attach files, so instead of attaching
- * the PDF we make sure the PDF already lives in Firebase Storage and hand the
- * customer a clickable download URL plus the Live Link portal URL. Every piece
- * of the message (customer name, invoice #, grand total, PDF link, portal
- * link) is dynamic and populated at share time.
- *
- * Storage layout: user_uploads/{userId}/{invoiceNumber}.pdf (already allowed
- * by storage.rules). The URL from getDownloadURL() is token-based, so anyone
- * with the link can open/download the PDF even though writes require the
- * owner's auth.
+ * Key design decisions in v3.0:
+ * 1. ALL emoji produced at runtime with String.fromCodePoint() - no literal
+ *    emoji bytes, no Firestore/localStorage template read.
+ * 2. wa.me URL built with encodeURIComponent() not URLSearchParams.
+ *    URLSearchParams encodes spaces as "+" which some WhatsApp URL parsers
+ *    treat as literal "+", garbling the text.
+ * 3. balanceDue always computed live from grandTotal - amountPaid.
  */
 
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -27,242 +21,127 @@ import { formatCurrency } from '../utils/invoiceUtils';
 import { toast } from 'react-hot-toast';
 
 const CACHE_KEY = (invoiceId) => `billqyro_invoice_pdf_url_${invoiceId}`;
+const readCache  = (key) => { try { return localStorage.getItem(key) || ''; } catch { return ''; } };
+const writeCache = (key, value) => { try { localStorage.setItem(key, value); } catch { /**/ } };
 
-const readCache = (key) => {
-  try {
-    return localStorage.getItem(key) || '';
-  } catch {
-    return '';
-  }
-};
-
-const writeCache = (key, value) => {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    // Storage full/blocked – cache is only an optimisation, safe to ignore.
-  }
-};
-
-/**
- * Resolve a customer object for an invoice (the invoice card embeds
- * customerName / customerPhone, but a full customer may also be available).
- */
 export const resolveCustomer = (invoice, customer) => {
   if (customer && customer.name) return customer;
   return {
-    id: invoice?.customerId || invoice?.customer?.id,
-    name: invoice?.customerName || invoice?.customer?.name,
-    phone: invoice?.customerPhone || invoice?.customer?.phone
+    id:    invoice?.customerId   || invoice?.customer?.id,
+    name:  invoice?.customerName || invoice?.customer?.name,
+    phone: invoice?.customerPhone|| invoice?.customer?.phone,
   };
 };
 
-/**
- * Make sure the invoice PDF exists in Firebase Storage and return a shareable
- * download URL. Reuses a previously generated URL (from invoice.pdfUrl or the
- * local cache) so we don't re-upload on every share. Never falls back to a
- * broken upload – throws a clear error instead.
- * @returns {Promise<string>} Public PDF download URL ('' when unavailable)
- */
 export async function ensureInvoicePdfUrl(invoice, businessSettings) {
   if (!invoice) return '';
-
   const alreadySet = invoice.pdfUrl || invoice.invoicePdfUrl;
   if (alreadySet) return alreadySet;
-
   const cacheKey = CACHE_KEY(invoice.id || invoice.invoiceNumber);
   const cached = readCache(cacheKey);
   if (cached) return cached;
-
-  if (!firebaseReady || !storage) {
-    throw new Error('Cloud storage is unavailable – the PDF link cannot be created right now.');
-  }
-
+  if (!firebaseReady || !storage) throw new Error('Cloud storage unavailable.');
   const userId = getRealUserId();
-  if (!userId) {
-    throw new Error('You need to be signed in to create the invoice PDF link.');
-  }
-
+  if (!userId) throw new Error('Sign in required to create PDF link.');
   const blob = await generateInvoicePdfBlob(invoice, businessSettings);
-  if (!blob || blob.size === 0) {
-    throw new Error('Invoice PDF could not be generated.');
-  }
-
+  if (!blob || blob.size === 0) throw new Error('Invoice PDF could not be generated.');
   const safeName = (invoice.invoiceNumber || invoice.id || 'invoice')
-    .replace(/[^a-zA-Z0-9_-]/g, '_')
-    .slice(0, 80);
+    .replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
   const storageRef = ref(storage, `user_uploads/${userId}/${safeName}.pdf`);
   await uploadBytes(storageRef, blob, { contentType: 'application/pdf' });
   const downloadUrl = await getDownloadURL(storageRef);
-
   writeCache(cacheKey, downloadUrl);
-
-  // Best-effort: remember the link on the public invoice doc so later shares
-  // can reuse it without re-uploading. Never blocks the share flow on failure.
   if (invoice.publicToken) {
     try {
       await setDoc(doc(db, 'publicInvoices', invoice.publicToken), { pdfUrl: downloadUrl }, { merge: true });
-    } catch {
-      console.warn('[InvoiceShareService] Could not persist pdfUrl on publicInvoices:');
-    }
+    } catch { console.warn('[InvoiceShareService] Could not persist pdfUrl.'); }
   }
-
   return downloadUrl;
 }
 
-/**
- * Build the WhatsApp message containing the dynamic invoice details plus the
- * PDF download link and the Live Link portal URL.
- */
 export function buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, liveLinkUrl) {
   if (!invoice) return '';
 
-  const customerName = invoice.customerName || invoice.customer?.name || 'there';
-  const invoiceNo = invoice.invoiceNumber || 'N/A';
-
+  const customerName  = invoice.customerName  || invoice.customer?.name || 'there';
+  const invoiceNo     = invoice.invoiceNumber || 'N/A';
   const regionalPrefs = invoice.regionalSettingsSnapshot || {};
-  const symbol = regionalPrefs.currency || businessSettings?.currency || '₹';
-  const numberFormat = regionalPrefs.numberFormat || businessSettings?.numberFormat || 'Indian';
-  const grandTotal = formatCurrency(invoice.grandTotal, symbol, numberFormat);
-  const amountPaid = formatCurrency(invoice.amountPaid || 0, symbol, numberFormat);
-  // Always compute balanceDue from live values – never trust a stored field
-  // that may be stale (e.g. created before a partial payment was recorded).
-  const balanceDue = formatCurrency(
+  const symbol        = regionalPrefs.currency     || businessSettings?.currency     || '\u20B9';
+  const numberFormat  = regionalPrefs.numberFormat || businessSettings?.numberFormat || 'Indian';
+  const grandTotal    = formatCurrency(invoice.grandTotal, symbol, numberFormat);
+  const amountPaid    = formatCurrency(invoice.amountPaid || 0, symbol, numberFormat);
+  const balanceDue    = formatCurrency(
     Math.max(0, Number(invoice.grandTotal || 0) - Number(invoice.amountPaid || 0)),
-    symbol,
-    numberFormat
+    symbol, numberFormat
   );
+  const businessName  = invoice.businessSnapshot?.businessName || businessSettings?.businessName || 'BillQyro';
+  const dueDate       = invoice.dueDate || '';
+  const finalPdfUrl   = pdfUrl       || '';
+  const finalLiveLink = liveLinkUrl  || '';
 
-  const businessName = invoice.businessSnapshot?.businessName || businessSettings?.businessName || 'BillQyro';
-  const dueDate = invoice.dueDate || '';
-  const finalPdfUrl = pdfUrl || '';
-  const finalLiveLinkUrl = liveLinkUrl || '';
-
-  // Use the custom WhatsApp template if one is saved and not corrupted.
-  // Corruption markers (\uFFFD replacement char or literal "??") indicate
-  // the template was saved with a broken encoding and must be skipped.
-  const rawTemplate = businessSettings?.whatsappMessageTemplate
-    ? String(businessSettings.whatsappMessageTemplate)
-    : '';
-  const isCorrupted =
-    rawTemplate.includes('\uFFFD') ||
-    rawTemplate.includes('??') ||
-    rawTemplate.includes('\\u');
-
-  if (rawTemplate && !isCorrupted) {
-    const message = rawTemplate
-      .replace(/\{\{customerName\}\}/g, customerName)
-      .replace(/\{\{invoiceNo\}\}/g, invoiceNo)
-      .replace(/\{\{grandTotal\}\}/g, grandTotal)
-      .replace(/\{\{amountPaid\}\}/g, amountPaid)
-      .replace(/\{\{balanceDue\}\}/g, balanceDue)
-      .replace(/\{\{dueDate\}\}/g, dueDate || 'N/A')
-      .replace(/\{\{pdfUrl\}\}/g, finalPdfUrl)
-      .replace(/\{\{liveLinkUrl\}\}/g, finalLiveLinkUrl)
-      .replace(/\{\{businessName\}\}/g, businessName);
-    return message.trim();
-  }
-
-  // Emoji characters generated via String.fromCodePoint() to prevent any file-encoding corruption
-  const e = {
-    wave: String.fromCodePoint(0x1F44B),      // 👋
-    party: String.fromCodePoint(0x1F389),     // 🎉
-    receipt: String.fromCodePoint(0x1F9FE),   // 🧾
-    money: String.fromCodePoint(0x1F4B0),     // 💰
-    check: String.fromCodePoint(0x2705),      // ✅
-    red: String.fromCodePoint(0x1F534),       // 🔴
-    calendar: String.fromCodePoint(0x1F4C5),  // 📅
-    doc: String.fromCodePoint(0x1F4C4),       // 📄
-    link: String.fromCodePoint(0x1F517),      // 🔗
-    chat: String.fromCodePoint(0x1F4AC),      // 💬
-  };
+  // ONLY String.fromCodePoint() - never literal emoji in this file
+  const WAVE     = String.fromCodePoint(0x1F44B); // wave hand
+  const PARTY    = String.fromCodePoint(0x1F389); // party popper
+  const RECEIPT  = String.fromCodePoint(0x1F9FE); // receipt
+  const MONEY    = String.fromCodePoint(0x1F4B0); // money bag
+  const CHECK    = String.fromCodePoint(0x2705);  // check mark
+  const RED_DOT  = String.fromCodePoint(0x1F534); // red circle
+  const CALENDAR = String.fromCodePoint(0x1F4C5); // calendar
+  const DOC      = String.fromCodePoint(0x1F4C4); // page
+  const LINK     = String.fromCodePoint(0x1F517); // link
+  const CHAT     = String.fromCodePoint(0x1F4AC); // speech bubble
 
   const lines = [
-    `${e.wave} Hello ${customerName},`,
+    WAVE + ' Hello ' + customerName + ',',
     '',
-    `Thank you for your business! Your invoice is ready. ${e.party}`,
+    'Thank you for your business! Your invoice is ready. ' + PARTY,
     '',
-    `${e.receipt} Invoice #: ${invoiceNo}`,
-    `${e.money} Total Amount: *${grandTotal}*`,
-    `${e.check} Amount Paid: ${amountPaid}`,
-    `${e.red} Balance Due: *${balanceDue}*`
+    RECEIPT + ' Invoice #: ' + invoiceNo,
+    MONEY   + ' Total Amount: *' + grandTotal + '*',
+    CHECK   + ' Amount Paid: ' + amountPaid,
+    RED_DOT + ' Balance Due: *' + balanceDue + '*',
+    CALENDAR+ ' Due Date: ' + (dueDate || 'N/A'),
+    '',
   ];
 
-  // Always show due date
-  lines.push(`${e.calendar} Due Date: ${dueDate || 'N/A'}`);
-
-  
-  lines.push('');
-
   if (finalPdfUrl) {
-    lines.push(`${e.doc} View/Download PDF:`);
+    lines.push(DOC + ' View/Download PDF:');
     lines.push(finalPdfUrl);
     lines.push('');
   }
-  if (finalLiveLinkUrl) {
-    lines.push(`${e.link} View Invoice & Pay Securely:`);
-    lines.push(finalLiveLinkUrl);
+
+  if (finalLiveLink) {
+    lines.push(LINK + ' View Invoice & Pay Securely:');
+    lines.push(finalLiveLink);
     lines.push('');
   }
 
-  lines.push(`Need any help? Just reply to this message ${e.chat}`);
+  lines.push('Need any help? Just reply to this message ' + CHAT);
   lines.push('');
   lines.push('Thank you,');
-  lines.push(`*${businessName}*`);
-  
+  lines.push('*' + businessName + '*');
+
   return lines.join('\n');
 }
 
-/**
- * Share an invoice over WhatsApp via a wa.me deep link.
- *
- * Steps:
- *  1. Resolve customer + phone (digits only via cleanPhoneNumber).
- *  2. Resolve the Live Link portal URL (buildPortalUrl).
- *  3. Ensure the invoice PDF is in Firebase Storage and grab its download URL.
- *  4. Compose the message with all dynamic values and open WhatsApp.
- *
- * A loading toast ("Preparing your invoice...") is shown while the PDF is being
- * generated/uploaded so the user never sends an incomplete message. A blank
- * window is opened inside the click gesture to dodge popup blockers, then
- * pointed at the final wa.me URL once everything is ready.
- *
- * @param {Object} customer - { id, name, phone }
- * @param {Object} invoice - Invoice object
- * @param {Object} businessSettings - Business settings
- * @returns {Promise<{ message: string, waUrl: string, pdfUrl: string, liveLinkUrl: string }>}
- */
 export async function shareOnWhatsApp(customer, invoice, businessSettings = {}) {
-  if (!invoice) throw new Error('Invoice missing – cannot share.');
+  if (!invoice) throw new Error('Invoice missing.');
 
   const resolvedCustomer = resolveCustomer(invoice, customer);
-  const symbol = businessSettings?.currency || invoice.regionalSettingsSnapshot?.currency || '₹';
   const phone = cleanPhoneNumber(resolvedCustomer?.phone || '');
-
   const liveLinkUrl = buildPortalUrl(invoice);
 
-  // Always pre-open a blank tab inside the synchronous click gesture so the
-  // browser never treats the later window.open() as an unsolicited popup.
   const win = window.open('', '_blank');
 
-  let pdfUrl;
+  let pdfUrl = '';
   if (invoice.pdfUrl || invoice.invoicePdfUrl) {
     pdfUrl = invoice.pdfUrl || invoice.invoicePdfUrl;
   } else {
-    // PDF needs to be generated/uploaded first.
-    // Browsers will block win.location.href if we await longer than ~2 seconds.
-    // So we race the PDF generation against a 1.5s timeout.
     const toastId = toast.loading('Preparing your invoice...', { duration: 2000 });
     try {
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('PDF generation took too long for sync popup')), 1500)
-      );
-      pdfUrl = await Promise.race([
-        ensureInvoicePdfUrl(invoice, businessSettings),
-        timeoutPromise
-      ]);
-    } catch (e) {
-      console.warn('[InvoiceShareService] PDF link skipped to prevent popup blocker:', e.message);
+      const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 1500));
+      pdfUrl = await Promise.race([ensureInvoicePdfUrl(invoice, businessSettings), timeout]);
+    } catch (err) {
+      console.warn('[InvoiceShareService] PDF skipped:', err.message);
       pdfUrl = '';
     } finally {
       toast.dismiss(toastId);
@@ -270,15 +149,11 @@ export async function shareOnWhatsApp(customer, invoice, businessSettings = {}) 
   }
 
   const message = buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, liveLinkUrl);
-  const waUrl = buildWaUrl({ phone, message });
+  const waUrl   = buildWaUrl({ phone, message });
 
-  // Point the pre-opened tab at the final WhatsApp deep-link URL.
   if (win && !win.closed) {
-    try {
-      win.location.href = waUrl;
-    } catch {
-      window.open(waUrl, '_blank');
-    }
+    try { win.location.href = waUrl; }
+    catch { window.open(waUrl, '_blank'); }
   } else {
     window.open(waUrl, '_blank');
   }
@@ -286,28 +161,20 @@ export async function shareOnWhatsApp(customer, invoice, businessSettings = {}) 
   return { message, waUrl, pdfUrl, liveLinkUrl };
 }
 
-/**
- * Build a wa.me deep link. Falls back to the generic WhatsApp send URL when
- * the phone number is missing so the message still opens.
- */
 function buildWaUrl({ phone, message }) {
-  // URLSearchParams uses browser-native UTF-8 encoding which correctly
-  // handles multi-byte characters (emoji, ₹, etc.) better than a manual
-  // encodeURIComponent call whose output can vary across JS engines.
-  const params = new URLSearchParams();
-  params.set('text', message);
-  const qs = params.toString();
-
+  // encodeURIComponent: spaces -> %20 (NOT +)
+  // URLSearchParams:   spaces -> + (WhatsApp treats this as literal +, garbling text)
+  const encoded = encodeURIComponent(message);
   return phone
-    ? `https://wa.me/${phone}?${qs}`
-    : `https://api.whatsapp.com/send?${qs}`;
+    ? 'https://wa.me/' + phone + '?text=' + encoded
+    : 'https://api.whatsapp.com/send?text=' + encoded;
 }
 
 export const invoiceShareService = {
   ensureInvoicePdfUrl,
   buildWhatsAppInvoiceMessage,
   shareOnWhatsApp,
-  resolveCustomer
+  resolveCustomer,
 };
 
 export default invoiceShareService;
