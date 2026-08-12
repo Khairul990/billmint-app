@@ -1,4 +1,4 @@
-﻿// src/services/invoiceShareService.js  [v3.0 - emoji via codePoint, encodeURIComponent URL]
+// src/services/invoiceShareService.js  [v3.0 - emoji via codePoint, encodeURIComponent URL]
 
 /**
  * Key design decisions in v3.0:
@@ -78,44 +78,35 @@ export function buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, l
   const finalPdfUrl   = pdfUrl       || '';
   const finalLiveLink = liveLinkUrl  || '';
 
-  // ONLY String.fromCodePoint() - never literal emoji in this file
-  const WAVE     = String.fromCodePoint(0x1F44B); // wave hand
-  const PARTY    = String.fromCodePoint(0x1F389); // party popper
-  const RECEIPT  = String.fromCodePoint(0x1F9FE); // receipt
-  const MONEY    = String.fromCodePoint(0x1F4B0); // money bag
-  const CHECK    = String.fromCodePoint(0x2705);  // check mark
-  const RED_DOT  = String.fromCodePoint(0x1F534); // red circle
-  const CALENDAR = String.fromCodePoint(0x1F4C5); // calendar
-  const DOC      = String.fromCodePoint(0x1F4C4); // page
-  const LINK     = String.fromCodePoint(0x1F517); // link
-  const CHAT     = String.fromCodePoint(0x1F4AC); // speech bubble
+  const CHECK   = String.fromCodePoint(0x2705);  // check mark (BMP)
+  const WARNING = String.fromCodePoint(0x26A0);  // warning sign (BMP)
 
   const lines = [
-    WAVE + ' Hello ' + customerName + ',',
+    'Hello ' + customerName + ',',
     '',
-    'Thank you for your business! Your invoice is ready. ' + PARTY,
+    'Thank you for your business! Your invoice is ready.',
     '',
-    RECEIPT + ' Invoice #: ' + invoiceNo,
-    MONEY   + ' Total Amount: *' + grandTotal + '*',
-    CHECK   + ' Amount Paid: ' + amountPaid,
-    RED_DOT + ' Balance Due: *' + balanceDue + '*',
-    CALENDAR+ ' Due Date: ' + (dueDate || 'N/A'),
+    'Invoice #: ' + invoiceNo,
+    'Total Amount: *' + grandTotal + '*',
+    CHECK + ' Amount Paid: ' + amountPaid,
+    WARNING + ' Balance Due: *' + balanceDue + '*',
+    'Due Date: ' + (dueDate || 'N/A'),
     '',
   ];
 
   if (finalPdfUrl) {
-    lines.push(DOC + ' View/Download PDF:');
+    lines.push('View/Download PDF:');
     lines.push(finalPdfUrl);
     lines.push('');
   }
 
   if (finalLiveLink) {
-    lines.push(LINK + ' View Invoice & Pay Securely:');
+    lines.push('View Invoice & Pay Securely:');
     lines.push(finalLiveLink);
     lines.push('');
   }
 
-  lines.push('Need any help? Just reply to this message ' + CHAT);
+  lines.push('Need any help? Just reply to this message.');
   lines.push('');
   lines.push('Thank you,');
   lines.push('*' + businessName + '*');
