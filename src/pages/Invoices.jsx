@@ -36,7 +36,7 @@ import {
   generateInvoiceShareText 
 } from '../utils/shareUtils';
 import { invoiceEngine } from '../services/invoiceEngine';
-import { shareOnWhatsApp } from '../services/invoiceShareService';
+import { shareOnWhatsApp } from '../services/invoiceShareService2';
 import PullToRefresh from '../components/PullToRefresh';
 import { addNotification } from '../services/notificationsService';
 import PremiumEmptyState from '../components/PremiumEmptyState';

@@ -67,61 +67,53 @@ export function buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, l
   const regionalPrefs = invoice.regionalSettingsSnapshot || {};
   const symbol        = regionalPrefs.currency     || businessSettings?.currency     || '\u20B9';
   const numberFormat  = regionalPrefs.numberFormat || businessSettings?.numberFormat || 'Indian';
-  const grandTotal    = formatCurrency(invoice.grandTotal, symbol, numberFormat);
-  const amountPaid    = formatCurrency(invoice.amountPaid || 0, symbol, numberFormat);
-  const balanceDue    = formatCurrency(
-    Math.max(0, Number(invoice.grandTotal || 0) - Number(invoice.amountPaid || 0)),
-    symbol, numberFormat
-  );
+  const oldDueVal     = Number(invoice.totals?.oldDue || invoice.oldDue || 0);
+  const baseTotal     = Number(invoice.totals?.grandTotal || invoice.grandTotal || 0);
+  const finalTotal    = Number(invoice.totals?.totalDue || (baseTotal + oldDueVal));
+  const amountPaidVal = Number(invoice.amountPaid || invoice.totals?.amountPaid || 0);
+  const balanceDueVal = Math.max(0, finalTotal - amountPaidVal);
+
+  const baseTotalStr  = formatCurrency(baseTotal, symbol, numberFormat);
+  const oldDueStr     = formatCurrency(oldDueVal, symbol, numberFormat);
+  const finalTotalStr = formatCurrency(finalTotal, symbol, numberFormat);
+  const amountPaidStr = formatCurrency(amountPaidVal, symbol, numberFormat);
+  const balanceDueStr = formatCurrency(balanceDueVal, symbol, numberFormat);
+
   const businessName  = invoice.businessSnapshot?.businessName || businessSettings?.businessName || 'BillQyro';
   const dueDate       = invoice.dueDate || '';
-  const finalPdfUrl   = pdfUrl       || '';
-  const finalLiveLink = liveLinkUrl  || '';
 
-  // Using literal raw emoji characters (UTF-8) as they are often more resilient 
-  // than surrogate pairs constructed at runtime in some JS engine / native bridge handoffs
-  const WAVE     = '👋';
-  const PARTY    = '🎉';
-  const RECEIPT  = '🧾';
-  const MONEY    = '💰';
-  const CHECK    = '✅';
-  const RED_DOT  = '🔴';
-  const CALENDAR = '📅';
-  const DOC      = '📄';
-  const LINK     = '🔗';
-  const CHAT     = '💬';
+  let message = `👋 Hello ${customerName},
 
-  const lines = [
-    WAVE + ' Hello ' + customerName + ',',
-    '',
-    'Thank you for your business! Your invoice is ready. ' + PARTY,
-    '',
-    RECEIPT + ' Invoice #: ' + invoiceNo,
-    MONEY   + ' Total Amount: *' + grandTotal + '*',
-    CHECK   + ' Amount Paid: ' + amountPaid,
-    RED_DOT + ' Balance Due: *' + balanceDue + '*',
-    CALENDAR+ ' Due Date: ' + (dueDate || 'N/A'),
-    '',
-  ];
+Thank you for your business! Your invoice is ready. 🎉
 
-  if (finalPdfUrl) {
-    lines.push(DOC + ' View/Download PDF:');
-    lines.push(finalPdfUrl);
-    lines.push('');
+🧾 Invoice #: ${invoiceNo}`;
+
+  if (oldDueVal > 0) {
+    message += `\n🛒 Subtotal: ${baseTotalStr}`;
+    message += `\n⏳ Old Due: ${oldDueStr}`;
+    message += `\n💰 Grand Total: *${finalTotalStr}*`;
+  } else {
+    message += `\n💰 Total Amount: *${baseTotalStr}*`;
   }
 
-  if (finalLiveLink) {
-    lines.push(LINK + ' View Invoice & Pay Securely:');
-    lines.push(finalLiveLink);
-    lines.push('');
+  message += `\n✅ Amount Paid: ${amountPaidStr}
+🔴 Balance Due: *${balanceDueStr}*`;
+
+  if (dueDate) {
+    message += `\n📅 Due Date: ${dueDate}`;
   }
 
-  lines.push('Need any help? Just reply to this message ' + CHAT);
-  lines.push('');
-  lines.push('Thank you,');
-  lines.push('*' + businessName + '*');
+  if (pdfUrl) {
+    message += `\n\n📄 View/Download PDF:\n${pdfUrl}`;
+  }
 
-  return lines.join('\n');
+  if (liveLinkUrl) {
+    message += `\n\n🔗 View Invoice & Pay Securely:\n${liveLinkUrl}`;
+  }
+
+  message += `\n\nNeed any help? Just reply to this message 💬\n\nThank you,\n*${businessName}*`;
+
+  return message;
 }
 
 export async function shareOnWhatsApp(customer, invoice, businessSettings = {}) {
@@ -131,7 +123,15 @@ export async function shareOnWhatsApp(customer, invoice, businessSettings = {}) 
   const phone = cleanPhoneNumber(resolvedCustomer?.phone || '');
   const liveLinkUrl = buildPortalUrl(invoice);
 
-  const win = window.open('', '_blank');
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  // Popup blocker workaround is ONLY needed for Desktop. 
+  // Opening a new window in Capacitor mobile routes through the InAppBrowser plugin,
+  // which can mangle UTF-16 surrogate pairs (emojis) during intent URL parsing.
+  let win = null;
+  if (!isMobile) {
+    win = window.open('', '_blank');
+  }
 
   let pdfUrl = '';
   if (invoice.pdfUrl || invoice.invoicePdfUrl) {
@@ -152,11 +152,16 @@ export async function shareOnWhatsApp(customer, invoice, businessSettings = {}) 
   const message = buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, liveLinkUrl);
   const waUrl   = buildWaUrl({ phone, message });
 
-  if (win && !win.closed) {
-    try { win.location.href = waUrl; }
-    catch { window.open(waUrl, '_blank'); }
+  if (isMobile) {
+    // Direct navigation on the main webview triggers native intent without string corruption
+    window.location.href = waUrl;
   } else {
-    window.open(waUrl, '_blank');
+    if (win && !win.closed) {
+      try { win.location.href = waUrl; }
+      catch { window.open(waUrl, '_blank'); }
+    } else {
+      window.open(waUrl, '_blank');
+    }
   }
 
   return { message, waUrl, pdfUrl, liveLinkUrl };
@@ -167,7 +172,6 @@ function buildWaUrl({ phone, message }) {
   
   // For Capacitor / Mobile WebViews, direct deep link is often safer 
   // to avoid intermediary wa.me browser intent decoding bugs.
-  // Using direct whatsapp:// protocol bypasses the browser intent parsing that might mangle surrogate pairs.
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   
   if (isMobile) {
@@ -176,8 +180,10 @@ function buildWaUrl({ phone, message }) {
       : 'whatsapp://send?text=' + encoded;
   }
   
+  // Always use api.whatsapp.com directly to avoid wa.me URL redirect 
+  // corruption on some browser/OS combinations for surrogate pairs (emojis)
   return phone
-    ? 'https://wa.me/' + phone + '?text=' + encoded
+    ? 'https://api.whatsapp.com/send?phone=' + phone + '&text=' + encoded
     : 'https://api.whatsapp.com/send?text=' + encoded;
 }
 

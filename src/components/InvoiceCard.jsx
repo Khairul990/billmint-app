@@ -8,7 +8,7 @@ import {
   generateInvoiceShareText
 } from '../utils/shareUtils';
 import { invoiceEngine } from '../services/invoiceEngine';
-import { shareOnWhatsApp } from '../services/invoiceShareService';
+import { shareOnWhatsApp } from '../services/invoiceShareService2';
 import { isEducationCategory } from '../utils/categoryChecks';
 import { getPortalLabelByType } from '../config/businessPresets';
 // Button component not needed in this file; removed import.

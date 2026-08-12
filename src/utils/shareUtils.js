@@ -57,9 +57,17 @@ export function generateInvoiceShareText(invoice, currencySymbol = '₹', busine
 
   const businessName = businessPrefs?.businessName || 'Our Business';
   const invoiceNo = invoice.invoiceNumber || 'N/A';
-  const grandTotal = formatCurrency(invoice.grandTotal, activeSymbol, activeNumberFormat);
-  const amountPaid = formatCurrency(invoice.amountPaid || 0, activeSymbol, activeNumberFormat);
-  const balanceDue = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), activeSymbol, activeNumberFormat);
+  const oldDueVal     = Number(invoice.totals?.oldDue || invoice.oldDue || 0);
+  const baseTotal     = Number(invoice.totals?.grandTotal || invoice.grandTotal || 0);
+  const finalTotal    = Number(invoice.totals?.totalDue || (baseTotal + oldDueVal));
+  const amountPaidVal = Number(invoice.amountPaid || invoice.totals?.amountPaid || 0);
+  const balanceDueVal = Math.max(0, finalTotal - amountPaidVal);
+
+  const baseTotalStr  = formatCurrency(baseTotal, activeSymbol, activeNumberFormat);
+  const oldDueStr     = formatCurrency(oldDueVal, activeSymbol, activeNumberFormat);
+  const finalTotalStr = formatCurrency(finalTotal, activeSymbol, activeNumberFormat);
+  const amountPaidStr = formatCurrency(amountPaidVal, activeSymbol, activeNumberFormat);
+  const balanceDueStr = formatCurrency(balanceDueVal, activeSymbol, activeNumberFormat);
   
   // Construct the secure live link using the canonical portal URL logic
   const liveLink = buildPortalUrl(invoice);
@@ -68,10 +76,18 @@ export function generateInvoiceShareText(invoice, currencySymbol = '₹', busine
 
 Thank you for your business! Your invoice is ready. 🎉
 
-🧾 Invoice #: ${invoiceNo}
-💰 Total: *${grandTotal}*
-✅ Paid: ${amountPaid}
-🔴 Balance Due: *${balanceDue}*`;
+🧾 Invoice #: ${invoiceNo}`;
+
+  if (oldDueVal > 0) {
+    message += `\n🛒 Subtotal: ${baseTotalStr}`;
+    message += `\n⏳ Old Due: ${oldDueStr}`;
+    message += `\n💰 Grand Total: *${finalTotalStr}*`;
+  } else {
+    message += `\n💰 Total: *${baseTotalStr}*`;
+  }
+
+  message += `\n✅ Paid: ${amountPaidStr}
+🔴 Balance Due: *${balanceDueStr}*`;
 
   if (invoice.dueDate) {
     message += `\n📅 Due Date: ${invoice.dueDate}`;
