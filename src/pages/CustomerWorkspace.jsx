@@ -264,7 +264,7 @@ export default function CustomerWorkspace({ customerId }) {
         <AnimatePresence mode="wait">
           {/* INVOICE CENTER */}
           {activeTab === 'dashboard' && (
-            <motion.div key="invoices" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-6">
+            <motion.div key="invoices" variants={pageVariants} initial="initial" animate="animate" exit="out" className="space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-theme-card border border-theme-border-soft p-4 rounded-2xl">
                 <h3 className="text-lg font-black flex items-center gap-2"><DynamicInvoiceIcon className="w-5 h-5 text-theme-accent" /> All {invoiceLabel}s</h3>
                 <div className="relative w-full sm:w-72">
@@ -414,7 +414,7 @@ export default function CustomerWorkspace({ customerId }) {
 
           {/* PAYMENT HISTORY */}
           {activeTab === 'payments' && (
-            <motion.div key="payments" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-6">
+            <motion.div key="payments" variants={pageVariants} initial="initial" animate="animate" exit="out" className="space-y-6">
                <div className="bg-theme-card border border-theme-border-soft rounded-3xl shadow-xl overflow-hidden">
                 <div className="p-6 border-b border-theme-border-soft">
                   <h3 className="text-lg font-black flex items-center gap-2"><CreditCard className="w-5 h-5 text-theme-accent" /> Payment History</h3>
@@ -497,7 +497,7 @@ export default function CustomerWorkspace({ customerId }) {
 
           {/* PROFILE & BUSINESS */}
           {activeTab === 'profile' && (
-            <motion.div key="profile" variants={pageVariants} initial="initial" animate="in" exit="out" className="grid md:grid-cols-2 gap-6">
+            <motion.div key="profile" variants={pageVariants} initial="initial" animate="animate" exit="out" className="grid md:grid-cols-2 gap-6">
               
               {/* Business Profile */}
               <div className="bg-theme-card border border-theme-border-soft rounded-3xl p-6 shadow-lg">

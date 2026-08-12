@@ -40,7 +40,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
                 <button
                   onClick={() => {
                     triggerLightHaptic();
-                    onQuickBillOpen();
+                    setCurrentTab('create-invoice');
                   }}
                   className="w-14 h-14 rounded-full bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-lg shadow-theme-glow border-[3px] border-theme-border-soft dark:border-slate-800 active:scale-90 hover:scale-105 transition-all duration-200 hover:shadow-xl"
                 >

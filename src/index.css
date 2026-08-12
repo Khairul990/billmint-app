@@ -7,6 +7,15 @@
 @keyframes fadeArea { from { opacity: 0; } to { opacity: 1; } }
 @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
+/* Mobile Native App Scale Factor */
+@media (max-width: 640px) {
+  html {
+    /* Scale down 1rem from 16px to 14.5px on phones */
+    /* This makes tailwind utilities proportionally smaller, fitting more content in and feeling native */
+    font-size: 14.5px !important;
+  }
+}
+
 /* Premium Shimmer Effect */
 @keyframes premium-shimmer {
   0% { transform: translateX(-150%) skewX(-20deg); }
