@@ -59,6 +59,9 @@ export default defineConfig(({ mode }) => ({
       }
     })
   ],
+  server: {
+    host: '0.0.0.0', // Listen on all local IPs so it's accessible from phone
+  },
   build: {
     sourcemap: false,
     cssCodeSplit: true,

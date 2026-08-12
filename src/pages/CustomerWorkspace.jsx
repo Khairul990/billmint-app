@@ -278,9 +278,9 @@ export default function CustomerWorkspace({ customerId }) {
                   />
                 </div>
               </div>
-
               <div className="bg-theme-card border border-theme-border-soft rounded-3xl shadow-xl overflow-hidden">
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-left text-sm">
                     <thead className="bg-theme-surface text-theme-muted text-xs uppercase font-bold">
                       <tr>
@@ -345,7 +345,6 @@ export default function CustomerWorkspace({ customerId }) {
                                 </button>
                                 <button 
                                   onClick={() => {
-                                      // Print logic uses the view URL in a hidden iframe or just opens it and calls print
                                       window.open(`/invoice/${inv.publicToken}?print=true`, '_blank');
                                   }}
                                   className="hidden sm:inline-flex items-center justify-center p-2 bg-theme-surface hover:bg-theme-accent/10 border border-theme-border-soft hover:border-theme-accent/30 text-theme-primary hover:text-theme-accent rounded-lg transition-colors tooltip-trigger"
@@ -361,6 +360,54 @@ export default function CustomerWorkspace({ customerId }) {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden flex flex-col divide-y divide-theme-border-soft">
+                  {filteredInvoices.length === 0 ? (
+                    <div className="p-12 text-center flex flex-col items-center text-theme-muted">
+                      <DynamicInvoiceIcon className="w-10 h-10 mb-3 opacity-50" />
+                      <p className="font-bold text-base text-theme-primary">No {invoiceLabel.toLowerCase()}s found</p>
+                    </div>
+                  ) : (
+                    filteredInvoices.map((inv) => (
+                      <div key={inv.id} className="p-4 flex flex-col gap-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="font-bold font-mono text-theme-primary">{inv.invoiceNumber}</span>
+                            <div className="text-xs text-theme-muted mt-0.5">{new Date(inv.date).toLocaleDateString()}</div>
+                          </div>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                            inv.paymentStatus === 'Paid' ? 'bg-theme-success/10 text-theme-success border border-theme-success/20' :
+                            inv.paymentStatus === 'Partial' ? 'bg-theme-warning/10 text-theme-warning border border-theme-warning/20' :
+                            'bg-theme-danger/10 text-theme-danger border border-theme-danger/20'
+                          }`}>
+                            {inv.paymentStatus || 'Unpaid'}
+                          </span>
+                        </div>
+                        
+                        <div className="flex justify-between items-end">
+                          <div>
+                            <div className="text-xs text-theme-muted uppercase font-bold tracking-wider mb-0.5">Amount</div>
+                            <div className="text-lg font-black text-theme-primary">
+                              {formatCurrency(Number(inv.totals?.totalDue || ((inv.totals?.grandTotal || inv.grandTotal || 0) + (inv.totals?.oldDue || inv.oldDue || 0))), activeSymbol)}
+                            </div>
+                            {inv.paymentStatus !== 'Paid' && inv.dueDate && (
+                              <div className="text-[10px] text-theme-danger font-bold mt-1">Due: {new Date(inv.dueDate).toLocaleDateString()}</div>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <a href={`/invoice/${inv.publicToken}`} target="_blank" rel="noreferrer" className="p-2.5 bg-theme-surface rounded-xl text-theme-primary hover:text-theme-accent border border-theme-border-soft transition-colors">
+                              <Eye className="w-4 h-4" />
+                            </a>
+                            <button onClick={() => downloadInvoicePDF(inv, inv.businessSnapshot, false)} className="p-2.5 bg-theme-surface rounded-xl text-theme-primary hover:text-theme-accent border border-theme-border-soft transition-colors">
+                              <Download className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </motion.div>
           )}
@@ -373,7 +420,7 @@ export default function CustomerWorkspace({ customerId }) {
                   <h3 className="text-lg font-black flex items-center gap-2"><CreditCard className="w-5 h-5 text-theme-accent" /> Payment History</h3>
                   <p className="text-xs text-theme-muted mt-1">A record of your payments derived from settled invoices.</p>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-left text-sm">
                     <thead className="bg-theme-surface text-theme-muted text-xs uppercase font-bold">
                       <tr>
@@ -401,16 +448,48 @@ export default function CustomerWorkspace({ customerId }) {
                             <td className="px-6 py-4 font-black text-theme-success">+{formatCurrency(pay.amount, activeSymbol)}</td>
                             <td className="px-6 py-4 text-theme-muted">{pay.method}</td>
                             <td className="px-6 py-4">
-                              <span className="inline-flex items-center px-2 py-1 rounded bg-theme-success/10 text-theme-success border border-theme-success/20 text-[10px] font-black uppercase tracking-wider">
-                                {pay.status}
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-theme-success/10 text-theme-success border border-theme-success/20">
+                                Completed
                               </span>
                             </td>
-                            <td className="px-6 py-4 font-mono text-xs">{pay.reference}</td>
+                            <td className="px-6 py-4 text-theme-muted font-mono">{pay.reference || '-'}</td>
                           </tr>
                         ))
                       )}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Mobile Card View for Payments */}
+                <div className="md:hidden flex flex-col divide-y divide-theme-border-soft">
+                  {payments.length === 0 ? (
+                    <div className="p-12 text-center flex flex-col items-center text-theme-muted">
+                      <CreditCard className="w-10 h-10 mb-3 opacity-50" />
+                      <p className="font-bold text-base text-theme-primary">No payments found</p>
+                    </div>
+                  ) : (
+                    payments.map((pay) => (
+                      <div key={pay.id} className="p-4 flex flex-col gap-2">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="font-bold text-theme-primary">{pay.method || 'Payment'}</span>
+                            <div className="text-xs text-theme-muted">{new Date(pay.date).toLocaleDateString()}</div>
+                          </div>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-theme-success/10 text-theme-success border border-theme-success/20">
+                            Completed
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-end mt-1">
+                          <div className="text-[10px] text-theme-muted font-mono max-w-[150px] truncate">
+                            Ref: {pay.reference || 'N/A'}
+                          </div>
+                          <div className="text-lg font-black text-theme-success">
+                            +{formatCurrency(pay.amount, activeSymbol)}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </motion.div>
