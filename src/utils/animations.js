@@ -11,6 +11,18 @@ export const springGentle = { type: 'spring', stiffness: 200, damping: 30 };
 // Page transition variants
 export const pageVariants = {
   initial: { opacity: 1, y: 15, scale: 0.98, filter: 'blur(4px)' },
+  in: { 
+    opacity: 1, 
+    y: 0,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: { 
+      duration: 0.4, 
+      ease: easePremium,
+      when: 'beforeChildren',
+      staggerChildren: 0.05
+    }
+  },
   animate: { 
     opacity: 1, 
     y: 0,
