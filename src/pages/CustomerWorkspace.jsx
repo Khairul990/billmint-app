@@ -307,7 +307,12 @@ export default function CustomerWorkspace({ customerId }) {
                           <tr key={inv.id} className="hover:bg-theme-surface transition-colors group">
                             <td className="px-6 py-4 font-bold font-mono">{inv.invoiceNumber}</td>
                             <td className="px-6 py-4 text-theme-muted">{new Date(inv.date).toLocaleDateString()}</td>
-                            <td className="px-6 py-4 font-black">{formatCurrency(inv.grandTotal, activeSymbol)}</td>
+                            <td className="px-6 py-4 font-black">
+                              {formatCurrency(
+                                Number(inv.totals?.totalDue || ((inv.totals?.grandTotal || inv.grandTotal || 0) + (inv.totals?.oldDue || inv.oldDue || 0))), 
+                                activeSymbol
+                              )}
+                            </td>
                             <td className="px-6 py-4">
                               <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${
                                 inv.paymentStatus === 'Paid' ? 'bg-theme-success/10 text-theme-success border border-theme-success/20' :
