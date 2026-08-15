@@ -1,0 +1,4247 @@
+{
+  "groups": [
+    {
+      "id": "sys",
+      "name": "Core System",
+      "cols": 2
+    },
+    {
+      "id": "dom",
+      "name": "Business Domains",
+      "cols": 4
+    },
+    {
+      "id": "eng",
+      "name": "Engines & Services",
+      "cols": 6
+    },
+    {
+      "id": "pag",
+      "name": "Pages & Routes",
+      "cols": 5
+    },
+    {
+      "id": "com",
+      "name": "UI Components",
+      "cols": 8
+    },
+    {
+      "id": "ctx",
+      "name": "Contexts & State",
+      "cols": 4
+    },
+    {
+      "id": "hok",
+      "name": "Hooks",
+      "cols": 4
+    },
+    {
+      "id": "utl",
+      "name": "Utilities & Config",
+      "cols": 4
+    },
+    {
+      "id": "sto",
+      "name": "Data Stores",
+      "cols": 4
+    }
+  ],
+  "nodes": [
+    {
+      "id": "billqyro",
+      "label": "BillQyro",
+      "type": "system",
+      "group": "sys",
+      "icon": "map",
+      "description": "Core Application"
+    },
+    {
+      "id": "engine_activityengine",
+      "label": "activityEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "activityEngine.js - Size: 1.7 KB",
+      "file": "src/services/activityEngine.js"
+    },
+    {
+      "id": "engine_adminengine",
+      "label": "adminEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "adminEngine.js - Size: 8.9 KB",
+      "file": "src/services/adminEngine.js"
+    },
+    {
+      "id": "engine_analyticsengine",
+      "label": "analyticsEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "analyticsEngine.js - Size: 2.2 KB",
+      "file": "src/services/analyticsEngine.js"
+    },
+    {
+      "id": "engine_appointmentengine",
+      "label": "appointmentEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "appointmentEngine.js - Size: 0.2 KB",
+      "file": "src/services/appointmentEngine.js"
+    },
+    {
+      "id": "engine_auditengine",
+      "label": "auditEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "auditEngine.js - Size: 1.7 KB",
+      "file": "src/services/auditEngine.js"
+    },
+    {
+      "id": "engine_authengine",
+      "label": "authEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "authEngine.js - Size: 2.5 KB",
+      "file": "src/services/authEngine.js"
+    },
+    {
+      "id": "engine_automationengine",
+      "label": "automationEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "automationEngine.js - Size: 3.2 KB",
+      "file": "src/services/automationEngine.js"
+    },
+    {
+      "id": "engine_backupengine",
+      "label": "backupEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "backupEngine.js - Size: 3.6 KB",
+      "file": "src/services/backupEngine.js"
+    },
+    {
+      "id": "engine_bankengine",
+      "label": "bankEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "bankEngine.js - Size: 26.9 KB",
+      "file": "src/services/bankEngine.js"
+    },
+    {
+      "id": "engine_cloudfunctions",
+      "label": "cloudFunctions.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "cloudFunctions.js - Size: 2.1 KB",
+      "file": "src/services/cloudFunctions.js"
+    },
+    {
+      "id": "engine_attachmentengine",
+      "label": "attachmentEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "communication/attachmentEngine.js - Size: 7.3 KB",
+      "file": "src/services\\communication/communication/attachmentEngine.js"
+    },
+    {
+      "id": "engine_communicationengine",
+      "label": "communicationEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "communication/communicationEngine.js - Size: 4.6 KB",
+      "file": "src/services\\communication/communication/communicationEngine.js"
+    },
+    {
+      "id": "engine_messagecomposer",
+      "label": "messageComposer.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "communication/messageComposer.js - Size: 1.7 KB",
+      "file": "src/services\\communication/communication/messageComposer.js"
+    },
+    {
+      "id": "engine_messagetemplateengine",
+      "label": "messageTemplateEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "communication/messageTemplateEngine.js - Size: 4.8 KB",
+      "file": "src/services\\communication/communication/messageTemplateEngine.js"
+    },
+    {
+      "id": "engine_whatsappshareadapter",
+      "label": "whatsappShareAdapter.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "communication/whatsappShareAdapter.js - Size: 6.4 KB",
+      "file": "src/services\\communication/communication/whatsappShareAdapter.js"
+    },
+    {
+      "id": "engine_customerengine",
+      "label": "customerEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "customerEngine.js - Size: 2.2 KB",
+      "file": "src/services/customerEngine.js"
+    },
+    {
+      "id": "engine_dbengine",
+      "label": "dbEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "dbEngine.js - Size: 135.8 KB",
+      "file": "src/services/dbEngine.js"
+    },
+    {
+      "id": "engine_demogenerator",
+      "label": "demoGenerator.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "demoGenerator.js - Size: 4.5 KB",
+      "file": "src/services/demoGenerator.js"
+    },
+    {
+      "id": "engine_empireagent",
+      "label": "empireAgent.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "empireAgent.js - Size: 2.0 KB",
+      "file": "src/services/empireAgent.js"
+    },
+    {
+      "id": "engine_expenseengine",
+      "label": "expenseEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "expenseEngine.js - Size: 1.7 KB",
+      "file": "src/services/expenseEngine.js"
+    },
+    {
+      "id": "engine_featurecontrolengine",
+      "label": "featureControlEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "featureControlEngine.js - Size: 7.2 KB",
+      "file": "src/services/featureControlEngine.js"
+    },
+    {
+      "id": "engine_featureregistry",
+      "label": "featureRegistry.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "featureRegistry.js - Size: 12.5 KB",
+      "file": "src/services/featureRegistry.js"
+    },
+    {
+      "id": "engine_firebaseconfig",
+      "label": "firebaseConfig.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "firebaseConfig.js - Size: 2.3 KB",
+      "file": "src/services/firebaseConfig.js"
+    },
+    {
+      "id": "engine_invoiceengine",
+      "label": "invoiceEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "invoiceEngine.js - Size: 9.0 KB",
+      "file": "src/services/invoiceEngine.js"
+    },
+    {
+      "id": "engine_invoicenumberservice",
+      "label": "invoiceNumberService.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "invoiceNumberService.js - Size: 2.1 KB",
+      "file": "src/services/invoiceNumberService.js"
+    },
+    {
+      "id": "engine_invoiceshareservice",
+      "label": "invoiceShareService.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "invoiceShareService.js - Size: 0.0 KB",
+      "file": "src/services/invoiceShareService.js"
+    },
+    {
+      "id": "engine_invoiceshareservice2",
+      "label": "invoiceShareService2.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "invoiceShareService2.js - Size: 8.0 KB",
+      "file": "src/services/invoiceShareService2.js"
+    },
+    {
+      "id": "engine_localdb",
+      "label": "localDb.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "localDb.js - Size: 6.2 KB",
+      "file": "src/services/localDb.js"
+    },
+    {
+      "id": "engine_migrationengine",
+      "label": "migrationEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "migrationEngine.js - Size: 1.7 KB",
+      "file": "src/services/migrationEngine.js"
+    },
+    {
+      "id": "engine_notificationengine",
+      "label": "notificationEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "notificationEngine.js - Size: 3.9 KB",
+      "file": "src/services/notificationEngine.js"
+    },
+    {
+      "id": "engine_notificationsservice",
+      "label": "notificationsService.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "notificationsService.js - Size: 1.4 KB",
+      "file": "src/services/notificationsService.js"
+    },
+    {
+      "id": "engine_offlineengine",
+      "label": "offlineEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "offlineEngine.js - Size: 1.9 KB",
+      "file": "src/services/offlineEngine.js"
+    },
+    {
+      "id": "engine_orderengine",
+      "label": "orderEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "orderEngine.js - Size: 0.1 KB",
+      "file": "src/services/orderEngine.js"
+    },
+    {
+      "id": "engine_paymentengine",
+      "label": "paymentEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "paymentEngine.js - Size: 10.2 KB",
+      "file": "src/services/paymentEngine.js"
+    },
+    {
+      "id": "engine_paymentlinkservice",
+      "label": "paymentLinkService.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "paymentLinkService.js - Size: 2.0 KB",
+      "file": "src/services/paymentLinkService.js"
+    },
+    {
+      "id": "engine_pdfengine",
+      "label": "pdfEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "pdfEngine.js - Size: 2.0 KB",
+      "file": "src/services/pdfEngine.js"
+    },
+    {
+      "id": "engine_platformadminservice",
+      "label": "platformAdminService.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "platformAdminService.js - Size: 9.8 KB",
+      "file": "src/services/platformAdminService.js"
+    },
+    {
+      "id": "engine_platformrevenueservice",
+      "label": "platformRevenueService.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "platformRevenueService.js - Size: 13.9 KB",
+      "file": "src/services/platformRevenueService.js"
+    },
+    {
+      "id": "engine_portalengine",
+      "label": "portalEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "portalEngine.js - Size: 2.5 KB",
+      "file": "src/services/portalEngine.js"
+    },
+    {
+      "id": "engine_productengine",
+      "label": "productEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "productEngine.js - Size: 2.1 KB",
+      "file": "src/services/productEngine.js"
+    },
+    {
+      "id": "engine_reportengine",
+      "label": "reportEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "reportEngine.js - Size: 2.8 KB",
+      "file": "src/services/reportEngine.js"
+    },
+    {
+      "id": "engine_roleengine",
+      "label": "roleEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "roleEngine.js - Size: 2.0 KB",
+      "file": "src/services/roleEngine.js"
+    },
+    {
+      "id": "engine_screenshotanalysisservice",
+      "label": "screenshotAnalysisService.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "screenshotAnalysisService.js - Size: 6.5 KB",
+      "file": "src/services/screenshotAnalysisService.js"
+    },
+    {
+      "id": "engine_searchengine",
+      "label": "searchEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "searchEngine.js - Size: 2.0 KB",
+      "file": "src/services/searchEngine.js"
+    },
+    {
+      "id": "engine_securityengine",
+      "label": "securityEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "securityEngine.js - Size: 3.9 KB",
+      "file": "src/services/securityEngine.js"
+    },
+    {
+      "id": "engine_settingsengine",
+      "label": "settingsEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "settingsEngine.js - Size: 4.2 KB",
+      "file": "src/services/settingsEngine.js"
+    },
+    {
+      "id": "engine_staffengine",
+      "label": "staffEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "staffEngine.js - Size: 1.6 KB",
+      "file": "src/services/staffEngine.js"
+    },
+    {
+      "id": "engine_storageengine",
+      "label": "storageEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "storageEngine.js - Size: 2.1 KB",
+      "file": "src/services/storageEngine.js"
+    },
+    {
+      "id": "engine_subscriptionengine",
+      "label": "subscriptionEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "subscriptionEngine.js - Size: 4.6 KB",
+      "file": "src/services/subscriptionEngine.js"
+    },
+    {
+      "id": "engine_supportengine",
+      "label": "supportEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "supportEngine.js - Size: 0.9 KB",
+      "file": "src/services/supportEngine.js"
+    },
+    {
+      "id": "engine_syncengine",
+      "label": "syncEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "syncEngine.js - Size: 0.1 KB",
+      "file": "src/services/syncEngine.js"
+    },
+    {
+      "id": "engine_syncworker",
+      "label": "syncWorker.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "syncWorker.js - Size: 0.6 KB",
+      "file": "src/services/syncWorker.js"
+    },
+    {
+      "id": "engine_templateengine",
+      "label": "TemplateEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "TemplateEngine.js - Size: 13.2 KB",
+      "file": "src/services/TemplateEngine.js"
+    },
+    {
+      "id": "engine_themeengine",
+      "label": "themeEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "themeEngine.js - Size: 5.1 KB",
+      "file": "src/services/themeEngine.js"
+    },
+    {
+      "id": "engine_verificationcodeservice",
+      "label": "verificationCodeService.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "verificationCodeService.js - Size: 1.1 KB",
+      "file": "src/services/verificationCodeService.js"
+    },
+    {
+      "id": "engine_workspaceengine",
+      "label": "workspaceEngine.js",
+      "type": "engine",
+      "group": "eng",
+      "icon": "settings",
+      "description": "workspaceEngine.js - Size: 2.6 KB",
+      "file": "src/services/workspaceEngine.js"
+    },
+    {
+      "id": "page_admindashboard",
+      "label": "AdminDashboard.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/AdminDashboard.jsx - Size: 23.0 KB",
+      "file": "src/pages\\admin/admin/AdminDashboard.jsx"
+    },
+    {
+      "id": "page_adminlayout",
+      "label": "AdminLayout.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/AdminLayout.jsx - Size: 10.1 KB",
+      "file": "src/pages\\admin/admin/AdminLayout.jsx"
+    },
+    {
+      "id": "page_adminpanel",
+      "label": "AdminPanel.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/AdminPanel.jsx - Size: 2.7 KB",
+      "file": "src/pages\\admin/admin/AdminPanel.jsx"
+    },
+    {
+      "id": "page_adminpinlogin",
+      "label": "AdminPINLogin.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/AdminPINLogin.jsx - Size: 7.2 KB",
+      "file": "src/pages\\admin/admin/AdminPINLogin.jsx"
+    },
+    {
+      "id": "page_analyticscenter",
+      "label": "AnalyticsCenter.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/AnalyticsCenter.jsx - Size: 8.3 KB",
+      "file": "src/pages\\admin/admin/AnalyticsCenter.jsx"
+    },
+    {
+      "id": "page_announcementmanager",
+      "label": "AnnouncementManager.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/AnnouncementManager.jsx - Size: 9.3 KB",
+      "file": "src/pages\\admin/admin/AnnouncementManager.jsx"
+    },
+    {
+      "id": "page_apphealthcenter",
+      "label": "AppHealthCenter.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/AppHealthCenter.jsx - Size: 4.1 KB",
+      "file": "src/pages\\admin/admin/AppHealthCenter.jsx"
+    },
+    {
+      "id": "page_architecturedata",
+      "label": "ArchitectureData.js",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/ArchitectureData.js - Size: 3.5 KB",
+      "file": "src/pages\\admin/admin/ArchitectureData.js"
+    },
+    {
+      "id": "page_architecturemap",
+      "label": "ArchitectureMap.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/ArchitectureMap.jsx - Size: 5.2 KB",
+      "file": "src/pages\\admin/admin/ArchitectureMap.jsx"
+    },
+    {
+      "id": "page_automationcenter",
+      "label": "AutomationCenter.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/AutomationCenter.jsx - Size: 6.4 KB",
+      "file": "src/pages\\admin/admin/AutomationCenter.jsx"
+    },
+    {
+      "id": "page_backupcenter",
+      "label": "BackupCenter.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/BackupCenter.jsx - Size: 2.3 KB",
+      "file": "src/pages\\admin/admin/BackupCenter.jsx"
+    },
+    {
+      "id": "page_changelogmanager",
+      "label": "ChangelogManager.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/ChangelogManager.jsx - Size: 7.2 KB",
+      "file": "src/pages\\admin/admin/ChangelogManager.jsx"
+    },
+    {
+      "id": "page_databasecenter",
+      "label": "DatabaseCenter.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/DatabaseCenter.jsx - Size: 2.8 KB",
+      "file": "src/pages\\admin/admin/DatabaseCenter.jsx"
+    },
+    {
+      "id": "page_featureswitchcenter",
+      "label": "FeatureSwitchCenter.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/FeatureSwitchCenter.jsx - Size: 3.8 KB",
+      "file": "src/pages\\admin/admin/FeatureSwitchCenter.jsx"
+    },
+    {
+      "id": "page_globalsettings",
+      "label": "GlobalSettings.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/GlobalSettings.jsx - Size: 18.6 KB",
+      "file": "src/pages\\admin/admin/GlobalSettings.jsx"
+    },
+    {
+      "id": "page_ownertestlab",
+      "label": "OwnerTestLab.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/OwnerTestLab.jsx - Size: 13.3 KB",
+      "file": "src/pages\\admin/admin/OwnerTestLab.jsx"
+    },
+    {
+      "id": "page_paymentproofcenter",
+      "label": "PaymentProofCenter.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/PaymentProofCenter.jsx - Size: 13.2 KB",
+      "file": "src/pages\\admin/admin/PaymentProofCenter.jsx"
+    },
+    {
+      "id": "page_premiumcontrolcenter",
+      "label": "PremiumControlCenter.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/PremiumControlCenter.jsx - Size: 20.8 KB",
+      "file": "src/pages\\admin/admin/PremiumControlCenter.jsx"
+    },
+    {
+      "id": "page_sandboxadmin",
+      "label": "SandboxAdmin.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/SandboxAdmin.jsx - Size: 4.6 KB",
+      "file": "src/pages\\admin/admin/SandboxAdmin.jsx"
+    },
+    {
+      "id": "page_securitycenter",
+      "label": "SecurityCenter.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/SecurityCenter.jsx - Size: 2.3 KB",
+      "file": "src/pages\\admin/admin/SecurityCenter.jsx"
+    },
+    {
+      "id": "page_subscriptionstudio",
+      "label": "SubscriptionStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/SubscriptionStudio.jsx - Size: 35.9 KB",
+      "file": "src/pages\\admin/admin/SubscriptionStudio.jsx"
+    },
+    {
+      "id": "page_supportcenter",
+      "label": "SupportCenter.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/SupportCenter.jsx - Size: 14.1 KB",
+      "file": "src/pages\\admin/admin/SupportCenter.jsx"
+    },
+    {
+      "id": "page_usermanager",
+      "label": "UserManager.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/UserManager.jsx - Size: 17.1 KB",
+      "file": "src/pages\\admin/admin/UserManager.jsx"
+    },
+    {
+      "id": "page_workspaceadmin",
+      "label": "WorkspaceAdmin.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "admin/WorkspaceAdmin.jsx - Size: 6.2 KB",
+      "file": "src/pages\\admin/admin/WorkspaceAdmin.jsx"
+    },
+    {
+      "id": "page_adminunlock",
+      "label": "AdminUnlock.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "AdminUnlock.jsx - Size: 4.4 KB",
+      "file": "src/pages/AdminUnlock.jsx"
+    },
+    {
+      "id": "page_appointments",
+      "label": "Appointments.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Appointments.jsx - Size: 19.7 KB",
+      "file": "src/pages/Appointments.jsx"
+    },
+    {
+      "id": "page_auditlogs",
+      "label": "AuditLogs.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "AuditLogs.jsx - Size: 13.0 KB",
+      "file": "src/pages/AuditLogs.jsx"
+    },
+    {
+      "id": "page_backuprestore",
+      "label": "BackupRestore.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "BackupRestore.jsx - Size: 27.5 KB",
+      "file": "src/pages/BackupRestore.jsx"
+    },
+    {
+      "id": "page_billingportal",
+      "label": "BillingPortal.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "BillingPortal.jsx - Size: 9.3 KB",
+      "file": "src/pages/BillingPortal.jsx"
+    },
+    {
+      "id": "page_clients",
+      "label": "Clients.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "business/Clients.jsx - Size: 12.0 KB",
+      "file": "src/pages\\business/business/Clients.jsx"
+    },
+    {
+      "id": "page_delivery",
+      "label": "Delivery.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "business/Delivery.jsx - Size: 13.9 KB",
+      "file": "src/pages\\business/business/Delivery.jsx"
+    },
+    {
+      "id": "page_designbook",
+      "label": "DesignBook.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "business/DesignBook.jsx - Size: 17.7 KB",
+      "file": "src/pages\\business/business/DesignBook.jsx"
+    },
+    {
+      "id": "page_devices",
+      "label": "Devices.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "business/Devices.jsx - Size: 13.9 KB",
+      "file": "src/pages\\business/business/Devices.jsx"
+    },
+    {
+      "id": "page_measurements",
+      "label": "Measurements.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "business/Measurements.jsx - Size: 15.2 KB",
+      "file": "src/pages\\business/business/Measurements.jsx"
+    },
+    {
+      "id": "page_patients",
+      "label": "Patients.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "business/Patients.jsx - Size: 12.6 KB",
+      "file": "src/pages\\business/business/Patients.jsx"
+    },
+    {
+      "id": "page_projects",
+      "label": "Projects.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "business/Projects.jsx - Size: 12.9 KB",
+      "file": "src/pages\\business/business/Projects.jsx"
+    },
+    {
+      "id": "page_servicejobs",
+      "label": "ServiceJobs.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "business/ServiceJobs.jsx - Size: 12.7 KB",
+      "file": "src/pages\\business/business/ServiceJobs.jsx"
+    },
+    {
+      "id": "page_students",
+      "label": "Students.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "business/Students.jsx - Size: 14.6 KB",
+      "file": "src/pages\\business/business/Students.jsx"
+    },
+    {
+      "id": "page_createinvoice",
+      "label": "CreateInvoice.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "CreateInvoice.jsx - Size: 40.0 KB",
+      "file": "src/pages/CreateInvoice.jsx"
+    },
+    {
+      "id": "page_createinvoice_backup",
+      "label": "CreateInvoice_Backup.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "CreateInvoice_Backup.jsx - Size: 0.8 KB",
+      "file": "src/pages/CreateInvoice_Backup.jsx"
+    },
+    {
+      "id": "page_customerportalconfig",
+      "label": "CustomerPortalConfig.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "CustomerPortalConfig.jsx - Size: 9.6 KB",
+      "file": "src/pages/CustomerPortalConfig.jsx"
+    },
+    {
+      "id": "page_customers",
+      "label": "Customers.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Customers.jsx - Size: 15.5 KB",
+      "file": "src/pages/Customers.jsx"
+    },
+    {
+      "id": "page_customerworkspace",
+      "label": "CustomerWorkspace.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "CustomerWorkspace.jsx - Size: 37.7 KB",
+      "file": "src/pages/CustomerWorkspace.jsx"
+    },
+    {
+      "id": "page_cashmanagement",
+      "label": "CashManagement.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "cybercafe/CashManagement.jsx - Size: 1.7 KB",
+      "file": "src/pages\\cybercafe/cybercafe/CashManagement.jsx"
+    },
+    {
+      "id": "page_customerregister",
+      "label": "CustomerRegister.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "cybercafe/CustomerRegister.jsx - Size: 1.9 KB",
+      "file": "src/pages\\cybercafe/cybercafe/CustomerRegister.jsx"
+    },
+    {
+      "id": "page_cyberdashboard",
+      "label": "CyberDashboard.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "cybercafe/CyberDashboard.jsx - Size: 1.7 KB",
+      "file": "src/pages\\cybercafe/cybercafe/CyberDashboard.jsx"
+    },
+    {
+      "id": "page_portalhub",
+      "label": "PortalHub.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "cybercafe/PortalHub.jsx - Size: 3.1 KB",
+      "file": "src/pages\\cybercafe/cybercafe/PortalHub.jsx"
+    },
+    {
+      "id": "page_quicktoolscenter",
+      "label": "QuickToolsCenter.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "cybercafe/QuickToolsCenter.jsx - Size: 2.2 KB",
+      "file": "src/pages\\cybercafe/cybercafe/QuickToolsCenter.jsx"
+    },
+    {
+      "id": "page_settingsstudiointegration",
+      "label": "SettingsStudioIntegration.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "cybercafe/SettingsStudioIntegration.jsx - Size: 6.5 KB",
+      "file": "src/pages\\cybercafe/cybercafe/SettingsStudioIntegration.jsx"
+    },
+    {
+      "id": "page_dashboard",
+      "label": "Dashboard.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Dashboard.jsx - Size: 104.0 KB",
+      "file": "src/pages/Dashboard.jsx"
+    },
+    {
+      "id": "page_datadeletion",
+      "label": "DataDeletion.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "DataDeletion.jsx - Size: 3.7 KB",
+      "file": "src/pages/DataDeletion.jsx"
+    },
+    {
+      "id": "page_demologin",
+      "label": "DemoLogin.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "DemoLogin.jsx - Size: 7.6 KB",
+      "file": "src/pages/DemoLogin.jsx"
+    },
+    {
+      "id": "page_designstudio",
+      "label": "DesignStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "DesignStudio.jsx - Size: 55.5 KB",
+      "file": "src/pages/DesignStudio.jsx"
+    },
+    {
+      "id": "page_dueledger",
+      "label": "DueLedger.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "DueLedger.jsx - Size: 19.9 KB",
+      "file": "src/pages/DueLedger.jsx"
+    },
+    {
+      "id": "page_estimates",
+      "label": "Estimates.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Estimates.jsx - Size: 20.0 KB",
+      "file": "src/pages/Estimates.jsx"
+    },
+    {
+      "id": "page_expenses",
+      "label": "Expenses.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Expenses.jsx - Size: 15.0 KB",
+      "file": "src/pages/Expenses.jsx"
+    },
+    {
+      "id": "page_guide",
+      "label": "Guide.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Guide.jsx - Size: 21.4 KB",
+      "file": "src/pages/Guide.jsx"
+    },
+    {
+      "id": "page_helpcenter",
+      "label": "HelpCenter.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "HelpCenter.jsx - Size: 22.8 KB",
+      "file": "src/pages/HelpCenter.jsx"
+    },
+    {
+      "id": "page_internalbank",
+      "label": "InternalBank.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "InternalBank.jsx - Size: 34.5 KB",
+      "file": "src/pages/InternalBank.jsx"
+    },
+    {
+      "id": "page_invoices",
+      "label": "Invoices.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Invoices.jsx - Size: 46.2 KB",
+      "file": "src/pages/Invoices.jsx"
+    },
+    {
+      "id": "page_landing",
+      "label": "Landing.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Landing.jsx - Size: 63.7 KB",
+      "file": "src/pages/Landing.jsx"
+    },
+    {
+      "id": "page_livelinktemplatestudio",
+      "label": "LiveLinkTemplateStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "LiveLinkTemplateStudio.jsx - Size: 39.8 KB",
+      "file": "src/pages/LiveLinkTemplateStudio.jsx"
+    },
+    {
+      "id": "page_login",
+      "label": "Login.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Login.jsx - Size: 53.0 KB",
+      "file": "src/pages/Login.jsx"
+    },
+    {
+      "id": "page_moremenu",
+      "label": "MoreMenu.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "MoreMenu.jsx - Size: 9.0 KB",
+      "file": "src/pages/MoreMenu.jsx"
+    },
+    {
+      "id": "page_businessdetailsform",
+      "label": "BusinessDetailsForm.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "onboarding/BusinessDetailsForm.jsx - Size: 8.3 KB",
+      "file": "src/pages\\onboarding/onboarding/BusinessDetailsForm.jsx"
+    },
+    {
+      "id": "page_countryselection",
+      "label": "CountrySelection.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "onboarding/CountrySelection.jsx - Size: 3.2 KB",
+      "file": "src/pages\\onboarding/onboarding/CountrySelection.jsx"
+    },
+    {
+      "id": "page_interactivetutorial",
+      "label": "InteractiveTutorial.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "onboarding/InteractiveTutorial.jsx - Size: 6.9 KB",
+      "file": "src/pages\\onboarding/onboarding/InteractiveTutorial.jsx"
+    },
+    {
+      "id": "page_onboardingwizard",
+      "label": "OnboardingWizard.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "onboarding/OnboardingWizard.jsx - Size: 34.1 KB",
+      "file": "src/pages\\onboarding/onboarding/OnboardingWizard.jsx"
+    },
+    {
+      "id": "page_paymentsetup",
+      "label": "PaymentSetup.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "onboarding/PaymentSetup.jsx - Size: 7.4 KB",
+      "file": "src/pages\\onboarding/onboarding/PaymentSetup.jsx"
+    },
+    {
+      "id": "page_templateselection",
+      "label": "TemplateSelection.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "onboarding/TemplateSelection.jsx - Size: 6.0 KB",
+      "file": "src/pages\\onboarding/onboarding/TemplateSelection.jsx"
+    },
+    {
+      "id": "page_welcomeboard",
+      "label": "WelcomeBoard.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "onboarding/WelcomeBoard.jsx - Size: 2.4 KB",
+      "file": "src/pages\\onboarding/onboarding/WelcomeBoard.jsx"
+    },
+    {
+      "id": "page_orders",
+      "label": "Orders.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Orders.jsx - Size: 23.0 KB",
+      "file": "src/pages/Orders.jsx"
+    },
+    {
+      "id": "page_paymentduescreen",
+      "label": "PaymentDueScreen.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "PaymentDueScreen.jsx - Size: 9.1 KB",
+      "file": "src/pages/PaymentDueScreen.jsx"
+    },
+    {
+      "id": "page_pdftemplatestudio",
+      "label": "PdfTemplateStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "PdfTemplateStudio.jsx - Size: 33.8 KB",
+      "file": "src/pages/PdfTemplateStudio.jsx"
+    },
+    {
+      "id": "page_pendingpayments",
+      "label": "PendingPayments.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "PendingPayments.jsx - Size: 12.1 KB",
+      "file": "src/pages/PendingPayments.jsx"
+    },
+    {
+      "id": "page_privacypolicy",
+      "label": "PrivacyPolicy.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "PrivacyPolicy.jsx - Size: 5.0 KB",
+      "file": "src/pages/PrivacyPolicy.jsx"
+    },
+    {
+      "id": "page_products",
+      "label": "Products.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Products.jsx - Size: 30.6 KB",
+      "file": "src/pages/Products.jsx"
+    },
+    {
+      "id": "page_publicinvoice",
+      "label": "PublicInvoice.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "PublicInvoice.jsx - Size: 75.5 KB",
+      "file": "src/pages/PublicInvoice.jsx"
+    },
+    {
+      "id": "page_refundpolicy",
+      "label": "RefundPolicy.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "RefundPolicy.jsx - Size: 3.4 KB",
+      "file": "src/pages/RefundPolicy.jsx"
+    },
+    {
+      "id": "page_reports",
+      "label": "Reports.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Reports.jsx - Size: 28.7 KB",
+      "file": "src/pages/Reports.jsx"
+    },
+    {
+      "id": "page_adminconsoletab",
+      "label": "AdminConsoleTab.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "settings/AdminConsoleTab.jsx - Size: 55.8 KB",
+      "file": "src/pages\\settings/settings/AdminConsoleTab.jsx"
+    },
+    {
+      "id": "page_businessprofiletab",
+      "label": "BusinessProfileTab.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "settings/BusinessProfileTab.jsx - Size: 72.2 KB",
+      "file": "src/pages\\settings/settings/BusinessProfileTab.jsx"
+    },
+    {
+      "id": "page_databackuptab",
+      "label": "DataBackupTab.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "settings/DataBackupTab.jsx - Size: 8.0 KB",
+      "file": "src/pages\\settings/settings/DataBackupTab.jsx"
+    },
+    {
+      "id": "page_settingssidebar",
+      "label": "SettingsSidebar.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "settings/SettingsSidebar.jsx - Size: 1.7 KB",
+      "file": "src/pages\\settings/settings/SettingsSidebar.jsx"
+    },
+    {
+      "id": "page_themestudiotab",
+      "label": "ThemeStudioTab.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "settings/ThemeStudioTab.jsx - Size: 29.8 KB",
+      "file": "src/pages\\settings/settings/ThemeStudioTab.jsx"
+    },
+    {
+      "id": "page_settingsstudiov2",
+      "label": "SettingsStudioV2.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "SettingsStudioV2.jsx - Size: 91.9 KB",
+      "file": "src/pages/SettingsStudioV2.jsx"
+    },
+    {
+      "id": "page_setupbilling",
+      "label": "SetupBilling.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "SetupBilling.jsx - Size: 41.7 KB",
+      "file": "src/pages/SetupBilling.jsx"
+    },
+    {
+      "id": "page_staffledger",
+      "label": "StaffLedger.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "StaffLedger.jsx - Size: 6.7 KB",
+      "file": "src/pages/StaffLedger.jsx"
+    },
+    {
+      "id": "page_studentportal",
+      "label": "StudentPortal.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "StudentPortal.jsx - Size: 12.4 KB",
+      "file": "src/pages/StudentPortal.jsx"
+    },
+    {
+      "id": "page_automationstudio",
+      "label": "AutomationStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/AutomationStudio.jsx - Size: 5.9 KB",
+      "file": "src/pages\\studios/studios/AutomationStudio.jsx"
+    },
+    {
+      "id": "page_backupstudio",
+      "label": "BackupStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/BackupStudio.jsx - Size: 8.3 KB",
+      "file": "src/pages\\studios/studios/BackupStudio.jsx"
+    },
+    {
+      "id": "page_businessstudio",
+      "label": "BusinessStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/BusinessStudio.jsx - Size: 11.6 KB",
+      "file": "src/pages\\studios/studios/BusinessStudio.jsx"
+    },
+    {
+      "id": "page_businesstemplatestudio",
+      "label": "BusinessTemplateStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/BusinessTemplateStudio.jsx - Size: 4.2 KB",
+      "file": "src/pages\\studios/studios/BusinessTemplateStudio.jsx"
+    },
+    {
+      "id": "page_dashboardstudio",
+      "label": "DashboardStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/DashboardStudio.jsx - Size: 4.9 KB",
+      "file": "src/pages\\studios/studios/DashboardStudio.jsx"
+    },
+    {
+      "id": "page_databasestudio",
+      "label": "DatabaseStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/DatabaseStudio.jsx - Size: 2.0 KB",
+      "file": "src/pages\\studios/studios/DatabaseStudio.jsx"
+    },
+    {
+      "id": "page_featurecontrolstudio",
+      "label": "FeatureControlStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/FeatureControlStudio.jsx - Size: 6.3 KB",
+      "file": "src/pages\\studios/studios/FeatureControlStudio.jsx"
+    },
+    {
+      "id": "page_formbuilder",
+      "label": "FormBuilder.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/FormBuilder.jsx - Size: 8.4 KB",
+      "file": "src/pages\\studios/studios/FormBuilder.jsx"
+    },
+    {
+      "id": "page_invoicestudio",
+      "label": "InvoiceStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/InvoiceStudio.jsx - Size: 41.5 KB",
+      "file": "src/pages\\studios/studios/InvoiceStudio.jsx"
+    },
+    {
+      "id": "page_localizationstudio",
+      "label": "LocalizationStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/LocalizationStudio.jsx - Size: 5.4 KB",
+      "file": "src/pages\\studios/studios/LocalizationStudio.jsx"
+    },
+    {
+      "id": "page_messagetemplatestudio",
+      "label": "MessageTemplateStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/MessageTemplateStudio.jsx - Size: 7.2 KB",
+      "file": "src/pages\\studios/studios/MessageTemplateStudio.jsx"
+    },
+    {
+      "id": "page_notificationstudio",
+      "label": "NotificationStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/NotificationStudio.jsx - Size: 6.6 KB",
+      "file": "src/pages\\studios/studios/NotificationStudio.jsx"
+    },
+    {
+      "id": "page_portalstudio",
+      "label": "PortalStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/PortalStudio.jsx - Size: 7.4 KB",
+      "file": "src/pages\\studios/studios/PortalStudio.jsx"
+    },
+    {
+      "id": "page_rolestudio",
+      "label": "RoleStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/RoleStudio.jsx - Size: 4.9 KB",
+      "file": "src/pages\\studios/studios/RoleStudio.jsx"
+    },
+    {
+      "id": "page_securitystudio",
+      "label": "SecurityStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/SecurityStudio.jsx - Size: 5.9 KB",
+      "file": "src/pages\\studios/studios/SecurityStudio.jsx"
+    },
+    {
+      "id": "page_studiolayout",
+      "label": "StudioLayout.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/StudioLayout.jsx - Size: 16.6 KB",
+      "file": "src/pages\\studios/studios/StudioLayout.jsx"
+    },
+    {
+      "id": "page_themestudio",
+      "label": "ThemeStudio.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "studios/ThemeStudio.jsx - Size: 6.9 KB",
+      "file": "src/pages\\studios/studios/ThemeStudio.jsx"
+    },
+    {
+      "id": "page_support",
+      "label": "Support.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "Support.jsx - Size: 25.4 KB",
+      "file": "src/pages/Support.jsx"
+    },
+    {
+      "id": "page_systemhealth",
+      "label": "SystemHealth.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "SystemHealth.jsx - Size: 14.7 KB",
+      "file": "src/pages/SystemHealth.jsx"
+    },
+    {
+      "id": "page_templatemarketplace",
+      "label": "TemplateMarketplace.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "TemplateMarketplace.jsx - Size: 23.3 KB",
+      "file": "src/pages/TemplateMarketplace.jsx"
+    },
+    {
+      "id": "page_termsofservice",
+      "label": "TermsOfService.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "TermsOfService.jsx - Size: 3.6 KB",
+      "file": "src/pages/TermsOfService.jsx"
+    },
+    {
+      "id": "page_workspacemanager",
+      "label": "WorkspaceManager.jsx",
+      "type": "page",
+      "group": "pag",
+      "icon": "layout",
+      "description": "WorkspaceManager.jsx - Size: 10.6 KB",
+      "file": "src/pages/WorkspaceManager.jsx"
+    },
+    {
+      "id": "component_activityfeed",
+      "label": "ActivityFeed.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ActivityFeed.jsx - Size: 3.0 KB",
+      "file": "src/components/ActivityFeed.jsx"
+    },
+    {
+      "id": "component_addcustomersheet",
+      "label": "AddCustomerSheet.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "AddCustomerSheet.jsx - Size: 4.3 KB",
+      "file": "src/components/AddCustomerSheet.jsx"
+    },
+    {
+      "id": "component_animatedbordertrail",
+      "label": "AnimatedBorderTrail.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "AnimatedBorderTrail.jsx - Size: 1.0 KB",
+      "file": "src/components/AnimatedBorderTrail.jsx"
+    },
+    {
+      "id": "component_animatedbutton",
+      "label": "AnimatedButton.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "AnimatedButton.jsx - Size: 2.3 KB",
+      "file": "src/components/AnimatedButton.jsx"
+    },
+    {
+      "id": "component_animatedpage",
+      "label": "AnimatedPage.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "AnimatedPage.jsx - Size: 0.4 KB",
+      "file": "src/components/AnimatedPage.jsx"
+    },
+    {
+      "id": "component_animatedthemetoggler",
+      "label": "AnimatedThemeToggler.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "AnimatedThemeToggler.jsx - Size: 8.1 KB",
+      "file": "src/components/AnimatedThemeToggler.jsx"
+    },
+    {
+      "id": "component_customnodes",
+      "label": "CustomNodes.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "architecture/CustomNodes.jsx - Size: 3.0 KB",
+      "file": "src/components\\architecture/architecture/CustomNodes.jsx"
+    },
+    {
+      "id": "component_bottomnav",
+      "label": "BottomNav.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "BottomNav.jsx - Size: 4.5 KB",
+      "file": "src/components/BottomNav.jsx"
+    },
+    {
+      "id": "component_bottomsheet",
+      "label": "BottomSheet.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "BottomSheet.jsx - Size: 2.7 KB",
+      "file": "src/components/BottomSheet.jsx"
+    },
+    {
+      "id": "component_categoryhints",
+      "label": "CategoryHints.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "CategoryHints.jsx - Size: 2.9 KB",
+      "file": "src/components/CategoryHints.jsx"
+    },
+    {
+      "id": "component_centeredmodal",
+      "label": "CenteredModal.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "CenteredModal.jsx - Size: 2.4 KB",
+      "file": "src/components/CenteredModal.jsx"
+    },
+    {
+      "id": "component_classicloader",
+      "label": "ClassicLoader.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ClassicLoader.jsx - Size: 1.1 KB",
+      "file": "src/components/ClassicLoader.jsx"
+    },
+    {
+      "id": "component_commandpalette",
+      "label": "CommandPalette.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "CommandPalette.jsx - Size: 5.9 KB",
+      "file": "src/components/CommandPalette.jsx"
+    },
+    {
+      "id": "component_whatsappcommunicationpreview",
+      "label": "WhatsAppCommunicationPreview.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "communication/WhatsAppCommunicationPreview.jsx - Size: 13.9 KB",
+      "file": "src/components\\communication/communication/WhatsAppCommunicationPreview.jsx"
+    },
+    {
+      "id": "component_whatsappsharepreview",
+      "label": "WhatsAppSharePreview.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "communication/WhatsAppSharePreview.jsx - Size: 5.5 KB",
+      "file": "src/components\\communication/communication/WhatsAppSharePreview.jsx"
+    },
+    {
+      "id": "component_customerledger",
+      "label": "CustomerLedger.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "customers/CustomerLedger.jsx - Size: 18.9 KB",
+      "file": "src/components\\customers/customers/CustomerLedger.jsx"
+    },
+    {
+      "id": "component_dynamicqrcode",
+      "label": "DynamicQRCode.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "DynamicQRCode.jsx - Size: 0.8 KB",
+      "file": "src/components/DynamicQRCode.jsx"
+    },
+    {
+      "id": "component_emptybills",
+      "label": "EmptyBills.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "EmptyStates/EmptyBills.jsx - Size: 0.4 KB",
+      "file": "src/components\\EmptyStates/EmptyStates/EmptyBills.jsx"
+    },
+    {
+      "id": "component_emptycustomers",
+      "label": "EmptyCustomers.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "EmptyStates/EmptyCustomers.jsx - Size: 0.3 KB",
+      "file": "src/components\\EmptyStates/EmptyStates/EmptyCustomers.jsx"
+    },
+    {
+      "id": "component_emptydueledger",
+      "label": "EmptyDueLedger.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "EmptyStates/EmptyDueLedger.jsx - Size: 0.3 KB",
+      "file": "src/components\\EmptyStates/EmptyStates/EmptyDueLedger.jsx"
+    },
+    {
+      "id": "component_emptyexpenses",
+      "label": "EmptyExpenses.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "EmptyStates/EmptyExpenses.jsx - Size: 0.6 KB",
+      "file": "src/components\\EmptyStates/EmptyStates/EmptyExpenses.jsx"
+    },
+    {
+      "id": "component_emptyinvoices",
+      "label": "EmptyInvoices.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "EmptyStates/EmptyInvoices.jsx - Size: 0.6 KB",
+      "file": "src/components\\EmptyStates/EmptyStates/EmptyInvoices.jsx"
+    },
+    {
+      "id": "component_emptypayments",
+      "label": "EmptyPayments.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "EmptyStates/EmptyPayments.jsx - Size: 0.6 KB",
+      "file": "src/components\\EmptyStates/EmptyStates/EmptyPayments.jsx"
+    },
+    {
+      "id": "component_emptyproducts",
+      "label": "EmptyProducts.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "EmptyStates/EmptyProducts.jsx - Size: 0.6 KB",
+      "file": "src/components\\EmptyStates/EmptyStates/EmptyProducts.jsx"
+    },
+    {
+      "id": "component_emptyreports",
+      "label": "EmptyReports.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "EmptyStates/EmptyReports.jsx - Size: 0.3 KB",
+      "file": "src/components\\EmptyStates/EmptyStates/EmptyReports.jsx"
+    },
+    {
+      "id": "component_herobackground",
+      "label": "HeroBackground.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "HeroBackground.jsx - Size: 7.5 KB",
+      "file": "src/components/HeroBackground.jsx"
+    },
+    {
+      "id": "component_aiinvoicescanner",
+      "label": "AIInvoiceScanner.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/AIInvoiceScanner.jsx - Size: 7.1 KB",
+      "file": "src/components\\invoice/invoice/AIInvoiceScanner.jsx"
+    },
+    {
+      "id": "component_itemssheetmodal",
+      "label": "ItemsSheetModal.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/ItemsSheetModal.jsx - Size: 22.5 KB",
+      "file": "src/components\\invoice/invoice/ItemsSheetModal.jsx"
+    },
+    {
+      "id": "component_liveinvoicepreview",
+      "label": "LiveInvoicePreview.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/LiveInvoicePreview.jsx - Size: 3.2 KB",
+      "file": "src/components\\invoice/invoice/LiveInvoicePreview.jsx"
+    },
+    {
+      "id": "component_pdffieldsmodal",
+      "label": "PdfFieldsModal.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/PdfFieldsModal.jsx - Size: 5.0 KB",
+      "file": "src/components\\invoice/invoice/PdfFieldsModal.jsx"
+    },
+    {
+      "id": "component_productsearch",
+      "label": "ProductSearch.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/ProductSearch.jsx - Size: 3.9 KB",
+      "file": "src/components\\invoice/invoice/ProductSearch.jsx"
+    },
+    {
+      "id": "component_quickbillform",
+      "label": "QuickBillForm.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/quick/QuickBillForm.jsx - Size: 13.3 KB",
+      "file": "src/components\\invoice\\quick/invoice/quick/QuickBillForm.jsx"
+    },
+    {
+      "id": "component_smartratemodal",
+      "label": "SmartRateModal.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/SmartRateModal.jsx - Size: 7.2 KB",
+      "file": "src/components\\invoice/invoice/SmartRateModal.jsx"
+    },
+    {
+      "id": "component_compactpaymentsection",
+      "label": "CompactPaymentSection.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/studio/CompactPaymentSection.jsx - Size: 8.9 KB",
+      "file": "src/components\\invoice\\studio/invoice/studio/CompactPaymentSection.jsx"
+    },
+    {
+      "id": "component_compactsummarystrip",
+      "label": "CompactSummaryStrip.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/studio/CompactSummaryStrip.jsx - Size: 5.4 KB",
+      "file": "src/components\\invoice\\studio/invoice/studio/CompactSummaryStrip.jsx"
+    },
+    {
+      "id": "component_customerinsightspane",
+      "label": "CustomerInsightsPane.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/studio/CustomerInsightsPane.jsx - Size: 5.5 KB",
+      "file": "src/components\\invoice\\studio/invoice/studio/CustomerInsightsPane.jsx"
+    },
+    {
+      "id": "component_editcolumnsmodal",
+      "label": "EditColumnsModal.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/studio/EditColumnsModal.jsx - Size: 8.8 KB",
+      "file": "src/components\\invoice\\studio/invoice/studio/EditColumnsModal.jsx"
+    },
+    {
+      "id": "component_excelbilltable",
+      "label": "ExcelBillTable.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/studio/ExcelBillTable.jsx - Size: 28.4 KB",
+      "file": "src/components\\invoice\\studio/invoice/studio/ExcelBillTable.jsx"
+    },
+    {
+      "id": "component_quickproductbar",
+      "label": "QuickProductBar.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/studio/QuickProductBar.jsx - Size: 7.4 KB",
+      "file": "src/components\\invoice\\studio/invoice/studio/QuickProductBar.jsx"
+    },
+    {
+      "id": "component_smartbillitemslist",
+      "label": "SmartBillItemsList.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/studio/SmartBillItemsList.jsx - Size: 14.1 KB",
+      "file": "src/components\\invoice\\studio/invoice/studio/SmartBillItemsList.jsx"
+    },
+    {
+      "id": "component_smartcustomerselect",
+      "label": "SmartCustomerSelect.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/studio/SmartCustomerSelect.jsx - Size: 13.0 KB",
+      "file": "src/components\\invoice\\studio/invoice/studio/SmartCustomerSelect.jsx"
+    },
+    {
+      "id": "component_smartpaymentsection",
+      "label": "SmartPaymentSection.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/studio/SmartPaymentSection.jsx - Size: 4.7 KB",
+      "file": "src/components\\invoice\\studio/invoice/studio/SmartPaymentSection.jsx"
+    },
+    {
+      "id": "component_smartstudiolayout",
+      "label": "SmartStudioLayout.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/studio/SmartStudioLayout.jsx - Size: 27.2 KB",
+      "file": "src/components\\invoice\\studio/invoice/studio/SmartStudioLayout.jsx"
+    },
+    {
+      "id": "component_stickytotalpanel",
+      "label": "StickyTotalPanel.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/studio/StickyTotalPanel.jsx - Size: 7.8 KB",
+      "file": "src/components\\invoice\\studio/invoice/studio/StickyTotalPanel.jsx"
+    },
+    {
+      "id": "component_studioheader",
+      "label": "StudioHeader.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/studio/StudioHeader.jsx - Size: 4.9 KB",
+      "file": "src/components\\invoice\\studio/invoice/studio/StudioHeader.jsx"
+    },
+    {
+      "id": "component_universalinvoicetemplate",
+      "label": "UniversalInvoiceTemplate.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/UniversalInvoiceTemplate.jsx - Size: 8.7 KB",
+      "file": "src/components\\invoice/invoice/UniversalInvoiceTemplate.jsx"
+    },
+    {
+      "id": "component_createinvoicewizard",
+      "label": "CreateInvoiceWizard.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/wizard/CreateInvoiceWizard.jsx - Size: 12.3 KB",
+      "file": "src/components\\invoice\\wizard/invoice/wizard/CreateInvoiceWizard.jsx"
+    },
+    {
+      "id": "component_customerselectionstep",
+      "label": "CustomerSelectionStep.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/wizard/steps/CustomerSelectionStep.jsx - Size: 9.9 KB",
+      "file": "src/components\\invoice\\wizard\\steps/invoice/wizard/steps/CustomerSelectionStep.jsx"
+    },
+    {
+      "id": "component_itemsselectionstep",
+      "label": "ItemsSelectionStep.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/wizard/steps/ItemsSelectionStep.jsx - Size: 15.8 KB",
+      "file": "src/components\\invoice\\wizard\\steps/invoice/wizard/steps/ItemsSelectionStep.jsx"
+    },
+    {
+      "id": "component_paymentdiscountstep",
+      "label": "PaymentDiscountStep.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/wizard/steps/PaymentDiscountStep.jsx - Size: 12.2 KB",
+      "file": "src/components\\invoice\\wizard\\steps/invoice/wizard/steps/PaymentDiscountStep.jsx"
+    },
+    {
+      "id": "component_previewdownloadstep",
+      "label": "PreviewDownloadStep.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice/wizard/steps/PreviewDownloadStep.jsx - Size: 12.4 KB",
+      "file": "src/components\\invoice\\wizard\\steps/invoice/wizard/steps/PreviewDownloadStep.jsx"
+    },
+    {
+      "id": "component_invoicecustomizationpanel",
+      "label": "InvoiceCustomizationPanel.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice-templates/InvoiceCustomizationPanel.jsx - Size: 27.0 KB",
+      "file": "src/components\\invoice-templates/invoice-templates/InvoiceCustomizationPanel.jsx"
+    },
+    {
+      "id": "component_livepreviewlayouts",
+      "label": "LivePreviewLayouts.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice-templates/layouts/LivePreviewLayouts.jsx - Size: 84.5 KB",
+      "file": "src/components\\invoice-templates\\layouts/invoice-templates/layouts/LivePreviewLayouts.jsx"
+    },
+    {
+      "id": "component_pdftemplatelayouts",
+      "label": "PdfTemplateLayouts.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice-templates/pdf-layouts/PdfTemplateLayouts.jsx - Size: 94.9 KB",
+      "file": "src/components\\invoice-templates\\pdf-layouts/invoice-templates/pdf-layouts/PdfTemplateLayouts.jsx"
+    },
+    {
+      "id": "component_templateconfigs",
+      "label": "TemplateConfigs.js",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice-templates/TemplateConfigs.js - Size: 7.7 KB",
+      "file": "src/components\\invoice-templates/invoice-templates/TemplateConfigs.js"
+    },
+    {
+      "id": "component_templategallery",
+      "label": "TemplateGallery.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "invoice-templates/TemplateGallery.jsx - Size: 2.4 KB",
+      "file": "src/components\\invoice-templates/invoice-templates/TemplateGallery.jsx"
+    },
+    {
+      "id": "component_invoicecard",
+      "label": "InvoiceCard.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "InvoiceCard.jsx - Size: 25.8 KB",
+      "file": "src/components/InvoiceCard.jsx"
+    },
+    {
+      "id": "component_invoicepreview",
+      "label": "InvoicePreview.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "InvoicePreview.jsx - Size: 30.2 KB",
+      "file": "src/components/InvoicePreview.jsx"
+    },
+    {
+      "id": "component_layout",
+      "label": "Layout.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "Layout.jsx - Size: 39.3 KB",
+      "file": "src/components/Layout.jsx"
+    },
+    {
+      "id": "component_lazypreview",
+      "label": "LazyPreview.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "LazyPreview.jsx - Size: 0.8 KB",
+      "file": "src/components/LazyPreview.jsx"
+    },
+    {
+      "id": "component_logo",
+      "label": "Logo.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "Logo.jsx - Size: 9.6 KB",
+      "file": "src/components/Logo.jsx"
+    },
+    {
+      "id": "component_shimmer-button",
+      "label": "shimmer-button.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "magicui/shimmer-button.jsx - Size: 2.1 KB",
+      "file": "src/components\\magicui/magicui/shimmer-button.jsx"
+    },
+    {
+      "id": "component_newuserguide",
+      "label": "NewUserGuide.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "NewUserGuide.jsx - Size: 3.1 KB",
+      "file": "src/components/NewUserGuide.jsx"
+    },
+    {
+      "id": "component_paymentmodal",
+      "label": "PaymentModal.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "PaymentModal.jsx - Size: 13.2 KB",
+      "file": "src/components/PaymentModal.jsx"
+    },
+    {
+      "id": "component_pdfdocument",
+      "label": "PdfDocument.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "PdfDocument.jsx - Size: 26.9 KB",
+      "file": "src/components/PdfDocument.jsx"
+    },
+    {
+      "id": "component_customerportallogin",
+      "label": "CustomerPortalLogin.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "portal/CustomerPortalLogin.jsx - Size: 4.9 KB",
+      "file": "src/components\\portal/portal/CustomerPortalLogin.jsx"
+    },
+    {
+      "id": "component_portallogin",
+      "label": "PortalLogin.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "portal/PortalLogin.jsx - Size: 5.1 KB",
+      "file": "src/components\\portal/portal/PortalLogin.jsx"
+    },
+    {
+      "id": "component_studentlogin",
+      "label": "StudentLogin.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "portal/StudentLogin.jsx - Size: 5.1 KB",
+      "file": "src/components\\portal/portal/StudentLogin.jsx"
+    },
+    {
+      "id": "component_postloginwelcome",
+      "label": "PostLoginWelcome.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "PostLoginWelcome.jsx - Size: 20.1 KB",
+      "file": "src/components/PostLoginWelcome.jsx"
+    },
+    {
+      "id": "component_premiumclock",
+      "label": "PremiumClock.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "PremiumClock.jsx - Size: 2.5 KB",
+      "file": "src/components/PremiumClock.jsx"
+    },
+    {
+      "id": "component_premiumemptystate",
+      "label": "PremiumEmptyState.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "PremiumEmptyState.jsx - Size: 7.4 KB",
+      "file": "src/components/PremiumEmptyState.jsx"
+    },
+    {
+      "id": "component_premiumskeleton",
+      "label": "PremiumSkeleton.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "PremiumSkeleton.jsx - Size: 2.0 KB",
+      "file": "src/components/PremiumSkeleton.jsx"
+    },
+    {
+      "id": "component_pulltorefresh",
+      "label": "PullToRefresh.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "PullToRefresh.jsx - Size: 3.4 KB",
+      "file": "src/components/PullToRefresh.jsx"
+    },
+    {
+      "id": "component_quickactions",
+      "label": "QuickActions.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "QuickActions.jsx - Size: 2.3 KB",
+      "file": "src/components/QuickActions.jsx"
+    },
+    {
+      "id": "component_quickbillmodal",
+      "label": "QuickBillModal.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "QuickBillModal.jsx - Size: 8.4 KB",
+      "file": "src/components/QuickBillModal.jsx"
+    },
+    {
+      "id": "component_scrollreveal",
+      "label": "ScrollReveal.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ScrollReveal.jsx - Size: 1.0 KB",
+      "file": "src/components/ScrollReveal.jsx"
+    },
+    {
+      "id": "component_demodata",
+      "label": "DemoData.js",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "settings/DemoData.js - Size: 2.0 KB",
+      "file": "src/components\\settings/settings/DemoData.js"
+    },
+    {
+      "id": "component_livepreviewpanel",
+      "label": "LivePreviewPanel.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "settings/LivePreviewPanel.jsx - Size: 16.1 KB",
+      "file": "src/components\\settings/settings/LivePreviewPanel.jsx"
+    },
+    {
+      "id": "component_premiumthemepicker",
+      "label": "PremiumThemePicker.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "settings/PremiumThemePicker.jsx - Size: 3.9 KB",
+      "file": "src/components\\settings/settings/PremiumThemePicker.jsx"
+    },
+    {
+      "id": "component_whatsapplivepreview",
+      "label": "WhatsAppLivePreview.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "settings/WhatsAppLivePreview.jsx - Size: 4.3 KB",
+      "file": "src/components\\settings/settings/WhatsAppLivePreview.jsx"
+    },
+    {
+      "id": "component_setupprogress",
+      "label": "SetupProgress.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "SetupProgress.jsx - Size: 7.9 KB",
+      "file": "src/components/SetupProgress.jsx"
+    },
+    {
+      "id": "component_shineborder",
+      "label": "ShineBorder.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ShineBorder.jsx - Size: 0.9 KB",
+      "file": "src/components/ShineBorder.jsx"
+    },
+    {
+      "id": "component_sidebar",
+      "label": "Sidebar.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "Sidebar.jsx - Size: 24.6 KB",
+      "file": "src/components/Sidebar.jsx"
+    },
+    {
+      "id": "component_staggerlist",
+      "label": "StaggerList.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "StaggerList.jsx - Size: 0.6 KB",
+      "file": "src/components/StaggerList.jsx"
+    },
+    {
+      "id": "component_statcard",
+      "label": "StatCard.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "StatCard.jsx - Size: 2.3 KB",
+      "file": "src/components/StatCard.jsx"
+    },
+    {
+      "id": "component_successanimation",
+      "label": "SuccessAnimation.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "SuccessAnimation.jsx - Size: 5.0 KB",
+      "file": "src/components/SuccessAnimation.jsx"
+    },
+    {
+      "id": "component_accordion",
+      "label": "Accordion.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ui/Accordion.jsx - Size: 1.2 KB",
+      "file": "src/components\\ui/ui/Accordion.jsx"
+    },
+    {
+      "id": "component_badge",
+      "label": "Badge.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ui/Badge.jsx - Size: 0.9 KB",
+      "file": "src/components\\ui/ui/Badge.jsx"
+    },
+    {
+      "id": "component_button",
+      "label": "Button.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ui/Button.jsx - Size: 2.1 KB",
+      "file": "src/components\\ui/ui/Button.jsx"
+    },
+    {
+      "id": "component_card",
+      "label": "Card.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ui/Card.jsx - Size: 1.2 KB",
+      "file": "src/components\\ui/ui/Card.jsx"
+    },
+    {
+      "id": "component_input",
+      "label": "Input.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ui/Input.jsx - Size: 1.9 KB",
+      "file": "src/components\\ui/ui/Input.jsx"
+    },
+    {
+      "id": "component_modal",
+      "label": "Modal.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ui/Modal.jsx - Size: 1.7 KB",
+      "file": "src/components\\ui/ui/Modal.jsx"
+    },
+    {
+      "id": "component_progress",
+      "label": "Progress.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ui/Progress.jsx - Size: 2.3 KB",
+      "file": "src/components\\ui/ui/Progress.jsx"
+    },
+    {
+      "id": "component_switch",
+      "label": "Switch.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ui/Switch.jsx - Size: 0.9 KB",
+      "file": "src/components\\ui/ui/Switch.jsx"
+    },
+    {
+      "id": "component_table",
+      "label": "Table.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ui/Table.jsx - Size: 1.3 KB",
+      "file": "src/components\\ui/ui/Table.jsx"
+    },
+    {
+      "id": "component_tabs",
+      "label": "Tabs.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "ui/Tabs.jsx - Size: 1.7 KB",
+      "file": "src/components\\ui/ui/Tabs.jsx"
+    },
+    {
+      "id": "component_workspaceswitcher",
+      "label": "WorkspaceSwitcher.jsx",
+      "type": "component",
+      "group": "com",
+      "icon": "box",
+      "description": "WorkspaceSwitcher.jsx - Size: 5.3 KB",
+      "file": "src/components/WorkspaceSwitcher.jsx"
+    },
+    {
+      "id": "context_invoicecontext",
+      "label": "InvoiceContext.jsx",
+      "type": "context",
+      "group": "ctx",
+      "icon": "database",
+      "description": "InvoiceContext.jsx - Size: 14.0 KB",
+      "file": "src/contexts/InvoiceContext.jsx"
+    },
+    {
+      "id": "context_onboardingcontext",
+      "label": "OnboardingContext.jsx",
+      "type": "context",
+      "group": "ctx",
+      "icon": "database",
+      "description": "OnboardingContext.jsx - Size: 2.3 KB",
+      "file": "src/contexts/OnboardingContext.jsx"
+    },
+    {
+      "id": "context_themecontext",
+      "label": "ThemeContext.jsx",
+      "type": "context",
+      "group": "ctx",
+      "icon": "database",
+      "description": "ThemeContext.jsx - Size: 2.1 KB",
+      "file": "src/contexts/ThemeContext.jsx"
+    },
+    {
+      "id": "hook_usefeaturecontrol",
+      "label": "useFeatureControl.js",
+      "type": "hook",
+      "group": "hok",
+      "icon": "settings",
+      "description": "useFeatureControl.js - Size: 1.9 KB",
+      "file": "src/hooks/useFeatureControl.js"
+    },
+    {
+      "id": "hook_usegeneratepdf",
+      "label": "useGeneratePDF.jsx",
+      "type": "hook",
+      "group": "hok",
+      "icon": "settings",
+      "description": "useGeneratePDF.jsx - Size: 3.8 KB",
+      "file": "src/hooks/useGeneratePDF.jsx"
+    },
+    {
+      "id": "hook_useinfinitescroll",
+      "label": "useInfiniteScroll.js",
+      "type": "hook",
+      "group": "hok",
+      "icon": "settings",
+      "description": "useInfiniteScroll.js - Size: 0.9 KB",
+      "file": "src/hooks/useInfiniteScroll.js"
+    },
+    {
+      "id": "hook_useonclickoutside",
+      "label": "useOnClickOutside.js",
+      "type": "hook",
+      "group": "hok",
+      "icon": "settings",
+      "description": "useOnClickOutside.js - Size: 0.8 KB",
+      "file": "src/hooks/useOnClickOutside.js"
+    },
+    {
+      "id": "hook_usepremiumux",
+      "label": "usePremiumUX.js",
+      "type": "hook",
+      "group": "hok",
+      "icon": "settings",
+      "description": "usePremiumUX.js - Size: 2.4 KB",
+      "file": "src/hooks/usePremiumUX.js"
+    },
+    {
+      "id": "hook_usesettingshistory",
+      "label": "useSettingsHistory.js",
+      "type": "hook",
+      "group": "hok",
+      "icon": "settings",
+      "description": "useSettingsHistory.js - Size: 2.2 KB",
+      "file": "src/hooks/useSettingsHistory.js"
+    },
+    {
+      "id": "hook_usethemeengine",
+      "label": "useThemeEngine.jsx",
+      "type": "hook",
+      "group": "hok",
+      "icon": "settings",
+      "description": "useThemeEngine.jsx - Size: 3.6 KB",
+      "file": "src/hooks/useThemeEngine.jsx"
+    },
+    {
+      "id": "hook_usewindowsize",
+      "label": "useWindowSize.js",
+      "type": "hook",
+      "group": "hok",
+      "icon": "settings",
+      "description": "useWindowSize.js - Size: 1.3 KB",
+      "file": "src/hooks/useWindowSize.js"
+    },
+    {
+      "id": "util_adminaccess",
+      "label": "adminAccess.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "adminAccess.js - Size: 0.8 KB",
+      "file": "src/utils/adminAccess.js"
+    },
+    {
+      "id": "util_animations",
+      "label": "animations.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "animations.js - Size: 7.1 KB",
+      "file": "src/utils/animations.js"
+    },
+    {
+      "id": "util_categorychecks",
+      "label": "categoryChecks.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "categoryChecks.js - Size: 0.3 KB",
+      "file": "src/utils/categoryChecks.js"
+    },
+    {
+      "id": "util_categoryutils",
+      "label": "categoryUtils.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "categoryUtils.js - Size: 0.4 KB",
+      "file": "src/utils/categoryUtils.js"
+    },
+    {
+      "id": "util_demodatagenerator",
+      "label": "demoDataGenerator.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "demoDataGenerator.js - Size: 10.9 KB",
+      "file": "src/utils/demoDataGenerator.js"
+    },
+    {
+      "id": "util_demodatamanager",
+      "label": "demoDataManager.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "demoDataManager.js - Size: 5.0 KB",
+      "file": "src/utils/demoDataManager.js"
+    },
+    {
+      "id": "util_featureflags",
+      "label": "featureFlags.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "featureFlags.js - Size: 1.0 KB",
+      "file": "src/utils/featureFlags.js"
+    },
+    {
+      "id": "util_feedback",
+      "label": "feedback.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "feedback.js - Size: 8.2 KB",
+      "file": "src/utils/feedback.js"
+    },
+    {
+      "id": "util_i18n",
+      "label": "i18n.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "i18n.js - Size: 4.1 KB",
+      "file": "src/utils/i18n.js"
+    },
+    {
+      "id": "util_invoicemath",
+      "label": "invoiceMath.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "invoiceMath.js - Size: 2.1 KB",
+      "file": "src/utils/invoiceMath.js"
+    },
+    {
+      "id": "util_invoiceschema",
+      "label": "invoiceSchema.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "invoiceSchema.js - Size: 7.2 KB",
+      "file": "src/utils/invoiceSchema.js"
+    },
+    {
+      "id": "util_invoiceutils",
+      "label": "invoiceUtils.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "invoiceUtils.js - Size: 4.5 KB",
+      "file": "src/utils/invoiceUtils.js"
+    },
+    {
+      "id": "util_normalizeinvoicemodel",
+      "label": "normalizeInvoiceModel.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "normalizeInvoiceModel.js - Size: 4.6 KB",
+      "file": "src/utils/normalizeInvoiceModel.js"
+    },
+    {
+      "id": "util_pdfparser",
+      "label": "pdfParser.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "pdfParser.js - Size: 4.3 KB",
+      "file": "src/utils/pdfParser.js"
+    },
+    {
+      "id": "util_pdfutils",
+      "label": "pdfUtils.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "pdfUtils.js - Size: 10.2 KB",
+      "file": "src/utils/pdfUtils.js"
+    },
+    {
+      "id": "util_portaltargets",
+      "label": "portalTargets.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "portalTargets.js - Size: 0.3 KB",
+      "file": "src/utils/portalTargets.js"
+    },
+    {
+      "id": "util_shareutils",
+      "label": "shareUtils.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "shareUtils.js - Size: 7.0 KB",
+      "file": "src/utils/shareUtils.js"
+    },
+    {
+      "id": "util_soundengine",
+      "label": "soundEngine.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "soundEngine.js - Size: 4.0 KB",
+      "file": "src/utils/soundEngine.js"
+    },
+    {
+      "id": "util_themeicon",
+      "label": "themeIcon.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "themeIcon.js - Size: 3.5 KB",
+      "file": "src/utils/themeIcon.js"
+    },
+    {
+      "id": "util_themeutils",
+      "label": "themeUtils.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "themeUtils.js - Size: 19.1 KB",
+      "file": "src/utils/themeUtils.js"
+    },
+    {
+      "id": "util_validation",
+      "label": "validation.js",
+      "type": "util",
+      "group": "utl",
+      "icon": "settings",
+      "description": "validation.js - Size: 1.7 KB",
+      "file": "src/utils/validation.js"
+    },
+    {
+      "id": "config_businesspresets",
+      "label": "businessPresets.js",
+      "type": "config",
+      "group": "utl",
+      "icon": "settings",
+      "description": "businessPresets.js - Size: 20.9 KB",
+      "file": "src/config/businessPresets.js"
+    },
+    {
+      "id": "config_categoryexperience",
+      "label": "categoryExperience.js",
+      "type": "config",
+      "group": "utl",
+      "icon": "settings",
+      "description": "categoryExperience.js - Size: 3.6 KB",
+      "file": "src/config/categoryExperience.js"
+    },
+    {
+      "id": "config_invoicetemplates",
+      "label": "invoiceTemplates.js",
+      "type": "config",
+      "group": "utl",
+      "icon": "settings",
+      "description": "invoiceTemplates.js - Size: 4.7 KB",
+      "file": "src/config/invoiceTemplates.js"
+    }
+  ],
+  "edges": [
+    {
+      "source": "billqyro",
+      "target": "engine_activityengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_adminengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_analyticsengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_appointmentengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_auditengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_authengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_automationengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_backupengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_bankengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_cloudfunctions",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_attachmentengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_communicationengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_messagecomposer",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_messagetemplateengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_whatsappshareadapter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_customerengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_dbengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_demogenerator",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_empireagent",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_expenseengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_featurecontrolengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_featureregistry",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_firebaseconfig",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_invoiceengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_invoicenumberservice",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_invoiceshareservice",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_invoiceshareservice2",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_localdb",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_migrationengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_notificationengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_notificationsservice",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_offlineengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_orderengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_paymentengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_paymentlinkservice",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_pdfengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_platformadminservice",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_platformrevenueservice",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_portalengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_productengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_reportengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_roleengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_screenshotanalysisservice",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_searchengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_securityengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_settingsengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_staffengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_storageengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_subscriptionengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_supportengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_syncengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_syncworker",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_templateengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_themeengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_verificationcodeservice",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "engine_workspaceengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_admindashboard",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_adminlayout",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_adminpanel",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_adminpinlogin",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_analyticscenter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_announcementmanager",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_apphealthcenter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_architecturedata",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_architecturemap",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_automationcenter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_backupcenter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_changelogmanager",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_databasecenter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_featureswitchcenter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_globalsettings",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_ownertestlab",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_paymentproofcenter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_premiumcontrolcenter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_sandboxadmin",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_securitycenter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_subscriptionstudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_supportcenter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_usermanager",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_workspaceadmin",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_adminunlock",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_appointments",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_auditlogs",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_backuprestore",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_billingportal",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_clients",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_delivery",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_designbook",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_devices",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_measurements",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_patients",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_projects",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_servicejobs",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_students",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_createinvoice",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_createinvoice_backup",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_customerportalconfig",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_customers",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_customerworkspace",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_cashmanagement",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_customerregister",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_cyberdashboard",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_portalhub",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_quicktoolscenter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_settingsstudiointegration",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_dashboard",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_datadeletion",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_demologin",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_designstudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_dueledger",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_estimates",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_expenses",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_guide",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_helpcenter",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_internalbank",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_invoices",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_landing",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_livelinktemplatestudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_login",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_moremenu",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_businessdetailsform",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_countryselection",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_interactivetutorial",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_onboardingwizard",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_paymentsetup",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_templateselection",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_welcomeboard",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_orders",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_paymentduescreen",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_pdftemplatestudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_pendingpayments",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_privacypolicy",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_products",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_publicinvoice",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_refundpolicy",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_reports",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_adminconsoletab",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_businessprofiletab",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_databackuptab",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_settingssidebar",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_themestudiotab",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_settingsstudiov2",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_setupbilling",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_staffledger",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_studentportal",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_automationstudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_backupstudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_businessstudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_businesstemplatestudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_dashboardstudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_databasestudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_featurecontrolstudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_formbuilder",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_invoicestudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_localizationstudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_messagetemplatestudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_notificationstudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_portalstudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_rolestudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_securitystudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_studiolayout",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_themestudio",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_support",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_systemhealth",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_templatemarketplace",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_termsofservice",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "page_workspacemanager",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_activityfeed",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_addcustomersheet",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_animatedbordertrail",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_animatedbutton",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_animatedpage",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_animatedthemetoggler",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_customnodes",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_bottomnav",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_bottomsheet",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_categoryhints",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_centeredmodal",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_classicloader",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_commandpalette",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_whatsappcommunicationpreview",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_whatsappsharepreview",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_customerledger",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_dynamicqrcode",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_emptybills",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_emptycustomers",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_emptydueledger",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_emptyexpenses",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_emptyinvoices",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_emptypayments",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_emptyproducts",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_emptyreports",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_herobackground",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_aiinvoicescanner",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_itemssheetmodal",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_liveinvoicepreview",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_pdffieldsmodal",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_productsearch",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_quickbillform",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_smartratemodal",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_compactpaymentsection",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_compactsummarystrip",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_customerinsightspane",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_editcolumnsmodal",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_excelbilltable",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_quickproductbar",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_smartbillitemslist",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_smartcustomerselect",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_smartpaymentsection",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_smartstudiolayout",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_stickytotalpanel",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_studioheader",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_universalinvoicetemplate",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_createinvoicewizard",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_customerselectionstep",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_itemsselectionstep",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_paymentdiscountstep",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_previewdownloadstep",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_invoicecustomizationpanel",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_livepreviewlayouts",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_pdftemplatelayouts",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_templateconfigs",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_templategallery",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_invoicecard",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_invoicepreview",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_layout",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_lazypreview",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_logo",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_shimmer-button",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_newuserguide",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_paymentmodal",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_pdfdocument",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_customerportallogin",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_portallogin",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_studentlogin",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_postloginwelcome",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_premiumclock",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_premiumemptystate",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_premiumskeleton",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_pulltorefresh",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_quickactions",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_quickbillmodal",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_scrollreveal",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_demodata",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_livepreviewpanel",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_premiumthemepicker",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_whatsapplivepreview",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_setupprogress",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_shineborder",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_sidebar",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_staggerlist",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_statcard",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_successanimation",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_accordion",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_badge",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_button",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_card",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_input",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_modal",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_progress",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_switch",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_table",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_tabs",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "component_workspaceswitcher",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "context_invoicecontext",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "context_onboardingcontext",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "context_themecontext",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "hook_usefeaturecontrol",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "hook_usegeneratepdf",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "hook_useinfinitescroll",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "hook_useonclickoutside",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "hook_usepremiumux",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "hook_usesettingshistory",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "hook_usethemeengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "hook_usewindowsize",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_adminaccess",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_animations",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_categorychecks",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_categoryutils",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_demodatagenerator",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_demodatamanager",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_featureflags",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_feedback",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_i18n",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_invoicemath",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_invoiceschema",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_invoiceutils",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_normalizeinvoicemodel",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_pdfparser",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_pdfutils",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_portaltargets",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_shareutils",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_soundengine",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_themeicon",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_themeutils",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "util_validation",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "config_businesspresets",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "config_categoryexperience",
+      "label": "uses"
+    },
+    {
+      "source": "billqyro",
+      "target": "config_invoicetemplates",
+      "label": "uses"
+    }
+  ]
+}

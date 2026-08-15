@@ -3235,7 +3235,7 @@ export const syncFromFirestore = async (force = false) => {
     const emptySnap = { forEach: () => {} };
 
     const [
-      settingsDoc, customersSnap, invoicesSnap, productsSnap, expensesSnap, studentsSnap, subDoc
+      settingsDoc, customersSnap, staffSnap, invoicesSnap, productsSnap, expensesSnap, studentsSnap, subDoc
     ] = await Promise.all([
       safeFetch(getDocFromServer(doc(db, 'settings', userId)), emptyDoc, 'settings'),
       safeFetch(getDocsFromServer(collection(db, 'customers', userId, 'items')), emptySnap, 'customers'),
@@ -3253,7 +3253,7 @@ export const syncFromFirestore = async (force = false) => {
 
     // 4. Apply Settings
     let activeWorkspaceId = 'default';
-    if (settingsDoc.exists()) {
+    if (settingsDoc && typeof settingsDoc.exists === 'function' && settingsDoc.exists()) {
       const settingsData = settingsDoc.data();
       activeWorkspaceId = settingsData.activeWorkspaceId || 'default';
       localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settingsData));
@@ -3306,7 +3306,7 @@ export const syncFromFirestore = async (force = false) => {
     await mergeData('students', studentsSnap, KEYS.STUDENTS);
 
     // 10. Apply Subscription
-    if (subDoc.exists()) {
+    if (subDoc && typeof subDoc.exists === 'function' && subDoc.exists()) {
       localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(subDoc.data()));
     }
 

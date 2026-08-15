@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, FileText, Globe, ChevronDown, Landmark, Crown } from 'lucide-react';
+import { LayoutDashboard, FileSpreadsheet, Users, Layers, LogOut, TrendingDown, Sparkles, HelpCircle, Settings as SettingsIcon, Bell, BookOpen, PieChart, Palette, Smartphone, Store, Database, ChevronsLeft, ChevronsRight, Scissors, Wrench, Briefcase, ShieldCheck, ShoppingBag, Calendar, Truck, FileText, Globe, ChevronDown, Landmark, Crown, Map } from 'lucide-react';
 import { authEngine } from '../services/authEngine';
 import { t } from '../utils/i18n';
 import { triggerLightHaptic } from '../utils/feedback';
@@ -73,6 +73,9 @@ const Sidebar = ({
     ...(enabledModules.includes('students') ? [{ id: 'students', label: 'Student Directory', icon: Users, featureId: 'customer' }] : []),
     ...(enabledModules.includes('clients') ? [{ id: 'clients', label: 'Client Roster', icon: Users, featureId: 'customer' }] : []),
 
+    { type: 'label', label: 'Staff' },
+    { id: 'staff-ledger', label: 'Staff Ledger', icon: Users, featureId: 'staff.ledger' },
+
     { type: 'label', label: 'Collections' },
     { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen, featureId: 'treasury' },
     { id: 'pending-payments', label: 'Payment Proofs', icon: Bell, featureId: 'payment' },
@@ -94,10 +97,11 @@ const Sidebar = ({
     { id: 'projects', label: 'Projects', icon: Briefcase, featureId: 'operations.projects' },
 
     { type: 'label', label: 'Portals' },
-    { id: 'customer-portal-config', label: getPortalLabelByType(wsType), icon: Globe },
+    { id: 'customer-portal-config', label: getPortalLabelByType(wsType), icon: Globe, featureId: 'liveLink' },
 
     { type: 'label', label: 'System' },
     { id: 'settings', label: 'Settings Studio', icon: SettingsIcon },
+    { id: 'architecture-map', label: 'Architecture Map', icon: Map },
     ...(localStorage.getItem('billqyro_demo_session_active') === 'true' ? [{ id: 'sandbox-admin', label: 'Sandbox Control Center', icon: ShieldCheck, module: 'sandbox' }] : []),
     { id: 'help-center', label: 'Help Center', icon: HelpCircle },
   ];

@@ -1736,8 +1736,15 @@ function App() {
       case 'appointments':
         return <Appointments />;
       case 'orders':
-        return <Orders invoices={activeInvoices} customers={activeCustomers}
-            staffs={activeStaffs} businessSettings={activeSettings} setCurrentTab={setCurrentTab} />;
+        return (
+          <Orders
+            invoices={activeInvoices}
+            customers={activeCustomers}
+            staffs={activeStaffs}
+            businessSettings={activeSettings}
+            setCurrentTab={setCurrentTab}
+          />
+        );
       case 'patients':
         return <Patients />;
       case 'students':

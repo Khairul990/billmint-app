@@ -3,7 +3,7 @@ import { pdf } from '@react-pdf/renderer';
 import PdfDocument from '../components/PdfDocument';
 import { toast } from 'react-hot-toast';
 import QRCode from 'qrcode';
-import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
+import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.js?url';
 
 let isDownloadingPDF = false;
 let isDownloadingImage = false;
@@ -102,7 +102,7 @@ const buildInvoicePdfBlob = async (invoice, businessSettings) => {
  * @returns {Promise<Blob>} PNG blob
  */
 const renderPdfPagesToSinglePng = async (arrayBuffer) => {
-  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  const pdfjs = await import('pdfjs-dist/build/pdf');
   pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
   const loadingTask = pdfjs.getDocument({ data: arrayBuffer });

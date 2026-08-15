@@ -269,9 +269,29 @@ const Invoices = ({
     downloadAnchorNode.remove();
   };
 
-  const handleImportInvoice = (e) => {
+  const handleImportInvoice = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Handle PDF import
+    if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+      try {
+        const toastId = toast.loading('Reading PDF invoice...');
+        const { parseInvoiceFromPdf } = await import('../utils/pdfParser.js');
+        const draftInvoice = await parseInvoiceFromPdf(file);
+        
+        await invoiceEngine.saveInvoice(draftInvoice);
+        toast.success(`PDF Invoice ${draftInvoice.invoiceNumber} imported!`, { id: toastId });
+        window.dispatchEvent(new Event('billqyro_sync'));
+      } catch (err) {
+        console.error(err);
+        toast.error(err.message || 'Failed to parse PDF invoice.');
+      }
+      e.target.value = '';
+      return;
+    }
+
+    // Handle JSON backup import
     const reader = new FileReader();
     reader.onload = async (event) => {
       try {
@@ -342,7 +362,7 @@ const Invoices = ({
             <span className="hidden sm:inline">Import Invoice</span>
             <input 
               type="file" 
-              accept=".json,.billqyro" 
+              accept=".json,.billqyro,.pdf" 
               onChange={handleImportInvoice} 
               className="hidden" 
             />

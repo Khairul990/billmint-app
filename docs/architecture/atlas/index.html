@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BillQyro System Atlas</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dark-theme">
+  
+  <div class="atlas-container">
+    
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="logo">
+        <i data-lucide="map"></i>
+        <h1>BillQyro System Atlas</h1>
+        <span class="version-badge">v8 Enterprise</span>
+      </div>
+      
+      <div class="breadcrumbs" id="breadcrumbs">
+        <span>BillQyro</span>
+      </div>
+
+      <div class="search-bar">
+        <i data-lucide="search"></i>
+        <input type="text" id="searchInput" placeholder="Search files, engines, domains...">
+      </div>
+      <div class="actions">
+        <button id="btnHealth" title="Architecture Health"><i data-lucide="activity"></i></button>
+        <button id="btnZoomIn" title="Zoom In"><i data-lucide="zoom-in"></i></button>
+        <button id="btnZoomOut" title="Zoom Out"><i data-lucide="zoom-out"></i></button>
+        <button id="btnFit" title="Fit to Screen"><i data-lucide="maximize"></i></button>
+      </div>
+    </header>
+
+    <!-- Map Modes Sub-nav -->
+    <nav class="map-modes">
+      <button class="mode-btn active" data-mode="all">SYSTEM MAP</button>
+      <button class="mode-btn" data-mode="domain">DOMAIN MAP</button>
+      <button class="mode-btn" data-mode="engine">ENGINE MAP</button>
+      <button class="mode-btn" data-mode="page">ROUTE MAP</button>
+      <button class="mode-btn" data-mode="component">COMPONENT MAP</button>
+      <button class="mode-btn" data-mode="context">CONTEXT MAP</button>
+      <button class="mode-btn" data-mode="hook">HOOK MAP</button>
+      <button class="mode-btn" data-mode="util">UTIL MAP</button>
+      <button class="mode-btn" data-mode="feature">FEATURE MAP</button>
+      <button class="mode-btn" data-mode="module">MODULE MAP</button>
+      <button class="mode-btn" data-mode="theme">THEME MAP</button>
+      <button class="mode-btn" data-mode="template">TEMPLATE MAP</button>
+      <button class="mode-btn" data-mode="studio">STUDIO MAP</button>
+      <button class="mode-btn" data-mode="data">DATA MAP</button>
+      <button class="mode-btn" data-mode="flow">FLOW MAP</button>
+      <button class="mode-btn" data-mode="risk">RISK MAP</button>
+      <button class="mode-btn" data-mode="design">DESIGN MAP</button>
+    </nav>
+
+    <div class="main-content">
+      <!-- Graph Canvas -->
+      <main class="canvas-wrapper">
+        <svg id="atlasCanvas"></svg>
+      </main>
+
+      <!-- Sidebar details panel -->
+      <aside class="details-panel" id="detailsPanel">
+        <div class="panel-header">
+          <h2>Node Details</h2>
+          <button id="btnClosePanel" class="icon-btn"><i data-lucide="x"></i></button>
+        </div>
+        
+        <div class="panel-content" id="panelContent">
+          <div class="empty-state">
+            <i data-lucide="mouse-pointer-click"></i>
+            <p>Click any node on the map to view its architecture details.</p>
+          </div>
+        </div>
+
+        <div class="panel-actions" id="panelActions" style="display: none;">
+          <button id="btnLocate" class="action-btn"><i data-lucide="crosshair"></i> Locate</button>
+          <button id="btnCopyPath" class="action-btn"><i data-lucide="copy"></i> Copy Path</button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Health Modal -->
+    <div id="healthModal" class="health-modal">
+      <div class="health-content">
+        <div class="health-header">
+          <h3><i data-lucide="activity"></i> Architecture Health</h3>
+          <button id="btnCloseHealth" class="icon-btn"><i data-lucide="x"></i></button>
+        </div>
+        <div class="health-stats" id="healthStats">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Minimap -->
+    <div class="minimap-container">
+      <svg id="minimapCanvas"></svg>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <h4>System Legend</h4>
+      <div class="legend-items">
+        <div class="legend-item"><span class="color-dot type-system"></span> System</div>
+        <div class="legend-item"><span class="color-dot type-engine"></span> Engine</div>
+        <div class="legend-item"><span class="color-dot type-page"></span> Page</div>
+        <div class="legend-item"><span class="color-dot type-component"></span> Component</div>
+        <div class="legend-item"><span class="color-dot type-context"></span> Context</div>
+        <div class="legend-item"><span class="color-dot type-hook"></span> Hook</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

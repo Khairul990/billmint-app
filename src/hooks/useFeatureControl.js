@@ -33,7 +33,9 @@ export function useFeatureControl(workspaceId) {
     loadSettings();
 
     const handleUpdate = (e) => {
-      if (e.detail?.workspaceId === workspaceId) {
+      const updatedWs = e.detail?.workspaceId || 'default';
+      const currentWs = workspaceId || 'default';
+      if (updatedWs === currentWs) {
         loadSettings();
       }
     };

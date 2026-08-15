@@ -27,9 +27,9 @@ const FeatureControlStudio = ({ workspaceId }) => {
   const [categories, setCategories] = useState({});
   const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
+  const loadData = async (showLoader = true) => {
     try {
-      setLoading(true);
+      if (showLoader) setLoading(true);
       const [feats, cats] = await Promise.all([
         featureControlEngine.getAllFeatures(workspaceId),
         featureControlEngine.getAllCategories(workspaceId)
@@ -40,7 +40,7 @@ const FeatureControlStudio = ({ workspaceId }) => {
       console.error(err);
       toast.error('Failed to load feature controls.');
     } finally {
-      setLoading(false);
+      if (showLoader) setLoading(false);
     }
   };
 
@@ -61,9 +61,10 @@ const FeatureControlStudio = ({ workspaceId }) => {
       }));
       await featureControlEngine.toggleFeature(workspaceId, featureId, !currentValue);
       toast.success('Feature updated.');
-      loadData(); // Re-sync to get correct effective states
-    } catch {
-      toast.error('Update failed.');
+      loadData(false); // Re-sync to get correct effective states
+    } catch (err) {
+      console.error('Feature toggle error:', err);
+      toast.error('Update failed: ' + (err.message || 'Unknown error'));
       loadData();
     }
   };
@@ -76,10 +77,10 @@ const FeatureControlStudio = ({ workspaceId }) => {
       }));
       await featureControlEngine.toggleCategory(workspaceId, categoryId, !currentValue);
       toast.success('Category updated.');
-      loadData();
+      loadData(false);
     } catch {
       toast.error('Update failed.');
-      loadData();
+      loadData(false);
     }
   };
 

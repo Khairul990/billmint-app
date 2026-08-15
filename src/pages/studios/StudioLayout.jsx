@@ -290,7 +290,7 @@ const StudioLayout = ({
                   {activeStudio === 'localization' && <LocalizationStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
                   {activeStudio === 'notification' && <NotificationStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
                   { activeStudio === 'database' && <DatabaseStudio settings={draftSettings} onUpdate={handleUpdateDraft} /> }
-                  { activeStudio === 'features' && <FeatureControlStudio workspaceId={settings?.workspaceId || settings?.id} /> }
+                  { activeStudio === 'features' && <FeatureControlStudio workspaceId={settings?.activeWorkspaceId || 'default'} /> }
                 </Suspense>
                 
                 {/* Fallback for unknown studio */}
