@@ -143,6 +143,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
           id: Date.now().toString() + idx,
           sNo: it.sNo || (idx + 1).toString(),
           name: it.itemService || it.name || '',
+          description: it.description || '',
           qty: parseFloat(it.qty) || 1,
           price: parseFloat(it.rate) || 0,
           customFields: it.customFields || {}
@@ -151,6 +152,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
       setDiscountAmount(parseFloat(editingInvoice.discountAmount) || 0);
       setDiscountType(parseFloat(editingInvoice.discountAmount) > 0 ? 'flat' : 'none');
       setTaxPercent(parseFloat(editingInvoice.taxAmount) ? (parseFloat(editingInvoice.taxAmount) / (parseFloat(editingInvoice.subtotal) || 1)) * 100 : 0);
+      setShipping(parseFloat(editingInvoice.shipping) || 0);
       setOldDue(parseFloat(editingInvoice.oldDue) || 0);
       setNotes(editingInvoice.notes || '');
     }
@@ -234,7 +236,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
         sNo: i.sNo || (idx + 1).toString(),
         itemService: i.name,
         name: i.name,
-        description: '',
+        description: i.description || '',
         qty: parseFloat(i.qty) || 0,
         rate: parseFloat(i.price) || 0,
         amount: (parseFloat(i.qty) || 0) * (parseFloat(i.price) || 0),
@@ -249,11 +251,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
       setIsSaving(true);
       try {
         await onSaveInvoice(payload, false, false);
-        if (onBack) {
-          onBack();
-        } else {
-          window.history.back();
-        }
+        // Do not call onBack() here; App.jsx handles the redirect to 'invoices' tab
       } finally {
         setIsSaving(false);
       }
