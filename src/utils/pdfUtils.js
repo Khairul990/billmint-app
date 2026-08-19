@@ -86,9 +86,12 @@ const buildInvoicePdfBlob = async (invoice, businessSettings) => {
     }
   }
 
+  // Deeply sanitize known unsupported characters that crash React-PDF without a font fallback
+  const safeInvoice = JSON.parse(JSON.stringify(invoice).replace(/₹/g, 'Rs. ').replace(/৳/g, 'Tk. '));
+
   const pageSize = businessSettings?.pdfPageSize || 'A4';
   const doc = React.createElement(PdfDocument, { 
-    invoice, 
+    invoice: safeInvoice, 
     businessSettings, 
     qrCodeBase64: qrCodeDataUrl,
     safeLogoBase64,

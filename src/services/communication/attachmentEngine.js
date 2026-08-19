@@ -90,15 +90,18 @@ export async function generateInvoicePdfBlob(invoice, businessSettings) {
     buildSafeLogoBase64(businessSettings)
   ]);
 
-  const pageSize = businessSettings?.pdfPageSize || 'A4';
   // Register a working emoji CDN because the default maxcdn is dead and causes infinite hangs
   Font.registerEmojiSource({
     format: 'png',
     url: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/',
   });
 
+  // Deeply sanitize known unsupported characters that crash React-PDF without a font fallback
+  const safeInvoice = JSON.parse(JSON.stringify(invoice).replace(/₹/g, 'Rs. ').replace(/৳/g, 'Tk. '));
+
+  const pageSize = businessSettings?.pdfPageSize || 'A4';
   const doc = React.createElement(PdfDocument, {
-    invoice,
+    invoice: safeInvoice,
     businessSettings: businessSettings || {},
     qrCodeBase64: qrCodeDataUrl,
     safeLogoBase64,

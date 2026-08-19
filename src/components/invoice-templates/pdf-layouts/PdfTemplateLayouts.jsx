@@ -72,7 +72,7 @@ const MinimalClassicPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeBa
           {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: 80, textAlign: 'right' }}>Total</Text>}
         </View>
         {invoice.items?.map((item, i) => (
-          <View key={i} style={[s.row, { fontSize: 10, borderBottomWidth: 1, borderBottomColor: '#eee', paddingVertical: 8 }]}>
+          <View key={i} wrap={false} style={[s.row, { fontSize: 10, borderBottomWidth: 1, borderBottomColor: '#eee', paddingVertical: 8 }]}>
             <Text style={{ flex: 1 }}>{item.name || item.itemService || 'Item'}</Text>
             <Text style={{ width: 60, textAlign: 'right' }}>{item.qty}</Text>
             <Text style={{ width: 80, textAlign: 'right' }}>{formatCurrency(item.rate || item.price)}</Text>
@@ -160,7 +160,7 @@ const ModernCorporatePdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
             {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: 80, textAlign: 'right' }}>Total</Text>}
           </View>
           {invoice.items?.map((item, i) => (
-            <View key={i} style={[s.row, { fontSize: 10, borderBottomWidth: 1, borderBottomColor: '#f3f4f6', padding: 12 }]}>
+            <View key={i} wrap={false} style={[s.row, { fontSize: 10, borderBottomWidth: 1, borderBottomColor: '#f3f4f6', padding: 12 }]}>
               <Text style={{ flex: 1 }}>{item.name || item.itemService || 'Item'}</Text>
               <Text style={{ width: 50, textAlign: 'center' }}>{item.qty}</Text>
               <Text style={{ width: 80, textAlign: 'right' }}>{formatCurrency(item.rate || item.price)}</Text>
@@ -250,7 +250,7 @@ const TealBoldHeaderPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeBa
             {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: 80, textAlign: 'right' }}>Amount</Text>}
           </View>
           {invoice.items?.map((item, i) => (
-            <View key={i} style={[s.row, { fontSize: 10, borderBottomWidth: 1, borderBottomColor: '#e5e5e5', paddingVertical: 12 }]}>
+            <View key={i} wrap={false} style={[s.row, { fontSize: 10, borderBottomWidth: 1, borderBottomColor: '#e5e5e5', paddingVertical: 12 }]}>
               <Text style={[s.bold, { flex: 1, color: '#333' }]}>{item.name || item.itemService || 'Item'}</Text>
               <Text style={{ width: 50, textAlign: 'center', color: '#666' }}>{item.qty}</Text>
               <Text style={[s.bold, { width: 80, textAlign: 'right', color: '#134e4a' }]}>{formatCurrency(item.qty * (item.rate || item.price))}</Text>
@@ -341,7 +341,7 @@ const SageGreenCurvedPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
             {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: 80, textAlign: 'right' }}>Amount</Text>}
           </View>
           {invoice.items?.map((item, i) => (
-            <View key={i} style={[s.row, { fontSize: 10, borderBottomWidth: 1, borderBottomColor: '#d1dbd5', paddingVertical: 12 }]}>
+            <View key={i} wrap={false} style={[s.row, { fontSize: 10, borderBottomWidth: 1, borderBottomColor: '#d1dbd5', paddingVertical: 12 }]}>
               <Text style={{ flex: 1, color: '#333' }}>{item.name || item.itemService || 'Item'}</Text>
               <Text style={{ width: 50, textAlign: 'center', color: '#666' }}>{item.qty}</Text>
               <Text style={{ width: 80, textAlign: 'right', color: '#666' }}>{formatCurrency(item.rate || item.price)}</Text>
@@ -428,7 +428,7 @@ const CreativeAgencyPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeBa
             {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: 80, textAlign: 'right' }}>Price</Text>}
           </View>
           {invoice.items?.map((item, i) => (
-            <View key={i} style={[s.row, { fontSize: 10, borderBottomWidth: 1, borderBottomColor: '#1f2937', paddingVertical: 12 }]}>
+            <View key={i} wrap={false} style={[s.row, { fontSize: 10, borderBottomWidth: 1, borderBottomColor: '#1f2937', paddingVertical: 12 }]}>
               <Text style={{ flex: 1, color: '#d1d5db' }}>{item.name || item.itemService || 'Item'}</Text>
               <Text style={{ width: 50, textAlign: 'center', color: '#6b7280' }}>{item.qty}</Text>
               <Text style={[s.bold, { width: 80, textAlign: 'right', color: '#fff' }]}>{formatCurrency(item.qty * (item.rate || item.price))}</Text>
@@ -534,7 +534,7 @@ const PurpleCorporatePdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
         {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
       </View>
       {invoice.items?.map((item, i) => (
-        <View key={i} style={[s.row, { padding: 8, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
+        <View key={i} wrap={false} style={[s.row, { padding: 8, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#444', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#444', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
@@ -640,7 +640,7 @@ const OrangeGradientModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
         {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Amount</Text>}
       </View>
       {invoice.items?.map((item, i) => (
-        <View key={i} style={[s.row, { backgroundColor: '#fff', padding: 10, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
+        <View key={i} wrap={false} style={[s.row, { backgroundColor: '#fff', padding: 10, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
@@ -756,7 +756,7 @@ const OrangeGeometricCornerPdf = ({ invoice, businessSettings, safeLogoBase64, q
         {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#FF8C00', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
       </View>
       {invoice.items?.map((item, i) => (
-        <View key={i} style={[s.row, { paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
+        <View key={i} wrap={false} style={[s.row, { paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
@@ -851,7 +851,7 @@ const BlackOrangeBoldPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
         {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
       </View>
       {invoice.items?.map((item, i) => (
-        <View key={i} style={[s.row, { padding: 8, borderBottomWidth: 1, borderBottomColor: '#333' }]}>
+        <View key={i} wrap={false} style={[s.row, { padding: 8, borderBottomWidth: 1, borderBottomColor: '#333' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#eee' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#aaa', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#aaa', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
@@ -944,7 +944,7 @@ const LuxuryGoldBlackPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
           {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 8, color: '#D4AF37', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase', letterSpacing: 1 }}>Total</Text>}
         </View>
         {invoice.items?.map((item, i) => (
-          <View key={i} style={[s.row, { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#333' }]}>
+          <View key={i} wrap={false} style={[s.row, { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#333' }]}>
             <Text style={{ width: '40%', fontSize: 9, color: '#eee' }}>{item.name || 'Item'}</Text>
             <Text style={{ width: '20%', fontSize: 9, color: '#aaa', textAlign: 'center' }}>{item.qty}</Text>
             <Text style={{ width: '20%', fontSize: 9, color: '#aaa', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
@@ -1037,7 +1037,7 @@ const BlackHeaderProfessionalPdf = ({ invoice, businessSettings, safeLogoBase64,
         {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#1a1a1a', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
       </View>
       {invoice.items?.map((item, i) => (
-        <View key={i} style={[s.row, { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
+        <View key={i} wrap={false} style={[s.row, { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
@@ -1126,7 +1126,7 @@ const BlueRoundedModernPdf = ({ invoice, businessSettings, safeLogoBase64, qrCod
           {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
         </View>
         {invoice.items?.map((item, i) => (
-          <View key={i} style={[s.row, { padding: 8, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' }]}>
+          <View key={i} wrap={false} style={[s.row, { padding: 8, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' }]}>
             <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
             <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'center' }}>{item.qty}</Text>
             <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
@@ -1233,7 +1233,7 @@ const RedCorporateCleanPdf = ({ invoice, businessSettings, safeLogoBase64, qrCod
         {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
       </View>
       {invoice.items?.map((item, i) => (
-        <View key={i} style={[s.row, { padding: 8, borderBottomWidth: 1, borderBottomColor: '#eee', backgroundColor: i % 2 === 0 ? '#fff' : '#fcfcfc' }]}>
+        <View key={i} wrap={false} style={[s.row, { padding: 8, borderBottomWidth: 1, borderBottomColor: '#eee', backgroundColor: i % 2 === 0 ? '#fff' : '#fcfcfc' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
@@ -1320,7 +1320,7 @@ const CleanTwoColumnModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
         {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#222', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
       </View>
       {invoice.items?.map((item, i) => (
-        <View key={i} style={[s.row, { paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' }]}>
+        <View key={i} wrap={false} style={[s.row, { paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
