@@ -66,12 +66,29 @@ const buildSafeLogoBase64 = async (businessSettings) => {
     clearTimeout(timeoutId);
     if (!response.ok) return null;
     const blob = await response.blob();
-    return await new Promise((resolve) => {
+    const dataUrl = await new Promise((resolve) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result);
       reader.onerror = () => resolve(null);
       reader.readAsDataURL(blob);
     });
+    if (dataUrl) {
+      return await new Promise((resolve) => {
+        const img = new window.Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      });
+    }
+    return null;
   } catch (err) {
     console.warn('[AttachmentEngine] Could not fetch logo for PDF (CORS/Network error). Rendering without logo.', err);
     return null;

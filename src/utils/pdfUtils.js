@@ -69,17 +69,34 @@ const buildInvoicePdfBlob = async (invoice, businessSettings) => {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      // Attempt to fetch and convert the logo to base64 to avoid React-PDF 'Failed to fetch' crashes
       const response = await fetch(businessSettings.logoUrl, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (response.ok) {
         const blob = await response.blob();
-        safeLogoBase64 = await new Promise((resolve) => {
+        const dataUrl = await new Promise((resolve) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve(reader.result);
           reader.onerror = () => resolve(null);
           reader.readAsDataURL(blob);
         });
+        
+        if (dataUrl) {
+          // Convert ANY image format (including WEBP) to PNG for react-pdf compatibility
+          safeLogoBase64 = await new Promise((resolve) => {
+            const img = new window.Image();
+            img.crossOrigin = 'Anonymous';
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0);
+              resolve(canvas.toDataURL('image/png'));
+            };
+            img.onerror = () => resolve(dataUrl); // Fallback to original if canvas fails
+            img.src = dataUrl;
+          });
+        }
       }
     } catch (err) {
       console.warn('Could not fetch logo for PDF (CORS/Network error). Rendering without logo.', err);
@@ -190,6 +207,7 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
   if (isDownloadingPDF) return false;
   if (!invoice) return false;
   isDownloadingPDF = true;
+  const toastId = toast.loading('Generating your PDF... please wait');
   try {
     const blob = await buildInvoicePdfBlob(invoice, businessSettings);
     
@@ -205,8 +223,10 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     
+    toast.dismiss(toastId);
     return true;
   } catch (error) {
+    toast.dismiss(toastId);
     console.error('Vector PDF generation failed:', error);
     toast.error(`PDF Error: ${error?.message || error?.toString() || 'Unknown error'}`);
     toast.error(`Stack: ${error?.stack?.substring(0, 100) || ''}`);
