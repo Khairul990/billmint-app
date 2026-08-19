@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { pdf } from '@react-pdf/renderer';
+import { pdf, Font } from '@react-pdf/renderer';
 import PdfDocument from '../../components/PdfDocument';
 import QRCode from 'qrcode';
 
@@ -82,16 +82,22 @@ const buildSafeLogoBase64 = async (businessSettings) => {
 export async function generateInvoicePdfBlob(invoice, businessSettings) {
   if (!invoice) throw new Error('Invoice missing for PDF generation');
 
-  const [qrCodeBase64, safeLogoBase64] = await Promise.all([
+  const [qrCodeDataUrl, safeLogoBase64] = await Promise.all([
     buildQrBase64(invoice, businessSettings),
     buildSafeLogoBase64(businessSettings)
   ]);
 
   const pageSize = businessSettings?.pdfPageSize || 'A4';
+  // Register a working emoji CDN because the default maxcdn is dead and causes infinite hangs
+  Font.registerEmojiSource({
+    format: 'png',
+    url: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/',
+  });
+
   const doc = React.createElement(PdfDocument, {
     invoice,
     businessSettings: businessSettings || {},
-    qrCodeBase64,
+    qrCodeBase64: qrCodeDataUrl,
     safeLogoBase64,
     pageSize
   });
@@ -99,7 +105,7 @@ export async function generateInvoicePdfBlob(invoice, businessSettings) {
   // Add a timeout so we never hang the share flow on font/network issues.
   const pdfPromise = pdf(doc).toBlob();
   const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('PDF generation timed out (network/font issue)')), 20000)
+    setTimeout(() => reject(new Error('PDF generation timed out (network/font issue)')), 45000)
   );
 
   return await Promise.race([pdfPromise, timeoutPromise]);

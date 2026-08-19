@@ -1,6 +1,12 @@
 import React from 'react';
-import { pdf } from '@react-pdf/renderer';
+import { pdf, Font } from '@react-pdf/renderer';
 import PdfDocument from '../components/PdfDocument';
+
+// Register a working emoji CDN because the default maxcdn is dead and causes infinite hangs
+Font.registerEmojiSource({
+  format: 'png',
+  url: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/',
+});
 import { toast } from 'react-hot-toast';
 import QRCode from 'qrcode';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.js?url';
@@ -86,10 +92,10 @@ const buildInvoicePdfBlob = async (invoice, businessSettings) => {
     pageSize
   });
   
-  // Add a 15-second timeout to prevent silent hangs in case of font or network issues
+  // Add a 45-second timeout to prevent silent hangs in case of font or network issues
   const pdfPromise = pdf(doc).toBlob();
   const timeoutPromise = new Promise((_, reject) => 
-    setTimeout(() => reject(new Error("PDF generation timed out (network/font issue)")), 15000)
+    setTimeout(() => reject(new Error("PDF generation timed out (network/font issue)")), 45000)
   );
   return Promise.race([pdfPromise, timeoutPromise]);
 };
