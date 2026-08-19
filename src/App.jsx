@@ -1048,8 +1048,8 @@ function App() {
       return payload;
     }
 
-    // Fire and forget saveInvoice for Layer 2 persistence
-    invoiceEngine.saveInvoice(payload).then(({ updatedInvoices, firebaseStatus }) => {
+    try {
+      const { updatedInvoices, firebaseStatus } = await invoiceEngine.saveInvoice(payload);
       setInvoices(updatedInvoices);
 
       if (!isSilent) {
@@ -1124,9 +1124,11 @@ function App() {
         setEditingInvoice(null);
         setCurrentTab('invoices');
       }
-    }).catch(e => console.error("Error saving invoice locally:", e));
-
-    return payload;
+      return payload;
+    } catch (e) {
+      console.error("Error saving invoice locally:", e);
+      return null;
+    }
   };
 
   const handleDeleteInvoice = async (id, permanent = false, skipConfirmation = false) => {

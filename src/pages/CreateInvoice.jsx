@@ -16,8 +16,9 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
   const [selectedTemplate, setSelectedTemplate] = useState(businessSettings?.selectedPdfTemplate || defaultTemplate);
   const [viewMode, setViewMode] = useState('pdf');
   const [activeTab, setActiveTab] = useState('listing');
-  const [showPreviewPanel, setShowPreviewPanel] = useState(true);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showPreviewPanel, setShowPreviewPanel] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [draftBusinessSettings, setDraftBusinessSettings] = useState(businessSettings || {});
   const [invoiceNumber, setInvoiceNumber] = useState(`INV-${Math.floor(1000 + Math.random() * 9000)}`);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -213,7 +214,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const payload = {
       invoiceNumber,
       date,
@@ -238,14 +239,24 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
         rate: parseFloat(i.price) || 0,
         amount: (parseFloat(i.qty) || 0) * (parseFloat(i.price) || 0),
         customFields: i.customFields || {}
-    })),
-    selectedTemplate,
-    invoiceColumns
-  };
-  if (editingInvoice?.id) payload.id = editingInvoice.id;
-  
-  if (onSaveInvoice) {
-    onSaveInvoice(payload, false, false);
+      })),
+      selectedTemplate,
+      invoiceColumns
+    };
+    if (editingInvoice?.id) payload.id = editingInvoice.id;
+    
+    if (onSaveInvoice) {
+      setIsSaving(true);
+      try {
+        await onSaveInvoice(payload, false, false);
+        if (onBack) {
+          onBack();
+        } else {
+          window.history.back();
+        }
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -299,8 +310,9 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
           <button onClick={() => setShowPreviewPanel(!showPreviewPanel)} className="p-2 rounded-xl border border-theme-border-soft hover:bg-theme-surface transition-colors flex items-center gap-2 text-sm font-bold text-theme-primary bg-theme-card shadow-sm">
             {showPreviewPanel ? <><EyeOff className="w-4 h-4" /> <span className="hidden sm:inline">Hide</span></> : <><Eye className="w-4 h-4" /> <span className="hidden sm:inline">Show Preview</span></>}
           </button>
-          <button onClick={handleSave} className="btn-premium ml-2">
-            <Save className="w-4 h-4" /> Save Invoice
+          <button onClick={handleSave} disabled={isSaving} className="btn-premium ml-2 flex items-center justify-center gap-2 min-w-[140px]">
+            {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <Save className="w-4 h-4" />}
+            {isSaving ? 'Saving...' : 'Save Invoice'}
           </button>
         </div>,
         getStudioHeaderTarget('studio-header-actions-portal')
