@@ -1,15 +1,15 @@
 import React from 'react';
 import { pdf, Font } from '@react-pdf/renderer';
 import PdfDocument from '../components/PdfDocument';
+import { toast } from 'react-hot-toast';
+import QRCode from 'qrcode';
+import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.js?url';
 
 // Register a working emoji CDN because the default maxcdn is dead and causes infinite hangs
 Font.registerEmojiSource({
   format: 'png',
   url: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/',
 });
-import { toast } from 'react-hot-toast';
-import QRCode from 'qrcode';
-import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.js?url';
 
 let isDownloadingPDF = false;
 let isDownloadingImage = false;
