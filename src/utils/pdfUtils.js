@@ -67,8 +67,11 @@ const buildInvoicePdfBlob = async (invoice, businessSettings) => {
   let safeLogoBase64 = null;
   if (businessSettings?.logoUrl) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       // Attempt to fetch and convert the logo to base64 to avoid React-PDF 'Failed to fetch' crashes
-      const response = await fetch(businessSettings.logoUrl);
+      const response = await fetch(businessSettings.logoUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (response.ok) {
         const blob = await response.blob();
         safeLogoBase64 = await new Promise((resolve) => {

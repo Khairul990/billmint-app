@@ -60,7 +60,10 @@ const buildSafeLogoBase64 = async (businessSettings) => {
   const logoUrl = businessSettings?.logoUrl;
   if (!logoUrl) return null;
   try {
-    const response = await fetch(logoUrl);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const response = await fetch(logoUrl, { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (!response.ok) return null;
     const blob = await response.blob();
     return await new Promise((resolve) => {
