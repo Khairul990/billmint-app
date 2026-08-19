@@ -107,12 +107,7 @@ export async function generateInvoicePdfBlob(invoice, businessSettings) {
     buildSafeLogoBase64(businessSettings)
   ]);
 
-  // Register a working emoji CDN because the default maxcdn is dead and causes infinite hangs
-  // using jsdelivr as cdnjs sometimes causes CORS or rate limiting hangs
-  Font.registerEmojiSource({
-    format: 'png',
-    url: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/',
-  });
+  // Emoji CDN registration removed to prevent network hangs. Emojis will be stripped or use default system fallbacks.
 
   // Deeply sanitize known unsupported characters that crash React-PDF without a font fallback
   const safeInvoice = JSON.parse(JSON.stringify(invoice).replace(/₹/g, 'Rs. ').replace(/৳/g, 'Tk. '));

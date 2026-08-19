@@ -5,12 +5,7 @@ import { toast } from 'react-hot-toast';
 import QRCode from 'qrcode';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.js?url';
 
-// Register a working emoji CDN because the default maxcdn is dead and causes infinite hangs
-// using jsdelivr as cdnjs sometimes causes CORS or rate limiting hangs
-Font.registerEmojiSource({
-  format: 'png',
-  url: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/',
-});
+// Emoji CDN registration removed to prevent network hangs. Emojis will be stripped or use default system fallbacks.
 
 let isDownloadingPDF = false;
 let isDownloadingImage = false;
