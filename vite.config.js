@@ -62,21 +62,14 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: '0.0.0.0', // Listen on all local IPs so it's accessible from phone
   },
+  esbuild: {
+    drop: mode === 'android' ? [] : ['console', 'debugger'],
+  },
   build: {
     sourcemap: false,
     cssCodeSplit: true,
     target: 'es2020',
-    minify: mode === 'android' ? false : 'terser',
-    terserOptions: mode === 'android' ? undefined : {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug'],
-        passes: 2
-      },
-      mangle: mode === 'android' ? false : { properties: { regex: /^_private_/ } },
-      format: { comments: false }
-    },
+    minify: mode === 'android' ? false : 'esbuild',
     rollupOptions: {
       output: {
         inlineDynamicImports: false,
