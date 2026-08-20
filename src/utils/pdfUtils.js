@@ -111,7 +111,8 @@ const buildInvoicePdfBlob = async (invoice, businessSettings) => {
     pageSize
   });
   
-  if (typeof window !== 'undefined' && !window.Buffer) {
+  const hasBuffer = typeof Buffer !== 'undefined' || (typeof window !== 'undefined' && window.Buffer) || (typeof globalThis !== 'undefined' && globalThis.Buffer);
+  if (!hasBuffer) {
     throw new Error('Fatal: Node.js polyfills (Buffer) are missing. Please ensure vite-plugin-node-polyfills is correctly configured or force-refresh the page to clear the PWA cache.');
   }
 

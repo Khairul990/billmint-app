@@ -6,7 +6,13 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
-    nodePolyfills(), // Required by @react-pdf/renderer in Vite production builds
+    nodePolyfills({
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true,
+      },
+    }), // Required by @react-pdf/renderer in Vite production builds
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
