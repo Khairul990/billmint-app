@@ -111,10 +111,14 @@ const buildInvoicePdfBlob = async (invoice, businessSettings) => {
     pageSize
   });
   
-  // Add a 45-second timeout to prevent silent hangs in case of font or network issues
+  if (typeof window !== 'undefined' && !window.Buffer) {
+    throw new Error('Fatal: Node.js polyfills (Buffer) are missing. Please ensure vite-plugin-node-polyfills is correctly configured or force-refresh the page to clear the PWA cache.');
+  }
+
+  // Add a 15-second timeout to prevent silent hangs in case of font or network issues
   const pdfPromise = pdf(doc).toBlob();
   const timeoutPromise = new Promise((_, reject) => 
-    setTimeout(() => reject(new Error("PDF generation timed out (network/font issue)")), 45000)
+    setTimeout(() => reject(new Error("PDF generation timed out (network/font issue). If this persists, try clearing your browser cache.")), 15000)
   );
   return Promise.race([pdfPromise, timeoutPromise]);
 };
