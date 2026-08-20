@@ -5,12 +5,7 @@ import { toast } from 'react-hot-toast';
 import QRCode from 'qrcode';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.js?url';
 
-// Fix twemoji maxcdn shutdown issue that causes React-PDF to hang when it encounters emojis
-Font.registerEmojiSource({
-  format: 'png',
-  url: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/',
-});
-
+// Emoji source registration removed because we strip emojis manually below to prevent hangs.
 let isDownloadingPDF = false;
 let isDownloadingImage = false;
 
