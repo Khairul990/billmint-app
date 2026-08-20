@@ -588,16 +588,16 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
             <View style={styles.grandTotalRow}>
               <Text style={[styles.grandTotalLabel, { color: tPrimary }]}>Grand Total</Text>
               <Text style={[styles.grandTotalValue, { color: tAccent }]}>
-                {formatCurrency(invoice.totalDue || invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}
+                {formatCurrency(invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0)), currencySymbol, regionalPrefs.numberFormat)}
               </Text>
             </View>
 
             {/* Balance Due */}
-            {(invoice.balanceDue > 0 || ((invoice.totalDue || invoice.grandTotal) > (invoice.amountPaid || 0))) && (
+            {(invoice.balanceDue > 0 || (invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0))) > (invoice.amountPaid || 0)) && (
               <View style={styles.balanceDueRow}>
                 <Text style={styles.balanceDueLabel}>Balance Due</Text>
                 <Text style={styles.balanceDueValue}>
-                  {formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.totalDue || invoice.grandTotal), currencySymbol, regionalPrefs.numberFormat)}
+                  {formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0))), currencySymbol, regionalPrefs.numberFormat)}
                 </Text>
               </View>
             )}

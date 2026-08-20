@@ -294,7 +294,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
           <div className={`flex justify-between items-center border-t pt-3 text-theme-primary dark:text-theme-primary dark:text-theme-primary ${templateId === 'classic-elegant' ? 'border-emerald-800/50' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
             <span className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Grand Total</span>
             <span className="text-lg font-black text-theme-accent dark:text-theme-accent">
-              {formatCurrency(invoice.totalDue || invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}
+              {formatCurrency(invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0)), currencySymbol, regionalPrefs.numberFormat)}
             </span>
           </div>
         </div>
