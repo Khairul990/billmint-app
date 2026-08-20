@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
+    nodePolyfills(), // Required by @react-pdf/renderer in Vite production builds
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
