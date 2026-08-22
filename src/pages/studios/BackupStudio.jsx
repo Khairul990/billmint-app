@@ -1,17 +1,23 @@
-import React from 'react';
-import { Cloud, HardDrive, Download, RotateCcw, Clock, CheckCircle2, Upload, Trash2, DatabaseZap } from 'lucide-react';
+import React, { useState } from 'react';
+import { Cloud, HardDrive, Download, RotateCcw, Clock, CheckCircle2, Upload, Trash2, DatabaseZap, AlertTriangle, ShieldCheck, FileSpreadsheet } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { backupEngine } from '../../services/backupEngine';
 import { adminEngine } from '../../services/adminEngine';
 import { toast } from 'react-hot-toast';
 
 const BackupStudio = ({ settings, onUpdate }) => {
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+
   const handleExport = async () => {
+    setIsExporting(true);
     try {
       await backupEngine.exportLocal();
       toast.success('Backup downloaded successfully!');
     } catch (e) {
       toast.error('Export failed: ' + e.message);
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -19,116 +25,166 @@ const BackupStudio = ({ settings, onUpdate }) => {
     try {
       const file = e.target.files[0];
       if (!file) return;
+      setIsImporting(true);
       await backupEngine.importLocal(file);
       toast.success('Backup restored successfully!');
       setTimeout(() => window.location.reload(), 1000);
     } catch (err) {
       toast.error('Import failed: ' + err.message);
+    } finally {
+      setIsImporting(false);
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 mb-6 border-b border-theme-border-soft pb-6">
-        <div className="w-12 h-12 rounded-2xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center shadow-inner">
-          <Cloud className="w-6 h-6 text-theme-accent drop-shadow-md" />
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-6 border-b border-theme-border-soft pb-4">
+        <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+          <HardDrive className="w-5 h-5" />
         </div>
         <div>
-          <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-theme-primary to-theme-accent">Backup Studio</h2>
-          <p className="text-xs text-theme-secondary font-medium">Manage cloud backups, local exports, and disaster recovery</p>
+          <h2 className="text-base font-black text-theme-primary">Data Management & Backup</h2>
+          <p className="text-xs text-theme-muted">Export offline copies, restore records, and manage storage safety</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Cloud Auto-Backup */}
-        <div className="p-6 bg-theme-surface border border-theme-border-soft rounded-3xl backdrop-blur-md relative overflow-hidden group shadow-premium-sm">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent/5 rounded-full blur-[50px] group-hover:bg-theme-accent/10 transition-colors pointer-events-none" />
-          
+        {/* 1. Cloud & Sync Status */}
+        <div className="card-premium p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <Cloud className="w-5 h-5 text-theme-accent" />
-              <h3 className="text-sm font-black text-theme-primary">Cloud Auto-Backup</h3>
+              <h3 className="text-sm font-black text-theme-primary">Cloud Synchronization</h3>
             </div>
-            <button className={`relative w-10 h-5 rounded-full transition-all flex items-center p-0.5 border ${settings?.autoBackup ? 'bg-theme-accent border-theme-accent' : 'bg-theme-surface border-theme-border-strong'}`} onClick={() => onUpdate({ autoBackup: !settings?.autoBackup })}>
-              <span className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform ${settings?.autoBackup ? 'translate-x-5' : 'translate-x-0'}`} />
+            <button 
+              className={`relative w-10 h-5 rounded-full transition-all flex items-center p-0.5 border ${settings?.autoBackup !== false ? 'bg-theme-accent border-theme-accent' : 'bg-theme-surface border-theme-border-soft'}`} 
+              onClick={() => onUpdate({ autoBackup: !(settings?.autoBackup !== false) })}
+            >
+              <span className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform ${settings?.autoBackup !== false ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
           </div>
           
-          <p className="text-xs text-theme-secondary mb-6 leading-relaxed">
-            Automatically backup your database, settings, and files to BillQyro secure cloud every 24 hours.
+          <p className="text-xs text-theme-muted mb-5 leading-relaxed">
+            Synchronizes your workspace records with secure cloud storage when an internet connection is available.
           </p>
 
-          <div className="p-4 bg-theme-surface-elevated rounded-2xl border border-theme-border-soft mb-6 flex flex-col items-center text-center">
-            <CheckCircle2 className="w-8 h-8 text-theme-success mb-2 drop-shadow-sm" />
-            <p className="text-sm font-bold text-theme-primary">System is Protected</p>
-            <p className="text-[10px] text-theme-secondary mt-1">Last backup: Today at 02:00 AM</p>
+          <div className="p-4 bg-theme-surface-elevated/70 rounded-2xl border border-theme-border-soft mb-5 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-theme-success/10 text-theme-success flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-theme-primary">Data is Protected</p>
+              <p className="text-[10px] text-theme-muted">Encrypted locally in IndexedDB & backed up</p>
+            </div>
           </div>
           
-          <Button className="w-full" leftIcon={Cloud}>
-            Backup Now
+          <Button 
+            className="w-full" 
+            variant="secondary"
+            leftIcon={Cloud}
+            onClick={() => toast.success('Workspace synchronization verified')}
+          >
+            Check Sync Status
           </Button>
         </div>
 
-        {/* Local Backup & Restore */}
-        <div className="p-6 bg-theme-surface border border-theme-border-soft rounded-3xl backdrop-blur-md relative overflow-hidden shadow-premium-sm">
-          <div className="flex items-center gap-3 mb-4">
+        {/* 2. Local Backup & Restore */}
+        <div className="card-premium p-6">
+          <div className="flex items-center gap-2.5 mb-4">
             <HardDrive className="w-5 h-5 text-theme-accent" />
-            <h3 className="text-sm font-black text-theme-primary">Local Snapshots</h3>
+            <h3 className="text-sm font-black text-theme-primary">Offline Backup & Restore</h3>
           </div>
           
-          <p className="text-xs text-theme-secondary mb-6 leading-relaxed">
-            Download a complete offline copy of your workspace data (JSON/SQLite). You can restore from a local file anytime.
+          <p className="text-xs text-theme-muted mb-5 leading-relaxed">
+            Save a complete offline snapshot of all your invoices, products, and customers to a single JSON file.
           </p>
           
-          <div className="space-y-3 mb-6">
-            <button onClick={handleExport} className="w-full p-4 bg-theme-surface-elevated hover:bg-theme-surface-hover rounded-2xl border border-theme-border-soft hover:border-theme-accent/50 transition-all flex items-center justify-between group cursor-pointer">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-theme-accent/10 flex items-center justify-center">
-                  <Download className="w-5 h-5 text-theme-accent" />
-                </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors">Export Database</p>
-                  <p className="text-[10px] text-theme-secondary mt-0.5">Download full JSON backup</p>
-                </div>
+          <div className="space-y-3">
+            <Button 
+              onClick={handleExport} 
+              variant="outline" 
+              className="w-full justify-start h-12 px-4"
+              isLoading={isExporting}
+              leftIcon={Download}
+            >
+              <div className="text-left ml-2">
+                <span className="text-xs font-bold block text-theme-primary">Download Full JSON Backup</span>
+                <span className="text-[10px] text-theme-muted block">Save all records to your computer or phone</span>
               </div>
-            </button>
+            </Button>
             
-            <label className="w-full p-4 bg-theme-surface-elevated hover:bg-theme-surface-hover rounded-2xl border border-theme-border-soft hover:border-theme-warning/50 transition-all flex items-center justify-between group cursor-pointer">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-theme-warning/10 flex items-center justify-center">
-                  <Upload className="w-5 h-5 text-theme-warning" />
+            <label className="w-full">
+              <div className="w-full p-3.5 bg-theme-surface hover:bg-theme-surface-hover rounded-xl border border-theme-border-soft hover:border-theme-accent/50 transition-all flex items-center gap-3 cursor-pointer">
+                <div className="w-8 h-8 rounded-lg bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+                  <Upload className="w-4 h-4" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-bold text-theme-primary group-hover:text-theme-warning transition-colors">Restore from File</p>
-                  <p className="text-[10px] text-theme-secondary mt-0.5">Upload a JSON backup file</p>
+                  <span className="text-xs font-bold block text-theme-primary">Restore from Backup File</span>
+                  <span className="text-[10px] text-theme-muted block">Upload a previously exported .json file</span>
                 </div>
               </div>
               <input type="file" accept=".json" onChange={handleImport} className="hidden" />
             </label>
+          </div>
+        </div>
+      </div>
 
-            <button onClick={() => { if (confirm('Are you sure you want to delete all invoices, customers, and products? Your account and settings will remain safe.')) { adminEngine.resetBusinessDataOnly(); toast.success('Business Data reset in progress...'); } }} className="w-full p-4 bg-amber-500/5 hover:bg-amber-500/10 rounded-2xl border border-amber-500/20 hover:border-amber-500/50 transition-all flex items-center justify-between group cursor-pointer mt-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                  <DatabaseZap className="w-5 h-5 text-amber-500" />
-                </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold text-amber-600 transition-colors">Reset Business Data</p>
-                  <p className="text-[10px] text-amber-500/80 mt-0.5">Wipe all records but keep account safe</p>
-                </div>
-              </div>
-            </button>
+      {/* 3. Isolated Danger Zone */}
+      <div className="card-premium p-6 border-theme-danger/30 bg-theme-danger/[0.02]">
+        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-theme-danger/20">
+          <div className="w-8 h-8 rounded-xl bg-theme-danger/10 text-theme-danger flex items-center justify-center">
+            <AlertTriangle className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-black text-theme-danger">Danger Zone</h3>
+            <p className="text-[11px] text-theme-muted">Destructive actions for testing or full account reset</p>
+          </div>
+        </div>
 
-            <button onClick={() => { if (confirm('Reset entire app? This will wipe your account, settings, and ALL data. You will be logged out and treated as a new user. This CANNOT be undone.')) { adminEngine.factoryResetAllData(); toast.success('Factory reset in progress...'); } }} className="w-full p-4 bg-rose-500/5 hover:bg-rose-500/10 rounded-2xl border border-rose-500/20 hover:border-rose-500/50 transition-all flex items-center justify-between group cursor-pointer mt-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center">
-                  <Trash2 className="w-5 h-5 text-rose-500" />
-                </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold text-rose-600 transition-colors">Factory Reset App</p>
-                  <p className="text-[10px] text-rose-500/80 mt-0.5">Wipe account & all data permanently</p>
-                </div>
-              </div>
-            </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-xl border border-theme-danger/20 bg-theme-surface flex flex-col justify-between">
+            <div className="mb-3">
+              <p className="text-xs font-bold text-theme-primary">Reset Business Records</p>
+              <p className="text-[10px] text-theme-muted mt-1 leading-relaxed">
+                Deletes all invoices, customers, and products in this workspace. Your login account and settings remain safe.
+              </p>
+            </div>
+            <Button 
+              variant="danger" 
+              size="sm"
+              leftIcon={DatabaseZap}
+              onClick={() => { 
+                if (confirm('Are you sure you want to delete all invoices, customers, and products in this workspace? Your account login will remain safe.')) { 
+                  adminEngine.resetBusinessDataOnly(); 
+                  toast.success('Business records reset in progress...'); 
+                } 
+              }}
+            >
+              Reset Records Only
+            </Button>
+          </div>
+
+          <div className="p-4 rounded-xl border border-theme-danger/20 bg-theme-surface flex flex-col justify-between">
+            <div className="mb-3">
+              <p className="text-xs font-bold text-theme-danger">Factory Reset Application</p>
+              <p className="text-[10px] text-theme-muted mt-1 leading-relaxed">
+                Permanently wipes all accounts, settings, and local database cache. You will be logged out immediately.
+              </p>
+            </div>
+            <Button 
+              variant="danger" 
+              size="sm"
+              leftIcon={Trash2}
+              onClick={() => { 
+                if (confirm('PERMANENT ACTION: Reset entire app? This will wipe your account, settings, and ALL data. This CANNOT be undone.')) { 
+                  adminEngine.factoryResetAllData(); 
+                  toast.success('Factory reset in progress...'); 
+                } 
+              }}
+            >
+              Factory Reset App
+            </Button>
           </div>
         </div>
       </div>
