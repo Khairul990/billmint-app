@@ -335,6 +335,18 @@ export const FEATURE_REGISTRY = {
     version: 1
   },
 
+  // --- REPORTING FEATURES ---
+  'reports': {
+    id: 'reports',
+    category: FEATURE_CATEGORIES.REPORTS,
+    name: 'Reports & Analytics',
+    description: 'View sales, payment, and business performance reports.',
+    defaultEnabled: true,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+
   // --- OPERATIONS FEATURES ---
   'operations.orders': {
     id: 'operations.orders',
@@ -442,3 +454,4 @@ export const FEATURE_REGISTRY = {
     version: 1
   }
 };
+
