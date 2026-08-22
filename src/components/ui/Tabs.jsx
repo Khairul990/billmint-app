@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 
-export const Tabs = ({ defaultValue, children, className = '' }) => {
-  const [activeTab, setActiveTab] = useState(defaultValue);
+export const Tabs = ({ value, onValueChange, defaultValue, children, className = '' }) => {
+  const [internalTab, setInternalTab] = useState(defaultValue);
+  const activeTab = value !== undefined ? value : internalTab;
+  const setActiveTab = onValueChange || setInternalTab;
 
   return (
     <div className={`w-full ${className}`}>
@@ -16,7 +18,7 @@ export const Tabs = ({ defaultValue, children, className = '' }) => {
 };
 
 export const TabsList = ({ children, activeTab, setActiveTab, className = '' }) => (
-  <div className={`flex items-center gap-2 border-b border-theme-border-soft pb-2 mb-6 overflow-x-auto no-scrollbar ${className}`}>
+  <div className={`flex items-center gap-1.5 p-1 bg-theme-surface-elevated/70 border border-theme-border-soft rounded-xl mb-5 overflow-x-auto no-scrollbar ${className}`}>
     {React.Children.map(children, child => {
       if (React.isValidElement(child)) {
         return React.cloneElement(child, { activeTab, setActiveTab });
@@ -30,11 +32,12 @@ export const TabsTrigger = ({ value, activeTab, setActiveTab, children, classNam
   const isActive = activeTab === value;
   return (
     <button
-      onClick={() => setActiveTab(value)}
-      className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
+      type="button"
+      onClick={() => setActiveTab && setActiveTab(value)}
+      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 whitespace-nowrap select-none ${
         isActive 
-          ? 'bg-theme-surface text-theme-primary border border-theme-border-soft shadow-glass' 
-          : 'text-theme-muted hover:text-theme-primary hover:bg-theme-surface-hover border border-transparent'
+          ? 'bg-theme-card text-theme-primary shadow-sm border border-theme-border-soft/60' 
+          : 'text-theme-muted hover:text-theme-primary hover:bg-theme-surface/50 border border-transparent'
       } ${className}`}
     >
       {children}
@@ -44,5 +47,5 @@ export const TabsTrigger = ({ value, activeTab, setActiveTab, children, classNam
 
 export const TabsContent = ({ value, activeTab, children, className = '' }) => {
   if (activeTab !== value) return null;
-  return <div className={`animate-in fade-in slide-in-from-bottom-2 duration-300 ${className}`}>{children}</div>;
+  return <div className={`animate-in fade-in duration-200 ${className}`}>{children}</div>;
 };
