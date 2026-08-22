@@ -35,6 +35,7 @@ import { Loader2, ArrowLeft } from 'lucide-react';
  */
 const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSettings, setCurrentTab }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [catalogFilter, setCatalogFilter] = useState(null);
   const [activeTab, setActiveTab] = useState('products');
   const [modalTab, setModalTab] = useState('basic');
   
@@ -169,17 +170,24 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
   };
 
   // Filter Catalog
-  const filteredProducts = useMemo(() => products.filter(p => {
-    const q = searchQuery.trim().toLowerCase();
-    return (
-      (p.name || '').toLowerCase().includes(q) ||
-      (p.description || '').toLowerCase().includes(q) ||
-      (p.category || '').toLowerCase().includes(q) ||
-      (p.brand || '').toLowerCase().includes(q) ||
-      (p.sku || '').toLowerCase().includes(q) ||
-      (p.barcode || '').toLowerCase().includes(q)
-    );
-  }), [products, searchQuery]);
+  const filteredProducts = useMemo(() => products.filter((product) => {
+    const query = searchQuery.trim().toLowerCase();
+    const matchesSearch = [
+      product.name,
+      product.description,
+      product.category,
+      product.brand,
+      product.sku,
+      product.barcode,
+    ].some((value) => (value || '').toLowerCase().includes(query));
+
+    if (!catalogFilter) return matchesSearch;
+
+    const value = catalogFilter.type === 'category'
+      ? (product.category?.trim() || 'Uncategorized')
+      : (product.brand?.trim() || 'Unbranded');
+    return matchesSearch && value === catalogFilter.value;
+  }), [products, searchQuery, catalogFilter]);
 
   const categorySummary = useMemo(() => {
     const categories = new Map();
@@ -215,8 +223,9 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
     })
     .sort((a, b) => Number(a.stockQty) - Number(b.stockQty)), [products]);
 
-  const viewCatalogFor = (term) => {
-    setSearchQuery(term);
+  const viewCatalogFor = (type, value) => {
+    setSearchQuery('');
+    setCatalogFilter({ type, value });
     setActiveTab('products');
   };
 
@@ -286,7 +295,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
         {activeTab === 'products' && (
           <>
             {/* SEARCH CARD */}
-        <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center justify-between">
+        <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium space-y-3">
           <div className="relative w-full">
             <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted pointer-events-none">
               <Search className="w-4 h-4" />
@@ -294,11 +303,20 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search catalog items by description, code name..."
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCatalogFilter(null);
+              }}
+              placeholder="Search by item, category, brand, SKU, or barcode..."
               className="w-full pl-10 pr-4 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent focus:bg-theme-card dark:bg-theme-card transition-all text-theme-primary dark:text-theme-primary"
             />
           </div>
+          {catalogFilter && (
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-theme-accent-light px-3 py-2 text-xs">
+              <span className="font-bold text-theme-accent">Showing {catalogFilter.type}: {catalogFilter.value}</span>
+              <button type="button" onClick={() => setCatalogFilter(null)} className="font-extrabold text-theme-primary hover:text-theme-accent transition-colors">Clear filter</button>
+            </div>
+          )}
         </div>
 
         {/* DYNAMIC LIST GRID */}
@@ -660,7 +678,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
               {categorySummary.length ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {categorySummary.map((item) => (
-                    <button key={item.label} onClick={() => viewCatalogFor(item.label)} className="text-left rounded-2xl border border-theme-border-soft bg-theme-surface/50 p-4 hover:border-theme-accent/50 hover:bg-theme-accent-light/50 transition-colors">
+                    <button key={item.label} onClick={() => viewCatalogFor('category', item.label)} className="text-left rounded-2xl border border-theme-border-soft bg-theme-surface/50 p-4 hover:border-theme-accent/50 hover:bg-theme-accent-light/50 transition-colors">
                       <div className="flex items-center justify-between gap-3">
                         <span className="flex items-center gap-2 font-extrabold text-sm text-theme-primary"><span className="w-8 h-8 rounded-xl bg-theme-card border border-theme-border-soft flex items-center justify-center text-theme-accent">{getCategoryIcon(item.label)}</span>{item.label}</span>
                         <span className="text-xs font-black text-theme-accent">{item.count}</span>
@@ -677,7 +695,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
               <h4 className="font-extrabold text-theme-primary">Brands</h4>
               <p className="text-xs text-theme-muted font-semibold mt-1 mb-4">Tap a brand to see its catalog items.</p>
               {brandSummary.length ? <div className="space-y-2">{brandSummary.map((item) => (
-                <button key={item.label} onClick={() => viewCatalogFor(item.label)} className="w-full flex items-center justify-between rounded-xl px-3.5 py-3 bg-theme-surface/60 border border-theme-border-soft text-left hover:border-theme-accent/50 transition-colors"><span className="text-xs font-bold text-theme-primary truncate pr-3">{item.label}</span><span className="shrink-0 text-[10px] font-black text-theme-muted">{item.count} item{item.count === 1 ? '' : 's'}</span></button>
+                <button key={item.label} onClick={() => viewCatalogFor('brand', item.label)} className="w-full flex items-center justify-between rounded-xl px-3.5 py-3 bg-theme-surface/60 border border-theme-border-soft text-left hover:border-theme-accent/50 transition-colors"><span className="text-xs font-bold text-theme-primary truncate pr-3">{item.label}</span><span className="shrink-0 text-[10px] font-black text-theme-muted">{item.count} item{item.count === 1 ? '' : 's'}</span></button>
               ))}</div> : <div className="py-10 text-center text-theme-muted"><Tag className="w-10 h-10 mx-auto mb-3 opacity-40" /><p className="text-sm font-bold">No brands assigned</p><p className="mt-1 text-xs">Brands are optional for each item.</p></div>}
             </section>
           </div>
