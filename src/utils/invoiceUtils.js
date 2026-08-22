@@ -8,7 +8,7 @@
 export const calculateTotals = (items = [], taxPercentage = 0, discountAmount = 0) => {
   const subtotal = items.reduce((acc, item) => {
     const q = parseFloat(item.qty) || 0;
-    const r = parseFloat(item.rate) || 0;
+    const r = parseFloat(item.rate || item.price || item.unitPrice) || 0;
     const d = parseFloat(item.discount) || 0;
     const itemAmount = Math.max(0, (q * r) - d); // Row level calculation
     return acc + itemAmount;

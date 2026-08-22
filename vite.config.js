@@ -83,12 +83,17 @@ export default defineConfig(({ mode }) => ({
         inlineDynamicImports: false,
         hoistTransitiveImports: true,
         manualChunks: {
-          vendor: ['react', 'react-dom', 'framer-motion'],
-          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore']
+          'vendor-react': ['react', 'react-dom', 'framer-motion'],
+          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-charts': ['recharts'],
+          'vendor-flow': ['@xyflow/react'],
+          'vendor-pdf': ['@react-pdf/renderer', 'pdfjs-dist'],
+          'vendor-ocr': ['tesseract.js'],
+          'vendor-utils': ['jszip', 'pako', 'qrcode', 'qrcode.react', 'zod', 'uuid']
         }
       }
     },
-    chunkSizeWarningLimit: 3000
+    chunkSizeWarningLimit: 1500
   }
 }))
-

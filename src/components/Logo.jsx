@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false, onClick }) => {
   const [isClicked, setIsClicked] = useState(false);
+  const rawId = useId();
+  const uid = rawId.replace(/:/g, '');
 
   const handleLogoClick = (e) => {
     if (!isClicked) {
@@ -11,8 +13,6 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false, onC
     }
     if (onClick) onClick(e);
   };
-
-  const uid = React.useId ? React.useId().replace(/:/g, '') : 'logo';
 
   const defs = (
     <defs>

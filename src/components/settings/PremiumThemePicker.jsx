@@ -37,11 +37,11 @@ const PremiumThemePicker = ({
             <button
               type="button"
               onClick={() => setThemeType('preset')}
-              className={\`flex-1 py-2 px-3 rounded-xl border text-sm font-medium transition-all \${
+              className={`flex-1 py-2 px-3 rounded-xl border text-sm font-medium transition-all ${
                 themeType === 'preset' 
                   ? 'bg-theme-accent text-white border-theme-accent shadow-premium' 
                   : 'bg-theme-surface border-theme-border-soft text-theme-muted hover:border-theme-accent/50'
-              }\`}
+              }`}
             >
               Pre-built Themes
             </button>
@@ -50,11 +50,11 @@ const PremiumThemePicker = ({
               onClick={() => {
                 if (isPremium) setThemeType('custom');
               }}
-              className={\`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border text-sm font-medium transition-all \${
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border text-sm font-medium transition-all ${
                 themeType === 'custom' 
                   ? 'bg-gradient-to-r from-theme-accent to-fuchsia-500 text-white border-transparent shadow-premium' 
                   : 'bg-theme-surface border-theme-border-soft text-theme-muted hover:border-theme-accent/50'
-              } \${!isPremium && 'opacity-60 cursor-not-allowed'}\`}
+              } ${!isPremium ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
               <Sparkles className="w-4 h-4" />
               Custom Brand

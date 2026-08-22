@@ -48,7 +48,7 @@ export const parseInvoiceFromPdf = async (file) => {
 
     // 2. Try to find Date
     let date = new Date().toISOString().split('T')[0];
-    const dateRegex = /(?:date|dated)[\s:-]*([\d]{1,2}[-/\.][\d]{1,2}[-/\.][\d]{2,4})/i;
+    const dateRegex = /(?:date|dated)[\s:-]*([\d]{1,2}[-/.\\][\d]{1,2}[-/.\\][\d]{2,4})/i;
     const dateMatch = fullLowerText.match(dateRegex);
     if (dateMatch && dateMatch[1]) {
       const parts = dateMatch[1].replace(/\./g, '-').replace(/\//g, '-').split('-');
@@ -66,7 +66,7 @@ export const parseInvoiceFromPdf = async (file) => {
 
     // 3. Try to find Total Amount
     let total = 0;
-    const totalRegex = /(?:grand\s+total|total\s+amount|net\s+total|total)[\s:Rs₹\.-]*([\d,]+(?:\.\d{1,2})?)/ig;
+    const totalRegex = /(?:grand\s+total|total\s+amount|net\s+total|total)[\s:Rs₹.-]*([\d,]+(?:\.\d{1,2})?)/ig;
     let match;
     let maxTotal = 0;
     while ((match = totalRegex.exec(fullLowerText)) !== null) {
@@ -118,6 +118,6 @@ export const parseInvoiceFromPdf = async (file) => {
     };
   } catch (err) {
     console.error('PDF Parse Error:', err);
-    throw new Error('Failed to parse PDF: ' + (err.message || 'Unknown error'));
+    throw new Error('Failed to parse PDF: ' + (err.message || 'Unknown error'), { cause: err });
   }
 };

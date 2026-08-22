@@ -36,7 +36,6 @@ import { backupEngine } from './services/backupEngine';
 import { subscriptionEngine } from './services/subscriptionEngine';
 import { paymentEngine } from './services/paymentEngine';
 
-import { downloadInvoicePDF, downloadInvoiceImage } from './utils/pdfUtils';
 import { auth, firebaseReady } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { triggerSuccessFeedback, triggerPaymentSuccessFeedback, triggerPopFeedback, triggerDeleteFeedback, triggerVoiceFeedback } from './utils/feedback';
@@ -776,7 +775,7 @@ function App() {
               });
             }
           });
-        } catch {
+        } catch (e) {
           sendEmpireError({ errorType: "sync_failed", message: "Could not sync Firestore on startup", severity: "Medium" });
           console.warn('Could not sync Firestore on startup. Falling back to LocalStorage.', e);
         } finally {
@@ -1140,6 +1139,27 @@ function App() {
 
     const executeDelete = async () => {
       triggerDeleteFeedback();
+      const targetInv = (invoices || []).find(inv => inv.id === id);
+      if (targetInv && Array.isArray(targetInv.items) && products && products.length > 0) {
+        let productsChanged = false;
+        const updatedProds = [...products];
+        const savePromises = [];
+        targetInv.items.forEach(item => {
+          const itemName = (item.description || item.productName || item.serviceName || item.itemService || '').trim().toLowerCase();
+          if (!itemName) return;
+          const matched = updatedProds.find(p => p.name && p.name.trim().toLowerCase() === itemName);
+          if (matched && matched.stockQty !== undefined) {
+            const returnQty = parseFloat(item.qty) || 1;
+            matched.stockQty += returnQty;
+            productsChanged = true;
+            savePromises.push(productEngine.saveProduct(matched));
+          }
+        });
+        if (productsChanged) {
+          Promise.all(savePromises).catch(e => console.error("Error restoring stock on invoice delete:", e));
+          setProducts(updatedProds);
+        }
+      }
       const { updatedInvoices, firebaseStatus } = await invoiceEngine.deleteInvoice(id, permanent);
       setInvoices(updatedInvoices);
       if (firebaseStatus === 'failed') {
@@ -1357,7 +1377,6 @@ function App() {
   const handleSaveSettings = async (payload) => {
     if (isDemoSessionActive) {
       localStorage.setItem('billqyro_demo_settings', JSON.stringify(payload));
-      setDemoSettings(payload);
       toast.success('Settings saved to Demo Session');
       window.dispatchEvent(new Event('storage'));
       return true;
@@ -1407,62 +1426,62 @@ function App() {
   };
 
   // --- PDF GENERATOR WORKER ---
-  const handleDownloadPDF = (invoice) => {
+  const handleDownloadPDF = async (invoice) => {
     if (!settings || !settings.businessName) {
       toast.error('⚠️ Business settings are incomplete. Please complete your business settings first.');
       setCurrentTab('settings');
       return;
     }
-    const isPremium = subscription.status === 'premium';
-    downloadInvoicePDF(invoice, settings, isPremium)
-      .then((ok) => {
-        if (ok) {
-          sendEmpireEvent({
-            eventType: "pdf_downloaded",
-            message: "Invoice PDF generated",
-            page: "invoice",
-            metadata: { feature: "pdf", action: "downloaded", privateDataIncluded: false }
-          });
-        }
-      })
-      .catch((err) => {
-        sendEmpireError({
-          errorType: "pdf_failed",
-          message: err?.toString() || "PDF generation failed",
-          severity: "Medium",
-          page: "invoice"
+    try {
+      const { downloadInvoicePDF } = await import('./utils/pdfUtils');
+      const isPremium = subscription.status === 'premium';
+      const ok = await downloadInvoicePDF(invoice, settings, isPremium);
+      if (ok) {
+        sendEmpireEvent({
+          eventType: "pdf_downloaded",
+          message: "Invoice PDF generated",
+          page: "invoice",
+          metadata: { feature: "pdf", action: "downloaded", privateDataIncluded: false }
         });
-        toast.error(`PDF Error: ${err?.toString() || "Unknown error generating PDF"}`);
+      }
+    } catch (err) {
+      sendEmpireError({
+        errorType: "pdf_failed",
+        message: err?.toString() || "PDF generation failed",
+        severity: "Medium",
+        page: "invoice"
       });
+      toast.error(`PDF Error: ${err?.toString() || "Unknown error generating PDF"}`);
+    }
   };
 
   // --- IMAGE GENERATOR WORKER ---
-  const handleDownloadImage = (invoice) => {
+  const handleDownloadImage = async (invoice) => {
     if (!settings || !settings.businessName) {
       toast.error('⚠️ Business settings are incomplete. Please complete your business settings first.');
       setCurrentTab('settings');
       return;
     }
-    downloadInvoiceImage(invoice, settings)
-      .then((ok) => {
-        if (ok) {
-          sendEmpireEvent({
-            eventType: "image_downloaded",
-            message: "Invoice image generated",
-            page: "invoice",
-            metadata: { feature: "image", action: "downloaded", privateDataIncluded: false }
-          });
-        }
-      })
-      .catch((err) => {
-        sendEmpireError({
-          errorType: "image_failed",
-          message: err?.toString() || "Image generation failed",
-          severity: "Medium",
-          page: "invoice"
+    try {
+      const { downloadInvoiceImage } = await import('./utils/pdfUtils');
+      const ok = await downloadInvoiceImage(invoice, settings);
+      if (ok) {
+        sendEmpireEvent({
+          eventType: "image_downloaded",
+          message: "Invoice image generated",
+          page: "invoice",
+          metadata: { feature: "image", action: "downloaded", privateDataIncluded: false }
         });
-        toast.error(`Image Error: ${err?.toString() || "Unknown error generating image"}`);
+      }
+    } catch (err) {
+      sendEmpireError({
+        errorType: "image_failed",
+        message: err?.toString() || "Image generation failed",
+        severity: "Medium",
+        page: "invoice"
       });
+      toast.error(`Image Error: ${err?.toString() || "Unknown error generating image"}`);
+    }
   };
 
   // HARD DEMO MODE ISOLATION SWITCH
@@ -1487,49 +1506,17 @@ function App() {
 
   // --- TAB ROUTER SWITCHBOARD ---
   const TAB_TO_FEATURE_MAP = {
-    'invoices': 'invoice', 'create-invoice': 'invoice', 'estimates': 'invoice',
+    'invoices': 'invoice', 'create-invoice': 'invoice', 'estimates': 'invoice.estimates',
     'customers': 'customer', 'patients': 'customer', 'students': 'customer', 'clients': 'customer',
-    'due-ledger': 'treasury', 'pending-payments': 'payment', 'reports': 'reports',
-    'expenses': 'treasury.moneyOut', 'products': 'product', 'orders': 'operations.orders', 'bank': 'bank',
-    'appointments': 'operations.appointments', 'delivery': 'operations.delivery', 'measurements': 'operations.measurements',
-    'designBook': 'operations.designBook', 'devices': 'operations.devices', 'serviceJobs': 'operations.serviceJobs', 'projects': 'operations.projects'
+    'due': 'treasury', 'due-ledger': 'treasury', 'pending-payments': 'payment', 'reports': 'reports',
+    'expenses': 'treasury.moneyOut', 'products': 'product', 'inventory': 'product.inventory', 'orders': 'operations', 'bank': 'treasury',
+    'appointments': 'customer', 'delivery': 'operations', 'measurements': 'operations',
+    'designBook': 'operations', 'devices': 'operations', 'serviceJobs': 'operations', 'projects': 'operations',
+    'staff-ledger': 'staff.ledger', 'customer-portal-config': 'liveLink'
   };
-
-  const TAB_TO_MODULE_MAP = {
-    'invoices': 'billing', 'create-invoice': 'billing', 'estimates': 'billing',
-    'customers': 'customers', 'patients': 'patients', 'students': 'students', 'clients': 'clients',
-    'due-ledger': 'dueLedger', 'expenses': 'expenses', 'reports': 'reports',
-    'products': 'products', 'orders': 'orders', 'appointments': 'appointments',
-    'delivery': 'delivery', 'measurements': 'measurements', 'designBook': 'designBook',
-    'devices': 'devices', 'serviceJobs': 'serviceJobs', 'projects': 'projects',
-    'pending-payments': 'paymentProofs'
-  };
-
-  const activeWorkspace = activeSettings?.businessWorkspaces?.find(
-    workspace => workspace.id === activeSettings?.activeWorkspaceId
-  );
-  const enabledWorkspaceModules = activeWorkspace?.enabledModules;
 
   const renderTabContent = (targetTab = currentTab) => {
     const isMaintenanceMode = (globalMaintenanceMode || activeSettings?.maintenanceMode) && !adminEngine.isAdminUser(authEngine.getAuthSession());
-
-    // A workspace may only open modules selected during onboarding. Legacy
-    // workspaces without an explicit module list keep their existing access.
-    const requiredModule = TAB_TO_MODULE_MAP[targetTab];
-    if (requiredModule && Array.isArray(enabledWorkspaceModules) && !enabledWorkspaceModules.includes(requiredModule)) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full text-center p-10 bg-theme-main">
-          <Lock className="w-16 h-16 text-theme-muted mb-4" />
-          <h2 className="text-2xl font-black text-white mb-2">Module Not Enabled</h2>
-          <p className="text-theme-muted max-w-md mb-6">
-            This module is not enabled for the current workspace. Update its modules from Workspace Settings to use it.
-          </p>
-          <button onClick={() => setCurrentTab('dashboard')} className="px-6 py-2.5 bg-theme-accent text-white font-bold rounded-xl hover:bg-theme-accent/80 transition-colors">
-            Return to Dashboard
-          </button>
-        </div>
-      );
-    }
 
     // Feature gating fallback
     if (!featuresLoading) {
@@ -1784,7 +1771,7 @@ function App() {
       case 'patients':
         return <Patients />;
       case 'students':
-        if (activeSettings && !isEducationBusiness(activeWorkspace?.type || activeSettings.businessType || activeSettings.defaultBillingTemplate)) {
+        if (activeSettings && !isEducationBusiness(activeSettings.defaultBillingTemplate)) {
           // If a Business workspace attempts to open /students, automatically redirect
           // We don't render Students, we redirect to customers
           setTimeout(() => setCurrentTab('customers'), 0);
@@ -2223,7 +2210,14 @@ function App() {
               <OnboardingWizard 
                 onComplete={() => setCurrentTab('dashboard')} 
                 businessSettings={activeSettings} 
-                onSaveSettings={handleSaveSettings}
+                onSaveSettings={(newSettings) => {
+                  settingsEngine.saveSettings(newSettings);
+                  setSettings(newSettings);
+                  if (isDemoSessionActive) {
+                    setDemoSettings(newSettings);
+                  }
+                  setCurrentTab('dashboard');
+                }}
                 setCurrentTab={setCurrentTab}
               />
             ) : (
@@ -2363,4 +2357,3 @@ function App() {
 }
 
 export default App;
-

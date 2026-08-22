@@ -3,12 +3,12 @@
 export const FEATURE_CATEGORIES = {
   INVOICE: 'invoice',
   CUSTOMERS: 'customers',
-  STAFF: 'staff',
   PRODUCTS_INVENTORY: 'products',
   PAYMENTS: 'payments',
-  LIVE_LINK: 'liveLink',
   TREASURY: 'treasury',
   REPORTS: 'reports',
+  LIVE_LINK: 'liveLink',
+  STAFF: 'staff',
   NOTIFICATIONS: 'notifications',
   SECURITY: 'security',
   APPEARANCE: 'appearance',
@@ -17,54 +17,52 @@ export const FEATURE_CATEGORIES = {
   OPERATIONS: 'operations'
 };
 
-// Default category states
+// Default category states for new workspaces
 export const DEFAULT_CATEGORY_STATE = {
   [FEATURE_CATEGORIES.INVOICE]: true,
   [FEATURE_CATEGORIES.CUSTOMERS]: true,
-  [FEATURE_CATEGORIES.STAFF]: false,
   [FEATURE_CATEGORIES.PRODUCTS_INVENTORY]: true,
   [FEATURE_CATEGORIES.PAYMENTS]: true,
-  [FEATURE_CATEGORIES.LIVE_LINK]: true,
   [FEATURE_CATEGORIES.TREASURY]: true,
   [FEATURE_CATEGORIES.REPORTS]: true,
+  [FEATURE_CATEGORIES.LIVE_LINK]: true,
+  [FEATURE_CATEGORIES.STAFF]: false,
   [FEATURE_CATEGORIES.NOTIFICATIONS]: true,
   [FEATURE_CATEGORIES.SECURITY]: true,
   [FEATURE_CATEGORIES.APPEARANCE]: true,
   [FEATURE_CATEGORIES.BACKUP]: true,
-  [FEATURE_CATEGORIES.ADVANCED]: true,
-  [FEATURE_CATEGORIES.OPERATIONS]: true
+  [FEATURE_CATEGORIES.ADVANCED]: false,
+  [FEATURE_CATEGORIES.OPERATIONS]: false
 };
 
 // Feature Registry Definition
 export const FEATURE_REGISTRY = {
-  // --- INVOICE FEATURES ---
+  // --- INVOICE CORE (Always required) ---
   'invoice': {
     id: 'invoice',
     category: FEATURE_CATEGORIES.INVOICE,
-    name: 'Invoicing Core',
-    description: 'Core invoicing functionality.',
+    name: 'Invoicing & Billing Core',
+    description: 'Create, manage, and print invoices and estimates.',
     defaultEnabled: true,
     dependencies: [],
     settingsSchema: {},
     version: 1
   },
-  'invoice.customColumns': {
-    id: 'invoice.customColumns',
+  'invoice.estimates': {
+    id: 'invoice.estimates',
     category: FEATURE_CATEGORIES.INVOICE,
-    name: 'Custom Columns',
-    description: 'Allow custom columns in invoice items.',
-    defaultEnabled: false,
+    name: 'Estimates & Quotations',
+    description: 'Create quotations that convert into invoices.',
+    defaultEnabled: true,
     dependencies: ['invoice'],
-    settingsSchema: {
-      columns: []
-    },
+    settingsSchema: {},
     version: 1
   },
   'invoice.discount': {
     id: 'invoice.discount',
     category: FEATURE_CATEGORIES.INVOICE,
     name: 'Discounts',
-    description: 'Enable line-item or overall discounts.',
+    description: 'Enable line-item or overall discounts on bills.',
     defaultEnabled: true,
     dependencies: ['invoice'],
     settingsSchema: {
@@ -76,8 +74,8 @@ export const FEATURE_REGISTRY = {
   'invoice.tax': {
     id: 'invoice.tax',
     category: FEATURE_CATEGORIES.INVOICE,
-    name: 'Taxes',
-    description: 'Enable tax calculation on invoices.',
+    name: 'Taxes & GST/VAT',
+    description: 'Calculate item taxes, GST, or VAT on bills.',
     defaultEnabled: true,
     dependencies: ['invoice'],
     settingsSchema: {
@@ -86,14 +84,16 @@ export const FEATURE_REGISTRY = {
     },
     version: 1
   },
-  'invoice.paymentStatus': {
-    id: 'invoice.paymentStatus',
+  'invoice.customColumns': {
+    id: 'invoice.customColumns',
     category: FEATURE_CATEGORIES.INVOICE,
-    name: 'Payment Status Tracking',
-    description: 'Track if an invoice is paid, partial, or overdue.',
-    defaultEnabled: true,
+    name: 'Custom Invoice Columns',
+    description: 'Add custom fields and columns to item rows.',
+    defaultEnabled: false,
     dependencies: ['invoice'],
-    settingsSchema: {},
+    settingsSchema: {
+      columns: []
+    },
     version: 1
   },
 
@@ -101,8 +101,8 @@ export const FEATURE_REGISTRY = {
   'customer': {
     id: 'customer',
     category: FEATURE_CATEGORIES.CUSTOMERS,
-    name: 'Customer Management',
-    description: 'Manage customers and clients.',
+    name: 'Customers & CRM',
+    description: 'Customer directory, contact profiles, and purchase histories.',
     defaultEnabled: true,
     dependencies: [],
     settingsSchema: {},
@@ -112,7 +112,7 @@ export const FEATURE_REGISTRY = {
     id: 'customer.ledger',
     category: FEATURE_CATEGORIES.CUSTOMERS,
     name: 'Customer Ledger',
-    description: 'Track individual customer balances and transaction history.',
+    description: 'Track individual customer running balances, payments, and dues.',
     defaultEnabled: true,
     dependencies: ['customer'],
     settingsSchema: {},
@@ -122,55 +122,19 @@ export const FEATURE_REGISTRY = {
     id: 'customer.portal',
     category: FEATURE_CATEGORIES.CUSTOMERS,
     name: 'Customer Portal',
-    description: 'Allow customers to view their invoices online.',
+    description: 'Provide an authenticated online portal for customers.',
     defaultEnabled: false,
     dependencies: ['customer'],
-    settingsSchema: {
-      allowPayment: false
-    },
-    version: 1
-  },
-  'customer.notifications': {
-    id: 'customer.notifications',
-    category: FEATURE_CATEGORIES.CUSTOMERS,
-    name: 'Customer Notifications',
-    description: 'Send automated reminders to customers.',
-    defaultEnabled: false,
-    dependencies: ['customer'],
-    settingsSchema: {
-      reminderDays: [3, 7]
-    },
-    version: 1
-  },
-
-  // --- STAFF FEATURES ---
-  'staff': {
-    id: 'staff',
-    category: FEATURE_CATEGORIES.STAFF,
-    name: 'Staff Management & Billing',
-    description: 'Manage staff, track payables, and issue payments.',
-    defaultEnabled: false,
-    dependencies: [],
-    settingsSchema: {},
-    version: 1
-  },
-  'staff.ledger': {
-    id: 'staff.ledger',
-    category: FEATURE_CATEGORIES.STAFF,
-    name: 'Staff Ledger',
-    description: 'Track individual staff earnings, advances, and payments.',
-    defaultEnabled: false,
-    dependencies: ['staff'],
     settingsSchema: {},
     version: 1
   },
 
-  // --- PRODUCT FEATURES ---
+  // --- PRODUCT & INVENTORY FEATURES ---
   'product': {
     id: 'product',
     category: FEATURE_CATEGORIES.PRODUCTS_INVENTORY,
     name: 'Product Catalog',
-    description: 'Manage products and services.',
+    description: 'Manage items, services, SKUs, pricing, and units.',
     defaultEnabled: true,
     dependencies: [],
     settingsSchema: {},
@@ -180,8 +144,8 @@ export const FEATURE_REGISTRY = {
     id: 'product.inventory',
     category: FEATURE_CATEGORIES.PRODUCTS_INVENTORY,
     name: 'Inventory Management',
-    description: 'Enable advanced inventory features.',
-    defaultEnabled: false,
+    description: 'Track in-stock quantities, reorder levels, and adjustments.',
+    defaultEnabled: true,
     dependencies: ['product'],
     settingsSchema: {},
     version: 1
@@ -189,9 +153,9 @@ export const FEATURE_REGISTRY = {
   'product.stockTracking': {
     id: 'product.stockTracking',
     category: FEATURE_CATEGORIES.PRODUCTS_INVENTORY,
-    name: 'Stock Tracking',
-    description: 'Track stock quantities for items.',
-    defaultEnabled: false,
+    name: 'Stock Tracking & Auto-Deduct',
+    description: 'Auto-deduct stock on bill creation and restore on bill deletion.',
+    defaultEnabled: true,
     dependencies: ['product', 'product.inventory'],
     settingsSchema: {},
     version: 1
@@ -200,7 +164,7 @@ export const FEATURE_REGISTRY = {
     id: 'product.lowStockAlert',
     category: FEATURE_CATEGORIES.PRODUCTS_INVENTORY,
     name: 'Low Stock Alerts',
-    description: 'Notify when stock falls below a threshold.',
+    description: 'Show dashboard warnings when inventory falls below minimum threshold.',
     defaultEnabled: false,
     dependencies: ['product', 'product.inventory', 'product.stockTracking'],
     settingsSchema: {
@@ -209,12 +173,12 @@ export const FEATURE_REGISTRY = {
     version: 1
   },
 
-  // --- PAYMENT FEATURES ---
+  // --- PAYMENTS ---
   'payment': {
     id: 'payment',
     category: FEATURE_CATEGORIES.PAYMENTS,
-    name: 'Payments',
-    description: 'Record and track payments.',
+    name: 'Payment Tracking',
+    description: 'Record incoming payments, payment modes, and receipts.',
     defaultEnabled: true,
     dependencies: [],
     settingsSchema: {},
@@ -223,8 +187,8 @@ export const FEATURE_REGISTRY = {
   'payment.partialPayment': {
     id: 'payment.partialPayment',
     category: FEATURE_CATEGORIES.PAYMENTS,
-    name: 'Partial Payments',
-    description: 'Allow partial payments against invoices.',
+    name: 'Partial Payments & Installments',
+    description: 'Allow partial deposits and balance installments.',
     defaultEnabled: true,
     dependencies: ['payment'],
     settingsSchema: {},
@@ -233,225 +197,271 @@ export const FEATURE_REGISTRY = {
   'payment.paymentProof': {
     id: 'payment.paymentProof',
     category: FEATURE_CATEGORIES.PAYMENTS,
-    name: 'Payment Proof',
-    description: 'Attach receipts or proof for payments.',
-    defaultEnabled: false,
-    dependencies: ['payment'],
-    settingsSchema: {},
-    version: 1
-  },
-  'payment.approval': {
-    id: 'payment.approval',
-    category: FEATURE_CATEGORIES.PAYMENTS,
-    name: 'Payment Approval',
-    description: 'Require admin approval for recorded payments.',
-    defaultEnabled: false,
-    dependencies: ['payment'],
-    settingsSchema: {},
-    version: 1
-  },
-
-  // --- LIVE LINK FEATURES ---
-  'liveLink': {
-    id: 'liveLink',
-    category: FEATURE_CATEGORIES.LIVE_LINK,
-    name: 'Live Link',
-    description: 'Shareable live links for documents.',
+    name: 'Payment Proofs & QR',
+    description: 'Dynamic UPI / banking QR codes and screenshot verification.',
     defaultEnabled: true,
-    dependencies: [],
-    settingsSchema: {},
-    version: 1
-  },
-  'liveLink.paymentRequest': {
-    id: 'liveLink.paymentRequest',
-    category: FEATURE_CATEGORIES.LIVE_LINK,
-    name: 'Payment Requests',
-    description: 'Request payment via live links.',
-    defaultEnabled: false,
-    dependencies: ['liveLink', 'payment'],
-    settingsSchema: {},
-    version: 1
-  },
-  'liveLink.whatsappProof': {
-    id: 'liveLink.whatsappProof',
-    category: FEATURE_CATEGORIES.LIVE_LINK,
-    name: 'WhatsApp Proof',
-    description: 'Submit payment proofs via WhatsApp integration.',
-    defaultEnabled: false,
-    dependencies: ['liveLink', 'liveLink.paymentRequest'],
-    settingsSchema: {},
-    version: 1
-  },
-  'liveLink.approvalWorkflow': {
-    id: 'liveLink.approvalWorkflow',
-    category: FEATURE_CATEGORIES.LIVE_LINK,
-    name: 'Approval Workflow',
-    description: 'Require approval for payments submitted via live link.',
-    defaultEnabled: false,
-    dependencies: ['liveLink', 'liveLink.paymentRequest', 'payment.approval'],
+    dependencies: ['payment'],
     settingsSchema: {},
     version: 1
   },
 
-  // --- TREASURY FEATURES ---
+  // --- TREASURY & EXPENSES ---
   'treasury': {
     id: 'treasury',
     category: FEATURE_CATEGORIES.TREASURY,
-    name: 'Internal Treasury',
-    description: 'Manage internal cashflow and bank accounts.',
-    defaultEnabled: false,
-    dependencies: [],
-    settingsSchema: {},
-    version: 1
-  },
-  'treasury.moneyIn': {
-    id: 'treasury.moneyIn',
-    category: FEATURE_CATEGORIES.TREASURY,
-    name: 'Money In',
-    description: 'Track incoming funds.',
+    name: 'Treasury & Bank Ledger',
+    description: 'Internal cash register, double-entry bank accounts, and balances.',
     defaultEnabled: true,
-    dependencies: ['treasury'],
+    dependencies: [],
     settingsSchema: {},
     version: 1
   },
   'treasury.moneyOut': {
     id: 'treasury.moneyOut',
     category: FEATURE_CATEGORIES.TREASURY,
-    name: 'Money Out',
-    description: 'Track expenses and outgoing funds.',
-    defaultEnabled: true,
-    dependencies: ['treasury'],
-    settingsSchema: {},
-    version: 1
-  },
-  'treasury.ledger': {
-    id: 'treasury.ledger',
-    category: FEATURE_CATEGORIES.TREASURY,
-    name: 'Treasury Ledger',
-    description: 'Master ledger for treasury accounts.',
+    name: 'Expenses Tracking',
+    description: 'Record business overheads, vendor bills, and operational expenses.',
     defaultEnabled: true,
     dependencies: ['treasury'],
     settingsSchema: {},
     version: 1
   },
 
-  // --- REPORTING FEATURES ---
+  // --- REPORTS & ANALYTICS ---
   'reports': {
     id: 'reports',
     category: FEATURE_CATEGORIES.REPORTS,
     name: 'Reports & Analytics',
-    description: 'View sales, payment, and business performance reports.',
+    description: 'Financial metrics, revenue trends, customer charts, and CSV exports.',
     defaultEnabled: true,
     dependencies: [],
     settingsSchema: {},
     version: 1
   },
 
-  // --- OPERATIONS FEATURES ---
-  'operations.orders': {
-    id: 'operations.orders',
-    category: FEATURE_CATEGORIES.OPERATIONS,
-    name: 'Orders',
-    description: 'Manage sales and purchase orders.',
+  // --- LIVE LINK ---
+  'liveLink': {
+    id: 'liveLink',
+    category: FEATURE_CATEGORIES.LIVE_LINK,
+    name: 'Live Document Link',
+    description: 'Instant shareable links for customers with payment verification.',
     defaultEnabled: true,
-    dependencies: [],
-    settingsSchema: {},
-    version: 1
-  },
-  'operations.appointments': {
-    id: 'operations.appointments',
-    category: FEATURE_CATEGORIES.OPERATIONS,
-    name: 'Appointments',
-    description: 'Schedule and manage appointments.',
-    defaultEnabled: false,
-    dependencies: [],
-    settingsSchema: {},
-    version: 1
-  },
-  'operations.delivery': {
-    id: 'operations.delivery',
-    category: FEATURE_CATEGORIES.OPERATIONS,
-    name: 'Delivery Tracking',
-    description: 'Track delivery of goods or services.',
-    defaultEnabled: false,
-    dependencies: [],
-    settingsSchema: {},
-    version: 1
-  },
-  'operations.measurements': {
-    id: 'operations.measurements',
-    category: FEATURE_CATEGORIES.OPERATIONS,
-    name: 'Measurements',
-    description: 'Record custom measurements for customers.',
-    defaultEnabled: false,
-    dependencies: [],
-    settingsSchema: {},
-    version: 1
-  },
-  'operations.designBook': {
-    id: 'operations.designBook',
-    category: FEATURE_CATEGORIES.OPERATIONS,
-    name: 'Design Book',
-    description: 'Manage design catalogs and lookbooks.',
-    defaultEnabled: false,
-    dependencies: [],
-    settingsSchema: {},
-    version: 1
-  },
-  'operations.devices': {
-    id: 'operations.devices',
-    category: FEATURE_CATEGORIES.OPERATIONS,
-    name: 'Device Management',
-    description: 'Track devices or assets.',
-    defaultEnabled: false,
-    dependencies: [],
-    settingsSchema: {},
-    version: 1
-  },
-  'operations.serviceJobs': {
-    id: 'operations.serviceJobs',
-    category: FEATURE_CATEGORIES.OPERATIONS,
-    name: 'Service Jobs',
-    description: 'Manage repair or service tickets.',
-    defaultEnabled: false,
-    dependencies: [],
-    settingsSchema: {},
-    version: 1
-  },
-  'operations.projects': {
-    id: 'operations.projects',
-    category: FEATURE_CATEGORIES.OPERATIONS,
-    name: 'Projects',
-    description: 'Manage long-term projects and tasks.',
-    defaultEnabled: false,
     dependencies: [],
     settingsSchema: {},
     version: 1
   },
 
-  // --- INTERNAL BANK / TREASURY FEATURES ---
-  'bank': {
-    id: 'bank',
-    category: FEATURE_CATEGORIES.TREASURY,
-    name: 'Internal Bank',
-    description: 'Track money in, money out, balance and a running ledger.',
-    defaultEnabled: true,
+  // --- STAFF & PAYABLES ---
+  'staff': {
+    id: 'staff',
+    category: FEATURE_CATEGORIES.STAFF,
+    name: 'Staff & Team Management',
+    description: 'Track staff profiles, assigned jobs, commissions, and salaries.',
+    defaultEnabled: false,
     dependencies: [],
-    settingsSchema: {
-      autoPostPayments: true,
-      allowNegativeBalance: false
-    },
+    settingsSchema: {},
     version: 1
   },
-  'bank.credit': {
-    id: 'bank.credit',
-    category: FEATURE_CATEGORIES.TREASURY,
-    name: 'Customer Credit',
-    description: 'Manage per-customer credit limits and outstanding liability.',
+  'staff.ledger': {
+    id: 'staff.ledger',
+    category: FEATURE_CATEGORIES.STAFF,
+    name: 'Staff Ledger',
+    description: 'Track staff advances, earnings, and payout transactions.',
+    defaultEnabled: false,
+    dependencies: ['staff'],
+    settingsSchema: {},
+    version: 1
+  },
+
+  // --- NOTIFICATIONS ---
+  'notifications': {
+    id: 'notifications',
+    category: FEATURE_CATEGORIES.NOTIFICATIONS,
+    name: 'Automated Reminders',
+    description: 'Payment reminders and status updates.',
     defaultEnabled: true,
-    dependencies: ['bank', 'customer'],
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+
+  // --- SECURITY & BACKUP ---
+  'security': {
+    id: 'security',
+    category: FEATURE_CATEGORIES.SECURITY,
+    name: 'Security & PIN Lockout',
+    description: 'Admin PIN protection, rate limiting, and activity audit trails.',
+    defaultEnabled: true,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+  'backup': {
+    id: 'backup',
+    category: FEATURE_CATEGORIES.BACKUP,
+    name: 'Data Backup & Offline Sync',
+    description: 'Full JSON backups, IndexedDB local persistence, and cloud sync.',
+    defaultEnabled: true,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+
+  // --- ADVANCED & OPERATIONS ---
+  'advanced': {
+    id: 'advanced',
+    category: FEATURE_CATEGORIES.ADVANCED,
+    name: 'Advanced Studio & Automation',
+    description: 'Custom PDF layouts, workflow automations, and role permissions.',
+    defaultEnabled: false,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+  'operations': {
+    id: 'operations',
+    category: FEATURE_CATEGORIES.OPERATIONS,
+    name: 'Specialized Industry Portals',
+    description: 'Workflows for Tailoring, Cyber Cafe, Clinic, Repair, and Delivery.',
+    defaultEnabled: false,
+    dependencies: [],
     settingsSchema: {},
     version: 1
   }
 };
 
+// Quick Business Setup Presets
+export const BUSINESS_SETUP_PRESETS = [
+  {
+    id: 'just_billing',
+    name: 'Just Billing',
+    description: 'Ultra-clean setup with only invoicing, manual line items, payments, and reports. No products or complex menus.',
+    icon: 'FileText',
+    badge: 'Simple',
+    enabledCategories: ['invoice', 'payments', 'reports', 'backup', 'security'],
+    disabledCategories: ['customers', 'products', 'staff', 'treasury', 'liveLink', 'notifications', 'advanced', 'operations'],
+    featureOverrides: {
+      'invoice': true,
+      'invoice.estimates': true,
+      'invoice.discount': true,
+      'invoice.tax': true,
+      'payment': true,
+      'payment.partialPayment': true,
+      'reports': true,
+      'backup': true,
+      'security': true,
+      'customer': false,
+      'customer.ledger': false,
+      'product': false,
+      'product.inventory': false,
+      'product.stockTracking': false,
+      'product.lowStockAlert': false,
+      'staff': false,
+      'staff.ledger': false,
+      'treasury': false,
+      'treasury.moneyOut': false,
+      'liveLink': false,
+      'advanced': false,
+      'operations': false
+    }
+  },
+  {
+    id: 'billing_customers',
+    name: 'Billing + Customers',
+    description: 'Ideal for freelance, consulting, and service providers who track client balances without inventory.',
+    icon: 'Users',
+    badge: 'Popular',
+    enabledCategories: ['invoice', 'customers', 'payments', 'reports', 'backup', 'security', 'notifications'],
+    disabledCategories: ['products', 'staff', 'treasury', 'liveLink', 'advanced', 'operations'],
+    featureOverrides: {
+      'invoice': true,
+      'invoice.estimates': true,
+      'customer': true,
+      'customer.ledger': true,
+      'payment': true,
+      'payment.partialPayment': true,
+      'payment.paymentProof': true,
+      'reports': true,
+      'backup': true,
+      'security': true,
+      'product': false,
+      'product.inventory': false,
+      'product.stockTracking': false,
+      'product.lowStockAlert': false,
+      'staff': false,
+      'staff.ledger': false,
+      'treasury': false,
+      'advanced': false,
+      'operations': false
+    }
+  },
+  {
+    id: 'retail',
+    name: 'Retail / Inventory',
+    description: 'Full-featured setup for shops, stores, and boutiques with product catalogs, stock tracking, and dues.',
+    icon: 'ShoppingBag',
+    badge: 'Retail',
+    enabledCategories: ['invoice', 'customers', 'products', 'payments', 'treasury', 'reports', 'liveLink', 'backup', 'security', 'notifications'],
+    disabledCategories: ['staff', 'advanced', 'operations'],
+    featureOverrides: {
+      'invoice': true,
+      'invoice.estimates': true,
+      'customer': true,
+      'customer.ledger': true,
+      'product': true,
+      'product.inventory': true,
+      'product.stockTracking': true,
+      'product.lowStockAlert': true,
+      'payment': true,
+      'payment.partialPayment': true,
+      'payment.paymentProof': true,
+      'treasury': true,
+      'treasury.moneyOut': true,
+      'reports': true,
+      'liveLink': true,
+      'backup': true,
+      'security': true,
+      'staff': false,
+      'advanced': false,
+      'operations': false
+    }
+  },
+  {
+    id: 'service',
+    name: 'Service Business',
+    description: 'Tailored for repair shops, clinics, salons, tailoring, and agencies with expenses and service workflows.',
+    icon: 'Briefcase',
+    badge: 'Services',
+    enabledCategories: ['invoice', 'customers', 'payments', 'treasury', 'reports', 'operations', 'backup', 'security'],
+    disabledCategories: ['products', 'staff', 'advanced'],
+    featureOverrides: {
+      'invoice': true,
+      'invoice.estimates': true,
+      'customer': true,
+      'customer.ledger': true,
+      'payment': true,
+      'payment.partialPayment': true,
+      'payment.paymentProof': true,
+      'treasury': true,
+      'treasury.moneyOut': true,
+      'reports': true,
+      'operations': true,
+      'product': false,
+      'product.inventory': false,
+      'product.stockTracking': false,
+      'product.lowStockAlert': false,
+      'staff': false,
+      'advanced': false
+    }
+  },
+  {
+    id: 'custom',
+    name: 'Custom Setup',
+    description: 'Fully customizable configuration. Hand-pick each module and sub-feature according to your exact needs.',
+    icon: 'Sliders',
+    badge: 'Expert',
+    enabledCategories: [],
+    disabledCategories: [],
+    featureOverrides: {}
+  }
+];

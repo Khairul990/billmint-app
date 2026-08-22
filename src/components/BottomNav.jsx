@@ -1,22 +1,31 @@
 import React from 'react';
-import { LayoutDashboard, CreditCard, Users, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, CreditCard, Users, MoreHorizontal, FileSpreadsheet, PieChart } from 'lucide-react';
 import { triggerLightHaptic } from '../utils/feedback';
-import { getCustomerLabelByType, getInvoiceLabelByType } from '../config/businessPresets';
+import { getCustomerLabelByType } from '../config/businessPresets';
+import { useFeatureControl } from '../hooks/useFeatureControl';
 
-const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPaymentsCount = 0, businessSettings }) => {
-  const activeWsId = businessSettings?.activeWorkspaceId;
+const BottomNav = ({ currentTab, setCurrentTab, pendingPaymentsCount = 0, businessSettings }) => {
+  const activeWsId = businessSettings?.activeWorkspaceId || 'default';
   const activeWorkspace = businessSettings?.businessWorkspaces?.find(ws => ws.id === activeWsId) || {};
   const wsType = activeWorkspace.type || 'retail';
-  const enabledModules = activeWorkspace.enabledModules || [];
-  const primaryPeopleModule = ['customers', 'patients', 'students', 'clients'].find(module => enabledModules.includes(module));
+  const { isFeatureEnabled } = useFeatureControl(activeWsId);
 
   const getCustomerLabel = () => getCustomerLabelByType(wsType);
 
+  const isDueEnabled = isFeatureEnabled('treasury') || isFeatureEnabled('payment');
+  const isCustomerEnabled = isFeatureEnabled('customer');
+  const isReportsEnabled = isFeatureEnabled('reports');
+
   let tabs = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
-    ...(enabledModules.includes('dueLedger') ? [{ id: 'due', label: 'Due', icon: CreditCard, badge: pendingPaymentsCount }] : []),
-    ...(enabledModules.includes('billing') ? [{ id: 'create', isAction: true, actionTab: 'create-invoice' }] : []),
-    ...(primaryPeopleModule ? [{ id: primaryPeopleModule, label: getCustomerLabel(), icon: Users }] : []),
+    ...(isDueEnabled ? [{ id: 'due', label: 'Due', icon: CreditCard, badge: pendingPaymentsCount }] : [{ id: 'invoices', label: 'Bills', icon: FileSpreadsheet }]),
+    { id: 'create', isAction: true },
+    ...(isCustomerEnabled 
+      ? [{ id: 'customers', label: getCustomerLabel(), icon: Users }] 
+      : isReportsEnabled 
+        ? [{ id: 'reports', label: 'Reports', icon: PieChart }] 
+        : [{ id: 'invoices', label: 'Invoices', icon: FileSpreadsheet }]
+    ),
     { id: 'more', label: 'More', icon: MoreHorizontal },
   ];
 
@@ -24,7 +33,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
     tabs = [
       { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
       { id: 'customer-register', label: 'Register', icon: Users },
-      { id: 'create', isAction: true, actionTab: 'quick-tools' },
+      { id: 'create', isAction: true },
       { id: 'portal-hub', label: 'Portals', icon: CreditCard },
       { id: 'more', label: 'More', icon: MoreHorizontal },
     ];
@@ -42,9 +51,10 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
                 <button
                   onClick={() => {
                     triggerLightHaptic();
-                    setCurrentTab(tab.actionTab);
+                    setCurrentTab('create-invoice');
                   }}
                   className="w-14 h-14 rounded-full bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-lg shadow-theme-glow border-[3px] border-theme-border-soft dark:border-slate-800 active:scale-90 hover:scale-105 transition-all duration-200 hover:shadow-xl"
+                  aria-label="Create Invoice"
                 >
                   <span className="text-2xl font-light leading-none -mt-0.5">+</span>
                 </button>
@@ -56,7 +66,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
           const isActive = 
             currentTab === tab.id || 
             (tab.id === 'due' && ['due-ledger', 'pending-payments'].includes(currentTab)) ||
-            (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings', 'help-center', 'estimates', 'pdf-templates', 'live-link-templates', 'marketplace', 'backup-restore', 'invoices', 'reports', 'quick-tools', 'cash-management'].includes(currentTab));
+            (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings', 'help-center', 'estimates', 'pdf-templates', 'live-link-templates', 'marketplace', 'backup-restore', 'reports', 'quick-tools', 'cash-management'].includes(currentTab));
           
           return (
             <button
@@ -66,6 +76,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
                 setCurrentTab(tab.id);
               }}
               className="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition-all cursor-pointer min-w-[44px] group relative"
+              aria-label={tab.label}
             >
               <div className={`relative p-1.5 rounded-xl transition-all duration-200 ${
                 isActive 
@@ -95,4 +106,3 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
 };
 
 export default BottomNav;
-

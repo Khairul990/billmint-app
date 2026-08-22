@@ -57,7 +57,7 @@ const InvoiceStudio = ({ settings, onUpdate, subscription }) => {
   useEffect(() => {
     const updateScale = () => {
       const tId = settings?.selectedPdfTemplate || 'classic';
-      const originalWidth = !!LivePreviewLayouts[tId] ? 595 : 800;
+      const originalWidth = LivePreviewLayouts[tId] ? 595 : 800;
       
       if (containerRef.current) {
         const availableWidth = containerRef.current.clientWidth - 32; 

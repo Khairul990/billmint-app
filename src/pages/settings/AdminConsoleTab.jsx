@@ -149,45 +149,6 @@ const AdminConsoleTab = (props) => {
                       <li>Open BillQyro in <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Chrome</strong>.</li>
                       <li>Tap the <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Menu</strong> icon (three vertical dots).</li>
                       <li>Select <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Add to Home screen</strong> or <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Install app</strong>.</li>
-                      <li>Confirm by tapping <strong className="text-theme-accent dark:text-theme-accent font-black">Install</strong>.</li>
-                    </ol>
-                  </div>
-
-                  {/* Desktop PCs */}
-                  <div className="bg-theme-app dark:bg-theme-surface dark:bg-theme-surface/40 p-5 rounded-2xl border border-theme-border-soft dark:border-theme-border-soft space-y-3">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface dark:bg-theme-card text-[10px] font-black text-theme-primary dark:text-theme-muted uppercase">
-                      💻 Desktop Computers
-                    </div>
-                    <ol className="text-xs text-theme-muted dark:text-theme-muted font-semibold space-y-2 list-decimal list-inside">
-                      <li>Open BillQyro in <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Chrome</strong> or <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Edge</strong>.</li>
-                      <li>Look at the right side of the browser's address bar.</li>
-                      <li>Click the <strong className="text-theme-primary dark:text-theme-muted dark:text-theme-secondary">Install App</strong> icon (square with overlapping shapes).</li>
-                      <li>Click <strong className="text-theme-accent dark:text-theme-accent font-black">Install</strong> in the confirmation box.</li>
-                    </ol>
-                  </div>
-                </div>
-              </div>
-          </div>
-      </div>
-
-      {/* --- SIMPLIFIED ADMIN FEATURE & PLAN CONTROL PANEL (TASK 8) --- */}
-      {isAdmin && (
-        <div className="mt-12 space-y-6 pt-12 border-t-2 border-theme-border-soft dark:border-theme-border-soft">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-theme-accent to-theme-accent-dark text-white flex items-center justify-center shadow-glow">
-                <ShieldAlert className="w-6 h-6" />
-              </div>
-              <div>
-                <h2 className="text-lg font-black text-theme-primary dark:text-theme-primary tracking-tight">Superuser Admin Console</h2>
-                <p className="text-xs text-theme-muted dark:text-theme-muted font-medium mt-0.5">SaaS tier levels, announcements, and global databases control</p>
-              </div>
-            </div>
-            {/* Storage Quota */}
-            <div className="flex flex-col sm:items-end">
-              <span className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Local storage quota</span>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="w-24 h-1.5 bg-theme-border-soft dark:bg-theme-surface rounded-full overflow-hidden">
                   <div className={`h-full rounded-full transition-all duration-500 ${storageHealth.percentage > 80 ? 'bg-theme-danger' : 'bg-theme-accent'}`} style={{ width: `${storageHealth.percentage}%` }}></div>
                 </div>
                 <span className="text-xs font-bold text-theme-primary dark:text-theme-muted dark:text-theme-muted">{storageHealth.percentage}%</span>

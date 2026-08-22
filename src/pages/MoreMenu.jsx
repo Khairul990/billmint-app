@@ -1,46 +1,42 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   TrendingDown, 
   Layers, 
   Sparkles, 
   Settings, 
-  KeyRound, 
-  AlertCircle, 
-  ShieldCheck, 
-  User, 
-  ExternalLink,
-  HelpCircle,
-  Bell,
-  RefreshCcw,
-  BookOpen,
-  PieChart,
-  FileSpreadsheet,
-  FileText,
-  Palette,
-  Smartphone,
-  Store,
-  Database,
-  Shield,
-  Activity,
-  ChevronRight,
-  Info,
-  MessageSquare
+  HelpCircle, 
+  Bell, 
+  RefreshCcw, 
+  BookOpen, 
+  PieChart, 
+  FileSpreadsheet, 
+  FileText, 
+  Palette, 
+  Store, 
+  Database, 
+  Activity, 
+  ChevronRight, 
+  Info, 
+  MessageSquare,
+  Landmark,
+  Sliders
 } from 'lucide-react';
 import { adminEngine } from '../services/adminEngine';
+import { useFeatureControl } from '../hooks/useFeatureControl';
 
 /**
- * Android Settings Style More Menu
+ * Android / iOS Settings Style More Menu with Module Control awareness
  */
 const MoreMenu = ({ 
   setCurrentTab, 
-  isAuthenticated, 
-  onLoginSuccess,
   businessSettings,
   pendingPaymentsCount = 0
 }) => {
+  const activeWsId = businessSettings?.activeWorkspaceId || 'default';
+  const { isFeatureEnabled } = useFeatureControl(activeWsId);
 
   const handleFactoryReset = () => {
-    if (window.confirm("🚨 WARNING: Are you sure you want to completely factory reset your app? This will wipe all data, invoices, and settings, and return you to the onboarding screen like a new user. This action cannot be undone locally!")) {
+    if (window.confirm("🚨 WARNING: Are you sure you want to completely factory reset your app? This will wipe local cache and return you to the onboarding screen. Your cloud data remains safe if logged in.")) {
       adminEngine.factoryResetAllData();
     }
   };
@@ -90,7 +86,7 @@ const MoreMenu = ({
           {businessSettings?.activeWorkspaceName || 'Main Workspace'}
         </span>
         <h2 className="text-xl font-extrabold tracking-tight mt-2.5">
-          {businessSettings?.businessName || 'BillQyro Embroidery'}
+          {businessSettings?.businessName || 'BillQyro Workspace'}
         </h2>
         <p className="text-xs text-white/80 font-bold mt-1">
           Owner: {businessSettings?.ownerName || 'Administrator'} • Phone: {businessSettings?.phone || 'N/A'}
@@ -107,6 +103,12 @@ const MoreMenu = ({
           onClick={() => setCurrentTab('settings')} 
         />
         <SettingsItem 
+          icon={Sliders} 
+          title="Modules & Features" 
+          description="Configure active modules & presets" 
+          onClick={() => setCurrentTab('settings')} 
+        />
+        <SettingsItem 
           icon={Store} 
           title="Workspace Manager" 
           description="Manage multiple businesses" 
@@ -118,7 +120,7 @@ const MoreMenu = ({
           description="Invoice & Live Link layouts" 
           onClick={() => setCurrentTab('marketplace')} 
         />
-        {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('products')) && (
+        {isFeatureEnabled('product') && (
           <SettingsItem 
             icon={Layers} 
             title="Products" 
@@ -137,13 +139,15 @@ const MoreMenu = ({
           description="View and manage all bills" 
           onClick={() => setCurrentTab('invoices')} 
         />
-        <SettingsItem 
-          icon={FileText} 
-          title="Estimates" 
-          description="Quotes and proposals" 
-          onClick={() => setCurrentTab('estimates')} 
-        />
-        {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('reports')) && (
+        {isFeatureEnabled('invoice.estimates') && (
+          <SettingsItem 
+            icon={FileText} 
+            title="Estimates" 
+            description="Quotes and proposals" 
+            onClick={() => setCurrentTab('estimates')} 
+          />
+        )}
+        {isFeatureEnabled('reports') && (
           <SettingsItem 
             icon={PieChart} 
             title="Reports" 
@@ -151,7 +155,7 @@ const MoreMenu = ({
             onClick={() => setCurrentTab('reports')} 
           />
         )}
-        {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('dueLedger')) && (
+        {isFeatureEnabled('treasury') && (
           <SettingsItem 
             icon={BookOpen} 
             title="Due Ledger" 
@@ -159,7 +163,15 @@ const MoreMenu = ({
             onClick={() => setCurrentTab('due-ledger')} 
           />
         )}
-        {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('expenses')) && (
+        {isFeatureEnabled('treasury') && (
+          <SettingsItem 
+            icon={Landmark} 
+            title="Internal Bank" 
+            description="Bank accounts & balances" 
+            onClick={() => setCurrentTab('bank')} 
+          />
+        )}
+        {isFeatureEnabled('treasury.moneyOut') && (
           <SettingsItem 
             icon={TrendingDown} 
             title="Expenses" 
@@ -167,7 +179,7 @@ const MoreMenu = ({
             onClick={() => setCurrentTab('expenses')} 
           />
         )}
-        {(!businessSettings?.businessWorkspaces?.length || businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.enabledModules?.includes('paymentProofs')) && (
+        {isFeatureEnabled('payment') && (
           <SettingsItem 
             icon={Bell} 
             title="Payment Proofs" 
@@ -183,7 +195,7 @@ const MoreMenu = ({
       <div className="bg-theme-card rounded-3xl border border-theme-border-soft shadow-premium">
         <SettingsItem 
           icon={Database} 
-          title="Backup" 
+          title="Backup & Restore" 
           description="Export & restore database" 
           onClick={() => setCurrentTab('backup-restore')} 
         />

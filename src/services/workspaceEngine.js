@@ -40,22 +40,31 @@ export const workspaceEngine = {
   },
 
   async getAll() {
-    if (!firebaseReady) return [{ id: 'default', name: 'Offline Workspace' }];
+    const settings = getSettings();
+    const localWs = settings?.businessWorkspaces;
+    if (Array.isArray(localWs) && localWs.length > 0) {
+      return localWs;
+    }
+    if (!firebaseReady) return [{ id: settings?.activeWorkspaceId || 'default', name: settings?.businessName || 'Default Workspace' }];
     try {
-      const snap = await getDocs(collection(db, 'settings'));
-      const workspaces = snap.docs.map(d => {
-        const data = d.data();
-        return {
-          id: d.id,
-          name: data.businessName || 'Unnamed Business',
-          email: data.email || '',
-          country: data.country || '',
-          userId: d.id
-        };
-      });
-      return workspaces;
+      const session = getAuthSession();
+      if (session?.isSuperAdmin) {
+        const snap = await getDocs(collection(db, 'settings'));
+        const workspaces = snap.docs.map(d => {
+          const data = d.data();
+          return {
+            id: d.id,
+            name: data.businessName || 'Unnamed Business',
+            email: data.email || '',
+            country: data.country || '',
+            userId: d.id
+          };
+        });
+        return workspaces;
+      }
+      return [{ id: settings?.activeWorkspaceId || 'default', name: settings?.businessName || 'Default Workspace' }];
     } catch {
-      return [{ id: 'default', name: 'Default Workspace' }];
+      return [{ id: settings?.activeWorkspaceId || 'default', name: settings?.businessName || 'Default Workspace' }];
     }
   },
 

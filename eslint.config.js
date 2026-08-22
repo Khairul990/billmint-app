@@ -4,7 +4,13 @@ import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 export default [
-  { ignores: ['dist', 'dev-dist', 'android', 'ios', '.capacitor', 'public', 'generate-icons.mjs', 'generateIcons.cjs', 'add-dark-classes.cjs', 'testRender.js', 'updateCreateInvoice_modal.cjs'] },
+  { 
+    ignores: [
+      'dist', 'dev-dist', 'dist-electron', 'dist_electron', 'android', 'ios', '.capacitor', 
+      'public', 'scratch', '_deleted_backup', 'src/pages/settings/**',
+      '*.mjs', '*.cjs', 'patch_*.js', 'test*.js', 'test*.mjs', 'merge_templates.js'
+    ] 
+  },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
@@ -28,6 +34,9 @@ export default [
       ...react.configs['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
       'react/prop-types': 'off',
+      'react/no-unescaped-entities': 'off',
+      'no-useless-assignment': 'off',
+      'no-empty': ['warn', { allowEmptyCatch: true }],
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },

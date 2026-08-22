@@ -9,7 +9,7 @@ import {
   Search, Link, Camera, FileSpreadsheet, ListChecks,
   AlertTriangle, ChevronRight, Circle, Briefcase,
   Zap, Target, Percent, Building2, Smartphone, Globe,
-  ArrowUpRight, ArrowDownRight, Timer, TrendingDown
+  ArrowUpRight, ArrowDownRight, Timer, TrendingDown, Layers
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid } from 'recharts';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -22,6 +22,7 @@ import { KPISkeleton, ChartSkeleton } from '../components/PremiumSkeleton';
 import ActivityFeed from '../components/ActivityFeed';
 import QuickActions from '../components/QuickActions';
 import PremiumEmptyState from '../components/PremiumEmptyState';
+import { useFeatureControl } from '../hooks/useFeatureControl';
 
 const AnimatedNumber = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(null);
@@ -119,6 +120,15 @@ const Dashboard = ({
   permissions = null,
   workspaceVerified = false
 }) => {
+  const activeWsId = businessSettings?.activeWorkspaceId || 'default';
+  const { isFeatureEnabled } = useFeatureControl(activeWsId);
+
+  const hasCustomers = isFeatureEnabled('customer');
+  const hasProducts = isFeatureEnabled('product');
+  const hasTreasury = isFeatureEnabled('treasury');
+  const hasExpenses = isFeatureEnabled('treasury.moneyOut');
+  const hasReports = isFeatureEnabled('reports');
+
   const [showAddCustomerSheet, setShowAddCustomerSheet] = useState(false);
   const [activeAnnouncement, setActiveAnnouncement] = useState(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -159,7 +169,10 @@ const Dashboard = ({
       .reduce((sum, inv) => {
         const s = (inv.paymentStatus || '').toLowerCase();
         if (s === 'paid') return sum + (inv.grandTotal || inv.total || 0);
-        if (s === 'partial' || s === 'partially paid') return sum + (parseFloat(inv.amountPaid) || 0);
+        if (s === 'partial' || s === 'partially paid') {
+          const paid = parseFloat(inv.amountPaid ?? inv.paidAmount) || 0;
+          return sum + paid;
+        }
         return sum;
       }, 0);
   }, [invoices]);
@@ -172,7 +185,7 @@ const Dashboard = ({
       })
       .reduce((sum, inv) => {
         const total = inv.grandTotal || inv.total || 0;
-        const paid = parseFloat(inv.amountPaid) || 0;
+        const paid = parseFloat(inv.amountPaid ?? inv.paidAmount) || 0;
         return sum + Math.max(0, total - paid);
       }, 0);
   }, [invoices]);
@@ -675,15 +688,26 @@ const Dashboard = ({
             <button onClick={onQuickBillOpen} className="flex-1 flex items-center justify-center gap-1.5 bg-[image:var(--accent-gradient)] text-white rounded-xl py-3 font-bold text-[10px] shadow-sm active:scale-[0.97] transition-all">
               <Plus className="w-3.5 h-3.5" /> New Bill
             </button>
-            <button onClick={() => setShowAddCustomerSheet(true)} className="flex-1 flex items-center justify-center gap-1.5 bg-theme-card border border-theme-border-soft rounded-xl py-3 font-bold text-[10px] text-theme-primary active:scale-[0.97] transition-all">
-              <Users className="w-3.5 h-3.5" /> Customer
-            </button>
-            <button onClick={() => setCurrentTab('due-ledger')} className="flex-1 flex items-center justify-center gap-1.5 bg-theme-card border border-theme-border-soft rounded-xl py-3 font-bold text-[10px] text-theme-primary active:scale-[0.97] transition-all">
-              <CreditCard className="w-3.5 h-3.5" /> Collect
-            </button>
-            <button onClick={() => setCurrentTab('reports')} className="flex-1 flex items-center justify-center gap-1.5 bg-theme-card border border-theme-border-soft rounded-xl py-3 font-bold text-[10px] text-theme-primary active:scale-[0.97] transition-all">
-              <BarChart3 className="w-3.5 h-3.5" /> Reports
-            </button>
+            {hasCustomers && (
+              <button onClick={() => setShowAddCustomerSheet(true)} className="flex-1 flex items-center justify-center gap-1.5 bg-theme-card border border-theme-border-soft rounded-xl py-3 font-bold text-[10px] text-theme-primary active:scale-[0.97] transition-all">
+                <Users className="w-3.5 h-3.5" /> Customer
+              </button>
+            )}
+            {hasTreasury && (
+              <button onClick={() => setCurrentTab('due-ledger')} className="flex-1 flex items-center justify-center gap-1.5 bg-theme-card border border-theme-border-soft rounded-xl py-3 font-bold text-[10px] text-theme-primary active:scale-[0.97] transition-all">
+                <CreditCard className="w-3.5 h-3.5" /> Collect
+              </button>
+            )}
+            {hasReports && (
+              <button onClick={() => setCurrentTab('reports')} className="flex-1 flex items-center justify-center gap-1.5 bg-theme-card border border-theme-border-soft rounded-xl py-3 font-bold text-[10px] text-theme-primary active:scale-[0.97] transition-all">
+                <BarChart3 className="w-3.5 h-3.5" /> Reports
+              </button>
+            )}
+            {hasProducts && (
+              <button onClick={() => setCurrentTab('products')} className="flex-1 flex items-center justify-center gap-1.5 bg-theme-card border border-theme-border-soft rounded-xl py-3 font-bold text-[10px] text-theme-primary active:scale-[0.97] transition-all">
+                <Layers className="w-3.5 h-3.5" /> Items
+              </button>
+            )}
           </div>
 
           {/* ===== MOBILE WELCOME AREA ===== */}
@@ -1142,7 +1166,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== QUICK STATS ROW ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-4 gap-5">
+            <motion.div variants={itemVariants} className={`grid gap-5 ${hasCustomers ? 'grid-cols-4' : 'grid-cols-3'}`}>
               {(() => {
                 const today = new Date().toDateString();
                 const billsToday = invoices.filter(i => new Date(i.createdAt).toDateString() === today).length;
@@ -1161,12 +1185,13 @@ const Dashboard = ({
                   const d = c.createdAt ? new Date(c.createdAt).toDateString() : null;
                   return d === today;
                 }).length;
-                return [
+                const statItems = [
                   { label: 'Bills Created Today', value: billsToday, icon: FileText, color: 'text-theme-accent' },
                   { label: 'Amount Collected Today', value: formatCurrency(collectedToday), icon: DollarSign, color: 'text-theme-success' },
                   { label: 'Due Bills Today', value: dueToday, icon: Clock, color: 'text-theme-warning' },
-                  { label: 'New Customers Today', value: newCustToday, icon: Users, color: 'text-theme-accent' }
-                ].map((s, i) => (
+                  ...(hasCustomers ? [{ label: 'New Customers Today', value: newCustToday, icon: Users, color: 'text-theme-accent' }] : [])
+                ];
+                return statItems.map((s, i) => (
                   <motion.div key={i} variants={itemVariants} className="stat-premium">
                     <div className="flex items-center justify-between mb-2">
                       <span className={`icon-premium icon-premium-sm ${s.color}`}>
@@ -1185,21 +1210,37 @@ const Dashboard = ({
               <button onClick={onQuickBillOpen} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-[image:var(--accent-gradient)] text-white rounded-xl shadow-sm hover:shadow-premium-hover transition-all active:scale-95 shrink-0">
                 <Plus className="w-4 h-4" /> New Invoice
               </button>
-              <button onClick={() => setShowAddCustomerSheet(true)} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-theme-card border border-theme-border-soft text-theme-primary rounded-xl hover:bg-theme-surface transition-all active:scale-95 shrink-0">
-                <Users className="w-4 h-4" /> Add Customer
-              </button>
-              <button onClick={() => setCurrentTab('due-ledger')} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-theme-card border border-theme-border-soft text-theme-primary rounded-xl hover:bg-theme-surface transition-all active:scale-95 shrink-0">
-                <CreditCard className="w-4 h-4" /> Log Payment
-              </button>
-              <button onClick={() => setCurrentTab('reports')} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-theme-card border border-theme-border-soft text-theme-primary rounded-xl hover:bg-theme-surface transition-all active:scale-95 shrink-0">
-                <BarChart3 className="w-4 h-4" /> View Reports
-              </button>
+              {hasCustomers && (
+                <button onClick={() => setShowAddCustomerSheet(true)} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-theme-card border border-theme-border-soft text-theme-primary rounded-xl hover:bg-theme-surface transition-all active:scale-95 shrink-0">
+                  <Users className="w-4 h-4" /> Add Customer
+                </button>
+              )}
+              {hasTreasury && (
+                <button onClick={() => setCurrentTab('due-ledger')} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-theme-card border border-theme-border-soft text-theme-primary rounded-xl hover:bg-theme-surface transition-all active:scale-95 shrink-0">
+                  <CreditCard className="w-4 h-4" /> Log Payment
+                </button>
+              )}
+              {hasReports && (
+                <button onClick={() => setCurrentTab('reports')} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-theme-card border border-theme-border-soft text-theme-primary rounded-xl hover:bg-theme-surface transition-all active:scale-95 shrink-0">
+                  <BarChart3 className="w-4 h-4" /> View Reports
+                </button>
+              )}
+              {hasProducts && (
+                <button onClick={() => setCurrentTab('products')} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-theme-card border border-theme-border-soft text-theme-primary rounded-xl hover:bg-theme-surface transition-all active:scale-95 shrink-0">
+                  <Layers className="w-4 h-4" /> Products
+                </button>
+              )}
+              {hasExpenses && (
+                <button onClick={() => setCurrentTab('expenses')} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-theme-card border border-theme-border-soft text-theme-primary rounded-xl hover:bg-theme-surface transition-all active:scale-95 shrink-0">
+                  <TrendingDown className="w-4 h-4" /> Log Expense
+                </button>
+              )}
             </motion.div>
 
             {/* ===== ROW 1: KPI CARDS ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-4 gap-5">
+            <motion.div variants={itemVariants} className={`grid gap-5 ${hasCustomers ? 'grid-cols-4' : 'grid-cols-3'}`}>
               {isInitialLoad ? (
-                <KPISkeleton count={4} />
+                <KPISkeleton count={hasCustomers ? 4 : 3} />
               ) : (
                 <>
                   <StatCard
@@ -1229,15 +1270,17 @@ const Dashboard = ({
                     subtitle="Outstanding collections"
                     isPremium={subscription?.planStatus === 'premium' || (subscription?.planId && subscription.planId.toLowerCase() !== 'free')}
                   />
-                  <StatCard
-                    title="Active Customers"
-                    value={customers.length}
-                    icon={Users}
-                    trend={customerGrowth}
-                    trendUp={!customerGrowth.startsWith('-')}
-                    subtitle="Registered customers"
-                    isPremium={subscription?.planStatus === 'premium' || (subscription?.planId && subscription.planId.toLowerCase() !== 'free')}
-                  />
+                  {hasCustomers && (
+                    <StatCard
+                      title="Active Customers"
+                      value={customers.length}
+                      icon={Users}
+                      trend={customerGrowth}
+                      trendUp={!customerGrowth.startsWith('-')}
+                      subtitle="Registered customers"
+                      isPremium={subscription?.planStatus === 'premium' || (subscription?.planId && subscription.planId.toLowerCase() !== 'free')}
+                    />
+                  )}
                 </>
               )}
             </motion.div>
@@ -1423,35 +1466,37 @@ const Dashboard = ({
 
             {/* ===== CUSTOMER INSIGHTS + WORKSPACE INFO ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-5">
-              <div className="col-span-7 card-premium p-5">
-                <div className="section-header">
-                  <div>
-                    <h3 className="section-header-title">Customer Insights</h3>
-                    <p className="section-header-subtitle">Customer engagement and growth metrics.</p>
+              {hasCustomers && (
+                <div className="col-span-12 lg:col-span-7 card-premium p-5">
+                  <div className="section-header">
+                    <div>
+                      <h3 className="section-header-title">Customer Insights</h3>
+                      <p className="section-header-subtitle">Customer engagement and growth metrics.</p>
+                    </div>
+                    <button onClick={() => setCurrentTab('customers')} className="btn-premium-ghost text-xs">
+                      View All <ChevronRight className="w-3 h-3" />
+                    </button>
                   </div>
-                  <button onClick={() => setCurrentTab('customers')} className="btn-premium-ghost text-xs">
-                    View All <ChevronRight className="w-3 h-3" />
-                  </button>
+                  <div className="grid grid-cols-3 gap-3 mt-6">
+                    <div className="stat-premium !p-4">
+                      <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Total</p>
+                      <p className="text-2xl font-black text-theme-primary tabular-nums">{totalCustomers}</p>
+                      <p className="text-2xs text-theme-muted font-medium mt-1">Registered</p>
+                    </div>
+                    <div className="stat-premium !p-4">
+                      <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">New This Month</p>
+                      <p className="text-2xl font-black text-theme-primary tabular-nums">{newCustomersThisMonth}</p>
+                      <p className="text-2xs text-theme-success font-medium mt-1">This month</p>
+                    </div>
+                    <div className="stat-premium !p-4">
+                      <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Active</p>
+                      <p className="text-2xl font-black text-theme-primary tabular-nums">{activeCustomers}</p>
+                      <p className="text-2xs text-theme-accent font-medium mt-1">Last 30d</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-3 gap-3 mt-6">
-                  <div className="stat-premium !p-4">
-                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Total</p>
-                    <p className="text-2xl font-black text-theme-primary tabular-nums">{totalCustomers}</p>
-                    <p className="text-2xs text-theme-muted font-medium mt-1">Registered</p>
-                  </div>
-                  <div className="stat-premium !p-4">
-                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">New This Month</p>
-                    <p className="text-2xl font-black text-theme-primary tabular-nums">{newCustomersThisMonth}</p>
-                    <p className="text-2xs text-theme-success font-medium mt-1">This month</p>
-                  </div>
-                  <div className="stat-premium !p-4">
-                    <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Active</p>
-                    <p className="text-2xl font-black text-theme-primary tabular-nums">{activeCustomers}</p>
-                    <p className="text-2xs text-theme-accent font-medium mt-1">Last 30d</p>
-                  </div>
-                </div>
-              </div>
-              <div className="col-span-5 card-premium p-5 flex flex-col">
+              )}
+              <div className={`${hasCustomers ? 'col-span-12 lg:col-span-5' : 'col-span-12'} card-premium p-5 flex flex-col`}>
                 <div className="section-header">
                   <h3 className="section-header-title">Workspace Overview</h3>
                 </div>
@@ -1481,35 +1526,37 @@ const Dashboard = ({
 
             {/* ===== TOP CUSTOMERS + BUSINESS INSIGHTS ===== */}
             <motion.div variants={itemVariants} className="grid grid-cols-12 gap-5">
-              <div className="col-span-6 card-premium p-5">
-                <div className="section-header">
-                  <div>
-                    <h3 className="section-header-title">Top Customers</h3>
-                    <p className="section-header-subtitle">Highest billing customers.</p>
+              {hasCustomers && (
+                <div className="col-span-12 lg:col-span-6 card-premium p-5">
+                  <div className="section-header">
+                    <div>
+                      <h3 className="section-header-title">Top Customers</h3>
+                      <p className="section-header-subtitle">Highest billing customers.</p>
+                    </div>
+                    <button onClick={() => setCurrentTab('customers')} className="btn-premium-ghost text-xs">View All <ChevronRight className="w-3 h-3" /></button>
                   </div>
-                  <button onClick={() => setCurrentTab('customers')} className="btn-premium-ghost text-xs">View All <ChevronRight className="w-3 h-3" /></button>
-                </div>
-                <div className="mt-6 space-y-2">
-                  {topCustomers.length === 0 ? (
-                    <p className="text-xs text-theme-muted font-medium text-center py-6">No customer data yet.</p>
-                  ) : (
-                    topCustomers.map((c, i) => (
-                      <motion.div key={c.name} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="flex items-center justify-between p-3 rounded-xl bg-theme-surface hover:bg-theme-accent/5 transition-colors">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-[9px] font-black ${i === 0 ? 'bg-theme-warning/20 text-theme-warning' : 'bg-theme-accent/10 text-theme-accent'}`}>
-                            {i + 1}
-                          </span>
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-theme-primary truncate">{c.name}</p>
+                  <div className="mt-6 space-y-2">
+                    {topCustomers.length === 0 ? (
+                      <p className="text-xs text-theme-muted font-medium text-center py-6">No customer data yet.</p>
+                    ) : (
+                      topCustomers.map((c, i) => (
+                        <motion.div key={c.name} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="flex items-center justify-between p-3 rounded-xl bg-theme-surface hover:bg-theme-accent/5 transition-colors">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-[9px] font-black ${i === 0 ? 'bg-theme-warning/20 text-theme-warning' : 'bg-theme-accent/10 text-theme-accent'}`}>
+                              {i + 1}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-theme-primary truncate">{c.name}</p>
+                            </div>
                           </div>
-                        </div>
-                        <p className="text-xs font-black text-theme-primary tabular-nums">{formatCurrency(c.total)}</p>
-                      </motion.div>
-                    ))
-                  )}
+                          <p className="text-xs font-black text-theme-primary tabular-nums">{formatCurrency(c.total)}</p>
+                        </motion.div>
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="col-span-6 card-premium p-5">
+              )}
+              <div className={`${hasCustomers ? 'col-span-12 lg:col-span-6' : 'col-span-12'} card-premium p-5`}>
                 <div className="section-header">
                   <h3 className="section-header-title">Business Insights</h3>
                 </div>

@@ -2451,6 +2451,13 @@ export const saveInvoice = async (invoice) => {
     invoice.verificationCode = generateVerificationCode(invoice.invoiceNumber || 'INV');
   }
 
+  // 1.6 Ensure financial parity (paidAmount and amountPaid)
+  const paidVal = Number(invoice.paidAmount ?? invoice.amountPaid ?? 0);
+  invoice.paidAmount = paidVal;
+  invoice.amountPaid = paidVal;
+  invoice.grandTotal = Number(invoice.grandTotal || invoice.total || 0);
+  invoice.balanceDue = Math.max(0, invoice.grandTotal - paidVal);
+
   // 2. Ensure snapshots are taken
   const activeSettings = getSettings() || DEFAULT_SETTINGS;
 

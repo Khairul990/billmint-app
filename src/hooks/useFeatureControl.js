@@ -7,18 +7,11 @@ export function useFeatureControl(workspaceId) {
   const [loading, setLoading] = useState(true);
 
   const loadSettings = useCallback(async () => {
-    if (!workspaceId) {
-      setFeatures({});
-      setCategories({});
-      setLoading(false);
-      return;
-    }
-    
-    setLoading(true);
+    const activeWs = workspaceId || 'default';
     try {
       const [feats, cats] = await Promise.all([
-        featureControlEngine.getAllFeatures(workspaceId),
-        featureControlEngine.getAllCategories(workspaceId)
+        featureControlEngine.getAllFeatures(activeWs),
+        featureControlEngine.getAllCategories(activeWs)
       ]);
       setFeatures(feats);
       setCategories(cats);
@@ -35,24 +28,39 @@ export function useFeatureControl(workspaceId) {
     const handleUpdate = (e) => {
       const updatedWs = e.detail?.workspaceId || 'default';
       const currentWs = workspaceId || 'default';
-      if (updatedWs === currentWs) {
+      if (!e.detail?.workspaceId || updatedWs === currentWs) {
         loadSettings();
       }
     };
 
+    const handleWorkspaceSwitch = (e) => {
+      loadSettings();
+    };
+
     window.addEventListener('billqyro_features_updated', handleUpdate);
-    return () => window.removeEventListener('billqyro_features_updated', handleUpdate);
+    window.addEventListener('billqyro_workspace_changed', handleWorkspaceSwitch);
+    return () => {
+      window.removeEventListener('billqyro_features_updated', handleUpdate);
+      window.removeEventListener('billqyro_workspace_changed', handleWorkspaceSwitch);
+    };
   }, [workspaceId, loadSettings]);
 
   // Synchronous checks using cached state
   const isFeatureEnabled = useCallback((featureId) => {
-    if (!features[featureId]) return false; // Default safe false if loading or unknown
-    return features[featureId].effectiveEnabled;
+    if (!featureId) return true;
+    if (features[featureId] !== undefined) {
+      return Boolean(features[featureId].effectiveEnabled);
+    }
+    // Safe default during initial mount before async resolve
+    return true;
   }, [features]);
 
   const isCategoryEnabled = useCallback((categoryId) => {
-    if (!categories[categoryId]) return false; // Default safe false
-    return categories[categoryId].enabled;
+    if (!categoryId) return true;
+    if (categories[categoryId] !== undefined) {
+      return Boolean(categories[categoryId].enabled);
+    }
+    return true;
   }, [categories]);
 
   return {

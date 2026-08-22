@@ -64,37 +64,37 @@ const Sidebar = ({
     { id: 'dashboard', label: "Today's Business", icon: LayoutDashboard },
 
     { type: 'label', label: 'Billing' },
-    { id: 'invoices', label: getInvoiceLabel(), icon: FileSpreadsheet, featureId: 'invoice', module: 'billing' },
-    { id: 'estimates', label: 'Estimates & Quotes', icon: FileSpreadsheet, featureId: 'invoice', module: 'billing' },
+    { id: 'invoices', label: getInvoiceLabel(), icon: FileSpreadsheet, featureId: 'invoice' },
+    { id: 'estimates', label: 'Estimates & Quotes', icon: FileSpreadsheet, featureId: 'invoice.estimates' },
 
     { type: 'label', label: 'Customers' },
-    ...(enabledModules.includes('customers') || wsType === 'billing_only' ? [{ id: 'customers', label: getCustomerLabel(), icon: Users, featureId: 'customer', module: 'customers' }] : []),
-    ...(enabledModules.includes('patients') ? [{ id: 'patients', label: 'Patient Records', icon: Users, featureId: 'customer', module: 'patients' }] : []),
-    ...(enabledModules.includes('students') ? [{ id: 'students', label: 'Student Directory', icon: Users, featureId: 'customer', module: 'students' }] : []),
-    ...(enabledModules.includes('clients') ? [{ id: 'clients', label: 'Client Roster', icon: Users, featureId: 'customer', module: 'clients' }] : []),
+    { id: 'customers', label: getCustomerLabel(), icon: Users, featureId: 'customer' },
+    ...(enabledModules.includes('patients') ? [{ id: 'patients', label: 'Patient Records', icon: Users, featureId: 'customer' }] : []),
+    ...(enabledModules.includes('students') ? [{ id: 'students', label: 'Student Directory', icon: Users, featureId: 'customer' }] : []),
+    ...(enabledModules.includes('clients') ? [{ id: 'clients', label: 'Client Roster', icon: Users, featureId: 'customer' }] : []),
 
     { type: 'label', label: 'Staff' },
     { id: 'staff-ledger', label: 'Staff Ledger', icon: Users, featureId: 'staff.ledger' },
 
     { type: 'label', label: 'Collections' },
-    { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen, featureId: 'treasury', module: 'dueLedger' },
-    { id: 'pending-payments', label: 'Payment Proofs', icon: Bell, featureId: 'payment', module: 'paymentProofs' },
-    { id: 'bank', label: 'Internal Bank', icon: Landmark, featureId: 'bank' },
+    { id: 'due-ledger', label: 'Due Ledger', icon: BookOpen, featureId: 'treasury' },
+    { id: 'pending-payments', label: 'Payment Proofs', icon: Bell, featureId: 'payment' },
+    { id: 'bank', label: 'Internal Bank', icon: Landmark, featureId: 'treasury' },
 
     { type: 'label', label: 'Analytics' },
-    { id: 'reports', label: 'Reports', icon: PieChart, featureId: 'reports', module: 'reports' },
-    { id: 'expenses', label: t('expenses'), icon: TrendingDown, featureId: 'treasury.moneyOut', module: 'expenses' },
+    { id: 'reports', label: 'Reports', icon: PieChart, featureId: 'reports' },
+    { id: 'expenses', label: t('expenses'), icon: TrendingDown, featureId: 'treasury.moneyOut' },
 
     { type: 'label', label: 'Operations' },
-    { id: 'products', label: t('products'), icon: Layers, featureId: 'product', module: 'products' },
-    { id: 'orders', label: 'Orders', icon: ShoppingBag, featureId: 'operations.orders', module: 'orders' },
-    { id: 'appointments', label: 'Appointments', icon: Calendar, featureId: 'operations.appointments', module: 'appointments' },
-    { id: 'delivery', label: 'Delivery Tracking', icon: Truck, featureId: 'operations.delivery', module: 'delivery' },
-    { id: 'measurements', label: 'Measurements', icon: Scissors, featureId: 'operations.measurements', module: 'measurements' },
-    { id: 'designBook', label: 'Design Book', icon: BookOpen, featureId: 'operations.designBook', module: 'designBook' },
-    { id: 'devices', label: 'Device Management', icon: Wrench, featureId: 'operations.devices', module: 'devices' },
-    { id: 'serviceJobs', label: 'Service Jobs', icon: Wrench, featureId: 'operations.serviceJobs', module: 'serviceJobs' },
-    { id: 'projects', label: 'Projects', icon: Briefcase, featureId: 'operations.projects', module: 'projects' },
+    { id: 'products', label: t('products'), icon: Layers, featureId: 'product' },
+    { id: 'orders', label: 'Orders', icon: ShoppingBag, featureId: 'operations' },
+    { id: 'appointments', label: 'Appointments', icon: Calendar, featureId: 'operations' },
+    { id: 'delivery', label: 'Delivery Tracking', icon: Truck, featureId: 'operations' },
+    { id: 'measurements', label: 'Measurements', icon: Scissors, featureId: 'operations' },
+    { id: 'designBook', label: 'Design Book', icon: BookOpen, featureId: 'operations' },
+    { id: 'devices', label: 'Device Management', icon: Wrench, featureId: 'operations' },
+    { id: 'serviceJobs', label: 'Service Jobs', icon: Wrench, featureId: 'operations' },
+    { id: 'projects', label: 'Projects', icon: Briefcase, featureId: 'operations' },
 
     { type: 'label', label: 'Portals' },
     { id: 'customer-portal-config', label: getPortalLabelByType(wsType), icon: Globe, featureId: 'liveLink' },
@@ -125,9 +125,6 @@ const Sidebar = ({
   // Filter items based on V8 Feature Control
   if (!featuresLoading) {
     menuItems = menuItems.filter(item => {
-      if (item.module && !enabledModules.includes(item.module)) {
-        return false;
-      }
       // Backwards compat check if module is defined but featureId is missing
       if (item.module && !item.featureId) {
         if (!enabledModules.includes(item.module)) {
@@ -479,4 +476,3 @@ const Sidebar = ({
 };
 
 export default Sidebar;
-

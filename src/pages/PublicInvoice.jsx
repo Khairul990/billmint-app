@@ -197,7 +197,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           uploadedUrl = await getDownloadURL(uploadResult.ref);
         } catch (uploadErr) {
           toast.dismiss('uploadToast');
-          throw new Error('Failed to upload image to secure storage: ' + uploadErr.message);
+          throw new Error('Failed to upload image to secure storage: ' + uploadErr.message, { cause: uploadErr });
         }
 
         const invoiceRef = doc(db, 'publicInvoices', docId);

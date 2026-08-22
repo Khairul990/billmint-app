@@ -1,14 +1,14 @@
-import { toast } from 'react-hot-toast';
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, 
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend 
+  AreaChart, Area, PieChart, Pie, Cell, 
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
 import { 
   Filter, Download, Printer, PieChart as PieChartIcon, 
   TrendingUp, DollarSign, FileText, CheckCircle2, AlertCircle, Clock
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
 
@@ -34,9 +34,9 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
   const isDateInRange = (dateString, rangeType, start, end) => {
     if (!dateString) return false;
     const d = new Date(dateString);
-    d.setHours(0,0,0,0);
+    d.setHours(0, 0, 0, 0);
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
 
     if (rangeType === 'All Time') return true;
     if (rangeType === 'Today') {
@@ -79,9 +79,9 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
       return true;
     }).map(inv => {
       const grandTotal = parseFloat(inv.grandTotal || inv.total) || 0;
-      let paid = 0;
-      if (inv.paymentStatus === 'Paid') paid = grandTotal;
-      else paid = parseFloat(inv.amountPaid) || 0;
+      const paid = inv.paymentStatus === 'Paid' 
+        ? grandTotal 
+        : (parseFloat(inv.amountPaid ?? inv.paidAmount) || 0);
 
       return {
         ...inv,
@@ -432,8 +432,6 @@ const Reports = ({ invoices = [], customers = [], businessSettings }) => {
           <p className="text-xl font-black text-theme-primary tracking-tight truncate">{metrics.topItem}</p>
         </motion.div>
       </motion.div>
-
-
 
       {/* CHARTS */}
       {invoices.length > 0 && (
