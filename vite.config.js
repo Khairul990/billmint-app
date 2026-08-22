@@ -82,18 +82,42 @@ export default defineConfig(({ mode }) => ({
       output: {
         inlineDynamicImports: false,
         hoistTransitiveImports: true,
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'framer-motion'],
-          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
-          'vendor-icons': ['lucide-react'],
-          'vendor-charts': ['recharts'],
-          'vendor-flow': ['@xyflow/react'],
-          'vendor-pdf': ['@react-pdf/renderer', 'pdfjs-dist'],
-          'vendor-ocr': ['tesseract.js'],
-          'vendor-utils': ['jszip', 'pako', 'qrcode', 'qrcode.react', 'zod', 'uuid']
+        manualChunks(id) {
+          const normalized = id.replace(/\\/g, '/');
+          if (normalized.includes('node_modules')) {
+            if (
+              normalized.includes('/react/') ||
+              normalized.includes('/react-dom/') ||
+              normalized.includes('/framer-motion/') ||
+              normalized.includes('/recharts/') ||
+              normalized.includes('/react-hot-toast/') ||
+              normalized.includes('/react-switch/') ||
+              normalized.includes('/react-confetti/') ||
+              normalized.includes('/use-sync-external-store/') ||
+              normalized.includes('/scheduler/')
+            ) {
+              return 'vendor-react';
+            }
+            if (normalized.includes('firebase')) {
+              return 'vendor-firebase';
+            }
+            if (normalized.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (normalized.includes('@react-pdf') || normalized.includes('pdfjs-dist')) {
+              return 'vendor-pdf';
+            }
+            if (normalized.includes('tesseract')) {
+              return 'vendor-ocr';
+            }
+            if (normalized.includes('@xyflow')) {
+              return 'vendor-flow';
+            }
+            return 'vendor-utils';
+          }
         }
       }
     },
-    chunkSizeWarningLimit: 1500
+    chunkSizeWarningLimit: 3000
   }
 }))
