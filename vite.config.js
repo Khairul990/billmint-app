@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ['favicon.svg', 'app-icon.svg'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        maximumFileSizeToCacheInBytes: 5000000,
+        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/__/, /^\/api\//, /^\/publicInvoices\//, /\.html$/],
         ignoreURLParametersMatching: [/^token/, /^secret/, /^auth/],
@@ -77,7 +77,7 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
     cssCodeSplit: true,
     target: 'es2020',
-    minify: mode === 'android' ? false : 'esbuild',
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         inlineDynamicImports: false,
@@ -91,3 +91,4 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 3000
   }
 }))
+
