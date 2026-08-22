@@ -8,10 +8,32 @@ import {
 } from 'lucide-react';
 import { BUSINESS_PRESETS, ALL_MODULES } from '../../config/businessPresets';
 import { authEngine } from '../../services/authEngine';
+import { featureControlEngine } from '../../services/featureControlEngine';
 import { soundEngine } from '../../utils/soundEngine';
 
 const iconMap = {
   ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText, Store, Palette: Paintbrush, Coffee, Settings, Monitor
+};
+
+const MODULE_FEATURES = {
+  billing: ['invoice'],
+  customers: ['customer'],
+  patients: ['customer'],
+  students: ['customer'],
+  clients: ['customer'],
+  products: ['product'],
+  dueLedger: ['treasury'],
+  expenses: ['treasury', 'treasury.moneyOut'],
+  reports: ['reports'],
+  paymentProofs: ['payment'],
+  orders: ['operations.orders'],
+  appointments: ['operations.appointments'],
+  delivery: ['operations.delivery'],
+  measurements: ['operations.measurements'],
+  designBook: ['operations.designBook'],
+  devices: ['operations.devices'],
+  serviceJobs: ['operations.serviceJobs'],
+  projects: ['operations.projects']
 };
 
 const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab }) => {
@@ -65,6 +87,16 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
   const isAddWorkspaceMode = businessSettings?.setupCompleted === true;
 
   const handleFinish = async () => {
+    const paymentMethod = paymentForm.indiaUpi
+      ? 'UPI'
+      : paymentForm.bdBkash
+        ? 'bKash'
+        : paymentForm.bdNagad
+          ? 'Nagad'
+          : paymentForm.bankName || paymentForm.accNum
+            ? 'Bank Transfer'
+            : 'Manual';
+
     // Create Workspace
     const defaultWs = {
       id: 'ws_' + Date.now(),
@@ -87,16 +119,28 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
       updatedSettings = {
         ...updatedSettings,
         businessName: formData.businessName.trim() || selectedPreset.label,
+        businessType: formData.businessType,
         ownerName: formData.ownerName,
         phone: formData.phone,
         address: formData.address,
         setupCompleted: true,
+        profileSetupCompleted: true,
         businessSetupCompleted: true,
         paymentSetupCompleted: true,
         legalAccepted: true,
         legalAcceptedAt: Date.now(),
         language: formData.language,
-        paymentMethod: paymentForm
+        defaultBillingTemplate: formData.businessType,
+        paymentMethod,
+        paymentQrEnabled: Boolean(paymentForm.indiaUpi || paymentForm.bdBkash || paymentForm.bdNagad),
+        upiId: paymentForm.indiaUpi.trim(),
+        bkashNumber: paymentForm.bdBkash.trim(),
+        nagadNumber: paymentForm.bdNagad.trim(),
+        bankDetails: {
+          bankName: paymentForm.bankName.trim(),
+          accountHolder: paymentForm.accHolder.trim(),
+          accountNumber: paymentForm.accNum.trim()
+        }
       };
       
       // Theme defaults handled outside in App/Settings
@@ -104,6 +148,10 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
 
     soundEngine.playPaymentSuccess();
     await onSaveSettings(updatedSettings);
+    const featureIds = [...new Set(formData.enabledModules.flatMap(module => MODULE_FEATURES[module] || []))];
+    for (const featureId of featureIds) {
+      await featureControlEngine.toggleFeature(defaultWs.id, featureId, true).catch(() => null);
+    }
     setCurrentTab('dashboard');
   };
 
@@ -575,3 +623,4 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, setCurrentTab
 };
 
 export default OnboardingWizard;
+
