@@ -10,7 +10,9 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
 
   const MAX_ATTEMPTS = 5;
   const rawPin = import.meta.env.VITE_ADMIN_PIN;
-  const CORRECT_PIN = (rawPin && rawPin !== 'undefined') ? rawPin : '0000';
+  // Never ship a usable default PIN. A missing PIN must deny access until the
+  // deployment environment is configured.
+  const CORRECT_PIN = (rawPin && rawPin !== 'undefined') ? rawPin : '';
   const [locked, setLocked] = useState(() => {
     return localStorage.getItem('billqyro_admin_locked') === 'true';
   });
@@ -184,3 +186,4 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
 };
 
 export default AdminPINLogin;
+
