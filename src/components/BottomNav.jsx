@@ -7,14 +7,16 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
   const activeWsId = businessSettings?.activeWorkspaceId;
   const activeWorkspace = businessSettings?.businessWorkspaces?.find(ws => ws.id === activeWsId) || {};
   const wsType = activeWorkspace.type || 'retail';
+  const enabledModules = activeWorkspace.enabledModules || [];
+  const primaryPeopleModule = ['customers', 'patients', 'students', 'clients'].find(module => enabledModules.includes(module));
 
   const getCustomerLabel = () => getCustomerLabelByType(wsType);
 
   let tabs = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
-    { id: 'due', label: 'Due', icon: CreditCard, badge: pendingPaymentsCount },
-    { id: 'create', isAction: true },
-    { id: 'customers', label: getCustomerLabel(), icon: Users },
+    ...(enabledModules.includes('dueLedger') ? [{ id: 'due', label: 'Due', icon: CreditCard, badge: pendingPaymentsCount }] : []),
+    ...(enabledModules.includes('billing') ? [{ id: 'create', isAction: true, actionTab: 'create-invoice' }] : []),
+    ...(primaryPeopleModule ? [{ id: primaryPeopleModule, label: getCustomerLabel(), icon: Users }] : []),
     { id: 'more', label: 'More', icon: MoreHorizontal },
   ];
 
@@ -22,7 +24,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
     tabs = [
       { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
       { id: 'customer-register', label: 'Register', icon: Users },
-      { id: 'create', isAction: true },
+      { id: 'create', isAction: true, actionTab: 'quick-tools' },
       { id: 'portal-hub', label: 'Portals', icon: CreditCard },
       { id: 'more', label: 'More', icon: MoreHorizontal },
     ];
@@ -40,7 +42,7 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
                 <button
                   onClick={() => {
                     triggerLightHaptic();
-                    setCurrentTab('create-invoice');
+                    setCurrentTab(tab.actionTab);
                   }}
                   className="w-14 h-14 rounded-full bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-lg shadow-theme-glow border-[3px] border-theme-border-soft dark:border-slate-800 active:scale-90 hover:scale-105 transition-all duration-200 hover:shadow-xl"
                 >
@@ -93,3 +95,4 @@ const BottomNav = ({ currentTab, setCurrentTab, onQuickBillOpen, pendingPayments
 };
 
 export default BottomNav;
+
