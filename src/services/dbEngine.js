@@ -2977,6 +2977,7 @@ export const exportBackup = async () => {
   const products = await getProducts();
   const expenses = await getExpenses();
   const students = await getStudents();
+  const staff = await getStaffs();
   const settings = getSettings();
 
   localStorage.setItem('billqyro_last_backup_time', new Date().toISOString());
@@ -2984,14 +2985,17 @@ export const exportBackup = async () => {
   return {
     appName: "BillQyro",
     backupVersion: 1,
+    formatVersion: 1,
     createdAt: new Date().toISOString(),
     dataSource: "localStorage/firebase-current",
+    workspaceId: settings?.activeWorkspaceId || 'default',
     recordCounts: {
       invoices: invoices.length,
       customers: customers.length,
       products: products.length,
       expenses: expenses.length,
-      students: students.length
+      students: students.length,
+      staff: staff.length
     },
     settings,
     customers,
@@ -2999,6 +3003,7 @@ export const exportBackup = async () => {
     invoices,
     expenses,
     students,
+    staff,
     subscription: getSubscriptionStatus(),
   };
 };
@@ -3043,41 +3048,70 @@ export const importRestore = async (backupData) => {
     throw new Error('Invalid backup file structure.');
   }
 
-  const requiredKeys = ['settings', 'customers', 'staff', 'products', 'invoices', 'expenses', 'students', 'subscription'];
+  const requiredKeys = ['settings', 'customers', 'products', 'invoices', 'expenses'];
   for (const k of requiredKeys) {
     if (!Object.prototype.hasOwnProperty.call(backupData, k)) {
       throw new Error(`Missing database key: ${k}`);
     }
   }
 
-  localStorage.setItem(KEYS.SETTINGS, JSON.stringify(backupData.settings));
-  updateLocalCache(KEYS.CUSTOMERS, backupData.customers);
-  for (const c of backupData.customers) await BillQyroDB.put('customers', c);
-  updateLocalCache(KEYS.PRODUCTS, backupData.products);
-  for (const p of backupData.products) await BillQyroDB.put('products', p);
-  updateLocalCache(KEYS.INVOICES, backupData.invoices);
-  for (const i of backupData.invoices) await BillQyroDB.put('invoices', i);
-  updateLocalCache(KEYS.EXPENSES, backupData.expenses);
-  for (const e of backupData.expenses) await BillQyroDB.put('expenses', e);
-  updateLocalCache(KEYS.STUDENTS, backupData.students || []);
-  for (const s of (backupData.students || [])) await BillQyroDB.put('students', s);
-  localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(backupData.subscription));
+  const previousSettings = getSettings();
+  const previousInvoices = await getInvoices();
 
-  // If Firebase is enabled, batch update Firestore as well
-  if (firebaseReady) {
-    const userId = getRealUserId();
-    firestoreSave('settings', userId, backupData.settings);
-    backupData.customers.forEach(c => firestoreSave('customers', c.id, c));
-    backupData.products.forEach(p => firestoreSave('products', p.id, p));
-    backupData.invoices.forEach(i => {
-      firestoreSave('invoices', i.id, i);
-    });
-    backupData.expenses.forEach(e => firestoreSave('expenses', e.id, e));
-    (backupData.students || []).forEach(s => firestoreSave('students', s.id, s));
-    firestoreSave('subscription', userId, backupData.subscription);
+  try {
+    if (backupData.settings) {
+      localStorage.setItem(KEYS.SETTINGS, JSON.stringify(backupData.settings));
+    }
+    if (Array.isArray(backupData.customers)) {
+      updateLocalCache(KEYS.CUSTOMERS, backupData.customers);
+      for (const c of backupData.customers) await BillQyroDB.put('customers', c);
+    }
+    if (Array.isArray(backupData.products)) {
+      updateLocalCache(KEYS.PRODUCTS, backupData.products);
+      for (const p of backupData.products) await BillQyroDB.put('products', p);
+    }
+    if (Array.isArray(backupData.invoices)) {
+      updateLocalCache(KEYS.INVOICES, backupData.invoices);
+      for (const i of backupData.invoices) await BillQyroDB.put('invoices', i);
+    }
+    if (Array.isArray(backupData.expenses)) {
+      updateLocalCache(KEYS.EXPENSES, backupData.expenses);
+      for (const e of backupData.expenses) await BillQyroDB.put('expenses', e);
+    }
+    if (Array.isArray(backupData.staff)) {
+      updateLocalCache(KEYS.STAFF, backupData.staff);
+      for (const s of backupData.staff) await BillQyroDB.put('staff', s);
+    }
+    if (Array.isArray(backupData.students)) {
+      updateLocalCache(KEYS.STUDENTS, backupData.students);
+      for (const st of backupData.students) await BillQyroDB.put('students', st);
+    }
+    if (backupData.subscription) {
+      localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(backupData.subscription));
+    }
+
+    // If Firebase is enabled, batch update Firestore as well
+    if (firebaseReady) {
+      const userId = getRealUserId();
+      if (userId) {
+        if (backupData.settings) firestoreSave('settings', userId, backupData.settings);
+        (backupData.customers || []).forEach(c => firestoreSave('customers', c.id, c));
+        (backupData.products || []).forEach(p => firestoreSave('products', p.id, p));
+        (backupData.invoices || []).forEach(i => firestoreSave('invoices', i.id, i));
+        (backupData.expenses || []).forEach(e => firestoreSave('expenses', e.id, e));
+        (backupData.staff || []).forEach(s => firestoreSave('staff', s.id, s));
+        (backupData.students || []).forEach(st => firestoreSave('students', st.id, st));
+        if (backupData.subscription) firestoreSave('subscription', userId, backupData.subscription);
+      }
+    }
+
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+    return backupData;
+  } catch (err) {
+    if (previousSettings) localStorage.setItem(KEYS.SETTINGS, JSON.stringify(previousSettings));
+    if (previousInvoices) updateLocalCache(KEYS.INVOICES, previousInvoices);
+    throw err;
   }
-
-  return backupData;
 };
 
 export const clearInvoices = async () => { localStorage.setItem(KEYS.INVOICES, JSON.stringify([])); await BillQyroDB.clear('invoices'); window.dispatchEvent(new CustomEvent('billqyro_sync')); return { status: 'success' }; };
