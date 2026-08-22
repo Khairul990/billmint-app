@@ -170,12 +170,55 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
 
   // Filter Catalog
   const filteredProducts = useMemo(() => products.filter(p => {
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.trim().toLowerCase();
     return (
       (p.name || '').toLowerCase().includes(q) ||
-      (p.description && p.description.toLowerCase().includes(q))
+      (p.description || '').toLowerCase().includes(q) ||
+      (p.category || '').toLowerCase().includes(q) ||
+      (p.brand || '').toLowerCase().includes(q) ||
+      (p.sku || '').toLowerCase().includes(q) ||
+      (p.barcode || '').toLowerCase().includes(q)
     );
   }), [products, searchQuery]);
+
+  const categorySummary = useMemo(() => {
+    const categories = new Map();
+    products.forEach((product) => {
+      const label = product.category?.trim() || 'Uncategorized';
+      const entry = categories.get(label) || { label, count: 0, brands: new Set() };
+      entry.count += 1;
+      if (product.brand?.trim()) entry.brands.add(product.brand.trim());
+      categories.set(label, entry);
+    });
+
+    return [...categories.values()]
+      .map((entry) => ({ ...entry, brands: [...entry.brands].sort() }))
+      .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+  }, [products]);
+
+  const brandSummary = useMemo(() => {
+    const brands = new Map();
+    products.forEach((product) => {
+      const label = product.brand?.trim();
+      if (!label) return;
+      brands.set(label, (brands.get(label) || 0) + 1);
+    });
+    return [...brands.entries()]
+      .map(([label, count]) => ({ label, count }))
+      .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+  }, [products]);
+
+  const lowStockProducts = useMemo(() => products
+    .filter((product) => {
+      if (product.stockQty === undefined || product.stockQty === null) return false;
+      return Number(product.stockQty) <= Number(product.lowStockThreshold ?? 5);
+    })
+    .sort((a, b) => Number(a.stockQty) - Number(b.stockQty)), [products]);
+
+  const viewCatalogFor = (term) => {
+    setSearchQuery(term);
+    setActiveTab('products');
+  };
 
   const ITEMS_PER_PAGE = 30;
   const { displayCount, loadMoreRef } = useInfiniteScroll(filteredProducts.length, ITEMS_PER_PAGE);
@@ -605,23 +648,52 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
         )}
         
         {activeTab === 'categories' && (
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
-            <Tag className="w-12 h-12 text-theme-primary mx-auto mb-3 opacity-50" />
-            <h4 className="font-extrabold text-theme-primary">Categories & Brands Management</h4>
-            <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
-              Categories feature is active. Dedicated UI coming soon as part of the Inventory Module upgrade.
-            </p>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-5">
+            <section className="lg:col-span-3 bg-theme-card dark:bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <h4 className="font-extrabold text-theme-primary">Categories</h4>
+                  <p className="text-xs text-theme-muted font-semibold mt-1">Organized from your current catalog.</p>
+                </div>
+                <span className="px-2.5 py-1 rounded-lg bg-theme-accent-light text-theme-accent text-[10px] font-black uppercase tracking-wider">{categorySummary.length} total</span>
+              </div>
+              {categorySummary.length ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {categorySummary.map((item) => (
+                    <button key={item.label} onClick={() => viewCatalogFor(item.label)} className="text-left rounded-2xl border border-theme-border-soft bg-theme-surface/50 p-4 hover:border-theme-accent/50 hover:bg-theme-accent-light/50 transition-colors">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="flex items-center gap-2 font-extrabold text-sm text-theme-primary"><span className="w-8 h-8 rounded-xl bg-theme-card border border-theme-border-soft flex items-center justify-center text-theme-accent">{getCategoryIcon(item.label)}</span>{item.label}</span>
+                        <span className="text-xs font-black text-theme-accent">{item.count}</span>
+                      </div>
+                      <p className="mt-3 text-[10px] font-bold text-theme-muted truncate">{item.brands.length ? item.brands.join(', ') : 'No brand assigned'}</p>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-10 text-center text-theme-muted"><Tag className="w-10 h-10 mx-auto mb-3 opacity-40" /><p className="text-sm font-bold">No categories yet</p><p className="mt-1 text-xs">Add a category while creating a catalog item.</p></div>
+              )}
+            </section>
+            <section className="lg:col-span-2 bg-theme-card dark:bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium">
+              <h4 className="font-extrabold text-theme-primary">Brands</h4>
+              <p className="text-xs text-theme-muted font-semibold mt-1 mb-4">Tap a brand to see its catalog items.</p>
+              {brandSummary.length ? <div className="space-y-2">{brandSummary.map((item) => (
+                <button key={item.label} onClick={() => viewCatalogFor(item.label)} className="w-full flex items-center justify-between rounded-xl px-3.5 py-3 bg-theme-surface/60 border border-theme-border-soft text-left hover:border-theme-accent/50 transition-colors"><span className="text-xs font-bold text-theme-primary truncate pr-3">{item.label}</span><span className="shrink-0 text-[10px] font-black text-theme-muted">{item.count} item{item.count === 1 ? '' : 's'}</span></button>
+              ))}</div> : <div className="py-10 text-center text-theme-muted"><Tag className="w-10 h-10 mx-auto mb-3 opacity-40" /><p className="text-sm font-bold">No brands assigned</p><p className="mt-1 text-xs">Brands are optional for each item.</p></div>}
+            </section>
           </div>
         )}
 
         {activeTab === 'stock' && (
-          <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
-            <Package className="w-12 h-12 text-theme-primary mx-auto mb-3 opacity-50" />
-            <h4 className="font-extrabold text-theme-primary">Stock Management</h4>
-            <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
-              Advanced stock transfers, adjustments, and purchase workflows are being prepared.
-            </p>
-          </div>
+          <section className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
+              <div><h4 className="font-extrabold text-theme-primary">Stock alerts</h4><p className="text-xs text-theme-muted font-semibold mt-1">Items at or below their configured reorder level.</p></div>
+              <span className={`w-fit px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider ${lowStockProducts.length ? 'bg-theme-danger/10 text-theme-danger' : 'bg-theme-accent-light text-theme-accent'}`}>{lowStockProducts.length ? `${lowStockProducts.length} need attention` : 'All stocked up'}</span>
+            </div>
+            {lowStockProducts.length ? <div className="space-y-3">{lowStockProducts.map((product) => {
+              const threshold = Number(product.lowStockThreshold ?? 5);
+              return <div key={product.id} className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl border border-theme-danger/20 bg-theme-danger/5 p-4"><div className="w-9 h-9 rounded-xl bg-theme-card flex items-center justify-center text-theme-danger"><BadgeAlert className="w-4 h-4" /></div><div className="min-w-0 flex-1"><p className="font-extrabold text-sm text-theme-primary truncate">{product.name}</p><p className="text-[10px] font-bold text-theme-muted mt-0.5">{product.category || 'Uncategorized'} · Reorder at {threshold} {product.unit || 'pcs'}</p></div><div className="flex items-center justify-between sm:justify-end gap-3"><span className="text-xs font-black text-theme-danger">{product.stockQty} {product.unit || 'pcs'} left</span><button onClick={() => openEditModal(product)} className="px-3 py-2 rounded-xl text-xs font-bold bg-theme-card border border-theme-border-soft text-theme-primary hover:border-theme-accent transition-colors">Update stock</button></div></div>;
+            })}</div> : <div className="py-12 text-center text-theme-muted"><Package className="w-12 h-12 mx-auto mb-3 text-theme-accent opacity-60" /><p className="font-extrabold text-theme-primary">No low-stock items</p><p className="text-xs font-semibold mt-1">Your tracked inventory is above its alert threshold.</p></div>}
+          </section>
         )}
         </div>
         </PullToRefresh>
