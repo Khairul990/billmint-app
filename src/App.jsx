@@ -1357,6 +1357,7 @@ function App() {
   const handleSaveSettings = async (payload) => {
     if (isDemoSessionActive) {
       localStorage.setItem('billqyro_demo_settings', JSON.stringify(payload));
+      setDemoSettings(payload);
       toast.success('Settings saved to Demo Session');
       window.dispatchEvent(new Event('storage'));
       return true;
@@ -1489,13 +1490,46 @@ function App() {
     'invoices': 'invoice', 'create-invoice': 'invoice', 'estimates': 'invoice',
     'customers': 'customer', 'patients': 'customer', 'students': 'customer', 'clients': 'customer',
     'due-ledger': 'treasury', 'pending-payments': 'payment', 'reports': 'reports',
-    'expenses': 'treasury.moneyOut', 'products': 'product', 'orders': 'product', 'bank': 'bank',
-    'appointments': 'customer', 'delivery': 'product', 'measurements': 'product',
-    'designBook': 'product', 'devices': 'product', 'serviceJobs': 'product', 'projects': 'product'
+    'expenses': 'treasury.moneyOut', 'products': 'product', 'orders': 'operations.orders', 'bank': 'bank',
+    'appointments': 'operations.appointments', 'delivery': 'operations.delivery', 'measurements': 'operations.measurements',
+    'designBook': 'operations.designBook', 'devices': 'operations.devices', 'serviceJobs': 'operations.serviceJobs', 'projects': 'operations.projects'
   };
+
+  const TAB_TO_MODULE_MAP = {
+    'invoices': 'billing', 'create-invoice': 'billing', 'estimates': 'billing',
+    'customers': 'customers', 'patients': 'patients', 'students': 'students', 'clients': 'clients',
+    'due-ledger': 'dueLedger', 'expenses': 'expenses', 'reports': 'reports',
+    'products': 'products', 'orders': 'orders', 'appointments': 'appointments',
+    'delivery': 'delivery', 'measurements': 'measurements', 'designBook': 'designBook',
+    'devices': 'devices', 'serviceJobs': 'serviceJobs', 'projects': 'projects',
+    'pending-payments': 'paymentProofs'
+  };
+
+  const activeWorkspace = activeSettings?.businessWorkspaces?.find(
+    workspace => workspace.id === activeSettings?.activeWorkspaceId
+  );
+  const enabledWorkspaceModules = activeWorkspace?.enabledModules;
 
   const renderTabContent = (targetTab = currentTab) => {
     const isMaintenanceMode = (globalMaintenanceMode || activeSettings?.maintenanceMode) && !adminEngine.isAdminUser(authEngine.getAuthSession());
+
+    // A workspace may only open modules selected during onboarding. Legacy
+    // workspaces without an explicit module list keep their existing access.
+    const requiredModule = TAB_TO_MODULE_MAP[targetTab];
+    if (requiredModule && Array.isArray(enabledWorkspaceModules) && !enabledWorkspaceModules.includes(requiredModule)) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-center p-10 bg-theme-main">
+          <Lock className="w-16 h-16 text-theme-muted mb-4" />
+          <h2 className="text-2xl font-black text-white mb-2">Module Not Enabled</h2>
+          <p className="text-theme-muted max-w-md mb-6">
+            This module is not enabled for the current workspace. Update its modules from Workspace Settings to use it.
+          </p>
+          <button onClick={() => setCurrentTab('dashboard')} className="px-6 py-2.5 bg-theme-accent text-white font-bold rounded-xl hover:bg-theme-accent/80 transition-colors">
+            Return to Dashboard
+          </button>
+        </div>
+      );
+    }
 
     // Feature gating fallback
     if (!featuresLoading) {
@@ -1750,7 +1784,7 @@ function App() {
       case 'patients':
         return <Patients />;
       case 'students':
-        if (activeSettings && !isEducationBusiness(activeSettings.defaultBillingTemplate)) {
+        if (activeSettings && !isEducationBusiness(activeWorkspace?.type || activeSettings.businessType || activeSettings.defaultBillingTemplate)) {
           // If a Business workspace attempts to open /students, automatically redirect
           // We don't render Students, we redirect to customers
           setTimeout(() => setCurrentTab('customers'), 0);
@@ -2189,14 +2223,7 @@ function App() {
               <OnboardingWizard 
                 onComplete={() => setCurrentTab('dashboard')} 
                 businessSettings={activeSettings} 
-                onSaveSettings={(newSettings) => {
-                  settingsEngine.saveSettings(newSettings);
-                  setSettings(newSettings);
-                  if (isDemoSessionActive) {
-                    setDemoSettings(newSettings);
-                  }
-                  setCurrentTab('dashboard');
-                }}
+                onSaveSettings={handleSaveSettings}
                 setCurrentTab={setCurrentTab}
               />
             ) : (
@@ -2336,3 +2363,4 @@ function App() {
 }
 
 export default App;
+
