@@ -85,33 +85,27 @@ export default defineConfig(({ mode }) => ({
         manualChunks(id) {
           const normalized = id.replace(/\\/g, '/');
           if (normalized.includes('node_modules')) {
-            if (
-              normalized.includes('/react/') ||
-              normalized.includes('/react-dom/') ||
-              normalized.includes('/framer-motion/') ||
-              normalized.includes('/recharts/') ||
-              normalized.includes('/react-hot-toast/') ||
-              normalized.includes('/react-switch/') ||
-              normalized.includes('/react-confetti/') ||
-              normalized.includes('/use-sync-external-store/') ||
-              normalized.includes('/scheduler/')
-            ) {
-              return 'vendor-react';
-            }
-            if (normalized.includes('firebase')) {
-              return 'vendor-firebase';
-            }
-            if (normalized.includes('lucide-react')) {
-              return 'vendor-icons';
-            }
             if (normalized.includes('@react-pdf') || normalized.includes('pdfjs-dist')) {
               return 'vendor-pdf';
             }
             if (normalized.includes('tesseract')) {
               return 'vendor-ocr';
             }
-            if (normalized.includes('@xyflow')) {
-              return 'vendor-flow';
+            if (normalized.includes('firebase')) {
+              return 'vendor-firebase';
+            }
+            // All React, DOM, hooks, and React component libraries in vendor-react
+            if (
+              normalized.includes('react') ||
+              normalized.includes('@dnd-kit') ||
+              normalized.includes('framer-motion') ||
+              normalized.includes('recharts') ||
+              normalized.includes('@xyflow') ||
+              normalized.includes('lucide-react') ||
+              normalized.includes('scheduler') ||
+              normalized.includes('use-sync-external-store')
+            ) {
+              return 'vendor-react';
             }
             return 'vendor-utils';
           }
