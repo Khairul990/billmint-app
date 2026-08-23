@@ -203,7 +203,9 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, onComplete, s
               ? 'Bank Transfer'
               : 'Manual';
 
-      // 2. Create Workspace
+      // 2. Create or Update Primary Workspace
+      const currentWorkspaces = Array.isArray(businessSettings?.businessWorkspaces) ? businessSettings.businessWorkspaces : [];
+      
       const defaultWs = {
         id: 'ws_' + Date.now(),
         name: formData.businessName.trim() || selectedPreset.label,
@@ -213,7 +215,25 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, onComplete, s
         createdAt: Date.now()
       };
 
-      const currentWorkspaces = businessSettings?.businessWorkspaces || [];
+      let updatedWorkspaces;
+      if (isAddWorkspaceMode) {
+        updatedWorkspaces = [...currentWorkspaces, defaultWs];
+      } else {
+        if (currentWorkspaces.length > 0) {
+          const existingWs = currentWorkspaces[0];
+          updatedWorkspaces = [{
+            ...existingWs,
+            name: formData.businessName.trim() || existingWs.name || selectedPreset.label,
+            type: formData.businessType || existingWs.type,
+            enabledModules: formData.enabledModules.length > 0 ? formData.enabledModules : (existingWs.enabledModules || selectedPreset.recommendedModules),
+            archived: false
+          }, ...currentWorkspaces.slice(1)];
+        } else {
+          updatedWorkspaces = [defaultWs];
+        }
+      }
+
+      const activeWsId = isAddWorkspaceMode ? defaultWs.id : (updatedWorkspaces[0]?.id || defaultWs.id);
       
       let updatedSettings = {
         ...businessSettings,
@@ -223,8 +243,8 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, onComplete, s
         currencySymbol: formData.currencySymbol,
         locale: formData.locale,
         timezone: formData.timezone,
-        businessWorkspaces: [...currentWorkspaces, defaultWs],
-        activeWorkspaceId: defaultWs.id
+        businessWorkspaces: updatedWorkspaces,
+        activeWorkspaceId: activeWsId
       };
 
       if (!isAddWorkspaceMode) {

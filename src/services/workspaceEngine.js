@@ -11,9 +11,24 @@ import {
 export const workspaceEngine = {
   async getCurrent() {
     const settings = getSettings();
+    const uid = getRealUserId();
+    const savedLastWs = uid ? localStorage.getItem(`billqyro_${uid}_last_workspace`) : null;
+    const workspaces = Array.isArray(settings?.businessWorkspaces) ? settings.businessWorkspaces : [];
+    
+    let activeWs = workspaces.find(w => w.id === savedLastWs);
+    if (!activeWs && settings?.activeWorkspaceId) {
+      activeWs = workspaces.find(w => w.id === settings.activeWorkspaceId);
+    }
+    if (!activeWs && workspaces.length > 0) {
+      activeWs = workspaces.find(w => w.name && w.name !== 'Default Workspace' && w.name !== 'My Retail Shop') || workspaces[0];
+    }
+
+    const wsId = activeWs ? activeWs.id : (settings?.activeWorkspaceId || 'default');
+    const wsName = activeWs?.name || settings?.businessName || 'Default Workspace';
+
     return {
-      id: settings?.activeWorkspaceId || 'default',
-      name: settings?.businessName || 'Default Workspace',
+      id: wsId,
+      name: wsName,
       settings
     };
   },
@@ -21,10 +36,15 @@ export const workspaceEngine = {
   async switchWorkspace(workspaceId) {
     const settings = getSettings();
     if (!settings) return false;
+    const uid = getRealUserId();
     settings.activeWorkspaceId = workspaceId;
     saveSettings(settings);
+    if (uid) {
+      localStorage.setItem(`billqyro_${uid}_last_workspace`, workspaceId);
+    }
     logAudit('workspace_switched', 'workspace', workspaceId, null, { workspaceId });
     window.dispatchEvent(new CustomEvent('billqyro_workspace_changed', { detail: { workspaceId } }));
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
     return true;
   },
 
@@ -32,11 +52,14 @@ export const workspaceEngine = {
     const session = getAuthSession();
     if (!session) return { authorized: false, reason: 'no_session' };
     const settings = getSettings();
-    const activeWs = settings?.activeWorkspaceId || 'default';
-    if (workspaceId && workspaceId !== activeWs) {
-      return { authorized: false, reason: 'workspace_mismatch' };
+    const workspaces = Array.isArray(settings?.businessWorkspaces) ? settings.businessWorkspaces : [];
+    if (workspaceId && workspaces.length > 0) {
+      const exists = workspaces.some(w => w.id === workspaceId);
+      if (!exists) {
+        return { authorized: false, reason: 'workspace_not_found_in_account' };
+      }
     }
-    return { authorized: true, workspaceId: activeWs };
+    return { authorized: true, workspaceId: workspaceId || settings?.activeWorkspaceId || 'default' };
   },
 
   async getAll() {

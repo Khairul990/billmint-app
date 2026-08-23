@@ -1242,19 +1242,13 @@ export const logout = async () => {
     }
   }
 
-  // 2. Clear known scoped session keys
-  localStorage.removeItem(KEYS.AUTH);
-  localStorage.removeItem(KEYS.SETTINGS);
-  localStorage.removeItem(KEYS.CUSTOMERS);
-  localStorage.removeItem(KEYS.PRODUCTS);
-  localStorage.removeItem(KEYS.INVOICES);
-  localStorage.removeItem(KEYS.EXPENSES);
-  localStorage.removeItem(KEYS.SUBSCRIPTION);
+  // 2. Clear ONLY session-level authentication state (DO NOT delete scoped persistent data like KEYS.SETTINGS or KEYS.INVOICES)
+  localStorage.removeItem(GLOBAL_KEYS.AUTH);
+  localStorage.removeItem('billqyro_auth');
   localStorage.removeItem('billqyro_last_route');
   localStorage.removeItem('billqyro_admin_unlocked');
   localStorage.removeItem('billqyro_user_permissions');
   localStorage.removeItem('billqyro_user_role');
-  localStorage.removeItem('billqyro_auth');
   
   // 3. Clear temporary session flags without deleting persistent device preferences
   const keysToRemove = [];
@@ -3366,12 +3360,27 @@ export const syncFromFirestore = async (force = false) => {
     // Instead, we will merge the cloud data with the local data, ensuring newer local data is preserved.
     clearCacheOnly();
 
-    // 4. Apply Settings
+    // 4. Apply Settings & Authoritative Workspace Restoration
     let activeWorkspaceId = 'default';
     if (settingsDoc && typeof settingsDoc.exists === 'function' && settingsDoc.exists()) {
       const settingsData = settingsDoc.data();
-      activeWorkspaceId = settingsData.activeWorkspaceId || 'default';
+      const workspaces = Array.isArray(settingsData.businessWorkspaces) ? settingsData.businessWorkspaces : [];
+      
+      const savedLastWs = localStorage.getItem(`billqyro_${userId}_last_workspace`);
+      if (savedLastWs && workspaces.some(w => w.id === savedLastWs)) {
+        activeWorkspaceId = savedLastWs;
+      } else if (settingsData.activeWorkspaceId && workspaces.some(w => w.id === settingsData.activeWorkspaceId)) {
+        activeWorkspaceId = settingsData.activeWorkspaceId;
+      } else if (workspaces.length > 0) {
+        const primary = workspaces.find(w => w.name && w.name !== 'Default Workspace' && w.name !== 'My Retail Shop') || workspaces[0];
+        activeWorkspaceId = primary.id;
+      } else {
+        activeWorkspaceId = settingsData.activeWorkspaceId || 'default';
+      }
+
+      settingsData.activeWorkspaceId = activeWorkspaceId;
       localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settingsData));
+      localStorage.setItem(`billqyro_${userId}_last_workspace`, activeWorkspaceId);
     }
 
     // Generic Merge Helper
