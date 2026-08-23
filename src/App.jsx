@@ -816,70 +816,6 @@ function App() {
 
 
 
-  // --- AUTH BRIDGE ---
-  const handleLoginSuccess = () => {
-    if (!sessionStorage.getItem('billqyro_welcome_shown')) {
-      setShowWelcomeAnimation(true);
-      sessionStorage.setItem('billqyro_welcome_shown', 'true');
-    }
-    // Yield route control to the Central App Gate
-    setCurrentTab(null);
-  };
-
-  // Handle Legacy User Silent Upgrade (No redirects)
-  useEffect(() => {
-    if (isAuthenticated && !isAppBooting && settings && cloudSyncDone) {
-      const isLegacyConfigured = !!(settings.businessName && settings.businessName.trim());
-      if (!settings.setupCompleted && isLegacyConfigured) {
-        const updated = { ...settings, setupCompleted: true };
-        settingsEngine.saveSettings(updated);
-        setSettings(updated);
-      }
-    }
-  }, [isAuthenticated, isAppBooting, settings, cloudSyncDone]);
-
-  const handleLogout = async () => {
-    // 1. Instantly log out visually
-    setUserRole('user');
-    setIsAuthenticated(false);
-    setCurrentTab('landing');
-    
-    // 2. Perform slow background network/db cleanup
-    try {
-      if (firebaseReady && auth) {
-        await auth.signOut();
-      }
-    } catch (err) {
-      console.error('Firebase sign out error', err);
-    }
-    
-    try {
-      // NOTE: IndexedDB operations can hang indefinitely if other tabs hold locks.
-      // This is now non-blocking for the UI.
-      authEngine.logout().catch(err => console.error('Auth engine logout error', err));
-    } catch (err) {
-      console.error('Auth engine logout error', err);
-    }
-    
-    localStorage.removeItem('billqyro_user_role');
-    localStorage.removeItem('billqyro_admin_unlocked');
-    
-    // STRICT MEMORY WIPE
-    setSettings({});
-    setBusinessWorkspaces([]);
-    setActiveWorkspaceId(null);
-    setInvoices([]);
-    setCustomers([]);
-    setProducts([]);
-    setExpenses([]);
-    setPendingPayments([]);
-    setStudents([]);
-    subscriptionEngine.getSubscriptionDetails().then(setSubscription);
-    
-    // RESET GLOBAL DOM THEME
-    window.dispatchEvent(new CustomEvent('billqyro:settings-updated', { detail: {} }));
-  };
-
   // --- DATA SYNCHRONIZERS ---
 
   // Invoices
@@ -1451,6 +1387,74 @@ function App() {
     setSubscription(parsedData.subscription);
     setCurrentTab('dashboard');
   };
+
+  // --- AUTH & ONBOARDING LIFECYCLE HANDLERS ---
+  const handleLogout = useCallback(async () => {
+    try {
+      await authEngine.logout();
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+    setIsAuthenticated(false);
+    setWorkspaceVerified(false);
+    setUserPermissions(null);
+    setInvoices([]);
+    setCustomers([]);
+    setProducts([]);
+    setStaffs([]);
+    setExpenses([]);
+    setStudents([]);
+    setSettings(null);
+    setCurrentTab('landing');
+    localStorage.removeItem('billqyro_last_route');
+    localStorage.removeItem('billqyro_admin_unlocked');
+    localStorage.removeItem('billqyro_auth');
+    toast.success('Logged out successfully');
+  }, []);
+
+  const handleLoginSuccess = useCallback(() => {
+    setIsAuthenticated(true);
+    setCurrentTab('dashboard');
+    setIsAppBooting(true);
+    setIsDataHydrating(true);
+    setTimeout(() => {
+      setIsAppBooting(false);
+      setIsDataHydrating(false);
+    }, 600);
+  }, []);
+
+  const handleOnboardingComplete = useCallback(async (newSettings) => {
+    await settingsEngine.saveSettings(newSettings);
+    setSettings(newSettings);
+    if (isDemoSessionActive) {
+      setDemoSettings(newSettings);
+    }
+    setCurrentTab('dashboard');
+    toast.success('Workspace configured successfully!');
+  }, [isDemoSessionActive]);
+
+  // Legacy Account Migration Guard: Auto-set canonical setupCompleted for previously configured businesses
+  useEffect(() => {
+    if (isAuthenticated && activeSettings && !activeSettings.setupCompleted) {
+      const isLegacySetup = Boolean(
+        activeSettings.businessName && (
+          activeSettings.profileSetupCompleted === true ||
+          activeSettings.businessSetupCompleted === true ||
+          (Array.isArray(activeSettings.businessWorkspaces) && activeSettings.businessWorkspaces.length > 0)
+        )
+      );
+      if (isLegacySetup) {
+        const migrated = {
+          ...activeSettings,
+          setupCompleted: true,
+          profileSetupCompleted: true,
+          businessSetupCompleted: true
+        };
+        settingsEngine.saveSettings(migrated);
+        setSettings(migrated);
+      }
+    }
+  }, [isAuthenticated, activeSettings]);
 
   // --- PDF GENERATOR WORKER ---
   const handleDownloadPDF = async (invoice) => {
@@ -2169,8 +2173,14 @@ function App() {
   const showAdminRoute = path === '/km-admin' || currentTab === 'admin-panel';
 
   // Enterprise Route Gate - Wait for Auth, Workspace, and Sync to resolve
-  const isAppReady = !isAppBooting && (!isAuthenticated || (cloudSyncDone && settings));
-  const isSetupIncomplete = isAuthenticated && activeSettings && !activeSettings.setupCompleted && !activeSettings.businessName;
+  const isAppReady = !isAppBooting;
+  const isSetupIncomplete = isAuthenticated && !activeSettings?.setupCompleted && !(
+    activeSettings?.businessName && (
+      activeSettings?.profileSetupCompleted === true || 
+      activeSettings?.businessSetupCompleted === true ||
+      (Array.isArray(activeSettings?.businessWorkspaces) && activeSettings?.businessWorkspaces.length > 0)
+    )
+  );
 
   // Resolve currentTab when we reach layout (defaulting to dashboard if null)
   const resolvedTab = currentTab || 'dashboard';
@@ -2186,6 +2196,12 @@ function App() {
           >
             <ClassicLoader />
             <p className="text-theme-muted font-bold mt-4 animate-pulse">Loading workspace...</p>
+          </motion.div>
+        ) : (!isAuthenticated && !isDemoSessionActive) ? (
+          <motion.div key="landing-unauth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
+            <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
+              <Landing onLoginSuccess={handleLoginSuccess} />
+            </React.Suspense>
           </motion.div>
         ) : showAdminRoute ? (
           <motion.div key="admin-route" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full">
@@ -2241,16 +2257,9 @@ function App() {
             />
             {isSetupIncomplete ? (
               <OnboardingWizard 
-                onComplete={() => setCurrentTab('dashboard')} 
+                onComplete={handleOnboardingComplete}
+                onSaveSettings={handleOnboardingComplete}
                 businessSettings={activeSettings} 
-                onSaveSettings={(newSettings) => {
-                  settingsEngine.saveSettings(newSettings);
-                  setSettings(newSettings);
-                  if (isDemoSessionActive) {
-                    setDemoSettings(newSettings);
-                  }
-                  setCurrentTab('dashboard');
-                }}
                 setCurrentTab={setCurrentTab}
               />
             ) : (

@@ -798,12 +798,15 @@ function ShowcasePanel() {
 
 function LoginPanel({ onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [cardHover, setCardHover] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
 
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -814,28 +817,46 @@ function LoginPanel({ onLoginSuccess }) {
     setError('');
     
     if (!email || !email.trim()) {
-      setError('Email is required');
+      setError('Email address is required.');
       setIsSigningIn(false);
       return;
     }
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      setError('Invalid email format');
+      setError('Please enter a valid email address.');
       setIsSigningIn(false);
       return;
     }
 
     if (!password || !password.trim()) {
-      setError('Password is required');
+      setError('Password is required.');
       setIsSigningIn(false);
       return;
     }
 
     if (password.trim().length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('Password must be at least 6 characters.');
       setIsSigningIn(false);
       return;
+    }
+
+    if (!isLoginMode) {
+      if (!name || !name.trim()) {
+        setError('Full Name is required for registration.');
+        setIsSigningIn(false);
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError('Passwords do not match.');
+        setIsSigningIn(false);
+        return;
+      }
+      if (!agreeTerms) {
+        setError('You must agree to the Terms of Service & Privacy Policy.');
+        setIsSigningIn(false);
+        return;
+      }
     }
     
     try {
@@ -848,14 +869,19 @@ function LoginPanel({ onLoginSuccess }) {
           onLoginSuccess();
         }
       } else {
-        setError('Firebase not configured. Cannot login or create account offline.');
+        setError('Firebase is not configured. Cannot login or create account offline.');
         setIsSigningIn(false);
       }
     } catch (err) {
       console.error('Firebase auth error', err);
-      let errorMsg = err.message || 'Authentication failed';
-      if (err.code === 'auth/email-already-in-use') errorMsg = 'Email is already in use.';
-      if (err.code === 'auth/invalid-credential') errorMsg = 'Invalid email or password.';
+      let errorMsg = 'Authentication failed. Please check your details.';
+      if (err.code === 'auth/email-already-in-use') errorMsg = 'An account already exists with this email address. Please sign in.';
+      else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') errorMsg = 'Invalid email or password. Please verify your credentials.';
+      else if (err.code === 'auth/weak-password') errorMsg = 'Password is too weak. Please choose a stronger password.';
+      else if (err.code === 'auth/too-many-requests') errorMsg = 'Too many failed attempts. Please wait a moment before trying again.';
+      else if (err.code === 'auth/network-request-failed') errorMsg = 'Network error. Please check your internet connection and retry.';
+      else if (err.message) errorMsg = err.message;
+      
       setError(errorMsg);
       setIsSigningIn(false);
     }
@@ -939,14 +965,14 @@ function LoginPanel({ onLoginSuccess }) {
           <p className="mt-2 text-sm font-semibold text-theme-muted">
             {isLoginMode 
               ? 'Sign in to manage your own customers, invoices, PDFs, links, and payments.' 
-              : 'New here? Create your account first, then complete the 1-minute setup wizard inside to get your shop ready.'}
+              : 'Create your account, then complete the 1-minute setup wizard to launch your business.'}
           </p>
         </motion.div>
 
-        {error && <p className="mt-4 rounded-xl bg-theme-danger/10 px-4 py-2 text-sm font-semibold text-theme-danger">{error}</p>}
+        {error && <p className="mt-4 rounded-xl bg-theme-danger/10 px-4 py-2.5 text-sm font-semibold text-theme-danger border border-theme-danger/20">{error}</p>}
 
         <form
-          className="mt-8 space-y-5"
+          className="mt-8 space-y-4"
           onSubmit={handleSubmit}
         >
           {!isLoginMode && (
@@ -960,7 +986,7 @@ function LoginPanel({ onLoginSuccess }) {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Your Name"
+                  placeholder="Your Full Name"
                   className="input-premium premium-focus h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-11 pr-4 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
                 />
               </div>
@@ -995,7 +1021,7 @@ function LoginPanel({ onLoginSuccess }) {
               <button
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted transition hover:text-theme-accent"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted transition hover:text-theme-accent cursor-pointer"
                 aria-label="Toggle password visibility"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -1003,12 +1029,41 @@ function LoginPanel({ onLoginSuccess }) {
             </div>
           </motion.label>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }} className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2 text-theme-muted">
-              <input type="checkbox" className="h-4 w-4 accent-theme-accent" />
-              Remember me
-            </label>
-            {isLoginMode && (
+          {!isLoginMode && (
+            <motion.label initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.5 }} className="block relative group">
+              <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent">Confirm Password</span>
+              <div className="relative">
+                <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="input-premium premium-focus h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-4 pr-12 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((value) => !value)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted transition hover:text-theme-accent cursor-pointer"
+                  aria-label="Toggle password visibility"
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </motion.label>
+          )}
+
+          {!isLoginMode ? (
+            <motion.label initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }} className="flex items-start gap-2.5 pt-1 text-xs text-theme-muted cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={agreeTerms}
+                onChange={(e) => setAgreeTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded accent-theme-accent" 
+              />
+              <span>I agree to the <span className="font-bold text-theme-primary">Terms of Service</span> & <span className="font-bold text-theme-primary">Privacy Policy</span>.</span>
+            </motion.label>
+          ) : (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }} className="flex items-center justify-end text-sm">
               <button
                 type="button"
                 onClick={async () => {
@@ -1024,12 +1079,12 @@ function LoginPanel({ onLoginSuccess }) {
                     toast.error('Please enter a valid email address.');
                   }
                 }}
-                className="font-bold text-theme-accent hover:text-theme-accent"
+                className="font-bold text-xs text-theme-accent hover:text-theme-primary transition-colors cursor-pointer"
               >
                 Forgot password?
               </button>
-            )}
-          </motion.div>
+            </motion.div>
+          )}
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.5 }}>
             <ShimmerButton
@@ -1040,7 +1095,7 @@ function LoginPanel({ onLoginSuccess }) {
               background="var(--accent-gradient)"
             >
               <div className="flex items-center gap-2 text-[15px] font-black drop-shadow-[0_1px_8px_rgba(0,0,0,0.3)] text-theme-primary">
-                {isSigningIn ? (isLoginMode ? "Signing in..." : "Creating account...") : (isLoginMode ? "Sign In to Dashboard" : "Sign Up to Dashboard")}
+                {isSigningIn ? (isLoginMode ? "Signing in..." : "Creating account...") : (isLoginMode ? "Sign In to Dashboard" : "Register & Begin Setup")}
                 {isSigningIn ? (
                   <motion.span
                     className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white"
@@ -1067,7 +1122,7 @@ function LoginPanel({ onLoginSuccess }) {
             type="button" 
             onClick={handleGoogleLogin}
             disabled={isSigningIn}
-            className="btn-premium flex h-[52px] w-full items-center justify-center gap-3 rounded-[22px] border border-theme-border-soft bg-theme-surface text-sm font-bold text-theme-muted transition-all hover:bg-theme-card hover:text-theme-primary hover:shadow-[0_0_15px_rgba(0,0,0,0.05)] disabled:opacity-70 disabled:cursor-not-allowed"
+            className="btn-premium flex h-[52px] w-full items-center justify-center gap-3 rounded-[22px] border border-theme-border-soft bg-theme-surface text-sm font-bold text-theme-muted transition-all hover:bg-theme-card hover:text-theme-primary hover:shadow-[0_0_15px_rgba(0,0,0,0.05)] disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
             <span className="grid h-6 w-6 place-items-center rounded-full bg-theme-app text-xs font-black text-theme-primary">G</span>
             {isSigningIn && !email && !password ? "Connecting to Google..." : "Continue with Google"}
@@ -1076,7 +1131,7 @@ function LoginPanel({ onLoginSuccess }) {
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.5 }} className="mt-6 text-center text-sm text-theme-muted">
           {isLoginMode ? (
-            <>Need access? <button type="button" onClick={() => { setIsLoginMode(false); setError(''); }} className="font-bold text-theme-accent hover:text-theme-primary transition-colors cursor-pointer">Create free account</button></>
+            <>Need an account? <button type="button" onClick={() => { setIsLoginMode(false); setError(''); }} className="font-bold text-theme-accent hover:text-theme-primary transition-colors cursor-pointer">Create account</button></>
           ) : (
             <>Already have an account? <button type="button" onClick={() => { setIsLoginMode(true); setError(''); }} className="font-bold text-theme-accent hover:text-theme-primary transition-colors cursor-pointer">Sign in instead</button></>
           )}

@@ -1233,7 +1233,16 @@ export const getAuthSession = () => {
 export const logout = async () => {
   const currentUserId = getRealUserId();
   
-  // Clear known scoped keys
+  // 1. Sign out Firebase Auth
+  if (firebaseReady && auth) {
+    try {
+      await auth.signOut();
+    } catch (authErr) {
+      console.warn('Firebase signOut error:', authErr);
+    }
+  }
+
+  // 2. Clear known scoped session keys
   localStorage.removeItem(KEYS.AUTH);
   localStorage.removeItem(KEYS.SETTINGS);
   localStorage.removeItem(KEYS.CUSTOMERS);
@@ -1242,40 +1251,34 @@ export const logout = async () => {
   localStorage.removeItem(KEYS.EXPENSES);
   localStorage.removeItem(KEYS.SUBSCRIPTION);
   localStorage.removeItem('billqyro_last_route');
+  localStorage.removeItem('billqyro_admin_unlocked');
+  localStorage.removeItem('billqyro_user_permissions');
+  localStorage.removeItem('billqyro_user_role');
+  localStorage.removeItem('billqyro_auth');
   
-  // Aggressively clear ALL possible user/workspace scoped caches
+  // 3. Clear temporary session flags without deleting persistent device preferences
   const keysToRemove = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith('billqyro_') && 
-        key !== 'billqyro_admin_default_theme' && 
-        key !== 'billqyro_admin_default_mode' &&
-        key !== 'billqyro_device_id') {
+    if (key && key.startsWith('billqyro_session_')) {
       keysToRemove.push(key);
     }
   }
   keysToRemove.forEach(k => localStorage.removeItem(k));
   
   sessionStorage.clear();
+
+  // 4. Safely clean active user's pending sync transactions without wiping other accounts' local caches
   try {
-    await BillQyroDB.clear('invoices');
-    await BillQyroDB.clear('customers');
-    await BillQyroDB.clear('products');
-    await BillQyroDB.clear('expenses');
-    
-    // For syncQueue, delete only the active user's items
     if (currentUserId) {
-        const queue = await BillQyroDB.getAll('syncQueue');
-        const userItems = queue.filter(tx => tx.userId === currentUserId);
-        for (const item of userItems) {
-            await BillQyroDB.delete('syncQueue', item.id);
-        }
+      const queue = await BillQyroDB.getAll('syncQueue');
+      const userItems = queue.filter(tx => tx.userId === currentUserId);
+      for (const item of userItems) {
+        await BillQyroDB.delete('syncQueue', item.id);
+      }
     }
-    
-    await BillQyroDB.clear('auditLogs');
-    await BillQyroDB.clear('errorLogs');
   } catch (e) {
-    console.error('Failed to clear IndexedDB on logout', e);
+    console.error('Failed to cleanup syncQueue on logout', e);
   }
 };
 

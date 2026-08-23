@@ -52,15 +52,19 @@ export const authEngine = {
     const settingsSnap = await getDoc(settingsRef);
     if (!settingsSnap.exists()) {
       await setDoc(settingsRef, {
+        userId: user.uid,
         email: user.email,
         contactEmail: user.email,
-        ownerName: name || '',
+        ownerName: name || user.displayName || '',
         businessName: '',
         phone: '',
         whatsapp: '',
         address: '',
         logoUrl: '',
+        setupCompleted: false,
         profileSetupCompleted: false,
+        businessSetupCompleted: false,
+        paymentSetupCompleted: false,
         createdAt: new Date().toISOString()
       });
     }
@@ -79,7 +83,14 @@ export const authEngine = {
     if (!user) return false;
     try {
       const settingsSnap = await getDoc(doc(db, 'settings', user.uid));
-      return settingsSnap.exists() && settingsSnap.data().profileSetupCompleted === true;
+      if (!settingsSnap.exists()) return false;
+      const data = settingsSnap.data();
+      // Canonical check + legacy account migration check
+      if (data.setupCompleted === true) return true;
+      if (data.businessName && (data.profileSetupCompleted === true || data.businessSetupCompleted === true || (data.businessWorkspaces && data.businessWorkspaces.length > 0))) {
+        return true;
+      }
+      return false;
     } catch {
       return false;
     }
