@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Trash2, AlertTriangle, Lock, ServerCrash } from 'lucide-react';
@@ -586,6 +586,19 @@ function App() {
     const handleSyncStatus = (e) => {
       if (e.detail) setSyncStatus(e.detail);
     };
+    const handleInvoiceUpdated = (e) => {
+      const updated = e.detail;
+      if (!updated?.id) return;
+      setInvoices(prev => {
+        const exists = prev.some(i => i.id === updated.id);
+        if (exists) {
+          return prev.map(i => i.id === updated.id ? { ...i, ...updated } : i);
+        } else {
+          return [updated, ...prev];
+        }
+      });
+    };
+    window.addEventListener('billqyro_invoice_updated', handleInvoiceUpdated);
     window.addEventListener('billqyro:settings-updated', handleSettingsUpdated);
     window.addEventListener('billqyro:data-updated', handleDataUpdated);
     window.addEventListener('billqyro:sync-status', handleSyncStatus);
@@ -599,11 +612,25 @@ function App() {
 
     return () => {
       window.removeEventListener('billqyro_sync', handleSync);
+      window.removeEventListener('billqyro_invoice_updated', handleInvoiceUpdated);
       window.removeEventListener('billqyro:settings-updated', handleSettingsUpdated);
       window.removeEventListener('billqyro:data-updated', handleDataUpdated);
       window.removeEventListener('billqyro:sync-status', handleSyncStatus);
       window.removeEventListener('navigate_tab', handleNavigate);
     };
+  }, []);
+
+  // Canonical Payment Recorded State Propagator
+  const handlePaymentRecorded = useCallback((updatedInvoice) => {
+    if (!updatedInvoice?.id) return;
+    setInvoices(prev => {
+      const exists = prev.some(i => i.id === updatedInvoice.id);
+      if (exists) {
+        return prev.map(i => i.id === updatedInvoice.id ? { ...i, ...updatedInvoice } : i);
+      } else {
+        return [updatedInvoice, ...prev];
+      }
+    });
   }, []);
 
   // Workspace Contexts
@@ -1583,6 +1610,7 @@ function App() {
             isLoading={isDataHydrating}
             revenueStatus={revenueStatus}
             onSaveCustomer={handleSaveCustomer}
+            onPaymentRecorded={handlePaymentRecorded}
             permissions={userPermissions}
             workspaceVerified={workspaceVerified}
           />
@@ -1616,6 +1644,7 @@ function App() {
             staffs={activeStaffs} 
             invoices={activeInvoices} 
             businessSettings={activeSettings}
+            onPaymentRecorded={handlePaymentRecorded}
           />
         );
       case 'bank':
@@ -1649,6 +1678,7 @@ function App() {
             onDownloadImage={handleDownloadImage}
             setCurrentTab={setCurrentTab}
             businessSettings={activeSettings}
+            onPaymentRecorded={handlePaymentRecorded}
           />
         );
       case 'estimates':
@@ -1732,6 +1762,7 @@ function App() {
             onDeleteCustomer={handleDeleteCustomer}
             businessSettings={activeSettings}
             setCurrentTab={setCurrentTab}
+            onPaymentRecorded={handlePaymentRecorded}
             onCreateBill={(cust) => {
               setEditingInvoice({ customerName: cust.name });
               setCurrentTab('create-invoice');

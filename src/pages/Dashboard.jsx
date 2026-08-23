@@ -161,23 +161,30 @@ const Dashboard = ({
   const calculatedTodaysSales = useMemo(() => {
     const today = new Date().toDateString();
     return invoices
-      .filter(inv => new Date(inv.createdAt).toDateString() === today)
-      .reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
+      .filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void' && new Date(inv.date || inv.createdAt).toDateString() === today)
+      .reduce((sum, inv) => sum + (parseFloat(inv.grandTotal || inv.total) || 0), 0);
   }, [invoices]);
 
   const calculatedTodaysCollections = useMemo(() => {
-    const today = new Date().toDateString();
+    const todayStr = new Date().toDateString();
     return invoices
-      .filter(inv => new Date(inv.createdAt).toDateString() === today)
-      .reduce((sum, inv) => sum + getInvoicePaidTotal(inv), 0);
+      .filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void')
+      .reduce((sum, inv) => {
+        if (Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0) {
+          const todaysPaidInHistory = inv.paymentHistory
+            .filter(p => p.date && new Date(p.date).toDateString() === todayStr)
+            .reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+          return sum + todaysPaidInHistory;
+        } else if (new Date(inv.date || inv.createdAt).toDateString() === todayStr) {
+          return sum + getInvoicePaidTotal(inv);
+        }
+        return sum;
+      }, 0);
   }, [invoices]);
 
   const calculatedTotalDue = useMemo(() => {
     return invoices
-      .filter(inv => {
-        const s = (inv.paymentStatus || '').toLowerCase();
-        return s === 'unpaid' || s === 'partial' || s === 'partially paid';
-      })
+      .filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void')
       .reduce((sum, inv) => sum + getInvoiceBalanceDue(inv), 0);
   }, [invoices]);
 
@@ -199,6 +206,7 @@ const Dashboard = ({
 
   const getRecentInvoices = () => {
     return [...invoices]
+      .filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void')
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 5);
   };
@@ -206,8 +214,8 @@ const Dashboard = ({
   const getRecentPayments = () => {
     return [...invoices]
       .filter(inv => {
-        const s = (inv.paymentStatus || '').toLowerCase();
-        return s === 'paid' || s === 'partial' || s === 'partially paid';
+        if (inv.isDeleted || inv.status === 'Cancelled' || inv.status === 'Void') return false;
+        return getInvoicePaidTotal(inv) > 0;
       })
       .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
       .slice(0, 5);
@@ -216,8 +224,8 @@ const Dashboard = ({
   const getPendingCollection = () => {
     return [...invoices]
       .filter(inv => {
-        const s = (inv.paymentStatus || '').toLowerCase();
-        return s === 'unpaid' || s === 'partial' || s === 'partially paid' || s === 'pending';
+        if (inv.isDeleted || inv.status === 'Cancelled' || inv.status === 'Void') return false;
+        return getInvoiceBalanceDue(inv) > 0;
       })
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   };
@@ -239,25 +247,36 @@ const Dashboard = ({
         id: `created-${inv.id}`,
         type: 'invoice_created',
         date: new Date(inv.createdAt).getTime(),
-        icon: FileText,
-        iconColor: 'text-theme-accent',
-        iconBg: 'bg-theme-accent/10',
-        text: `${getInvoiceLabel().slice(0, -1)} ${inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`} created`,
-        subtext: inv.customerName || 'Walk-in Customer',
-        amount: inv.grandTotal || inv.total || 0,
+        title: `Created ${getInvoiceLabel().slice(0, -1)} #${inv.invoiceNumber || inv.id?.slice(0, 6)}`,
+        subtitle: `${inv.customerName || 'Walk-in'} • ${formatCurrency(inv.grandTotal || inv.total || 0)}`,
+        status: inv.paymentStatus,
+        data: inv
       });
-      if (inv.paymentStatus === 'Paid' || inv.paymentStatus === 'paid') {
-        activities.push({
-          id: `paid-${inv.id}`,
-          type: 'payment_received',
-          date: new Date(inv.updatedAt || inv.createdAt).getTime(),
-          icon: CheckCircle,
-          iconColor: 'text-theme-success',
-          iconBg: 'bg-theme-success/10',
-          text: `Payment received from ${inv.customerName || 'Walk-in Customer'}`,
-          subtext: inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`,
-          amount: inv.grandTotal || inv.total || 0,
+      if (Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0) {
+        inv.paymentHistory.forEach((p, idx) => {
+          activities.push({
+            id: `paid-${inv.id}-${p.id || idx}`,
+            type: 'payment_received',
+            date: new Date(p.date || inv.updatedAt || inv.createdAt).getTime(),
+            title: `Payment Received on #${inv.invoiceNumber || inv.id?.slice(0, 6)}`,
+            subtitle: `${inv.customerName || 'Walk-in'} • ${formatCurrency(p.amount)} (${p.method || 'Cash'})`,
+            status: 'Paid',
+            data: { invoice: inv, payment: p }
+          });
         });
+      } else {
+        const s = (inv.paymentStatus || '').toLowerCase();
+        if (s === 'paid' || s === 'partial' || s === 'partially paid') {
+          activities.push({
+            id: `paid-${inv.id}`,
+            type: 'payment_received',
+            date: new Date(inv.updatedAt || inv.createdAt).getTime(),
+            title: `Payment on ${getInvoiceLabel().slice(0, -1)} #${inv.invoiceNumber || inv.id?.slice(0, 6)}`,
+            subtitle: `${inv.customerName || 'Walk-in'} • ${formatCurrency(getInvoicePaidTotal(inv))}`,
+            status: inv.paymentStatus,
+            data: inv
+          });
+        }
       }
     });
     return activities.sort((a, b) => b.date - a.date).slice(0, 10);
@@ -295,8 +314,8 @@ const Dashboard = ({
     const todayEarnings = calculatedTodaysSales;
     const totalDue = calculatedTotalDue;
     const pendingBillsCount = invoices.filter(inv => {
-      const s = (inv.paymentStatus || '').toLowerCase();
-      return s === 'unpaid' || s === 'partial' || s === 'partially paid' || s === 'pending';
+      if (inv.isDeleted || inv.status === 'Cancelled' || inv.status === 'Void') return false;
+      return getInvoiceBalanceDue(inv) > 0;
     }).length;
     const recentInvoices = getRecentInvoices();
     const recentPayments = getRecentPayments();
@@ -305,18 +324,19 @@ const Dashboard = ({
     const totalUpcoming = getUpcomingCount(pendingCollection);
     const activities = getActivities();
     const totalPaymentsCount = invoices.filter(inv => {
-      const s = (inv.paymentStatus || '').toLowerCase();
-      return s === 'paid' || s === 'partial' || s === 'partially paid';
+      if (inv.isDeleted || inv.status === 'Cancelled' || inv.status === 'Void') return false;
+      return getInvoicePaidTotal(inv) > 0;
     }).length;
-    const paidCount = invoices.filter(inv => (inv.paymentStatus || '').toLowerCase() === 'paid').length;
-    const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.grandTotal || inv.total || 0), 0);
+    const paidCount = invoices.filter(inv => {
+      if (inv.isDeleted || inv.status === 'Cancelled' || inv.status === 'Void') return false;
+      return getInvoicePaymentStatus(inv) === 'Paid';
+    }).length;
+    const totalRevenue = invoices
+      .filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void')
+      .reduce((sum, inv) => sum + (parseFloat(inv.grandTotal || inv.total) || 0), 0);
     const totalCollected = invoices
-      .reduce((sum, inv) => {
-        const s = (inv.paymentStatus || '').toLowerCase();
-        if (s === 'paid') return sum + (inv.grandTotal || inv.total || 0);
-        if (s === 'partial' || s === 'partially paid') return sum + (parseFloat(inv.amountPaid) || 0);
-        return sum;
-      }, 0);
+      .filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void')
+      .reduce((sum, inv) => sum + getInvoicePaidTotal(inv), 0);
     const healthScore = Math.min(100, Math.round(
       (invoices.length > 0 ? Math.min(paidCount / invoices.length, 1) * 40 : 0) +
       (totalRevenue > 0 ? Math.min(totalCollected / totalRevenue, 1) * 30 : 0) +
@@ -414,15 +434,24 @@ const Dashboard = ({
       const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       daily[key] = { day: key, revenue: 0, collection: 0 };
     }
-    invoices.forEach(inv => {
-      const d = new Date(inv.createdAt);
+    invoices.filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void').forEach(inv => {
+      const d = new Date(inv.date || inv.createdAt);
       const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       if (daily[key]) {
-        daily[key].revenue += inv.grandTotal || inv.total || 0;
-        if (inv.paymentStatus?.toLowerCase() === 'paid') {
-          daily[key].collection += inv.grandTotal || inv.total || 0;
-        } else {
-          daily[key].collection += parseFloat(inv.amountPaid) || 0;
+        daily[key].revenue += parseFloat(inv.grandTotal || inv.total) || 0;
+      }
+      if (Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0) {
+        inv.paymentHistory.forEach(p => {
+          const pDate = new Date(p.date || inv.date || inv.createdAt);
+          const pKey = pDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          if (daily[pKey]) {
+            daily[pKey].collection += parseFloat(p.amount) || 0;
+          }
+        });
+      } else {
+        const paid = getInvoicePaidTotal(inv);
+        if (daily[key] && paid > 0) {
+          daily[key].collection += paid;
         }
       }
     });
@@ -431,17 +460,22 @@ const Dashboard = ({
 
   function getPaymentBreakdown() {
     let paid = 0, partial = 0, unpaid = 0;
-    invoices.forEach(inv => {
-      const s = (inv.paymentStatus || '').toLowerCase();
-      const total = inv.grandTotal || inv.total || 0;
-      if (s === 'paid') paid += total;
-      else if (s === 'partial' || s === 'partially paid') partial += parseFloat(inv.amountPaid) || 0;
+    invoices.filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void').forEach(inv => {
+      const status = getInvoicePaymentStatus(inv);
+      const total = parseFloat(inv.grandTotal || inv.total) || 0;
+      const paidAmt = getInvoicePaidTotal(inv);
+      const dueAmt = getInvoiceBalanceDue(inv);
+      if (status === 'Paid') paid += total;
+      else if (status === 'Partially Paid') {
+        partial += paidAmt;
+        unpaid += dueAmt;
+      }
       else unpaid += total;
     });
     return [
-      { name: 'Paid', value: paid, color: 'var(--theme-success)' },
-      { name: 'Partial', value: partial, color: 'var(--theme-warning)' },
-      { name: 'Unpaid', value: unpaid, color: 'var(--theme-danger)' },
+      { name: 'Paid', value: Math.round(paid * 100) / 100, color: 'var(--theme-success)' },
+      { name: 'Partial', value: Math.round(partial * 100) / 100, color: 'var(--theme-warning)' },
+      { name: 'Unpaid', value: Math.round(unpaid * 100) / 100, color: 'var(--theme-danger)' },
     ];
   };
 
@@ -1171,15 +1205,10 @@ const Dashboard = ({
             <motion.div variants={itemVariants} className={`grid gap-5 ${hasCustomers ? 'grid-cols-4' : 'grid-cols-3'}`}>
               {(() => {
                 const today = new Date().toDateString();
-                const billsToday = invoices.filter(i => new Date(i.createdAt).toDateString() === today).length;
-                const collectedToday = invoices
-                  .filter(i => {
-                    const d = new Date(i.updatedAt || i.createdAt).toDateString();
-                    return d === today && (i.paymentStatus === 'Paid' || i.paymentStatus === 'paid');
-                  })
-                  .reduce((s, i) => s + (i.grandTotal || i.total || 0), 0);
+                const billsToday = invoices.filter(i => !i.isDeleted && i.status !== 'Cancelled' && i.status !== 'Void' && new Date(i.date || i.createdAt).toDateString() === today).length;
+                const collectedToday = calculatedTodaysCollections;
                 const dueToday = invoices.filter(i => {
-                  if (i.paymentStatus === 'Paid' || i.paymentStatus === 'paid') return false;
+                  if (i.isDeleted || i.status === 'Cancelled' || i.status === 'Void' || getInvoiceBalanceDue(i) <= 0) return false;
                   const dueDate = i.dueDate ? new Date(i.dueDate).toDateString() : null;
                   return dueDate === today;
                 }).length;

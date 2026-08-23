@@ -33,15 +33,31 @@ export const invoiceEngine = {
 
   async saveInvoice(invoice) {
     const normalized = normalizeInvoiceFinancials(invoice);
-    return dbSaveInvoice(normalized);
+    const saved = await dbSaveInvoice(normalized);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('billqyro_invoice_updated', { detail: saved }));
+      window.dispatchEvent(new Event('billqyro_sync'));
+      window.dispatchEvent(new CustomEvent('billqyro:data-updated', { detail: { collectionName: 'invoices', doc: saved } }));
+    }
+    return saved;
   },
 
   async deleteInvoice(invoiceId, permanent = false) {
-    return dbDeleteInvoice(invoiceId, permanent);
+    const res = await dbDeleteInvoice(invoiceId, permanent);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('billqyro_sync'));
+      window.dispatchEvent(new CustomEvent('billqyro:data-updated', { detail: { collectionName: 'invoices' } }));
+    }
+    return res;
   },
 
   async restoreInvoice(invoiceId) {
-    return dbRestoreInvoice(invoiceId);
+    const res = await dbRestoreInvoice(invoiceId);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('billqyro_sync'));
+      window.dispatchEvent(new CustomEvent('billqyro:data-updated', { detail: { collectionName: 'invoices' } }));
+    }
+    return res;
   },
 
   async getCustomerPortalInvoices(customerId) {
@@ -157,6 +173,13 @@ export const invoiceEngine = {
       });
     } catch (e) {
       console.warn('[BANK] auto-post payment skipped (non-blocking):', e);
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('billqyro_invoice_updated', { detail: result }));
+      window.dispatchEvent(new Event('billqyro_bank_updated'));
+      window.dispatchEvent(new Event('billqyro_sync'));
+      window.dispatchEvent(new CustomEvent('billqyro:data-updated', { detail: { collectionName: 'invoices', doc: result } }));
     }
 
     return result;

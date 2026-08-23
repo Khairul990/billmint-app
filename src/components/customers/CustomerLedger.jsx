@@ -25,7 +25,7 @@ import { toast } from 'react-hot-toast';
  * Customer 360° / Customer Ledger Modal
  * Compact, responsive, and uses the canonical computeCustomerLedger calculation.
  */
-const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymbol = '₹', onCreateBill }) => {
+const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymbol = '₹', onCreateBill, onPaymentRecorded }) => {
   const [updatingInvoiceId, setUpdatingInvoiceId] = useState(null);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Cash');
@@ -60,11 +60,14 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
 
     setIsSaving(true);
     try {
-      await invoiceEngine.markAsPaid(inv.id, {
+      const updatedInvoice = await invoiceEngine.markAsPaid(inv.id, {
         amount: payVal,
         method: paymentMethod,
         note: paymentNote
       });
+      if (onPaymentRecorded && updatedInvoice) {
+        onPaymentRecorded(updatedInvoice);
+      }
       setUpdatingInvoiceId(null);
       setPaymentAmount('');
       setPaymentNote('');

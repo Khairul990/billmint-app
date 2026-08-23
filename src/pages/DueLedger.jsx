@@ -7,7 +7,7 @@ import { CardSkeleton } from '../components/PremiumSkeleton';
 import CustomerLedger from '../components/customers/CustomerLedger';
 import { getInvoicePaidTotal, getInvoiceBalanceDue } from '../utils/financialCalculations';
 
-const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
+const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentRecorded }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -437,6 +437,7 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
         customer={selectedCustomer}
         invoices={invoices}
         currencySymbol={currencySymbol}
+        onPaymentRecorded={onPaymentRecorded}
       />
 
       <style dangerouslySetInnerHTML={{__html: `

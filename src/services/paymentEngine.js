@@ -1,67 +1,47 @@
 import { invoiceEngine } from './invoiceEngine';
+import { getInvoicePaymentStatus, getInvoicePaidTotal } from '../utils/invoiceMath';
 
 import { db, firebaseReady } from './firebaseConfig';
 import { doc, runTransaction } from 'firebase/firestore';
 import {  submitPlatformPaymentProof as dbSubmitPlatformPaymentProof, getUserPaymentProofs as dbGetUserPaymentProofs, getUserRevenueState as dbGetUserRevenueState  } from './dbEngine';
 
 class PaymentEngine {
-  // Add payment transaction to an invoice
+  // Add payment transaction to an invoice (Canonical Unified Flow)
   async addPayment(invoiceId, paymentData) {
-    const invoice = await invoiceEngine.getInvoiceById(invoiceId);
-    if (!invoice) throw new Error("Invoice not found");
-
-    if (!invoice.payments) invoice.payments = [];
-    
-    const newPayment = {
-      id: `pay_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-      amount: Number(paymentData.amount) || 0,
-      method: paymentData.method || 'Cash',
-      date: paymentData.date || new Date().toISOString(),
-      reference: paymentData.reference || '',
-      notes: paymentData.notes || '',
-      proofUrl: paymentData.proofUrl || null
-    };
-
-    invoice.payments.push(newPayment);
-    invoice.amountPaid = this.calculateTotalPaid(invoice.payments);
-    
-    // Auto-update status
-    if (invoice.amountPaid >= invoice.total) {
-      invoice.status = 'Paid';
-    } else if (invoice.amountPaid > 0) {
-      invoice.status = 'Partial';
-    }
-
-    invoice.updatedAt = new Date().toISOString();
-    
-    // Save updated invoice back via invoiceEngine
-    await invoiceEngine.saveInvoice(invoice);
-    return invoice;
+    return await invoiceEngine.markAsPaid(invoiceId, paymentData);
   }
 
-  // Remove a payment transaction
+  // Remove a payment transaction (Canonical Unified Flow)
   async removePayment(invoiceId, paymentId) {
-    const invoice = await invoiceEngine.getInvoiceById(invoiceId);
-    if (!invoice || !invoice.payments) return null;
+    const invoices = await invoiceEngine.getInvoices(true);
+    const invoice = invoices.find(inv => inv.id === invoiceId);
+    if (!invoice) return null;
 
-    invoice.payments = invoice.payments.filter(p => p.id !== paymentId);
-    invoice.amountPaid = this.calculateTotalPaid(invoice.payments);
-
-    // Re-evaluate status
-    if (invoice.amountPaid >= invoice.total) {
-      invoice.status = 'Paid';
-    } else if (invoice.amountPaid > 0) {
-      invoice.status = 'Partial';
-    } else {
-      invoice.status = 'Pending';
+    if (!invoice.paymentHistory) invoice.paymentHistory = [];
+    invoice.paymentHistory = invoice.paymentHistory.filter(p => p.id !== paymentId && p.proofId !== paymentId);
+    if (invoice.payments) {
+      invoice.payments = invoice.payments.filter(p => p.id !== paymentId);
     }
 
+    const totalPaid = Math.round(invoice.paymentHistory.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) * 100) / 100;
+    invoice.amountPaid = totalPaid;
+    invoice.paidAmount = totalPaid;
+    const grandTotal = Math.round((parseFloat(invoice.grandTotal || invoice.total) || 0) * 100) / 100;
+    invoice.balanceDue = Math.max(0, Math.round((grandTotal - totalPaid) * 100) / 100);
+    invoice.paymentStatus = getInvoicePaymentStatus(invoice);
     invoice.updatedAt = new Date().toISOString();
-    await invoiceEngine.saveInvoice(invoice);
-    return invoice;
+
+    const saved = await invoiceEngine.saveInvoice(invoice);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('billqyro_invoice_updated', { detail: saved }));
+      window.dispatchEvent(new Event('billqyro_bank_updated'));
+      window.dispatchEvent(new Event('billqyro_sync'));
+      window.dispatchEvent(new CustomEvent('billqyro:data-updated', { detail: { collectionName: 'invoices', doc: saved } }));
+    }
+    return saved;
   }
 
-  // Calculate total paid amount from payments array
+  // Calculate total paid amount from payment transactions
   calculateTotalPaid(payments = []) {
     return payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
   }

@@ -29,7 +29,7 @@ import { toast } from 'react-hot-toast';
  * @param {Function} onSaveCustomer - saves or edits customer in state/storage
  * @param {Function} onDeleteCustomer - deletes customer
  */
-const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCustomer, businessSettings, onCreateBill, setCurrentTab }) => {
+const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCustomer, businessSettings, onCreateBill, onPaymentRecorded, setCurrentTab }) => {
   const wsType = useMemo(() => businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.type || 'retail', [businessSettings]);
   const customerLabel = getCustomerLabelByType(wsType);
   const [searchQuery, setSearchQuery] = useState('');
@@ -325,6 +325,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
           customer={ledgerCustomer}
           invoices={invoices}
           onCreateBill={onCreateBill}
+          onPaymentRecorded={onPaymentRecorded}
         />
       </div>
         </PullToRefresh>
