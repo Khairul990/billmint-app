@@ -204,7 +204,17 @@ const CreateInvoice = ({
     generateQr();
   }, [businessSettings, totals.grandTotal, invoiceNumber, enableQrCode]);
 
+  const lastInitializedIdRef = React.useRef(null);
+
   useEffect(() => {
+    const currentKey = editingInvoice?.id ? `edit_${editingInvoice.id}` : 'new';
+    
+    // Form must only initialize when the invoice identity changes (Create vs Edit invoice ID)
+    if (lastInitializedIdRef.current === currentKey) {
+      return;
+    }
+    lastInitializedIdRef.current = currentKey;
+
     if (editingInvoice) {
       setInvoiceNumber(editingInvoice.invoiceNumber || editingInvoice.id);
       setDate(editingInvoice.date || new Date().toISOString().split('T')[0]);
@@ -250,7 +260,7 @@ const CreateInvoice = ({
       setPaymentMethod(businessSettings?.defaultPaymentMethod || 'Cash');
       setNotes(businessSettings?.defaultNotes || 'Thank you for your business!');
     }
-  }, [editingInvoice, customers, businessSettings]);
+  }, [editingInvoice]);
 
   const customer = customers.find(c => c.id === selectedCustomerId);
   const staff = staffs.find(s => s.id === selectedStaffId);
