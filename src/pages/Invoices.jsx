@@ -89,12 +89,6 @@ const Invoices = ({
   const currencySymbol = businessSettings?.currency || '₹';
   const portalLabel = getPortalLabelByType(businessSettings?.businessType);
 
-  useEffect(() => {
-    if (editingInvoice) {
-      setViewingInvoice(editingInvoice);
-    }
-  }, [editingInvoice]);
-
   // Background Firestore public proofs sweeping & syncing
   useEffect(() => {
     if (invoices.length > 0) {

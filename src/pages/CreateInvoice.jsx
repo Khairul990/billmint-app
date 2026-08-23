@@ -17,6 +17,7 @@ import { getStudioHeaderTarget } from '../utils/portalTargets';
 import { getInvoiceColumns } from '../utils/invoiceSchema';
 import { customerEngine } from '../services/customerEngine';
 import { computeCustomerLedger } from '../utils/financialCalculations';
+import { toast } from 'react-hot-toast';
 
 const CreateInvoice = ({ 
   onSaveInvoice, 
@@ -557,7 +558,7 @@ const CreateInvoice = ({
           </button>
           <button onClick={handleSave} disabled={isSaving} className="btn-premium ml-2 flex items-center justify-center gap-2 min-w-[140px]">
             {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <Save className="w-4 h-4" />}
-            {isSaving ? 'Saving...' : 'Save Invoice'}
+            {isSaving ? 'Saving...' : (editingInvoice ? 'Update Invoice' : 'Save Invoice')}
           </button>
         </div>,
         getStudioHeaderTarget('studio-header-actions-portal')
@@ -1114,6 +1115,35 @@ const CreateInvoice = ({
                 </div>
               </div>
             </section>
+
+            {/* Bottom Actions Bar */}
+            <div className="mt-8 pt-6 border-t border-theme-border-soft flex flex-col sm:flex-row items-center justify-between gap-4">
+              <button
+                type="button"
+                onClick={() => onBack ? onBack() : window.history.back()}
+                className="btn-premium-outline w-full sm:w-auto px-6 py-3 text-sm font-bold text-theme-muted hover:text-theme-primary flex items-center justify-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" /> Cancel
+              </button>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowPreviewModal(true)}
+                  className="btn-premium-outline flex-1 sm:flex-initial px-5 py-3 text-sm font-bold flex items-center justify-center gap-2"
+                >
+                  <Eye className="w-4 h-4" /> Preview
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="btn-premium flex-1 sm:flex-initial px-8 py-3 text-sm font-bold flex items-center justify-center gap-2 shadow-premium"
+                >
+                  {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <Save className="w-4 h-4" />}
+                  {isSaving ? 'Saving...' : (editingInvoice ? 'Update Invoice' : 'Save Invoice')}
+                </button>
+              </div>
+            </div>
 
               </div>
             ) : (
