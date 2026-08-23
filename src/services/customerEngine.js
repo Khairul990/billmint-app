@@ -1,4 +1,5 @@
 import { getCustomers, saveCustomer, deleteCustomer, restoreCustomer } from './dbEngine';
+import { computeCustomerLedger } from '../utils/financialCalculations';
 
 class CustomerEngine {
   async getCustomers(includeDeleted = false) {
@@ -30,43 +31,25 @@ class CustomerEngine {
   }
 
   // Calculate Due Ledger for a single customer
-  // This could involve cross-referencing with invoiceEngine, but for now we aggregate local data if present
-  calculateDueLedger(customer, invoices = []) {
-    const customerInvoices = invoices.filter(inv => inv.customer?.id === customer.id || inv.customerId === customer.id);
-    let totalInvoiced = 0;
-    let totalPaid = 0;
-    let totalDue = 0;
-
-    customerInvoices.forEach(inv => {
-      totalInvoiced += (inv.total || 0);
-      const paid = inv.amountPaid || 0;
-      totalPaid += paid;
-      totalDue += ((inv.total || 0) - paid);
-    });
-
-    return { totalInvoiced, totalPaid, totalDue };
+  calculateDueLedger(customer, invoices = [], excludeInvoiceId = null) {
+    const result = computeCustomerLedger(customer, invoices, excludeInvoiceId);
+    return {
+      totalInvoiced: result.totalBilled,
+      totalBilled: result.totalBilled,
+      totalPaid: result.totalPaid,
+      totalDue: result.totalDue,
+      invoiceCount: result.invoiceCount,
+      isSettled: result.isSettled,
+      invoices: result.invoices
+    };
   }
 
   // Track Payment History
   getPaymentHistory(customer, invoices = []) {
-    const customerInvoices = invoices.filter(inv => inv.customer?.id === customer.id || inv.customerId === customer.id);
-    const payments = [];
-    
-    customerInvoices.forEach(inv => {
-      if (inv.payments && Array.isArray(inv.payments)) {
-        inv.payments.forEach(p => {
-          payments.push({
-            ...p,
-            invoiceId: inv.id,
-            invoiceNumber: inv.invoiceNumber
-          });
-        });
-      }
-    });
-
-    // Sort by date descending
-    return payments.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const result = computeCustomerLedger(customer, invoices);
+    return result.paymentHistory;
   }
 }
 
 export const customerEngine = new CustomerEngine();
+

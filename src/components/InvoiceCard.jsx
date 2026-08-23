@@ -158,92 +158,106 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
 
   return (
     <>
-    <div className="bg-theme-card dark:bg-theme-card rounded-2xl p-5 md:p-5 border border-theme-border-soft dark:border-theme-border-soft/80 shadow-premium hover:shadow-2xl hover:border-theme-accent/30 dark:hover:border-theme-accent/40 transition-all duration-500 group">
-      <div className={`flex flex-col ${compact ? '' : 'md:flex-row md:items-center'} justify-between gap-4`}>
-        {/* Top/Left Section: Metadata */}
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-theme-app to-theme-surface dark:from-theme-surface dark:to-theme-card text-theme-accent dark:text-theme-accent rounded-xl border border-theme-border-soft shadow-sm hidden sm:block group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-theme-accent/20 transition-all duration-300">
-            <FileText className="w-6 h-6" />
+    <div className="bg-theme-card dark:bg-theme-card rounded-2xl p-4 sm:p-4.5 border border-theme-border-soft hover:border-theme-accent/40 shadow-premium transition-all duration-300 group">
+      <div className={`flex flex-col ${compact ? '' : 'lg:flex-row lg:items-center'} justify-between gap-3.5`}>
+        {/* Left Section: Metadata */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-theme-app dark:bg-theme-surface text-theme-accent flex items-center justify-center border border-theme-border-soft shadow-xs shrink-0 group-hover:border-theme-accent/30 group-hover:scale-105 transition-all">
+            <FileText className="w-5 h-5" />
           </div>
-          <div>
+          
+          <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-black text-theme-primary dark:text-theme-primary text-base md:text-lg">{invoice.invoiceNumber}</span>
+              <span className="font-mono font-black text-theme-primary text-sm sm:text-base tracking-tight">{invoice.invoiceNumber}</span>
               {invoice.customerName && (
                 <>
-                   <span className="text-theme-muted hidden sm:inline">•</span>
-                   <span className="font-extrabold text-theme-accent dark:text-theme-accent text-sm md:text-base bg-theme-accent/5 px-2 py-0.5 rounded-lg border border-theme-accent/10">{invoice.customerName}</span>
+                  <span className="text-theme-muted text-xs hidden sm:inline">•</span>
+                  <span className="font-bold text-theme-accent text-xs sm:text-sm bg-theme-accent/5 px-2 py-0.5 rounded-lg border border-theme-accent/15 truncate max-w-[200px]">
+                    {invoice.customerName}
+                  </span>
                 </>
               )}
             </div>
-            <div className="flex flex-wrap items-center gap-1.5 mt-2">
-              <span className={`text-[10px] px-2.5 py-0.5 rounded-full border font-extrabold uppercase tracking-wider shadow-sm ${getStatusStyle(invoice.paymentStatus)}`}>
+
+            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+              <span className={`text-[10px] px-2 py-0.5 rounded-full border font-black uppercase tracking-wider ${getStatusStyle(invoice.paymentStatus)}`}>
                 {invoice.paymentStatus}
               </span>
               {invoice.orderStatus && (
-                <span className={`text-[10px] px-2.5 py-0.5 rounded-full border font-extrabold uppercase tracking-wider shadow-sm ${getOrderStatusStyle(invoice.orderStatus)}`}>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-black uppercase tracking-wider ${getOrderStatusStyle(invoice.orderStatus)}`}>
                   {invoice.orderStatus}
                 </span>
               )}
               {invoice.syncStatus && getSyncStatusLabel(invoice.syncStatus) && (
-                <span className={`text-[10px] px-2.5 py-0.5 rounded-full border font-extrabold uppercase tracking-wider shadow-sm ${getSyncStatusStyle(invoice.syncStatus)}`}>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-extrabold uppercase tracking-wider ${getSyncStatusStyle(invoice.syncStatus)}`}>
                   {getSyncStatusLabel(invoice.syncStatus)}
                 </span>
               )}
+              <span className="text-[10px] font-semibold text-theme-muted ml-1">
+                Due: {invoice.dueDate || (invoice.date ? new Date(invoice.date).toLocaleDateString() : 'N/A')}
+              </span>
             </div>
-            <p className="text-[11px] font-bold text-theme-muted dark:text-theme-muted mt-2">Due Date: {invoice.dueDate || 'N/A'}</p>
           </div>
         </div>
 
-        {/* Right Section: Price & Quick CTA Buttons */}
-        <div className={`flex ${compact ? 'flex-col items-start border-t pt-3' : 'md:flex-col items-start md:items-end justify-between border-t md:border-t-0 pt-3 md:pt-0 gap-3'} border-theme-border-soft dark:border-theme-border-soft/80`}>
+        {/* Right Section: Compact Financial Summary & Actions */}
+        <div className={`flex flex-col sm:flex-row sm:items-center ${compact ? 'pt-2 border-t' : 'lg:border-t-0 pt-2 lg:pt-0'} justify-between lg:justify-end gap-3 border-theme-border-soft`}>
           
-          {/* Pro+ Payment Stats Bar */}
-          <div className="flex items-center gap-3 bg-theme-app dark:bg-theme-surface rounded-xl px-3 py-2 border border-theme-border-soft dark:border-theme-border-soft/50 shadow-inner w-full md:w-auto overflow-x-auto no-scrollbar">
-            <div className="flex flex-col items-start md:items-end min-w-[70px]">
-              <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">Bill Total</span>
-              <span className="text-sm font-black text-theme-primary dark:text-theme-primary">{formatCurrency(invoice.grandTotal, currencySymbol)}</span>
+          {/* Pro+ Payment Stats Pill */}
+          <div className="flex items-center justify-between sm:justify-end gap-2.5 bg-theme-app dark:bg-theme-surface rounded-xl px-3 py-1.5 border border-theme-border-soft shadow-inner">
+            <div className="flex flex-col items-start sm:items-end">
+              <span className="text-[8px] text-theme-muted font-black uppercase tracking-wider">Total</span>
+              <span className="text-xs sm:text-sm font-black text-theme-primary tabular-nums">{formatCurrency(invoice.grandTotal, currencySymbol)}</span>
             </div>
-            <div className="w-px h-6 bg-theme-border-soft dark:bg-theme-border-soft/50"></div>
-            <div className="flex flex-col items-start md:items-end min-w-[70px]">
-              <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">Paid</span>
-              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(invoice.amountPaid || 0, currencySymbol)}</span>
+            <div className="w-px h-5 bg-theme-border-soft"></div>
+            <div className="flex flex-col items-start sm:items-end">
+              <span className="text-[8px] text-theme-muted font-black uppercase tracking-wider">Paid</span>
+              <span className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 tabular-nums">{formatCurrency(invoice.amountPaid || invoice.paidAmount || 0, currencySymbol)}</span>
             </div>
-            <div className="w-px h-6 bg-theme-border-soft dark:bg-theme-border-soft/50"></div>
-            <div className="flex flex-col items-start md:items-end min-w-[70px]">
-              <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">Due</span>
-              <span className={`text-sm font-black ${invoice.balanceDue > 0 ? 'text-rose-500' : 'text-theme-muted'}`}>{formatCurrency(invoice.balanceDue || 0, currencySymbol)}</span>
+            <div className="w-px h-5 bg-theme-border-soft"></div>
+            <div className="flex flex-col items-start sm:items-end">
+              <span className="text-[8px] text-theme-muted font-black uppercase tracking-wider">Due</span>
+              <span className={`text-xs sm:text-sm font-black tabular-nums ${invoice.balanceDue > 0 ? 'text-rose-500' : 'text-theme-muted'}`}>{formatCurrency(invoice.balanceDue || 0, currencySymbol)}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 mt-2">
+          {/* Action Buttons Bar */}
+          <div className="flex items-center gap-1 shrink-0">
             {!isDeleted && (
               <>
                 <button
                   onClick={() => onView(invoice)}
-                  title="Preview Invoice"
-                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light rounded-xl transition-all cursor-pointer"
+                  title="View Invoice"
+                  aria-label="View Invoice"
+                  className="w-9 h-9 flex items-center justify-center text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 focus:ring-2 focus:ring-theme-accent/30 rounded-xl transition-all cursor-pointer"
                 >
                   <Eye className="w-4 h-4" />
                 </button>
+                
                 <button
                   onClick={() => onEdit(invoice)}
                   title="Edit Invoice"
-                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light rounded-xl transition-all cursor-pointer"
+                  aria-label="Edit Invoice"
+                  className="w-9 h-9 flex items-center justify-center text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 focus:ring-2 focus:ring-theme-accent/30 rounded-xl transition-all cursor-pointer"
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
+                
                 <button
                   onClick={() => onDownload(invoice)}
                   title="Download PDF"
-                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/30 rounded-xl transition-all cursor-pointer"
+                  aria-label="Download PDF"
+                  className="w-9 h-9 flex items-center justify-center text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 focus:ring-2 focus:ring-theme-accent/30 rounded-xl transition-all cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                 </button>
+
                 {onDownloadImage && (
                   <button
                     onClick={() => onDownloadImage(invoice)}
-                    title="Download Image (PNG)"
-                    className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/30 rounded-xl transition-all cursor-pointer"
+                    title="Download PNG Image"
+                    aria-label="Download PNG Image"
+                    className="w-9 h-9 flex items-center justify-center text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 focus:ring-2 focus:ring-theme-accent/30 rounded-xl transition-all cursor-pointer"
                   >
                     <ImageDown className="w-4 h-4" />
                   </button>
@@ -271,8 +285,9 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                       toast.error(err.message || `Could not create ${portalLabel.toLowerCase()}. Please try again.`);
                     }
                   }}
-                  title={`Copy ${portalLabel}`}
-                  className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/30 rounded-xl transition-all cursor-pointer"
+                  title={`Copy ${portalLabel} Link`}
+                  aria-label={`Copy ${portalLabel} Link`}
+                  className="w-9 h-9 flex items-center justify-center text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 focus:ring-2 focus:ring-theme-accent/30 rounded-xl transition-all cursor-pointer"
                 >
                   <Link className="w-4 h-4" />
                 </button>
@@ -282,9 +297,10 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                   <button
                     onClick={() => setShowShareMenu(!showShareMenu)}
                     title="Share Invoice"
-                    className={`p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center ${showShareMenu
-                      ? 'text-theme-accent bg-theme-accent-light dark:text-theme-accent dark:bg-theme-accent-light'
-                      : 'text-theme-muted dark:text-theme-muted hover:text-theme-accent dark:hover:text-theme-accent hover:bg-theme-accent-light dark:hover:bg-theme-accent-light'
+                    aria-label="Share Invoice"
+                    className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all cursor-pointer focus:ring-2 focus:ring-theme-accent/30 ${showShareMenu
+                      ? 'text-theme-accent bg-theme-accent/15'
+                      : 'text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10'
                       }`}
                   >
                     <Share2 className="w-4 h-4" />
@@ -297,9 +313,9 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 bottom-full mb-2 w-48 bg-theme-card dark:bg-theme-card/95 dark:bg-theme-card/95 backdrop-blur-md border border-theme-border-soft dark:border-theme-border-soft rounded-2xl p-2 shadow-2xl z-20 flex flex-col gap-1 text-[11px]"
+                        className="absolute right-0 bottom-full mb-2 w-48 bg-theme-surface border border-theme-border-soft rounded-2xl p-1.5 shadow-2xl z-20 flex flex-col gap-1 text-[11px]"
                       >
-                        <div className="px-3 py-1 font-black text-[9px] text-theme-muted dark:text-theme-muted uppercase tracking-wider border-b border-theme-border-soft dark:border-theme-border-soft/60 mb-1">
+                        <div className="px-3 py-1 font-black text-[9px] text-theme-muted uppercase tracking-wider border-b border-theme-border-soft mb-1">
                           Quick Share
                         </div>
 
@@ -318,18 +334,18 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                             }
                           }}
                           disabled={isSharingWhatsApp}
-                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-theme-accent-light/20 hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+                          className="flex items-center gap-2 px-2.5 py-1.5 text-theme-primary hover:bg-theme-accent/10 hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer disabled:opacity-60"
                         >
-                          <WhatsAppIcon className="w-3.5 h-3.5 text-theme-accent" />
+                          <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-500" />
                           <span>{isSharingWhatsApp ? 'Preparing...' : 'WhatsApp Share'}</span>
                         </button>
 
                         {invoice.paymentStatus !== 'Paid' && (
                           <button
                             onClick={handleSendReminder}
-                            className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-danger/5 dark:hover:bg-rose-950/20 hover:text-rose-700 dark:hover:text-theme-danger rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                            className="flex items-center gap-2 px-2.5 py-1.5 text-theme-primary hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-600 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
                           >
-                            <WhatsAppIcon className="w-3.5 h-3.5 text-theme-danger" />
+                            <WhatsAppIcon className="w-3.5 h-3.5 text-rose-500" />
                             <span>Send Reminder</span>
                           </button>
                         )}
@@ -347,36 +363,30 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
                               window.open(mailto, '_blank');
                               setShowShareMenu(false);
                             } catch (err) {
-                              toast.error(err.message || 'Could not create live link. Please try again.');
+                              toast.error(err.message || 'Could not create email link. Please try again.');
                             }
                           }}
-                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-accent-light dark:hover:bg-sky-950/20 hover:text-theme-accent dark:hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                          className="flex items-center gap-2 px-2.5 py-1.5 text-theme-primary hover:bg-theme-accent/10 hover:text-theme-accent rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
                         >
                           <Mail className="w-3.5 h-3.5 text-theme-accent" />
                           <span>Email Invoice</span>
                         </button>
 
-
                         <button
                           onClick={async () => {
                             try {
-                              const customerId = invoice.customerId || invoice.customer?.id;
-                              if (!customerId) {
-                                toast.error('Please assign a customer to share the Portal.');
-                                return;
-                              }
                               const updatedInvoice = { ...invoice };
                               const text = generateInvoiceShareText(updatedInvoice, currencySymbol, businessSettings);
                               await navigator.clipboard.writeText(text);
-                              toast.success('Invoicing summary copied to clipboard!');
+                              toast.success('Invoicing summary copied!');
                               setShowShareMenu(false);
                             } catch (err) {
-                              toast.error(err.message || 'Could not create live link. Please try again.');
+                              toast.error(err.message || 'Could not copy summary.');
                             }
                           }}
-                          className="flex items-center gap-2 px-3 py-2 text-theme-primary dark:text-theme-muted hover:bg-theme-warning/5 dark:hover:bg-amber-950/20 hover:text-amber-700 dark:hover:text-amber-400 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
+                          className="flex items-center gap-2 px-2.5 py-1.5 text-theme-primary hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:text-amber-600 rounded-xl transition-colors font-bold w-full text-left cursor-pointer"
                         >
-                          <Copy className="w-3.5 h-3.5 text-theme-warning" />
+                          <Copy className="w-3.5 h-3.5 text-amber-500" />
                           <span>Copy Summary</span>
                         </button>
                       </motion.div>
@@ -390,7 +400,8 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
               <button
                 onClick={() => onRestore(invoice.id)}
                 title="Restore Invoice"
-                className="text-xs font-bold px-3 py-1.5 bg-theme-accent-light text-theme-accent hover:bg-theme-accent-light rounded-lg transition-all"
+                aria-label="Restore Invoice"
+                className="text-xs font-bold px-3 py-1.5 bg-theme-accent/15 text-theme-accent hover:bg-theme-accent/25 rounded-xl transition-all cursor-pointer"
               >
                 Restore
               </button>
@@ -400,7 +411,8 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
               <button
                 onClick={() => onDownloadBackup()}
                 title="Download Editable Backup (.billqyro)"
-                className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light rounded-xl transition-all"
+                aria-label="Download Backup"
+                className="w-9 h-9 flex items-center justify-center text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 focus:ring-2 focus:ring-theme-accent/30 rounded-xl transition-all cursor-pointer"
               >
                 <Download className="w-4 h-4" />
               </button>
@@ -409,8 +421,9 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
             {!isDeleted && (
               <button
                 onClick={() => onDelete(invoice.id)}
-                title={isDeleted ? "Permanently Delete" : "Move to Trash"}
-                className="p-2 text-theme-muted dark:text-theme-muted hover:text-theme-danger dark:hover:text-theme-danger hover:bg-theme-danger/5 dark:hover:bg-rose-950/30 rounded-xl transition-all cursor-pointer"
+                title="Move to Trash"
+                aria-label="Move to Trash"
+                className="w-9 h-9 flex items-center justify-center text-theme-muted hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 focus:ring-2 focus:ring-rose-500/30 rounded-xl transition-all cursor-pointer"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -420,12 +433,13 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
               <button
                 onClick={() => {
                   toast.loading('Retrying sync...', { id: 'retrySync' });
-                  import('../services/invoiceEngine').then(m => m.invoiceEngine.retrySync(invoice.id)).then(res => {
+                  import('../services/invoiceEngine').then(m => m.invoiceEngine.retrySync(invoice.id)).then(() => {
                     toast.dismiss('retrySync');
                   });
                 }}
-                title={`Retry Sync. Error: ${invoice.syncError || 'Unknown'}`}
-                className="p-2 text-theme-danger dark:text-theme-danger hover:text-white dark:hover:text-white hover:bg-rose-600 dark:hover:bg-rose-600 rounded-xl transition-all cursor-pointer flex items-center gap-1"
+                title={`Retry Sync: ${invoice.syncError || 'Unknown error'}`}
+                aria-label="Retry Sync"
+                className="w-9 h-9 flex items-center justify-center text-rose-500 hover:text-white hover:bg-rose-600 rounded-xl transition-all cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
@@ -453,3 +467,4 @@ export default React.memo(InvoiceCard, (prevProps, nextProps) => {
     prevProps.isDeleted === nextProps.isDeleted
   );
 });
+

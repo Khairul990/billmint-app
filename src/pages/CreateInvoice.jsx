@@ -16,6 +16,7 @@ import { UNIVERSAL_TEMPLATES } from '../services/TemplateEngine';
 import { getStudioHeaderTarget } from '../utils/portalTargets';
 import { getInvoiceColumns } from '../utils/invoiceSchema';
 import { customerEngine } from '../services/customerEngine';
+import { computeCustomerLedger } from '../utils/financialCalculations';
 
 const CreateInvoice = ({ 
   onSaveInvoice, 
@@ -119,31 +120,50 @@ const CreateInvoice = ({
     const tax = afterDiscount * ((parseFloat(taxPercent) || 0) / 100);
     const shippingVal = parseFloat(shipping) || 0;
     const oldDueVal = parseFloat(oldDue) || 0;
-    const grandTotal = afterDiscount + tax + shippingVal;
-    const totalReceivable = grandTotal + oldDueVal;
+    
+    // Canonical arithmetic invariants
+    const grandTotal = Math.round((afterDiscount + tax + shippingVal) * 100) / 100;
+    const totalReceivable = Math.round((grandTotal + oldDueVal) * 100) / 100;
     const paidVal = parseFloat(amountPaid) || 0;
-    const balanceDue = Math.max(0, totalReceivable - paidVal);
+    const balanceDue = Math.max(0, Math.round((totalReceivable - paidVal) * 100) / 100);
+    const currentBillDue = Math.max(0, Math.round((grandTotal - paidVal) * 100) / 100);
 
     let paymentStatus = 'Unpaid';
-    if (paidVal >= totalReceivable && totalReceivable > 0) {
+    if (paidVal >= grandTotal && grandTotal > 0) {
       paymentStatus = 'Paid';
     } else if (paidVal > 0) {
       paymentStatus = 'Partial';
     }
 
     return { 
-      subtotal, 
-      discount, 
-      tax, 
+      subtotal: Math.round(subtotal * 100) / 100, 
+      discount: Math.round(discount * 100) / 100, 
+      tax: Math.round(tax * 100) / 100, 
       grandTotal, 
       oldDue: oldDueVal, 
       totalDue: totalReceivable, 
       totalReceivable, 
       paidVal, 
       balanceDue, 
+      currentBillDue,
       paymentStatus 
     };
   }, [items, discountType, discountAmount, taxPercent, shipping, oldDue, amountPaid]);
+
+  // Auto-calculate canonical Previous Due when selectedCustomerId changes
+  useEffect(() => {
+    if (selectedCustomerId) {
+      const cust = customers.find(c => c.id === selectedCustomerId);
+      if (cust) {
+        const ledger = computeCustomerLedger(cust, invoices, editingInvoice?.id);
+        setOldDue(ledger.totalDue);
+      }
+    } else {
+      if (!editingInvoice) {
+        setOldDue(0);
+      }
+    }
+  }, [selectedCustomerId, customers, invoices, editingInvoice]);
 
   useEffect(() => {
     const generateQr = async () => {
@@ -988,36 +1008,63 @@ const CreateInvoice = ({
                   </div>
                 )}
 
-                <div className="pt-2 border-t border-theme-border-soft/60 flex justify-between items-center text-sm font-bold text-theme-primary">
-                  <span>Current Bill Total</span>
-                  <span className="tabular-nums font-black">{formatCurrency(totals.grandTotal)}</span>
-                </div>
-
-                {draftBusinessSettings?.invoiceBuilderSettings?.showOldDue && (
-                  <div className="flex justify-between items-center text-sm font-semibold text-theme-muted gap-4">
-                    <span className="text-amber-600 dark:text-amber-400 font-bold">+ Previous / Old Due</span>
-                    <input 
-                      type="number" min="0" 
-                      className="w-24 px-3 py-1 bg-theme-surface border border-amber-500/30 rounded-lg text-sm text-right font-black text-amber-600 dark:text-amber-400 focus:outline-none focus:border-theme-accent transition-colors"
-                      value={oldDue} 
-                      onChange={(e) => setOldDue(e.target.value)} 
-                    />
+                <div className="pt-3 border-t border-theme-border-soft/60 space-y-2.5">
+                  <div className="flex justify-between items-center text-sm font-semibold text-theme-muted">
+                    <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
+                      <span>Previous / Old Due</span>
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-theme-muted font-mono font-bold">+</span>
+                      <input 
+                        type="number" min="0" 
+                        className="w-24 px-2.5 py-1 bg-theme-surface border border-amber-500/30 rounded-lg text-sm text-right font-black text-amber-600 dark:text-amber-400 focus:outline-none focus:border-theme-accent transition-colors tabular-nums"
+                        value={oldDue} 
+                        onChange={(e) => setOldDue(e.target.value)} 
+                        title="Customer prior outstanding due"
+                      />
+                    </div>
                   </div>
-                )}
 
-                <div className="flex justify-between items-center text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                  <span>- Amount Paid Now</span>
-                  <span className="font-bold tabular-nums">{formatCurrency(totals.paidVal)}</span>
-                </div>
-
-                <div className="pt-3 mt-3 border-t border-theme-border-soft flex justify-between items-center">
-                  <div>
-                    <span className="text-sm font-black text-theme-primary block">Total Remaining Due</span>
-                    <span className="text-2xs text-theme-muted">Invariant: Grand Total + Old Due - Paid</span>
+                  <div className="flex justify-between items-center text-sm font-bold text-theme-primary">
+                    <span>Current Invoice Total</span>
+                    <span className="tabular-nums font-black text-theme-primary">
+                      <span className="text-xs text-theme-muted font-mono font-bold mr-1">+</span>
+                      {formatCurrency(totals.grandTotal)}
+                    </span>
                   </div>
-                  <span className="text-xl font-black text-theme-accent tabular-nums">
-                    {formatCurrency(totals.balanceDue)}
-                  </span>
+
+                  <div className="flex justify-between items-center text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    <span>Amount Paid Now</span>
+                    <span className="font-black tabular-nums">
+                      <span className="text-xs text-emerald-500 font-mono font-bold mr-1">-</span>
+                      {formatCurrency(totals.paidVal)}
+                    </span>
+                  </div>
+
+                  <div className="pt-3 mt-1 border-t-2 border-dashed border-theme-border-soft flex flex-col gap-2">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="text-sm font-black text-theme-primary block tracking-tight">Remaining Balance Due</span>
+                        <span className="text-[10px] text-theme-muted font-bold font-mono">
+                          {formatCurrency(totals.oldDue)} + {formatCurrency(totals.grandTotal)} - {formatCurrency(totals.paidVal)} = {formatCurrency(totals.balanceDue)}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xl font-black text-theme-accent tabular-nums block">
+                          {formatCurrency(totals.balanceDue)}
+                        </span>
+                        <span className={`inline-block text-[9px] font-black uppercase px-2 py-0.5 rounded-md mt-0.5 ${
+                          totals.paymentStatus === 'Paid'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40'
+                            : totals.paymentStatus === 'Partial'
+                            ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-300/40'
+                            : 'bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-300/40'
+                        }`}>
+                          {totals.paymentStatus}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>

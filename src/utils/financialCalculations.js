@@ -409,3 +409,107 @@ export const computeInventoryReport = (products = [], invoices = []) => {
     bestSellers
   };
 };
+
+/**
+ * Canonical Customer Ledger & Due Calculation
+ * Pure mathematical helper ensuring exact financial parity across:
+ * - Customer Ledger modal
+ * - Customer CRM list
+ * - CreateInvoice (for auto-populating previous / old due)
+ * - Due Ledger
+ * - Reports & Dashboard
+ *
+ * @param {Object} customer - Customer object { id, name, phone, ... }
+ * @param {Array} invoices - All workspace invoices
+ * @param {string|null} excludeInvoiceId - Invoice ID to exclude (e.g. current invoice draft in edit mode)
+ */
+export const computeCustomerLedger = (customer, invoices = [], excludeInvoiceId = null) => {
+  if (!customer) {
+    return {
+      totalBilled: 0,
+      totalPaid: 0,
+      totalDue: 0,
+      invoiceCount: 0,
+      isSettled: true,
+      invoices: [],
+      paymentHistory: []
+    };
+  }
+
+  const custId = customer.id ? String(customer.id) : null;
+  const custName = (customer.name || '').trim().toLowerCase();
+
+  const customerInvoices = invoices.filter(inv => {
+    if (!inv || inv.isDeleted) return false;
+    if (inv.status === 'Cancelled' || inv.status === 'Void') return false;
+    if (excludeInvoiceId && (inv.id === excludeInvoiceId || inv.invoiceNumber === excludeInvoiceId)) return false;
+
+    // Match by ID if available, otherwise match by customerName
+    const matchesId = custId && (
+      (inv.customerId && String(inv.customerId) === custId) ||
+      (inv.customer?.id && String(inv.customer.id) === custId)
+    );
+    const matchesName = custName && (
+      (inv.customerName && inv.customerName.trim().toLowerCase() === custName) ||
+      (inv.customer?.name && inv.customer.name.trim().toLowerCase() === custName)
+    );
+
+    return matchesId || matchesName;
+  });
+
+  let totalBilled = 0;
+  let totalPaid = 0;
+  let totalDue = 0;
+  const paymentHistory = [];
+
+  customerInvoices.forEach(inv => {
+    const grandTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
+    const paid = roundTo2(
+      inv.paymentStatus === 'Paid'
+        ? grandTotal
+        : (parseFloat(inv.amountPaid ?? inv.paidAmount) || 0)
+    );
+    const due = Math.max(0, roundTo2(grandTotal - paid));
+
+    totalBilled += grandTotal;
+    totalPaid += paid;
+    totalDue += due;
+
+    if (Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0) {
+      inv.paymentHistory.forEach(p => {
+        paymentHistory.push({
+          ...p,
+          invoiceId: inv.id,
+          invoiceNumber: inv.invoiceNumber
+        });
+      });
+    } else if (paid > 0) {
+      paymentHistory.push({
+        date: inv.paymentDate || inv.date || inv.createdAt,
+        amount: paid,
+        method: inv.paymentMethod || 'Cash',
+        invoiceId: inv.id,
+        invoiceNumber: inv.invoiceNumber,
+        notes: inv.paymentNote || ''
+      });
+    }
+  });
+
+  totalBilled = roundTo2(totalBilled);
+  totalPaid = roundTo2(totalPaid);
+  totalDue = roundTo2(totalDue);
+
+  const sortedInvoices = [...customerInvoices].sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+  const sortedPayments = [...paymentHistory].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+  return {
+    totalBilled,
+    totalPaid,
+    totalDue,
+    invoiceCount: customerInvoices.length,
+    isSettled: totalDue === 0,
+    invoices: sortedInvoices,
+    paymentHistory: sortedPayments
+  };
+};
+
