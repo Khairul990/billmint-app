@@ -69,6 +69,9 @@ export default defineConfig(({ mode }) => ({
   ],
   server: {
     host: '0.0.0.0', // Listen on all local IPs so it's accessible from phone
+    watch: {
+      ignored: ['**/*.md', '**/dist/**', '**/.git/**', '**/dev-dist/**', '**/docs/**']
+    }
   },
   esbuild: {
     drop: mode === 'android' ? [] : ['console', 'debugger'],
