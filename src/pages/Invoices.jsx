@@ -139,28 +139,39 @@ const Invoices = ({
 
     // 0. Fetch the latest invoice snapshot to prevent stale overwrite
     const freshInvoice = invoices.find(inv => inv.id === viewingInvoice.id) || viewingInvoice;
+    const history = freshInvoice.paymentHistory || [];
 
-    // 1. Calculate new figures
-    const totalPaid = (freshInvoice.amountPaid || 0) + proof.amount;
-    const balanceDue = Math.max(0, freshInvoice.grandTotal - totalPaid);
-    
-    let newStatus = freshInvoice.paymentStatus;
-    if (balanceDue <= 0) {
-      newStatus = 'Paid';
-    } else if (totalPaid > 0) {
-      newStatus = 'Partially Paid';
+    // Idempotency check: if proof is already approved or in history, prevent double counting
+    const alreadyApplied = history.some(p => p.proofId === proof.id || p.id === proof.id || p.id === ('pmt_' + proof.id));
+    if (alreadyApplied) {
+      toast.error('This payment proof has already been approved.');
+      return;
     }
 
-    // 2. Map new payment history item
+    const proofAmount = parseFloat(proof.amount) || 0;
     const historyItem = {
+      id: 'pmt_' + (proof.id || Date.now()),
+      proofId: proof.id,
       date: new Date().toISOString().split('T')[0],
-      amount: proof.amount,
-      method: proof.method,
+      amount: proofAmount,
+      method: proof.method || 'Online',
       transactionId: proof.transactionId || 'N/A',
       verified: true,
       reviewer: businessSettings?.businessName ? `Admin (${businessSettings.businessName})` : 'System Admin',
       verifiedAt: new Date().toISOString()
     };
+
+    const newHistory = [...history, historyItem];
+    const totalPaid = Math.round(newHistory.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) * 100) / 100;
+    const grandTotal = Math.round((parseFloat(freshInvoice.grandTotal || freshInvoice.total) || 0) * 100) / 100;
+    const balanceDue = Math.max(0, Math.round((grandTotal - totalPaid) * 100) / 100);
+    
+    let newStatus = freshInvoice.paymentStatus;
+    if (balanceDue <= 0 && grandTotal > 0) {
+      newStatus = 'Paid';
+    } else if (totalPaid > 0) {
+      newStatus = 'Partially Paid';
+    }
 
     // 3. Update the matching proof status to Approved
     const updatedProofs = (freshInvoice.paymentProofs || []).map(p => {
@@ -172,19 +183,40 @@ const Invoices = ({
 
     const updatedInvoice = {
       ...freshInvoice,
+      grandTotal,
       amountPaid: totalPaid,
+      paidAmount: totalPaid,
       balanceDue,
       paymentStatus: newStatus,
-      paymentHistory: [...(freshInvoice.paymentHistory || []), historyItem],
+      paymentHistory: newHistory,
       paymentProofs: updatedProofs
     };
 
     // 4. Save
     await invoiceEngine.saveInvoice(updatedInvoice);
+
+    // 5. Mirror into Internal Bank ledger (idempotent)
+    try {
+      const { bankEngine } = await import('../services/bankEngine');
+      await bankEngine.autoPostPayment({
+        id: historyItem.id,
+        amount: historyItem.amount,
+        method: historyItem.method,
+        date: historyItem.date,
+        invoiceId: updatedInvoice.id,
+        invoiceNumber: updatedInvoice.invoiceNumber,
+        customerId: updatedInvoice.customer?.id || updatedInvoice.customerId || null,
+        customerName: updatedInvoice.customer?.name || updatedInvoice.customerName || '',
+        note: `Approved proof txn: ${historyItem.transactionId}`
+      });
+    } catch (e) {
+      console.warn('[BANK] auto-post proof payment skipped:', e);
+    }
     
     setViewingInvoice(updatedInvoice);
     toast.success('Payment proof successfully APPROVED!');
   };
+
 
   const handleRejectProof = async (proof) => {
     if (!window.confirm(`Are you sure you want to REJECT this payment proof of ${currencySymbol}${proof.amount}?`)) return;

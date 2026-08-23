@@ -24,6 +24,7 @@ import QuickActions from '../components/QuickActions';
 import PremiumEmptyState from '../components/PremiumEmptyState';
 import { useFeatureControl } from '../hooks/useFeatureControl';
 import CategoryDashboardWidgets from '../components/dashboard/CategoryDashboardWidgets';
+import { getInvoicePaidTotal, getInvoiceBalanceDue } from '../utils/financialCalculations';
 
 const AnimatedNumber = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(null);
@@ -168,15 +169,7 @@ const Dashboard = ({
     const today = new Date().toDateString();
     return invoices
       .filter(inv => new Date(inv.createdAt).toDateString() === today)
-      .reduce((sum, inv) => {
-        const s = (inv.paymentStatus || '').toLowerCase();
-        if (s === 'paid') return sum + (inv.grandTotal || inv.total || 0);
-        if (s === 'partial' || s === 'partially paid') {
-          const paid = parseFloat(inv.amountPaid ?? inv.paidAmount) || 0;
-          return sum + paid;
-        }
-        return sum;
-      }, 0);
+      .reduce((sum, inv) => sum + getInvoicePaidTotal(inv), 0);
   }, [invoices]);
 
   const calculatedTotalDue = useMemo(() => {
@@ -185,11 +178,7 @@ const Dashboard = ({
         const s = (inv.paymentStatus || '').toLowerCase();
         return s === 'unpaid' || s === 'partial' || s === 'partially paid';
       })
-      .reduce((sum, inv) => {
-        const total = inv.grandTotal || inv.total || 0;
-        const paid = parseFloat(inv.amountPaid ?? inv.paidAmount) || 0;
-        return sum + Math.max(0, total - paid);
-      }, 0);
+      .reduce((sum, inv) => sum + getInvoiceBalanceDue(inv), 0);
   }, [invoices]);
 
   const getInvoiceLabel = () => {

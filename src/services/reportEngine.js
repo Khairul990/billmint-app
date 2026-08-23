@@ -10,7 +10,9 @@ import {
   computeCustomerReport,
   computeInventoryReport,
   filterByDateRange,
-  filterByWorkspace
+  filterByWorkspace,
+  getInvoicePaidTotal,
+  getInvoiceBalanceDue
 } from '../utils/financialCalculations';
 
 class ReportEngine {
@@ -96,11 +98,9 @@ class ReportEngine {
     const filtered = filterByDateRange(wsInvoices, 'date', dateRange, customStart, customEnd);
 
     const formatted = filtered.map(inv => {
-      const grandTotal = parseFloat(inv.grandTotal || inv.total) || 0;
-      const paid = inv.paymentStatus === 'Paid' 
-        ? grandTotal 
-        : (parseFloat(inv.amountPaid ?? inv.paidAmount) || 0);
-      const due = Math.max(0, grandTotal - paid);
+      const grandTotal = Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
+      const paid = getInvoicePaidTotal(inv);
+      const due = getInvoiceBalanceDue(inv);
 
       return {
         'Date': inv.date || inv.createdAt || '',

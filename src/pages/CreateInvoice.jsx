@@ -360,6 +360,13 @@ const CreateInvoice = ({
       balanceDue: totals.balanceDue,
       paymentStatus: totals.paymentStatus,
       paymentMethod,
+      paymentHistory: editingInvoice?.paymentHistory ? [...editingInvoice.paymentHistory] : (totals.paidVal > 0 ? [{
+        id: 'pmt_' + Date.now(),
+        amount: totals.paidVal,
+        method: paymentMethod || 'Cash',
+        date: date || new Date().toISOString(),
+        note: 'Payment on creation'
+      }] : []),
       items: items.map((i, idx) => ({
         sNo: i.sNo || (idx + 1).toString(),
         itemService: i.name,

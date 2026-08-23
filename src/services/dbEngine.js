@@ -2451,12 +2451,40 @@ export const saveInvoice = async (invoice) => {
     invoice.verificationCode = generateVerificationCode(invoice.invoiceNumber || 'INV');
   }
 
-  // 1.6 Ensure financial parity (paidAmount and amountPaid)
-  const paidVal = Number(invoice.paidAmount ?? invoice.amountPaid ?? 0);
-  invoice.paidAmount = paidVal;
-  invoice.amountPaid = paidVal;
-  invoice.grandTotal = Number(invoice.grandTotal || invoice.total || 0);
-  invoice.balanceDue = Math.max(0, invoice.grandTotal - paidVal);
+  // 1.6 Ensure canonical financial parity (paidAmount, amountPaid, balanceDue, paymentHistory)
+  let paidVal = 0;
+  if (Array.isArray(invoice.paymentHistory) && invoice.paymentHistory.length > 0) {
+    const historySum = invoice.paymentHistory.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+    paidVal = historySum > 0 ? historySum : Number(invoice.paidAmount ?? invoice.amountPaid ?? 0);
+  } else {
+    paidVal = Number(invoice.paidAmount ?? invoice.amountPaid ?? 0);
+  }
+
+  invoice.grandTotal = Math.round((Number(invoice.grandTotal || invoice.total || 0)) * 100) / 100;
+  invoice.paidAmount = Math.round(paidVal * 100) / 100;
+  invoice.amountPaid = Math.round(paidVal * 100) / 100;
+  invoice.balanceDue = Math.max(0, Math.round((invoice.grandTotal - paidVal) * 100) / 100);
+
+  if (paidVal > 0 && (!invoice.paymentHistory || invoice.paymentHistory.length === 0)) {
+    invoice.paymentHistory = [{
+      id: 'pmt_init_' + (invoice.id || Date.now()),
+      amount: paidVal,
+      method: invoice.paymentMethod || 'Cash',
+      date: invoice.date || invoice.createdAt || new Date().toISOString(),
+      note: 'Initial payment'
+    }];
+  }
+
+  // Ensure paymentStatus invariant holds
+  if (invoice.status !== 'Cancelled' && invoice.status !== 'Void' && invoice.paymentStatus !== 'Pending Verification') {
+    if (paidVal >= invoice.grandTotal && invoice.grandTotal > 0) {
+      invoice.paymentStatus = 'Paid';
+    } else if (paidVal > 0) {
+      invoice.paymentStatus = 'Partially Paid';
+    } else {
+      invoice.paymentStatus = 'Unpaid';
+    }
+  }
 
   // 2. Ensure snapshots are taken
   const activeSettings = getSettings() || DEFAULT_SETTINGS;

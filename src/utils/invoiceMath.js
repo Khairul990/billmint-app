@@ -62,3 +62,66 @@ export const determinePaymentStatus = (amountPaid, grandTotal, currentStatus) =>
   if (paid > 0 && paid < total) return 'Partially Paid';
   return 'Unpaid';
 };
+
+/**
+ * CANONICAL PAYMENT AMOUNT RESOLVER
+ */
+export const getInvoicePaidTotal = (inv) => {
+  if (!inv) return 0;
+  if (Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0) {
+    const sum = inv.paymentHistory.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+    if (sum > 0) return roundTo2(sum);
+  }
+  const val = parseFloat(inv.amountPaid ?? inv.paidAmount);
+  if (!isNaN(val) && val >= 0) return roundTo2(val);
+  if (inv.paymentStatus === 'Paid') {
+    return roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
+  }
+  return 0;
+};
+
+/**
+ * CANONICAL BALANCE DUE RESOLVER
+ */
+export const getInvoiceBalanceDue = (inv) => {
+  if (!inv) return 0;
+  const grandTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
+  const paidTotal = getInvoicePaidTotal(inv);
+  return Math.max(0, roundTo2(grandTotal - paidTotal));
+};
+
+/**
+ * CANONICAL PAYMENT STATUS RESOLVER
+ */
+export const getInvoicePaymentStatus = (inv) => {
+  if (!inv) return 'Unpaid';
+  if (inv.status === 'Cancelled' || inv.status === 'Void') return inv.status;
+  const grandTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
+  const paidTotal = getInvoicePaidTotal(inv);
+  if (paidTotal >= grandTotal && grandTotal > 0) return 'Paid';
+  if (paidTotal > 0 && paidTotal < grandTotal) return 'Partially Paid';
+  if (inv.paymentStatus === 'Pending Verification' || (Array.isArray(inv.paymentProofs) && inv.paymentProofs.some(p => p.status === 'Pending Verification' || p.status === 'pending'))) {
+    return 'Pending Verification';
+  }
+  return 'Unpaid';
+};
+
+/**
+ * NORMALIZE INVOICE FINANCIALS
+ */
+export const normalizeInvoiceFinancials = (inv) => {
+  if (!inv) return inv;
+  const grandTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
+  const paidTotal = getInvoicePaidTotal(inv);
+  const balanceDue = Math.max(0, roundTo2(grandTotal - paidTotal));
+  const paymentStatus = getInvoicePaymentStatus({ ...inv, grandTotal, amountPaid: paidTotal, paidAmount: paidTotal });
+
+  return {
+    ...inv,
+    grandTotal,
+    amountPaid: paidTotal,
+    paidAmount: paidTotal,
+    balanceDue,
+    paymentStatus
+  };
+};

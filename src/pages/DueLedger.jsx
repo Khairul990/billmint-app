@@ -5,6 +5,7 @@ import { pageVariants, staggerContainer, staggerItem } from '../utils/animations
 import { formatCurrency } from '../utils/invoiceUtils';
 import { CardSkeleton } from '../components/PremiumSkeleton';
 import CustomerLedger from '../components/customers/CustomerLedger';
+import { getInvoicePaidTotal, getInvoiceBalanceDue } from '../utils/financialCalculations';
 
 const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,14 +16,24 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings }) => {
   const dueBills = useMemo(() => {
     return invoices
       .filter(inv => {
-        const s = (inv.paymentStatus || '').toLowerCase();
-        return s === 'unpaid' || s === 'partial' || s === 'partially paid';
+        if (!inv || inv.isDeleted || inv.status === 'Cancelled' || inv.status === 'Void') return false;
+        const due = getInvoiceBalanceDue(inv);
+        return due > 0;
       })
-      .map(inv => ({
-        ...inv,
-        dueAmount: inv.dueAmount || (inv.grandTotal || inv.total || 0) - (inv.amountPaid || 0),
-        dueDate: new Date(inv.dueDate || inv.createdAt)
-      }))
+      .map(inv => {
+        const grandTotal = Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
+        const paidAmount = getInvoicePaidTotal(inv);
+        const dueAmount = getInvoiceBalanceDue(inv);
+        return {
+          ...inv,
+          grandTotal,
+          paidAmount,
+          amountPaid: paidAmount,
+          dueAmount,
+          balanceDue: dueAmount,
+          dueDate: new Date(inv.dueDate || inv.createdAt)
+        };
+      })
       .sort((a, b) => a.dueDate - b.dueDate);
   }, [invoices]);
 

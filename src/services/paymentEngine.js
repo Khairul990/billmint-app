@@ -158,28 +158,64 @@ class PaymentEngine {
       
       if (existingInvoice) {
         const paymentAmount = parseFloat(payment.amount) || 0;
-        const currentPaid = parseFloat(existingInvoice.amountPaid) || 0;
-        const newPaidAmount = currentPaid + paymentAmount;
-        const grandTotal = parseFloat(existingInvoice.grandTotal) || 0;
-        const newBalance = Math.max(0, grandTotal - newPaidAmount);
+        const invoice = { ...existingInvoice };
+        if (!invoice.paymentHistory) invoice.paymentHistory = [];
+
+        // Deduplication check: prevent applying same proof twice
+        const alreadyApplied = invoice.paymentHistory.some(p => p.proofId === payment.id || p.id === payment.id || p.id === ('pmt_' + payment.id));
+        if (!alreadyApplied && paymentAmount > 0) {
+          const paymentEntry = {
+            id: 'pmt_' + payment.id,
+            proofId: payment.id,
+            amount: paymentAmount,
+            method: payment.paymentMethod || invoice.paymentMethod || 'Proof Approval',
+            date: new Date().toISOString(),
+            note: payment.notes || 'Payment proof approved'
+          };
+          invoice.paymentHistory.push(paymentEntry);
+
+          // Mirror into Internal Bank ledger (idempotent)
+          try {
+            const { bankEngine } = await import('./bankEngine');
+            await bankEngine.autoPostPayment({
+              id: paymentEntry.id,
+              amount: paymentEntry.amount,
+              method: paymentEntry.method,
+              date: paymentEntry.date,
+              invoiceId: invoice.id,
+              invoiceNumber: invoice.invoiceNumber,
+              customerId: invoice.customer?.id || invoice.customerId || null,
+              customerName: invoice.customer?.name || invoice.customerName || '',
+              note: paymentEntry.note
+            });
+          } catch (e) {
+            console.warn('[BANK] auto-post proof payment skipped:', e);
+          }
+        }
+
+        const totalPaid = Math.round(invoice.paymentHistory.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) * 100) / 100;
+        const grandTotal = Math.round((parseFloat(invoice.grandTotal || invoice.total) || 0) * 100) / 100;
+        const newBalance = Math.max(0, Math.round((grandTotal - totalPaid) * 100) / 100);
         
         let newStatus;
-        if (newBalance <= 0) newStatus = 'Paid';
-        else if (newPaidAmount > 0) newStatus = 'Partially Paid';
-        else newStatus = existingInvoice.status;
+        if (newBalance <= 0 && grandTotal > 0) newStatus = 'Paid';
+        else if (totalPaid > 0) newStatus = 'Partially Paid';
+        else newStatus = invoice.paymentStatus || 'Unpaid';
 
         await invoiceEngine.saveInvoice({
-          ...existingInvoice,
+          ...invoice,
           status: newStatus,
           paymentStatus: newStatus,
-          amountPaid: newPaidAmount,
+          amountPaid: totalPaid,
+          paidAmount: totalPaid,
           balanceDue: newBalance,
-          paymentMethod: payment.paymentMethod || existingInvoice.paymentMethod || 'UPI'
+          paymentMethod: payment.paymentMethod || invoice.paymentMethod || 'UPI'
         });
         if (typeof window !== 'undefined') window.dispatchEvent(new Event('billqyro_sync'));
       }
     }
   }
+
 
   // Atomically reject a payment proof
   async rejectPaymentProof(payment) {

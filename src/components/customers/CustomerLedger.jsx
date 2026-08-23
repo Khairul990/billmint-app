@@ -60,40 +60,11 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
 
     setIsSaving(true);
     try {
-      const currentPaid = parseFloat(inv.amountPaid ?? inv.paidAmount) || 0;
-      const grandTotal = parseFloat(inv.grandTotal || inv.total) || 0;
-      const newPaid = Math.min(grandTotal, currentPaid + payVal);
-      const newBalanceDue = Math.max(0, grandTotal - newPaid);
-      
-      let newStatus = 'Partially Paid';
-      if (newPaid >= grandTotal) {
-        newStatus = 'Paid';
-      } else if (newPaid === 0) {
-        newStatus = 'Unpaid';
-      }
-
-      const historyItem = {
-        date: new Date().toISOString().split('T')[0],
+      await invoiceEngine.markAsPaid(inv.id, {
         amount: payVal,
         method: paymentMethod,
-        transactionId: paymentNote || `PAY-${Date.now().toString().slice(-4)}`,
-        verified: true,
-        verifiedAt: new Date().toISOString()
-      };
-
-      const updatedInvoice = {
-        ...inv,
-        amountPaid: newPaid,
-        paidAmount: newPaid,
-        balanceDue: newBalanceDue,
-        paymentStatus: newStatus,
-        paymentMethod: paymentMethod,
-        paymentNote: paymentNote,
-        paymentDate: new Date().toISOString(),
-        paymentHistory: [...(inv.paymentHistory || []), historyItem]
-      };
-
-      await invoiceEngine.saveInvoice(updatedInvoice);
+        note: paymentNote
+      });
       setUpdatingInvoiceId(null);
       setPaymentAmount('');
       setPaymentNote('');

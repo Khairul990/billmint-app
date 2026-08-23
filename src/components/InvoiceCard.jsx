@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FileText, Eye, Edit2, Trash2, Download, ImageDown, Share2, Mail, Copy, Check, Link, RefreshCw } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
+import { getInvoicePaidTotal, getInvoiceBalanceDue } from '../utils/financialCalculations';
 import { toast } from 'react-hot-toast';
 import {
   generateEmailShareLink,
@@ -212,12 +213,12 @@ const InvoiceCard = ({ invoice, currencySymbol = '₹', businessSettings = {}, c
             <div className="w-px h-5 bg-theme-border-soft"></div>
             <div className="flex flex-col items-start sm:items-end">
               <span className="text-[8px] text-theme-muted font-black uppercase tracking-wider">Paid</span>
-              <span className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 tabular-nums">{formatCurrency(invoice.amountPaid || invoice.paidAmount || 0, currencySymbol)}</span>
+              <span className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 tabular-nums">{formatCurrency(getInvoicePaidTotal(invoice), currencySymbol)}</span>
             </div>
             <div className="w-px h-5 bg-theme-border-soft"></div>
             <div className="flex flex-col items-start sm:items-end">
               <span className="text-[8px] text-theme-muted font-black uppercase tracking-wider">Due</span>
-              <span className={`text-xs sm:text-sm font-black tabular-nums ${invoice.balanceDue > 0 ? 'text-rose-500' : 'text-theme-muted'}`}>{formatCurrency(invoice.balanceDue || 0, currencySymbol)}</span>
+              <span className={`text-xs sm:text-sm font-black tabular-nums ${getInvoiceBalanceDue(invoice) > 0 ? 'text-rose-500' : 'text-theme-muted'}`}>{formatCurrency(getInvoiceBalanceDue(invoice), currencySymbol)}</span>
             </div>
           </div>
 

@@ -22,7 +22,9 @@ import {
   computeCustomerReport,
   computeInventoryReport,
   filterByDateRange,
-  filterByWorkspace
+  filterByWorkspace,
+  getInvoicePaidTotal,
+  getInvoiceBalanceDue
 } from '../utils/financialCalculations';
 import { reportEngine } from '../services/reportEngine';
 
@@ -107,10 +109,9 @@ const Reports = ({
 
       return true;
     }).map(inv => {
-      const grandTotal = parseFloat(inv.grandTotal || inv.total) || 0;
-      const paid = inv.paymentStatus === 'Paid' 
-        ? grandTotal 
-        : (parseFloat(inv.amountPaid ?? inv.paidAmount) || 0);
+      const grandTotal = Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
+      const paid = getInvoicePaidTotal(inv);
+      const due = getInvoiceBalanceDue(inv);
 
       return {
         ...inv,
@@ -118,7 +119,7 @@ const Reports = ({
         parsedDate: new Date(inv.date || inv.createdAt),
         parsedTotal: grandTotal,
         parsedPaid: paid,
-        parsedDue: Math.max(0, grandTotal - paid),
+        parsedDue: due,
         parsedStatus: inv.paymentStatus || 'Unpaid'
       };
     }).sort((a, b) => b.parsedDate - a.parsedDate);

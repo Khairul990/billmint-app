@@ -12,6 +12,76 @@ export const roundTo2 = (num) => {
 };
 
 /**
+ * CANONICAL PAYMENT AMOUNT RESOLVER
+ * Resolves the single authoritative paid amount for an invoice.
+ * Guaranteed invariant:
+ * 1. If paymentHistory is present and has items with positive amounts, sum(paymentHistory) is authoritative.
+ * 2. Otherwise read amountPaid / paidAmount safely.
+ * 3. Fallback: if explicitly marked 'Paid', grandTotal is paid.
+ */
+export const getInvoicePaidTotal = (inv) => {
+  if (!inv) return 0;
+  if (Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0) {
+    const sum = inv.paymentHistory.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+    if (sum > 0) return roundTo2(sum);
+  }
+  const val = parseFloat(inv.amountPaid ?? inv.paidAmount);
+  if (!isNaN(val) && val >= 0) return roundTo2(val);
+  if (inv.paymentStatus === 'Paid') {
+    return roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
+  }
+  return 0;
+};
+
+/**
+ * CANONICAL BALANCE DUE RESOLVER
+ * Invariant: balanceDue = Math.max(0, grandTotal - paidTotal)
+ */
+export const getInvoiceBalanceDue = (inv) => {
+  if (!inv) return 0;
+  const grandTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
+  const paidTotal = getInvoicePaidTotal(inv);
+  return Math.max(0, roundTo2(grandTotal - paidTotal));
+};
+
+/**
+ * CANONICAL PAYMENT STATUS RESOLVER
+ */
+export const getInvoicePaymentStatus = (inv) => {
+  if (!inv) return 'Unpaid';
+  if (inv.status === 'Cancelled' || inv.status === 'Void') return inv.status;
+  const grandTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
+  const paidTotal = getInvoicePaidTotal(inv);
+  if (paidTotal >= grandTotal && grandTotal > 0) return 'Paid';
+  if (paidTotal > 0 && paidTotal < grandTotal) return 'Partially Paid';
+  if (inv.paymentStatus === 'Pending Verification' || (Array.isArray(inv.paymentProofs) && inv.paymentProofs.some(p => p.status === 'Pending Verification' || p.status === 'pending'))) {
+    return 'Pending Verification';
+  }
+  return 'Unpaid';
+};
+
+/**
+ * NORMALIZE INVOICE FINANCIALS
+ * Enforces zero divergence between amountPaid, paidAmount, balanceDue, and paymentStatus.
+ */
+export const normalizeInvoiceFinancials = (inv) => {
+  if (!inv) return inv;
+  const grandTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
+  const paidTotal = getInvoicePaidTotal(inv);
+  const balanceDue = Math.max(0, roundTo2(grandTotal - paidTotal));
+  const paymentStatus = getInvoicePaymentStatus({ ...inv, grandTotal, amountPaid: paidTotal, paidAmount: paidTotal });
+
+  return {
+    ...inv,
+    grandTotal,
+    amountPaid: paidTotal,
+    paidAmount: paidTotal,
+    balanceDue,
+    paymentStatus
+  };
+};
+
+/**
  * Filter items by date range.
  * Supports: 'Today', 'Yesterday', 'This Week', 'This Month', 'Last Month', 'This Year', 'All Time', 'Custom'
  */
@@ -131,9 +201,7 @@ export const computeSalesSummary = (invoices = []) => {
 
   billable.forEach(inv => {
     const grandTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
-    const paid = roundTo2(inv.paymentStatus === 'Paid' 
-      ? grandTotal 
-      : (parseFloat(inv.amountPaid ?? inv.paidAmount) || 0));
+    const paid = getInvoicePaidTotal(inv);
     const due = Math.max(0, roundTo2(grandTotal - paid));
 
     totalSales += grandTotal;
@@ -199,9 +267,7 @@ export const computeCollectionsSummary = (invoices = []) => {
 
   billable.forEach(inv => {
     const grandTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
-    const paid = roundTo2(inv.paymentStatus === 'Paid' 
-      ? grandTotal 
-      : (parseFloat(inv.amountPaid ?? inv.paidAmount) || 0));
+    const paid = getInvoicePaidTotal(inv);
     const due = Math.max(0, roundTo2(grandTotal - paid));
 
     totalInvoiced += grandTotal;
@@ -234,6 +300,7 @@ export const computeCollectionsSummary = (invoices = []) => {
     paymentMethodBreakdown
   };
 };
+
 
 /**
  * Compute Expense Summary from expenses.
@@ -305,7 +372,7 @@ export const computeCustomerReport = (invoices = [], customers = []) => {
     const custId = inv.customerId || inv.customerName || 'Unknown';
     const custName = inv.customerName || 'Unknown';
     const total = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
-    const paid = roundTo2(inv.paymentStatus === 'Paid' ? total : (parseFloat(inv.amountPaid ?? inv.paidAmount) || 0));
+    const paid = getInvoicePaidTotal(inv);
     const due = Math.max(0, roundTo2(total - paid));
 
     if (!customerStats[custId]) {
@@ -464,11 +531,7 @@ export const computeCustomerLedger = (customer, invoices = [], excludeInvoiceId 
 
   customerInvoices.forEach(inv => {
     const grandTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
-    const paid = roundTo2(
-      inv.paymentStatus === 'Paid'
-        ? grandTotal
-        : (parseFloat(inv.amountPaid ?? inv.paidAmount) || 0)
-    );
+    const paid = getInvoicePaidTotal(inv);
     const due = Math.max(0, roundTo2(grandTotal - paid));
 
     totalBilled += grandTotal;
