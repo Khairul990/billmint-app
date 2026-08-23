@@ -430,6 +430,26 @@ function App() {
     };
     fetchRevenue();
   }, [invoices, subscription, isAuthenticated]);
+  // HARD DEMO MODE ISOLATION SWITCH
+  const activeInvoices = isDemoSessionActive ? demoInvoices : invoices;
+  const activeCustomers = isDemoSessionActive ? demoCustomers : customers;
+  const activeStaffs = isDemoSessionActive ? demoStaffs : staffs;
+  const activeProducts = isDemoSessionActive ? demoProducts : products;
+  const activeExpenses = isDemoSessionActive ? demoExpenses : expenses;
+  
+  let activeSettings = (isDemoSessionActive && demoSettings) ? demoSettings : settings;
+  if (isDemoSessionActive && isVideoCreatorMode && activeSettings) {
+    activeSettings = {
+      ...activeSettings,
+      businessName: activeSettings.businessName || 'Demo Corp',
+      ownerName: 'Demo Owner',
+      email: 'hello@democorp.local',
+      phone: '+1 555-0199',
+      logoUrl: '',
+      whatsapp: '+1 555-0199'
+    };
+  }
+
   // Workspace state
   const safeSettings = settings || {};
   const safeWorkspaces = safeSettings.businessWorkspaces || [];
@@ -1514,26 +1534,6 @@ function App() {
       toast.error(`Image Error: ${err?.toString() || "Unknown error generating image"}`);
     }
   };
-
-  // HARD DEMO MODE ISOLATION SWITCH
-  const activeInvoices = isDemoSessionActive ? demoInvoices : invoices;
-  const activeCustomers = isDemoSessionActive ? demoCustomers : customers;
-  const activeStaffs = isDemoSessionActive ? demoStaffs : staffs;
-  const activeProducts = isDemoSessionActive ? demoProducts : products;
-  const activeExpenses = isDemoSessionActive ? demoExpenses : expenses;
-  
-  let activeSettings = (isDemoSessionActive && demoSettings) ? demoSettings : settings;
-  if (isDemoSessionActive && isVideoCreatorMode && activeSettings) {
-    activeSettings = {
-      ...activeSettings,
-      businessName: activeSettings.businessName || 'Demo Corp',
-      ownerName: 'Demo Owner',
-      email: 'hello@democorp.local',
-      phone: '+1 555-0199',
-      logoUrl: '',
-      whatsapp: '+1 555-0199'
-    };
-  }
 
   // --- TAB ROUTER SWITCHBOARD ---
   const TAB_TO_FEATURE_MAP = {
