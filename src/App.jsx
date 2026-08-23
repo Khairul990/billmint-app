@@ -1030,22 +1030,32 @@ function App() {
       return payload;
     }
 
+    const isEditing = Boolean(payload.id && targetInvoices.some(inv => inv.id === payload.id));
+
     try {
       const { updatedInvoices, firebaseStatus } = await invoiceEngine.saveInvoice(payload);
       setInvoices(updatedInvoices);
 
       if (!isSilent) {
-        if (firebaseStatus === 'failed') {
-          toast.success('Invoice created successfully. (Saved locally. Firebase sync pending.)');
+        if (isEditing) {
+          if (!navigator.onLine || firebaseStatus === 'failed') {
+            toast.success('Invoice updated locally. Cloud sync pending.');
+          } else {
+            toast.success('Invoice updated successfully');
+          }
         } else {
-          toast.success('Invoice created successfully');
+          if (!navigator.onLine || firebaseStatus === 'failed') {
+            toast.success('Invoice saved locally. Cloud sync pending.');
+          } else {
+            toast.success('Invoice created successfully');
+          }
         }
         
         sendEmpireEvent({
-          eventType: "invoice_created",
-          message: "Invoice created in BillQyro",
+          eventType: isEditing ? "invoice_updated" : "invoice_created",
+          message: isEditing ? "Invoice updated in BillQyro" : "Invoice created in BillQyro",
           page: "create-invoice",
-          metadata: { feature: "invoice", action: "created", privateDataIncluded: false }
+          metadata: { feature: "invoice", action: isEditing ? "updated" : "created", privateDataIncluded: false }
         });
 
         // Trigger Premium Celebration Confetti

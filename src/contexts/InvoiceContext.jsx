@@ -246,10 +246,13 @@ const invoiceReducer = (state, action) => {
 
 export const InvoiceProvider = ({ children, editingInvoice, invoices, businessSettings }) => {
   const [state, dispatch] = useReducer(invoiceReducer, initialState);
+  const lastInitializedKeyRef = React.useRef(null);
 
   // Initialize State (Edit mode vs Create mode)
   useEffect(() => {
-    if (state.isInitialized) return;
+    const currentKey = editingInvoice ? `edit_${editingInvoice.id}_${editingInvoice.updatedAt || ''}` : 'new';
+    if (lastInitializedKeyRef.current === currentKey) return;
+    lastInitializedKeyRef.current = currentKey;
 
     if (editingInvoice) {
       // Setup edit mode

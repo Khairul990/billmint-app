@@ -207,17 +207,19 @@ const CreateInvoice = ({
     if (editingInvoice) {
       setInvoiceNumber(editingInvoice.invoiceNumber || editingInvoice.id);
       setDate(editingInvoice.date || new Date().toISOString().split('T')[0]);
-      if (editingInvoice.customerName) {
-        const cust = customers.find(c => c.name === editingInvoice.customerName);
+      if (editingInvoice.customerId) {
+        setSelectedCustomerId(editingInvoice.customerId);
+      } else if (editingInvoice.customerName) {
+        const cust = customers.find(c => c.name === editingInvoice.customerName || (editingInvoice.customerPhone && c.phone === editingInvoice.customerPhone));
         if (cust) setSelectedCustomerId(cust.id);
       }
       if (editingInvoice.items && editingInvoice.items.length > 0) {
         setItems(editingInvoice.items.map((it, idx) => ({
-          id: Date.now().toString() + idx,
+          id: it.id || (Date.now().toString() + idx),
           sNo: it.sNo || (idx + 1).toString(),
-          name: it.itemService || it.name || '',
+          name: it.itemService || it.name || it.description || '',
           description: it.description || '',
-          qty: parseFloat(it.qty) || 1,
+          qty: parseFloat(it.qty ?? it.quantity) || 1,
           price: parseFloat(it.rate ?? it.price) || 0,
           customFields: it.customFields || {}
         })));
@@ -230,8 +232,24 @@ const CreateInvoice = ({
       setAmountPaid(parseFloat(editingInvoice.amountPaid ?? editingInvoice.paidAmount) || 0);
       setPaymentMethod(editingInvoice.paymentMethod || 'Cash');
       setNotes(editingInvoice.notes || '');
+      setSelectedTemplate(editingInvoice.selectedTemplate || businessSettings?.selectedPdfTemplate || defaultTemplate);
+    } else {
+      // Clean blank state for Create mode
+      setInvoiceNumber(`INV-${Math.floor(1000 + Math.random() * 9000)}`);
+      setDate(new Date().toISOString().split('T')[0]);
+      setSelectedCustomerId('');
+      setSelectedStaffId('');
+      setItems([{ id: Date.now().toString(), sNo: '1', name: '', qty: 1, price: 0, customFields: {} }]);
+      setDiscountType('none');
+      setDiscountAmount(0);
+      setTaxPercent(businessSettings?.defaultTax || 0);
+      setShipping(0);
+      setOldDue(0);
+      setAmountPaid(0);
+      setPaymentMethod(businessSettings?.defaultPaymentMethod || 'Cash');
+      setNotes(businessSettings?.defaultNotes || 'Thank you for your business!');
     }
-  }, [editingInvoice, customers]);
+  }, [editingInvoice, customers, businessSettings]);
 
   const customer = customers.find(c => c.id === selectedCustomerId);
   const staff = staffs.find(s => s.id === selectedStaffId);
@@ -299,15 +317,17 @@ const CreateInvoice = ({
 
   const handleDeleteItem = (id) => {
     if (items.length > 1) {
-      setItems(items.filter(item => item.id !== id));
+      setItems(items.filter(item => item.id !== id).map((it, idx) => ({ ...it, sNo: (idx + 1).toString() })));
+    } else {
+      setItems([{ id: Date.now().toString(), sNo: '1', name: '', qty: 1, price: 0, customFields: {} }]);
     }
   };
 
   const handleDuplicateItem = (id) => {
     const itemToDuplicate = items.find(item => item.id === id);
     if (itemToDuplicate) {
-      const sNo = (parseInt(items[items.length-1].sNo) + 1).toString();
-      setItems([...items, { ...itemToDuplicate, id: Date.now().toString(), sNo: isNaN(sNo) ? '' : sNo }]);
+      const copiedItem = { ...itemToDuplicate, id: Date.now().toString() };
+      setItems([...items, copiedItem].map((it, idx) => ({ ...it, sNo: (idx + 1).toString() })));
     }
   };
 
@@ -323,30 +343,55 @@ const CreateInvoice = ({
         name: newCustName.trim(),
         phone: newCustPhone.trim(),
         address: newCustAddress.trim(),
+        previousDue: 0,
         createdAt: new Date().toISOString()
       };
       await customerEngine.saveCustomer(newCust);
-      customers.unshift(newCust);
+      customers.push(newCust);
       setSelectedCustomerId(newCust.id);
       setShowQuickAddCustomer(false);
       setNewCustName('');
       setNewCustPhone('');
       setNewCustAddress('');
+      toast.success('Customer added!');
     } catch (err) {
-      console.error('Failed to create customer:', err);
+      console.error(err);
+      toast.error('Failed to add customer');
     } finally {
       setIsSavingCustomer(false);
     }
   };
 
   const handleSave = async () => {
+    const isEditing = Boolean(editingInvoice?.id);
+    const existingPaymentHistory = Array.isArray(editingInvoice?.paymentHistory) ? editingInvoice.paymentHistory : [];
+    
+    // In edit mode: preserve payment history if not explicitly wiped
+    let finalPaymentHistory = [...existingPaymentHistory];
+    if (!isEditing && totals.paidVal > 0) {
+      finalPaymentHistory = [{
+        id: 'pmt_' + Date.now(),
+        amount: totals.paidVal,
+        method: paymentMethod || 'Cash',
+        date: date || new Date().toISOString(),
+        note: 'Payment on creation'
+      }];
+    }
+
     const payload = {
-      invoiceNumber,
+      id: editingInvoice?.id || undefined,
+      invoiceNumber: editingInvoice?.invoiceNumber || invoiceNumber,
+      createdAt: editingInvoice?.createdAt || undefined,
+      publicToken: editingInvoice?.publicToken || undefined,
+      verificationCode: editingInvoice?.verificationCode || undefined,
+      createdByUid: editingInvoice?.createdByUid || undefined,
+      createdByEmail: editingInvoice?.createdByEmail || undefined,
+      paymentProofs: editingInvoice?.paymentProofs || [],
       date,
       billType: 'Invoice',
-      customerName: customer?.name || 'Walk-in Customer',
-      customerPhone: customer?.phone || '',
-      customerId: customer?.id || '',
+      customerName: customer?.name || editingInvoice?.customerName || 'Walk-in Customer',
+      customerPhone: customer?.phone || editingInvoice?.customerPhone || '',
+      customerId: customer?.id || editingInvoice?.customerId || '',
       notes,
       subtotal: totals.subtotal,
       taxAmount: totals.tax,
@@ -360,14 +405,9 @@ const CreateInvoice = ({
       balanceDue: totals.balanceDue,
       paymentStatus: totals.paymentStatus,
       paymentMethod,
-      paymentHistory: editingInvoice?.paymentHistory ? [...editingInvoice.paymentHistory] : (totals.paidVal > 0 ? [{
-        id: 'pmt_' + Date.now(),
-        amount: totals.paidVal,
-        method: paymentMethod || 'Cash',
-        date: date || new Date().toISOString(),
-        note: 'Payment on creation'
-      }] : []),
+      paymentHistory: finalPaymentHistory,
       items: items.map((i, idx) => ({
+        id: i.id,
         sNo: i.sNo || (idx + 1).toString(),
         itemService: i.name,
         name: i.name,
@@ -380,7 +420,6 @@ const CreateInvoice = ({
       selectedTemplate,
       invoiceColumns
     };
-    if (editingInvoice?.id) payload.id = editingInvoice.id;
     
     if (onSaveInvoice) {
       setIsSaving(true);

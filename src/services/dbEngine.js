@@ -2614,20 +2614,63 @@ export const saveInvoice = async (invoice) => {
   invoice.createdByEmail = userEmail;
   invoice.businessContactEmail = settings?.email || userEmail;
 
-  if (invoice.id && invoice.id.startsWith('inv-')) {
-    const index = invoices.findIndex(inv => inv.id === invoice.id);
-    if (index !== -1) {
-      const existing = invoices[index];
-      invoice.__version = Math.max(invoice.__version || 0, existing.__version || 0);
-      invoices[index] = stampRecord(invoice, invoice.userId);
-      logAudit('invoice_updated', 'invoice', invoice.id, existing, invoices[index]);
-    } else {
-      invoices.push(stampRecord({ ...invoice, createdAt: timestamp }, invoice.userId));
-      logAudit('invoice_created', 'invoice', invoice.id, null, invoice);
+  // Canonical Identity Lookup: Update if ID exists in database, Create if not found
+  const existingIndex = invoice.id ? invoices.findIndex(inv => inv.id === invoice.id) : -1;
+  const isEditing = existingIndex !== -1;
+
+  if (isEditing) {
+    const existing = invoices[existingIndex];
+    // Preserve immutable attributes from original invoice
+    invoice.id = existing.id;
+    invoice.createdAt = existing.createdAt || timestamp;
+    invoice.publicToken = existing.publicToken || invoice.publicToken;
+    invoice.verificationCode = existing.verificationCode || invoice.verificationCode;
+    invoice.createdByUid = existing.createdByUid || invoice.userId;
+    invoice.createdByEmail = existing.createdByEmail || userEmail;
+    invoice.invoiceNumber = invoice.invoiceNumber || existing.invoiceNumber;
+    
+    // Preserve payment histories and proofs if not modified
+    if (!invoice.paymentHistory || invoice.paymentHistory.length === 0) {
+      invoice.paymentHistory = existing.paymentHistory || [];
     }
+    if (!invoice.paymentProofs || invoice.paymentProofs.length === 0) {
+      invoice.paymentProofs = existing.paymentProofs || [];
+    }
+
+    // Re-verify canonical financial parity with preserved payments
+    let paidVal = 0;
+    if (Array.isArray(invoice.paymentHistory) && invoice.paymentHistory.length > 0) {
+      paidVal = invoice.paymentHistory.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+    } else {
+      paidVal = Number(invoice.paidAmount ?? invoice.amountPaid ?? existing.amountPaid ?? 0);
+    }
+    paidVal = Math.round(paidVal * 100) / 100;
+    invoice.paidAmount = paidVal;
+    invoice.amountPaid = paidVal;
+    invoice.balanceDue = Math.max(0, Math.round((invoice.grandTotal - paidVal) * 100) / 100);
+    invoice.dueAmount = invoice.balanceDue;
+
+    if (invoice.status !== 'Cancelled' && invoice.status !== 'Void' && invoice.paymentStatus !== 'Pending Verification') {
+      if (paidVal >= invoice.grandTotal && invoice.grandTotal > 0) {
+        invoice.paymentStatus = 'Paid';
+      } else if (paidVal > 0) {
+        invoice.paymentStatus = 'Partially Paid';
+      } else {
+        invoice.paymentStatus = 'Unpaid';
+      }
+    }
+
+    invoice.updatedAt = timestamp;
+    invoice.__version = Math.max(invoice.__version || 0, existing.__version || 0);
+    invoices[existingIndex] = stampRecord(invoice, invoice.userId);
+    logAudit('invoice_updated', 'invoice', invoice.id, existing, invoices[existingIndex]);
   } else {
-    invoice.id = 'inv-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
-    invoices.push(stampRecord({ ...invoice, createdAt: timestamp }, invoice.userId));
+    if (!invoice.id) {
+      invoice.id = 'inv-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    }
+    invoice.createdAt = timestamp;
+    invoice.updatedAt = timestamp;
+    invoices.push(stampRecord(invoice, invoice.userId));
     logAudit('invoice_created', 'invoice', invoice.id, null, invoice);
   }
 
