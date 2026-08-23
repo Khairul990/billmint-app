@@ -1632,6 +1632,8 @@ function App() {
           <Reports 
             invoices={activeInvoices} 
             customers={activeCustomers}
+            products={activeProducts}
+            expenses={activeExpenses}
             staffs={activeStaffs} 
             businessSettings={activeSettings}
           />
