@@ -129,6 +129,7 @@ const Dashboard = ({
   const hasTreasury = isFeatureEnabled('treasury');
   const hasExpenses = isFeatureEnabled('treasury.moneyOut');
   const hasReports = isFeatureEnabled('reports');
+  const currencySymbol = businessSettings?.currency || '₹';
 
   const [showAddCustomerSheet, setShowAddCustomerSheet] = useState(false);
   const [activeAnnouncement, setActiveAnnouncement] = useState(null);
