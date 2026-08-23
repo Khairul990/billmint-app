@@ -24,7 +24,9 @@ import PullToRefresh from '../components/PullToRefresh';
 import { invoiceEngine } from '../services/invoiceEngine';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { getUnitsByType } from '../config/businessPresets';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, Scan, Printer, QrCode } from 'lucide-react';
+import BarcodeScannerModal from '../components/BarcodeScannerModal';
+import QRCode from 'qrcode';
 
 /**
  * Products and Services Catalog Page
@@ -41,6 +43,11 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
   // Modals / Add-Edit states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
+  const [selectedProductForBarcode, setSelectedProductForBarcode] = useState(null);
+  const [barcodeLabelCount, setBarcodeLabelCount] = useState(8);
+  const [generatedQrMap, setGeneratedQrMap] = useState({});
 
   // Form Fields
   const [name, setName] = useState('');
@@ -231,13 +238,34 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
             ))}
           </div>
 
-          <button
-            onClick={openAddModal}
-            className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-premium hover:scale-[1.02] active:scale-[0.98] transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add Product</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsScannerOpen(true)}
+              className="flex items-center justify-center gap-1.5 bg-theme-surface border border-theme-border-soft text-theme-primary font-bold text-xs px-3.5 py-3 rounded-2xl hover:bg-theme-card shadow-sm transition-all"
+              title="Scan Barcode / QR"
+            >
+              <Scan className="w-4 h-4 text-theme-accent" />
+              <span className="hidden sm:inline">Scan</span>
+            </button>
+            <button
+              onClick={() => {
+                setSelectedProductForBarcode(products[0] || null);
+                setIsBarcodeModalOpen(true);
+              }}
+              className="flex items-center justify-center gap-1.5 bg-theme-surface border border-theme-border-soft text-theme-primary font-bold text-xs px-3.5 py-3 rounded-2xl hover:bg-theme-card shadow-sm transition-all"
+              title="Print Barcode Labels"
+            >
+              <Printer className="w-4 h-4 text-theme-accent" />
+              <span className="hidden sm:inline">Print Labels</span>
+            </button>
+            <button
+              onClick={openAddModal}
+              className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-premium hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Add Product</span>
+            </button>
+          </div>
         </div>
 
         {activeTab === 'products' && (
@@ -625,6 +653,100 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, businessSetti
         )}
         </div>
         </PullToRefresh>
+
+        {/* SCANNER MODAL */}
+        <BarcodeScannerModal
+          isOpen={isScannerOpen}
+          onClose={() => setIsScannerOpen(false)}
+          products={products}
+          currencySymbol={currencySymbol}
+          onProductScanned={(prod) => {
+            setSearchQuery(prod.name);
+            setIsScannerOpen(false);
+          }}
+        />
+
+        {/* PRINTABLE BARCODE LABELS MODAL */}
+        <CenteredModal
+          isOpen={isBarcodeModalOpen}
+          onClose={() => setIsBarcodeModalOpen(false)}
+          title="Print Product Barcode Labels"
+        >
+          <div className="space-y-4 text-xs font-semibold text-theme-muted">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block mb-1 text-theme-muted uppercase font-bold text-2xs">Select Product</label>
+                <select
+                  className="input-premium w-full text-xs bg-theme-surface"
+                  value={selectedProductForBarcode?.id || ''}
+                  onChange={(e) => {
+                    const found = products.find(p => p.id === e.target.value);
+                    setSelectedProductForBarcode(found || null);
+                  }}
+                >
+                  {products.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} {p.sku ? `(${p.sku})` : ''} - ₹{p.price || p.rate || 0}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1 text-theme-muted uppercase font-bold text-2xs">Label Count (Sheet)</label>
+                <select
+                  className="input-premium w-full text-xs bg-theme-surface"
+                  value={barcodeLabelCount}
+                  onChange={(e) => setBarcodeLabelCount(Number(e.target.value))}
+                >
+                  <option value={4}>4 Labels (Sample)</option>
+                  <option value={8}>8 Labels (Grid 2x4)</option>
+                  <option value={12}>12 Labels (Grid 3x4)</option>
+                  <option value={24}>24 Labels (Full Sheet)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Label Preview Grid */}
+            <div className="border border-theme-border-soft rounded-2xl p-4 bg-white dark:bg-slate-900 shadow-inner max-h-[300px] overflow-y-auto">
+              <p className="text-2xs font-bold text-slate-500 uppercase tracking-wider mb-3 text-center">Print Preview (A4 Sticker Sheet)</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                {Array.from({ length: barcodeLabelCount }).map((_, idx) => (
+                  <div key={idx} className="border border-dashed border-slate-300 dark:border-slate-700 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-center flex flex-col items-center justify-between min-h-[95px]">
+                    <p className="text-[10px] font-black text-slate-900 dark:text-white line-clamp-1">
+                      {selectedProductForBarcode?.name || 'Sample Product'}
+                    </p>
+                    <div className="w-10 h-10 my-1 bg-white p-0.5 rounded border border-slate-200 flex items-center justify-center">
+                      <QrCode className="w-8 h-8 text-slate-900" />
+                    </div>
+                    <div className="w-full flex justify-between items-center text-[9px] font-mono text-slate-600 dark:text-slate-300">
+                      <span>{selectedProductForBarcode?.sku || 'SKU-001'}</span>
+                      <span className="font-black text-slate-900 dark:text-white">
+                        {formatCurrency(selectedProductForBarcode?.price || selectedProductForBarcode?.rate || 0, currencySymbol)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsBarcodeModalOpen(false)}
+                className="btn-premium-outline flex-1 py-2 text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="btn-premium flex-1 py-2 text-xs flex items-center justify-center gap-1.5"
+              >
+                <Printer className="w-4 h-4" /> Print Labels
+              </button>
+            </div>
+          </div>
+        </CenteredModal>
     </AnimatedPage>
   );
 };

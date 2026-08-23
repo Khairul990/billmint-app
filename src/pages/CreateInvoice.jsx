@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, Save, LayoutTemplate, Plus, Trash2, Copy, FileText, Eye, EyeOff, Maximize, X, Check, ChevronDown, Palette, Columns, DollarSign } from 'lucide-react';
+import { 
+  ArrowLeft, Save, LayoutTemplate, Plus, Trash2, Copy, FileText, 
+  Eye, EyeOff, Maximize, X, Check, ChevronDown, Palette, Columns, 
+  DollarSign, UserPlus, CreditCard, Layers, Tag, ChevronUp, AlertCircle
+} from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,8 +15,20 @@ import { LivePreviewLayouts } from '../components/invoice-templates/layouts/Live
 import { UNIVERSAL_TEMPLATES } from '../services/TemplateEngine';
 import { getStudioHeaderTarget } from '../utils/portalTargets';
 import { getInvoiceColumns } from '../utils/invoiceSchema';
+import { customerEngine } from '../services/customerEngine';
 
-const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = [], products = [], businessSettings, editingInvoice, onBack, defaultTemplate = 'minimal-classic', subscription }) => {
+const CreateInvoice = ({ 
+  onSaveInvoice, 
+  invoices = [], 
+  customers = [], 
+  staffs = [], 
+  products = [], 
+  businessSettings, 
+  editingInvoice, 
+  onBack, 
+  defaultTemplate = 'minimal-classic', 
+  subscription 
+}) => {
   const [selectedTemplate, setSelectedTemplate] = useState(businessSettings?.selectedPdfTemplate || defaultTemplate);
   const [viewMode, setViewMode] = useState('pdf');
   const [activeTab, setActiveTab] = useState('listing');
@@ -26,18 +42,35 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
   const [selectedStaffId, setSelectedStaffId] = useState('');
   const [billingTarget, setBillingTarget] = useState('customer');
   const [items, setItems] = useState([
-    { id: Date.now().toString(), sNo: '1', name: '', qty: 1, price: 0 }
+    { id: Date.now().toString(), sNo: '1', name: '', qty: 1, price: 0, customFields: {} }
   ]);
   const [discountType, setDiscountType] = useState('none');
   const [discountAmount, setDiscountAmount] = useState(0);
   const [taxPercent, setTaxPercent] = useState(0);
   const [shipping, setShipping] = useState(0);
   const [oldDue, setOldDue] = useState(0);
+  const [amountPaid, setAmountPaid] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState(businessSettings?.defaultPaymentMethod || 'Cash');
   const [notes, setNotes] = useState('Thank you for your business!');
   const [previewQrCode, setPreviewQrCode] = useState(null);
   const [enableQrCode, setEnableQrCode] = useState(true);
 
+  // Quick Add Customer state
+  const [showQuickAddCustomer, setShowQuickAddCustomer] = useState(false);
+  const [newCustName, setNewCustName] = useState('');
+  const [newCustPhone, setNewCustPhone] = useState('');
+  const [newCustAddress, setNewCustAddress] = useState('');
+  const [isSavingCustomer, setIsSavingCustomer] = useState(false);
+
+  // Category item expandable state
+  const [expandedCategoryItemId, setExpandedCategoryItemId] = useState(null);
+
   const [invoiceColumns, setInvoiceColumns] = useState([]);
+
+  // Active workspace type
+  const wsType = (businessSettings?.businessType || businessSettings?.businessWorkspaces?.find(
+    ws => ws.id === businessSettings.activeWorkspaceId
+  )?.type || 'retail').toLowerCase();
 
   useEffect(() => {
     if (businessSettings) {
@@ -87,10 +120,30 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
     const shippingVal = parseFloat(shipping) || 0;
     const oldDueVal = parseFloat(oldDue) || 0;
     const grandTotal = afterDiscount + tax + shippingVal;
-    const totalDue = grandTotal + oldDueVal;
+    const totalReceivable = grandTotal + oldDueVal;
+    const paidVal = parseFloat(amountPaid) || 0;
+    const balanceDue = Math.max(0, totalReceivable - paidVal);
 
-    return { subtotal, discount, tax, grandTotal, oldDue: oldDueVal, totalDue };
-  }, [items, discountType, discountAmount, taxPercent, shipping, oldDue]);
+    let paymentStatus = 'Unpaid';
+    if (paidVal >= totalReceivable && totalReceivable > 0) {
+      paymentStatus = 'Paid';
+    } else if (paidVal > 0) {
+      paymentStatus = 'Partial';
+    }
+
+    return { 
+      subtotal, 
+      discount, 
+      tax, 
+      grandTotal, 
+      oldDue: oldDueVal, 
+      totalDue: totalReceivable, 
+      totalReceivable, 
+      paidVal, 
+      balanceDue, 
+      paymentStatus 
+    };
+  }, [items, discountType, discountAmount, taxPercent, shipping, oldDue, amountPaid]);
 
   useEffect(() => {
     const generateQr = async () => {
@@ -98,7 +151,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
       const showQrInPreview = businessSettings?.showQrInPreview !== false;
       
       if (paymentQrEnabled && showQrInPreview) {
-        const paymentMethod = businessSettings?.paymentMethod || 'Manual';
+        const method = businessSettings?.paymentMethod || 'Manual';
         const upiId = businessSettings?.upiId || '';
         const bkashNumber = businessSettings?.bkashNumber || '';
         const nagadNumber = businessSettings?.nagadNumber || '';
@@ -107,11 +160,11 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
         const dueAmount = totals.grandTotal || 0;
 
         let qrText = '';
-        if (paymentMethod === 'UPI') {
+        if (method === 'UPI') {
           qrText = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${dueAmount}&cu=${currencyCode}&tn=${invoiceNumber}`;
-        } else if (paymentMethod === 'bKash') {
+        } else if (method === 'bKash') {
           qrText = `bKash Payment\nMerchant/Personal Number: ${bkashNumber}\nAmount: ${dueAmount}\nInvoice: ${invoiceNumber}`;
-        } else if (paymentMethod === 'Nagad') {
+        } else if (method === 'Nagad') {
           qrText = `Nagad Payment\nNumber: ${nagadNumber}\nAmount: ${dueAmount}\nInvoice: ${invoiceNumber}`;
         } else {
           qrText = `${window.location.origin}/invoice/preview`;
@@ -128,7 +181,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
       }
     };
     generateQr();
-  }, [businessSettings, totals.grandTotal, invoiceNumber]);
+  }, [businessSettings, totals.grandTotal, invoiceNumber, enableQrCode]);
 
   useEffect(() => {
     if (editingInvoice) {
@@ -145,7 +198,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
           name: it.itemService || it.name || '',
           description: it.description || '',
           qty: parseFloat(it.qty) || 1,
-          price: parseFloat(it.rate) || 0,
+          price: parseFloat(it.rate ?? it.price) || 0,
           customFields: it.customFields || {}
         })));
       }
@@ -154,6 +207,8 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
       setTaxPercent(parseFloat(editingInvoice.taxAmount) ? (parseFloat(editingInvoice.taxAmount) / (parseFloat(editingInvoice.subtotal) || 1)) * 100 : 0);
       setShipping(parseFloat(editingInvoice.shipping) || 0);
       setOldDue(parseFloat(editingInvoice.oldDue) || 0);
+      setAmountPaid(parseFloat(editingInvoice.amountPaid ?? editingInvoice.paidAmount) || 0);
+      setPaymentMethod(editingInvoice.paymentMethod || 'Cash');
       setNotes(editingInvoice.notes || '');
     }
   }, [editingInvoice, customers]);
@@ -161,20 +216,26 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
   const customer = customers.find(c => c.id === selectedCustomerId);
   const staff = staffs.find(s => s.id === selectedStaffId);
 
-  const currentTemplateName = useMemo(
-    () => UNIVERSAL_TEMPLATES.find(t => t.id === selectedTemplate)?.name || 'Template',
-    [selectedTemplate]
-  );
-
-
   const previewData = useMemo(() => ({
     invoiceNumber: invoiceNumber || 'INV-XXXX',
     date: date ? new Date(date).toLocaleDateString() : '-',
     customerName: billingTarget === 'staff' ? (staff?.name || 'Walk-in Staff') : (customer ? customer.name : 'Walk-in Customer'),
     customerPhone: billingTarget === 'staff' ? (staff?.phone || '') : (customer?.phone || ''),
     billingTarget,
-    items: items.map(i => ({ ...i, description: i.name, rate: parseFloat(i.price) || 0, qty: parseFloat(i.qty) || 0, amount: (parseFloat(i.qty) || 0) * (parseFloat(i.price) || 0) })),
-    totals: { ...totals, tax: totals.tax },
+    items: items.map(i => ({ 
+      ...i, 
+      description: i.name, 
+      rate: parseFloat(i.price) || 0, 
+      qty: parseFloat(i.qty) || 0, 
+      amount: (parseFloat(i.qty) || 0) * (parseFloat(i.price) || 0) 
+    })),
+    totals: { 
+      ...totals, 
+      tax: totals.tax, 
+      amountPaid: totals.paidVal,
+      balanceDue: totals.balanceDue,
+      paymentStatus: totals.paymentStatus
+    },
     notes,
     businessSettings: {
       ...draftBusinessSettings,
@@ -183,11 +244,11 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
     },
     invoiceColumns,
     qrCodeBase64: previewQrCode
-  }), [invoiceNumber, date, customer, items, totals, notes, draftBusinessSettings, bankDetails, invoiceColumns, previewQrCode]);
+  }), [invoiceNumber, date, customer, staff, billingTarget, items, totals, notes, draftBusinessSettings, bankDetails, invoiceColumns, previewQrCode]);
 
   const handleAddItem = () => {
     const sNo = items.length > 0 ? (parseInt(items[items.length-1].sNo) + 1).toString() : '1';
-    setItems([...items, { id: Date.now().toString(), sNo: isNaN(sNo) ? '' : sNo, name: '', qty: 1, price: 0 }]);
+    setItems([...items, { id: Date.now().toString(), sNo: isNaN(sNo) ? '' : sNo, name: '', qty: 1, price: 0, customFields: {} }]);
   };
 
   const handleUpdateItem = (id, field, value, isCustom = false) => {
@@ -196,6 +257,20 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
         if (isCustom) {
           return { ...item, customFields: { ...(item.customFields || {}), [field]: value } };
         }
+        
+        // Auto-match product from catalog
+        if (field === 'name' && value) {
+          const matched = products.find(p => p.name?.toLowerCase() === value.trim().toLowerCase() || p.sku === value.trim());
+          if (matched) {
+            return {
+              ...item,
+              name: matched.name,
+              price: parseFloat(matched.sellingPrice ?? matched.price ?? matched.rate) || item.price,
+              description: matched.description || item.description
+            };
+          }
+        }
+
         return { ...item, [field]: value };
       }
       return item;
@@ -216,6 +291,34 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
     }
   };
 
+  // Quick Add Customer Handler
+  const handleQuickAddCustomer = async (e) => {
+    e.preventDefault();
+    if (!newCustName.trim()) return;
+
+    setIsSavingCustomer(true);
+    try {
+      const newCust = {
+        id: `cust_${Date.now()}`,
+        name: newCustName.trim(),
+        phone: newCustPhone.trim(),
+        address: newCustAddress.trim(),
+        createdAt: new Date().toISOString()
+      };
+      await customerEngine.saveCustomer(newCust);
+      customers.unshift(newCust);
+      setSelectedCustomerId(newCust.id);
+      setShowQuickAddCustomer(false);
+      setNewCustName('');
+      setNewCustPhone('');
+      setNewCustAddress('');
+    } catch (err) {
+      console.error('Failed to create customer:', err);
+    } finally {
+      setIsSavingCustomer(false);
+    }
+  };
+
   const handleSave = async () => {
     const payload = {
       invoiceNumber,
@@ -223,6 +326,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
       billType: 'Invoice',
       customerName: customer?.name || 'Walk-in Customer',
       customerPhone: customer?.phone || '',
+      customerId: customer?.id || '',
       notes,
       subtotal: totals.subtotal,
       taxAmount: totals.tax,
@@ -231,7 +335,11 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
       shipping: parseFloat(shipping) || 0,
       grandTotal: totals.grandTotal,
       oldDue: totals.oldDue,
-      balanceDue: totals.totalDue,
+      amountPaid: totals.paidVal,
+      paidAmount: totals.paidVal,
+      balanceDue: totals.balanceDue,
+      paymentStatus: totals.paymentStatus,
+      paymentMethod,
       items: items.map((i, idx) => ({
         sNo: i.sNo || (idx + 1).toString(),
         itemService: i.name,
@@ -251,7 +359,6 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
       setIsSaving(true);
       try {
         await onSaveInvoice(payload, false, false);
-        // Do not call onBack() here; App.jsx handles the redirect to 'invoices' tab
       } finally {
         setIsSaving(false);
       }
@@ -281,6 +388,80 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
           </div>
         </div>
       )}
+
+      {/* QUICK ADD CUSTOMER MODAL */}
+      <AnimatePresence>
+        {showQuickAddCustomer && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-theme-card max-w-md w-full p-6 rounded-2xl shadow-2xl border border-theme-border-soft"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft mb-4">
+                <div className="flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-theme-accent" />
+                  <h3 className="text-base font-black text-theme-primary">Add New Customer</h3>
+                </div>
+                <button onClick={() => setShowQuickAddCustomer(false)} className="p-1 text-theme-muted hover:text-theme-primary">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <form onSubmit={handleQuickAddCustomer} className="space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-theme-muted uppercase block mb-1">Customer Name *</label>
+                  <input 
+                    type="text" 
+                    required 
+                    placeholder="e.g. John Doe"
+                    value={newCustName}
+                    onChange={(e) => setNewCustName(e.target.value)}
+                    className="input-premium w-full bg-theme-surface"
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-theme-muted uppercase block mb-1">Phone Number</label>
+                  <input 
+                    type="tel" 
+                    placeholder="e.g. +91 9876543210"
+                    value={newCustPhone}
+                    onChange={(e) => setNewCustPhone(e.target.value)}
+                    className="input-premium w-full bg-theme-surface"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-theme-muted uppercase block mb-1">Address / City</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Downtown Street"
+                    value={newCustAddress}
+                    onChange={(e) => setNewCustAddress(e.target.value)}
+                    className="input-premium w-full bg-theme-surface"
+                  />
+                </div>
+                <div className="flex gap-2 pt-3">
+                  <button 
+                    type="button" 
+                    onClick={() => setShowQuickAddCustomer(false)}
+                    className="btn-premium-outline flex-1 py-2 text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={isSavingCustomer || !newCustName.trim()}
+                    className="btn-premium flex-1 py-2 text-xs"
+                  >
+                    {isSavingCustomer ? 'Saving...' : 'Save & Select'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Sticky Header via Portal */}
       {getStudioHeaderTarget('studio-header-portal') && createPortal(
@@ -410,11 +591,20 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
 
                   {billingTarget === 'customer' ? (
                     <>
-                      <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Select Customer</label>
-                  <select className="input-premium bg-theme-surface" value={selectedCustomerId} onChange={(e) => setSelectedCustomerId(e.target.value)}>
-                    <option value="">Walk-in Customer</option>
-                    {customers.map(c => <option key={c.id} value={c.id}>{c.name} {c.phone ? `(${c.phone})` : ''}</option>)}
-                  </select>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[10px] font-bold text-theme-muted uppercase">Select Customer</label>
+                        <button 
+                          type="button"
+                          onClick={() => setShowQuickAddCustomer(true)} 
+                          className="text-[10px] font-bold text-theme-accent hover:underline flex items-center gap-1"
+                        >
+                          <UserPlus className="w-3 h-3" /> + New Customer
+                        </button>
+                      </div>
+                      <select className="input-premium bg-theme-surface" value={selectedCustomerId} onChange={(e) => setSelectedCustomerId(e.target.value)}>
+                        <option value="">Walk-in Customer</option>
+                        {customers.map(c => <option key={c.id} value={c.id}>{c.name} {c.phone ? `(${c.phone})` : ''}</option>)}
+                      </select>
                     </>
                   ) : (
                     <>
@@ -441,6 +631,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
             <section>
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-theme-border-soft relative after:content-[''] after:absolute after:bottom-[-1px] after:left-0 after:w-10 after:h-[2px] after:bg-theme-accent">
                 <h3 className="text-xs font-black text-theme-muted uppercase tracking-wider">2. Line Items</h3>
+                <span className="text-2xs text-theme-muted font-semibold">Type item name to auto-fill from catalog</span>
               </div>
               <div className="overflow-x-auto -mx-6 px-6">
                 <table className="w-full text-left border-collapse min-w-[600px]">
@@ -451,75 +642,216 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
                         const widthClass = c.id === 'sn' ? 'w-16' : c.id === 'qty' ? 'w-24' : (c.id === 'rate' || c.id === 'amount') ? 'w-32' : '';
                         return <th key={c.id} className={`pb-3 px-2 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft ${widthClass}`}>{c.label}</th>;
                       })}
-                      <th className="pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft w-24 text-right">Actions</th>
+                      <th className="pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft w-28 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     <AnimatePresence>
                       {items.map((item) => (
-                        <motion.tr 
-                          key={item.id} 
-                          initial={{ opacity: 0, y: -10 }} 
-                          animate={{ opacity: 1, y: 0 }} 
-                          exit={{ opacity: 0, x: -20 }}
-                          className="group border-b border-theme-border-soft/50 last:border-0"
-                        >
-                          {invoiceColumns.map(c => {
-                            if (!c.visible) return null;
-                            if (c.id === 'sn') return (
-                              <td key={c.id} className="py-2 px-2">
-                                <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface text-center" value={item.sNo} onChange={(e) => handleUpdateItem(item.id, 'sNo', e.target.value)} />
+                        <React.Fragment key={item.id}>
+                          <motion.tr 
+                            initial={{ opacity: 0, y: -10 }} 
+                            animate={{ opacity: 1, y: 0 }} 
+                            exit={{ opacity: 0, x: -20 }}
+                            className="group border-b border-theme-border-soft/50 last:border-0 hover:bg-theme-surface/30 transition-colors"
+                          >
+                            {invoiceColumns.map(c => {
+                              if (!c.visible) return null;
+                              if (c.id === 'sn') return (
+                                <td key={c.id} className="py-2 px-2">
+                                  <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface text-center" value={item.sNo} onChange={(e) => handleUpdateItem(item.id, 'sNo', e.target.value)} />
+                                </td>
+                              );
+                              if (c.id === 'item') return (
+                                <td key={c.id} className="py-2 px-2">
+                                  <input 
+                                    type="text" 
+                                    className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" 
+                                    placeholder="Item or service description" 
+                                    value={item.name} 
+                                    onChange={(e) => handleUpdateItem(item.id, 'name', e.target.value)} 
+                                    list="products-list" 
+                                  />
+                                </td>
+                              );
+                              if (c.id === 'hsn') return (
+                                <td key={c.id} className="py-2 px-2">
+                                  <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" placeholder="HSN/SAC" value={item.hsn || ''} onChange={(e) => handleUpdateItem(item.id, 'hsn', e.target.value)} />
+                                </td>
+                              );
+                              if (c.id === 'qty') return (
+                                <td key={c.id} className="py-2 px-2">
+                                  <input type="number" min="1" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.qty} onChange={(e) => handleUpdateItem(item.id, 'qty', e.target.value)} />
+                                </td>
+                              );
+                              if (c.id === 'rate') return (
+                                <td key={c.id} className="py-2 px-2">
+                                  <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.price} onChange={(e) => handleUpdateItem(item.id, 'price', e.target.value)} />
+                                </td>
+                              );
+                              if (c.id === 'discount') return (
+                                <td key={c.id} className="py-2 px-2">
+                                  <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.discount || ''} onChange={(e) => handleUpdateItem(item.id, 'discount', e.target.value)} />
+                                </td>
+                              );
+                              if (c.id === 'tax') return (
+                                <td key={c.id} className="py-2 px-2">
+                                  <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.tax || ''} onChange={(e) => handleUpdateItem(item.id, 'tax', e.target.value)} />
+                                </td>
+                              );
+                              if (c.id === 'amount') return (
+                                <td key={c.id} className="py-2 px-2 font-bold tabular-nums text-theme-primary">
+                                  {formatCurrency(item.qty * item.price)}
+                                </td>
+                              );
+                              // custom column
+                              return (
+                                <td key={c.id} className="py-2 px-2">
+                                  <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.customFields?.[c.id] || ''} onChange={(e) => handleUpdateItem(item.id, c.id, e.target.value, true)} />
+                                </td>
+                              );
+                            })}
+                            <td className="py-2 text-right">
+                              <div className="flex justify-end gap-1 items-center">
+                                {/* Expand Category Custom Fields Button */}
+                                <button 
+                                  type="button"
+                                  onClick={() => setExpandedCategoryItemId(expandedCategoryItemId === item.id ? null : item.id)}
+                                  title="Category Custom Fields"
+                                  className={`p-1.5 rounded-lg transition-colors text-2xs font-bold flex items-center gap-0.5 ${expandedCategoryItemId === item.id ? 'bg-theme-accent text-white' : 'text-theme-muted hover:text-theme-accent hover:bg-theme-surface'}`}
+                                >
+                                  <Tag className="w-3.5 h-3.5" />
+                                </button>
+                                <button onClick={() => handleDuplicateItem(item.id)} className="p-1.5 text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 rounded-lg transition-colors"><Copy className="w-3.5 h-3.5" /></button>
+                                <button onClick={() => handleDeleteItem(item.id)} className="p-1.5 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded-lg transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                              </div>
+                            </td>
+                          </motion.tr>
+
+                          {/* EXPANDED CATEGORY FIELDS ROW */}
+                          {expandedCategoryItemId === item.id && (
+                            <tr className="bg-theme-surface/40 border-b border-theme-border-soft">
+                              <td colSpan={invoiceColumns.filter(c => c.visible).length + 1} className="p-3">
+                                <div className="p-3 bg-theme-card rounded-xl border border-theme-border-soft shadow-inner">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-2xs font-black uppercase tracking-wider text-theme-accent">
+                                      Category Specifications ({wsType})
+                                    </span>
+                                    <button onClick={() => setExpandedCategoryItemId(null)} className="text-2xs text-theme-muted hover:text-theme-primary">
+                                      Close
+                                    </button>
+                                  </div>
+
+                                  {/* Tailor Preset Custom Fields */}
+                                  {(wsType === 'tailor' || wsType === 'boutique') && (
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                      {['Length', 'Chest', 'Waist', 'Sleeve'].map(f => (
+                                        <div key={f}>
+                                          <label className="text-[10px] font-bold text-theme-muted uppercase">{f} (in)</label>
+                                          <input 
+                                            type="text" 
+                                            className="input-premium py-1 text-xs" 
+                                            placeholder={`e.g. 38"`}
+                                            value={item.customFields?.[f.toLowerCase()] || ''}
+                                            onChange={(e) => handleUpdateItem(item.id, f.toLowerCase(), e.target.value, true)}
+                                          />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {/* Doctor / Clinic Preset Custom Fields */}
+                                  {(wsType === 'doctor' || wsType === 'clinic') && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                      <div>
+                                        <label className="text-[10px] font-bold text-theme-muted uppercase">Dosage</label>
+                                        <input 
+                                          type="text" 
+                                          className="input-premium py-1 text-xs" 
+                                          placeholder="e.g. 500mg (1-0-1)"
+                                          value={item.customFields?.dosage || ''}
+                                          onChange={(e) => handleUpdateItem(item.id, 'dosage', e.target.value, true)}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-theme-muted uppercase">Duration</label>
+                                        <input 
+                                          type="text" 
+                                          className="input-premium py-1 text-xs" 
+                                          placeholder="e.g. 5 Days"
+                                          value={item.customFields?.duration || ''}
+                                          onChange={(e) => handleUpdateItem(item.id, 'duration', e.target.value, true)}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-theme-muted uppercase">Instructions</label>
+                                        <input 
+                                          type="text" 
+                                          className="input-premium py-1 text-xs" 
+                                          placeholder="After meals"
+                                          value={item.customFields?.instructions || ''}
+                                          onChange={(e) => handleUpdateItem(item.id, 'instructions', e.target.value, true)}
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Service & Repair Preset Custom Fields */}
+                                  {(wsType === 'service' || wsType === 'repair' || wsType === 'garage') && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                      <div>
+                                        <label className="text-[10px] font-bold text-theme-muted uppercase">Device Model</label>
+                                        <input 
+                                          type="text" 
+                                          className="input-premium py-1 text-xs" 
+                                          placeholder="e.g. iPhone 13 Pro"
+                                          value={item.customFields?.deviceModel || ''}
+                                          onChange={(e) => handleUpdateItem(item.id, 'deviceModel', e.target.value, true)}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-theme-muted uppercase">Serial / IMEI</label>
+                                        <input 
+                                          type="text" 
+                                          className="input-premium py-1 text-xs font-mono" 
+                                          placeholder="IMEI / Reg No."
+                                          value={item.customFields?.serialNumber || ''}
+                                          onChange={(e) => handleUpdateItem(item.id, 'serialNumber', e.target.value, true)}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-theme-muted uppercase">Job / Fault Note</label>
+                                        <input 
+                                          type="text" 
+                                          className="input-premium py-1 text-xs" 
+                                          placeholder="Screen replacement"
+                                          value={item.customFields?.jobNote || ''}
+                                          onChange={(e) => handleUpdateItem(item.id, 'jobNote', e.target.value, true)}
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Default General Custom Field */}
+                                  {wsType !== 'tailor' && wsType !== 'boutique' && wsType !== 'doctor' && wsType !== 'clinic' && wsType !== 'service' && wsType !== 'repair' && wsType !== 'garage' && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                      <div>
+                                        <label className="text-[10px] font-bold text-theme-muted uppercase">Item Notes / Serial No.</label>
+                                        <input 
+                                          type="text" 
+                                          className="input-premium py-1 text-xs" 
+                                          placeholder="Custom notes or serial"
+                                          value={item.customFields?.note || ''}
+                                          onChange={(e) => handleUpdateItem(item.id, 'note', e.target.value, true)}
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
                               </td>
-                            );
-                            if (c.id === 'item') return (
-                              <td key={c.id} className="py-2 px-2">
-                                <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" placeholder="Item description" value={item.name} onChange={(e) => handleUpdateItem(item.id, 'name', e.target.value)} list="products-list" />
-                              </td>
-                            );
-                            if (c.id === 'hsn') return (
-                              <td key={c.id} className="py-2 px-2">
-                                <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" placeholder="HSN/SAC" value={item.hsn || ''} onChange={(e) => handleUpdateItem(item.id, 'hsn', e.target.value)} />
-                              </td>
-                            );
-                            if (c.id === 'qty') return (
-                              <td key={c.id} className="py-2 px-2">
-                                <input type="number" min="1" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.qty} onChange={(e) => handleUpdateItem(item.id, 'qty', e.target.value)} />
-                              </td>
-                            );
-                            if (c.id === 'rate') return (
-                              <td key={c.id} className="py-2 px-2">
-                                <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.price} onChange={(e) => handleUpdateItem(item.id, 'price', e.target.value)} />
-                              </td>
-                            );
-                            if (c.id === 'discount') return (
-                              <td key={c.id} className="py-2 px-2">
-                                <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.discount || ''} onChange={(e) => handleUpdateItem(item.id, 'discount', e.target.value)} />
-                              </td>
-                            );
-                            if (c.id === 'tax') return (
-                              <td key={c.id} className="py-2 px-2">
-                                <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.tax || ''} onChange={(e) => handleUpdateItem(item.id, 'tax', e.target.value)} />
-                              </td>
-                            );
-                            if (c.id === 'amount') return (
-                              <td key={c.id} className="py-2 px-2 font-bold tabular-nums text-theme-primary">
-                                {formatCurrency(item.qty * item.price)}
-                              </td>
-                            );
-                            // custom column
-                            return (
-                              <td key={c.id} className="py-2 px-2">
-                                <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.customFields?.[c.id] || ''} onChange={(e) => handleUpdateItem(item.id, c.id, e.target.value, true)} />
-                              </td>
-                            );
-                          })}
-                          <td className="py-2 text-right">
-                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => handleDuplicateItem(item.id)} className="p-1.5 text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 rounded-lg transition-colors"><Copy className="w-4 h-4" /></button>
-                              <button onClick={() => handleDeleteItem(item.id)} className="p-1.5 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
-                            </div>
-                          </td>
-                        </motion.tr>
+                            </tr>
+                          )}
+                        </React.Fragment>
                       ))}
                     </AnimatePresence>
                   </tbody>
@@ -530,12 +862,79 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
               </button>
             </section>
 
-            {/* 3. Totals & Adjustments */}
-            <section className="mt-8 flex justify-end">
-              <div className="w-full md:w-1/2 lg:w-2/3 xl:w-1/2 space-y-3 bg-white p-6 rounded-2xl border border-theme-border-soft shadow-sm">
+            {/* 3. Totals, Advance Payment & Financial Invariant */}
+            <section className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              
+              {/* Payment Recording Box */}
+              <div className="bg-theme-card p-5 rounded-2xl border border-theme-border-soft shadow-sm space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-theme-border-soft">
+                  <CreditCard className="w-4 h-4 text-theme-accent" />
+                  <h4 className="text-xs font-black uppercase tracking-wider text-theme-primary">Payment Recording</h4>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-xs font-bold text-theme-muted uppercase">Amount Paid Now</label>
+                      <div className="flex gap-1.5">
+                        <button 
+                          type="button" 
+                          onClick={() => setAmountPaid(totals.totalDue)}
+                          className="px-2 py-0.5 rounded bg-theme-accent/10 text-theme-accent text-2xs font-black hover:bg-theme-accent/20 transition-colors"
+                        >
+                          Full Paid
+                        </button>
+                        <button 
+                          type="button" 
+                          onClick={() => setAmountPaid(0)}
+                          className="px-2 py-0.5 rounded bg-theme-surface text-theme-muted text-2xs font-black hover:text-theme-primary transition-colors"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+                    <input 
+                      type="number" 
+                      min="0" 
+                      step="0.01"
+                      className="input-premium w-full text-base font-black tabular-nums bg-theme-surface text-theme-primary"
+                      placeholder="0.00"
+                      value={amountPaid}
+                      onChange={(e) => setAmountPaid(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-theme-muted uppercase block mb-1">Payment Method</label>
+                    <select 
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="input-premium w-full bg-theme-surface text-xs font-bold"
+                    >
+                      <option value="Cash">Cash</option>
+                      <option value="UPI">UPI / QR Code</option>
+                      <option value="Card">Credit / Debit Card</option>
+                      <option value="Bank Transfer">Bank Transfer / NEFT</option>
+                      <option value="bKash">bKash</option>
+                      <option value="Nagad">Nagad</option>
+                      <option value="Cheque">Cheque</option>
+                    </select>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between text-xs font-bold">
+                    <span className="text-theme-muted">Payment Status:</span>
+                    <span className={`badge-premium ${totals.paymentStatus === 'Paid' ? 'badge-success' : totals.paymentStatus === 'Partial' ? 'badge-warning' : 'badge-neutral'}`}>
+                      {totals.paymentStatus}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Invariant Totals Box */}
+              <div className="space-y-3 bg-white dark:bg-theme-card p-6 rounded-2xl border border-theme-border-soft shadow-sm">
                 <div className="flex justify-between items-center text-sm font-semibold text-theme-muted">
                   <span>Subtotal</span>
-                  <span className="text-theme-primary">{formatCurrency(totals.subtotal)}</span>
+                  <span className="text-theme-primary font-bold tabular-nums">{formatCurrency(totals.subtotal)}</span>
                 </div>
 
                 {draftBusinessSettings?.invoiceBuilderSettings?.showDiscount !== false && (
@@ -589,21 +988,36 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
                   </div>
                 )}
 
+                <div className="pt-2 border-t border-theme-border-soft/60 flex justify-between items-center text-sm font-bold text-theme-primary">
+                  <span>Current Bill Total</span>
+                  <span className="tabular-nums font-black">{formatCurrency(totals.grandTotal)}</span>
+                </div>
+
                 {draftBusinessSettings?.invoiceBuilderSettings?.showOldDue && (
                   <div className="flex justify-between items-center text-sm font-semibold text-theme-muted gap-4">
-                    <span>Old Due</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-bold">+ Previous / Old Due</span>
                     <input 
                       type="number" min="0" 
-                      className="w-24 px-3 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-sm text-right font-semibold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
+                      className="w-24 px-3 py-1 bg-theme-surface border border-amber-500/30 rounded-lg text-sm text-right font-black text-amber-600 dark:text-amber-400 focus:outline-none focus:border-theme-accent transition-colors"
                       value={oldDue} 
                       onChange={(e) => setOldDue(e.target.value)} 
                     />
                   </div>
                 )}
 
-                <div className="pt-3 mt-3 border-t border-theme-border-soft/50 flex justify-between items-center">
-                  <span className="text-base font-black text-theme-primary">Total Due</span>
-                  <span className="text-xl font-black text-theme-accent">{formatCurrency(totals.totalDue)}</span>
+                <div className="flex justify-between items-center text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                  <span>- Amount Paid Now</span>
+                  <span className="font-bold tabular-nums">{formatCurrency(totals.paidVal)}</span>
+                </div>
+
+                <div className="pt-3 mt-3 border-t border-theme-border-soft flex justify-between items-center">
+                  <div>
+                    <span className="text-sm font-black text-theme-primary block">Total Remaining Due</span>
+                    <span className="text-2xs text-theme-muted">Invariant: Grand Total + Old Due - Paid</span>
+                  </div>
+                  <span className="text-xl font-black text-theme-accent tabular-nums">
+                    {formatCurrency(totals.balanceDue)}
+                  </span>
                 </div>
               </div>
             </section>
@@ -659,7 +1073,7 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
             {(() => {
               const SelectedLayout = LivePreviewLayouts[selectedTemplate];
               
-                            if (viewMode === 'livelink') {
+              if (viewMode === 'livelink') {
                 return (
                   <div className="w-full max-w-[375px] mx-auto shrink-0 h-max mt-4">
                     <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden border-[8px] border-slate-900 relative h-[700px]">
@@ -700,11 +1114,11 @@ const CreateInvoice = ({ onSaveInvoice, invoices = [], customers = [], staffs = 
       </div>
       
       <datalist id="products-list">
-        {products.map((p, idx) => <option key={idx} value={p.name} />)}
-      </datalist>
-
-      <datalist id="products-list">
-        {products.map((p, idx) => <option key={idx} value={p.name} />)}
+        {products.map((p, idx) => (
+          <option key={idx} value={p.name}>
+            {p.sku ? `[${p.sku}] ` : ''}{p.sellingPrice ? `₹${p.sellingPrice} ` : ''}(Stock: {p.stock || p.quantity || 0})
+          </option>
+        ))}
       </datalist>
     </motion.div>
   );

@@ -23,6 +23,7 @@ import ActivityFeed from '../components/ActivityFeed';
 import QuickActions from '../components/QuickActions';
 import PremiumEmptyState from '../components/PremiumEmptyState';
 import { useFeatureControl } from '../hooks/useFeatureControl';
+import CategoryDashboardWidgets from '../components/dashboard/CategoryDashboardWidgets';
 
 const AnimatedNumber = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(null);
@@ -710,6 +711,17 @@ const Dashboard = ({
             )}
           </div>
 
+          {/* DYNAMIC CATEGORY WIDGETS */}
+          <CategoryDashboardWidgets
+            businessType={workspaceType}
+            products={products}
+            invoices={invoices}
+            customers={customers}
+            currencySymbol={currencySymbol}
+            setCurrentTab={setCurrentTab}
+            onQuickBillOpen={onQuickBillOpen}
+          />
+
           {/* ===== MOBILE WELCOME AREA ===== */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass p-4 rounded-2xl">
             <div className="flex items-center justify-between">
@@ -1236,6 +1248,17 @@ const Dashboard = ({
                 </button>
               )}
             </motion.div>
+
+            {/* DYNAMIC CATEGORY WIDGETS */}
+            <CategoryDashboardWidgets
+              businessType={workspaceType}
+              products={products}
+              invoices={invoices}
+              customers={customers}
+              currencySymbol={currencySymbol}
+              setCurrentTab={setCurrentTab}
+              onQuickBillOpen={onQuickBillOpen}
+            />
 
             {/* ===== ROW 1: KPI CARDS ===== */}
             <motion.div variants={itemVariants} className={`grid gap-5 ${hasCustomers ? 'grid-cols-4' : 'grid-cols-3'}`}>

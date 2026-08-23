@@ -11,6 +11,7 @@ import DesignStudio from './DesignStudio';
 import TemplateMarketplace from './TemplateMarketplace';
 import BackupRestore from './BackupRestore';
 import MessageTemplateStudio, { DEFAULT_WHATSAPP_TEMPLATE } from './studios/MessageTemplateStudio';
+import FeatureControlStudio from './studios/FeatureControlStudio';
 import { applyTheme } from '../hooks/useThemeEngine';
 import { getThemePreviewColors, ALL_THEMES, THEME_INFO } from '../utils/themeUtils';
 import { getCustomerLabelByType, isEducationBusiness, BUSINESS_PRESETS } from '../config/businessPresets';
@@ -59,6 +60,7 @@ const NAV_GROUPS = [
     group: 'Business', icon: Building2,
     items: [
       { id: 'business', label: 'Business Profile', icon: Building2, description: 'Company details & logo' },
+      { id: 'modules', label: 'Feature Control', icon: Sliders, description: 'Enable or disable optional modules' },
       { id: 'workspace', label: 'Workspace', icon: Globe, description: 'Regional & language' },
       { id: 'theme-engine', label: 'Theme Engine', icon: Palette, description: 'Colors & appearance' }
     ]
@@ -1232,6 +1234,13 @@ const SettingsStudioV2 = ({
             whatsappMessageTemplate={whatsappMessageTemplate}
             setWhatsappMessageTemplate={setWhatsappMessageTemplate}
           />
+        );
+
+      case 'modules':
+        return (
+          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
+            <FeatureControlStudio workspaceId={settings?.activeWorkspaceId} />
+          </div>
         );
 
       case 'advanced':
