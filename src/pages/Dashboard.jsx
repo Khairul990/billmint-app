@@ -24,7 +24,7 @@ import QuickActions from '../components/QuickActions';
 import PremiumEmptyState from '../components/PremiumEmptyState';
 import { useFeatureControl } from '../hooks/useFeatureControl';
 import CategoryDashboardWidgets from '../components/dashboard/CategoryDashboardWidgets';
-import { getInvoicePaidTotal, getInvoiceBalanceDue } from '../utils/financialCalculations';
+import { getInvoicePaidTotal, getInvoiceBalanceDue, getInvoicePaymentStatus } from '../utils/financialCalculations';
 
 const AnimatedNumber = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(null);
