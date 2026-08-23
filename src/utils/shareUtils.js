@@ -133,7 +133,7 @@ export function generateWhatsAppReminderLink(invoice, currencySymbol = '₹', bu
   const businessName = invoice.businessSnapshot?.businessName || businessSettings?.businessName || 'Our Business';
   const balanceDue = formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal - (invoice.amountPaid || 0)), activeSymbol, activeNumberFormat);
   
-  const liveLink = invoice.publicToken ? `${getAppBaseUrl()}/invoice/${invoice.publicToken}` : '';
+  const liveLink = buildPortalUrl(invoice);
   
   let text = `Hi ${invoice.customerName || 'there'},\n\nJust a gentle reminder from ${businessName} that Invoice #${invoice.invoiceNumber || 'N/A'} has a pending balance of *${balanceDue}*.\n\n`;
   if (liveLink) {

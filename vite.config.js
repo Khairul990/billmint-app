@@ -97,20 +97,9 @@ export default defineConfig(({ mode }) => ({
             if (normalized.includes('firebase')) {
               return 'vendor-firebase';
             }
-            // All React, DOM, hooks, and React component libraries in vendor-react
-            if (
-              normalized.includes('react') ||
-              normalized.includes('@dnd-kit') ||
-              normalized.includes('framer-motion') ||
-              normalized.includes('recharts') ||
-              normalized.includes('@xyflow') ||
-              normalized.includes('lucide-react') ||
-              normalized.includes('scheduler') ||
-              normalized.includes('use-sync-external-store')
-            ) {
-              return 'vendor-react';
+            if (normalized.includes('qrcode')) {
+              return 'vendor-qr';
             }
-            return 'vendor-utils';
           }
         }
       }
