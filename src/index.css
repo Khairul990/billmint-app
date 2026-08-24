@@ -2231,6 +2231,37 @@ button:active {
 .billqyro-signature-brand .shadow-theme-glow,
 .billqyro-signature-brand .shadow-glow { box-shadow: 0 12px 36px rgba(11, 143, 120, 0.20) !important; }
 
+.billqyro-hero-cockpit {
+  box-shadow:
+    0 35px 90px rgba(15, 23, 42, 0.14),
+    0 0 0 1px rgba(11,143,120,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.45);
+  transform: perspective(1400px) rotateY(-2deg) rotateX(1deg);
+}
+.billqyro-hero-cockpit::before {
+  content: "";
+  position: absolute;
+  inset: -35%;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(24,185,155,0.16), transparent 22%),
+    radial-gradient(circle at 72% 70%, rgba(200,169,107,0.10), transparent 20%);
+  pointer-events: none;
+}
+.billqyro-luxury-card {
+  box-shadow: 0 18px 55px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.34);
+  transition: transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s ease, border-color .35s ease;
+}
+.billqyro-luxury-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(11,143,120,0.32);
+  box-shadow: 0 24px 65px rgba(11,143,120,0.10), inset 0 1px 0 rgba(255,255,255,0.42);
+}
+.dark .billqyro-hero-cockpit {
+  box-shadow: 0 35px 90px rgba(0,0,0,0.42), 0 0 0 1px rgba(24,185,155,0.08);
+}
+@media (max-width: 1024px) {
+  .billqyro-hero-cockpit { transform: none; }
+}
 .billqyro-landing-premium {
   background:
     radial-gradient(circle at 12% 8%, rgba(11,143,120,0.10), transparent 30%),
