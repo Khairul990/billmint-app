@@ -1,0 +1,254 @@
+/* BillQyro Settings Studio — Premium Compact System */
+.settings-studio-premium {
+  --settings-gap: 14px;
+  --settings-radius: 18px;
+  --settings-shadow: 0 10px 30px rgba(15, 23, 42, .055);
+  --settings-shadow-hover: 0 14px 34px rgba(15, 23, 42, .09);
+}
+
+.settings-studio-premium .settings-content-shell {
+  background:
+    radial-gradient(900px 420px at 90% 0%, color-mix(in srgb, var(--accent) 5%, transparent), transparent 60%),
+    transparent;
+}
+
+.settings-studio-premium .card-premium {
+  border-radius: var(--settings-radius) !important;
+  padding: 18px !important;
+  box-shadow: var(--settings-shadow);
+  border: 1px solid var(--border-soft, rgba(15,23,42,.08)) !important;
+  background: color-mix(in srgb, var(--card-bg, #fff) 96%, transparent) !important;
+}
+
+.settings-studio-premium .card-premium:hover {
+  box-shadow: var(--settings-shadow-hover);
+}
+
+.settings-studio-premium .section-header {
+  margin-bottom: 2px;
+}
+
+.settings-studio-premium .section-header-title {
+  font-size: 18px !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.02em;
+  font-weight: 850 !important;
+}
+
+.settings-studio-premium .section-header-subtitle {
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+  margin-top: 3px;
+  color: var(--text-muted);
+}
+
+.settings-studio-premium input,
+.settings-studio-premium select,
+.settings-studio-premium textarea {
+  border-radius: 12px !important;
+  min-height: 40px;
+  font-size: 12px !important;
+}
+
+.settings-studio-premium textarea {
+  min-height: 88px;
+}
+
+.settings-studio-premium label {
+  letter-spacing: .01em;
+}
+
+.settings-studio-premium .settings-control-card,
+.settings-studio-premium .settings-option-card {
+  border: 1px solid var(--border-soft, rgba(15,23,42,.08));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface, #fff) 72%, transparent);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.settings-studio-premium .settings-control-card:hover,
+.settings-studio-premium .settings-option-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(15,23,42,.06);
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--border-soft));
+}
+
+.settings-studio-premium .flex.items-start.justify-between.p-4 {
+  padding: 12px !important;
+  border-radius: 14px !important;
+}
+
+.settings-studio-premium .grid.gap-4 {
+  gap: 12px !important;
+}
+
+.settings-studio-premium .space-y-6 > * + * {
+  margin-top: 16px !important;
+}
+
+.settings-studio-premium .space-y-4 > * + * {
+  margin-top: 12px !important;
+}
+
+.settings-studio-premium .space-y-3 > * + * {
+  margin-top: 9px !important;
+}
+
+.settings-studio-premium .settings-nav-group {
+  padding: 3px 0 7px;
+}
+
+.settings-studio-premium .settings-nav-group-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px 5px;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .12em;
+}
+
+.settings-studio-premium .settings-nav-group-title svg {
+  width: 12px;
+  height: 12px;
+  color: var(--accent);
+}
+
+.settings-studio-premium .settings-nav-item {
+  min-height: 38px;
+  border: 1px solid transparent;
+}
+
+.settings-studio-premium .settings-nav-item .settings-nav-description {
+  display: none;
+}
+
+.settings-studio-premium .settings-nav-item[data-selected="true"] {
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 15%, transparent);
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.settings-studio-premium .settings-nav-item[data-selected="true"]::after {
+  content: "";
+  width: 4px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--accent);
+  margin-left: auto;
+}
+
+.settings-studio-premium .settings-sidebar {
+  width: 244px;
+  padding: 10px !important;
+  background: color-mix(in srgb, var(--surface) 48%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.settings-studio-premium .settings-sidebar-header {
+  padding: 7px 9px 9px;
+}
+
+.settings-studio-premium .settings-mode-tabs {
+  padding: 3px !important;
+  border-radius: 11px !important;
+}
+
+.settings-studio-premium .settings-mode-tabs button {
+  min-height: 29px;
+  border-radius: 8px !important;
+  font-size: 10px !important;
+}
+
+.settings-studio-premium .settings-main-pane {
+  padding: 16px !important;
+  gap: 16px !important;
+}
+
+.settings-studio-premium .settings-preview {
+  width: 300px !important;
+}
+
+.settings-studio-premium .settings-topbar {
+  min-height: 58px;
+}
+
+.settings-studio-premium .settings-contextbar {
+  min-height: 38px;
+}
+
+.settings-studio-premium .settings-breadcrumb-chip {
+  border-radius: 10px;
+  padding: 4px 8px;
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--border-soft));
+}
+
+.settings-studio-premium .settings-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.settings-studio-premium .settings-kpi {
+  min-height: 74px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border-soft, rgba(15,23,42,.08));
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+}
+
+.settings-studio-premium .settings-kpi-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-muted);
+}
+
+.settings-studio-premium .settings-kpi-value {
+  margin-top: 5px;
+  font-size: 16px;
+  font-weight: 850;
+  letter-spacing: -.025em;
+}
+
+.settings-studio-premium button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-studio-premium .sticky-save-bar {
+  backdrop-filter: blur(22px);
+}
+
+@media (min-width: 1280px) {
+  .settings-studio-premium .card-premium {
+    padding: 20px !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .settings-studio-premium .settings-preview {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .settings-studio-premium .card-premium {
+    padding: 14px !important;
+    border-radius: 15px !important;
+  }
+
+  .settings-studio-premium .section-header-title {
+    font-size: 16px !important;
+  }
+
+  .settings-studio-premium .settings-main-pane {
+    padding: 10px !important;
+  }
+
+  .settings-studio-premium .settings-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
