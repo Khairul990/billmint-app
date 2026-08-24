@@ -18,12 +18,12 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
     { id: 'features', group: 'PLATFORM', label: 'Feature Control', icon: <ToggleRight className="w-5 h-5" /> },
     { id: 'health', group: 'PLATFORM', label: 'App Health', icon: <Activity className="w-5 h-5" /> },
     { id: 'security', group: 'PLATFORM', label: 'Security Center', icon: <ShieldCheck className="w-5 h-5" /> },
+    { id: 'settings', group: 'PLATFORM', label: 'Global Settings', icon: <SettingsIcon className="w-5 h-5" /> },
     { id: 'database', group: 'DATA & OPERATIONS', label: 'Database', icon: <Database className="w-5 h-5" /> },
     { id: 'analytics', group: 'DATA & OPERATIONS', label: 'Analytics', icon: <BarChart3 className="w-5 h-5" /> },
     { id: 'automation', group: 'DATA & OPERATIONS', label: 'Automation', icon: <Workflow className="w-5 h-5" /> },
     { id: 'support', group: 'OPERATIONS', label: 'Support', icon: <MessageSquare className="w-5 h-5" /> },
     { id: 'announcements', group: 'OPERATIONS', label: 'Announcements', icon: <Megaphone className="w-5 h-5" /> },
-    { id: 'settings', group: 'PLATFORM', label: 'Global Settings', icon: <SettingsIcon className="w-5 h-5" /> },
     { id: 'lab', group: 'OWNER TOOLS', label: 'Owner Test Lab', icon: <ShieldAlert className="w-5 h-5" /> },
     { id: 'changelog', group: 'OPERATIONS', label: 'Changelog', icon: <ListPlus className="w-5 h-5" /> },
   ];
@@ -117,7 +117,7 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
       {/* Mobile Header & Sidebar */}
       <div className="md:hidden flex items-center justify-between p-4 bg-theme-surface/60 backdrop-blur-2xl border-b border-theme-border-soft z-30 sticky top-0 shadow-glass">
         <div className="flex items-center text-theme-primary font-black text-lg">
-          <Lock className="w-5 h-5 mr-2 text-theme-danger" /> KM Admin
+          <Crown className="w-5 h-5 mr-2 text-theme-accent" /> BillQyro Control
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-theme-secondary hover:text-theme-primary p-2">
           {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
