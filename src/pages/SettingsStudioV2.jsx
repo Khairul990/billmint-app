@@ -1646,7 +1646,7 @@ const SettingsStudioV2 = ({
 
         {/* CONTENT PANE & LIVE PREVIEW */}
         <div className="settings-main-pane flex-1 min-w-0 p-4 lg:p-6 flex flex-col lg:flex-row gap-6">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 settings-render-surface">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeSection}
