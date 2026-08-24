@@ -130,7 +130,7 @@ const Landing = ({ onLoginSuccess }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-theme-app text-theme-primary font-sans selection:bg-theme-accent selection:text-white flex flex-col relative overflow-x-hidden">
+    <div className="billqyro-landing-premium min-h-screen bg-theme-app text-theme-primary font-sans selection:bg-theme-accent selection:text-white flex flex-col relative overflow-x-hidden" data-brand="billqyro">
       {/* Background Ambience */}
       <HeroBackground />
       <div className="absolute inset-0 bg-gradient-to-b from-theme-app/30 via-transparent to-theme-app -z-10 pointer-events-none" />
@@ -223,7 +223,7 @@ const Landing = ({ onLoginSuccess }) => {
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="text-[11px] font-extrabold uppercase tracking-widest text-theme-secondary">
-                Next-Gen Enterprise Billing Engine
+                SIGNATURE BILLING OS · IMPERIAL EMERALD
               </span>
             </motion.div>
 
