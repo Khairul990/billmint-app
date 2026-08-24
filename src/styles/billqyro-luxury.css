@@ -1,0 +1,128 @@
+/*
+ * BillQyro Luxury Visual System
+ * Phase 1: shared visual primitives only.
+ *
+ * This layer intentionally does not override business logic or template data.
+ * Components can progressively opt in through the billqyro-* utility classes.
+ */
+
+:root {
+  --bq-luxury-radius-sm: 10px;
+  --bq-luxury-radius-md: 14px;
+  --bq-luxury-radius-lg: 18px;
+  --bq-luxury-radius-xl: 24px;
+  --bq-luxury-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --bq-luxury-duration: 180ms;
+  --bq-luxury-duration-slow: 280ms;
+  --bq-luxury-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 18px rgba(15, 23, 42, 0.035);
+  --bq-luxury-shadow-md: 0 10px 30px rgba(15, 23, 42, 0.07), 0 2px 8px rgba(15, 23, 42, 0.04);
+  --bq-luxury-shadow-accent: 0 10px 30px var(--accent-glow, rgba(16, 185, 129, 0.16));
+  --bq-luxury-ring: 0 0 0 3px var(--accent-light, rgba(16, 185, 129, 0.12));
+}
+
+.billqyro-luxury-surface {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border-soft, rgba(15, 23, 42, 0.08));
+  border-radius: var(--bq-luxury-radius-lg);
+  box-shadow: var(--bq-luxury-shadow-sm);
+}
+
+.billqyro-luxury-elevated {
+  background: var(--surface-elevated, var(--surface, #fff));
+  border: 1px solid var(--border-soft, rgba(15, 23, 42, 0.08));
+  border-radius: var(--bq-luxury-radius-lg);
+  box-shadow: var(--bq-luxury-shadow-md);
+}
+
+.billqyro-luxury-interactive {
+  transition:
+    transform var(--bq-luxury-duration) var(--bq-luxury-ease),
+    box-shadow var(--bq-luxury-duration) var(--bq-luxury-ease),
+    border-color var(--bq-luxury-duration) var(--bq-luxury-ease),
+    background-color var(--bq-luxury-duration) var(--bq-luxury-ease);
+}
+
+.billqyro-luxury-interactive:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-strong, rgba(15, 23, 42, 0.14));
+  box-shadow: var(--bq-luxury-shadow-md);
+}
+
+.billqyro-luxury-interactive:active {
+  transform: translateY(0);
+}
+
+.billqyro-luxury-focus:focus-visible {
+  outline: none;
+  box-shadow: var(--bq-luxury-ring);
+}
+
+.billqyro-luxury-accent {
+  background: var(--accent-gradient, var(--accent, #0f9f83));
+  color: var(--button-text, #fff);
+  border: 1px solid transparent;
+  box-shadow: var(--bq-luxury-shadow-accent);
+  transition:
+    transform var(--bq-luxury-duration) var(--bq-luxury-ease),
+    box-shadow var(--bq-luxury-duration) var(--bq-luxury-ease),
+    filter var(--bq-luxury-duration) var(--bq-luxury-ease);
+}
+
+.billqyro-luxury-accent:hover {
+  transform: translateY(-1px);
+  filter: saturate(1.04) brightness(1.015);
+  box-shadow: 0 14px 34px var(--accent-glow, rgba(16, 185, 129, 0.20));
+}
+
+.billqyro-luxury-accent:active {
+  transform: translateY(0);
+}
+
+.billqyro-luxury-divider {
+  border-color: var(--border-soft, rgba(15, 23, 42, 0.08));
+}
+
+.billqyro-luxury-muted {
+  color: var(--text-muted, #64748b);
+}
+
+.billqyro-luxury-number {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+}
+
+.billqyro-luxury-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong, rgba(100, 116, 139, 0.28)) transparent;
+}
+
+.billqyro-luxury-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.billqyro-luxury-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.billqyro-luxury-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-strong, rgba(100, 116, 139, 0.28));
+  border-radius: 999px;
+}
+
+::selection {
+  background: var(--accent-light, rgba(16, 185, 129, 0.18));
+  color: var(--text-primary, #0f172a);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .billqyro-luxury-interactive,
+  .billqyro-luxury-accent {
+    transition: none;
+  }
+
+  .billqyro-luxury-interactive:hover,
+  .billqyro-luxury-accent:hover {
+    transform: none;
+  }
+}

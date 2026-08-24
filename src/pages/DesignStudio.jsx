@@ -262,7 +262,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
       )}
 
       {/* Page Header */}
-      <div className="glass rounded-2xl p-6 md:p-8">
+      <div className="glass billqyro-luxury-elevated billqyro-luxury-interactive rounded-2xl p-6 md:p-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-theme-accent/20 flex items-center justify-center shrink-0">
@@ -297,7 +297,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
       </div>
 
       {/* Glass Pill-Style Tab Navigation */}
-      <div className="glass rounded-2xl p-1.5 border border-theme-border-soft overflow-x-auto hide-scrollbar">
+      <div className="glass billqyro-luxury-surface rounded-2xl p-1.5 border border-theme-border-soft overflow-x-auto hide-scrollbar">
         <div className="flex gap-1.5 min-w-max md:min-w-0">
           {SUB_TABS.map((tab) => {
             const TabIcon = tab.icon;
@@ -321,7 +321,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
 
       {/* RECENT ACTIVITY */}
       <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3 card-premium p-4">
+        <div className="lg:col-span-3 card-premium billqyro-luxury-interactive p-4">
           <div className="section-header mb-3">
             <h3 className="section-header-title">Recent Activity</h3>
             <span className="badge-premium badge-info">Last 5</span>
@@ -355,7 +355,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
           </div>
         </div>
         <div className="lg:col-span-1 grid grid-cols-1 gap-3">
-          <div className="card-premium p-4 text-center">
+          <div className="card-premium billqyro-luxury-interactive p-4 text-center">
             <p className="text-xl font-black text-theme-primary">18+</p>
             <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Total Templates</p>
           </div>
@@ -400,7 +400,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
                   key={section.id}
                   variants={staggerItem}
                   whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  className="card-premium p-6 flex flex-col"
+                  className="card-premium billqyro-luxury-interactive p-6 flex flex-col"
                 >
                   <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${section.gradient} flex items-center justify-center mb-4 shadow-md`}>
                     <Icon className="w-6 h-6 text-white" />
