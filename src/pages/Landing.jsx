@@ -147,6 +147,7 @@ const Landing = ({ onLoginSuccess }) => {
           {/* Desktop Nav Links */}
           <div className="hidden lg:flex items-center gap-7">
             <button onClick={() => scrollTo('preview')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors">Platform</button>
+            <button onClick={() => scrollTo('why-billqyro')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors">Why BillQyro</button>
             <button onClick={() => scrollTo('categories')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors">Categories</button>
             <button onClick={() => scrollTo('workflow')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors">Workflow</button>
             <button onClick={() => scrollTo('payments')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors">Payments</button>
@@ -202,6 +203,7 @@ const Landing = ({ onLoginSuccess }) => {
             className="absolute top-20 left-4 right-4 bg-theme-card border border-theme-border-soft rounded-2xl p-5 shadow-2xl space-y-3 z-50 backdrop-blur-2xl"
           >
             <button onClick={() => scrollTo('preview')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">Platform Preview</button>
+            <button onClick={() => scrollTo('why-billqyro')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">Why BillQyro</button>
             <button onClick={() => scrollTo('categories')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">Business Categories</button>
             <button onClick={() => scrollTo('workflow')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">Invoice Workflow</button>
             <button onClick={() => scrollTo('payments')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">Payment Collections</button>
@@ -213,7 +215,7 @@ const Landing = ({ onLoginSuccess }) => {
       </nav>
 
       {/* ===== SECTION 1: HERO ===== */}
-      <section className="relative min-h-[85vh] flex items-center pt-28 pb-16 px-6">
+      <section className="relative min-h-[92vh] flex items-center pt-32 pb-20 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1 text-center lg:text-left space-y-6">
             <motion.div 
@@ -231,7 +233,7 @@ const Landing = ({ onLoginSuccess }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-theme-primary leading-[1.1]"
+              className="text-4xl sm:text-5xl lg:text-[4.7rem] font-black tracking-[-0.045em] text-theme-primary leading-[1.02] max-w-3xl"
             >
               Smart Billing. <br />
               <span className="text-transparent bg-clip-text bg-[image:var(--accent-gradient)]">
@@ -245,7 +247,7 @@ const Landing = ({ onLoginSuccess }) => {
               transition={{ delay: 0.2 }}
               className="text-base sm:text-lg text-theme-muted max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed"
             >
-              Architected for high-performance commerce. Instant invoice generation, multi-workspace isolation, automated customer ledgers, and zero-latency offline operations.
+              A premium billing command center for modern businesses. Create beautiful invoices, collect faster, manage customer dues, and keep working even when the network disappears.
             </motion.p>
 
             <motion.div 
@@ -288,7 +290,7 @@ const Landing = ({ onLoginSuccess }) => {
             transition={{ delay: 0.2, duration: 0.6 }}
             className="flex-1 w-full max-w-xl"
           >
-            <div className="rounded-3xl border border-theme-border-soft bg-theme-card p-4 sm:p-5 shadow-2xl relative overflow-hidden backdrop-blur-xl">
+            <div className="billqyro-hero-cockpit rounded-[2rem] border border-theme-accent/20 bg-theme-card/90 p-4 sm:p-5 shadow-2xl relative overflow-hidden backdrop-blur-2xl">
               {/* Window Controls */}
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-theme-border-soft/60">
                 <div className="flex items-center gap-1.5">
@@ -535,6 +537,84 @@ const Landing = ({ onLoginSuccess }) => {
         </div>
       </section>
 
+      {/* ===== SECTION 3A: WHY BILLQYRO ===== */}
+      <section id="why-billqyro" className="relative py-24 px-6 border-t border-theme-border-soft bg-theme-surface/20 overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-theme-accent/50 to-transparent" />
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-12 lg:gap-20 items-start">
+            <div className="lg:sticky lg:top-28">
+              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-theme-accent">The BillQyro Difference</span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-theme-primary leading-[1.05] mt-4">
+                One system for the work that happens after the sale.
+              </h2>
+              <p className="text-sm sm:text-base text-theme-muted font-medium leading-relaxed mt-5 max-w-lg">
+                Billing is only the beginning. BillQyro connects invoices, payments, customer balances, live links, reports and workspace controls into one disciplined operating layer.
+              </p>
+              <button onClick={() => scrollTo('preview')} className="mt-7 inline-flex items-center gap-2 text-xs font-black text-theme-accent hover:gap-3 transition-all">
+                See the platform in action <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="billqyro-luxury-card p-6 rounded-3xl border border-theme-accent/15 bg-theme-card/80 backdrop-blur-xl">
+                <div className="w-11 h-11 rounded-2xl bg-theme-accent-light text-theme-accent flex items-center justify-center mb-5"><Zap className="w-5 h-5" /></div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-theme-accent">01 · Speed</p>
+                <h3 className="text-lg font-black text-theme-primary mt-2">Fast enough for the counter</h3>
+                <p className="text-xs text-theme-muted leading-relaxed mt-2">Optimistic local saves and focused workflows keep everyday billing responsive instead of form-heavy.</p>
+              </div>
+              <div className="billqyro-luxury-card p-6 rounded-3xl border border-theme-accent/15 bg-theme-card/80 backdrop-blur-xl">
+                <div className="w-11 h-11 rounded-2xl bg-theme-accent-light text-theme-accent flex items-center justify-center mb-5"><Layers className="w-5 h-5" /></div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-theme-accent">02 · Control</p>
+                <h3 className="text-lg font-black text-theme-primary mt-2">Everything stays connected</h3>
+                <p className="text-xs text-theme-muted leading-relaxed mt-2">Invoice totals, payments, customer dues and reporting are designed around the same financial source of truth.</p>
+              </div>
+              <div className="billqyro-luxury-card p-6 rounded-3xl border border-theme-accent/15 bg-theme-card/80 backdrop-blur-xl">
+                <div className="w-11 h-11 rounded-2xl bg-theme-accent-light text-theme-accent flex items-center justify-center mb-5"><ShieldCheck className="w-5 h-5" /></div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-theme-accent">03 · Trust</p>
+                <h3 className="text-lg font-black text-theme-primary mt-2">Built around safe boundaries</h3>
+                <p className="text-xs text-theme-muted leading-relaxed mt-2">Workspace isolation, authenticated access and audit-oriented controls make business data easier to govern.</p>
+              </div>
+              <div className="billqyro-luxury-card p-6 rounded-3xl border border-theme-accent/15 bg-theme-card/80 backdrop-blur-xl">
+                <div className="w-11 h-11 rounded-2xl bg-theme-accent-light text-theme-accent flex items-center justify-center mb-5"><Sparkles className="w-5 h-5" /></div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-theme-accent">04 · Presentation</p>
+                <h3 className="text-lg font-black text-theme-primary mt-2">A brand customers remember</h3>
+                <p className="text-xs text-theme-muted leading-relaxed mt-2">Premium invoice layouts, polished live links and a consistent visual system make every customer touchpoint feel intentional.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== SECTION 3B: PLATFORM PILLARS ===== */}
+      <section className="py-24 px-6 border-t border-theme-border-soft bg-theme-app">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-theme-accent">Platform Architecture</span>
+              <h2 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight mt-3">Every operational layer, designed to work together.</h2>
+            </div>
+            <p className="text-xs sm:text-sm text-theme-muted max-w-md leading-relaxed">
+              From first draft to final collection, the platform keeps the workflow visible, structured and measurable.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {[
+              ['01','Invoice Studio','Create polished invoices, estimates and documents.'],
+              ['02','Live Customer Links','Give customers a clean place to view, verify and act.'],
+              ['03','Collections & Ledgers','Track paid, partial, due and overdue amounts clearly.'],
+              ['04','Reports & Control','Turn daily activity into a reliable operating picture.']
+            ].map(([n,t,d]) => (
+              <div key={n} className="group relative min-h-[190px] p-5 sm:p-6 rounded-3xl border border-theme-border-soft bg-theme-card hover:border-theme-accent/30 hover:-translate-y-1 transition-all duration-300">
+                <span className="text-4xl font-black text-theme-accent/20 font-numbers">{n}</span>
+                <h3 className="text-base font-black text-theme-primary mt-7">{t}</h3>
+                <p className="text-xs text-theme-muted leading-relaxed mt-2">{d}</p>
+                <ArrowUpRight className="absolute right-5 bottom-5 w-4 h-4 text-theme-accent opacity-40 group-hover:opacity-100 transition-opacity" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ===== SECTION 3: BUSINESS CATEGORIES ===== */}
       <section id="categories" className="py-20 px-6 border-t border-theme-border-soft bg-theme-app">
         <div className="max-w-7xl mx-auto">
@@ -730,14 +810,25 @@ const Landing = ({ onLoginSuccess }) => {
       </section>
 
       {/* ===== SECTION 8: AUTH / LOGIN SECTION ===== */}
-      <section id="login" className="border-t border-theme-border-soft bg-theme-surface/50 py-16 px-6 relative z-10">
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-black text-theme-primary">Access Your Workspace</h2>
+      <section id="login" className="relative border-t border-theme-border-soft bg-theme-surface/50 py-24 px-6 z-10 overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-theme-accent/10 to-transparent pointer-events-none" />
+        <div className="max-w-5xl mx-auto grid lg:grid-cols-[0.9fr_1.1fr] gap-10 lg:gap-16 items-center relative">
+          <div className="text-center lg:text-left mb-6">
+            <span className="text-[10px] font-black uppercase tracking-[0.24em] text-theme-accent">Ready when you are</span>
+            <h2 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight mt-2">Bring your billing desk into focus.</h2>
             <p className="text-xs text-theme-muted mt-1 font-medium">Log into your existing business account or register a new workspace</p>
           </div>
 
-          <div className="flex bg-theme-card p-1 rounded-xl border border-theme-border-soft shadow-sm mb-6">
+          <div className="hidden lg:block mb-8">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[9px] font-black uppercase tracking-wider text-theme-accent">Setup</p><p className="text-xs font-bold text-theme-primary mt-1">Business workspace</p></div>
+              <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[9px] font-black uppercase tracking-wider text-theme-accent">Operate</p><p className="text-xs font-bold text-theme-primary mt-1">Invoice & collect</p></div>
+              <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[9px] font-black uppercase tracking-wider text-theme-accent">Grow</p><p className="text-xs font-bold text-theme-primary mt-1">Measure & improve</p></div>
+            </div>
+          </div>
+
+          <div className="bg-theme-card/80 rounded-3xl border border-theme-accent/15 p-3 sm:p-4 shadow-premium backdrop-blur-xl">
+          <div className="flex bg-theme-surface p-1 rounded-2xl border border-theme-border-soft mb-5">
             <button
               onClick={() => setPortalMode('business')}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
@@ -769,10 +860,11 @@ const Landing = ({ onLoginSuccess }) => {
               window.location.href = `/customer/${id}`;
             }} />
           )}
+          </div>
         </div>
       </section>
 
-      {/* ===== FOOTER ===== */}
+      {/* ===== FOOTER ===== */
       <footer className="border-t border-theme-border-soft bg-theme-app py-10 px-6 text-xs text-theme-muted">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
