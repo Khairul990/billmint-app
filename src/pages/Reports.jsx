@@ -238,7 +238,7 @@ const Reports = ({
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="page-premium pb-28 h-full flex flex-col print-container"
+      className="page-premium w-full max-w-full pb-28 h-full flex flex-col print-container"
     >
       {/* OFFLINE STATUS BANNER */}
       {!isOnline && (

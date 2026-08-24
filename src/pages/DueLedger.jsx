@@ -145,87 +145,86 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
     if (bills.length === 0 && !searchQuery) return null;
     return (
       <motion.div variants={staggerItem} className="mb-6">
-        <div className="section-header">
+        <div className="flex items-center justify-between mb-3 px-1">
           <div className="flex items-center gap-2">
-            <div className={`w-8 h-8 rounded-xl ${accentBg} flex items-center justify-center`}>
-              <Icon className="w-4 h-4 text-white" />
+            <div className={`w-7 h-7 rounded-lg ${accentBg} flex items-center justify-center text-white shadow-xs`}>
+              <Icon className="w-3.5 h-3.5" />
             </div>
             <div>
-              <h3 className="section-header-title">{title}</h3>
-              <p className="section-header-subtitle">{bills.length} bill{bills.length !== 1 ? 's' : ''}</p>
+              <h3 className="text-xs font-black text-theme-primary tracking-tight">{title}</h3>
+              <p className="text-[10px] font-semibold text-theme-muted">{bills.length} bill{bills.length !== 1 ? 's' : ''}</p>
             </div>
           </div>
           <span className={`badge-premium ${badgeColor}`}>{bills.length} pending</span>
         </div>
-        <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-2">
-          {bills.map((bill, idx) => {
+
+        <div className="bg-theme-card border border-theme-border-soft rounded-2xl overflow-hidden divide-y divide-theme-border-soft/60 shadow-xs">
+          {bills.map((bill) => {
             const urgency = getUrgencyBadge(bill);
             const status = getStatusBadge(bill);
             return (
-              <motion.div
+              <div
                 key={bill.id}
-                variants={staggerItem}
-                className="card-premium p-4 group"
+                className="py-3 px-4 hover:bg-theme-surface/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 group text-xs"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-theme-surface flex items-center justify-center text-theme-muted group-hover:text-theme-accent group-hover:bg-theme-accent/10 transition-colors shrink-0">
-                      <User className="w-5 h-5" />
+                {/* Left: Customer & Details */}
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-8 h-8 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-secondary group-hover:text-theme-accent shrink-0">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-bold text-theme-primary truncate">{bill.customerName || 'Walk-in Customer'}</p>
+                      <span className={`badge-premium ${urgency.class}`}>{urgency.label}</span>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-bold text-theme-primary truncate">{bill.customerName || 'Walk-in Customer'}</p>
-                        <span className={`badge-premium ${urgency.class}`}>{urgency.label}</span>
-                      </div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-xs text-theme-muted font-semibold">
-                          {bill.invoiceNumber || `#${bill.id?.slice(0, 6)}`}
-                        </p>
-                        <span className="text-theme-border-strong">•</span>
-                        <p className="text-xs text-theme-muted font-semibold">
-                          Due {bill.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </p>
-                        <span className={`badge-premium ${status.class}`}>{status.label}</span>
-                      </div>
+                    <div className="flex items-center gap-2 mt-0.5 text-[11px] text-theme-muted font-semibold flex-wrap">
+                      <span className="font-numbers">{bill.invoiceNumber || `#${bill.id?.slice(0, 6)}`}</span>
+                      <span>•</span>
+                      <span>Due {bill.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                      <span className={`badge-premium ${status.class}`}>{status.label}</span>
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-black text-theme-primary tabular-nums">{formatCurrency(bill.dueAmount, currencySymbol)}</p>
+                </div>
+
+                {/* Right: Amount & Actions */}
+                <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-theme-border-soft/40">
+                  <div className="text-left sm:text-right">
+                    <p className="text-xs text-theme-muted font-bold sm:hidden uppercase">Due Amount</p>
+                    <p className="text-sm font-black text-theme-primary font-numbers tabular-nums">
+                      {formatCurrency(bill.dueAmount, currencySymbol)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => handleMarkPaid(bill)}
+                      className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
+                      title="Record Payment"
+                    >
+                      <CheckCircle2 className="w-3 h-3" />
+                      <span>Mark Paid</span>
+                    </button>
+                    <button
+                      onClick={() => handleSendReminder(bill)}
+                      className="px-2 py-1.5 rounded-lg hover:bg-theme-surface text-theme-muted hover:text-theme-primary font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
+                      title="Send Reminder"
+                    >
+                      <Send className="w-3 h-3" />
+                      <span className="hidden md:inline">Remind</span>
+                    </button>
+                    <button
+                      onClick={() => handleOpenCustomer(bill)}
+                      className="px-2 py-1.5 rounded-lg hover:bg-theme-surface text-theme-muted hover:text-theme-primary font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
+                      title="View Customer"
+                    >
+                      <Eye className="w-3 h-3" />
+                      <span className="hidden md:inline">Customer</span>
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-theme-border-soft">
-                  <button
-                    onClick={() => handleMarkPaid(bill)}
-                    className="btn-premium-ghost text-[10px] !min-h-[32px] !py-1.5 !px-3"
-                  >
-                    <CheckCircle2 className="w-3 h-3" /> Mark Paid
-                  </button>
-                  <button
-                    onClick={() => handleSendReminder(bill)}
-                    className="btn-premium-ghost text-[10px] !min-h-[32px] !py-1.5 !px-3"
-                  >
-                    <Send className="w-3 h-3" /> Remind
-                  </button>
-                  <button
-                    onClick={() => handleOpenCustomer(bill)}
-                    className="btn-premium-ghost text-[10px] !min-h-[32px] !py-1.5 !px-3"
-                  >
-                    <Eye className="w-3 h-3" /> Customer
-                  </button>
-                </div>
-              </motion.div>
+              </div>
             );
           })}
-          {bills.length === 0 && searchQuery && (
-            <div className="empty-state py-6">
-              <div className="empty-state-icon">
-                <Search className="w-5 h-5" />
-              </div>
-              <p className="empty-state-title">No results found</p>
-              <p className="empty-state-text">No bills match your search for "{searchQuery}"</p>
-            </div>
-          )}
-        </motion.div>
+        </div>
       </motion.div>
     );
   };
@@ -248,101 +247,72 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="page-premium w-full max-w-full pb-24"
+      className="page-premium w-full max-w-full pb-24 space-y-5"
     >
-      <div className="hero-premium">
-        <h1 className="hero-premium-title">Due Ledger</h1>
-        <p className="hero-premium-subtitle">Track and collect pending payments</p>
-      </div>
-
-      <div className="stats-grid mb-6">
-        <div className="stat-premium">
-          <div className="flex items-center justify-between mb-2">
-            <div className="icon-premium icon-premium-sm">
-              <AlertCircle className="w-4 h-4" />
-            </div>
-            <span className="badge-premium badge-danger">{totalOverdue} bills</span>
-          </div>
-          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Overdue</p>
-          <p className="text-xl font-black text-theme-primary tabular-nums">{formatCurrency(totalDueToday, currencySymbol)}</p>
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-black text-theme-primary tracking-tight">Due Ledger</h1>
+          <p className="text-xs font-semibold text-theme-muted mt-0.5">Track and collect outstanding payments across all accounts</p>
         </div>
-        <div className="stat-premium">
-          <div className="flex items-center justify-between mb-2">
-            <div className="icon-premium icon-premium-sm bg-amber-500/10 text-amber-500">
-              <Calendar className="w-4 h-4" />
-            </div>
-            <span className="badge-premium badge-warning">{grouped.thisWeek.length} bills</span>
-          </div>
-          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Due This Week</p>
-          <p className="text-xl font-black text-theme-primary tabular-nums">{formatCurrency(totalDueThisWeek, currencySymbol)}</p>
-        </div>
-        <div className="stat-premium">
-          <div className="flex items-center justify-between mb-2">
-            <div className="icon-premium icon-premium-sm">
-              <Clock className="w-4 h-4" />
-            </div>
-            <span className="badge-premium badge-info">{grouped.older.length} bills</span>
-          </div>
-          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Upcoming</p>
-          <p className="text-xl font-black text-theme-primary tabular-nums">{formatCurrency(totalUpcoming, currencySymbol)}</p>
-        </div>
-        <div className="stat-premium">
-          <div className="flex items-center justify-between mb-2">
-            <div className="icon-premium icon-premium-sm bg-emerald-500/10 text-emerald-500">
-              <DollarSign className="w-4 h-4" />
-            </div>
-            <span className="badge-premium badge-success">{dueBills.length} total</span>
-          </div>
-          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Total Outstanding</p>
-          <p className="text-xl font-black text-theme-primary tabular-nums">{formatCurrency(totalOutstanding, currencySymbol)}</p>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button className="px-3.5 py-2 rounded-xl bg-theme-accent text-white font-bold text-xs flex items-center gap-1.5 shadow-xs hover:opacity-95 transition-all cursor-pointer">
+            <Bell className="w-3.5 h-3.5" /> Send Reminder to All
+          </button>
+          <button onClick={() => {
+            const csvRows = ['Customer,Invoice No,Due Date,Amount,Status'];
+            dueBills.forEach(b => {
+              csvRows.push(`"${b.customerName || 'Walk-in'}","${b.invoiceNumber || ''}","${new Date(b.dueDate).toLocaleDateString()}","${formatCurrency(b.dueAmount)}","${b.paymentStatus || 'Unpaid'}"`);
+            });
+            const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'DueList.csv'; a.click();
+            URL.revokeObjectURL(url);
+          }} className="px-3.5 py-2 rounded-xl bg-theme-card border border-theme-border-soft text-theme-primary font-bold text-xs flex items-center gap-1.5 shadow-xs hover:bg-theme-surface transition-all cursor-pointer">
+            <Download className="w-3.5 h-3.5" /> Export Due List
+          </button>
         </div>
       </div>
 
-      {/* DUE SUMMARY */}
-      <motion.div variants={staggerItem} className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-        <div className="stat-premium !p-3">
-          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Total Due Amount</p>
-          <p className="text-lg font-black text-theme-primary tabular-nums">{formatCurrency(totalOutstanding, currencySymbol)}</p>
+      {/* 4-METRIC OVERVIEW STATS */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Total Outstanding</span>
+            <span className="badge-premium badge-danger font-numbers">{dueBills.length} bills</span>
+          </div>
+          <p className="text-xl font-black text-theme-primary font-numbers tabular-nums">{formatCurrency(totalOutstanding, currencySymbol)}</p>
         </div>
-        <div className="stat-premium !p-3">
-          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Overdue %</p>
-          <p className="text-lg font-black text-rose-500 tabular-nums">
-            {dueBills.length > 0 ? Math.round((grouped.today.length / dueBills.length) * 100) : 0}%
-          </p>
-        </div>
-        <div className="stat-premium !p-3">
-          <p className="text-2xs font-bold text-theme-muted uppercase tracking-premium-wide mb-1">Avg Days Overdue</p>
-          <p className="text-lg font-black text-theme-primary tabular-nums">
-            {grouped.today.length > 0
-              ? Math.round(grouped.today.reduce((s, b) => s + Math.max(0, Math.floor((new Date() - b.dueDate) / (1000 * 60 * 60 * 24))), 0) / grouped.today.length)
-              : 0}d
-          </p>
-        </div>
-      </motion.div>
 
-      {/* QUICK ACTIONS */}
-      <motion.div variants={staggerItem} className="flex items-center gap-2 mb-4 flex-wrap">
-        <button className="btn-premium text-[10px] !min-h-[36px] !px-4 flex items-center gap-1.5 bg-theme-accent text-white">
-          <Bell className="w-3.5 h-3.5" /> Send Reminder to All
-        </button>
-        <button className="btn-premium text-[10px] !min-h-[36px] !px-4 flex items-center gap-1.5 bg-emerald-500 text-white">
-          <CheckCircle2 className="w-3.5 h-3.5" /> Mark Paid
-        </button>
-        <button onClick={() => {
-          const csvRows = ['Customer,Invoice No,Due Date,Amount,Status'];
-          dueBills.forEach(b => {
-            csvRows.push(`"${b.customerName || 'Walk-in'}","${b.invoiceNumber || ''}","${new Date(b.dueDate).toLocaleDateString()}","${formatCurrency(b.dueAmount)}","${b.paymentStatus || 'Unpaid'}"`);
-          });
-          const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a'); a.href = url; a.download = 'DueList.csv'; a.click();
-          URL.revokeObjectURL(url);
-        }} className="btn-premium text-[10px] !min-h-[36px] !px-4 flex items-center gap-1.5 bg-theme-card border border-theme-border-soft text-theme-primary">
-          <Download className="w-3.5 h-3.5" /> Export Due List
-        </button>
-      </motion.div>
+        <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Overdue Bills</span>
+            <span className="badge-premium badge-danger">
+              {dueBills.length > 0 ? Math.round((grouped.today.length / dueBills.length) * 100) : 0}%
+            </span>
+          </div>
+          <p className="text-xl font-black text-rose-500 font-numbers tabular-nums">{formatCurrency(totalDueToday, currencySymbol)}</p>
+        </div>
 
-      <div className="toolbar-premium mb-6">
+        <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Due This Week</span>
+            <span className="badge-premium badge-warning font-numbers">{grouped.thisWeek.length} bills</span>
+          </div>
+          <p className="text-xl font-black text-amber-500 font-numbers tabular-nums">{formatCurrency(totalDueThisWeek, currencySymbol)}</p>
+        </div>
+
+        <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Upcoming</span>
+            <span className="badge-premium badge-info font-numbers">{grouped.older.length} bills</span>
+          </div>
+          <p className="text-xl font-black text-theme-primary font-numbers tabular-nums">{formatCurrency(totalUpcoming, currencySymbol)}</p>
+        </div>
+      </div>
+
+      {/* SEARCH BAR */}
+      <div className="relative">
         <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted pointer-events-none">
           <Search className="w-4 h-4" />
         </span>
@@ -351,12 +321,12 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by customer or bill number..."
-          className="input-premium"
+          className="w-full pl-10 pr-10 py-2.5 bg-theme-card border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary placeholder-theme-muted focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all shadow-xs"
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            className="btn-premium-ghost !min-h-[44px] !px-3"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-theme-muted hover:text-theme-primary"
           >
             <X className="w-4 h-4" />
           </button>

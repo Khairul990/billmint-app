@@ -1650,6 +1650,14 @@ function App() {
         return (
           <AuditLogs setCurrentTab={setCurrentTab} />
         );
+      case 'staff-ledger':
+      case 'users':
+        return (
+          <StaffLedger 
+            staffs={activeStaffs} 
+            invoices={activeInvoices} 
+          />
+        );
       case 'due':
       case 'due-ledger':
         return (

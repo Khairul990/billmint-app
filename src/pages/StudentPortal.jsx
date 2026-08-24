@@ -85,7 +85,7 @@ export default function StudentPortal({ studentId }) {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="w-full max-w-full space-y-6">
         
         {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-3xl border border-slate-200 shadow-sm gap-4 relative overflow-hidden">

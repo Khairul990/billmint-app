@@ -205,25 +205,25 @@ body {
 
   /* 2. Arctic Teal */
   [data-theme="arctic-teal"] {
-    --app-bg: #EAF7F5;
-    --app-bg-soft: #F4FFFD;
+    --app-bg: #F8FAFC;
+    --app-bg-soft: #F1F5F9;
     --surface: #FFFFFF;
-    --surface-elevated: #F8FAFC;
+    --surface-elevated: #FFFFFF;
     --card-bg: #FFFFFF;
-    --text-primary: #10201D;
-    --text-secondary: #10201D;
-    --text-muted: #4B6F68;
+    --text-primary: #0F172A;
+    --text-secondary: #334155;
+    --text-muted: #64748B;
     --button-text: #FFFFFF;
-    --border-soft: rgba(0,158,127,0.24);
-    --border-strong: rgba(0,158,127,0.5);
+    --border-soft: rgba(15,23,42,0.08);
+    --border-strong: rgba(15,23,42,0.16);
     --accent: #009E7F;
     --accent-light: rgba(0,158,127,0.08);
     --accent-dark: #0F766E;
     --accent-gradient: linear-gradient(135deg, #009E7F, #0F766E);
-    --accent-glow: rgba(0,158,127,0.25);
-    --sidebar-bg: #EAF7F5;
-    --sidebar-active: rgba(0,158,127,0.1);
-    --sidebar-text: #10201D;
+    --accent-glow: rgba(0,158,127,0.2);
+    --sidebar-bg: #FFFFFF;
+    --sidebar-active: rgba(0,158,127,0.08);
+    --sidebar-text: #0F172A;
     --input-bg: #FFFFFF;
     --chart-primary: #009E7F;
     --status-success: #10B981;

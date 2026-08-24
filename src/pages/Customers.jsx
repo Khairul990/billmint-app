@@ -15,6 +15,8 @@ import {
   FileText,
   Loader2,
 } from 'lucide-react';
+import { formatCurrency } from '../utils/invoiceUtils';
+import { getInvoiceBalanceDue } from '../utils/financialCalculations';
 import BottomSheet from '../components/BottomSheet';
 import PullToRefresh from '../components/PullToRefresh';
 import { invoiceEngine } from '../services/invoiceEngine';
@@ -32,8 +34,39 @@ import { toast } from 'react-hot-toast';
 const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCustomer, businessSettings, onCreateBill, onPaymentRecorded, setCurrentTab }) => {
   const wsType = useMemo(() => businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || businessSettings?.type || 'retail', [businessSettings]);
   const customerLabel = getCustomerLabelByType(wsType);
+  const currencySymbol = businessSettings?.currencySymbol || '$';
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Financial map per customer
+  const customerStatsMap = useMemo(() => {
+    const map = {};
+    invoices.forEach(inv => {
+      if (inv.isDeleted) return;
+      const cid = inv.customerId || inv.customer?.id;
+      const cphone = inv.customerPhone;
+      const cname = (inv.customerName || '').trim().toLowerCase();
+      
+      const keys = [cid, cphone, cname].filter(Boolean);
+      keys.forEach(k => {
+        if (!map[k]) {
+          map[k] = { count: 0, totalBilled: 0, totalDue: 0 };
+        }
+      });
+
+      const grandTotal = parseFloat(inv.grandTotal || inv.total) || 0;
+      const due = getInvoiceBalanceDue(inv);
+
+      // Add to primary key
+      const primaryKey = cid || cphone || cname;
+      if (primaryKey && map[primaryKey]) {
+        map[primaryKey].count += 1;
+        map[primaryKey].totalBilled += grandTotal;
+        map[primaryKey].totalDue += due;
+      }
+    });
+    return map;
+  }, [invoices]);
+
   // Modals / Add-Edit states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -150,7 +183,7 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
 
           <button
             onClick={openAddModal}
-            className="hidden md:flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-premium hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="hidden md:flex items-center justify-center gap-2 btn-premium text-xs px-5 py-2.5 shadow-sm"
           >
             <UserPlus className="w-4 h-4" />
             <span>+ Add {customerLabel}</span>
@@ -159,80 +192,116 @@ const Customers = ({ customers = [], invoices = [], onSaveCustomer, onDeleteCust
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={openAddModal}
-            className="fixed bottom-4 right-4 md:hidden flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white rounded-full p-4 shadow-premium hover:scale-105 transition-transform"
+            className="fixed bottom-20 right-4 md:hidden z-40 flex items-center justify-center gap-2 btn-premium rounded-full p-4 shadow-lg"
             aria-label={'Add ' + customerLabel}
           >
-            <UserPlus className="w-6 h-6" />
+            <UserPlus className="w-5 h-5" />
           </motion.button>
         </div>
 
-        {/* SEARCH CARD */}
-        <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center">
-        <div className="relative w-full">
-          <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-theme-muted pointer-events-none">
-            <Search className="w-5 h-5" />
-          </span>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={'Search ' + customerLabel.toLowerCase() + ' by name, contact, location...'}
-            className="w-full pl-12 pr-4 py-5 md:py-4 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl text-xl md:text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent focus:bg-theme-card dark:bg-theme-card transition-all text-theme-primary dark:text-theme-primary"
-          />
-        </div>
+        {/* SEARCH BAR */}
+        <div className="bg-theme-card rounded-2xl p-2.5 border border-theme-border-soft shadow-xs flex items-center">
+          <div className="relative w-full">
+            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted pointer-events-none">
+              <Search className="w-4 h-4" />
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={'Search ' + customerLabel.toLowerCase() + ' by name, contact, location...'}
+              className="w-full pl-10 pr-4 py-2.5 bg-theme-surface border border-transparent rounded-xl text-sm font-medium focus:outline-none focus:border-theme-accent focus:bg-theme-card transition-all text-theme-primary"
+            />
+          </div>
         </div>
 
         {/* DYNAMIC LIST GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-        {paginatedCustomers.map((cust) => (
-          <div key={cust.id} className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 md:p-6 border border-theme-border-soft dark:border-theme-border-soft shadow-premium hover:shadow-premium-hover transition-all">
-            {/* Header with avatar and name */}
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 md:h-10 md:w-10 items-center justify-center rounded-full bg-theme-accent text-white font-bold text-lg md:text-base">
-                {(cust.name || '').split(' ').map(n => n[0]).join('').toUpperCase()}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {paginatedCustomers.map((cust) => {
+          const key = cust.id || cust.phone || (cust.name || '').trim().toLowerCase();
+          const stats = customerStatsMap[key] || customerStatsMap[cust.name?.trim().toLowerCase()] || { count: 0, totalBilled: 0, totalDue: 0 };
+
+          return (
+            <div key={cust.id} className="bg-theme-card rounded-2xl p-4 sm:p-5 border border-theme-border-soft hover:border-theme-border-strong hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                {/* Header with avatar, name, and status badge */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-theme-accent text-white font-black text-xs shadow-xs shrink-0">
+                      {(cust.name || '').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm font-black text-theme-primary truncate">{cust.name}</h3>
+                      {cust.phone && <p className="text-xs font-semibold text-theme-muted font-numbers">{cust.phone}</p>}
+                    </div>
+                  </div>
+
+                  {stats.totalDue > 0 ? (
+                    <span className="px-2 py-0.5 rounded-lg text-[10px] font-black bg-rose-500/10 text-rose-500 border border-rose-500/20 shrink-0">
+                      Due
+                    </span>
+                  ) : stats.count > 0 ? (
+                    <span className="px-2 py-0.5 rounded-lg text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                      Settled
+                    </span>
+                  ) : null}
+                </div>
+
+                {/* Financial Summary Pill */}
+                {stats.count > 0 && (
+                  <div className="mt-3.5 grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-theme-surface/60 border border-theme-border-soft/60">
+                    <div>
+                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-theme-muted">Billed ({stats.count})</p>
+                      <p className="text-xs font-black text-theme-primary font-numbers tabular-nums">
+                        {formatCurrency(stats.totalBilled, currencySymbol)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-theme-muted">Balance Due</p>
+                      <p className={`text-xs font-black font-numbers tabular-nums ${stats.totalDue > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                        {formatCurrency(stats.totalDue, currencySymbol)}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Meta info */}
+                <div className="mt-3 space-y-1.5 text-xs text-theme-muted">
+                  {cust.email && (
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 text-theme-muted shrink-0" />
+                      <span className="truncate">{cust.email}</span>
+                    </div>
+                  )}
+                  {cust.address && (
+                    <div className="flex items-start gap-2 leading-relaxed">
+                      <MapPin className="w-3.5 h-3.5 text-theme-muted shrink-0 mt-0.5" />
+                      <span className="line-clamp-1">{cust.address}</span>
+                    </div>
+                  )}
+                </div>
               </div>
-              <h3 className="text-base font-extrabold text-theme-primary dark:text-theme-primary">{cust.name}</h3>
-            </div>
-            {/* Action buttons */}
-            <div className="flex items-center gap-1.5 mt-3" onClick={(e) => e.stopPropagation()}>
-              {onCreateBill && (
-                <button onClick={() => { onCreateBill(cust); }} className="flex-1 py-2 bg-theme-accent/10 text-theme-accent hover:bg-theme-accent/20 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1 min-h-[36px]">
-                  <Plus className="w-3.5 h-3.5" /> Bill
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-1.5 mt-4 pt-3 border-t border-theme-border-soft" onClick={(e) => e.stopPropagation()}>
+                {onCreateBill && (
+                  <button onClick={() => { onCreateBill(cust); }} className="flex-1 py-1.5 bg-theme-accent text-white hover:opacity-95 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 min-h-[32px] cursor-pointer shadow-xs">
+                    <Plus className="w-3 h-3" /> Bill
+                  </button>
+                )}
+                <button onClick={() => setLedgerCustomer(cust)} className="flex-1 py-1.5 bg-theme-surface border border-theme-border-soft hover:bg-theme-card rounded-xl text-xs font-bold text-theme-primary transition-all flex items-center justify-center gap-1 min-h-[32px] cursor-pointer">
+                  <FileText className="w-3 h-3" /> Ledger
                 </button>
-              )}
-              <button onClick={() => setLedgerCustomer(cust)} className="flex-1 py-2 bg-theme-app border border-theme-border-soft hover:border-theme-accent/30 rounded-xl text-[10px] font-bold text-theme-muted hover:text-theme-primary transition-all flex items-center justify-center gap-1 min-h-[36px]">
-                <FileText className="w-3.5 h-3.5" /> Ledger
-              </button>
-              <button onClick={() => openEditModal(cust)} className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 rounded-xl transition-all" title="Edit Contact">
-                <Edit2 className="w-4 h-4" />
-              </button>
-              <button onClick={() => handleDelete(cust.id)} className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all" title="Delete Contact">
-                <Trash2 className="w-4 h-4" />
-              </button>
+                <button onClick={() => openEditModal(cust)} className="p-1.5 text-theme-muted hover:text-theme-primary hover:bg-theme-surface rounded-xl transition-all cursor-pointer" title="Edit Contact">
+                  <Edit2 className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => handleDelete(cust.id)} className="p-1.5 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded-xl transition-all cursor-pointer" title="Delete Contact">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
-            {/* Meta info */}
-            <div className="mt-5 space-y-2 text-xs font-semibold text-theme-muted leading-none">
-              {cust.phone && (
-                <div className="flex items-center gap-2">
-                  <Phone className="w-3.5 h-3.5 text-theme-muted" />
-                  <span>{cust.phone}</span>
-                </div>
-              )}
-              {cust.email && (
-                <div className="flex items-center gap-2">
-                  <Mail className="w-3.5 h-3.5 text-theme-muted" />
-                  <span className="truncate">{cust.email}</span>
-                </div>
-              )}
-              {cust.address && (
-                <div className="flex items-start gap-2 leading-relaxed mt-1 text-theme-muted font-medium">
-                  <MapPin className="w-3.5 h-3.5 text-theme-muted shrink-0 mt-0.5" />
-                  <span className="line-clamp-2">{cust.address}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       
 
           {filteredCustomers.length === 0 && (

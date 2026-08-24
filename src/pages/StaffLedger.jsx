@@ -93,7 +93,7 @@ const StaffLedger = ({ staffs = [], invoices = [], bankTransactions = [] }) => {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6">
+    <div className="w-full max-w-full space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

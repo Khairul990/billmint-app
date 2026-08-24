@@ -84,7 +84,7 @@ export default function BillingPortal({ customerId }) {
 
   return (
     <div className="min-h-screen bg-theme-main text-theme-primary font-sans p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="w-full max-w-full space-y-6">
         
         {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center bg-theme-card p-6 rounded-3xl border border-theme-border-soft shadow-xl gap-4">

@@ -100,7 +100,7 @@ const AuditLogs = ({ setCurrentTab }) => {
   const clearFilters = () => { setSearch(''); setActionFilter(''); setDateFrom(''); setDateTo(''); };
 
   return (
-    <motion.div variants={pageVariants} initial="initial" animate="animate" className="max-w-6xl mx-auto pb-12 relative font-sans space-y-6">
+    <motion.div variants={pageVariants} initial="initial" animate="animate" className="w-full max-w-full pb-12 relative font-sans space-y-6">
       <button onClick={() => setCurrentTab('more')} className="flex items-center gap-2 text-theme-muted hover:text-theme-primary transition-colors cursor-pointer">
         <ArrowLeft className="w-4 h-4" />
         <span className="text-xs font-bold uppercase tracking-wider">Back</span>

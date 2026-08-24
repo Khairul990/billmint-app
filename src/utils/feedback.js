@@ -239,3 +239,5 @@ export const triggerLightHaptic = () => {
     } catch (err) { console.warn('Ignored error in feedback.js:', err); }
   }
 };
+
+export const triggerSuccessHaptic = triggerSuccessFeedback;

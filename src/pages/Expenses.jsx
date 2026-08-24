@@ -109,7 +109,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
 
         <button
           onClick={() => setShowAddForm(true)}
-          className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-premium hover:scale-[1.02] active:scale-[0.98] transition-all"
+          className="btn-premium flex items-center justify-center gap-2 text-xs px-5 py-2.5 shadow-sm"
         >
           <Plus className="w-4 h-4" />
           <span>Log Expense</span>
@@ -120,32 +120,31 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         
         {/* TOTAL BOX */}
-        <div className="bg-theme-card text-white rounded-3xl p-6 shadow-premium relative overflow-hidden border border-theme-border-soft">
-          <div className="absolute top-[-20%] right-[-10%] w-32 h-32 bg-theme-accent-light rounded-full blur-2xl"></div>
-          <p className="text-[10px] font-bold text-theme-accent uppercase tracking-widest">Total Monthly Cost</p>
-          <h3 className="text-3xl font-black mt-2 tracking-tight">
+        <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs">
+          <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Total Monthly Cost</p>
+          <h3 className="text-3xl font-black mt-1 text-theme-primary tracking-tight font-numbers">
             {formatCurrency(totalExpenses, currencySymbol)}
           </h3>
           <div className="flex items-center gap-1.5 mt-3 text-xs font-semibold text-theme-muted">
-            <PieChart className="w-4 h-4 text-theme-accent" />
+            <PieChart className="w-3.5 h-3.5 text-theme-accent" />
             <span>Aggregate business overhead logged</span>
           </div>
         </div>
 
         {/* TOP CATEGORIES PANEL */}
-        <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium md:col-span-2 space-y-4">
-          <h3 className="text-xs font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft pb-2">
+        <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs md:col-span-2 space-y-3">
+          <h3 className="text-[10px] font-bold text-theme-muted uppercase tracking-wider pb-1 border-b border-theme-border-soft">
             Cost By Category
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {CATEGORIES.slice(0, 6).map((cat) => {
               const catTotal = getCategoryTotal(cat.name);
               return (
-                <div key={cat.name} className="p-3 bg-theme-app dark:bg-theme-surface/50 border border-theme-border-soft dark:border-theme-border-soft rounded-2xl">
+                <div key={cat.name} className="p-2.5 bg-theme-surface border border-theme-border-soft rounded-xl">
                   <span className={`inline-block text-[9px] font-extrabold px-2 py-0.5 rounded-full ${cat.color}`}>
                     {cat.name.split(' ')[0]}
                   </span>
-                  <p className="text-sm font-black text-theme-primary dark:text-theme-muted mt-2">
+                  <p className="text-xs font-black text-theme-primary mt-1.5 font-numbers">
                     {formatCurrency(catTotal, currencySymbol)}
                   </p>
                 </div>
@@ -162,27 +161,27 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
         <CenteredModal 
           isOpen={showAddForm} 
           onClose={() => setShowAddForm(false)} 
-          title="Log New Bill"
+          title="Log Operating Cost"
         >
-          <form onSubmit={handleAddExpense} className="space-y-4 text-xs font-semibold text-theme-muted pb-4">
+          <form onSubmit={handleAddExpense} className="space-y-4 text-xs font-semibold text-theme-muted pb-2">
             <div>
-              <label className="block mb-1 text-theme-muted">Expense Title / Description</label>
+              <label className="block mb-1 text-theme-primary text-xs font-bold">Expense Title / Description</label>
               <input
                 type="text"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Embroidery Thread Reels"
-                className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
+                placeholder="e.g. Office Supplies / Raw Material"
+                className="w-full px-3.5 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:border-theme-accent text-theme-primary font-bold text-xs"
               />
             </div>
 
             <div>
-              <label className="block mb-1 text-theme-muted">Category</label>
+              <label className="block mb-1 text-theme-primary text-xs font-bold">Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-extrabold"
+                className="w-full px-3.5 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:border-theme-accent text-theme-primary font-bold text-xs"
               >
                 {CATEGORIES.map(c => (
                   <option key={c.name} value={c.name}>{c.name}</option>
@@ -192,7 +191,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block mb-1 text-theme-muted">Amount ({currencySymbol})</label>
+                <label className="block mb-1 text-theme-primary text-xs font-bold">Amount ({currencySymbol})</label>
                 <input
                   type="number"
                   required
@@ -201,27 +200,27 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="1500"
-                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
+                  className="w-full px-3.5 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:border-theme-accent text-theme-primary font-bold text-xs"
                 />
               </div>
 
               <div>
-                <label className="block mb-1 text-theme-muted">Date</label>
+                <label className="block mb-1 text-theme-primary text-xs font-bold">Date</label>
                 <input
                   type="date"
                   required
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent text-theme-primary dark:text-theme-primary font-bold"
+                  className="w-full px-3.5 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:border-theme-accent text-theme-primary font-bold text-xs"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full py-4 mt-2 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 rounded-2xl font-bold shadow-premium transition-all flex items-center justify-center gap-2"
+              className="w-full btn-premium py-2.5 mt-3 text-xs flex items-center justify-center gap-2"
             >
-              <Receipt className="w-4 h-4" />
+              <Receipt className="w-3.5 h-3.5" />
               <span>Confirm Log Cost</span>
             </button>
           </form>
@@ -230,13 +229,13 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
         {/* 4. EXPENSE ENTRIES REGISTRY */}
         <div className="w-full space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">Registry Log</h3>
-            <span className="text-[10px] text-theme-muted font-bold uppercase tracking-wider bg-theme-surface dark:bg-theme-card px-2 py-0.5 rounded-full">
+            <h3 className="text-xs font-bold text-theme-primary uppercase tracking-wider">Registry Log</h3>
+            <span className="text-[10px] text-theme-muted font-bold uppercase tracking-wider bg-theme-surface px-2 py-0.5 rounded-full border border-theme-border-soft">
               {expenses.length} Records
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <AnimatePresence>
               {expenses.map((exp) => {
                 const catInfo = CATEGORIES.find(c => c.name === exp.category) || CATEGORIES[5];
@@ -248,45 +247,43 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.2 }}
-                    className="bg-theme-card dark:bg-theme-card rounded-3xl p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium hover:shadow-premium-hover transition-all duration-300 relative flex flex-col justify-between"
+                    className="bg-theme-card rounded-2xl p-4.5 border border-theme-border-soft hover:border-theme-border-strong hover:shadow-md transition-all relative flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-theme-accent-light border border-theme-border-soft flex items-center justify-center font-extrabold text-theme-accent text-sm">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-9 h-9 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center font-extrabold text-theme-accent text-xs shrink-0">
                             <Receipt className="w-4 h-4" />
                           </div>
-                          <div>
-                            <h3 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary tracking-tight leading-tight">{exp.title}</h3>
-                            <span className="text-[10px] text-theme-muted font-bold uppercase tracking-widest mt-0.5 inline-block">Expense Entry</span>
+                          <div className="min-w-0">
+                            <h3 className="font-bold text-xs text-theme-primary truncate leading-tight">{exp.title}</h3>
+                            <span className="text-[10px] text-theme-muted font-semibold mt-0.5 inline-block">Expense Entry</span>
                           </div>
                         </div>
 
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() => onDeleteExpense(exp.id)}
-                            className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all"
-                            title="Delete Expense"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => onDeleteExpense(exp.id)}
+                          className="p-1.5 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded-xl transition-all"
+                          title="Delete Expense"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
 
                       <div className="mt-3 flex items-center gap-2 flex-wrap">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${catInfo.color} ${catInfo.border}`}>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold ${catInfo.color} ${catInfo.border}`}>
                           {exp.category}
                         </span>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-theme-app dark:bg-theme-surface text-theme-muted border border-theme-border-soft">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-theme-surface text-theme-muted border border-theme-border-soft">
                           <Calendar className="w-3 h-3" />
                           {exp.date}
                         </span>
                       </div>
                     </div>
 
-                    <div className="border-t border-theme-border-soft dark:border-theme-border-soft/60 pt-4 mt-5 flex justify-between items-center">
-                      <span className="text-[10px] text-theme-muted font-extrabold uppercase tracking-wider">Logged Amount</span>
-                      <span className="text-base font-black text-theme-accent">
+                    <div className="border-t border-theme-border-soft pt-3 mt-4 flex justify-between items-center">
+                      <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">Amount</span>
+                      <span className="text-sm font-black text-theme-primary font-numbers">
                         {formatCurrency(exp.amount, currencySymbol)}
                       </span>
                     </div>
@@ -296,10 +293,10 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
             </AnimatePresence>
 
             {expenses.length === 0 && (
-              <div className="md:col-span-2 lg:col-span-3 bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
-                <Receipt className="w-12 h-12 text-theme-primary mx-auto mb-3 animate-pulse" />
-                <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">No Operating Costs Logged</h4>
-                <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
+              <div className="md:col-span-2 lg:col-span-3 bg-theme-card rounded-2xl p-10 border border-theme-border-soft text-center shadow-xs">
+                <Receipt className="w-10 h-10 text-theme-muted mx-auto mb-2 opacity-60" />
+                <h4 className="font-bold text-sm text-theme-primary">No Operating Costs Logged</h4>
+                <p className="text-xs text-theme-muted font-medium mt-1 max-w-xs mx-auto">
                   Keep overhead clean. Click Log Expense to add business expenses!
                 </p>
               </div>

@@ -177,7 +177,7 @@ const FeatureControlStudio = ({ workspaceId }) => {
   const totalFeaturesCount = Object.keys(features).length;
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto pb-16">
+    <div className="space-y-8 w-full max-w-full pb-16">
       
       {/* HEADER HERO */}
       <div className="bg-[image:var(--accent-gradient)] text-white rounded-3xl p-6 sm:p-8 shadow-premium relative overflow-hidden">

@@ -477,7 +477,7 @@ const StudioLayout = ({
               initial="initial"
               animate="animate"
               exit="exit"
-              className="w-full max-w-5xl mx-auto pb-16"
+              className="w-full max-w-full pb-16"
             >
               <Suspense fallback={
                 <div className="p-12 text-center text-theme-muted">
