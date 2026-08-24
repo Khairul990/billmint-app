@@ -817,17 +817,17 @@ const Landing = ({ onLoginSuccess }) => {
             <span className="text-[10px] font-black uppercase tracking-[0.24em] text-theme-accent">Ready when you are</span>
             <h2 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight mt-2">Bring your billing desk into focus.</h2>
             <p className="text-xs text-theme-muted mt-1 font-medium">Log into your existing business account or register a new workspace</p>
-          </div>
-
-          <div className="hidden lg:block mb-8">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="hidden lg:block mt-8">
+              <div className="grid grid-cols-3 gap-3">
               <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[9px] font-black uppercase tracking-wider text-theme-accent">Setup</p><p className="text-xs font-bold text-theme-primary mt-1">Business workspace</p></div>
               <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[9px] font-black uppercase tracking-wider text-theme-accent">Operate</p><p className="text-xs font-bold text-theme-primary mt-1">Invoice & collect</p></div>
               <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[9px] font-black uppercase tracking-wider text-theme-accent">Grow</p><p className="text-xs font-bold text-theme-primary mt-1">Measure & improve</p></div>
+              </div>
             </div>
           </div>
 
-          <div className="bg-theme-card/80 rounded-3xl border border-theme-accent/15 p-3 sm:p-4 shadow-premium backdrop-blur-xl">
+          <div className="w-full max-w-xl lg:justify-self-end">
+            <div className="bg-theme-card/80 rounded-3xl border border-theme-accent/15 p-3 sm:p-4 shadow-premium backdrop-blur-xl">
           <div className="flex bg-theme-surface p-1 rounded-2xl border border-theme-border-soft mb-5">
             <button
               onClick={() => setPortalMode('business')}
@@ -859,7 +859,8 @@ const Landing = ({ onLoginSuccess }) => {
               sessionStorage.setItem('billqyro_customer_portal_phone', phone);
               window.location.href = `/customer/${id}`;
             }} />
-          )}
+            )}
+            </div>
           </div>
         </div>
       </section>
