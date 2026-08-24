@@ -862,10 +862,11 @@ const Landing = ({ onLoginSuccess }) => {
             )}
             </div>
           </div>
+          </div>
         </div>
       </section>
 
-      {/* ===== FOOTER ===== */
+      {/* ===== FOOTER ===== */}
       <footer className="border-t border-theme-border-soft bg-theme-app py-10 px-6 text-xs text-theme-muted">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
