@@ -560,7 +560,7 @@ const Dashboard = ({
   return (
     <AnimatedPage>
       <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
-        <div className="min-h-screen bg-theme-surface/50">
+        <div className="min-h-screen bg-theme-surface/50 billqyro-dashboard-shell">
           {(isInitialLoad || isLoading) ? (
             <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
               <KPISkeleton count={4} />
@@ -1106,7 +1106,7 @@ const Dashboard = ({
         </div>
 
         {/* ===== DESKTOP VIEW (>= 1024px) ===== */}
-        <div className="hidden lg:block w-full max-w-full mx-auto px-6 py-5">
+        <div className="hidden lg:block w-full max-w-full mx-auto px-6 py-5 billqyro-dashboard-desktop">
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-5">
 
             {/* Banners Row */}
@@ -1151,7 +1151,7 @@ const Dashboard = ({
             )}
 
             {/* ===== PREMIUM HERO SECTION ===== */}
-            <motion.div variants={itemVariants} className="bg-[image:var(--accent-gradient)] rounded-2xl p-6 shadow-premium relative overflow-hidden">
+            <motion.div variants={itemVariants} className="bg-[image:var(--accent-gradient)] rounded-2xl p-6 shadow-premium relative overflow-hidden billqyro-financial-hero">
               <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
               <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
               <div className="relative z-10">
@@ -1202,7 +1202,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== QUICK STATS ROW ===== */}
-            <motion.div variants={itemVariants} className={`grid gap-5 ${hasCustomers ? 'grid-cols-4' : 'grid-cols-3'}`}>
+            <motion.div variants={itemVariants} className={`grid gap-5 ${hasCustomers ? 'grid-cols-4' : 'grid-cols-3'} billqyro-secondary-kpis`}>
               {(() => {
                 const today = new Date().toDateString();
                 const billsToday = invoices.filter(i => !i.isDeleted && i.status !== 'Cancelled' && i.status !== 'Void' && new Date(i.date || i.createdAt).toDateString() === today).length;
@@ -1237,7 +1237,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== QUICK ACTION BAR ===== */}
-            <motion.div variants={itemVariants} className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
+            <motion.div variants={itemVariants} className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1 billqyro-quick-actions">
               <button onClick={onQuickBillOpen} className="btn-premium flex items-center gap-2 px-4 py-2.5 bg-[image:var(--accent-gradient)] text-white rounded-xl shadow-sm hover:shadow-premium-hover transition-all active:scale-95 shrink-0">
                 <Plus className="w-4 h-4" /> New Invoice
               </button>
@@ -1328,7 +1328,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== BUSINESS HEALTH + COLLECTION SUMMARY ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-5">
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-5 billqyro-insight-grid">
               <div className="col-span-4 card-premium p-5 flex flex-col">
                 <div className="section-header">
                   <h3 className="section-header-title">Business Health</h3>
@@ -1403,7 +1403,7 @@ const Dashboard = ({
             </motion.div>
 
             {/* ===== ROW 2: CHARTS ===== */}
-            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-5">
+            <motion.div variants={itemVariants} className="grid grid-cols-12 gap-5 billqyro-chart-grid">
               {/* Revenue Trend */}
               <div className="col-span-6 card-premium p-5">
                 <div className="section-header">
