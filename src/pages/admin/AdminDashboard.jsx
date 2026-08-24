@@ -84,7 +84,7 @@ const AdminDashboard = () => {
             desc: `₹${p.amount} pending verification for workspace ${p.workspaceId || 'Unknown'}.`,
             date: new Date(p.createdAt || Date.now()),
             icon: CreditCard,
-            color: 'text-amber-500 bg-amber-500/10 border-amber-500/20'
+            color: 'text-theme-accent bg-theme-accent/10 border-theme-accent/20'
           });
         });
 
@@ -164,7 +164,7 @@ const AdminDashboard = () => {
     try {
       await adminEngine.cleanTemporaryData();
       toast.success('System Cache Purged. Performance optimized.', { id: 'cache' });
-      addLocalLog('System Cache Purged', 'Temporary data cleared. Speed optimized.', Zap, 'text-blue-500 bg-blue-500/10 border-blue-500/20');
+      addLocalLog('System Cache Purged', 'Temporary data cleared. Speed optimized.', Zap, 'text-theme-accent bg-theme-accent/10 border-theme-accent/20');
     } catch (e) {
       toast.error('Failed to purge cache', { id: 'cache' });
     }
@@ -182,7 +182,7 @@ const AdminDashboard = () => {
         adminEngine.getRevenueStates().catch(() => []),
         adminEngine.getTotalStats().catch(() => ({ invoices: 0, customers: 0, products: 0 }))
       ]);
-      addLocalLog('Force Sync', 'Edge nodes aligned with main server.', RefreshCw, 'text-purple-500 bg-purple-500/10 border-purple-500/20');
+      addLocalLog('Force Sync', 'Edge nodes aligned with main server.', RefreshCw, 'text-theme-accent bg-theme-accent/10 border-theme-accent/20');
       setTimeout(() => window.location.reload(), 1000);
     } catch (e) {
       toast.error('Sync failed', { id: 'sync' });
@@ -199,13 +199,13 @@ const AdminDashboard = () => {
   }
 
   const kpiCards = [
-    { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-    { label: 'Premium Users', value: stats.premiumUsers, icon: Crown, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+    { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-theme-accent', bg: 'bg-theme-accent/10', border: 'border-theme-accent/20' },
+    { label: 'Premium Users', value: stats.premiumUsers, icon: Crown, color: 'text-theme-accent', bg: 'bg-theme-accent/10', border: 'border-theme-accent/20' },
     { label: "Today's New", value: stats.todayNewUsers, icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-    { label: 'Workspaces', value: stats.totalWorkspaces, icon: Building2, color: 'text-indigo-500', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
-    { label: 'Total Invoices', value: stats.totalInvoices || 0, icon: Layers, color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+    { label: 'Workspaces', value: stats.totalWorkspaces, icon: Building2, color: 'text-theme-accent', bg: 'bg-theme-accent/10', border: 'border-theme-accent/20' },
+    { label: 'Total Invoices', value: stats.totalInvoices || 0, icon: Layers, color: 'text-theme-accent', bg: 'bg-theme-accent/10', border: 'border-theme-accent/20' },
     { label: 'Total Revenue', value: `₹${stats.monthlyRevenue}`, icon: IndianRupee, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-    { label: 'Pending Dues', value: `₹${stats.pendingPayments}`, icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+    { label: 'Pending Dues', value: `₹${stats.pendingPayments}`, icon: AlertTriangle, color: 'text-theme-accent', bg: 'bg-theme-accent/10', border: 'border-theme-accent/20' },
     { label: 'Payment Proofs', value: stats.pendingPaymentProofs, icon: CreditCard, color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
     { label: 'Storage Usage', value: stats.cloudStorageUsage, icon: Cloud, color: 'text-cyan-500', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20' },
     { label: 'Offline Queue', value: stats.failedSyncs, icon: FileWarning, color: stats.failedSyncs > 0 ? 'text-rose-500' : 'text-slate-500', bg: 'bg-slate-500/10', border: 'border-slate-500/20' },
@@ -216,10 +216,10 @@ const AdminDashboard = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h2 className="text-3xl font-black tracking-tight vip-text-glow flex items-center gap-3">
-            VIP Owner Dashboard
-            <Crown className="w-6 h-6 text-amber-500" />
+            Owner Command Center
+            <Crown className="w-6 h-6 text-theme-accent" />
           </h2>
-          <p className="text-sm text-theme-secondary mt-1 font-bold">Real-time global metrics for BillQyro VIP platform.</p>
+          <p className="text-sm text-theme-secondary mt-1 font-bold">Real-time platform governance, revenue, security and workspace telemetry.</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -237,12 +237,12 @@ const AdminDashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            className="p-5 rounded-[2rem] bg-gradient-to-b from-theme-surface/80 to-theme-surface/40 backdrop-blur-3xl border border-amber-500/20 dark:border-amber-500/10 shadow-[0_8px_30px_rgba(245,158,11,0.05)] hover:shadow-[0_8px_40px_rgba(245,158,11,0.2)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative overflow-hidden group premium-shimmer-wrapper"
+            className="p-5 rounded-[2rem] bg-gradient-to-b from-theme-surface/80 to-theme-surface/40 backdrop-blur-3xl border border-theme-accent/20 dark:border-theme-accent/10 shadow-[0_8px_30px_rgba(245,158,11,0.05)] hover:shadow-[0_8px_40px_rgba(245,158,11,0.2)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative overflow-hidden group premium-shimmer-wrapper"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/10 via-transparent to-theme-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-5">
-                <span className="text-[11px] font-black uppercase tracking-widest text-theme-muted group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">{kpi.label}</span>
+                <span className="text-[11px] font-black uppercase tracking-widest text-theme-muted group-hover:text-theme-accent dark:group-hover:text-theme-accent transition-colors">{kpi.label}</span>
                 <div className={`p-2.5 rounded-2xl border backdrop-blur-md shadow-inner ${kpi.bg} ${kpi.border} group-hover:scale-110 transition-transform duration-300`}>
                   <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
                 </div>
@@ -254,7 +254,7 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* VIP God Mode Controls */}
+        {/* Owner Operations */}
         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
           
           <button onClick={handleMaintenanceMode} className="relative p-6 rounded-[2rem] bg-gradient-to-br from-rose-500/10 to-transparent border border-rose-500/30 hover:bg-rose-500/20 hover:border-rose-500/50 transition-all duration-300 group overflow-hidden text-left flex flex-col justify-between h-40 shadow-[0_0_20px_rgba(243,24,103,0.1)] hover:shadow-[0_0_30px_rgba(243,24,103,0.3)]">
@@ -279,57 +279,57 @@ const AdminDashboard = () => {
             </div>
           </button>
 
-          <button onClick={handlePurgeCache} className="relative p-6 rounded-[2rem] bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 transition-all duration-300 group overflow-hidden text-left flex flex-col justify-between h-40 shadow-[0_0_20px_rgba(59,130,246,0.1)] hover:shadow-[0_0_30px_rgba(59,130,246,0.3)]">
-            <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-[40px] group-hover:bg-blue-500/40 transition-colors" />
-            <div className="p-3 rounded-2xl bg-blue-500/20 w-fit backdrop-blur-md mb-4 group-hover:scale-110 transition-transform">
-              <Zap className="w-6 h-6 text-blue-500" />
+          <button onClick={handlePurgeCache} className="relative p-6 rounded-[2rem] bg-gradient-to-br from-blue-500/10 to-transparent border border-theme-accent/30 hover:bg-theme-accent/20 hover:border-theme-accent/50 transition-all duration-300 group overflow-hidden text-left flex flex-col justify-between h-40 shadow-[0_0_20px_rgba(59,130,246,0.1)] hover:shadow-[0_0_30px_rgba(59,130,246,0.3)]">
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-theme-accent/20 rounded-full blur-[40px] group-hover:bg-theme-accent/40 transition-colors" />
+            <div className="p-3 rounded-2xl bg-theme-accent/20 w-fit backdrop-blur-md mb-4 group-hover:scale-110 transition-transform">
+              <Zap className="w-6 h-6 text-theme-accent" />
             </div>
             <div className="relative z-10">
-              <h4 className="text-lg font-black text-blue-500 tracking-tight">Purge Cache</h4>
-              <p className="text-xs font-semibold text-blue-500/70 mt-1">Optimize global speed</p>
+              <h4 className="text-lg font-black text-theme-accent tracking-tight">Purge Cache</h4>
+              <p className="text-xs font-semibold text-theme-accent/70 mt-1">Optimize global speed</p>
             </div>
           </button>
 
-          <button onClick={handleForceSync} className="relative p-6 rounded-[2rem] bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/30 hover:bg-purple-500/20 hover:border-purple-500/50 transition-all duration-300 group overflow-hidden text-left flex flex-col justify-between h-40 shadow-[0_0_20px_rgba(168,85,247,0.1)] hover:shadow-[0_0_30px_rgba(168,85,247,0.3)]">
-            <div className="absolute -right-10 -top-10 w-40 h-40 bg-purple-500/20 rounded-full blur-[40px] group-hover:bg-purple-500/40 transition-colors" />
-            <div className="p-3 rounded-2xl bg-purple-500/20 w-fit backdrop-blur-md mb-4 group-hover:scale-110 group-hover:rotate-180 transition-all duration-700">
-              <RefreshCw className="w-6 h-6 text-purple-500" />
+          <button onClick={handleForceSync} className="relative p-6 rounded-[2rem] bg-gradient-to-br from-purple-500/10 to-transparent border border-theme-accent/30 hover:bg-theme-accent/20 hover:border-theme-accent/50 transition-all duration-300 group overflow-hidden text-left flex flex-col justify-between h-40 shadow-[0_0_20px_rgba(168,85,247,0.1)] hover:shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-theme-accent/20 rounded-full blur-[40px] group-hover:bg-theme-accent/40 transition-colors" />
+            <div className="p-3 rounded-2xl bg-theme-accent/20 w-fit backdrop-blur-md mb-4 group-hover:scale-110 group-hover:rotate-180 transition-all duration-700">
+              <RefreshCw className="w-6 h-6 text-theme-accent" />
             </div>
             <div className="relative z-10">
-              <h4 className="text-lg font-black text-purple-500 tracking-tight">Force Sync</h4>
-              <p className="text-xs font-semibold text-purple-500/70 mt-1">Align cloud with edge nodes</p>
+              <h4 className="text-lg font-black text-theme-accent tracking-tight">Force Sync</h4>
+              <p className="text-xs font-semibold text-theme-accent/70 mt-1">Align cloud with edge nodes</p>
             </div>
           </button>
 
         </div>
 
         {/* AI Strategist */}
-        <div className="lg:col-span-1 p-8 rounded-[2rem] bg-gradient-to-br from-theme-surface/80 to-theme-surface/40 backdrop-blur-3xl border border-indigo-500/30 shadow-[0_8px_30px_rgba(99,102,241,0.15)] relative overflow-hidden group">
+        <div className="lg:col-span-1 p-8 rounded-[2rem] bg-gradient-to-br from-theme-surface/80 to-theme-surface/40 backdrop-blur-3xl border border-theme-accent/30 shadow-[0_8px_30px_rgba(99,102,241,0.15)] relative overflow-hidden group">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-[60px] animate-pulse" />
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-blue-500/20 rounded-full blur-[60px] animate-pulse animation-delay-2000" />
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-theme-accent/20 rounded-full blur-[60px] animate-pulse" />
+          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-theme-accent/20 rounded-full blur-[60px] animate-pulse animation-delay-2000" />
           
           <div className="relative z-10 h-full flex flex-col">
             <div className="flex justify-between items-start mb-6">
-              <div className="p-3 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 shadow-[inset_0_0_15px_rgba(99,102,241,0.4)]">
-                <BrainCircuit className="w-8 h-8 text-indigo-400 animate-pulse" />
+              <div className="p-3 rounded-2xl bg-theme-accent/20 border border-theme-accent/30 shadow-[inset_0_0_15px_rgba(99,102,241,0.4)]">
+                <BrainCircuit className="w-8 h-8 text-theme-accent animate-pulse" />
               </div>
-              <span className="px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-[10px] font-black uppercase tracking-widest text-indigo-400">AI Active</span>
+              <span className="px-3 py-1 rounded-full bg-theme-accent/20 border border-theme-accent/30 text-[10px] font-black uppercase tracking-widest text-theme-accent">AI Active</span>
             </div>
             
             <h3 className="text-2xl font-black text-theme-primary tracking-tight mb-2">Business Strategist</h3>
             <p className="text-sm font-semibold text-theme-secondary mb-8">Real-time owner insights.</p>
             
             <div className="mt-auto space-y-4">
-              <div className="p-4 rounded-xl bg-theme-surface/50 border border-indigo-500/20">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 mb-1">Growth Insight</p>
+              <div className="p-4 rounded-xl bg-theme-surface/50 border border-theme-accent/20">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-theme-accent mb-1">Growth Insight</p>
                 <p className="text-xs font-bold text-theme-primary leading-relaxed">
                   {stats.totalUsers > 0 
                     ? `Platform has ${stats.totalUsers} registered users and ${stats.totalInvoices} invoices generated. Recommend pushing premium features to active users.` 
                     : `System is fresh. Recommend activating marketing campaigns to acquire first users.`}
                 </p>
               </div>
-              <div className="p-4 rounded-xl bg-theme-surface/50 border border-indigo-500/20">
+              <div className="p-4 rounded-xl bg-theme-surface/50 border border-theme-accent/20">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 mb-1">System Health</p>
                 <p className="text-xs font-bold text-theme-primary leading-relaxed">
                   {stats.systemHealth === 'Healthy' 
@@ -341,16 +341,16 @@ const AdminDashboard = () => {
           </div>
         </div>
         {/* Recent Activities */}
-        <div className="lg:col-span-3 p-8 rounded-[2rem] bg-gradient-to-b from-theme-surface/90 to-theme-surface/60 backdrop-blur-3xl border border-amber-500/20 shadow-[0_8px_40px_rgba(245,158,11,0.08)] relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="lg:col-span-3 p-8 rounded-[2rem] bg-gradient-to-b from-theme-surface/90 to-theme-surface/60 backdrop-blur-3xl border border-theme-accent/20 shadow-[0_8px_40px_rgba(245,158,11,0.08)] relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-theme-accent/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-theme-accent/10 rounded-full blur-[100px] pointer-events-none" />
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-xl font-black text-theme-primary flex items-center gap-3">
-                <Activity className="w-6 h-6 text-amber-500 animate-pulse" /> Recent VIP Activities
+                <Activity className="w-6 h-6 text-theme-accent animate-pulse" /> Recent Platform Activities
               </h3>
-              <button className="px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest text-amber-600 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500 hover:text-white transition-all duration-300 shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)]">
+              <button className="px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest text-theme-accent bg-theme-accent/10 border border-theme-accent/30 hover:bg-theme-accent hover:text-white transition-all duration-300 shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)]">
                 View All Logs
               </button>
             </div>
