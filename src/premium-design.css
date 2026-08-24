@@ -1564,3 +1564,44 @@
     transition-duration: .001ms !important;
   }
 }
+
+
+/* --- V3 application shell --- */
+.billqyro-sidebar-v3 {
+  background: color-mix(in srgb, var(--sidebar-bg) 96%, var(--app-bg));
+  border-right-color: var(--border-soft);
+  box-shadow: 12px 0 40px -34px var(--accent-glow);
+}
+
+.billqyro-sidebar-v3 > div:first-child {
+  background: transparent !important;
+  border-bottom-color: var(--border-soft) !important;
+  box-shadow: none !important;
+}
+
+.billqyro-sidebar-v3 .bg-theme-surface\/50,
+.billqyro-sidebar-v3 .bg-theme-surface\/80 {
+  background: transparent !important;
+}
+
+.billqyro-sidebar-v3 .rounded-2xl {
+  border-radius: .9rem;
+}
+
+.billqyro-sidebar-v3 button:hover {
+  box-shadow: none;
+}
+
+.billqyro-topbar-v3 {
+  box-shadow: 0 1px 0 var(--border-soft), 0 12px 30px -28px var(--accent-glow) !important;
+}
+
+.billqyro-topbar-v3 input {
+  border-radius: .8rem !important;
+  background: var(--surface) !important;
+  box-shadow: none !important;
+}
+
+.billqyro-topbar-v3 > div {
+  min-height: 64px;
+}
