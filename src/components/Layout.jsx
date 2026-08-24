@@ -170,7 +170,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
         {/* ===== ULTRA PREMIUM HEADER ===== */}
         {/* Desktop: Full featured header. Mobile: Compact 2-row */}
-        <header className="sticky top-0 z-40 bg-theme-app/95 backdrop-blur-xl text-theme-primary shadow-sm border-b border-theme-border-soft transition-all">
+        <header className="sticky top-0 z-40 bg-theme-app/95 backdrop-blur-xl text-theme-primary shadow-sm border-b border-theme-border-soft transition-all billqyro-topbar-v3">
 
           {/* ===== DESKTOP HEADER ===== */}
           <div className="max-w-full w-full mx-auto px-4 lg:px-6 hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10 py-2.5 md:py-3">
