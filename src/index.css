@@ -2202,3 +2202,93 @@ button:active {
     box-shadow: none !important;
   }
 }
+
+/* =========================================================
+   BILLQYRO SIGNATURE BRAND SYSTEM
+   Official platform identity: Signature Emerald
+   Applied to public landing + owner control surfaces.
+   ========================================================= */
+.billqyro-signature-brand {
+  --billqyro-brand: #0B8F78;
+  --billqyro-brand-deep: #075E50;
+  --billqyro-brand-bright: #18B99B;
+  --billqyro-champagne: #C8A96B;
+  --accent: var(--billqyro-brand);
+  --accent-light: rgba(11, 143, 120, 0.10);
+  --accent-dark: var(--billqyro-brand-deep);
+  --accent-gradient: linear-gradient(135deg, #0B8F78 0%, #18B99B 52%, #0A7766 100%);
+  --accent-glow: rgba(11, 143, 120, 0.28);
+  --chart-primary: var(--billqyro-brand);
+  --sidebar-active: rgba(11, 143, 120, 0.10);
+  --button-text: #FFFFFF;
+}
+
+.billqyro-signature-brand .text-theme-accent,
+.billqyro-signature-brand .text-theme-accent-dark { color: var(--billqyro-brand) !important; }
+.billqyro-signature-brand .bg-theme-accent { background-color: var(--billqyro-brand) !important; }
+.billqyro-signature-brand .bg-theme-accent-light { background-color: rgba(11, 143, 120, 0.10) !important; }
+.billqyro-signature-brand .border-theme-accent { border-color: rgba(11, 143, 120, 0.30) !important; }
+.billqyro-signature-brand .shadow-theme-glow,
+.billqyro-signature-brand .shadow-glow { box-shadow: 0 12px 36px rgba(11, 143, 120, 0.20) !important; }
+
+.billqyro-landing-premium {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(11,143,120,0.10), transparent 30%),
+    radial-gradient(circle at 88% 18%, rgba(200,169,107,0.08), transparent 24%),
+    linear-gradient(180deg, var(--app-bg) 0%, var(--app-bg) 60%, var(--surface) 100%);
+}
+
+.billqyro-landing-premium .btn-premium {
+  background-image: var(--accent-gradient);
+  border: 1px solid rgba(11,143,120,0.28);
+  box-shadow: 0 14px 34px rgba(11,143,120,0.18), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+.billqyro-landing-premium .btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 44px rgba(11,143,120,0.25), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+.billqyro-landing-premium .btn-premium-outline {
+  background: rgba(255,255,255,0.48);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(11,143,120,0.22);
+  box-shadow: 0 8px 24px rgba(15,23,42,0.05);
+}
+.dark .billqyro-landing-premium .btn-premium-outline {
+  background: rgba(15,23,42,0.38);
+}
+
+.billqyro-brand-strip {
+  box-shadow: 0 18px 55px rgba(15,23,42,0.07), inset 0 1px 0 rgba(255,255,255,0.35);
+}
+.brand-proof-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(11,143,120,0.16);
+  background: rgba(11,143,120,0.055);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.billqyro-admin-premium {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(11,143,120,0.10), transparent 30%),
+    radial-gradient(circle at 92% 12%, rgba(200,169,107,0.06), transparent 24%),
+    var(--app-bg);
+}
+.billqyro-admin-premium .vip-text-glow {
+  text-shadow: 0 0 24px rgba(11,143,120,0.22);
+}
+@media (prefers-reduced-motion: reduce) {
+  .billqyro-landing-premium *,
+  .billqyro-admin-premium * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
