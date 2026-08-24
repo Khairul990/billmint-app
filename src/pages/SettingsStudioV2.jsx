@@ -58,6 +58,7 @@ const compressImage = (file, maxWidth = 400) => {
 const NAV_GROUPS = [
   {
     group: 'BUSINESS',
+    description: 'Identity, workspace & appearance',
     icon: Building2,
     items: [
       { id: 'business', label: 'Business Profile', icon: Building2, description: 'Company details & logo', mode: 'simple' },
@@ -68,6 +69,7 @@ const NAV_GROUPS = [
   },
   {
     group: 'INVENTORY',
+    description: 'Products, stock & tracking',
     icon: Box,
     items: [
       { id: 'inventory-settings', label: 'Inventory Settings', icon: PackageSearch, description: 'Products, Variants & Tracking', mode: 'advanced' }
@@ -75,6 +77,7 @@ const NAV_GROUPS = [
   },
   {
     group: 'INVOICE',
+    description: 'Billing, templates & documents',
     icon: FileText,
     items: [
       { id: 'invoice-builder', label: 'Invoice & Billing', icon: LayoutTemplate, description: 'Advanced builder settings', mode: 'advanced' },
@@ -83,6 +86,7 @@ const NAV_GROUPS = [
   },
   {
     group: 'PAYMENTS',
+    description: 'Payment collection & QR',
     icon: CreditCard,
     items: [
       { id: 'payment', label: 'Payment Methods', icon: QrCode, description: 'UPI, bKash, Nagad', mode: 'simple' }
@@ -90,6 +94,7 @@ const NAV_GROUPS = [
   },
   {
     group: 'COMMUNICATION',
+    description: 'Messages, reminders & alerts',
     icon: MessageCircle,
     items: [
       { id: 'whatsapp-template', label: 'Message Templates', icon: MessageCircle, description: 'Customize WhatsApp messages', mode: 'simple' },
@@ -98,6 +103,7 @@ const NAV_GROUPS = [
   },
   {
     group: 'SECURITY',
+    description: 'Access, team & credentials',
     icon: Shield,
     items: [
       { id: 'security', label: 'Security & Access', icon: Shield, description: 'API keys & access', mode: 'advanced' },
@@ -106,6 +112,7 @@ const NAV_GROUPS = [
   },
   {
     group: 'SYSTEM',
+    description: 'Plan, backup & maintenance',
     icon: Settings2,
     items: [
       { id: 'subscription', label: 'Subscription & Plan', icon: CreditCard, description: 'Plan & billing', mode: 'simple' },
@@ -1616,9 +1623,11 @@ const SettingsStudioV2 = ({
           <div className="flex-1 space-y-4 overflow-y-auto custom-scrollbar pr-1">
             {filteredNav.map(group => (
               <div key={group.group} className="settings-nav-group space-y-1">
-                <p className="settings-nav-group-title text-[10px] font-extrabold text-theme-muted uppercase tracking-wider px-2.5 py-1">
-                  {group.group}
-                </p>
+                <div className="settings-nav-group-title">
+                  <span className="settings-nav-group-title-main">{group.group}</span>
+                  <span className="settings-nav-group-count">{group.items.length}</span>
+                  <span className="settings-nav-group-description">{group.description}</span>
+                </div>
                 <div className="space-y-0.5">
                   {group.items.map(item => {
                     const isSelected = activeSection === item.id;
@@ -1627,6 +1636,7 @@ const SettingsStudioV2 = ({
                       <button
                         key={item.id}
                         onClick={() => setActiveSection(item.id)}
+                        data-selected={isSelected ? 'true' : 'false'}
                         className={`settings-nav-item w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer text-left ${
                           isSelected
                             ? 'bg-[color-mix(in_srgb,var(--accent)_8%,var(--surface))] border-l-[3px] border-theme-accent text-theme-accent font-bold shadow-xs'
