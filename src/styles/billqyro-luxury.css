@@ -126,3 +126,195 @@
     transform: none;
   }
 }
+
+
+/* =========================================================
+   BILLQYRO LANDING — LUXURY PRODUCT EXPERIENCE
+   Visual-only layer. No business logic or routing changes.
+   ========================================================= */
+
+.billqyro-landing-premium {
+  --bq-landing-grid: color-mix(in srgb, var(--accent, #0f9f83) 7%, transparent);
+  background:
+    radial-gradient(900px 520px at 8% 0%, color-mix(in srgb, var(--accent, #0f9f83) 10%, transparent), transparent 68%),
+    radial-gradient(800px 520px at 92% 18%, color-mix(in srgb, var(--accent, #0f9f83) 7%, transparent), transparent 70%),
+    var(--app-bg, #f8fafc);
+}
+
+.billqyro-landing-premium::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: .42;
+  background-image:
+    linear-gradient(to right, var(--bq-landing-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--bq-landing-grid) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 62%);
+}
+
+.billqyro-signature-brand nav {
+  filter: drop-shadow(0 12px 35px rgba(15, 23, 42, .08));
+}
+
+.billqyro-signature-brand nav > div {
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.5) inset,
+    0 18px 55px rgba(15,23,42,.08);
+}
+
+.billqyro-signature-brand .btn-premium {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent, #0f9f83) 25%, transparent);
+  box-shadow:
+    0 12px 28px var(--accent-glow, rgba(15,159,131,.18)),
+    0 1px 0 rgba(255,255,255,.28) inset;
+  transition: transform .28s var(--bq-luxury-ease), box-shadow .28s var(--bq-luxury-ease), filter .28s ease;
+}
+
+.billqyro-signature-brand .btn-premium::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,.20) 48%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform .7s var(--bq-luxury-ease);
+}
+
+.billqyro-signature-brand .btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 18px 38px var(--accent-glow, rgba(15,159,131,.24)),
+    0 1px 0 rgba(255,255,255,.32) inset;
+}
+
+.billqyro-signature-brand .btn-premium:hover::after {
+  transform: translateX(120%);
+}
+
+.billqyro-landing-premium section {
+  position: relative;
+  z-index: 1;
+}
+
+.billqyro-landing-premium section h1,
+.billqyro-landing-premium section h2 {
+  text-wrap: balance;
+}
+
+.billqyro-landing-premium .billqyro-hero-cockpit {
+  box-shadow:
+    0 45px 100px rgba(15,23,42,.13),
+    0 0 0 1px color-mix(in srgb, var(--accent, #0f9f83) 10%, transparent),
+    0 1px 0 rgba(255,255,255,.45) inset;
+  transform: perspective(1500px) rotateY(-1.8deg) rotateX(1deg);
+  transition: transform .5s var(--bq-luxury-ease), box-shadow .5s var(--bq-luxury-ease);
+}
+
+.billqyro-landing-premium .billqyro-hero-cockpit:hover {
+  transform: perspective(1500px) rotateY(0deg) rotateX(0deg) translateY(-4px);
+  box-shadow:
+    0 55px 115px rgba(15,23,42,.16),
+    0 0 0 1px color-mix(in srgb, var(--accent, #0f9f83) 18%, transparent),
+    0 1px 0 rgba(255,255,255,.5) inset;
+}
+
+.billqyro-landing-premium .billqyro-hero-cockpit::after {
+  content: "";
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  right: -150px;
+  top: -170px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent, #0f9f83) 15%, transparent), transparent 68%);
+  pointer-events: none;
+}
+
+.billqyro-landing-premium .billqyro-brand-strip {
+  box-shadow:
+    0 20px 55px rgba(15,23,42,.06),
+    0 1px 0 rgba(255,255,255,.5) inset;
+}
+
+.billqyro-landing-premium .billqyro-luxury-card,
+.billqyro-landing-premium .bg-theme-card {
+  transition:
+    transform .32s var(--bq-luxury-ease),
+    box-shadow .32s var(--bq-luxury-ease),
+    border-color .32s ease;
+}
+
+.billqyro-landing-premium .billqyro-luxury-card:hover,
+.billqyro-landing-premium .bg-theme-card:hover {
+  box-shadow:
+    0 22px 60px rgba(15,23,42,.075),
+    0 1px 0 rgba(255,255,255,.45) inset;
+}
+
+.billqyro-landing-premium .btn-premium-outline {
+  border-color: color-mix(in srgb, var(--accent, #0f9f83) 28%, var(--border-soft, #e2e8f0));
+  background: color-mix(in srgb, var(--surface, #fff) 74%, transparent);
+  box-shadow: 0 1px 0 rgba(255,255,255,.45) inset;
+  transition: transform .28s var(--bq-luxury-ease), border-color .28s ease, background .28s ease, box-shadow .28s ease;
+}
+
+.billqyro-landing-premium .btn-premium-outline:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent, #0f9f83) 48%, transparent);
+  background: color-mix(in srgb, var(--accent-light, rgba(15,159,131,.08)) 70%, var(--surface, #fff));
+  box-shadow: 0 14px 35px color-mix(in srgb, var(--accent, #0f9f83) 9%, transparent);
+}
+
+.billqyro-landing-premium .shadow-premium {
+  box-shadow:
+    0 24px 70px rgba(15,23,42,.09),
+    0 1px 0 rgba(255,255,255,.42) inset;
+}
+
+.billqyro-landing-premium .rounded-3xl {
+  border-color: color-mix(in srgb, var(--border-soft, #e2e8f0) 90%, var(--accent, #0f9f83) 10%);
+}
+
+.dark .billqyro-landing-premium::before {
+  opacity: .16;
+}
+
+.dark .billqyro-landing-premium .billqyro-hero-cockpit {
+  box-shadow:
+    0 45px 100px rgba(0,0,0,.42),
+    0 0 0 1px color-mix(in srgb, var(--accent, #0f9f83) 18%, transparent),
+    0 1px 0 rgba(255,255,255,.06) inset;
+}
+
+.dark .billqyro-landing-premium .billqyro-signature-brand nav > div {
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 20px 60px rgba(0,0,0,.28);
+}
+
+@media (max-width: 1024px) {
+  .billqyro-landing-premium .billqyro-hero-cockpit {
+    transform: none;
+  }
+  .billqyro-landing-premium .billqyro-hero-cockpit:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 640px) {
+  .billqyro-landing-premium::before {
+    background-size: 48px 48px;
+    opacity: .18;
+  }
+  .billqyro-landing-premium .billqyro-hero-cockpit {
+    border-radius: 24px;
+    box-shadow: 0 24px 55px rgba(15,23,42,.10);
+  }
+  .billqyro-landing-premium .billqyro-hero-cockpit:hover {
+    transform: none;
+  }
+}
