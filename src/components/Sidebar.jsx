@@ -211,7 +211,7 @@ const Sidebar = ({
 
   return (
     <aside
-      className="hidden lg:flex flex-col h-full z-30 overflow-hidden shrink-0 border-r border-theme-border-soft bg-theme-surface shadow-xl"
+      className="hidden lg:flex flex-col h-full z-30 overflow-hidden shrink-0 border-r border-theme-border-soft bg-theme-surface shadow-xl billqyro-sidebar-v3"
       style={{
         width: isCollapsed ? 72 : 220,
         minWidth: isCollapsed ? 72 : 220,
