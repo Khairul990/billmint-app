@@ -318,3 +318,262 @@
     transform: none;
   }
 }
+
+
+/* =========================================================
+   LANDING PAGE — COMPLETE LUXURY PASS
+   Section hierarchy, typography, spacing, glass surfaces,
+   responsive rhythm and theme-aware accent treatment.
+   ========================================================= */
+
+.billqyro-landing-premium {
+  --bq-content-max: 1240px;
+  --bq-section-gap: clamp(84px, 10vw, 150px);
+  --bq-radius-xl: 30px;
+  --bq-radius-lg: 24px;
+  --bq-luxury-ease: cubic-bezier(.22,1,.36,1);
+  isolation: isolate;
+}
+
+.billqyro-landing-premium > section {
+  width: min(var(--bq-content-max), calc(100% - 32px));
+  margin-inline: auto;
+  scroll-margin-top: 110px;
+}
+
+.billqyro-landing-premium > section:not(#login) {
+  margin-bottom: var(--bq-section-gap);
+}
+
+.billqyro-landing-premium section h2 {
+  font-family: Sora, sans-serif;
+  letter-spacing: -.045em;
+  line-height: 1.06;
+}
+
+.billqyro-landing-premium section p {
+  line-height: 1.75;
+}
+
+.billqyro-landing-premium #preview {
+  margin-top: clamp(35px, 6vw, 78px);
+}
+
+.billqyro-landing-premium #preview > div,
+.billqyro-landing-premium #why-billqyro > div,
+.billqyro-landing-premium #workflow > div,
+.billqyro-landing-premium #payments > div,
+.billqyro-landing-premium #offline-security > div {
+  border-color: color-mix(in srgb, var(--border-soft, #e2e8f0) 88%, var(--accent, #0f9f83) 12%);
+}
+
+.billqyro-landing-premium #preview [class*="rounded-"],
+.billqyro-landing-premium #why-billqyro [class*="rounded-"],
+.billqyro-landing-premium #categories [class*="rounded-"],
+.billqyro-landing-premium #workflow [class*="rounded-"],
+.billqyro-landing-premium #payments [class*="rounded-"],
+.billqyro-landing-premium #offline-security [class*="rounded-"] {
+  transition:
+    transform .38s var(--bq-luxury-ease),
+    box-shadow .38s var(--bq-luxury-ease),
+    border-color .38s ease,
+    background-color .38s ease;
+}
+
+.billqyro-landing-premium #preview [class*="rounded-"]:hover,
+.billqyro-landing-premium #why-billqyro [class*="rounded-"]:hover,
+.billqyro-landing-premium #categories [class*="rounded-"]:hover,
+.billqyro-landing-premium #workflow [class*="rounded-"]:hover,
+.billqyro-landing-premium #payments [class*="rounded-"]:hover,
+.billqyro-landing-premium #offline-security [class*="rounded-"]:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 65px rgba(15,23,42,.075);
+}
+
+.billqyro-landing-premium #why-billqyro,
+.billqyro-landing-premium #categories,
+.billqyro-landing-premium #workflow,
+.billqyro-landing-premium #payments,
+.billqyro-landing-premium #offline-security,
+.billqyro-landing-premium #faq {
+  position: relative;
+}
+
+.billqyro-landing-premium #why-billqyro::before,
+.billqyro-landing-premium #categories::before,
+.billqyro-landing-premium #workflow::before,
+.billqyro-landing-premium #payments::before,
+.billqyro-landing-premium #offline-security::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -70px;
+  width: min(820px, 90%);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent, #0f9f83) 20%, transparent), transparent);
+}
+
+.billqyro-landing-premium #categories {
+  padding-block: clamp(20px, 4vw, 45px);
+}
+
+.billqyro-landing-premium #categories > div:first-child {
+  margin-bottom: clamp(26px, 4vw, 46px);
+}
+
+.billqyro-landing-premium #categories [class*="grid"] > * {
+  min-height: 100%;
+}
+
+.billqyro-landing-premium #categories [class*="grid"] > *:hover {
+  border-color: color-mix(in srgb, var(--accent, #0f9f83) 28%, var(--border-soft, #e2e8f0));
+  box-shadow:
+    0 26px 70px rgba(15,23,42,.09),
+    0 0 0 1px color-mix(in srgb, var(--accent, #0f9f83) 5%, transparent);
+}
+
+.billqyro-landing-premium #workflow {
+  padding-block: clamp(20px, 4vw, 40px);
+}
+
+.billqyro-landing-premium #workflow [class*="grid"] > * {
+  position: relative;
+}
+
+.billqyro-landing-premium #workflow [class*="grid"] > *::before {
+  content: "";
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  width: 34px;
+  height: 1px;
+  background: color-mix(in srgb, var(--accent, #0f9f83) 35%, transparent);
+}
+
+.billqyro-landing-premium #payments {
+  padding-block: clamp(24px, 5vw, 55px);
+}
+
+.billqyro-landing-premium #payments .btn-premium,
+.billqyro-landing-premium #login .btn-premium {
+  box-shadow:
+    0 16px 42px var(--accent-glow, rgba(15,159,131,.18)),
+    0 1px 0 rgba(255,255,255,.3) inset;
+}
+
+.billqyro-landing-premium #offline-security {
+  padding-block: clamp(24px, 5vw, 55px);
+}
+
+.billqyro-landing-premium #offline-security svg {
+  filter: drop-shadow(0 7px 14px color-mix(in srgb, var(--accent, #0f9f83) 18%, transparent));
+}
+
+.billqyro-landing-premium #faq {
+  padding-block: clamp(20px, 4vw, 45px);
+}
+
+.billqyro-landing-premium #faq button {
+  font-family: Plus Jakarta Sans, sans-serif;
+  transition:
+    background-color .25s ease,
+    transform .25s var(--bq-luxury-ease),
+    color .25s ease;
+}
+
+.billqyro-landing-premium #faq button:hover {
+  transform: translateX(2px);
+  background: color-mix(in srgb, var(--accent, #0f9f83) 5%, transparent);
+}
+
+.billqyro-landing-premium #login {
+  width: min(1120px, calc(100% - 32px));
+  padding: clamp(24px, 5vw, 64px);
+  margin-top: 30px;
+  margin-bottom: 80px;
+  border: 1px solid color-mix(in srgb, var(--accent, #0f9f83) 15%, var(--border-soft, #e2e8f0));
+  border-radius: var(--bq-radius-xl);
+  background:
+    radial-gradient(600px 280px at 50% 0%, color-mix(in srgb, var(--accent, #0f9f83) 8%, transparent), transparent 72%),
+    color-mix(in srgb, var(--surface, #fff) 82%, transparent);
+  box-shadow:
+    0 35px 90px rgba(15,23,42,.09),
+    0 1px 0 rgba(255,255,255,.55) inset;
+  backdrop-filter: blur(22px);
+}
+
+.billqyro-landing-premium footer {
+  position: relative;
+  z-index: 2;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--app-bg, #f8fafc) 92%, transparent), var(--app-bg, #f8fafc));
+  border-top-color: color-mix(in srgb, var(--accent, #0f9f83) 12%, var(--border-soft, #e2e8f0));
+}
+
+.billqyro-landing-premium footer a,
+.billqyro-landing-premium footer button {
+  transition: color .2s ease, transform .2s var(--bq-luxury-ease);
+}
+
+.billqyro-landing-premium footer a:hover,
+.billqyro-landing-premium footer button:hover {
+  transform: translateY(-1px);
+}
+
+.dark .billqyro-landing-premium #login {
+  background:
+    radial-gradient(600px 280px at 50% 0%, color-mix(in srgb, var(--accent, #0f9f83) 12%, transparent), transparent 72%),
+    color-mix(in srgb, var(--surface, #111827) 82%, transparent);
+  box-shadow:
+    0 35px 90px rgba(0,0,0,.35),
+    0 1px 0 rgba(255,255,255,.05) inset;
+}
+
+.dark .billqyro-landing-premium #categories [class*="grid"] > *:hover,
+.dark .billqyro-landing-premium #preview [class*="rounded-"]:hover,
+.dark .billqyro-landing-premium #why-billqyro [class*="rounded-"]:hover,
+.dark .billqyro-landing-premium #workflow [class*="rounded-"]:hover,
+.dark .billqyro-landing-premium #payments [class*="rounded-"]:hover,
+.dark .billqyro-landing-premium #offline-security [class*="rounded-"]:hover {
+  box-shadow: 0 26px 70px rgba(0,0,0,.28);
+}
+
+@media (max-width: 768px) {
+  .billqyro-landing-premium > section,
+  .billqyro-landing-premium #login {
+    width: min(100% - 24px, var(--bq-content-max));
+  }
+
+  .billqyro-landing-premium > section:not(#login) {
+    margin-bottom: 76px;
+  }
+
+  .billqyro-landing-premium #why-billqyro::before,
+  .billqyro-landing-premium #categories::before,
+  .billqyro-landing-premium #workflow::before,
+  .billqyro-landing-premium #payments::before,
+  .billqyro-landing-premium #offline-security::before {
+    top: -38px;
+  }
+
+  .billqyro-landing-premium #workflow [class*="grid"] > *::before {
+    display: none;
+  }
+
+  .billqyro-landing-premium #login {
+    padding: 20px;
+    margin-bottom: 48px;
+    border-radius: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .billqyro-landing-premium *,
+  .billqyro-landing-premium *::before,
+  .billqyro-landing-premium *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
