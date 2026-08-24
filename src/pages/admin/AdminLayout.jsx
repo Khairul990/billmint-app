@@ -36,7 +36,7 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
   const SidebarContent = () => (
     <>
       <div className="h-24 px-6 border-b border-theme-border-soft flex items-center shrink-0 bg-gradient-to-r from-theme-accent/10 via-transparent to-transparent">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 p-[1.5px] shadow-[0_0_15px_rgba(251,191,36,0.3)] mr-3 shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-theme-accent to-theme-accent p-[1.5px] shadow-[0_0_15px_rgba(251,191,36,0.3)] mr-3 shrink-0">
           <div className="w-full h-full bg-theme-surface-elevated rounded-[10.5px] flex items-center justify-center">
              <Crown className="w-5 h-5 text-theme-accent" />
           </div>
@@ -44,7 +44,7 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
         <div>
           <h1 className="text-theme-primary font-black text-xl tracking-tight leading-none vip-text-glow">BillQyro</h1>
           <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-[9px] font-black tracking-widest text-white uppercase bg-gradient-to-r from-amber-500 to-orange-600 px-2 py-0.5 rounded shadow-[0_0_10px_rgba(245,158,11,0.5)]">OWNER CONTROL</span>
+            <span className="text-[9px] font-black tracking-widest text-white uppercase bg-gradient-to-r from-theme-accent to-orange-600 px-2 py-0.5 rounded shadow-[0_0_10px_rgba(245,158,11,0.5)]">OWNER CONTROL</span>
             <p className="text-[10px] text-theme-accent uppercase tracking-wider font-bold flex items-center">
               <span className="w-1.5 h-1.5 rounded-full bg-theme-accent mr-1.5 animate-pulse"></span>
               Secure
@@ -76,7 +76,7 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
               {isActive && (
                 <motion.div 
                   layoutId="activeTabIndicator"
-                  className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-amber-600 shadow-[0_0_15px_rgba(251,191,36,0.6)]" 
+                  className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-theme-accent to-theme-accent shadow-[0_0_15px_rgba(251,191,36,0.6)]" 
                 />
               )}
               <div className={`mr-3 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
@@ -101,12 +101,12 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
   );
 
   return (
-    <div className="billqyro-admin-premium h-screen bg-theme-main text-theme-primary font-sans flex flex-col md:flex-row overflow-hidden relative selection:bg-theme-accent selection:text-white" data-brand="billqyro">
+    <div className="billqyro-admin-premium billqyro-signature-brand h-screen bg-theme-main text-theme-primary font-sans flex flex-col md:flex-row overflow-hidden relative selection:bg-theme-accent selection:text-white" data-brand="billqyro">
       {/* VIP Luxury Background gradients */}
       <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[120%] pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[5%] left-[10%] w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[120px] mix-blend-screen opacity-70 animate-blob" />
-        <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] mix-blend-screen opacity-60 animate-blob animation-delay-2000" />
-        <div className="absolute top-[40%] right-[30%] w-[400px] h-[400px] bg-orange-500/10 rounded-full blur-[100px] mix-blend-screen opacity-40 animate-blob animation-delay-4000" />
+        <div className="absolute top-[5%] left-[10%] w-[600px] h-[600px] bg-theme-accent/10 rounded-full blur-[120px] mix-blend-screen opacity-70 animate-blob" />
+        <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] bg-theme-accent/10 rounded-full blur-[120px] mix-blend-screen opacity-60 animate-blob animation-delay-2000" />
+        <div className="absolute top-[40%] right-[30%] w-[400px] h-[400px] bg-theme-accent/10 rounded-full blur-[100px] mix-blend-screen opacity-40 animate-blob animation-delay-4000" />
       </div>
       
       {/* Desktop Sidebar */}
@@ -141,13 +141,13 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
         
         {/* Top Header */}
-        {/* VIP Top Header */}
+        {/* Signature Owner Header */}
         <header className="hidden md:flex h-24 items-center justify-between px-8 bg-theme-surface/40 backdrop-blur-xl border-b border-theme-border-soft shrink-0 shadow-[0_4px_30px_rgba(0,0,0,0.1)] relative">
-          <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-theme-accent/30 to-transparent"></div>
           <div>
             <h2 className="text-2xl font-black text-theme-primary tracking-tight flex items-center gap-3">
-              BillQyro Control Room
-              <span className="px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-500 text-[10px] uppercase font-black tracking-widest shadow-[inset_0_0_10px_rgba(245,158,11,0.1)]">Level 99</span>
+              BillQyro Signature Control Room
+              <span className="px-2 py-0.5 rounded-full border border-theme-accent/30 bg-theme-accent/10 text-theme-accent text-[10px] uppercase font-black tracking-widest shadow-[inset_0_0_10px_rgba(245,158,11,0.1)]">OWNER ONLY</span>
             </h2>
             <p className="text-xs font-semibold text-theme-secondary mt-1">Private owner console · platform governance, security & operations.</p>
           </div>
@@ -159,9 +159,9 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
             
             {/* VIP Avatar Ring */}
             <div className="relative w-12 h-12 rounded-full p-[2px] overflow-hidden group cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] transition-all">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-300 via-orange-500 to-purple-600 animate-[spin_4s_linear_infinite]" />
+              <div className="absolute inset-0 bg-gradient-to-br from-theme-accent via-theme-accent to-theme-accent animate-[spin_4s_linear_infinite]" />
               <div className="absolute inset-[2px] bg-theme-surface rounded-full flex items-center justify-center overflow-hidden z-10">
-                <Crown className="w-5 h-5 text-amber-500 group-hover:scale-110 transition-transform duration-300" />
+                <Crown className="w-5 h-5 text-theme-accent group-hover:scale-110 transition-transform duration-300" />
               </div>
             </div>
           </div>
