@@ -1460,9 +1460,9 @@ const SettingsStudioV2 = ({
         );
 
   return (
-    <motion.div variants={pageVariants} initial="initial" animate="animate" className="min-h-screen pb-32 font-sans w-full bg-theme-app text-theme-primary">
+    <motion.div variants={pageVariants} initial="initial" animate="animate" className="settings-studio-premium min-h-screen pb-32 font-sans w-full bg-theme-app text-theme-primary">
       {/* 1. TOP SETTINGS HEADER */}
-      <header className="sticky top-0 z-30 bg-theme-app/90 backdrop-blur-xl border-b border-theme-border-soft">
+      <header className="settings-topbar sticky top-0 z-30 bg-theme-app/90 backdrop-blur-xl border-b border-theme-border-soft">
         <div className="w-full px-4 lg:px-6 py-2.5 flex items-center justify-between gap-4">
           {/* Left: Back + Current Section Info + Status */}
           <div className="flex items-center gap-3 min-w-0">
@@ -1568,7 +1568,7 @@ const SettingsStudioV2 = ({
       </header>
 
       {/* 2. WORKSPACE CONTEXT BAR */}
-      <div className="bg-theme-surface/50 border-b border-theme-border-soft/70 px-4 lg:px-6 py-2 flex items-center justify-between text-xs text-theme-muted">
+      <div className="settings-contextbar bg-theme-surface/50 border-b border-theme-border-soft/70 px-4 lg:px-6 py-2 flex items-center justify-between text-xs text-theme-muted">
         <div className="flex items-center gap-2">
           <Building2 className="w-3.5 h-3.5 text-theme-accent" />
           <span className="font-bold text-theme-primary">{settings?.businessName || 'KB.Embroidery Designer 1118'}</span>
@@ -1586,17 +1586,17 @@ const SettingsStudioV2 = ({
       </div>
 
       {/* 3. MAIN WORKSPACE: CONTROL SIDEBAR + CONTENT PANE */}
-      <div className="flex w-full min-h-[calc(100vh-110px)]">
+      <div className="settings-content-shell flex w-full min-h-[calc(100vh-110px)]">
         {/* SETTINGS CONTROL SIDEBAR */}
-        <aside className="w-60 lg:w-64 border-r border-theme-border-soft bg-theme-surface/30 shrink-0 p-3 space-y-3 hidden md:flex md:flex-col">
+        <aside className="settings-sidebar w-60 lg:w-64 border-r border-theme-border-soft bg-theme-surface/30 shrink-0 p-3 space-y-3 hidden md:flex md:flex-col">
           {/* Header */}
-          <div className="px-2 py-1">
+          <div className="settings-sidebar-header px-2 py-1">
             <h2 className="text-xs font-black text-theme-primary tracking-tight">Settings</h2>
             <p className="text-[10px] font-semibold text-theme-muted">Business preferences</p>
           </div>
 
           {/* Mode Tabs: All | Simple | Advanced */}
-          <div className="flex bg-theme-surface p-0.5 rounded-lg border border-theme-border-soft text-[11px] font-bold">
+          <div className="settings-mode-tabs flex bg-theme-surface p-0.5 rounded-lg border border-theme-border-soft text-[11px] font-bold">
             {['All', 'Simple', 'Advanced'].map(mode => (
               <button
                 key={mode}
@@ -1615,8 +1615,8 @@ const SettingsStudioV2 = ({
           {/* Navigation Groups */}
           <div className="flex-1 space-y-4 overflow-y-auto custom-scrollbar pr-1">
             {filteredNav.map(group => (
-              <div key={group.group} className="space-y-1">
-                <p className="text-[10px] font-extrabold text-theme-muted uppercase tracking-wider px-2.5 py-1">
+              <div key={group.group} className="settings-nav-group space-y-1">
+                <p className="settings-nav-group-title text-[10px] font-extrabold text-theme-muted uppercase tracking-wider px-2.5 py-1">
                   {group.group}
                 </p>
                 <div className="space-y-0.5">
@@ -1627,7 +1627,7 @@ const SettingsStudioV2 = ({
                       <button
                         key={item.id}
                         onClick={() => setActiveSection(item.id)}
-                        className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer text-left ${
+                        className={`settings-nav-item w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer text-left ${
                           isSelected
                             ? 'bg-[color-mix(in_srgb,var(--accent)_8%,var(--surface))] border-l-[3px] border-theme-accent text-theme-accent font-bold shadow-xs'
                             : 'text-theme-secondary hover:text-theme-primary hover:bg-theme-surface/70'
@@ -1645,7 +1645,7 @@ const SettingsStudioV2 = ({
         </aside>
 
         {/* CONTENT PANE & LIVE PREVIEW */}
-        <div className="flex-1 min-w-0 p-4 lg:p-6 flex flex-col lg:flex-row gap-6">
+        <div className="settings-main-pane flex-1 min-w-0 p-4 lg:p-6 flex flex-col lg:flex-row gap-6">
           <div className="flex-1 min-w-0">
             <AnimatePresence mode="wait">
               <motion.div
@@ -1662,7 +1662,7 @@ const SettingsStudioV2 = ({
 
           {/* Live Preview Panel on the right */}
           {showPreview && (
-            <div className="w-full lg:w-80 shrink-0">
+            <div className="settings-preview w-full lg:w-80 shrink-0">
               <LivePreviewPanel themeId={themeId} darkMode={darkMode} brandColor={brandColor} settings={settings} />
             </div>
           )}
@@ -1676,7 +1676,7 @@ const SettingsStudioV2 = ({
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
-            className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl bg-theme-card/95 border-t border-theme-border-soft shadow-2xl"
+            className="sticky-save-bar fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl bg-theme-card/95 border-t border-theme-border-soft shadow-2xl"
           >
             <div className="max-w-full mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
