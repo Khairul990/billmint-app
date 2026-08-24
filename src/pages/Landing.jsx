@@ -130,7 +130,7 @@ const Landing = ({ onLoginSuccess }) => {
   ];
 
   return (
-    <div className="billqyro-landing-premium min-h-screen bg-theme-app text-theme-primary font-sans selection:bg-theme-accent selection:text-white flex flex-col relative overflow-x-hidden" data-brand="billqyro">
+    <div className="billqyro-landing-premium billqyro-signature-brand min-h-screen bg-theme-app text-theme-primary font-sans selection:bg-theme-accent selection:text-white flex flex-col relative overflow-x-hidden" data-brand="billqyro">
       {/* Background Ambience */}
       <HeroBackground />
       <div className="absolute inset-0 bg-gradient-to-b from-theme-app/30 via-transparent to-theme-app -z-10 pointer-events-none" />
@@ -223,7 +223,7 @@ const Landing = ({ onLoginSuccess }) => {
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="text-[11px] font-extrabold uppercase tracking-widest text-theme-secondary">
-                SIGNATURE BILLING OS · IMPERIAL EMERALD
+                BILLQYRO SIGNATURE · OFFICIAL EMERALD STANDARD
               </span>
             </motion.div>
 
@@ -337,6 +337,28 @@ const Landing = ({ onLoginSuccess }) => {
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* ===== BRAND SIGNATURE STRIP ===== */}
+      <section className="relative px-6 pb-10 -mt-2">
+        <div className="max-w-7xl mx-auto">
+          <div className="billqyro-brand-strip rounded-[2rem] border border-theme-accent/15 bg-theme-card/70 backdrop-blur-2xl px-5 py-4 sm:px-7 sm:py-5 shadow-premium">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-theme-accent-light border border-theme-accent/20 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-theme-accent" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-theme-accent">Official BillQyro Brand System</p>
+                  <p className="text-xs sm:text-sm font-bold text-theme-primary mt-0.5">Signature Emerald · Financial clarity with a premium edge</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full lg:w-auto">
+                <span className="brand-proof-pill">Local-first</span><span className="brand-proof-pill">Live links</span><span className="brand-proof-pill">Secure sync</span><span className="brand-proof-pill">Premium PDFs</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
