@@ -10,22 +10,22 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const adminMenu = [
-    { id: 'dashboard', label: 'Dashboard', icon: <Activity className="w-5 h-5" /> },
-    { id: 'users', label: 'User Manager', icon: <Users className="w-5 h-5" /> },
-    { id: 'workspaces', label: 'Workspaces', icon: <Building2 className="w-5 h-5" /> },
-    { id: 'subscriptions', label: 'Subscription Plans', icon: <ListPlus className="w-5 h-5" /> },
-    { id: 'payments', label: 'Payments', icon: <CreditCard className="w-5 h-5" /> },
-    { id: 'features', label: 'Feature Control', icon: <ToggleRight className="w-5 h-5" /> },
-    { id: 'health', label: 'App Health', icon: <Activity className="w-5 h-5" /> },
-    { id: 'security', label: 'Security Center', icon: <ShieldCheck className="w-5 h-5" /> },
-    { id: 'database', label: 'Database', icon: <Database className="w-5 h-5" /> },
-    { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-5 h-5" /> },
-    { id: 'automation', label: 'Automation', icon: <Workflow className="w-5 h-5" /> },
-    { id: 'support', label: 'Support', icon: <MessageSquare className="w-5 h-5" /> },
-    { id: 'announcements', label: 'Announcements', icon: <Megaphone className="w-5 h-5" /> },
-    { id: 'settings', label: 'Global Settings', icon: <SettingsIcon className="w-5 h-5" /> },
-    { id: 'lab', label: 'Owner Test Lab', icon: <ShieldAlert className="w-5 h-5" /> },
-    { id: 'changelog', label: 'Changelog', icon: <ListPlus className="w-5 h-5" /> },
+    { id: 'dashboard', label: 'Command Center', group: 'OVERVIEW', icon: <Activity className="w-5 h-5" /> },
+    { id: 'users', group: 'USERS & WORKSPACES', label: 'User Manager', icon: <Users className="w-5 h-5" /> },
+    { id: 'workspaces', group: 'USERS & WORKSPACES', label: 'Workspaces', icon: <Building2 className="w-5 h-5" /> },
+    { id: 'subscriptions', group: 'COMMERCE', label: 'Subscription Plans', icon: <ListPlus className="w-5 h-5" /> },
+    { id: 'payments', group: 'COMMERCE', label: 'Payments', icon: <CreditCard className="w-5 h-5" /> },
+    { id: 'features', group: 'PLATFORM', label: 'Feature Control', icon: <ToggleRight className="w-5 h-5" /> },
+    { id: 'health', group: 'PLATFORM', label: 'App Health', icon: <Activity className="w-5 h-5" /> },
+    { id: 'security', group: 'PLATFORM', label: 'Security Center', icon: <ShieldCheck className="w-5 h-5" /> },
+    { id: 'database', group: 'DATA & OPERATIONS', label: 'Database', icon: <Database className="w-5 h-5" /> },
+    { id: 'analytics', group: 'DATA & OPERATIONS', label: 'Analytics', icon: <BarChart3 className="w-5 h-5" /> },
+    { id: 'automation', group: 'DATA & OPERATIONS', label: 'Automation', icon: <Workflow className="w-5 h-5" /> },
+    { id: 'support', group: 'OPERATIONS', label: 'Support', icon: <MessageSquare className="w-5 h-5" /> },
+    { id: 'announcements', group: 'OPERATIONS', label: 'Announcements', icon: <Megaphone className="w-5 h-5" /> },
+    { id: 'settings', group: 'PLATFORM', label: 'Global Settings', icon: <SettingsIcon className="w-5 h-5" /> },
+    { id: 'lab', group: 'OWNER TOOLS', label: 'Owner Test Lab', icon: <ShieldAlert className="w-5 h-5" /> },
+    { id: 'changelog', group: 'OPERATIONS', label: 'Changelog', icon: <ListPlus className="w-5 h-5" /> },
   ];
 
   const handleNavClick = (id) => {
@@ -35,18 +35,18 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
 
   const SidebarContent = () => (
     <>
-      <div className="h-24 px-6 border-b border-theme-border-soft flex items-center shrink-0 bg-gradient-to-r from-amber-900/10 to-transparent">
+      <div className="h-24 px-6 border-b border-theme-border-soft flex items-center shrink-0 bg-gradient-to-r from-theme-accent/10 via-transparent to-transparent">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 p-[1.5px] shadow-[0_0_15px_rgba(251,191,36,0.3)] mr-3 shrink-0">
           <div className="w-full h-full bg-theme-surface-elevated rounded-[10.5px] flex items-center justify-center">
-             <Crown className="w-5 h-5 text-amber-500" />
+             <Crown className="w-5 h-5 text-theme-accent" />
           </div>
         </div>
         <div>
-          <h1 className="text-theme-primary font-black text-xl tracking-tight leading-none vip-text-glow">KM Admin</h1>
+          <h1 className="text-theme-primary font-black text-xl tracking-tight leading-none vip-text-glow">BillQyro</h1>
           <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-[9px] font-black tracking-widest text-white uppercase bg-gradient-to-r from-amber-500 to-orange-600 px-2 py-0.5 rounded shadow-[0_0_10px_rgba(245,158,11,0.5)]">VIP Pro+</span>
-            <p className="text-[10px] text-emerald-500 uppercase tracking-wider font-bold flex items-center">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse shadow-[0_0_5px_rgba(16,185,129,0.8)]"></span>
+            <span className="text-[9px] font-black tracking-widest text-white uppercase bg-gradient-to-r from-amber-500 to-orange-600 px-2 py-0.5 rounded shadow-[0_0_10px_rgba(245,158,11,0.5)]">OWNER CONTROL</span>
+            <p className="text-[10px] text-theme-accent uppercase tracking-wider font-bold flex items-center">
+              <span className="w-1.5 h-1.5 rounded-full bg-theme-accent mr-1.5 animate-pulse"></span>
               Secure
             </p>
           </div>
@@ -54,9 +54,16 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
       </div>
       
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
-        {adminMenu.map(item => {
+        {adminMenu.map((item, index) => {
           const isActive = activeAdminTab === item.id;
+          const showGroup = index === 0 || item.group !== adminMenu[index - 1]?.group;
           return (
+            <React.Fragment key={item.id}>
+              {showGroup && (
+                <div className="billqyro-admin-nav-group">
+                  <span>{item.group || 'OWNER TOOLS'}</span>
+                </div>
+              )}
             <button
               key={item.id}
               onClick={() => handleNavClick(item.id)}
@@ -77,6 +84,7 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
               </div>
               <span>{item.label}</span>
             </button>
+            </React.Fragment>
           );
         })}
       </nav>
@@ -93,7 +101,7 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
   );
 
   return (
-    <div className="h-screen bg-theme-main text-theme-primary font-sans flex flex-col md:flex-row overflow-hidden relative selection:bg-theme-accent selection:text-white">
+    <div className="billqyro-admin-premium h-screen bg-theme-main text-theme-primary font-sans flex flex-col md:flex-row overflow-hidden relative selection:bg-theme-accent selection:text-white" data-brand="billqyro">
       {/* VIP Luxury Background gradients */}
       <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[120%] pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[5%] left-[10%] w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[120px] mix-blend-screen opacity-70 animate-blob" />
@@ -138,10 +146,10 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
           <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"></div>
           <div>
             <h2 className="text-2xl font-black text-theme-primary tracking-tight flex items-center gap-3">
-              VIP Control Center
+              BillQyro Control Room
               <span className="px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-500 text-[10px] uppercase font-black tracking-widest shadow-[inset_0_0_10px_rgba(245,158,11,0.1)]">Level 99</span>
             </h2>
-            <p className="text-xs font-semibold text-theme-secondary mt-1">Exclusive administrative access to the global BillQyro ecosystem.</p>
+            <p className="text-xs font-semibold text-theme-secondary mt-1">Private owner console · platform governance, security & operations.</p>
           </div>
           <div className="flex items-center space-x-6">
             <div className="flex items-center px-4 py-2 bg-emerald-500/10 rounded-full border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
