@@ -3,7 +3,7 @@
  * Provides fast, offline-first asynchronous storage structures for larger data collections.
  */
 const DB_NAME = 'billqyro-db';
-const DB_VERSION = 6;
+const DB_VERSION = 7;
 
 let _dbInstance = null;
 let _dbOpenPromise = null;
@@ -14,7 +14,6 @@ export class BillQyroDB {
     if (_dbOpenPromise) return _dbOpenPromise;
     _dbOpenPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
-
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
         const addStoreIfMissing = (name) => {
@@ -25,17 +24,14 @@ export class BillQyroDB {
           if (!store.indexNames.contains('userId')) store.createIndex('userId', 'userId', { unique: false });
           if (!store.indexNames.contains('workspaceId')) store.createIndex('workspaceId', 'workspaceId', { unique: false });
         };
-
-        const stores = [
+        [
           'invoices', 'customers', 'expenses', 'products', 'students',
-          'bankLedger', 'bankCredit', 'appointments', 'orders'
-        ];
-        stores.forEach((name) => {
+          'bankLedger', 'bankCredit', 'appointments', 'orders', 'activities'
+        ].forEach((name) => {
           const store = addStoreIfMissing(name);
           if (store) addIndexes(store);
           else if (db.objectStoreNames.contains(name)) addIndexes(event.target.transaction.objectStore(name));
         });
-
         if (!db.objectStoreNames.contains('syncQueue')) {
           const store = db.createObjectStore('syncQueue', { keyPath: 'id' });
           addIndexes(store);
@@ -43,17 +39,13 @@ export class BillQyroDB {
         if (!db.objectStoreNames.contains('auditLogs')) db.createObjectStore('auditLogs', { keyPath: 'id' });
         if (!db.objectStoreNames.contains('errorLogs')) db.createObjectStore('errorLogs', { keyPath: 'id' });
       };
-
       request.onsuccess = (event) => {
         _dbInstance = event.target.result;
         _dbInstance.onclose = () => { _dbInstance = null; _dbOpenPromise = null; };
         _dbInstance.onversionchange = () => { _dbInstance.close(); _dbInstance = null; _dbOpenPromise = null; };
         resolve(_dbInstance);
       };
-      request.onerror = (event) => {
-        _dbOpenPromise = null;
-        reject(event.target.error);
-      };
+      request.onerror = (event) => { _dbOpenPromise = null; reject(event.target.error); };
     });
     return _dbOpenPromise;
   }
