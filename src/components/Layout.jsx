@@ -10,13 +10,11 @@ import { flushSyncQueue } from '../services/syncEngine';
 import AnimatedBorderTrail from './AnimatedBorderTrail';
 import { AnimatedThemeToggler } from './AnimatedThemeToggler';
 import { getNotifications, markNotificationAsRead, clearAllNotifications } from '../services/notificationsService';
-import { useTheme } from '../contexts/ThemeContext';
 import { useOnClickOutside } from '../hooks/useOnClickOutside';
+import { useTheme } from '../context/ThemeContext';
 
 const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncSource, syncStatus }) => {
-  const { themeState } = useTheme();
-  const isDarkMode = themeState.darkMode;
-
+  const { isDarkMode } = useTheme();
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);

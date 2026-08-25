@@ -796,7 +796,7 @@ function ShowcasePanel() {
   );
 }
 
-function LoginPanel({ onLoginSuccess }) {
+function LoginPanel({ onLoginSuccess, embedded = false }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -863,14 +863,15 @@ function LoginPanel({ onLoginSuccess }) {
       if (firebaseReady) {
         if (isLoginMode) {
           await authEngine.signIn(email.trim(), password.trim());
-          onLoginSuccess();
+          toast.success("Welcome back to BillQyro!");
+          if (onLoginSuccess) onLoginSuccess();
         } else {
           await authEngine.register(email.trim(), password.trim(), name.trim());
-          onLoginSuccess();
+          toast.success("Account created successfully!");
+          if (onLoginSuccess) onLoginSuccess();
         }
       } else {
         setError('Firebase is not configured. Cannot login or create account offline.');
-        setIsSigningIn(false);
       }
     } catch (err) {
       console.error('Firebase auth error', err);
@@ -883,91 +884,55 @@ function LoginPanel({ onLoginSuccess }) {
       else if (err.message) errorMsg = err.message;
       
       setError(errorMsg);
+    } finally {
       setIsSigningIn(false);
     }
   };
 
   const handleGoogleLogin = async () => {
+    setError("");
     setIsSigningIn(true);
-    setError('');
     try {
       if (firebaseReady) {
-        await authEngine.signInWithGoogle(name.trim());
-        onLoginSuccess();
+        const user = await authEngine.signInWithGoogle(name.trim());
+        if (user) {
+          toast.success("Signed in with Google successfully!");
+          if (onLoginSuccess) onLoginSuccess();
+        }
       } else {
         setError('Firebase is not configured for Google login.');
-        setIsSigningIn(false);
       }
     } catch (err) {
       console.error('Firebase auth error', err);
       if (err.code !== 'auth/popup-closed-by-user') {
         setError(err.message || 'Google login failed');
       }
+    } finally {
       setIsSigningIn(false);
     }
   };
 
-  return (
-    <section className="flex flex-1 items-center justify-center border-l border-theme-border-soft bg-theme-app/50 p-6 sm:p-10">
-      <motion.div
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        onMouseMove={(event) => {
-          const rect = event.currentTarget.getBoundingClientRect();
-          const x = ((event.clientX - rect.left) / rect.width) * 100;
-          const y = ((event.clientY - rect.top) / rect.height) * 100;
-          setMousePosition({ x, y });
-          setCardHover(true);
-        }}
-        onMouseLeave={() => setCardHover(false)}
-        className="card-premium glass glass-strong relative w-full max-w-md overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface/80 p-6 shadow-2xl shadow-theme-glow/5 backdrop-blur-xl transition-colors duration-300 sm:p-7"
-      >
-        <motion.div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
-          animate={cardHover ? { opacity: 0.72 } : { opacity: 0.18 }}
-          transition={{ duration: 0.28 }}
-          style={{
-            background: `radial-gradient(420px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(225,29,72,0.16), rgba(244,114,182,0.055) 28%, transparent 64%)`,
-          }}
-        />
-        <motion.div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.075] via-transparent to-transparent"
-          animate={cardHover ? { opacity: 0.75 } : { opacity: 0.22 }}
-          transition={{ duration: 0.3 }}
-        />
-        <motion.div
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-theme-card/12 blur-xl"
-          animate={cardHover ? { x: [0, 760] } : { x: 0 }}
-          transition={{ duration: 1.15, ease: "easeInOut" }}
-        />
-        <motion.div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-theme-accent/10"
-          animate={cardHover ? { boxShadow: "inset 0 0 0 1px rgba(225,29,72,0.18), 0 0 40px rgba(225,29,72,0.10)" } : { boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.04), 0 0 0 rgba(0,0,0,0)" }}
-          transition={{ duration: 0.25 }}
-        />
-        <div className="relative z-10">
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-theme-accent via-purple-500/80 to-theme-accent rounded-t-[2rem]" />
+  const content = (
+    <div className="relative z-10 w-full">
+      {!embedded && <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-theme-accent via-purple-500/80 to-theme-accent rounded-t-[2rem]" />}
+      {!embedded && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="mb-8">
           <BrandMark />
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
-          <div className="badge-premium mb-3 inline-flex items-center gap-2 rounded-full border border-theme-border-soft bg-theme-accent-light px-3 py-1 text-[10px] font-black uppercase tracking-wide text-theme-accent">
-            {isLoginMode ? 'Secure Login' : 'Create Account'} <span className="h-1.5 w-1.5 rounded-full bg-theme-accent" />
-          </div>
-          <h1 className="text-3xl font-black tracking-tight text-theme-primary sm:text-4xl">
-            {isLoginMode ? 'Welcome back' : 'Get started'}
-          </h1>
-          <p className="mt-2 text-sm font-semibold text-theme-muted">
-            {isLoginMode 
-              ? 'Sign in to manage your own customers, invoices, PDFs, links, and payments.' 
-              : 'Create your account, then complete the 1-minute setup wizard to launch your business.'}
-          </p>
-        </motion.div>
+      )}
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}>
+        <div className="badge-premium mb-2.5 inline-flex items-center gap-2 rounded-full border border-theme-border-soft bg-theme-accent-light px-3 py-1 text-[10px] font-black uppercase tracking-wide text-theme-accent">
+          {isLoginMode ? 'Secure Login' : 'Create Account'} <span className="h-1.5 w-1.5 rounded-full bg-theme-accent" />
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-theme-primary">
+          {isLoginMode ? 'Welcome back' : 'Get started'}
+        </h2>
+        <p className="mt-1.5 text-xs sm:text-sm font-medium text-theme-muted">
+          {isLoginMode 
+            ? 'Sign in to manage your customers, invoices, PDFs, and collections.' 
+            : 'Create your account, then complete the 1-minute setup wizard to launch your business.'}
+        </p>
+      </motion.div>
 
         {error && <p className="mt-4 rounded-xl bg-theme-danger/10 px-4 py-2.5 text-sm font-semibold text-theme-danger border border-theme-danger/20">{error}</p>}
 
@@ -1148,13 +1113,71 @@ function LoginPanel({ onLoginSuccess }) {
           <span className="flex items-center gap-1.5"><Check size={11} className="text-theme-accent" /> 99.9% Uptime</span>
           <span className="flex items-center gap-1.5"><Check size={11} className="text-theme-accent" /> Secure Cloud</span>
         </motion.div>
-              </div>
+    </div>
+  );
+
+  if (embedded) {
+    return (
+      <div className="w-full">
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <section className="flex flex-1 items-center justify-center border-l border-theme-border-soft bg-theme-app/50 p-6 sm:p-10">
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        onMouseMove={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          const x = ((event.clientX - rect.left) / rect.width) * 100;
+          const y = ((event.clientY - rect.top) / rect.height) * 100;
+          setMousePosition({ x, y });
+          setCardHover(true);
+        }}
+        onMouseLeave={() => setCardHover(false)}
+        className="card-premium glass glass-strong relative w-full max-w-md overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface/80 p-6 shadow-2xl shadow-theme-glow/5 backdrop-blur-xl transition-colors duration-300 sm:p-7"
+      >
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          animate={cardHover ? { opacity: 0.72 } : { opacity: 0.18 }}
+          transition={{ duration: 0.28 }}
+          style={{
+            background: `radial-gradient(420px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(225,29,72,0.16), rgba(244,114,182,0.055) 28%, transparent 64%)`,
+          }}
+        />
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.075] via-transparent to-transparent"
+          animate={cardHover ? { opacity: 0.75 } : { opacity: 0.22 }}
+          transition={{ duration: 0.3 }}
+        />
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-theme-card/12 blur-xl"
+          animate={cardHover ? { x: [0, 760] } : { x: 0 }}
+          transition={{ duration: 1.15, ease: "easeInOut" }}
+        />
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-theme-accent/10"
+          animate={cardHover ? { boxShadow: "inset 0 0 0 1px rgba(225,29,72,0.18), 0 0 40px rgba(225,29,72,0.10)" } : { boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.04), 0 0 0 rgba(0,0,0,0)" }}
+          transition={{ duration: 0.25 }}
+        />
+        {content}
       </motion.div>
     </section>
   );
 }
 
-export default function Login({ onLoginSuccess }) {
+export default function Login({ onLoginSuccess, embedded = false }) {
+  if (embedded) {
+    return <LoginPanel onLoginSuccess={onLoginSuccess} embedded={true} />;
+  }
+
   return (
     <motion.div
       variants={pageVariants}

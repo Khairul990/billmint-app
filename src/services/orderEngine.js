@@ -1,6 +1,59 @@
+import { BillQyroDB } from './localDb';
+import { getRealUserId, queueSyncTransaction, syncOfflineTransactions } from './dbEngine';
+
+const STORE = 'orders';
+
+const getWorkspaceId = () => {
+  try {
+    const uid = getRealUserId();
+    const raw = localStorage.getItem(uid ? `billqyro_settings_${uid}` : 'billqyro_settings');
+    const settings = raw ? JSON.parse(raw) : {};
+    return settings?.activeWorkspaceId || 'default';
+  } catch {
+    return 'default';
+  }
+};
+
+const scope = (record) => ({
+  ...record,
+  userId: record.userId || getRealUserId() || 'local-user',
+  workspaceId: record.workspaceId || getWorkspaceId(),
+  updatedAt: record.updatedAt || new Date().toISOString(),
+  __version: record.__version || 1
+});
+
+const readLocal = async () => {
+  const uid = getRealUserId();
+  const workspaceId = getWorkspaceId();
+  const rows = await BillQyroDB.getAll(STORE).catch(() => []);
+  return rows.filter(r => (!uid || r.userId === uid) && (!workspaceId || r.workspaceId === workspaceId));
+};
+
 export const orderEngine = {
-  syncFromCloud: async () => {
-    // Future implementation for syncing orders from firestore
+  async getAll() {
+    return readLocal();
+  },
+
+  async save(order) {
+    const record = scope(order);
+    await BillQyroDB.put(STORE, record);
+    await queueSyncTransaction('save', STORE, record.id, record);
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+    if (navigator.onLine) syncOfflineTransactions().catch(() => {});
+    return record;
+  },
+
+  async delete(id) {
+    const existing = (await readLocal()).find(r => r.id === id);
+    if (!existing) return false;
+    await BillQyroDB.delete(STORE, id);
+    await queueSyncTransaction('delete', STORE, id, existing);
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+    if (navigator.onLine) syncOfflineTransactions().catch(() => {});
     return true;
+  },
+
+  async syncFromCloud() {
+    return readLocal();
   }
 };
