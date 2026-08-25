@@ -21,6 +21,31 @@ const Landing = ({ onLoginSuccess }) => {
   const faqs = [['Does BillQyro work offline?','Yes. BillQyro is designed around a local-first architecture so invoices, customers and core workflows remain usable offline and synchronize when connectivity returns.'],['Can customers view an invoice without an account?','Yes. Every invoice can have a secure Live Link so a customer can view the document and follow the configured payment workflow from a browser.'],['Can I change the brand theme?','Yes. The platform uses a semantic theme system, allowing the accent and visual language to adapt without rewriting the application UI.'],['Is my workspace data isolated?','Yes. Workspace-aware storage and authenticated synchronization keep business data separated across workspaces.']];
   const featureData = [[Zap,'Fast invoicing','Create polished invoices, estimates and receipts with a focused workflow.'],[Link2,'Live invoice links','Give customers a beautiful browser-based invoice experience.'],[CreditCard,'Payments & collections','Track paid, partial, unpaid and overdue balances with confidence.'],[ShieldCheck,'Secure by design','Workspace isolation, authentication and controlled data access.'],[RefreshCw,'Offline-first','Keep working during connectivity gaps and synchronize later.'],[Download,'PDF-ready','Generate professional documents for print, download and sharing.']];
   return <div className={`billqyro-landing-premium min-h-screen overflow-x-hidden bg-theme-app text-theme-primary ${isDarkMode?'dark':''}`}>
+    <style>{`
+      .billqyro-landing-premium #login,
+      .billqyro-landing-premium #login * { box-sizing: border-box; }
+      .billqyro-landing-premium #login { overflow: hidden; }
+      .billqyro-landing-premium #login > div { width: min(100%, 1120px); }
+      .billqyro-landing-premium #login input,
+      .billqyro-landing-premium #login button { max-width: 100%; }
+      @media (max-width: 1023px) {
+        .billqyro-landing-premium #login { padding-top: 2rem; padding-bottom: 2rem; }
+        .billqyro-landing-premium #login > div { width: 100%; max-width: 680px; min-height: 0; }
+        .billqyro-landing-premium #login > div > div { min-width: 0; }
+        .billqyro-landing-premium #login section { min-width: 0; width: 100%; border-left: 0 !important; }
+        .billqyro-landing-premium #login .card-premium .card-premium { width: 100% !important; max-width: 520px !important; margin-left: auto; margin-right: auto; }
+        .billqyro-landing-premium #login .card-premium .card-premium > .relative.z-10 { min-width: 0; width: 100%; }
+        .billqyro-landing-premium #login .card-premium .card-premium form { min-width: 0; }
+      }
+      @media (max-width: 640px) {
+        .billqyro-landing-premium #login { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .billqyro-landing-premium #login > div { border-radius: 24px; }
+        .billqyro-landing-premium #login > div > div > section { padding: 1rem !important; }
+        .billqyro-landing-premium #login .card-premium .card-premium { border-radius: 24px; padding: 1.1rem !important; }
+        .billqyro-landing-premium #login .card-premium .card-premium h1 { font-size: 1.85rem; line-height: 1.1; }
+        .billqyro-landing-premium #login .card-premium .card-premium form { margin-top: 1.25rem; }
+      }
+    `}</style>
     <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden"><div className="absolute left-1/2 top-[-260px] h-[620px] w-[900px] -translate-x-1/2 rounded-full bg-theme-accent/10 blur-[120px]"/><div className="absolute right-[-180px] top-[38%] h-[420px] w-[420px] rounded-full bg-theme-accent/5 blur-[100px]"/><HeroBackground/></div>
     <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${isScrolled?'border-b border-theme-border-soft bg-theme-app/85 shadow-xl backdrop-blur-2xl':'bg-transparent'}`}><div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 lg:px-8"><button onClick={()=>scrollTo('top')} className="shrink-0"><Logo type="horizontal" forceWhiteText={false}/></button><nav className="hidden items-center gap-1 rounded-full border border-theme-border-soft bg-theme-card/70 p-1 backdrop-blur-xl md:flex">{['features','categories','workflow','faq'].map(item=><button key={item} onClick={()=>scrollTo(item)} className="rounded-full px-4 py-2 text-xs font-bold capitalize text-theme-muted transition hover:bg-theme-accent/10 hover:text-theme-primary">{item}</button>)}</nav><div className="flex items-center gap-2"><AnimatedThemeToggler/><button onClick={()=>scrollTo('login')} className="hidden rounded-full bg-theme-accent px-5 py-2.5 text-xs font-extrabold text-white shadow-lg shadow-theme-accent/20 transition hover:-translate-y-0.5 sm:block">Sign in</button><button onClick={()=>setMobileMenuOpen(v=>!v)} className="rounded-xl border border-theme-border-soft bg-theme-card p-2.5 md:hidden"><Layers size={18}/></button></div></div><AnimatePresence>{mobileMenuOpen&&<motion.div initial={{opacity:0,height:0}} animate={{opacity:1,height:'auto'}} exit={{opacity:0,height:0}} className="border-t border-theme-border-soft bg-theme-app/95 px-5 py-4 backdrop-blur-xl md:hidden">{['features','categories','workflow','faq','login'].map(item=><button key={item} onClick={()=>scrollTo(item)} className="block w-full border-b border-theme-border-soft py-3 text-left text-sm font-bold capitalize">{item}</button>)}</motion.div>}</AnimatePresence></header>
     <main id="top" className="pt-28">
