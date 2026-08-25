@@ -1,31 +1,37 @@
-import * as dbEngine from './dbEngine';
+import { BillQyroDB } from './localDb';
+import { getRealUserId, queueSyncTransaction, syncOfflineTransactions } from './dbEngine';
 
 class ActivityEngine {
+  getScopeKey(workspaceId) {
+    const uid = getRealUserId() || 'local-user';
+    return `billqyro_activities_${uid}_${workspaceId || 'default'}`;
+  }
+
   async logActivity(workspaceId, action, entityType, entityId, details = {}) {
-    // In production, save this to a dedicated activities subcollection in Firestore/IndexedDB
+    const userId = getRealUserId() || 'local-user';
+    const resolvedWorkspaceId = workspaceId || 'default';
     const activity = {
       id: `act_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-      action, // e.g. 'CREATED', 'UPDATED', 'DELETED', 'PAID'
-      entityType, // e.g. 'INVOICE', 'CUSTOMER', 'PAYMENT'
+      userId,
+      workspaceId: resolvedWorkspaceId,
+      action,
+      entityType,
       entityId,
       details,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      __version: 1
     };
 
     try {
-      const activities = await this.getActivities(workspaceId);
-      activities.unshift(activity); // Add to beginning
-      
-      // Keep only last 100 activities per workspace to prevent local bloat
-      if (activities.length > 100) {
-        activities.length = 100;
-      }
-      
-      localStorage.setItem(`billqyro_activities_${workspaceId}`, JSON.stringify(activities));
-      
-      // In production, this would also push to dbEngine -> Firestore
-      // await dbEngine.saveActivity(workspaceId, activity);
-      
+      const activities = await this.getActivities(resolvedWorkspaceId);
+      const next = [activity, ...activities].slice(0, 100);
+      localStorage.setItem(this.getScopeKey(resolvedWorkspaceId), JSON.stringify(next));
+      await BillQyroDB.put('activities', activity);
+      await queueSyncTransaction('save', 'activities', activity.id, activity);
+      window.dispatchEvent(new CustomEvent('billqyro_sync'));
+      if (navigator.onLine) syncOfflineTransactions().catch(() => {});
       return activity;
     } catch (e) {
       console.error('[ActivityEngine] Error logging activity', e);
@@ -34,13 +40,19 @@ class ActivityEngine {
   }
 
   async getActivities(workspaceId, limit = 50) {
+    const userId = getRealUserId() || 'local-user';
+    const resolvedWorkspaceId = workspaceId || 'default';
     try {
-      const raw = localStorage.getItem(`billqyro_activities_${workspaceId}`);
-      if (raw) {
-        const activities = JSON.parse(raw);
-        return activities.slice(0, limit);
-      }
-      return [];
+      const rows = await BillQyroDB.getAll('activities');
+      const scoped = rows
+        .filter(item => item.userId === userId && item.workspaceId === resolvedWorkspaceId)
+        .sort((a, b) => new Date(b.createdAt || b.timestamp || 0) - new Date(a.createdAt || a.timestamp || 0));
+      if (scoped.length) return scoped.slice(0, limit);
+
+      const raw = localStorage.getItem(this.getScopeKey(resolvedWorkspaceId));
+      if (!raw) return [];
+      const activities = JSON.parse(raw);
+      return Array.isArray(activities) ? activities.slice(0, limit) : [];
     } catch (e) {
       console.error('[ActivityEngine] Error fetching activities', e);
       return [];
