@@ -49,8 +49,7 @@ import AdminPINLogin from './pages/admin/AdminPINLogin';
 import Confetti from 'react-confetti';
 import CommandPalette from './components/CommandPalette';
 import { pageVariants } from './utils/animations';
-
-const Landing = React.lazy(() => import('./pages/Landing'));
+import Landing from './pages/Landing';
 
 const DemoLogin = React.lazy(() => import('./pages/DemoLogin'));
 const OnboardingWizard = React.lazy(() => import('./pages/onboarding/OnboardingWizard'));

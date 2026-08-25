@@ -59,7 +59,24 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
-export const useTheme = () => useContext(ThemeContext) || {
-  themeState: { themeId: 'obsidian-gold', darkMode: false },
-  setThemeState: () => {}
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    return {
+      themeState: { themeId: 'obsidian-gold', darkMode: false },
+      setThemeState: () => {},
+      isDarkMode: false,
+      toggleTheme: () => {}
+    };
+  }
+  return {
+    ...context,
+    isDarkMode: context.themeState?.darkMode ?? false,
+    toggleTheme: () => {
+      context.setThemeState(prev => ({
+        ...prev,
+        darkMode: !prev.darkMode
+      }));
+    }
+  };
 };

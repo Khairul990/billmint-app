@@ -2,8 +2,19 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig(({ mode }) => ({
+  resolve: {
+    alias: [
+      { find: /^.*\/contexts\/(.*)$/, replacement: path.resolve(__dirname, 'src/context/$1') },
+      { find: /^(\.\.?\/)+contexts$/, replacement: path.resolve(__dirname, 'src/context') },
+      { find: '@/contexts', replacement: path.resolve(__dirname, 'src/context') }
+    ]
+  },
   plugins: [
     react(),
     nodePolyfills({
