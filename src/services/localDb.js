@@ -3,7 +3,7 @@
  * Provides fast, offline-first asynchronous storage structures for larger data collections.
  */
 const DB_NAME = 'billqyro-db';
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 let _dbInstance = null;
 let _dbOpenPromise = null;
@@ -17,82 +17,31 @@ export class BillQyroDB {
 
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
-
         const addStoreIfMissing = (name) => {
-          if (!db.objectStoreNames.contains(name)) {
-            return db.createObjectStore(name, { keyPath: 'id' });
-          }
+          if (!db.objectStoreNames.contains(name)) return db.createObjectStore(name, { keyPath: 'id' });
           return null;
         };
         const addIndexes = (store) => {
-          if (!store.indexNames.contains('userId')) {
-            store.createIndex('userId', 'userId', { unique: false });
-          }
-          if (!store.indexNames.contains('workspaceId')) {
-            store.createIndex('workspaceId', 'workspaceId', { unique: false });
-          }
+          if (!store.indexNames.contains('userId')) store.createIndex('userId', 'userId', { unique: false });
+          if (!store.indexNames.contains('workspaceId')) store.createIndex('workspaceId', 'workspaceId', { unique: false });
         };
 
-        let store;
-        store = addStoreIfMissing('invoices');
-        if (store) addIndexes(store);
-        if (!store && db.objectStoreNames.contains('invoices')) {
-          const txn = event.target.transaction;
-          addIndexes(txn.objectStore('invoices'));
-        }
-
-        store = addStoreIfMissing('customers');
-        if (store) addIndexes(store);
-        if (!store && db.objectStoreNames.contains('customers')) {
-          const txn = event.target.transaction;
-          addIndexes(txn.objectStore('customers'));
-        }
-
-        store = addStoreIfMissing('expenses');
-        if (store) addIndexes(store);
-        if (!store && db.objectStoreNames.contains('expenses')) {
-          const txn = event.target.transaction;
-          addIndexes(txn.objectStore('expenses'));
-        }
-
-        store = addStoreIfMissing('products');
-        if (store) addIndexes(store);
-        if (!store && db.objectStoreNames.contains('products')) {
-          const txn = event.target.transaction;
-          addIndexes(txn.objectStore('products'));
-        }
-
-        store = addStoreIfMissing('students');
-        if (store) addIndexes(store);
-        if (!store && db.objectStoreNames.contains('students')) {
-          const txn = event.target.transaction;
-          addIndexes(txn.objectStore('students'));
-        }
-
-        store = addStoreIfMissing('bankLedger');
-        if (store) addIndexes(store);
-        if (!store && db.objectStoreNames.contains('bankLedger')) {
-          const txn = event.target.transaction;
-          addIndexes(txn.objectStore('bankLedger'));
-        }
-
-        store = addStoreIfMissing('bankCredit');
-        if (store) addIndexes(store);
-        if (!store && db.objectStoreNames.contains('bankCredit')) {
-          const txn = event.target.transaction;
-          addIndexes(txn.objectStore('bankCredit'));
-        }
+        const stores = [
+          'invoices', 'customers', 'expenses', 'products', 'students',
+          'bankLedger', 'bankCredit', 'appointments', 'orders'
+        ];
+        stores.forEach((name) => {
+          const store = addStoreIfMissing(name);
+          if (store) addIndexes(store);
+          else if (db.objectStoreNames.contains(name)) addIndexes(event.target.transaction.objectStore(name));
+        });
 
         if (!db.objectStoreNames.contains('syncQueue')) {
-          store = db.createObjectStore('syncQueue', { keyPath: 'id' });
+          const store = db.createObjectStore('syncQueue', { keyPath: 'id' });
           addIndexes(store);
         }
-        if (!db.objectStoreNames.contains('auditLogs')) {
-          db.createObjectStore('auditLogs', { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains('errorLogs')) {
-          db.createObjectStore('errorLogs', { keyPath: 'id' });
-        }
+        if (!db.objectStoreNames.contains('auditLogs')) db.createObjectStore('auditLogs', { keyPath: 'id' });
+        if (!db.objectStoreNames.contains('errorLogs')) db.createObjectStore('errorLogs', { keyPath: 'id' });
       };
 
       request.onsuccess = (event) => {
@@ -101,7 +50,6 @@ export class BillQyroDB {
         _dbInstance.onversionchange = () => { _dbInstance.close(); _dbInstance = null; _dbOpenPromise = null; };
         resolve(_dbInstance);
       };
-
       request.onerror = (event) => {
         _dbOpenPromise = null;
         reject(event.target.error);
@@ -113,24 +61,22 @@ export class BillQyroDB {
   static async getAll(storeName) {
     const db = await this.open();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, 'readonly');
-      const store = transaction.objectStore(storeName);
-      const request = store.getAll();
-
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error);
+      try {
+        const request = db.transaction(storeName, 'readonly').objectStore(storeName).getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      } catch (error) { reject(error); }
     });
   }
 
   static async get(storeName, id) {
     const db = await this.open();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, 'readonly');
-      const store = transaction.objectStore(storeName);
-      const request = store.get(id);
-
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      try {
+        const request = db.transaction(storeName, 'readonly').objectStore(storeName).get(id);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      } catch (error) { reject(error); }
     });
   }
 
@@ -138,12 +84,11 @@ export class BillQyroDB {
     if (localStorage.getItem('billqyro_demo_session_active') === 'true') return item;
     const db = await this.open();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, 'readwrite');
-      const store = transaction.objectStore(storeName);
-      const request = store.put(item);
-
-      request.onsuccess = () => resolve(item);
-      request.onerror = () => reject(request.error);
+      try {
+        const request = db.transaction(storeName, 'readwrite').objectStore(storeName).put(item);
+        request.onsuccess = () => resolve(item);
+        request.onerror = () => reject(request.error);
+      } catch (error) { reject(error); }
     });
   }
 
@@ -151,12 +96,11 @@ export class BillQyroDB {
     if (localStorage.getItem('billqyro_demo_session_active') === 'true') return true;
     const db = await this.open();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, 'readwrite');
-      const store = transaction.objectStore(storeName);
-      const request = store.delete(id);
-
-      request.onsuccess = () => resolve(true);
-      request.onerror = () => reject(request.error);
+      try {
+        const request = db.transaction(storeName, 'readwrite').objectStore(storeName).delete(id);
+        request.onsuccess = () => resolve(true);
+        request.onerror = () => reject(request.error);
+      } catch (error) { reject(error); }
     });
   }
 
@@ -164,12 +108,11 @@ export class BillQyroDB {
     if (localStorage.getItem('billqyro_demo_session_active') === 'true') return true;
     const db = await this.open();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, 'readwrite');
-      const store = transaction.objectStore(storeName);
-      const request = store.clear();
-
-      request.onsuccess = () => resolve(true);
-      request.onerror = () => reject(request.error);
+      try {
+        const request = db.transaction(storeName, 'readwrite').objectStore(storeName).clear();
+        request.onsuccess = () => resolve(true);
+        request.onerror = () => reject(request.error);
+      } catch (error) { reject(error); }
     });
   }
 
