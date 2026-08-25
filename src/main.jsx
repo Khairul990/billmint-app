@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import './legacy-modernization.css'
 import App from './App.jsx'
 import { ThemeProvider } from './contexts/ThemeContext.jsx'
 import { Toaster, toast } from 'react-hot-toast'
