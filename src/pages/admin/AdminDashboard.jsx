@@ -185,22 +185,22 @@ const AdminDashboard = () => {
       ) : (
         <>
           {/* KPI Metrics Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5">
             {kpis.map((kpi, idx) => {
               const Icon = kpi.icon;
               const isUnavailable = kpi.value === 'Data unavailable';
               return (
                 <div
                   key={idx}
-                  className="p-5 rounded-2xl bg-theme-surface/50 border border-theme-border-soft hover:border-theme-accent/20 transition-all flex flex-col justify-between"
+                  className="p-4 rounded-xl bg-theme-surface/60 border border-theme-border-soft hover:border-theme-accent/20 transition-all flex flex-col justify-between"
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] font-black uppercase tracking-wider text-theme-muted">{kpi.label}</span>
-                    <div className="p-2 rounded-xl bg-theme-surface-elevated border border-theme-border-soft">
-                      <Icon className={`w-4 h-4 ${kpi.color}`} />
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">{kpi.label}</span>
+                    <div className="p-1.5 rounded-lg bg-theme-surface-elevated border border-theme-border-soft">
+                      <Icon className={`w-3.5 h-3.5 ${kpi.color}`} />
                     </div>
                   </div>
-                  <div className={`text-2xl font-black tracking-tight ${isUnavailable ? 'text-sm text-theme-muted font-bold' : 'text-theme-primary'}`}>
+                  <div className={`text-xl md:text-2xl font-black tracking-tight ${isUnavailable ? 'text-xs text-theme-muted font-bold' : 'text-theme-primary'}`}>
                     {kpi.value}
                   </div>
                 </div>
