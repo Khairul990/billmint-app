@@ -107,4 +107,12 @@ export class BillQyroDB {
       } catch (error) { reject(error); }
     });
   }
+
+  static close() {
+    if (_dbInstance) {
+      _dbInstance.close();
+      _dbInstance = null;
+      _dbOpenPromise = null;
+    }
+  }
 }
