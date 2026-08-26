@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback, memo } from 'react';
-import { useInvoice } from '../../../contexts/InvoiceContext';
+import { useInvoice } from '../../../context/InvoiceContext';
 import { Plus, Copy, Trash2, GripVertical, FilePlus, ChevronDown, Settings } from 'lucide-react';
 import QuickProductBar from './QuickProductBar';
 import EditColumnsModal from './EditColumnsModal';

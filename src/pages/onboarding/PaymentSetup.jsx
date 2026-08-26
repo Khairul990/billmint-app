@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useOnboarding } from '../../contexts/OnboardingContext';
+import { useOnboarding } from '../../context/OnboardingContext';
 import Switch from 'react-switch';
 import { ChevronLeft, ChevronRight, QrCode } from 'lucide-react';
 import { toast } from 'react-hot-toast';

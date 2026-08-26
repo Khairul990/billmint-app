@@ -1,7 +1,7 @@
-import * as dbEngine from './dbEngine';
-import { submitPremiumRequest as dbSubmitPremiumRequest } from './dbEngine';
+import * as dbEngine from './dbEngine.js';
+import { submitPremiumRequest as dbSubmitPremiumRequest } from './dbEngine.js';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { db } from './firebaseConfig.js';
 
 const SUBSCRIPTION_PLANS = {
   FREE: {

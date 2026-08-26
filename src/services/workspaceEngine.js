@@ -1,4 +1,4 @@
-import { db, firebaseReady } from './firebaseConfig';
+import { db, firebaseReady } from './firebaseConfig.js';
 import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
 import {
   getSettings,
@@ -6,7 +6,7 @@ import {
   getRealUserId,
   getAuthSession,
   logAudit
-} from './dbEngine';
+} from './dbEngine.js';
 
 export const workspaceEngine = {
   async getCurrent() {

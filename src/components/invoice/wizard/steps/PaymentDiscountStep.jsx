@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useInvoice } from '../../../../contexts/InvoiceContext';
+import { useInvoice } from '../../../../context/InvoiceContext';
 import { Percent, Banknote, FileText, FileSignature } from 'lucide-react';
 
 const PaymentDiscountStep = () => {

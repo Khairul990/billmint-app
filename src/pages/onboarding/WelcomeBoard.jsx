@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useOnboarding } from '../../contexts/OnboardingContext';
+import { useOnboarding } from '../../context/OnboardingContext';
 import Confetti from 'react-confetti';
 import { CheckCircle } from 'lucide-react';
 

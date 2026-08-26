@@ -1,7 +1,7 @@
-import { invoiceEngine } from './invoiceEngine';
-import { customerEngine } from './customerEngine';
-import { expenseEngine } from './expenseEngine';
-import { productEngine } from './productEngine';
+import { invoiceEngine } from './invoiceEngine.js';
+import { customerEngine } from './customerEngine.js';
+import { expenseEngine } from './expenseEngine.js';
+import { productEngine } from './productEngine.js';
 import {
   computeSalesSummary,
   computeCollectionsSummary,
@@ -13,7 +13,7 @@ import {
   filterByWorkspace,
   getInvoicePaidTotal,
   getInvoiceBalanceDue
-} from '../utils/financialCalculations';
+} from '../utils/financialCalculations.js';
 
 class ReportEngine {
   async generateComprehensiveReport(workspaceId, dateRange = 'This Month', customStart = null, customEnd = null) {

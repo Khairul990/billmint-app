@@ -1,4 +1,4 @@
-import { db, firebaseReady, auth } from './firebaseConfig'
+import { db, firebaseReady, auth } from './firebaseConfig.js';
 
 
 // ==========================================
@@ -149,9 +149,9 @@ export const clearStaffs = async () => {
 import { toast } from 'react-hot-toast';
 import JSZip from 'jszip';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where, getCountFromServer } from 'firebase/firestore';
-import { getAdminEmail, isAdminUser } from '../utils/adminAccess';
-import { BillQyroDB } from './localDb';
-import { generateVerificationCode } from './verificationCodeService';
+import { getAdminEmail, isAdminUser } from '../utils/adminAccess.js';
+import { BillQyroDB } from './localDb.js';
+import { generateVerificationCode } from './verificationCodeService.js';
 import {
   getUserRevenueState,
   saveUserRevenueState,
@@ -163,7 +163,7 @@ import {
   getAdminAllPaymentProofs,
   getAdminPlatformRevenueStates,
   updatePlatformPaymentProofStatus
-} from './platformRevenueService';
+} from './platformRevenueService.js';
 import {
   submitSupportTicket,
   getAdminAllSupportTickets,
@@ -179,7 +179,7 @@ import {
   toggleAnnouncementActive,
   createChangelog,
   getAdminAllChangelogs
-} from './platformAdminService';
+} from './platformAdminService.js';
 
 // --- VERSION TRACKING FOR CONFLICT RESOLUTION ---
 const getNextVersion = (record) => {

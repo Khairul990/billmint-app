@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useInvoice } from '../../../contexts/InvoiceContext';
+import { useInvoice } from '../../../context/InvoiceContext';
 import { toast } from 'react-hot-toast';
 import { Check, User, ShoppingBag, CreditCard, AlertTriangle, Loader2, ArrowRight, ArrowLeft, Eye, X, ExternalLink, MessageCircle, Download, CheckCircle2 } from 'lucide-react';
 import { getCustomerLabelByType } from '../../../config/businessPresets';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { InvoiceProvider } from '../contexts/InvoiceContext';
+import { InvoiceProvider } from '../context/InvoiceContext';
 import SmartStudioLayout from '../components/invoice/studio/SmartStudioLayout';
 
 const CreateInvoice = ({

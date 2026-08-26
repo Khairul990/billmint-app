@@ -1,5 +1,5 @@
-import { BillQyroDB } from './localDb';
-import { db, firebaseReady } from './firebaseConfig';
+import { BillQyroDB } from './localDb.js';
+import { db, firebaseReady } from './firebaseConfig.js';
 import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 
 const STORE = 'announcements';

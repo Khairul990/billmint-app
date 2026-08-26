@@ -1,4 +1,4 @@
-import * as dbEngine from './dbEngine';
+import * as dbEngine from './dbEngine.js';
 
 class MigrationEngine {
   constructor() {

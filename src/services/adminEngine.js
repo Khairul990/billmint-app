@@ -1,4 +1,4 @@
-import { db, firebaseReady } from './firebaseConfig';
+import { db, firebaseReady } from './firebaseConfig.js';
 import { collection, getDocs, doc, getDoc, setDoc, deleteDoc, query, where } from 'firebase/firestore';
 import {
   getInvoices as dbGetInvoices,
@@ -33,7 +33,7 @@ import {
   getActiveAnnouncement as dbGetActiveAnnouncement,
   getAdminPremiumRequests as dbGetAdminPremiumRequests,
   updatePremiumRequestStatus as dbUpdatePremiumRequestStatus
-} from './dbEngine';
+} from './dbEngine.js';
 import {
   getAdminAllSupportTickets,
   updateSupportTicketStatus,
@@ -44,14 +44,14 @@ import {
   toggleAnnouncementActive,
   createChangelog,
   getAdminAllChangelogs
-} from './platformAdminService';
+} from './platformAdminService.js';
 import {
   getAdminPlatformRevenueStates,
   getAdminAllPaymentProofs,
   updatePlatformPaymentProofStatus,
   getGlobalRevenueSettings,
   saveGlobalRevenueSettings
-} from './platformRevenueService';
+} from './platformRevenueService.js';
 
 const memoryCache = {
   revenueStates: { data: null, time: 0 },

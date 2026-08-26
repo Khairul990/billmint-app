@@ -1,5 +1,5 @@
-import { BillQyroDB } from './localDb';
-import { getRealUserId, queueSyncTransaction, syncOfflineTransactions } from './dbEngine';
+import { BillQyroDB } from './localDb.js';
+import { getRealUserId, queueSyncTransaction, syncOfflineTransactions } from './dbEngine.js';
 
 const STORE = 'appointments';
 

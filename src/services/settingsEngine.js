@@ -1,5 +1,5 @@
-import * as dbEngine from './dbEngine';
-import {  saveSettings as dbSaveSettings  } from './dbEngine';
+import * as dbEngine from './dbEngine.js';
+import {  saveSettings as dbSaveSettings  } from './dbEngine.js';
 
 class SettingsEngine {
   constructor() {

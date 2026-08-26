@@ -1,14 +1,14 @@
 import {
   sendPaymentReceiptEmail,
   sendWhatsAppNotification
-} from './cloudFunctions';
+} from './cloudFunctions.js';
 import {
   addNotification as addLocalNotification,
   getNotifications as getLocalNotifications,
   markNotificationAsRead as markLocalNotificationRead,
   clearAllNotifications as clearLocalNotifications
-} from './notificationsService';
-import { db, firebaseReady } from './firebaseConfig';
+} from './notificationsService.js';
+import { db, firebaseReady } from './firebaseConfig.js';
 import { collection, addDoc, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 
 export const notificationEngine = {

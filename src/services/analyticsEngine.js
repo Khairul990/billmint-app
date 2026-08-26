@@ -1,6 +1,6 @@
-import { invoiceEngine } from './invoiceEngine';
-import * as dbEngine from './dbEngine';
-import {  getActiveAnnouncement as dbGetActiveAnnouncement  } from './dbEngine';
+import { invoiceEngine } from './invoiceEngine.js';
+import * as dbEngine from './dbEngine.js';
+import {  getActiveAnnouncement as dbGetActiveAnnouncement  } from './dbEngine.js';
 
 class AnalyticsEngine {
   async getDashboardMetrics(workspaceId) {

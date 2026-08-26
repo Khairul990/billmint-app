@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useInvoice } from '../../../contexts/InvoiceContext';
+import { useInvoice } from '../../../context/InvoiceContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings2, Calculator, ChevronUp, ChevronDown, FileText, Link, Loader2 } from 'lucide-react';
 import SmartPaymentSection from './SmartPaymentSection';

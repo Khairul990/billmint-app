@@ -1,4 +1,4 @@
-import { getStaffs, saveStaff, deleteStaff, restoreStaff } from './dbEngine';
+import { getStaffs, saveStaff, deleteStaff, restoreStaff } from './dbEngine.js';
 
 class StaffEngine {
   async getStaffs(includeDeleted = false) {

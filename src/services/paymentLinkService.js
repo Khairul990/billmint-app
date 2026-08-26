@@ -1,6 +1,6 @@
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { db } from './firebaseConfig';
-import { isEducationCategory } from '../utils/categoryChecks';
+import { db } from './firebaseConfig.js';
+import { isEducationCategory } from '../utils/categoryChecks.js';
 
 /**
  * Build the canonical customer portal URL for an invoice.

@@ -95,21 +95,19 @@ const InvoiceCard = ({
     };
   }, [showMoreMenu]);
 
-  if (!invoice) return null;
-
-  const grandTotal = parseFloat(invoice.grandTotal || invoice.total) || 0;
-  const paidTotal = getInvoicePaidTotal(invoice);
-  const balanceDue = getInvoiceBalanceDue(invoice);
+  const grandTotal = parseFloat(invoice?.grandTotal || invoice?.total) || 0;
+  const paidTotal = invoice ? getInvoicePaidTotal(invoice) : 0;
+  const balanceDue = invoice ? getInvoiceBalanceDue(invoice) : 0;
 
   // Progress percentage
   const progressPercent = grandTotal > 0 ? Math.min(100, Math.max(0, Math.round((paidTotal / grandTotal) * 100))) : (paidTotal > 0 ? 100 : 0);
 
   // Check overdue
   const isOverdue = useMemo(() => {
-    if (balanceDue <= 0 || !invoice.dueDate) return false;
+    if (!invoice || balanceDue <= 0 || !invoice.dueDate) return false;
     const due = new Date(invoice.dueDate);
     return !isNaN(due) && due < new Date();
-  }, [balanceDue, invoice.dueDate]);
+  }, [invoice, balanceDue]);
 
   // Category Icon & Context
   const categoryIcon = useMemo(() => {
@@ -126,6 +124,7 @@ const InvoiceCard = ({
 
   // Category Metadata Line
   const categoryMetadata = useMemo(() => {
+    if (!invoice) return null;
     const items = invoice.items || [];
     if (items.length === 0) {
       return invoice.notes ? `Note: ${invoice.notes.slice(0, 45)}...` : null;
@@ -149,7 +148,9 @@ const InvoiceCard = ({
     }
 
     return parts.join(' • ');
-  }, [invoice.items, invoice.notes]);
+  }, [invoice]);
+
+  if (!invoice) return null;
 
   const handleSendReminder = async () => {
     if (localStorage.getItem('billqyro_demo_session_active') === 'true') {

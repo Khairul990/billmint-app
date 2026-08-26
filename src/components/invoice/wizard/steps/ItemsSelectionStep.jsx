@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useInvoice } from '../../../../contexts/InvoiceContext';
+import { useInvoice } from '../../../../context/InvoiceContext';
 import { invoiceTemplates } from '../../../../config/invoiceTemplates';
 import { Plus, Trash2, GripVertical, Package, X } from 'lucide-react';
 import {

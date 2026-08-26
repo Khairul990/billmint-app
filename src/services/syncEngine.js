@@ -7,4 +7,4 @@ export {
   pushDataUpdate,
   startRealTimeSync,
   stopRealTimeSync
-} from './dbEngine';
+} from './dbEngine.js';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, AlertTriangle, ArrowUp } from 'lucide-react';
-import { useInvoice } from '../../../contexts/InvoiceContext';
+import { useInvoice } from '../../../context/InvoiceContext';
 
 const QuickProductBar = ({ products = [] }) => {
   const { state, dispatch } = useInvoice();

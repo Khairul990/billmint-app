@@ -1,5 +1,5 @@
-import * as dbEngine from './dbEngine';
-import { authEngine } from './authEngine';
+import * as dbEngine from './dbEngine.js';
+import { authEngine } from './authEngine.js';
 
 class AuditEngine {
   async logAuditEvent(workspaceId, eventType, details = {}, severity = 'info') {

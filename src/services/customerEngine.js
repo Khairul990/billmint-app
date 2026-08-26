@@ -1,5 +1,5 @@
-import { getCustomers, saveCustomer, deleteCustomer, restoreCustomer } from './dbEngine';
-import { computeCustomerLedger } from '../utils/financialCalculations';
+import { getCustomers, saveCustomer, deleteCustomer, restoreCustomer } from './dbEngine.js';
+import { computeCustomerLedger } from '../utils/financialCalculations.js';
 
 class CustomerEngine {
   async getCustomers(includeDeleted = false) {
