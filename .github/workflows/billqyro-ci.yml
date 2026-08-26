@@ -1,0 +1,46 @@
+name: BillQyro CI
+
+on:
+  push:
+    branches:
+      - main
+      - audit/fix-broken-business-features
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate web application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci || npm install --legacy-peer-deps
+
+      - name: Build
+        run: npm run build
+        env:
+          CI: false
+
+      - name: Run project tests when present
+        shell: bash
+        run: |
+          set -e
+          if [ -d tests ] && compgen -G "tests/*.mjs" > /dev/null; then
+            for test_file in tests/*.mjs; do
+              echo "Running $test_file"
+              node "$test_file"
+            done
+          else
+            echo "No standalone tests/*.mjs found; build validation completed."
+          fi
