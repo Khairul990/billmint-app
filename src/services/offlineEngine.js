@@ -1,4 +1,4 @@
-import { BillQyroDB } from './localDb';
+import { BillQyroDB } from './localDb.js';
 import {
   enqueueSync,
   flushSyncQueue,
@@ -7,8 +7,8 @@ import {
   stopRealTimeSync as dbStopRealTimeSync,
   cloudWins,
   getDeviceId
-} from './dbEngine';
-import { startBackgroundSync } from './syncWorker';
+} from './dbEngine.js';
+import { startBackgroundSync } from './syncWorker.js';
 
 export const offlineEngine = {
   async getQueueStatus() {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useInvoice } from '../../../contexts/InvoiceContext';
+import { useInvoice } from '../../../context/InvoiceContext';
 import { Wallet, Banknote, CreditCard, Clock } from 'lucide-react';
 
 const SmartPaymentSection = () => {

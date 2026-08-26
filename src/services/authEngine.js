@@ -1,4 +1,4 @@
-import { auth, db } from './firebaseConfig';
+import { auth, db } from './firebaseConfig.js';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
@@ -7,7 +7,7 @@ import {
   sendPasswordResetEmail 
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { getAuthSession as dbGetAuthSession, getRealUserId as dbGetRealUserId, logout as dbLogout} from './dbEngine';
+import { getAuthSession as dbGetAuthSession, getRealUserId as dbGetRealUserId, logout as dbLogout} from './dbEngine.js';
 
 export const authEngine = {
   async signIn(email, password) {

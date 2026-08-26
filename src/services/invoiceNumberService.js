@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc, runTransaction, updateDoc } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { db } from './firebaseConfig.js';
 
 export const generateInvoiceNumber = async (userId) => {
   const currentYear = new Date().getFullYear();

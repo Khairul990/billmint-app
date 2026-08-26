@@ -12,12 +12,12 @@
 
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc } from 'firebase/firestore';
-import { storage, db, firebaseReady } from './firebaseConfig';
-import { generateInvoicePdfBlob } from './communication/attachmentEngine';
-import { buildPortalUrl } from './paymentLinkService';
-import { getRealUserId } from './dbEngine';
-import { cleanPhoneNumber } from '../utils/shareUtils';
-import { formatCurrency } from '../utils/invoiceUtils';
+import { storage, db, firebaseReady } from './firebaseConfig.js';
+import { generateInvoicePdfBlob } from './communication/attachmentEngine.js';
+import { buildPortalUrl } from './paymentLinkService.js';
+import { getRealUserId } from './dbEngine.js';
+import { cleanPhoneNumber } from '../utils/shareUtils.js';
+import { formatCurrency } from '../utils/invoiceUtils.js';
 import { toast } from 'react-hot-toast';
 
 const CACHE_KEY = (invoiceId) => `billqyro_invoice_pdf_url_${invoiceId}`;

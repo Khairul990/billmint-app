@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Sparkles, UploadCloud, X, Loader2, CheckCircle2 } from 'lucide-react';
-import { useInvoice } from '../../contexts/InvoiceContext';
+import { useInvoice } from '../../context/InvoiceContext';
 import { toast } from 'react-hot-toast';
 import { settingsEngine } from '../../services/settingsEngine';
 

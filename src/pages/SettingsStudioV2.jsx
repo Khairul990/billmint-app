@@ -14,20 +14,18 @@ import MessageTemplateStudio, { DEFAULT_WHATSAPP_TEMPLATE } from './studios/Mess
 import FeatureControlStudio from './studios/FeatureControlStudio';
 import { applyTheme } from '../hooks/useThemeEngine';
 import { getThemePreviewColors, ALL_THEMES, THEME_INFO } from '../utils/themeUtils';
-import { getCustomerLabelByType, isEducationBusiness, BUSINESS_PRESETS } from '../config/businessPresets';
+import { BUSINESS_PRESETS } from '../config/businessPresets';
 
 import {
-  Building2, MapPin, FileText, Save, Image as ImageIcon, Phone, Mail,
-  User, Check, CheckCircle2, QrCode, Palette, LayoutTemplate, Database,
-  Download, Upload, Wifi, WifiOff, ServerOff, ShieldAlert, RotateCcw,
-  RefreshCw, BarChart3, Users, CircleDollarSign, HardDrive, Lock, Trash2,
-  Globe, Languages, Sliders, Sparkles, Link, Info, Smartphone, Search,
-  AlertCircle, X, Star, Bell, Shield, CreditCard, Puzzle, Settings2,
-  Volume2, MessageCircle, ShieldCheck, Key, Zap, Headphones,
-  Sun, Moon, Undo2, ChevronLeft, ChevronRight, Eye, CheckSquare,
-  Clock, AlertTriangle, ArrowLeft, Layers, PaintBucket, Briefcase,
-  Hash, ImageIcon as ImageIconLucide, HelpCircle, Monitor,
-  BookOpen, DollarSign, Percent, Printer, Share2, Send, Box, PackageSearch
+  Building2, MapPin, FileText, Save, Phone, Mail,
+  Check, CheckCircle2, QrCode, Palette, LayoutTemplate, Database,
+  Download, Upload, Wifi, WifiOff, RotateCcw, Users,
+  Globe, Sliders, Sparkles, Link, Smartphone, Search,
+  X, Star, Bell, Shield, CreditCard, Settings2,
+  MessageCircle, ShieldCheck, Key, Zap,
+  Sun, Moon, Eye, Clock, AlertTriangle, ArrowLeft,
+  Layers, PaintBucket, Briefcase,
+  Trash2, Box, PackageSearch, Tag, CheckSquare, RefreshCw
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { adminEngine } from '../services/adminEngine';
@@ -58,89 +56,87 @@ const compressImage = (file, maxWidth = 400) => {
 const NAV_GROUPS = [
   {
     group: 'BUSINESS',
-    description: 'Identity, workspace & appearance',
+    description: 'Profile, workspace, features & theme',
     icon: Building2,
     items: [
-      { id: 'business', label: 'Business Profile', icon: Building2, description: 'Company details & logo', mode: 'simple' },
-      { id: 'modules', label: 'Modules & Features', icon: Sliders, description: 'Enable or disable optional modules', mode: 'advanced' },
-      { id: 'workspace', label: 'Workspace', icon: Globe, description: 'Regional & language', mode: 'simple' },
-      { id: 'theme-engine', label: 'Appearance & Theme', icon: Palette, description: 'Colors & appearance', mode: 'simple' }
+      { id: 'business', label: 'Business Profile', icon: Building2, description: 'Company details & brand logo', mode: 'simple' },
+      { id: 'workspace', label: 'Workspace & Regional', icon: Globe, description: 'Currency, locale & number format', mode: 'simple' },
+      { id: 'modules', label: 'Modules & Features', icon: Sliders, description: 'Enable or disable optional capabilities', mode: 'advanced' },
+      { id: 'theme-engine', label: 'Appearance & Theme', icon: Palette, description: 'Design swatches & visual styling', mode: 'simple' }
+    ]
+  },
+  {
+    group: 'BILLING',
+    description: 'Invoice numbering, tax & payment methods',
+    icon: FileText,
+    items: [
+      { id: 'invoice-builder', label: 'Invoice & Numbering', icon: LayoutTemplate, description: 'Prefix, table columns & signature', mode: 'advanced' },
+      { id: 'payment', label: 'Payment Methods & QR', icon: QrCode, description: 'UPI, bKash, Nagad & QR codes', mode: 'simple' }
+    ]
+  },
+  {
+    group: 'TEMPLATES & BRAND',
+    description: 'PDF, Live link, marketplace & design studio',
+    icon: Layers,
+    items: [
+      { id: 'pdf-templates', label: 'PDF Invoice Templates', icon: FileText, description: 'A4/A5 print & export templates', mode: 'simple' },
+      { id: 'live-link-templates', label: 'Live Link Templates', icon: Smartphone, description: 'Customer self-service portal look', mode: 'simple' },
+      { id: 'design-studio', label: 'Design Studio', icon: Sparkles, description: 'Universal branding & color studio', mode: 'advanced' },
+      { id: 'template-marketplace', label: 'Template Marketplace', icon: LayoutTemplate, description: 'Explore community & pro templates', mode: 'simple' }
     ]
   },
   {
     group: 'INVENTORY',
-    description: 'Products, stock & tracking',
+    description: 'Products, stock tracking & barcode',
     icon: Box,
     items: [
-      { id: 'inventory-settings', label: 'Inventory Settings', icon: PackageSearch, description: 'Products, Variants & Tracking', mode: 'advanced' }
-    ]
-  },
-  {
-    group: 'INVOICE',
-    description: 'Billing, templates & documents',
-    icon: FileText,
-    items: [
-      { id: 'invoice-builder', label: 'Invoice & Billing', icon: LayoutTemplate, description: 'Advanced builder settings', mode: 'advanced' },
-      { id: 'template-gallery', label: 'Template Gallery', icon: LayoutTemplate, description: 'Unified template selection', mode: 'simple' }
-    ]
-  },
-  {
-    group: 'PAYMENTS',
-    description: 'Payment collection & QR',
-    icon: CreditCard,
-    items: [
-      { id: 'payment', label: 'Payment Methods', icon: QrCode, description: 'UPI, bKash, Nagad', mode: 'simple' }
+      { id: 'inventory-settings', label: 'Inventory Settings', icon: PackageSearch, description: 'SKU, variants, batch & warehouse', mode: 'advanced' }
     ]
   },
   {
     group: 'COMMUNICATION',
-    description: 'Messages, reminders & alerts',
+    description: 'WhatsApp messages & automated alerts',
     icon: MessageCircle,
     items: [
-      { id: 'whatsapp-template', label: 'Message Templates', icon: MessageCircle, description: 'Customize WhatsApp messages', mode: 'simple' },
-      { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Reminders & alerts', mode: 'simple' }
+      { id: 'whatsapp-template', label: 'Message Templates', icon: MessageCircle, description: 'WhatsApp share & reminder templates', mode: 'simple' },
+      { id: 'notifications', label: 'Notifications & Alerts', icon: Bell, description: 'Due date, payment & system alerts', mode: 'simple' }
     ]
   },
   {
-    group: 'SECURITY',
-    description: 'Access, team & credentials',
+    group: 'SECURITY & TEAM',
+    description: 'Credentials, API keys & access control',
     icon: Shield,
     items: [
-      { id: 'security', label: 'Security & Access', icon: Shield, description: 'API keys & access', mode: 'advanced' },
-      { id: 'users', label: 'Users & Roles', icon: Users, description: 'Team management', mode: 'advanced' }
+      { id: 'security', label: 'Security & Access', icon: ShieldCheck, description: 'API keys, database & auth status', mode: 'advanced' },
+      { id: 'users', label: 'Users & Roles', icon: Users, description: 'Team members & permissions', mode: 'advanced' }
     ]
   },
   {
-    group: 'SYSTEM',
-    description: 'Plan, backup & maintenance',
+    group: 'DATA & SYSTEM',
+    description: 'Plan, backup, recovery & maintenance',
     icon: Settings2,
     items: [
-      { id: 'subscription', label: 'Subscription & Plan', icon: CreditCard, description: 'Plan & billing', mode: 'simple' },
-      { id: 'backup', label: 'Data & Backup', icon: Database, description: 'Data management', mode: 'simple' },
-      { id: 'advanced', label: 'Advanced', icon: Settings2, description: 'Danger zone', mode: 'advanced' }
+      { id: 'subscription', label: 'Subscription & Plan', icon: CreditCard, description: 'Plan tier & billing status', mode: 'simple' },
+      { id: 'backup', label: 'Backup & Restore', icon: Database, description: 'JSON backup export & import', mode: 'simple' },
+      { id: 'advanced', label: 'Advanced / Danger Zone', icon: AlertTriangle, description: 'Cache, duplicate cleaner & data reset', mode: 'advanced' }
     ]
   }
 ];
 
-const THEME_PRESETS = [
-  { id: 'light', label: 'Light', icon: Sun },
-  { id: 'dark', label: 'Dark', icon: Moon },
-  { id: 'auto', label: 'Auto', icon: Monitor },
-  { id: 'custom', label: 'Custom', icon: PaintBucket }
-];
-
 const ToggleSwitch = ({ enabled, onChange, label, description }) => (
-  <div className="flex items-start justify-between p-4 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl gap-3">
+  <div className="flex items-start justify-between p-3.5 bg-theme-surface/60 border border-theme-border-soft rounded-2xl gap-3 transition-all hover:bg-theme-surface/80">
     <div className="flex-1 min-w-0">
-      <span className="text-xs font-bold text-gray-900 dark:text-white block">{label}</span>
-      {description && <span className="text-[9px] text-gray-500 dark:text-gray-400 font-semibold mt-0.5 block">{description}</span>}
+      <span className="text-xs font-bold text-theme-primary block">{label}</span>
+      {description && <span className="text-[10px] text-theme-muted font-medium mt-0.5 block leading-relaxed">{description}</span>}
     </div>
     <button
       type="button"
       onClick={() => onChange(!enabled)}
-      className={'relative w-12 h-6 rounded-full transition-all duration-500 ease-in-out shadow-inner flex items-center p-1 shrink-0 focus:outline-none ' + (enabled ? 'bg-[image:var(--accent-gradient)] shadow-md shadow-[var(--accent)]/30' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5')}
+      className={`relative w-11 h-6 rounded-full transition-all duration-300 ease-in-out shadow-inner flex items-center p-0.5 shrink-0 focus:outline-none cursor-pointer ${
+        enabled ? 'bg-theme-accent shadow-xs' : 'bg-slate-300 dark:bg-slate-700/60 border border-slate-400/20 dark:border-white/5'
+      }`}
     >
-      <span className={'w-4 h-4 bg-white rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ' + (enabled ? 'translate-x-6' : 'translate-x-0')} />
+      <span className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
     </button>
   </div>
 );
@@ -149,7 +145,7 @@ const SettingsStudioV2 = ({
   settings, onSaveSettings, isAdmin, onResetDemo, onImportBackup,
   invoices = [], customers = [], installPromptEvent = null,
   isAppInstalled = false, onInstallApp, subscription = null,
-  onUpgrade, setCurrentTab
+  onUpgrade, setCurrentTab, products = [], expenses = []
 }) => {
   const [activeSection, setActiveSection] = useState('business');
   const [settingsMode, setSettingsMode] = useState('All');
@@ -157,10 +153,8 @@ const SettingsStudioV2 = ({
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveState, setSaveState] = useState('idle');
-  const [showNav, setShowNav] = useState(true);
   const [showPreview, setShowPreview] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const [storageInfo, setStorageInfo] = useState(null);
   const [lastSaved, setLastSaved] = useState(null);
   const isInitialized = useRef(false);
 
@@ -262,7 +256,6 @@ const SettingsStudioV2 = ({
   const [enableBatchExpiry, setEnableBatchExpiry] = useState(false);
   const [enableBarcodeSku, setEnableBarcodeSku] = useState(true);
 
-  const [isDragging, setIsDragging] = useState(false);
   const [dbProvider, setDbProvider] = useState(() => localStorage.getItem('billmint_db_provider') || 'firebase');
   const session = authEngine.getAuthSession();
 
@@ -270,7 +263,7 @@ const SettingsStudioV2 = ({
   const isOnline = navigator.onLine;
   const firebaseStatus = firebaseReady && isOnline ? 'connected' : firebaseReady && !isOnline ? 'offline' : 'not-configured';
 
-  // Load settings
+  // Load initial settings
   useEffect(() => {
     if (settings && Object.keys(settings).length > 0 && !isInitialized.current) {
       isInitialized.current = true;
@@ -367,7 +360,7 @@ const SettingsStudioV2 = ({
 
   useEffect(() => {
     if (settings && Object.keys(settings).length > 0) setIsLoading(false);
-    else { const t = setTimeout(() => setIsLoading(false), 800); return () => clearTimeout(t); }
+    else { const t = setTimeout(() => setIsLoading(false), 500); return () => clearTimeout(t); }
   }, [settings]);
 
   useEffect(() => {
@@ -385,11 +378,12 @@ const SettingsStudioV2 = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDirty]);
 
-  // Mark dirty on changes
+  // Mark dirty on any field change
   useEffect(() => {
     if (!isInitialized.current) return;
     setIsDirty(true);
-  }, [businessName, businessType, ownerName, phone, whatsapp, email, address, gstNumber, geminiApiKey, twilioAccountSid, twilioAuthToken,
+  }, [
+    businessName, businessType, ownerName, phone, whatsapp, email, address, gstNumber, geminiApiKey, twilioAccountSid, twilioAuthToken,
     country, language, currency, currencyCode, taxLabel, vatTax, dateFormat, numberFormat,
     invoicePrefix, defaultTax, defaultNotes, terms, pdfFooter, brandColor, invoiceTemplate, defaultBillingTemplate,
     upiId, bkashNumber, nagadNumber, rocketNumber, payeeName, paymentNote, paymentQrEnabled, paymentMethod,
@@ -418,16 +412,17 @@ const SettingsStudioV2 = ({
     applyTheme(themeId, null, newMode);
   }, [darkMode, themeId]);
 
-  // Search
+  // Navigation Filter
   const getDynamicNav = () => {
     let baseNav = [...NAV_GROUPS];
     if (businessType === 'cybercafe') {
-      // Just add the Cyber Cafe group, don't hide anything else so the user has full access
       baseNav.splice(1, 0, {
-        group: 'Cyber Cafe', icon: Monitor,
+        group: 'Cyber Cafe',
+        description: 'Portal Hub & AI photo tools',
+        icon: Zap,
         items: [
-          { id: 'cyber-portals', label: 'Portal Hub Config', icon: Link, description: 'Manage quick links' },
-          { id: 'cyber-tools', label: 'Tools & AI Config', icon: Zap, description: 'Background remover, APIs' }
+          { id: 'cyber-portals', label: 'Portal Hub Config', icon: Link, description: 'Manage quick links', mode: 'simple' },
+          { id: 'cyber-tools', label: 'Tools & AI Config', icon: Zap, description: 'Background remover & APIs', mode: 'advanced' }
         ]
       });
     }
@@ -480,7 +475,7 @@ const SettingsStudioV2 = ({
     }
   };
 
-  // Save
+  // Save Settings Payload
   const handleSave = (e) => {
     if (e) e.preventDefault();
     if (!businessName) { toast.error('Please specify a Business Name.'); return; }
@@ -628,14 +623,6 @@ const SettingsStudioV2 = ({
       setEnableDragAndDrop(settings.invoiceBuilderSettings.enableDragAndDrop !== false);
       setEnableDigitalSignature(settings.invoiceBuilderSettings.enableDigitalSignature !== false);
       setEnableLivePreview(settings.invoiceBuilderSettings.enableLivePreview !== false);
-    } else {
-      setEnableProductAutocomplete(true);
-      setEnableTemplateSwitcher(true);
-      setEnableItemLevelDiscount(false);
-      setEnableItemLevelTax(false);
-      setEnableDragAndDrop(true);
-      setEnableDigitalSignature(true);
-      setEnableLivePreview(true);
     }
     
     if (settings.inventorySettings) {
@@ -643,11 +630,6 @@ const SettingsStudioV2 = ({
       setEnableWarehouseTracking(settings.inventorySettings.enableWarehouseTracking === true);
       setEnableBatchExpiry(settings.inventorySettings.enableBatchExpiry === true);
       setEnableBarcodeSku(settings.inventorySettings.enableBarcodeSku !== false);
-    } else {
-      setEnableVariantTracking(false);
-      setEnableWarehouseTracking(false);
-      setEnableBatchExpiry(false);
-      setEnableBarcodeSku(true);
     }
   };
 
@@ -686,8 +668,6 @@ const SettingsStudioV2 = ({
     else { setCurrency('$'); setCurrencyCode('USD'); setTaxLabel('Tax'); setPaymentMethod('Manual'); setDateFormat('DD/MM/YYYY'); setNumberFormat('Standard'); setDefaultTax(0); }
   };
 
-  const saveTimeAgo = lastSaved ? Math.floor((Date.now() - lastSaved.getTime()) / 1000) + 's ago' : null;
-
   if (isLoading) {
     return (
       <div className="max-w-full mx-auto p-6 space-y-6">
@@ -705,24 +685,16 @@ const SettingsStudioV2 = ({
       case 'business':
         return (
           <div className="space-y-6 animate-fadeIn">
-            {/* Header */}
             <div>
-              <h2 className="text-xl font-black text-theme-primary tracking-tight">
-                Business Profile & Branding
-              </h2>
-              <p className="text-xs font-semibold text-theme-muted mt-0.5">
-                Your official business name, logo, and store identity.
-              </p>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Business Profile & Identity</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Your official business name, logo, legal tax identifiers, and contact details.</p>
             </div>
 
             {/* SECTION 1: BRAND IDENTITY */}
             <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-4">
-              <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">
-                Brand Identity
-              </h3>
+              <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Brand Identity</h3>
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-theme-surface/50 border border-theme-border-soft">
-                {/* Left: Logo Preview */}
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="w-16 h-16 rounded-2xl border border-theme-border-soft bg-theme-card flex items-center justify-center p-1 overflow-hidden shrink-0 shadow-xs">
                     {logoUrl ? (
@@ -733,18 +705,12 @@ const SettingsStudioV2 = ({
                       </div>
                     )}
                   </div>
-
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-theme-primary truncate">
-                      {businessName || 'KB.Embroidery Designer 1118'}
-                    </p>
-                    <p className="text-xs text-theme-muted font-medium mt-0.5 capitalize">
-                      {businessType || 'Retail / Services'}
-                    </p>
+                    <p className="text-sm font-bold text-theme-primary truncate">{businessName || 'Your Business Name'}</p>
+                    <p className="text-xs text-theme-muted font-medium mt-0.5 capitalize">{businessType || 'Retail / Services'}</p>
                   </div>
                 </div>
 
-                {/* Right: Upload / Replace Logo */}
                 <div className="flex items-center gap-2 shrink-0 flex-wrap">
                   <label className="px-3.5 py-2 rounded-xl bg-theme-card border border-theme-border-soft hover:bg-theme-surface text-theme-primary font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs">
                     <Upload className="w-3.5 h-3.5 text-theme-accent" />
@@ -770,11 +736,8 @@ const SettingsStudioV2 = ({
                 </div>
               </div>
 
-              {/* Paste Image URL */}
               <div>
-                <label className="block text-[11px] font-bold text-theme-muted mb-1 uppercase tracking-wider">
-                  Logo URL (Optional)
-                </label>
+                <label className="block text-[11px] font-bold text-theme-muted mb-1 uppercase tracking-wider">Logo URL (Optional Direct Link)</label>
                 <input
                   type="url"
                   value={logoUrl}
@@ -787,44 +750,35 @@ const SettingsStudioV2 = ({
 
             {/* SECTION 2: BUSINESS INFORMATION */}
             <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-4">
-              <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">
-                Business Information
-              </h3>
-              
+              <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Legal & Trade Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-theme-primary mb-0.5">
-                    Business Name
-                  </label>
-                  <p className="text-[11px] text-theme-muted mb-1.5">Public business name shown to customers.</p>
+                  <label className="block text-xs font-bold text-theme-primary mb-0.5">Business Name</label>
+                  <p className="text-[11px] text-theme-muted mb-1.5">Official company or store name displayed on invoices.</p>
                   <input
                     type="text"
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="KB.Embroidery Designer"
+                    placeholder="e.g. Acme Innovations Ltd."
                     className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent focus:bg-theme-card transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-theme-primary mb-0.5">
-                    Owner / Manager Name
-                  </label>
-                  <p className="text-[11px] text-theme-muted mb-1.5">Proprietor or authorized manager name.</p>
+                  <label className="block text-xs font-bold text-theme-primary mb-0.5">Owner / Manager Name</label>
+                  <p className="text-[11px] text-theme-muted mb-1.5">Authorized signatory or proprietor name.</p>
                   <input
                     type="text"
                     value={ownerName}
                     onChange={(e) => setOwnerName(e.target.value)}
-                    placeholder="Khairul Basar"
+                    placeholder="e.g. John Doe"
                     className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent focus:bg-theme-card transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-theme-primary mb-0.5">
-                    Business Type / Preset
-                  </label>
-                  <p className="text-[11px] text-theme-muted mb-1.5">Adapts terminology and default bill columns.</p>
+                  <label className="block text-xs font-bold text-theme-primary mb-0.5">Business Category / Preset</label>
+                  <p className="text-[11px] text-theme-muted mb-1.5">Adapts bill columns and terminology.</p>
                   <select
                     value={businessType}
                     onChange={(e) => setBusinessType(e.target.value)}
@@ -837,73 +791,54 @@ const SettingsStudioV2 = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-theme-primary mb-0.5">
-                    GSTIN / Tax Number
-                  </label>
-                  <p className="text-[11px] text-theme-muted mb-1.5">Optional government registration or tax ID.</p>
+                  <label className="block text-xs font-bold text-theme-primary mb-0.5">GSTIN / Tax Registration ID</label>
+                  <p className="text-[11px] text-theme-muted mb-1.5">Official government tax ID printed on invoice header.</p>
                   <input
                     type="text"
                     value={gstNumber}
                     onChange={(e) => setGstNumber(e.target.value)}
-                    placeholder="29ABCDE1234F1Z5"
+                    placeholder="e.g. 29ABCDE1234F1Z5"
                     className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent focus:bg-theme-card transition-all font-numbers"
                   />
                 </div>
               </div>
             </div>
 
-            {/* SECTION 3: CONTACT & ADDRESS */}
+            {/* SECTION 3: CONTACT & LOCATION */}
             <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-4">
-              <div>
-                <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">
-                  Contact & Address
-                </h3>
-                <p className="text-xs text-theme-muted font-medium mt-0.5">
-                  Customer service phone, WhatsApp number and store address.
-                </p>
-              </div>
-
+              <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Contact & Address</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-theme-primary mb-0.5">
-                    Phone Number
-                  </label>
-                  <p className="text-[11px] text-theme-muted mb-1.5">Official customer service phone number.</p>
-                  <div className="relative">
+                  <label className="block text-xs font-bold text-theme-primary mb-0.5">Phone Number</label>
+                  <div className="relative mt-1">
                     <Phone className="w-3.5 h-3.5 text-theme-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <input
                       type="text"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+91 99035 91839"
+                      placeholder="+91 98765 43210"
                       className="w-full pl-9 pr-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent focus:bg-theme-card transition-all font-numbers"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-theme-primary mb-0.5">
-                    WhatsApp Number
-                  </label>
-                  <p className="text-[11px] text-theme-muted mb-1.5">Direct number for bill sharing & reminders.</p>
-                  <div className="relative">
+                  <label className="block text-xs font-bold text-theme-primary mb-0.5">WhatsApp Number</label>
+                  <div className="relative mt-1">
                     <MessageCircle className="w-3.5 h-3.5 text-theme-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <input
                       type="text"
                       value={whatsapp}
                       onChange={(e) => setWhatsapp(e.target.value)}
-                      placeholder="+91 99035 91839"
+                      placeholder="+91 98765 43210"
                       className="w-full pl-9 pr-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent focus:bg-theme-card transition-all font-numbers"
                     />
                   </div>
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-theme-primary mb-0.5">
-                    Business Email
-                  </label>
-                  <p className="text-[11px] text-theme-muted mb-1.5">Primary email address associated with workspace.</p>
-                  <div className="relative">
+                  <label className="block text-xs font-bold text-theme-primary mb-0.5">Primary Business Email</label>
+                  <div className="relative mt-1">
                     <Mail className="w-3.5 h-3.5 text-theme-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <input
                       type="email"
@@ -915,17 +850,14 @@ const SettingsStudioV2 = ({
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-theme-primary mb-0.5">
-                    Store / Office Address
-                  </label>
-                  <p className="text-[11px] text-theme-muted mb-1.5">Physical billing address printed on invoice footer.</p>
-                  <div className="relative">
+                  <label className="block text-xs font-bold text-theme-primary mb-0.5">Physical / Billing Address</label>
+                  <div className="relative mt-1">
                     <MapPin className="w-3.5 h-3.5 text-theme-muted absolute left-3 top-3 pointer-events-none" />
                     <textarea
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       rows={2}
-                      placeholder="Street address, City, State, PIN"
+                      placeholder="Shop No, Street, City, State, ZIP code"
                       className="w-full pl-9 pr-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent focus:bg-theme-card transition-all resize-none"
                     />
                   </div>
@@ -937,40 +869,82 @@ const SettingsStudioV2 = ({
 
       case 'workspace':
         return (
-          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-            <div className="section-header border-b border-gray-200 dark:border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Globe className="w-5 h-5" /></div>
-                <div><h2 className="section-header-title">Workspace Settings</h2><p className="section-header-subtitle">Regional preferences and localization</p></div>
+          <div className="space-y-6 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Workspace & Regional Settings</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Localization, currencies, numerical formats, and tax labels.</p>
+            </div>
+
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-4">
+              <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Regional Formatting</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Country Setup</label>
+                  <select value={country} onChange={(e) => handleCountryAutoConfigure(e.target.value)} className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all">
+                    <option value="India">India (INR, GST, UPI)</option>
+                    <option value="Bangladesh">Bangladesh (BDT, VAT, bKash)</option>
+                    <option value="Other">International (USD, Standard)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Language</label>
+                  <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all">
+                    <option value="English">English</option>
+                    <option value="Bengali">Bengali</option>
+                    <option value="Hindi">Hindi</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Currency Symbol</label>
+                  <input type="text" value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all font-numbers" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Currency Code (ISO)</label>
+                  <input type="text" value={currencyCode} onChange={(e) => setCurrencyCode(e.target.value)} className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all font-numbers" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Tax Nomenclature</label>
+                  <select value={taxLabel} onChange={(e) => setTaxLabel(e.target.value)} className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all">
+                    <option value="GST">GST</option>
+                    <option value="VAT">VAT</option>
+                    <option value="Tax">Sales Tax</option>
+                    <option value="None">None</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Date Format</label>
+                  <select value={dateFormat} onChange={(e) => setDateFormat(e.target.value)} className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all">
+                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Number Formatting</label>
+                  <select value={numberFormat} onChange={(e) => setNumberFormat(e.target.value)} className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all">
+                    <option value="Indian">Indian Lakh/Crore (1,23,456.78)</option>
+                    <option value="Standard">Standard International (123,456.78)</option>
+                    <option value="European">European (123.456,78)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Default Tax Rate (%)</label>
+                  <input type="number" value={defaultTax} onChange={(e) => setDefaultTax(e.target.value)} className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all font-numbers" />
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div><label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Country</label>
-                <select value={country} onChange={(e) => handleCountryAutoConfigure(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl">
-                  <option value="India">India</option><option value="Bangladesh">Bangladesh</option><option value="Other">Other</option>
-                </select></div>
-              <div><label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Language</label>
-                <select value={language} onChange={(e) => setLanguage(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl">
-                  <option value="English">English</option><option value="Bengali">Bengali</option><option value="Hindi">Hindi</option>
-                </select></div>
-              <div><label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Currency Symbol</label>
-                <input type="text" value={currency} onChange={(e) => setCurrency(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl" /></div>
-              <div><label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Currency Code</label>
-                <input type="text" value={currencyCode} onChange={(e) => setCurrencyCode(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl" /></div>
-              <div><label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Tax Label</label>
-                <select value={taxLabel} onChange={(e) => setTaxLabel(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl">
-                  <option value="GST">GST</option><option value="VAT">VAT</option><option value="Tax">Tax</option><option value="None">None</option>
-                </select></div>
-              <div><label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Date Format</label>
-                <select value={dateFormat} onChange={(e) => setDateFormat(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl">
-                  <option value="DD/MM/YYYY">DD/MM/YYYY</option><option value="MM/DD/YYYY">MM/DD/YYYY</option><option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                </select></div>
-              <div><label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Number Format</label>
-                <select value={numberFormat} onChange={(e) => setNumberFormat(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl">
-                  <option value="Indian">Indian (lakh/crore)</option><option value="Standard">Standard (1,234,567)</option><option value="European">European (1.234.567,89)</option>
-                </select></div>
-              <div><label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Default Tax Rate (%)</label>
-                <input type="number" value={defaultTax} onChange={(e) => setDefaultTax(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl" /></div>
+          </div>
+        );
+
+      case 'modules':
+        return (
+          <div className="space-y-4 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Modules & Feature Control</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Toggle optional capabilities for your workspace. Disabling a module hides its UI without deleting data.</p>
+            </div>
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs">
+              <FeatureControlStudio workspaceId={settings?.activeWorkspaceId} />
             </div>
           </div>
         );
@@ -978,72 +952,122 @@ const SettingsStudioV2 = ({
       case 'theme-engine':
         return (
           <div className="space-y-6 animate-fadeIn">
-            <div className="card-premium p-6 space-y-6">
-              <div className="section-header border-b border-gray-200 dark:border-white/10 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Palette className="w-5 h-5" /></div>
-                  <div><h2 className="section-header-title">Theme Engine</h2><p className="section-header-subtitle">Customize every visual aspect instantly</p></div>
-                </div>
-              </div>
-
-              {/* Mode Selector */}
-              <div className="flex items-center justify-between p-4 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl">
-                <div>
-                  <h3 className="text-xs font-bold text-gray-900 dark:text-white">Dark Mode</h3>
-                  <p className="text-[9px] text-gray-500">Toggle dark/light appearance</p>
-                </div>
-                <button onClick={handleToggleDark} className={'relative w-12 h-6 rounded-full transition-all flex items-center p-1 ' + (darkMode ? 'bg-[image:var(--accent-gradient)]' : 'bg-slate-300 dark:bg-slate-700/60')}>
-                  <span className={'w-4 h-4 bg-white rounded-full shadow-md transition-transform ' + (darkMode ? 'translate-x-6' : 'translate-x-0')} />
-                </button>
-              </div>
-
-              {/* Theme Presets Grid */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">Theme Presets</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                  {ALL_THEMES.map(({ id, name, category }) => {
-                    const info = THEME_INFO[id];
-                    const isActive = themeId === id;
-                    return (
-                      <button key={id} onClick={() => handleApplyTheme(id)}
-                        className={'relative rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02] ' + (isActive ? 'border-[var(--accent)] shadow-lg shadow-[var(--accent)]/20' : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20')}
-                      >
-                        <div className="flex gap-1 mb-2">
-                          {info?.colors?.slice(0, 3).map((c, i) => <div key={i} className="flex-1 h-3 rounded-sm" style={{ backgroundColor: c }} />)}
+                <h2 className="text-lg font-black text-theme-primary tracking-tight">Brand Theme & Appearance</h2>
+                <p className="text-xs font-semibold text-theme-muted mt-0.5">Curated luxury colorways, dark mode, and interface dynamics.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleToggleDark}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-theme-card border border-theme-border-soft text-xs font-bold text-theme-primary hover:bg-theme-surface transition-all cursor-pointer shadow-xs"
+              >
+                {darkMode ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-indigo-400" />}
+                <span>{darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</span>
+              </button>
+            </div>
+
+            {/* LUXURY THEME SWATCHES */}
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Design System Colorways</h3>
+                <span className="text-[10px] font-bold text-theme-muted uppercase">{ALL_THEMES.length} Presets Available</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                {ALL_THEMES.map(({ id, name, category }) => {
+                  const info = THEME_INFO[id];
+                  const isActive = themeId === id;
+                  const colors = info?.colors || ['#14b8a6', '#0f172a', '#f8fafc'];
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => handleApplyTheme(id)}
+                      className={`relative rounded-2xl p-3 text-left transition-all cursor-pointer border flex flex-col justify-between group ${
+                        isActive
+                          ? 'border-theme-accent bg-theme-accent/5 ring-2 ring-theme-accent/30 shadow-md scale-[1.02]'
+                          : 'border-theme-border-soft bg-theme-surface/50 hover:border-theme-accent/40 hover:bg-theme-surface'
+                      }`}
+                    >
+                      <div>
+                        {/* Mini Color Swatch Bar */}
+                        <div className="flex items-center gap-1.5 mb-2.5">
+                          {colors.slice(0, 3).map((c, i) => (
+                            <div
+                              key={i}
+                              className="h-3.5 flex-1 rounded-md shadow-2xs border border-black/10"
+                              style={{ backgroundColor: c }}
+                            />
+                          ))}
                         </div>
-                        <p className="text-[10px] font-bold text-gray-900 dark:text-white truncate">{name}</p>
-                        <p className="text-[8px] text-gray-400 uppercase tracking-wider">{category}</p>
-                        {isActive && <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[8px]">+</div>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                        <p className="text-xs font-bold text-theme-primary truncate">{name}</p>
+                        <p className="text-[9px] font-semibold text-theme-muted uppercase tracking-wider mt-0.5">{category}</p>
+                      </div>
 
-              {/* Custom Color */}
-              <div className="flex items-center gap-4 p-4 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl">
+                      {isActive && (
+                        <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-theme-accent text-white flex items-center justify-center text-[9px] shadow-xs">
+                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* CUSTOM BRAND COLOR & METRICS */}
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-4">
+              <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Custom Accent & Styling Metrics</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl bg-theme-surface/50 border border-theme-border-soft">
                 <div>
-                  <h3 className="text-xs font-bold text-gray-900 dark:text-white">Custom Brand Color</h3>
-                  <p className="text-[9px] text-gray-500">Set a specific accent color</p>
+                  <label className="block text-xs font-bold text-theme-primary">Custom Brand Accent</label>
+                  <p className="text-[11px] text-theme-muted mt-0.5">Use your exact brand hex code.</p>
                 </div>
-                <input type="color" value={brandColor} onChange={(e) => { setBrandColor(e.target.value); setThemeId('custom'); applyTheme('custom', e.target.value, darkMode, false); }} className="w-10 h-10 rounded-xl cursor-pointer border border-gray-200" />
-                <input type="text" value={brandColor} onChange={(e) => { setBrandColor(e.target.value); setThemeId('custom'); applyTheme('custom', e.target.value, darkMode, false); }} className="flex-1 px-3 py-2 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs font-mono" />
+                <div className="flex items-center gap-3 ml-auto">
+                  <input
+                    type="color"
+                    value={brandColor}
+                    onChange={(e) => {
+                      setBrandColor(e.target.value);
+                      setThemeId('custom');
+                      applyTheme('custom', e.target.value, darkMode, false);
+                    }}
+                    className="w-9 h-9 rounded-xl cursor-pointer border border-theme-border-soft bg-transparent"
+                  />
+                  <input
+                    type="text"
+                    value={brandColor}
+                    onChange={(e) => {
+                      setBrandColor(e.target.value);
+                      setThemeId('custom');
+                      applyTheme('custom', e.target.value, darkMode, false);
+                    }}
+                    className="w-28 px-3 py-2 bg-theme-card border border-theme-border-soft rounded-xl text-xs font-mono font-bold text-theme-primary focus:outline-none focus:ring-1 focus:ring-theme-accent"
+                  />
+                </div>
               </div>
 
-              {/* Advanced Settings */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2">
                 {[
                   { label: 'Corner Radius', value: cornerRadius, set: (v) => { setCornerRadius(v); applyTheme(themeId, brandColor, darkMode, false); document.documentElement.style.setProperty('--radius-base', `${v}px`); }, min: 4, max: 24, unit: 'px' },
-                  { label: 'Shadow Intensity', value: shadowIntensity, set: (v) => { setShadowIntensity(v); document.documentElement.style.setProperty('--shadow-opacity', `${v / 100}`); }, min: 0, max: 100, unit: '%' },
-                  { label: 'Animation Speed', value: animationSpeed, set: (v) => { setAnimationSpeed(v); document.documentElement.style.setProperty('--animation-multiplier', `${v}s`); }, min: 0.25, max: 2, step: 0.25, unit: 'x' },
-                  { label: 'Font Density', value: fontDensity === 'compact' ? 0 : fontDensity === 'normal' ? 1 : 2, set: (v) => { const newDensity = ['compact', 'normal', 'relaxed'][v]; setFontDensity(newDensity); }, min: 0, max: 2, step: 1, unit: '', display: fontDensity }
+                  { label: 'Shadow Depth', value: shadowIntensity, set: (v) => { setShadowIntensity(v); document.documentElement.style.setProperty('--shadow-opacity', `${v / 100}`); }, min: 0, max: 100, unit: '%' },
+                  { label: 'Motion Speed', value: animationSpeed, set: (v) => { setAnimationSpeed(v); document.documentElement.style.setProperty('--animation-multiplier', `${v}s`); }, min: 0.25, max: 2, step: 0.25, unit: 'x' },
+                  { label: 'UI Density', value: fontDensity === 'compact' ? 0 : fontDensity === 'normal' ? 1 : 2, set: (v) => { const newDensity = ['compact', 'normal', 'relaxed'][v]; setFontDensity(newDensity); }, min: 0, max: 2, step: 1, unit: '', display: fontDensity }
                 ].map((opt, i) => (
-                  <div key={i} className="p-4 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl">
-                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">{opt.label}</label>
-                    <div className="flex items-center gap-2 mt-2">
-                      <input type="range" min={opt.min} max={opt.max} step={opt.step || 1} value={typeof opt.value === 'number' ? opt.value : 0} onChange={(e) => opt.set(parseFloat(e.target.value))} className="flex-1 accent-[var(--accent)] h-1.5" />
-                      <span className="text-xs font-bold text-gray-900 dark:text-white w-12 text-right">{opt.display || opt.value}{opt.unit}</span>
+                  <div key={i} className="p-3.5 bg-theme-surface/50 border border-theme-border-soft rounded-xl space-y-2">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-theme-muted uppercase">
+                      <span>{opt.label}</span>
+                      <span className="text-theme-primary font-mono">{opt.display || opt.value}{opt.unit}</span>
                     </div>
+                    <input
+                      type="range"
+                      min={opt.min}
+                      max={opt.max}
+                      step={opt.step || 1}
+                      value={typeof opt.value === 'number' ? opt.value : 0}
+                      onChange={(e) => opt.set(parseFloat(e.target.value))}
+                      className="w-full accent-theme-accent h-1.5 bg-theme-border-soft rounded-lg cursor-pointer"
+                    />
                   </div>
                 ))}
               </div>
@@ -1051,405 +1075,535 @@ const SettingsStudioV2 = ({
           </div>
         );
 
-      case 'payment':
-        return (
-          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-            <div className="section-header border-b border-gray-200 dark:border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><QrCode className="w-5 h-5" /></div>
-                <div><h2 className="section-header-title">Payment Methods</h2><p className="section-header-subtitle">Configure how customers pay you</p></div>
-              </div>
-            </div>
-            <ToggleSwitch enabled={paymentQrEnabled} onChange={setPaymentQrEnabled} label="Enable Digital Payments" description="Show payment details on invoices" />
-            {paymentQrEnabled && (
-              <div className="bg-white/50 dark:bg-white/5 p-6 rounded-2xl border border-gray-200 dark:border-white/10 space-y-4">
-                <div><label className="block text-xs font-bold text-gray-500 mb-1.5">Payment Method</label>
-                  <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl">
-                    <option value="UPI">UPI (India)</option><option value="bKash">bKash (Bangladesh)</option><option value="Nagad">Nagad (Bangladesh)</option><option value="Bank">Bank Transfer</option><option value="Manual">Custom Link</option>
-                  </select></div>
-                {paymentMethod === 'UPI' && <div><label className="block text-xs font-bold text-gray-500 mb-1.5">UPI ID</label><input type="text" value={upiId} onChange={(e) => setUpiId(e.target.value)} placeholder="example@ybl" className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>}
-                {paymentMethod === 'bKash' && <div><label className="block text-xs font-bold text-gray-500 mb-1.5">bKash Number</label><input type="text" value={bkashNumber} onChange={(e) => setBkashNumber(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>}
-                {paymentMethod === 'Nagad' && <div><label className="block text-xs font-bold text-gray-500 mb-1.5">Nagad Number</label><input type="text" value={nagadNumber} onChange={(e) => setNagadNumber(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>}
-                {paymentMethod === 'Rocket' && <div><label className="block text-xs font-bold text-gray-500 mb-1.5">Rocket Number</label><input type="text" value={rocketNumber} onChange={(e) => setRocketNumber(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>}
-                {paymentMethod === 'Manual' && <div><label className="block text-xs font-bold text-gray-500 mb-1.5">Custom Payment Link / Details</label><input type="text" value={customPaymentLink} onChange={(e) => setCustomPaymentLink(e.target.value)} placeholder="https:// or bank details" className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>}
-                <div><label className="block text-xs font-bold text-gray-500 mb-1.5">Payee Name</label><input type="text" value={payeeName} onChange={(e) => setPayeeName(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>
-                <div><label className="block text-xs font-bold text-gray-500 mb-1.5">Payment Note</label><input type="text" value={paymentNote} onChange={(e) => setPaymentNote(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl" /></div>
-                <div className="flex items-center justify-between p-3 bg-white/50 border border-gray-200 rounded-xl">
-                  <span className="text-xs font-bold text-gray-700">Show QR on Invoice Preview</span>
-                  <button onClick={() => setShowQrInPreview(!showQrInPreview)} className={'relative w-10 h-5 rounded-full transition-all flex items-center p-0.5 ' + (showQrInPreview ? 'bg-[image:var(--accent-gradient)]' : 'bg-slate-300')}>
-                    <span className={'w-4 h-4 bg-white rounded-full shadow transition-transform ' + (showQrInPreview ? 'translate-x-5' : 'translate-x-0')} />
-                  </button>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-white/50 border border-gray-200 rounded-xl">
-                  <span className="text-xs font-bold text-gray-700">Show QR on PDF</span>
-                  <button onClick={() => setShowQrInPdf(!showQrInPdf)} className={'relative w-10 h-5 rounded-full transition-all flex items-center p-0.5 ' + (showQrInPdf ? 'bg-[image:var(--accent-gradient)]' : 'bg-slate-300')}>
-                    <span className={'w-4 h-4 bg-white rounded-full shadow transition-transform ' + (showQrInPdf ? 'translate-x-5' : 'translate-x-0')} />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-
-      case 'notifications':
-        return (
-          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-            <div className="section-header border-b border-gray-200 dark:border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Bell className="w-5 h-5" /></div>
-                <div><h2 className="section-header-title">Notifications</h2><p className="section-header-subtitle">Manage alerts and reminders</p></div>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <ToggleSwitch enabled={emailNotifications} onChange={setEmailNotifications} label="Email Notifications" description="Invoice and payment updates via email" />
-              <ToggleSwitch enabled={whatsappNotifications} onChange={setWhatsappNotifications} label="WhatsApp Notifications" description="Real-time WhatsApp updates" />
-              <ToggleSwitch enabled={dueDateReminders} onChange={setDueDateReminders} label="Due Date Reminders" description="Automatic reminders before due dates" />
-              <ToggleSwitch enabled={paymentConfirmation} onChange={setPaymentConfirmation} label="Payment Confirmations" description="When customer submits payment proof" />
-              <ToggleSwitch enabled={securityAlerts} onChange={setSecurityAlerts} label="Security Alerts" description="Login activity and security changes" />
-              <ToggleSwitch enabled={marketingEmails} onChange={setMarketingEmails} label="Marketing & Updates" description="Product updates and tips" />
-            </div>
-          </div>
-        );
-
-      case 'security':
-        return (
-          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-            <div className="section-header border-b border-gray-200 dark:border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Shield className="w-5 h-5" /></div>
-                <div><h2 className="section-header-title">Security & API Keys</h2><p className="section-header-subtitle">API credentials and account protection</p></div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4">
-                <div className="flex items-center gap-2 mb-2"><ShieldCheck className="w-4 h-4 text-green-500" /><span className="text-[10px] font-bold text-green-500 uppercase">Account</span></div>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">Authenticated</p>
-                <p className="text-[9px] text-gray-500 truncate">{loggedInEmail}</p>
-              </div>
-              <div className="bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4">
-                <div className="flex items-center gap-2 mb-2"><Key className="w-4 h-4 text-[var(--accent)]" /><span className="text-[10px] font-bold text-[var(--accent)] uppercase">Database</span></div>
-                <select value={dbProvider} onChange={(e) => { setDbProvider(e.target.value); localStorage.setItem('billmint_db_provider', e.target.value); }} className="text-xs w-full bg-transparent border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1 font-bold">
-                  <option value="firebase">Firebase</option><option value="indexeddb">IndexedDB (Local)</option>
-                </select>
-              </div>
-              <div className="bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  {firebaseStatus === 'connected' ? <Wifi className="w-4 h-4 text-green-500" /> : <WifiOff className="w-4 h-4 text-yellow-500" />}
-                  <span className="text-[10px] font-bold uppercase">{firebaseStatus === 'connected' ? 'Connected' : 'Offline'}</span>
-                </div>
-                <p className="text-xs text-gray-500">Sync status: {firebaseStatus === 'connected' ? 'All good' : 'Working offline'}</p>
-              </div>
-            </div>
-            <div className="space-y-4 pt-2">
-              <div><label className="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Gemini API Key (AI Scanner)</label>
-                <input type="password" value={geminiApiKey} onChange={(e) => setGeminiApiKey(e.target.value)} placeholder="AIzaSy..." className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs" /></div>
-              <div><label className="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Twilio Account SID</label>
-                <input type="text" value={twilioAccountSid} onChange={(e) => setTwilioAccountSid(e.target.value)} placeholder="AC..." className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs mb-3" />
-                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Twilio Auth Token</label>
-                <input type="password" value={twilioAuthToken} onChange={(e) => setTwilioAuthToken(e.target.value)} className="input-premium w-full px-4 py-3 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs" /></div>
-            </div>
-          </div>
-        );
-
-      case 'backup':
-        return (
-          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-            <div className="section-header border-b border-gray-200 dark:border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Database className="w-5 h-5" /></div>
-                <div><h2 className="section-header-title">Backup & Restore</h2><p className="section-header-subtitle">Export, import, and manage your data</p></div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button onClick={handleExport} className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 text-left transition-colors">
-                <Download className="text-emerald-500 w-5 h-5 shrink-0" />
-                <div>
-                  <div className="font-extrabold text-sm text-theme-primary">Export Backup</div>
-                  <div className="text-[10px] font-semibold text-theme-muted mt-0.5">Download all data as JSON</div>
-                </div>
-              </button>
-              <label className="flex items-center gap-3 p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 cursor-pointer text-left transition-colors">
-                <Upload className="text-blue-500 w-5 h-5 shrink-0" />
-                <div>
-                  <div className="font-extrabold text-sm text-theme-primary">Import Backup</div>
-                  <div className="text-[10px] font-semibold text-theme-muted mt-0.5">Restore from a backup file</div>
-                </div>
-                <input type="file" accept=".json" onChange={handleImport} className="hidden" />
-              </label>
-              <button onClick={() => { if (confirm('Clear cache?')) { adminEngine.clearCacheOnly(); toast.success('Cache cleared'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 text-left transition-colors">
-                <RotateCcw className="text-amber-500 w-5 h-5 shrink-0" />
-                <div>
-                  <div className="font-extrabold text-sm text-theme-primary">Clear Cache</div>
-                  <div className="text-[10px] font-semibold text-theme-muted mt-0.5">Reset temporary data</div>
-                </div>
-              </button>
-              <button onClick={() => { if (confirm('Reset all data? This cannot be undone.')) { adminEngine.factoryResetAllData(); toast.success('Data reset in progress...'); } }} className="flex items-center gap-3 p-4 rounded-xl border border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/10 text-left transition-colors">
-                <Trash2 className="text-rose-500 w-5 h-5 shrink-0" />
-                <div>
-                  <div className="font-extrabold text-sm text-rose-600 dark:text-rose-400">Factory Reset</div>
-                  <div className="text-[10px] font-bold text-rose-500/80 mt-0.5">Wipe all local data permanently</div>
-                </div>
-              </button>
-            </div>
-          </div>
-        );
-
       case 'invoice-builder':
         return (
-          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-            <div className="section-header border-b border-gray-200 dark:border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0">
-                  <LayoutTemplate className="w-5 h-5" />
+          <div className="space-y-6 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Invoice Builder & Numbering</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Customize default invoice prefixes, numbering, line-item capabilities, and custom table columns.</p>
+            </div>
+
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-4">
+              <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Numbering & Default Terms</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Invoice Prefix</label>
+                  <input type="text" value={invoicePrefix} onChange={(e) => setInvoicePrefix(e.target.value)} placeholder="INV-" className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all font-mono" />
                 </div>
                 <div>
-                  <h2 className="section-header-title">Invoice Builder Controls</h2>
-                  <p className="section-header-subtitle">Enable or disable premium features in the invoice builder</p>
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Default Item / Product Label</label>
+                  <input type="text" value={invoiceItemLabel} onChange={(e) => setInvoiceItemLabel(e.target.value)} placeholder="e.g. Item, Product, Service" className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Default Payment Terms</label>
+                  <textarea value={terms} onChange={(e) => setTerms(e.target.value)} rows={2} placeholder="e.g. Payment due within 7 days of invoice date." className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all resize-none" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-theme-primary mb-1">PDF Footer Notice / Bank Details</label>
+                  <textarea value={pdfFooter} onChange={(e) => setPdfFooter(e.target.value)} rows={2} placeholder="e.g. Thank you for your business! Bank: HDFC Bank, A/C: 1234567890" className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all resize-none" />
                 </div>
               </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ToggleSwitch
-                enabled={enableProductAutocomplete}
-                onChange={setEnableProductAutocomplete}
-                label="Product Autocomplete"
-                description="Auto-suggest items from your catalog"
-              />
-              <ToggleSwitch
-                enabled={enableTemplateSwitcher}
-                onChange={setEnableTemplateSwitcher}
-                label="Template Switcher"
-                description="Allow switching invoice designs"
-              />
-              <ToggleSwitch
-                enabled={enableItemLevelDiscount}
-                onChange={setEnableItemLevelDiscount}
-                label="Item-Level Discount"
-                description="Allow adding discounts per line item"
-              />
-              <ToggleSwitch
-                enabled={enableItemLevelTax}
-                onChange={setEnableItemLevelTax}
-                label="Item-Level Tax"
-                description="Allow adding tax per line item"
-              />
-              <ToggleSwitch
-                enabled={enableDragAndDrop}
-                onChange={setEnableDragAndDrop}
-                label="Drag & Drop Rows"
-                description="Reorder items by dragging"
-              />
-              <ToggleSwitch
-                enabled={enableDigitalSignature}
-                onChange={setEnableDigitalSignature}
-                label="Digital Signature"
-                description="Enable signature pad on invoice"
-              />
-              <ToggleSwitch
-                enabled={enableLivePreview}
-                onChange={setEnableLivePreview}
-                label="Live PDF Preview"
-                description="Real-time PDF rendering preview"
-              />
+
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-4">
+              <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Line Item & Builder Features</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <ToggleSwitch enabled={enableProductAutocomplete} onChange={setEnableProductAutocomplete} label="Product Autocomplete" description="Auto-suggest items from catalog as you type." />
+                <ToggleSwitch enabled={enableTemplateSwitcher} onChange={setEnableTemplateSwitcher} label="Template Switcher" description="Allow instant theme & layout switching during creation." />
+                <ToggleSwitch enabled={enableItemLevelDiscount} onChange={setEnableItemLevelDiscount} label="Item-Level Discount" description="Allow per-item discount % or amount." />
+                <ToggleSwitch enabled={enableItemLevelTax} onChange={setEnableItemLevelTax} label="Item-Level Tax Breakdown" description="Allow distinct tax rates per line item." />
+                <ToggleSwitch enabled={enableDragAndDrop} onChange={setEnableDragAndDrop} label="Drag & Drop Rows" description="Reorder invoice line items interactively." />
+                <ToggleSwitch enabled={enableDigitalSignature} onChange={setEnableDigitalSignature} label="Digital Signature Pad" description="Add authorized sign-off box on bills." />
+              </div>
             </div>
-            
-            {/* Custom Columns & Labels */}
-            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
-              <h3 className="text-lg font-bold text-theme-primary mb-4">Table Customization</h3>
-              
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-theme-main mb-2">Item/Product Column Label</label>
-                <input
-                  type="text"
-                  value={invoiceItemLabel}
-                  onChange={(e) => setInvoiceItemLabel(e.target.value)}
-                  className="w-full max-w-xs px-4 py-2 bg-theme-surface border border-theme-border rounded-xl focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent text-theme-main"
-                  placeholder="e.g. Item, Product, Service"
-                />
+
+            {/* CUSTOM TABLE COLUMNS */}
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Custom Table Columns</h3>
+                  <p className="text-[11px] text-theme-muted mt-0.5">Add extra fields to line items (e.g. Size, Batch No, HSN code, Warranty).</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setInvoiceCustomColumns([...invoiceCustomColumns, { id: 'col_' + Date.now(), name: '', type: 'text', options: '' }])}
+                  className="px-3 py-1.5 text-xs font-bold bg-theme-accent text-white rounded-xl shadow-xs hover:opacity-90 transition-all cursor-pointer"
+                >
+                  + Add Column
+                </button>
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <label className="block text-sm font-semibold text-theme-main">Custom Columns</label>
-                    <p className="text-xs text-theme-muted mt-1">Add additional columns to your invoice table (e.g. Size, Color, Warranty)</p>
-                  </div>
-                  <button onClick={() => setInvoiceCustomColumns([...invoiceCustomColumns, { id: 'col_' + Date.now(), name: '', type: 'text', options: '' }])} className="px-3 py-1.5 text-xs font-bold bg-theme-accent text-white rounded-lg shadow-sm hover:brightness-110 transition-all">+ Add Column</button>
+              {invoiceCustomColumns.length === 0 ? (
+                <p className="text-xs text-theme-muted p-4 bg-theme-surface/40 rounded-xl border border-dashed border-theme-border-soft text-center font-medium">No custom columns added yet.</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {invoiceCustomColumns.map((col, index) => (
+                    <div key={col.id} className="flex flex-wrap items-center gap-3 p-3 bg-theme-surface/50 border border-theme-border-soft rounded-xl">
+                      <input
+                        type="text"
+                        value={col.name}
+                        onChange={(e) => {
+                          const newCols = [...invoiceCustomColumns];
+                          newCols[index].name = e.target.value;
+                          setInvoiceCustomColumns(newCols);
+                        }}
+                        className="flex-1 min-w-[120px] px-3 py-1.5 text-xs font-semibold bg-theme-card border border-theme-border-soft rounded-lg text-theme-primary focus:outline-none focus:border-theme-accent"
+                        placeholder="Column Name (e.g. HSN)"
+                      />
+                      <select
+                        value={col.type}
+                        onChange={(e) => {
+                          const newCols = [...invoiceCustomColumns];
+                          newCols[index].type = e.target.value;
+                          setInvoiceCustomColumns(newCols);
+                        }}
+                        className="px-3 py-1.5 text-xs font-semibold bg-theme-card border border-theme-border-soft rounded-lg text-theme-primary focus:outline-none focus:border-theme-accent"
+                      >
+                        <option value="text">Text</option>
+                        <option value="number">Number</option>
+                        <option value="dropdown">Dropdown</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setInvoiceCustomColumns(invoiceCustomColumns.filter((_, i) => i !== index))}
+                        className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                        title="Remove Column"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                {invoiceCustomColumns.length === 0 ? (
-                  <p className="text-sm text-theme-muted p-4 bg-gray-50 dark:bg-black/20 rounded-xl border border-dashed border-gray-300 dark:border-white/20 text-center">No custom columns added.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {invoiceCustomColumns.map((col, index) => (
-                      <div key={col.id} className="flex flex-wrap items-center gap-3 p-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl">
-                        <input
-                          type="text"
-                          value={col.name}
-                          onChange={(e) => {
-                            const newCols = [...invoiceCustomColumns];
-                            newCols[index].name = e.target.value;
-                            setInvoiceCustomColumns(newCols);
-                          }}
-                          className="flex-1 min-w-[120px] px-3 py-1.5 text-sm bg-theme-surface border border-theme-border rounded-lg text-theme-main focus:outline-none focus:border-theme-accent"
-                          placeholder="Column Name"
-                        />
-                        <select
-                          value={col.type}
-                          onChange={(e) => {
-                            const newCols = [...invoiceCustomColumns];
-                            newCols[index].type = e.target.value;
-                            setInvoiceCustomColumns(newCols);
-                          }}
-                          className="px-3 py-1.5 text-sm bg-theme-surface border border-theme-border rounded-lg text-theme-main focus:outline-none focus:border-theme-accent"
-                        >
-                          <option value="text">Text Input</option>
-                          <option value="number">Number Input</option>
-                          <option value="dropdown">Dropdown</option>
-                        </select>
-                        {col.type === 'dropdown' && (
-                          <input
-                            type="text"
-                            value={col.options || ''}
-                            onChange={(e) => {
-                              const newCols = [...invoiceCustomColumns];
-                              newCols[index].options = e.target.value;
-                              setInvoiceCustomColumns(newCols);
-                            }}
-                            className="flex-1 min-w-[150px] px-3 py-1.5 text-sm bg-theme-surface border border-theme-border rounded-lg text-theme-main focus:outline-none focus:border-theme-accent"
-                            placeholder="Options (comma separated)"
-                          />
-                        )}
-                        <button
-                          onClick={() => {
-                            const newCols = invoiceCustomColumns.filter((_, i) => i !== index);
-                            setInvoiceCustomColumns(newCols);
-                          }}
-                          className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors shrink-0"
-                          title="Remove Column"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+              )}
+            </div>
+          </div>
+        );
+
+      case 'payment':
+        return (
+          <div className="space-y-6 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Payment Methods & QR Gateway</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Configure UPI, bKash, Nagad, dynamic payment QR codes, and customer proof submissions.</p>
+            </div>
+
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-4">
+              <ToggleSwitch
+                enabled={paymentQrEnabled}
+                onChange={setPaymentQrEnabled}
+                label="Enable Digital Payments & QR"
+                description="Display dynamic QR codes and gateway options on PDF and Live Link invoices."
+              />
+
+              {paymentQrEnabled && (
+                <div className="space-y-4 pt-2 border-t border-theme-border-soft">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-theme-primary mb-1">Primary Payment Channel</label>
+                      <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all">
+                        <option value="UPI">UPI (India - GPay, PhonePe, Paytm)</option>
+                        <option value="bKash">bKash (Bangladesh Mobile Banking)</option>
+                        <option value="Nagad">Nagad (Bangladesh)</option>
+                        <option value="Rocket">Rocket (DBBL)</option>
+                        <option value="Bank">Bank Account Transfer</option>
+                        <option value="Manual">Custom Payment Link</option>
+                      </select>
+                    </div>
+
+                    {paymentMethod === 'UPI' && (
+                      <div>
+                        <label className="block text-xs font-bold text-theme-primary mb-1">UPI VPA / ID</label>
+                        <input type="text" value={upiId} onChange={(e) => setUpiId(e.target.value)} placeholder="merchant@okhdfcbank" className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all font-mono" />
                       </div>
-                    ))}
+                    )}
+
+                    {paymentMethod === 'bKash' && (
+                      <div>
+                        <label className="block text-xs font-bold text-theme-primary mb-1">bKash Merchant / Personal Number</label>
+                        <input type="text" value={bkashNumber} onChange={(e) => setBkashNumber(e.target.value)} placeholder="01XXXXXXXXX" className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all font-numbers" />
+                      </div>
+                    )}
+
+                    {paymentMethod === 'Nagad' && (
+                      <div>
+                        <label className="block text-xs font-bold text-theme-primary mb-1">Nagad Number</label>
+                        <input type="text" value={nagadNumber} onChange={(e) => setNagadNumber(e.target.value)} placeholder="01XXXXXXXXX" className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all font-numbers" />
+                      </div>
+                    )}
+
+                    {paymentMethod === 'Rocket' && (
+                      <div>
+                        <label className="block text-xs font-bold text-theme-primary mb-1">Rocket Number</label>
+                        <input type="text" value={rocketNumber} onChange={(e) => setRocketNumber(e.target.value)} placeholder="01XXXXXXXXXX" className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all font-numbers" />
+                      </div>
+                    )}
+
+                    {paymentMethod === 'Manual' && (
+                      <div>
+                        <label className="block text-xs font-bold text-theme-primary mb-1">Custom Payment Link</label>
+                        <input type="url" value={customPaymentLink} onChange={(e) => setCustomPaymentLink(e.target.value)} placeholder="https://buy.stripe.com/..." className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all" />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-xs font-bold text-theme-primary mb-1">Payee Name (Receiver Display)</label>
+                      <input type="text" value={payeeName} onChange={(e) => setPayeeName(e.target.value)} placeholder="e.g. Khairul Basar" className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all" />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-theme-primary mb-1">Payment Instructions Note</label>
+                      <input type="text" value={paymentNote} onChange={(e) => setPaymentNote(e.target.value)} placeholder="e.g. Scan QR and attach screenshot of receipt" className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all" />
+                    </div>
                   </div>
-                )}
-              </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-theme-border-soft">
+                    <ToggleSwitch enabled={showQrInPreview} onChange={setShowQrInPreview} label="Show QR on Interactive Preview" description="Display QR in browser preview modal." />
+                    <ToggleSwitch enabled={showQrInPdf} onChange={setShowQrInPdf} label="Show QR on PDF Export" description="Print dynamic scannable QR on downloaded A4/A5 PDFs." />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 'pdf-templates':
+        return (
+          <div className="space-y-4 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">PDF Invoice Templates</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Select and configure visual layout styles for printed and downloaded PDF documents.</p>
+            </div>
+            <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs">
+              <PdfTemplateStudio
+                setCurrentTab={(tab) => {
+                  if (tab === 'dashboard') setCurrentTab?.('dashboard');
+                  else if (tab === 'settings') setActiveSection('business');
+                  else setActiveSection(tab);
+                }}
+                businessSettings={settings}
+                setSettings={onSaveSettings}
+              />
+            </div>
+          </div>
+        );
+
+      case 'live-link-templates':
+        return (
+          <div className="space-y-4 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Live Link Invoice Templates</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Configure client-facing live web links, self-service payments, and proof upload layouts.</p>
+            </div>
+            <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs">
+              <LiveLinkTemplateStudio
+                setCurrentTab={(tab) => {
+                  if (tab === 'dashboard') setCurrentTab?.('dashboard');
+                  else if (tab === 'settings') setActiveSection('business');
+                  else setActiveSection(tab);
+                }}
+                businessSettings={settings}
+                setSettings={onSaveSettings}
+              />
+            </div>
+          </div>
+        );
+
+      case 'design-studio':
+        return (
+          <div className="space-y-4 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Universal Design Studio</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Unified design center connecting themes, templates, and branding tokens.</p>
+            </div>
+            <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs">
+              <DesignStudio
+                setCurrentTab={setCurrentTab}
+                businessSettings={settings}
+                onSaveSettings={onSaveSettings}
+              />
+            </div>
+          </div>
+        );
+
+      case 'template-marketplace':
+        return (
+          <div className="space-y-4 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Template Marketplace</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Browse community layouts, thermal receipt templates, and specialized industry designs.</p>
+            </div>
+            <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs">
+              <TemplateMarketplace
+                setCurrentTab={setCurrentTab}
+                businessSettings={settings}
+              />
             </div>
           </div>
         );
 
       case 'inventory-settings':
         return (
-          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-            <div className="section-header border-b border-gray-200 dark:border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0">
-                  <PackageSearch className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="section-header-title">Inventory Configuration</h2>
-                  <p className="section-header-subtitle">Enable advanced tracking features for products</p>
-                </div>
+          <div className="space-y-6 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Inventory & Product Tracking</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Enable SKU barcoding, size/color variant matrices, multi-warehouse tracking, and batch expiry dates.</p>
+            </div>
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <ToggleSwitch enabled={enableBarcodeSku} onChange={setEnableBarcodeSku} label="Barcode & SKU Tracking" description="Enable barcode scanners and SKU lookups across catalog." />
+                <ToggleSwitch enabled={enableVariantTracking} onChange={setEnableVariantTracking} label="Product Variants (Size/Color)" description="Manage size, color, material, and style matrices." />
+                <ToggleSwitch enabled={enableWarehouseTracking} onChange={setEnableWarehouseTracking} label="Multi-Warehouse & Shelf" description="Track physical inventory locations and stock bins." />
+                <ToggleSwitch enabled={enableBatchExpiry} onChange={setEnableBatchExpiry} label="Batch & Expiry Dates" description="Crucial for pharmacy, FMCG, and perishable inventory." />
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ToggleSwitch
-                enabled={enableBarcodeSku}
-                onChange={setEnableBarcodeSku}
-                label="SKU & Barcode Fields"
-                description="Show SKU and Barcode inputs for products"
-              />
-              <ToggleSwitch
-                enabled={enableVariantTracking}
-                onChange={setEnableVariantTracking}
-                label="Variant Tracking (Size/Color)"
-                description="Manage product variants like size and color"
-              />
-              <ToggleSwitch
-                enabled={enableWarehouseTracking}
-                onChange={setEnableWarehouseTracking}
-                label="Warehouse & Shelf Tracking"
-                description="Track inventory across shelves and locations"
-              />
-              <ToggleSwitch
-                enabled={enableBatchExpiry}
-                onChange={setEnableBatchExpiry}
-                label="Batch & Expiry Dates"
-                description="Essential for Pharmacy or FMCG businesses"
-              />
-            </div>
-          </div>
-        );
-
-      case 'subscription':
-        return <div className="animate-fadeIn"><Subscription currentSubscription={subscription} onUpgrade={onUpgrade} businessSettings={settings} /></div>;
-
-      case 'template-gallery':
-        return (
-          <div className="animate-fadeIn">
-            <div className="flex items-center justify-between mb-4">
-              <div className="section-header">
-                <h2 className="section-header-title">Universal Template Gallery</h2>
-                <p className="section-header-subtitle">Select a single design to unify your PDF, Live Link, and Printed invoices.</p>
-              </div>
-            </div>
-            <PdfTemplateStudio setCurrentTab={(tab) => {
-              if (tab === 'dashboard') setCurrentTab?.('dashboard');
-              else if (tab === 'settings') setActiveSection('business');
-              else setActiveSection(tab);
-            }} businessSettings={settings} setSettings={onSaveSettings} />
-          </div>
-        );
-
-      case 'users':
-        return (
-          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-            <div className="section-header border-b border-gray-200 dark:border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center shadow-sm shrink-0"><Users className="w-5 h-5" /></div>
-                <div><h2 className="section-header-title">Users & Roles</h2><p className="section-header-subtitle">Manage team access</p></div>
-              </div>
-            </div>
-            <p className="text-sm text-gray-500">Team management coming soon. Currently, accounts are managed through Firebase Auth.</p>
           </div>
         );
 
       case 'whatsapp-template':
         return (
-          <MessageTemplateStudio 
-            settings={settings}
-            whatsappMessageTemplate={whatsappMessageTemplate}
-            setWhatsappMessageTemplate={setWhatsappMessageTemplate}
-          />
+          <div className="space-y-4 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">WhatsApp & Message Templates</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Customize automatic billing share texts and payment reminder notices.</p>
+            </div>
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs">
+              <MessageTemplateStudio
+                settings={settings}
+                whatsappMessageTemplate={whatsappMessageTemplate}
+                setWhatsappMessageTemplate={setWhatsappMessageTemplate}
+              />
+            </div>
+          </div>
         );
 
-      case 'modules':
+      case 'notifications':
         return (
-          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-            <FeatureControlStudio workspaceId={settings?.activeWorkspaceId} />
+          <div className="space-y-6 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Notifications & Automated Alerts</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Configure client email notices, WhatsApp reminders, and system alerts.</p>
+            </div>
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-3">
+              <ToggleSwitch enabled={emailNotifications} onChange={setEmailNotifications} label="Email Invoices & Receipts" description="Send PDF copy automatically when invoice is generated." />
+              <ToggleSwitch enabled={whatsappNotifications} onChange={setWhatsappNotifications} label="WhatsApp Dispatch" description="Prompt instant WhatsApp share modal after invoice creation." />
+              <ToggleSwitch enabled={dueDateReminders} onChange={setDueDateReminders} label="Due Date Reminders" description="Alert customers 24 hours before payment is due." />
+              <ToggleSwitch enabled={paymentConfirmation} onChange={setPaymentConfirmation} label="Payment Confirmation Receipts" description="Notify customer when digital payment proof is verified." />
+              <ToggleSwitch enabled={securityAlerts} onChange={setSecurityAlerts} label="Security & Sync Alerts" description="Notify on unverified logins or offline sync conflicts." />
+            </div>
+          </div>
+        );
+
+      case 'security':
+        return (
+          <div className="space-y-6 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Security, API Keys & Credentials</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Manage external AI keys, SMS gateways, and cloud sync providers securely.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-xs">
+                <div className="flex items-center gap-2 mb-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                  <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Account</span>
+                </div>
+                <p className="text-xs font-bold text-theme-primary">Authenticated</p>
+                <p className="text-[10px] font-mono text-theme-muted truncate mt-0.5">{loggedInEmail}</p>
+              </div>
+
+              <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-xs">
+                <div className="flex items-center gap-2 mb-2">
+                  <Key className="w-4 h-4 text-theme-accent" />
+                  <span className="text-[10px] font-bold text-theme-accent uppercase tracking-wider">Storage Engine</span>
+                </div>
+                <select
+                  value={dbProvider}
+                  onChange={(e) => { setDbProvider(e.target.value); localStorage.setItem('billmint_db_provider', e.target.value); }}
+                  className="text-xs w-full bg-theme-surface border border-theme-border-soft rounded-xl px-2.5 py-1.5 font-bold text-theme-primary"
+                >
+                  <option value="firebase">Firebase (Cloud-Synced)</option>
+                  <option value="indexeddb">IndexedDB (Local-First)</option>
+                </select>
+              </div>
+
+              <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-xs">
+                <div className="flex items-center gap-2 mb-2">
+                  {firebaseStatus === 'connected' ? <Wifi className="w-4 h-4 text-emerald-500" /> : <WifiOff className="w-4 h-4 text-amber-500" />}
+                  <span className="text-[10px] font-bold uppercase tracking-wider">{firebaseStatus === 'connected' ? 'Connected' : 'Offline Mode'}</span>
+                </div>
+                <p className="text-xs font-semibold text-theme-muted">
+                  {firebaseStatus === 'connected' ? 'Real-time database active' : 'Storing locally in IndexedDB'}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-4">
+              <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">API Keys (Encrypted)</h3>
+              <div>
+                <label className="block text-xs font-bold text-theme-primary mb-1">Gemini AI API Key (Smart Invoice OCR & Assist)</label>
+                <input
+                  type="password"
+                  value={geminiApiKey}
+                  onChange={(e) => setGeminiApiKey(e.target.value)}
+                  placeholder="AIzaSy..."
+                  className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-mono text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Twilio Account SID</label>
+                  <input
+                    type="text"
+                    value={twilioAccountSid}
+                    onChange={(e) => setTwilioAccountSid(e.target.value)}
+                    placeholder="AC..."
+                    className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-mono text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Twilio Auth Token</label>
+                  <input
+                    type="password"
+                    value={twilioAuthToken}
+                    onChange={(e) => setTwilioAuthToken(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-mono text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'users':
+        return (
+          <div className="space-y-6 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Users & Workspace Roles</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Team management, role-based access control (RBAC), and session permissions.</p>
+            </div>
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs space-y-4">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-theme-surface/50 border border-theme-border-soft">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-theme-accent/10 text-theme-accent flex items-center justify-center font-bold">
+                    {loggedInEmail.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-theme-primary">{ownerName || loggedInEmail.split('@')[0]}</p>
+                    <p className="text-[11px] text-theme-muted font-mono">{loggedInEmail}</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-theme-accent/10 text-theme-accent font-bold text-[10px] uppercase border border-theme-accent/20">
+                  Workspace Owner (Admin)
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'subscription':
+        return (
+          <div className="animate-fadeIn">
+            <Subscription currentSubscription={subscription} onUpgrade={onUpgrade} businessSettings={settings} />
+          </div>
+        );
+
+      case 'backup':
+        return (
+          <div className="space-y-4 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary tracking-tight">Backup & Data Recovery</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Download full JSON workspace archive or restore records safely.</p>
+            </div>
+            <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs">
+              <BackupRestore
+                settings={settings}
+                invoices={invoices}
+                customers={customers}
+                products={products}
+                expenses={expenses}
+                onImportBackup={onImportBackup}
+              />
+            </div>
           </div>
         );
 
       case 'advanced':
         return (
-          <div className="card-premium p-6 md:p-8 space-y-6 animate-fadeIn">
-            <div className="section-header border-b border-gray-200 dark:border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-red-500 text-white flex items-center justify-center shadow-sm shrink-0"><Settings2 className="w-5 h-5" /></div>
-                <div><h2 className="section-header-title text-red-600">Advanced</h2><p className="section-header-subtitle">Danger zone — proceed with caution</p></div>
-              </div>
+          <div className="space-y-6 animate-fadeIn">
+            <div>
+              <h2 className="text-lg font-black text-rose-500 tracking-tight">Advanced / Danger Zone</h2>
+              <p className="text-xs font-semibold text-theme-muted mt-0.5">Perform maintenance tasks and database cleanups with extreme care.</p>
             </div>
-            <div className="space-y-3">
+            <div className="bg-theme-card rounded-2xl p-5 border border-rose-500/20 shadow-xs space-y-3">
               {[
-                { label: 'Clear All Local Data', desc: 'Wipe everything including IndexedDB', action: async () => { if (confirm('Permanently wipe all local data?')) { await adminEngine.clearAllLocalData(); toast.success('Data wiped'); window.location.href = '/'; } }, danger: true },
-                { label: 'Clean Duplicate Drafts', desc: 'Remove empty zero-amount invoices', action: async () => { const r = await adminEngine.cleanDuplicateDrafts(); toast.success('Removed ' + r + ' drafts'); } },
-                { label: 'Empty Trash', desc: 'Permanently delete trashed invoices', action: async () => { const r = await adminEngine.emptyTrash(); toast.success('Deleted ' + r.count + ' items'); } }
+                {
+                  label: 'Clean Duplicate Draft Invoices',
+                  desc: 'Remove blank zero-amount draft invoices safely without affecting completed sales.',
+                  action: async () => {
+                    const r = await adminEngine.cleanDuplicateDrafts();
+                    toast.success('Cleaned ' + (r || 0) + ' draft invoices');
+                  },
+                  danger: false
+                },
+                {
+                  label: 'Empty Trashed Invoices',
+                  desc: 'Permanently purge soft-deleted invoices from trash.',
+                  action: async () => {
+                    const r = await adminEngine.emptyTrash();
+                    toast.success('Purged ' + (r?.count || 0) + ' trashed items');
+                  },
+                  danger: false
+                },
+                {
+                  label: 'Clear Local Storage Cache',
+                  desc: 'Reset UI cache and local storage keys without deleting Firestore cloud data.',
+                  action: async () => {
+                    if (confirm('Clear temporary local cache?')) {
+                      adminEngine.clearCacheOnly();
+                      toast.success('Cache cleared successfully');
+                    }
+                  },
+                  danger: false
+                },
+                {
+                  label: 'Factory Reset All Local Data',
+                  desc: 'Permanently wipe local IndexedDB store. Cloud data remains untouched.',
+                  action: async () => {
+                    if (confirm('Permanently wipe local workspace data? This cannot be undone.')) {
+                      await adminEngine.clearAllLocalData();
+                      toast.success('Data wiped successfully');
+                      window.location.href = '/';
+                    }
+                  },
+                  danger: true
+                }
               ].map((item, i) => (
-                <button key={i} onClick={item.action} className={'w-full flex items-center justify-between p-4 rounded-xl border text-left ' + (item.danger ? 'border-red-500/30 bg-red-500/5 hover:bg-red-500/10' : 'border-gray-200 dark:border-white/10 bg-white/50 dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10')}>
-                  <div><p className={'text-xs font-bold ' + (item.danger ? 'text-red-600' : 'text-gray-900 dark:text-white')}>{item.label}</p><p className="text-[9px] text-gray-500">{item.desc}</p></div>
-                  <span className={'text-[9px] font-bold ' + (item.danger ? 'text-red-500' : 'text-gray-400')}>Run</span>
-                </button>
+                <div
+                  key={i}
+                  className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                    item.danger
+                      ? 'border-rose-500/30 bg-rose-500/5'
+                      : 'border-theme-border-soft bg-theme-surface/50'
+                  }`}
+                >
+                  <div className="pr-4">
+                    <p className={`text-xs font-bold ${item.danger ? 'text-rose-500' : 'text-theme-primary'}`}>
+                      {item.label}
+                    </p>
+                    <p className="text-[10px] text-theme-muted font-medium mt-0.5">{item.desc}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={item.action}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                      item.danger
+                        ? 'bg-rose-500 text-white hover:bg-rose-600 shadow-xs'
+                        : 'bg-theme-card border border-theme-border-soft hover:bg-theme-surface text-theme-primary'
+                    }`}
+                  >
+                    Execute
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -1460,11 +1614,16 @@ const SettingsStudioV2 = ({
 
       case 'cyber-tools':
         return (
-          <CyberToolsConfig 
-            enablePhotoMaker={enablePhotoMaker} setEnablePhotoMaker={setEnablePhotoMaker} 
-            removeBgApiKey={removeBgApiKey} setRemoveBgApiKey={setRemoveBgApiKey} 
+          <CyberToolsConfig
+            enablePhotoMaker={enablePhotoMaker} setEnablePhotoMaker={setEnablePhotoMaker}
+            removeBgApiKey={removeBgApiKey} setRemoveBgApiKey={setRemoveBgApiKey}
           />
         );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" className="settings-studio-premium min-h-screen pb-32 font-sans w-full bg-theme-app text-theme-primary">
@@ -1494,7 +1653,7 @@ const SettingsStudioV2 = ({
                   </h1>
                   <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Auto-Synced
+                    Synced
                   </span>
                 </div>
               </div>
@@ -1512,7 +1671,7 @@ const SettingsStudioV2 = ({
               className="w-full pl-9 pr-8 py-1.5 bg-theme-surface/70 border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">
+              <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary cursor-pointer">
                 <X className="w-3 h-3" />
               </button>
             )}
@@ -1578,16 +1737,16 @@ const SettingsStudioV2 = ({
       <div className="settings-contextbar bg-theme-surface/50 border-b border-theme-border-soft/70 px-4 lg:px-6 py-2 flex items-center justify-between text-xs text-theme-muted">
         <div className="flex items-center gap-2">
           <Building2 className="w-3.5 h-3.5 text-theme-accent" />
-          <span className="font-bold text-theme-primary">{settings?.businessName || 'KB.Embroidery Designer 1118'}</span>
+          <span className="font-bold text-theme-primary">{settings?.businessName || 'BillQyro Workspace'}</span>
           <span className="text-theme-border-strong">•</span>
-          <span className="font-mono text-[11px] text-theme-muted">Workspace: {settings?.activeWorkspaceId || 'ws_primary'}</span>
+          <span className="font-mono text-[11px] text-theme-muted">ID: {settings?.activeWorkspaceId || 'ws_primary'}</span>
         </div>
         <div className="flex items-center gap-3 text-[11px] font-semibold">
           <span className="flex items-center gap-1 text-emerald-600 font-bold">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Synced
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live Cloud Sync
           </span>
           <span className="flex items-center gap-1 text-theme-muted font-bold">
-            <span>▣</span> Isolated
+            <span>▣</span> Workspace Isolated
           </span>
         </div>
       </div>
@@ -1596,10 +1755,9 @@ const SettingsStudioV2 = ({
       <div className="settings-content-shell flex w-full min-h-[calc(100vh-110px)]">
         {/* SETTINGS CONTROL SIDEBAR */}
         <aside className="settings-sidebar w-60 lg:w-64 border-r border-theme-border-soft bg-theme-surface/30 shrink-0 p-3 space-y-3 hidden md:flex md:flex-col">
-          {/* Header */}
           <div className="settings-sidebar-header px-2 py-1">
             <h2 className="text-xs font-black text-theme-primary tracking-tight">Settings</h2>
-            <p className="text-[10px] font-semibold text-theme-muted">Business preferences</p>
+            <p className="text-[10px] font-semibold text-theme-muted">SaaS Control Center</p>
           </div>
 
           {/* Mode Tabs: All | Simple | Advanced */}
@@ -1670,7 +1828,7 @@ const SettingsStudioV2 = ({
             </AnimatePresence>
           </div>
 
-          {/* Live Preview Panel on the right */}
+          {/* Contextual Live Preview Panel */}
           {showPreview && (
             <div className="settings-preview w-full lg:w-80 shrink-0">
               <LivePreviewPanel themeId={themeId} darkMode={darkMode} brandColor={brandColor} settings={settings} />
@@ -1679,7 +1837,7 @@ const SettingsStudioV2 = ({
         </div>
       </div>
 
-      {/* Sticky Save Bar (Floating when dirty) */}
+      {/* Sticky Floating Save Bar */}
       <AnimatePresence>
         {isDirty && (
           <motion.div
@@ -1694,8 +1852,8 @@ const SettingsStudioV2 = ({
                   <AlertTriangle className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-theme-primary">Unsaved changes</p>
-                  <p className="text-[10px] text-theme-muted font-medium">You have pending modifications</p>
+                  <p className="text-xs font-bold text-theme-primary">Unsaved changes pending</p>
+                  <p className="text-[10px] text-theme-muted font-medium">Press Ctrl+S or click Save Changes</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -1722,7 +1880,7 @@ const SettingsStudioV2 = ({
         )}
       </AnimatePresence>
 
-      {/* Mobile Bottom Nav */}
+      {/* Mobile Horizontal Category Bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-theme-card border-t border-theme-border-soft overflow-x-auto custom-scrollbar">
         <div className="flex items-center justify-around px-2 py-1.5 min-w-max">
           {NAV_GROUPS.map((group) => {
@@ -1733,7 +1891,7 @@ const SettingsStudioV2 = ({
               <button
                 key={group.group}
                 onClick={() => setActiveSection(firstItem?.id || group.group)}
-                className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all ${
+                className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all min-w-[50px] min-h-[44px] justify-center cursor-pointer ${
                   isActive ? 'text-theme-accent font-bold' : 'text-theme-muted'
                 }`}
               >

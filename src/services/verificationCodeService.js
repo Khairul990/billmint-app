@@ -1,5 +1,5 @@
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { db } from './firebaseConfig.js';
 
 /**
  * Generate unique verification code for an invoice

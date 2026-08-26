@@ -1,9 +1,9 @@
-import { invoiceEngine } from './invoiceEngine';
-import { getInvoicePaymentStatus, getInvoicePaidTotal } from '../utils/invoiceMath';
+import { invoiceEngine } from './invoiceEngine.js';
+import { getInvoicePaymentStatus, getInvoicePaidTotal } from '../utils/invoiceMath.js';
 
-import { db, firebaseReady } from './firebaseConfig';
+import { db, firebaseReady } from './firebaseConfig.js';
 import { doc, runTransaction } from 'firebase/firestore';
-import {  submitPlatformPaymentProof as dbSubmitPlatformPaymentProof, getUserPaymentProofs as dbGetUserPaymentProofs, getUserRevenueState as dbGetUserRevenueState  } from './dbEngine';
+import {  submitPlatformPaymentProof as dbSubmitPlatformPaymentProof, getUserPaymentProofs as dbGetUserPaymentProofs, getUserRevenueState as dbGetUserRevenueState  } from './dbEngine.js';
 
 class PaymentEngine {
   // Add payment transaction to an invoice (Canonical Unified Flow)

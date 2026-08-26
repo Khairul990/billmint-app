@@ -1,4 +1,4 @@
-import { db, firebaseReady } from './firebaseConfig';
+import { db, firebaseReady } from './firebaseConfig.js';
 import { collection, addDoc } from 'firebase/firestore';
 
 export const EMPIRE_AGENT_ENABLED = true;

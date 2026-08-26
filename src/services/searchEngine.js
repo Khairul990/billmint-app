@@ -1,6 +1,6 @@
-import { invoiceEngine } from './invoiceEngine';
-import { customerEngine } from './customerEngine';
-import * as dbEngine from './dbEngine';
+import { invoiceEngine } from './invoiceEngine.js';
+import { customerEngine } from './customerEngine.js';
+import * as dbEngine from './dbEngine.js';
 
 class SearchEngine {
   async globalSearch(workspaceId, query) {

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { useInvoice } from '../../../contexts/InvoiceContext';
+import { useInvoice } from '../../../context/InvoiceContext';
 import { Plus, Trash2, AlertTriangle, ArrowUp, X, Settings2, Copy, Package } from 'lucide-react';
 import { getProductLabelByType } from '../../../config/businessPresets';
 import PremiumEmptyState from '../../../components/PremiumEmptyState';

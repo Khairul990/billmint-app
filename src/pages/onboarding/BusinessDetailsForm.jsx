@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useOnboarding } from '../../contexts/OnboardingContext';
+import { useOnboarding } from '../../context/OnboardingContext';
 import { Upload, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 

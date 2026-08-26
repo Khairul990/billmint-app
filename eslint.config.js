@@ -7,7 +7,7 @@ export default [
   { 
     ignores: [
       'dist', 'dev-dist', 'dist-electron', 'dist_electron', 'android', 'ios', '.capacitor', 
-      'public', 'scratch', '_deleted_backup', 'src/pages/settings/**',
+      'public', 'scratch', '_deleted_backup', 'src/pages/settings/**', 'src/contexts/**',
       'docs/**', 'electron/**', 'functions/**', 'scripts/**',
       '*.mjs', '*.cjs', 'patch_*.js', 'test*.js', 'test*.mjs', 'merge_templates.js'
     ] 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useInvoice } from '../../../../contexts/InvoiceContext';
+import { useInvoice } from '../../../../context/InvoiceContext';
 import { Download, Send, CheckCircle2, Copy, Loader2 } from 'lucide-react';
 import InvoicePreview from '../../../InvoicePreview';
 import useGeneratePDF from '../../../../hooks/useGeneratePDF';

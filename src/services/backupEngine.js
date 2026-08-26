@@ -5,9 +5,9 @@ import {
   importRestore as dbImportRestore,
   backupLocalData as dbBackupLocalData,
   syncFromFirestore as dbSyncFromFirestore
-} from './dbEngine';
-import { BillQyroDB } from './localDb';
-import { firebaseReady, db } from './firebaseConfig';
+} from './dbEngine.js';
+import { BillQyroDB } from './localDb.js';
+import { firebaseReady, db } from './firebaseConfig.js';
 import { doc, setDoc, getDoc, collection, getDocs } from 'firebase/firestore';
 
 export const backupEngine = {

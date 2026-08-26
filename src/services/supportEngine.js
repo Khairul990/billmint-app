@@ -3,7 +3,7 @@ import {
   getUserSupportTickets as dbGetUserSupportTickets,
   submitFeatureRequest as dbSubmitFeatureRequest,
   getUserFeatureRequests as dbGetUserFeatureRequests
-} from './dbEngine';
+} from './dbEngine.js';
 
 class SupportEngine {
   async submitSupportTicket(userId, email, phone, issueType, message, screenshotBase64) {

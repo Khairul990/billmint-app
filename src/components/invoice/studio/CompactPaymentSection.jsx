@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useInvoice } from '../../../contexts/InvoiceContext';
+import { useInvoice } from '../../../context/InvoiceContext';
 import { CreditCard, Banknote, Landmark, Smartphone, CheckCircle2, Circle, AlertTriangle } from 'lucide-react';
 
 const CompactPaymentSection = () => {

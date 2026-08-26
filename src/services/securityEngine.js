@@ -1,12 +1,12 @@
-import { firebaseReady, auth, db } from './firebaseConfig';
+import { firebaseReady, auth, db } from './firebaseConfig.js';
 import { doc, getDoc, setDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
   logAudit,
   getAuthSession,
   getRealUserId
-} from './dbEngine';
-import { BillQyroDB } from './localDb';
+} from './dbEngine.js';
+import { BillQyroDB } from './localDb.js';
 
 const ROLES = {
   OWNER: 'owner',

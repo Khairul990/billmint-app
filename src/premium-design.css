@@ -1630,7 +1630,7 @@
   letter-spacing: -.035em;
 }
 .billqyro-landing-premium section .rounded-3xl,
-.billqyro-landing-premium section .rounded-[2rem] {
+.billqyro-landing-premium section .rounded-\\[2rem\\] {
   box-shadow: 0 18px 60px rgba(11,18,32,.055);
   border-color: color-mix(in srgb, var(--billqyro-brand) 10%, var(--theme-border-soft, #e5e7eb));
 }

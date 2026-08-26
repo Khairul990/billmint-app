@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useOnboarding } from '../../contexts/OnboardingContext';
+import { useOnboarding } from '../../context/OnboardingContext';
 import { ChevronLeft, ChevronRight, Stethoscope, Store, ShoppingBasket, Wrench, Scissors, PenTool, LayoutTemplate, Pill } from 'lucide-react';
 import Switch from 'react-switch';
 

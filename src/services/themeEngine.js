@@ -1,7 +1,7 @@
-import { updateFaviconForTheme } from '../utils/themeIcon';
+import { updateFaviconForTheme } from '../utils/themeIcon.js';
 // Note: If using offline engine, dbEngine will route appropriately based on the new architecture.
 
-import { ALL_THEME_COLORS, THEME_INFO } from '../utils/themeUtils';
+import { ALL_THEME_COLORS, THEME_INFO } from '../utils/themeUtils.js';
 
 export const themeEngine = {
   hexToRgb(hex) {

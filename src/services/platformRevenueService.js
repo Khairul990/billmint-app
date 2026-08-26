@@ -1,4 +1,4 @@
-import { db, firebaseReady } from './firebaseConfig';
+import { db, firebaseReady } from './firebaseConfig.js';
 import { doc, setDoc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 
 const DEFAULT_GLOBAL_SETTINGS = {

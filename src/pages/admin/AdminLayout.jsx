@@ -1,31 +1,63 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Lock, ShieldAlert, ArrowLeft, Activity, Users, Settings as SettingsIcon, 
-  CreditCard, ShieldCheck, Menu, X, User, Crown, ToggleRight, Database, 
-  ListPlus, MessageSquare, Megaphone, Building2, Workflow, BarChart3
+import {
+  Activity, Users, Building2, ListPlus, CreditCard, IndianRupee,
+  Settings, Megaphone, ToggleRight, Power, ShieldCheck, Database,
+  HardDrive, RefreshCw, ShieldAlert, ArrowLeft, Menu, X, Crown, ChevronLeft, ChevronRight, Sliders
 } from 'lucide-react';
 
 const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTab }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const adminMenu = [
-    { id: 'dashboard', label: 'Command Center', group: 'OVERVIEW', icon: <Activity className="w-5 h-5" /> },
-    { id: 'users', group: 'USERS & WORKSPACES', label: 'User Manager', icon: <Users className="w-5 h-5" /> },
-    { id: 'workspaces', group: 'USERS & WORKSPACES', label: 'Workspaces', icon: <Building2 className="w-5 h-5" /> },
-    { id: 'subscriptions', group: 'COMMERCE', label: 'Subscription Plans', icon: <ListPlus className="w-5 h-5" /> },
-    { id: 'payments', group: 'COMMERCE', label: 'Payments', icon: <CreditCard className="w-5 h-5" /> },
-    { id: 'features', group: 'PLATFORM', label: 'Feature Control', icon: <ToggleRight className="w-5 h-5" /> },
-    { id: 'health', group: 'PLATFORM', label: 'App Health', icon: <Activity className="w-5 h-5" /> },
-    { id: 'security', group: 'PLATFORM', label: 'Security Center', icon: <ShieldCheck className="w-5 h-5" /> },
-    { id: 'settings', group: 'PLATFORM', label: 'Global Settings', icon: <SettingsIcon className="w-5 h-5" /> },
-    { id: 'database', group: 'DATA & OPERATIONS', label: 'Database', icon: <Database className="w-5 h-5" /> },
-    { id: 'analytics', group: 'DATA & OPERATIONS', label: 'Analytics', icon: <BarChart3 className="w-5 h-5" /> },
-    { id: 'automation', group: 'DATA & OPERATIONS', label: 'Automation', icon: <Workflow className="w-5 h-5" /> },
-    { id: 'support', group: 'OPERATIONS', label: 'Support', icon: <MessageSquare className="w-5 h-5" /> },
-    { id: 'announcements', group: 'OPERATIONS', label: 'Announcements', icon: <Megaphone className="w-5 h-5" /> },
-    { id: 'lab', group: 'OWNER TOOLS', label: 'Owner Test Lab', icon: <ShieldAlert className="w-5 h-5" /> },
-    { id: 'changelog', group: 'OPERATIONS', label: 'Changelog', icon: <ListPlus className="w-5 h-5" /> },
+  const adminMenuGroups = [
+    {
+      group: 'OVERVIEW',
+      items: [
+        { id: 'dashboard', label: 'Command Center', icon: Activity }
+      ]
+    },
+    {
+      group: 'USERS & WORKSPACES',
+      items: [
+        { id: 'users', label: 'Users', icon: Users },
+        { id: 'workspaces', label: 'Workspaces', icon: Building2 },
+        { id: 'subscriptions', label: 'Plans & Subscriptions', icon: ListPlus }
+      ]
+    },
+    {
+      group: 'FINANCIAL',
+      items: [
+        { id: 'payments', label: 'Payment Proofs', icon: CreditCard },
+        { id: 'revenue', label: 'Platform Revenue', icon: IndianRupee },
+        { id: 'billing', label: 'Billing Configuration', icon: Settings }
+      ]
+    },
+    {
+      group: 'PLATFORM',
+      items: [
+        { id: 'announcements', label: 'Announcements', icon: Megaphone },
+        { id: 'modules', label: 'Modules & Feature Controls', icon: ToggleRight },
+        { id: 'maintenance', label: 'Maintenance Mode', icon: Power },
+        { id: 'health', label: 'System Health', icon: Activity }
+      ]
+    },
+    {
+      group: 'DATA',
+      items: [
+        { id: 'backup', label: 'Backup & Restore', icon: Database },
+        { id: 'storage', label: 'Storage Diagnostics', icon: HardDrive },
+        { id: 'sync', label: 'Sync Diagnostics', icon: RefreshCw }
+      ]
+    },
+    {
+      group: 'SECURITY',
+      items: [
+        { id: 'security', label: 'Security Center', icon: ShieldCheck },
+        { id: 'audit', label: 'Audit Logs', icon: Sliders },
+        { id: 'owner-controls', label: 'Owner Controls', icon: ShieldAlert }
+      ]
+    }
   ];
 
   const handleNavClick = (id) => {
@@ -34,150 +66,125 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
   };
 
   const SidebarContent = () => (
-    <>
-      <div className="h-24 px-6 border-b border-theme-border-soft flex items-center shrink-0 bg-gradient-to-r from-theme-accent/10 via-transparent to-transparent">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-theme-accent to-theme-accent p-[1.5px] shadow-[0_0_15px_rgba(251,191,36,0.3)] mr-3 shrink-0">
-          <div className="w-full h-full bg-theme-surface-elevated rounded-[10.5px] flex items-center justify-center">
-             <Crown className="w-5 h-5 text-theme-accent" />
+    <div className="flex flex-col h-full select-none">
+      {/* Brand Header */}
+      <div className="h-16 px-4 border-b border-theme-border-soft flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center shrink-0">
+            <Crown className="w-4 h-4 text-theme-accent" />
           </div>
+          {!isCollapsed && (
+            <div className="min-w-0">
+              <h1 className="text-sm font-black text-theme-primary tracking-tight truncate">BillQyro</h1>
+              <span className="text-[9px] font-black tracking-widest text-theme-accent uppercase block">Owner Room</span>
+            </div>
+          )}
         </div>
-        <div>
-          <h1 className="text-theme-primary font-black text-xl tracking-tight leading-none vip-text-glow">BillQyro</h1>
-          <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-[9px] font-black tracking-widest text-white uppercase bg-gradient-to-r from-theme-accent to-orange-600 px-2 py-0.5 rounded shadow-[0_0_10px_rgba(245,158,11,0.5)]">OWNER CONTROL</span>
-            <p className="text-[10px] text-theme-accent uppercase tracking-wider font-bold flex items-center">
-              <span className="w-1.5 h-1.5 rounded-full bg-theme-accent mr-1.5 animate-pulse"></span>
-              Secure
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
-        {adminMenu.map((item, index) => {
-          const isActive = activeAdminTab === item.id;
-          const showGroup = index === 0 || item.group !== adminMenu[index - 1]?.group;
-          return (
-            <React.Fragment key={item.id}>
-              {showGroup && (
-                <div className="billqyro-admin-nav-group">
-                  <span>{item.group || 'OWNER TOOLS'}</span>
-                </div>
-              )}
-            <button
-              key={item.id}
-              onClick={() => handleNavClick(item.id)}
-              className={`w-full flex items-center p-3 rounded-xl transition-all duration-200 text-sm font-semibold relative overflow-hidden group ${
-                isActive 
-                  ? 'bg-theme-accent/10 text-theme-accent border border-theme-accent/20' 
-                  : 'text-theme-secondary hover:bg-theme-surface-hover hover:text-theme-primary border border-transparent'
-              }`}
-            >
-              {isActive && (
-                <motion.div 
-                  layoutId="activeTabIndicator"
-                  className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-theme-accent to-theme-accent shadow-[0_0_15px_rgba(251,191,36,0.6)]" 
-                />
-              )}
-              <div className={`mr-3 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
-                {item.icon}
-              </div>
-              <span>{item.label}</span>
-            </button>
-            </React.Fragment>
-          );
-        })}
-      </nav>
-      
-      <div className="p-4 border-t border-theme-border-soft shrink-0">
+
+        {/* Desktop Collapse Toggle */}
         <button
-          onClick={() => setCurrentTab('dashboard')}
-          className="w-full flex items-center justify-center p-3 rounded-xl bg-theme-surface-elevated hover:bg-theme-surface-hover text-theme-primary text-sm font-bold transition-all border border-theme-border-soft"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="hidden md:flex items-center justify-center w-7 h-7 rounded-lg hover:bg-theme-surface-hover text-theme-muted hover:text-theme-primary transition-colors"
+          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
         >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Exit Admin
+          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
       </div>
-    </>
+
+      {/* Navigation Links */}
+      <nav className="flex-1 p-2 space-y-4 overflow-y-auto custom-scrollbar">
+        {adminMenuGroups.map((grp) => (
+          <div key={grp.group} className="space-y-1">
+            {!isCollapsed && (
+              <span className="px-3 text-[10px] font-black uppercase tracking-wider text-theme-muted block mb-1">
+                {grp.group}
+              </span>
+            )}
+            {grp.items.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeAdminTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.id)}
+                  title={isCollapsed ? item.label : undefined}
+                  className={`w-full min-h-[44px] flex items-center px-3 py-2 rounded-xl text-xs font-bold transition-colors relative group ${
+                    isActive
+                      ? 'bg-theme-accent/10 text-theme-accent font-extrabold border border-theme-accent/20'
+                      : 'text-theme-secondary hover:bg-theme-surface-hover hover:text-theme-primary border border-transparent'
+                  }`}
+                >
+                  {isActive && (
+                    <div className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r bg-theme-accent shadow-sm" />
+                  )}
+                  <Icon className={`w-4 h-4 shrink-0 ${isCollapsed ? 'mx-auto' : 'mr-3'} ${isActive ? 'text-theme-accent' : 'text-theme-muted group-hover:text-theme-primary'}`} />
+                  {!isCollapsed && <span className="truncate">{item.label}</span>}
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </nav>
+
+      {/* Exit Control */}
+      <div className="p-3 border-t border-theme-border-soft shrink-0">
+        <button
+          onClick={() => setCurrentTab('dashboard')}
+          className="w-full min-h-[44px] flex items-center justify-center p-2.5 rounded-xl bg-theme-surface-elevated hover:bg-theme-surface-hover text-theme-secondary hover:text-theme-primary text-xs font-bold transition-all border border-theme-border-soft"
+        >
+          <ArrowLeft className={`w-4 h-4 ${isCollapsed ? '' : 'mr-2'}`} />
+          {!isCollapsed && <span>Exit Console</span>}
+        </button>
+      </div>
+    </div>
   );
 
   return (
-    <div className="billqyro-admin-premium billqyro-signature-brand h-screen bg-theme-main text-theme-primary font-sans flex flex-col md:flex-row overflow-hidden relative selection:bg-theme-accent selection:text-white" data-brand="billqyro">
-      {/* VIP Luxury Background gradients */}
-      <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[120%] pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[5%] left-[10%] w-[600px] h-[600px] bg-theme-accent/10 rounded-full blur-[120px] mix-blend-screen opacity-70 animate-blob" />
-        <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] bg-theme-accent/10 rounded-full blur-[120px] mix-blend-screen opacity-60 animate-blob animation-delay-2000" />
-        <div className="absolute top-[40%] right-[30%] w-[400px] h-[400px] bg-theme-accent/10 rounded-full blur-[100px] mix-blend-screen opacity-40 animate-blob animation-delay-4000" />
-      </div>
-      
+    <div className="billqyro-admin-premium h-screen bg-theme-main text-theme-primary font-sans flex flex-col md:flex-row overflow-hidden relative">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 h-full bg-theme-surface/60 backdrop-blur-2xl border-r border-theme-border-soft flex-col z-20 shrink-0 shadow-glass">
+      <aside
+        className={`hidden md:flex flex-col h-full bg-theme-surface/70 backdrop-blur-xl border-r border-theme-border-soft shrink-0 transition-all duration-300 z-20 ${
+          isCollapsed ? 'w-16' : 'w-64'
+        }`}
+      >
         <SidebarContent />
       </aside>
 
-      {/* Mobile Header & Sidebar */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-theme-surface/60 backdrop-blur-2xl border-b border-theme-border-soft z-30 sticky top-0 shadow-glass">
-        <div className="flex items-center text-theme-primary font-black text-lg">
-          <Crown className="w-5 h-5 mr-2 text-theme-accent" /> BillQyro Control
+      {/* Mobile Top Header */}
+      <div className="md:hidden flex items-center justify-between px-4 h-14 bg-theme-surface/70 backdrop-blur-xl border-b border-theme-border-soft z-30 shrink-0">
+        <div className="flex items-center gap-2 font-bold text-sm text-theme-primary">
+          <Crown className="w-4 h-4 text-theme-accent" />
+          <span>BillQyro Owner Control</span>
         </div>
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-theme-secondary hover:text-theme-primary p-2">
-          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-theme-secondary hover:text-theme-primary"
+        >
+          {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
 
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="md:hidden absolute top-[69px] left-0 right-0 bottom-0 bg-theme-main/90 backdrop-blur-3xl z-20 flex flex-col"
+          <motion.div
+            initial={{ opacity: 0, x: -100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden fixed inset-0 top-14 bg-theme-main z-40 flex flex-col"
           >
             <SidebarContent />
           </motion.div>
         )}
       </AnimatePresence>
-      
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
-        
-        {/* Top Header */}
-        {/* Signature Owner Header */}
-        <header className="hidden md:flex h-24 items-center justify-between px-8 bg-theme-surface/40 backdrop-blur-xl border-b border-theme-border-soft shrink-0 shadow-[0_4px_30px_rgba(0,0,0,0.1)] relative">
-          <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-theme-accent/30 to-transparent"></div>
-          <div>
-            <h2 className="text-2xl font-black text-theme-primary tracking-tight flex items-center gap-3">
-              BillQyro Signature Control Room
-              <span className="px-2 py-0.5 rounded-full border border-theme-accent/30 bg-theme-accent/10 text-theme-accent text-[10px] uppercase font-black tracking-widest shadow-[inset_0_0_10px_rgba(245,158,11,0.1)]">OWNER ONLY</span>
-            </h2>
-            <p className="text-xs font-semibold text-theme-secondary mt-1">Private owner console · platform governance, security & operations.</p>
-          </div>
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center px-4 py-2 bg-emerald-500/10 rounded-full border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2 animate-pulse shadow-[0_0_8px_var(--color-success)]"></span>
-              <span className="text-[11px] font-black tracking-widest uppercase text-emerald-500">System Nominal</span>
-            </div>
-            
-            {/* VIP Avatar Ring */}
-            <div className="relative w-12 h-12 rounded-full p-[2px] overflow-hidden group cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] transition-all">
-              <div className="absolute inset-0 bg-gradient-to-br from-theme-accent via-theme-accent to-theme-accent animate-[spin_4s_linear_infinite]" />
-              <div className="absolute inset-[2px] bg-theme-surface rounded-full flex items-center justify-center overflow-hidden z-10">
-                <Crown className="w-5 h-5 text-theme-accent group-hover:scale-110 transition-transform duration-300" />
-              </div>
-            </div>
-          </div>
-        </header>
 
-        {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar relative z-10 custom-scrollbar">
-          <motion.div
-            key={activeAdminTab}
-            initial={{ opacity: 0, y: 15, scale: 0.99 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="max-w-7xl mx-auto w-full"
-          >
+      {/* Main Content Viewport */}
+      <div className="flex-1 flex flex-col h-[calc(100vh-56px)] md:h-screen overflow-hidden relative z-10">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+          <div className="max-w-7xl mx-auto w-full">
             {children}
-          </motion.div>
+          </div>
         </main>
       </div>
     </div>

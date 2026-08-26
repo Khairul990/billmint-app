@@ -1,5 +1,5 @@
 import React from 'react';
-import { useInvoice } from '../../../contexts/InvoiceContext';
+import { useInvoice } from '../../../context/InvoiceContext';
 import { Loader2, Cloud, CloudOff, FileText, Eye, ArrowLeft, Save } from 'lucide-react';
 
 const StudioHeader = ({ showPreviewModal, setShowPreviewModal, lastSaved, saveStatus, isSaving, onSaveDraft, onDownloadPDF, onBack }) => {

@@ -1,7 +1,7 @@
-import { invoiceEngine } from './invoiceEngine';
-import * as dbEngine from './dbEngine';
-import {  verifyCustomerPortal as dbVerifyCustomerPortal  } from './dbEngine';
-import { paymentEngine } from './paymentEngine';
+import { invoiceEngine } from './invoiceEngine.js';
+import * as dbEngine from './dbEngine.js';
+import {  verifyCustomerPortal as dbVerifyCustomerPortal  } from './dbEngine.js';
+import { paymentEngine } from './paymentEngine.js';
 
 class PortalEngine {
   // Public invoice access

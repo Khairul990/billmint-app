@@ -1,7 +1,7 @@
 import React, { useState, useEffect, memo } from 'react';
-import { Search, Filter, Shield, UserX, CheckCircle, Ban, Users, Inbox, Loader2, ChevronLeft, ChevronRight, Eye, Trash2, RotateCcw, Smartphone, Clock, Cloud, MonitorSmartphone, X } from 'lucide-react';
+import { Search, Filter, Shield, UserX, CheckCircle, Ban, Users, Inbox, Loader2, ChevronLeft, ChevronRight, Eye, Trash2, RotateCcw, Crown, Mail, Calendar, Building2, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { adminEngine } from '../../services/adminEngine';
+import { adminEngine } from '../../services/adminEngine.js';
 import { toast } from 'react-hot-toast';
 import { pageVariants } from '../../utils/animations';
 import { TableRowSkeleton } from '../../components/PremiumSkeleton';
@@ -23,14 +23,16 @@ const UserManager = () => {
   const [processingId, setProcessingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [planChangeModalUser, setPlanChangeModalUser] = useState(null);
+  const [newPlanSelection, setNewPlanSelection] = useState('pro');
 
   const fetchUsersData = async () => {
     setLoading(true);
     try {
-const list = await adminEngine.getUsersList();
-        const revs = await adminEngine.getRevenueStates();
-      setUsers(list);
-      setRevenueStates(revs);
+      const list = await adminEngine.getUsersList();
+      const revs = await adminEngine.getRevenueStates();
+      setUsers(list || []);
+      setRevenueStates(revs || []);
     } catch (e) {
       console.error(e);
       toast.error('Failed to load user list.');
@@ -42,21 +44,29 @@ const list = await adminEngine.getUsersList();
   useEffect(() => {
     fetchUsersData();
   }, []);
-  
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
 
-  const handleToggleBlock = async (user, action = 'suspend') => {
+  const handleToggleBlock = async (user) => {
+    const isBlocking = !user.blocked;
+    const confirmAction = window.confirm(
+      `Are you sure you want to ${isBlocking ? 'SUSPEND' : 'REACTIVATE'} account for ${user.email || user.businessName}?`
+    );
+    if (!confirmAction) return;
+
     setProcessingId(user.userId);
-    const newBlocked = action === 'suspend';
     try {
-      const success = newBlocked ? await adminEngine.blockUser(user.userId) : await adminEngine.unblockUser(user.userId);
+      const success = isBlocking
+        ? await adminEngine.blockUser(user.userId)
+        : await adminEngine.unblockUser(user.userId);
+
       if (success) {
-        toast.success(`User successfully ${newBlocked ? 'suspended' : 'activated'}!`);
+        toast.success(`User ${isBlocking ? 'suspended' : 'reactivated'} successfully.`);
         fetchUsersData();
         if (selectedUser?.userId === user.userId) {
-          setSelectedUser({ ...selectedUser, blocked: newBlocked });
+          setSelectedUser({ ...selectedUser, blocked: isBlocking });
         }
       } else {
         toast.error('Failed to update user block status.');
@@ -69,54 +79,34 @@ const list = await adminEngine.getUsersList();
     }
   };
 
-  const handleDeleteUser = async () => {
-    if (!selectedUser) return;
-    if (window.confirm(`WARNING! This will permanently delete ${selectedUser.businessName}'s entire account and all their subcollections. Are you absolutely sure?`)) {
-      setProcessingId(selectedUser.userId);
-      const success = await adminEngine.deleteUser(selectedUser.userId);
-      if (success) {
-        toast.success('Enterprise account completely deleted.');
-        setSelectedUser(null);
-        fetchUsersData();
-      } else {
-        toast.error('Failed to delete account.');
+  const handleSavePlanChange = async () => {
+    if (!planChangeModalUser) return;
+    setProcessingId(planChangeModalUser.userId);
+    try {
+      await adminEngine.updateUserPlan(planChangeModalUser.userId, newPlanSelection);
+      toast.success(`Assigned ${newPlanSelection.toUpperCase()} tier to ${planChangeModalUser.email}`);
+      setPlanChangeModalUser(null);
+      fetchUsersData();
+      if (selectedUser?.userId === planChangeModalUser.userId) {
+        setSelectedUser({ ...selectedUser, planStatus: newPlanSelection });
       }
+    } catch (e) {
+      toast.error('Failed to change plan');
+    } finally {
       setProcessingId(null);
     }
-  };
-
-  const handleResetWorkspace = async () => {
-    if (!selectedUser) return;
-    if (window.confirm(`This will delete all invoices, customers, and products for ${selectedUser.businessName}, but keep their settings. Proceed?`)) {
-      setProcessingId(selectedUser.userId);
-      const success = await adminEngine.resetWorkspace(selectedUser.userId);
-      if (success) {
-        toast.success('Workspace data reset successfully.');
-      } else {
-        toast.error('Failed to reset workspace.');
-      }
-      setProcessingId(null);
-    }
-  };
-
-  const getRevenueInfo = (userId) => {
-    const state = revenueStates.find(r => r.userId === userId);
-    return state || { platformPendingAmount: 0, lockStatus: 'none', totalBillsCreated: 0 };
   };
 
   const filteredUsers = users.filter(user => {
     const term = searchTerm.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       (user.email?.toLowerCase().includes(term) || '') ||
       (user.businessName?.toLowerCase().includes(term) || '') ||
       (user.userId?.toLowerCase().includes(term) || '');
 
-    const rev = getRevenueInfo(user.userId);
-
     if (statusFilter === 'all') return matchesSearch;
-    if (statusFilter === 'premium') return user.planStatus === 'premium' && matchesSearch;
-    if (statusFilter === 'free') return user.planStatus === 'free' && matchesSearch;
-    if (statusFilter === 'locked') return rev.lockStatus === 'locked' && matchesSearch;
+    if (statusFilter === 'premium') return (user.planStatus === 'premium' || user.planStatus === 'pro') && matchesSearch;
+    if (statusFilter === 'free') return (user.planStatus === 'free' || !user.planStatus) && matchesSearch;
     if (statusFilter === 'suspended') return user.blocked && matchesSearch;
     return matchesSearch;
   });
@@ -125,227 +115,275 @@ const list = await adminEngine.getUsersList();
   const safePage = Math.min(currentPage, totalPages);
   const paginatedUsers = filteredUsers.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  if (loading) {
-    return (
-      <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-6">
-        <div className="mb-6"><h2 className="text-2xl font-black text-theme-primary">User Manager</h2></div>
-        <Card className="p-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <TableRowSkeleton key={i} cols={5} />
-          ))}
-        </Card>
-      </motion.div>
-    );
-  }
-
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-6 pb-32">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-3xl font-black text-theme-primary tracking-tight flex items-center">
-            <Users className="w-8 h-8 mr-3 text-theme-accent" /> User Control Center
+          <h2 className="text-3xl font-black text-theme-primary tracking-tight flex items-center gap-3">
+            <Users className="w-8 h-8 text-theme-accent" />
+            User Management & Tenant Control
           </h2>
-          <p className="text-sm text-theme-secondary mt-1">Search, filter, view profiles, and manage enterprise security limits.</p>
+          <p className="text-sm text-theme-secondary mt-1">
+            Search users, inspect workspace allocations, manage tier assignments, and enforce access restrictions.
+          </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
-          <Input 
-            icon={Search}
-            type="text" 
-            placeholder="Search users..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full md:w-64"
-          />
-          <Select 
-            icon={Filter}
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">All Status</option>
-            <option value="premium">Premium Users</option>
-            <option value="free">Free Starter</option>
-            <option value="locked">Locked Dues</option>
-            <option value="suspended">Suspended</option>
-          </Select>
+          <Button variant="outline" size="sm" onClick={fetchUsersData} leftIcon={RefreshCw}>
+            Refresh
+          </Button>
         </div>
       </div>
 
-      <Card className="overflow-hidden">
+      {/* Filter Toolbar */}
+      <Card className="p-4 bg-theme-surface/50 border-theme-border-soft">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <Input
+            icon={Search}
+            type="text"
+            placeholder="Search email, business name, or user ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full sm:flex-1"
+          />
+          <Select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full sm:w-48"
+          >
+            <option value="all">All Users ({users.length})</option>
+            <option value="premium">Premium / Pro</option>
+            <option value="free">Free Tier</option>
+            <option value="suspended">Suspended</option>
+          </Select>
+        </div>
+      </Card>
+
+      {/* Users Table */}
+      <Card className="overflow-hidden border-theme-border-soft">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>User Details</TableHead>
-              <TableHead className="text-center">Plan</TableHead>
-              <TableHead className="text-center">Storage</TableHead>
-              <TableHead className="text-center">Status</TableHead>
+              <TableHead>User / Business</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Plan</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Created</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedUsers.length === 0 ? (
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell colSpan={6} className="p-4">
+                    <TableRowSkeleton cols={6} />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : paginatedUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-12">
-                  <Inbox className="w-10 h-10 text-theme-muted mx-auto mb-4" />
-                  <p className="text-theme-secondary font-bold">No users found.</p>
+                <TableCell colSpan={6} className="text-center py-12 text-theme-muted font-bold">
+                  <Inbox className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  No users found matching search query.
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedUsers.map((user) => {
-                const rev = getRevenueInfo(user.userId);
-                const workspacesCount = user.workspacesCount || 1;
-                return (
-                  <TableRow key={user.userId}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-theme-accent/10 flex items-center justify-center text-theme-accent font-black text-lg shrink-0">
-                          {user.email?.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-black text-theme-primary truncate">{user.businessName || 'Unnamed Business'}</p>
-                          <p className="text-[11px] text-theme-secondary truncate">{user.email}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={user.planStatus === 'premium' ? 'primary' : 'outline'}>
-                        {user.planStatus === 'premium' ? 'Premium' : 'Free'}
-                      </Badge>
-                      <p className="text-[10px] text-theme-secondary mt-1 font-bold">{workspacesCount} Workspace(s)</p>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1 text-theme-primary font-bold">
-                        <Cloud className="w-3.5 h-3.5 text-theme-accent" />
-                        {(workspacesCount * 0.05).toFixed(2)} GB
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {user.blocked ? (
-                        <Badge variant="danger">Suspended</Badge>
-                      ) : rev.lockStatus === 'locked' ? (
-                        <Badge variant="warning">Locked (Dues)</Badge>
-                      ) : (
-                        <Badge variant="success">Active</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => setSelectedUser(user)}>
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        {user.blocked ? (
-                          <Button variant="outline" className="border-theme-success text-theme-success" size="sm" onClick={() => handleToggleBlock(user, 'activate')}>
-                            <CheckCircle className="w-4 h-4" />
-                          </Button>
-                        ) : (
-                          <Button variant="outline" className="border-theme-danger text-theme-danger" size="sm" onClick={() => handleToggleBlock(user, 'suspend')}>
-                            <Ban className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
+              paginatedUsers.map((user) => (
+                <TableRow key={user.userId || user.id} className="hover:bg-theme-surface-hover/50 transition-colors">
+                  <TableCell className="font-bold text-theme-primary">
+                    <div>
+                      <span>{user.businessName || 'Default Workspace'}</span>
+                      <span className="text-[10px] text-theme-muted block font-mono">ID: {user.userId || user.id}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-xs text-theme-secondary font-medium">
+                    {user.email || 'No email attached'}
+                  </TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
+                      user.planStatus === 'pro' || user.planStatus === 'premium'
+                        ? 'bg-theme-accent/10 text-theme-accent border border-theme-accent/20'
+                        : 'bg-theme-surface text-theme-muted border border-theme-border-soft'
+                    }`}>
+                      {user.planStatus || 'free'}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                      user.blocked ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500'
+                    }`}>
+                      {user.blocked ? 'Suspended' : 'Active'}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-xs text-theme-muted font-semibold">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedUser(user)}
+                        className="text-xs font-bold text-theme-accent hover:underline"
+                      >
+                        Inspect
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setPlanChangeModalUser(user);
+                          setNewPlanSelection(user.planStatus || 'pro');
+                        }}
+                        className="text-xs font-bold text-theme-primary"
+                      >
+                        Tier
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={processingId === user.userId}
+                        onClick={() => handleToggleBlock(user)}
+                        className={`text-xs font-bold ${user.blocked ? 'text-emerald-500' : 'text-rose-500'}`}
+                      >
+                        {user.blocked ? 'Unblock' : 'Suspend'}
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>
-        
+
+        {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t border-theme-border-soft bg-theme-surface-elevated">
-            <span className="text-xs text-theme-secondary font-semibold">
-              Showing {(safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, filteredUsers.length)} of {filteredUsers.length}
-            </span>
+          <div className="flex items-center justify-between p-4 border-t border-theme-border-soft text-xs text-theme-secondary">
+            <span>Page {safePage} of {totalPages}</span>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={safePage <= 1}>
-                <ChevronLeft className="w-4 h-4" />
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={safePage <= 1}
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              >
+                Previous
               </Button>
-              <span className="text-xs text-theme-primary font-bold px-2">{safePage} / {totalPages}</span>
-              <Button variant="ghost" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={safePage >= totalPages}>
-                <ChevronRight className="w-4 h-4" />
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={safePage >= totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              >
+                Next
               </Button>
             </div>
           </div>
         )}
       </Card>
 
-      <Modal isOpen={!!selectedUser} onClose={() => setSelectedUser(null)} title={selectedUser?.businessName || 'Unnamed Business'} className="max-w-3xl">
-        {selectedUser && (
-          <div className="p-6 space-y-8">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-theme-accent/10 flex items-center justify-center text-theme-accent font-black text-xl">
-                {selectedUser.email?.charAt(0).toUpperCase()}
+      {/* User Detail Drawer / Modal */}
+      {selectedUser && (
+        <Modal
+          isOpen={!!selectedUser}
+          onClose={() => setSelectedUser(null)}
+          title="Tenant User Profile"
+        >
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 text-xs bg-theme-surface-elevated p-4 rounded-xl border border-theme-border-soft">
+              <div>
+                <span className="text-theme-muted uppercase font-bold block mb-0.5">Business Name</span>
+                <span className="text-theme-primary font-bold">{selectedUser.businessName || 'N/A'}</span>
               </div>
               <div>
-                <p className="text-sm text-theme-secondary font-medium">{selectedUser.email}</p>
-                <p className="text-xs text-theme-muted font-mono">{selectedUser.userId}</p>
+                <span className="text-theme-muted uppercase font-bold block mb-0.5">Email</span>
+                <span className="text-theme-primary font-bold">{selectedUser.email}</span>
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card className="p-4 border-transparent shadow-none bg-theme-surface-elevated">
-                <p className="text-[10px] font-black text-theme-muted uppercase tracking-wider mb-1">Status</p>
-                <p className={`font-bold ${selectedUser.blocked ? 'text-theme-danger' : 'text-theme-success'}`}>
+              <div>
+                <span className="text-theme-muted uppercase font-bold block mb-0.5">User ID</span>
+                <span className="text-theme-muted font-mono">{selectedUser.userId || selectedUser.id}</span>
+              </div>
+              <div>
+                <span className="text-theme-muted uppercase font-bold block mb-0.5">Current Tier</span>
+                <span className="text-theme-accent font-bold uppercase">{selectedUser.planStatus || 'free'}</span>
+              </div>
+              <div>
+                <span className="text-theme-muted uppercase font-bold block mb-0.5">Account Status</span>
+                <span className={`font-bold uppercase ${selectedUser.blocked ? 'text-rose-500' : 'text-emerald-500'}`}>
                   {selectedUser.blocked ? 'Suspended' : 'Active'}
-                </p>
-              </Card>
-              <Card className="p-4 border-transparent shadow-none bg-theme-surface-elevated">
-                <p className="text-[10px] font-black text-theme-muted uppercase tracking-wider mb-1">Storage Used</p>
-                <p className="font-bold text-theme-primary flex items-center gap-2">
-                  <Cloud className="w-4 h-4 text-theme-accent"/> {((selectedUser.workspacesCount || 1) * 0.05).toFixed(2)} GB
-                </p>
-              </Card>
-              <Card className="p-4 border-transparent shadow-none bg-theme-surface-elevated">
-                <p className="text-[10px] font-black text-theme-muted uppercase tracking-wider mb-1">Plan</p>
-                <p className={`font-bold ${selectedUser.planStatus === 'premium' ? 'text-theme-accent' : 'text-theme-primary'}`}>
-                  {selectedUser.planStatus === 'premium' ? 'Premium' : 'Free Starter'}
-                </p>
-              </Card>
-              <Card className="p-4 border-transparent shadow-none bg-theme-surface-elevated">
-                <p className="text-[10px] font-black text-theme-muted uppercase tracking-wider mb-1">Workspaces</p>
-                <p className="font-bold text-theme-primary">{selectedUser.workspacesCount || 1} Active</p>
-              </Card>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-bold text-theme-primary mb-4 flex items-center gap-2"><Clock className="w-4 h-4 text-theme-warning" /> Recent Logins & Devices</h4>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between bg-theme-surface-elevated border border-theme-border-soft p-3 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <MonitorSmartphone className="w-5 h-5 text-theme-muted" />
-                    <div>
-                      <p className="text-sm font-bold text-theme-primary">Chrome on Windows 11</p>
-                      <p className="text-[10px] text-theme-secondary uppercase font-mono mt-0.5">IP: 192.168.1.1 (Mumbai, IN)</p>
-                    </div>
-                  </div>
-                  <span className="text-xs text-theme-success font-bold">Active Now</span>
-                </div>
+                </span>
+              </div>
+              <div>
+                <span className="text-theme-muted uppercase font-bold block mb-0.5">Registration Date</span>
+                <span className="text-theme-primary">{selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : 'N/A'}</span>
               </div>
             </div>
 
-            <div className="border-t border-theme-border-soft pt-6">
-              <h4 className="text-sm font-bold text-theme-primary mb-4">Danger Zone</h4>
-              <div className="flex flex-wrap gap-3">
-                <Button variant="outline" className="border-theme-warning text-theme-warning hover:bg-theme-warning/10" onClick={handleResetWorkspace} leftIcon={RotateCcw}>
-                  Reset Workspace
-                </Button>
-                {selectedUser.blocked ? (
-                  <Button variant="outline" className="border-theme-success text-theme-success hover:bg-theme-success/10" onClick={() => handleToggleBlock(selectedUser, 'activate')} leftIcon={CheckCircle}>
-                    Restore User
-                  </Button>
-                ) : (
-                  <Button variant="outline" className="border-theme-danger text-theme-danger hover:bg-theme-danger/10" onClick={() => handleToggleBlock(selectedUser, 'suspend')} leftIcon={Ban}>
-                    Suspend User
-                  </Button>
-                )}
-                <Button variant="primary" className="bg-theme-danger hover:bg-theme-danger/80 border-theme-danger shadow-[0_0_15px_var(--danger)] ml-auto" disabled={processingId === selectedUser.userId} onClick={handleDeleteUser} leftIcon={processingId === selectedUser.userId ? Loader2 : Trash2}>
-                  {processingId === selectedUser.userId ? 'Deleting...' : 'Delete Account'}
-                </Button>
-              </div>
+            <div className="flex items-center justify-between pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setPlanChangeModalUser(selectedUser);
+                  setNewPlanSelection(selectedUser.planStatus || 'pro');
+                }}
+              >
+                Change Subscription Tier
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setSelectedUser(null)}
+              >
+                Close
+              </Button>
             </div>
           </div>
-        )}
-      </Modal>
+        </Modal>
+      )}
+
+      {/* Plan Changer Modal */}
+      {planChangeModalUser && (
+        <Modal
+          isOpen={!!planChangeModalUser}
+          onClose={() => setPlanChangeModalUser(null)}
+          title="Change Tenant Subscription Plan"
+        >
+          <div className="space-y-4">
+            <p className="text-xs text-theme-secondary">
+              Assign a new subscription tier for <strong>{planChangeModalUser.email}</strong>. This updates feature access and invoicing limits immediately.
+            </p>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-theme-muted uppercase tracking-wider block">Select Tier</label>
+              <Select
+                value={newPlanSelection}
+                onChange={(e) => setNewPlanSelection(e.target.value)}
+                className="w-full"
+              >
+                <option value="free">Free Tier (15 Invoices / Basic Modules)</option>
+                <option value="pro">Pro Tier (Unlimited Invoices / All Modules)</option>
+                <option value="enterprise">Enterprise Tier (Dedicated Multi-Workspace)</option>
+              </Select>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="ghost" size="sm" onClick={() => setPlanChangeModalUser(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                disabled={processingId === planChangeModalUser.userId}
+                onClick={handleSavePlanChange}
+              >
+                Save Plan Assignment
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </motion.div>
   );
 };

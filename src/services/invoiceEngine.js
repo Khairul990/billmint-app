@@ -13,7 +13,7 @@ import {
   syncFromFirestore as dbSyncFromFirestore,
   retrySyncInvoice as dbRetrySyncInvoice,
   generateSecureToken as dbGenerateSecureToken
-} from './dbEngine';
+} from './dbEngine.js';
 
 import { 
   determinePaymentStatus, 
@@ -21,9 +21,9 @@ import {
   getInvoiceBalanceDue, 
   getInvoicePaymentStatus,
   normalizeInvoiceFinancials 
-} from '../utils/invoiceMath';
+} from '../utils/invoiceMath.js';
 
-import { db, firebaseReady } from './firebaseConfig';
+import { db, firebaseReady } from './firebaseConfig.js';
 import { doc, getDoc } from 'firebase/firestore';
 
 export const invoiceEngine = {

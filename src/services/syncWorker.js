@@ -1,6 +1,6 @@
-import { firebaseReady } from './firebaseConfig';
-import { BillQyroDB } from './localDb';
-import { syncOfflineTransactions } from './dbEngine';
+import { firebaseReady } from './firebaseConfig.js';
+import { BillQyroDB } from './localDb.js';
+import { syncOfflineTransactions } from './dbEngine.js';
 
 // Background Sync Worker to push offline changes to Firebase
 export const startBackgroundSync = async () => {

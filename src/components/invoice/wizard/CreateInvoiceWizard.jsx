@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Save, Eye, Loader2, Check } from 'lucide-react';
-import { useInvoice } from '../../../contexts/InvoiceContext';
+import { useInvoice } from '../../../context/InvoiceContext';
 import { toast } from 'react-hot-toast';
 import { auth } from '../../../services/firebaseConfig';
 import { generateInvoiceNumber } from '../../../services/invoiceNumberService';

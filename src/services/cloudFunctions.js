@@ -8,7 +8,7 @@
  */
 
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { app } from './firebaseConfig';
+import { app } from './firebaseConfig.js';
 
 const functions = app ? getFunctions(app) : null;
 
