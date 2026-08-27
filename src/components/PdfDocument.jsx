@@ -400,7 +400,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
             </View>
             {templateId === 'retail' && (
               <View style={{ marginBottom: 6, padding: 4, borderWidth: 1, borderStyle: 'solid', borderColor: '#e2e8f0', borderRadius: 2, alignItems: 'center', backgroundColor: '#fff' }}>
-                <Text style={{ fontFamily: 'Courier', fontSize: 6, letterSpacing: 2, fontFamily: 'Helvetica-Bold', color: '#1e293b', marginBottom: 2 }}>||| |||| || |||</Text>
+                <Text style={{ fontFamily: 'Courier', fontSize: 6, letterSpacing: 2, color: '#1e293b', marginBottom: 2 }}>||| |||| || |||</Text>
                 <Text style={{ fontSize: 5, color: '#94a3b8', letterSpacing: 1 }}>{invoice.invoiceNumber}</Text>
               </View>
             )}

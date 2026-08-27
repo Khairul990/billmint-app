@@ -3389,13 +3389,21 @@ export const syncFromFirestore = async (force = false) => {
       return finalItems;
     };
 
+    const safeMerge = async (storeName, snap, storageKey, formatInvoice = false) => {
+      try {
+        await mergeData(storeName, snap, storageKey, formatInvoice);
+      } catch (err) {
+        console.error(`[SYNC] Failed to merge data for ${storeName}:`, err);
+      }
+    };
+
     // 5-9. Apply merged data
-    await mergeData('customers', customersSnap, KEYS.CUSTOMERS);
-    await mergeData('staff', staffSnap, KEYS.STAFF);
-    await mergeData('invoices', invoicesSnap, KEYS.INVOICES, true);
-    await mergeData('products', productsSnap, KEYS.PRODUCTS);
-    await mergeData('expenses', expensesSnap, KEYS.EXPENSES);
-    await mergeData('students', studentsSnap, KEYS.STUDENTS);
+    await safeMerge('customers', customersSnap, KEYS.CUSTOMERS);
+    await safeMerge('staff', staffSnap, KEYS.STAFF);
+    await safeMerge('invoices', invoicesSnap, KEYS.INVOICES, true);
+    await safeMerge('products', productsSnap, KEYS.PRODUCTS);
+    await safeMerge('expenses', expensesSnap, KEYS.EXPENSES);
+    await safeMerge('students', studentsSnap, KEYS.STUDENTS);
 
     // 10. Apply Subscription
     if (subDoc && typeof subDoc.exists === 'function' && subDoc.exists()) {

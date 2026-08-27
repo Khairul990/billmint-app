@@ -3,7 +3,7 @@
  * Provides fast, offline-first asynchronous storage structures for larger data collections.
  */
 const DB_NAME = 'billqyro-db';
-const DB_VERSION = 9;
+const DB_VERSION = 10;
 
 let _dbInstance = null;
 let _dbOpenPromise = null;
@@ -27,7 +27,7 @@ export class BillQyroDB {
         [
           'invoices', 'customers', 'expenses', 'products', 'students',
           'bankLedger', 'bankCredit', 'appointments', 'orders', 'activities', 'announcements',
-          'vendors', 'outsourceJobs', 'outsourcePayments'
+          'vendors', 'outsourceJobs', 'outsourcePayments', 'staff'
         ].forEach((name) => {
           const store = addStoreIfMissing(name);
           if (store) addIndexes(store);
