@@ -93,6 +93,7 @@ const Devices = React.lazy(() => import('./pages/business/Devices'));
 const ServiceJobs = React.lazy(() => import('./pages/business/ServiceJobs'));
 const Projects = React.lazy(() => import('./pages/business/Projects'));
 const Delivery = React.lazy(() => import('./pages/business/Delivery'));
+const OutsourceVendors = React.lazy(() => import('./pages/business/OutsourceVendors'));
 const AdminPanel = React.lazy(() => import('./pages/admin/AdminPanel'));
 const CyberDashboard = React.lazy(() => import('./pages/cybercafe/CyberDashboard'));
 const PortalHub = React.lazy(() => import('./pages/cybercafe/PortalHub'));
@@ -1846,6 +1847,14 @@ function App() {
         return <Projects />;
       case 'delivery':
         return <Delivery />;
+      case 'outsource':
+        return (
+          <OutsourceVendors
+            invoices={activeInvoices}
+            currentTab={currentTab}
+            setCurrentTab={setCurrentTab}
+          />
+        );
       case 'premium-upgrade':
         if (isMaintenanceMode || activeSettings?.disablePremiumUpgrade) {
           return (

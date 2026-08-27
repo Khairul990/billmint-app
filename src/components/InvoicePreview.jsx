@@ -284,17 +284,38 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
               <span>{formatCurrency(invoice.shipping, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
+          <div className={`flex justify-between items-center border-t pt-2 text-theme-primary dark:text-theme-secondary font-bold ${templateId === 'classic-elegant' ? 'border-emerald-800/30' : 'border-theme-border-soft'}`}>
+            <span>Current Invoice</span>
+            <span className="font-extrabold">{formatCurrency(invoice.grandTotal || 0, currencySymbol, regionalPrefs.numberFormat)}</span>
+          </div>
+
           {((businessSettings?.invoiceBuilderSettings?.showOldDue) || invoice.oldDue > 0) && (
-            <div className="flex justify-between text-theme-warning font-bold">
-              <span>Old Due</span>
-              <span>{formatCurrency(invoice.oldDue || 0, currencySymbol, regionalPrefs.numberFormat)}</span>
+            <div className="flex justify-between text-amber-600 dark:text-amber-400 font-bold">
+              <span>Previous / Old Due</span>
+              <span>+{formatCurrency(invoice.oldDue || 0, currencySymbol, regionalPrefs.numberFormat)}</span>
+            </div>
+          )}
+
+          {((businessSettings?.invoiceBuilderSettings?.showOldDue) || invoice.oldDue > 0) && (
+            <div className="flex justify-between items-center text-theme-primary dark:text-theme-primary font-bold text-xs pt-1 border-t border-dashed border-theme-border-soft">
+              <span>Total Receivable</span>
+              <span className="font-black">{formatCurrency(invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0)), currencySymbol, regionalPrefs.numberFormat)}</span>
+            </div>
+          )}
+
+          {(invoice.amountPaid > 0 || invoice.paidAmount > 0) && (
+            <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold">
+              <span>Amount Paid</span>
+              <span>-{formatCurrency(invoice.amountPaid ?? invoice.paidAmount ?? 0, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
           
-          <div className={`flex justify-between items-center border-t pt-3 text-theme-primary dark:text-theme-primary dark:text-theme-primary ${templateId === 'classic-elegant' ? 'border-emerald-800/50' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
-            <span className="text-sm font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">Grand Total</span>
+          <div className={`flex justify-between items-center border-t pt-3 text-theme-primary dark:text-theme-primary ${templateId === 'classic-elegant' ? 'border-emerald-800/50' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
+            <span className="text-sm font-extrabold text-theme-primary dark:text-theme-secondary">
+              {(invoice.amountPaid > 0 || invoice.oldDue > 0) ? 'Balance Due' : 'Grand Total'}
+            </span>
             <span className="text-lg font-black text-theme-accent dark:text-theme-accent">
-              {formatCurrency(invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0)), currencySymbol, regionalPrefs.numberFormat)}
+              {formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0))), currencySymbol, regionalPrefs.numberFormat)}
             </span>
           </div>
         </div>

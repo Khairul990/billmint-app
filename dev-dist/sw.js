@@ -81,7 +81,7 @@ define(['./workbox-afac4cd2'], (function (workbox) { 'use strict';
     "revision": "3ca0b8505b4bec776b69afdba2768812"
   }, {
     "url": "index.html",
-    "revision": "0.fc848taj0fs"
+    "revision": "0.lchgruh5otc"
   }], {
     "ignoreURLParametersMatching": [/^token/, /^secret/, /^auth/]
   });

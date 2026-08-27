@@ -578,29 +578,40 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
               </View>
             )}
 
+            <View style={styles.totalRow}>
+              <Text style={styles.metaText}>Current Invoice</Text>
+              <Text style={{ fontWeight: 'bold' }}>{formatCurrency(invoice.grandTotal || 0, currencySymbol, regionalPrefs.numberFormat)}</Text>
+            </View>
+
             {((businessSettings?.invoiceBuilderSettings?.showOldDue) || invoice.oldDue > 0) && (
               <View style={styles.totalRow}>
-                <Text style={{ fontSize: 8.5, color: '#d97706' }}>Old Due</Text>
-                <Text style={{ fontSize: 8.5, color: '#d97706', fontWeight: 'bold' }}>{formatCurrency(invoice.oldDue || 0, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontSize: 8.5, color: '#d97706' }}>Previous / Old Due</Text>
+                <Text style={{ fontSize: 8.5, color: '#d97706', fontWeight: 'bold' }}>+{formatCurrency(invoice.oldDue || 0, currencySymbol, regionalPrefs.numberFormat)}</Text>
+              </View>
+            )}
+
+            {((businessSettings?.invoiceBuilderSettings?.showOldDue) || invoice.oldDue > 0) && (
+              <View style={styles.totalRow}>
+                <Text style={styles.metaText}>Total Receivable</Text>
+                <Text style={{ fontWeight: 'bold' }}>{formatCurrency(invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0)), currencySymbol, regionalPrefs.numberFormat)}</Text>
+              </View>
+            )}
+
+            {(invoice.amountPaid > 0 || invoice.paidAmount > 0) && (
+              <View style={styles.totalRow}>
+                <Text style={{ fontSize: 8.5, color: '#16a34a' }}>Amount Paid</Text>
+                <Text style={{ fontSize: 8.5, color: '#16a34a', fontWeight: 'bold' }}>-{formatCurrency(invoice.amountPaid ?? invoice.paidAmount ?? 0, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
             <View style={styles.grandTotalRow}>
-              <Text style={[styles.grandTotalLabel, { color: tPrimary }]}>Grand Total</Text>
+              <Text style={[styles.grandTotalLabel, { color: tPrimary }]}>
+                {(invoice.amountPaid > 0 || invoice.oldDue > 0) ? 'Balance Due' : 'Grand Total'}
+              </Text>
               <Text style={[styles.grandTotalValue, { color: tAccent }]}>
-                {formatCurrency(invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0)), currencySymbol, regionalPrefs.numberFormat)}
+                {formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0))), currencySymbol, regionalPrefs.numberFormat)}
               </Text>
             </View>
-
-            {/* Balance Due */}
-            {(invoice.balanceDue > 0 || (invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0))) > (invoice.amountPaid || 0)) && (
-              <View style={styles.balanceDueRow}>
-                <Text style={styles.balanceDueLabel}>Balance Due</Text>
-                <Text style={styles.balanceDueValue}>
-                  {formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0))), currencySymbol, regionalPrefs.numberFormat)}
-                </Text>
-              </View>
-            )}
           </View>
         </View>
 

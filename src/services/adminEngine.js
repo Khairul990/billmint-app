@@ -147,7 +147,22 @@ export const adminEngine = {
     if (memoryCache.usersList.data && Date.now() - memoryCache.usersList.time < CACHE_TTL) {
       return memoryCache.usersList.data;
     }
-    const data = await dbGetAdminUsersList();
+    let data = await dbGetAdminUsersList().catch(() => []);
+    if (!Array.isArray(data) || data.length === 0) {
+      const session = getAuthSession();
+      const localSettings = await BillQyroDB.getAll('settings').catch(() => []);
+      const primarySetting = localSettings[0] || {};
+      data = [{
+        userId: session?.userId || 'owner_primary',
+        id: session?.userId || 'owner_primary',
+        email: session?.userEmail || primarySetting.email || 'owner@billqyro.com',
+        businessName: primarySetting.businessName || 'Primary Workspace',
+        planStatus: primarySetting.isPremium ? 'pro' : (primarySetting.subscriptionPlan || 'free'),
+        blocked: false,
+        workspacesCount: 1,
+        createdAt: primarySetting.createdAt || new Date().toISOString()
+      }];
+    }
     memoryCache.usersList = { data, time: Date.now() };
     return data;
   },
@@ -156,7 +171,19 @@ export const adminEngine = {
     if (memoryCache.totalStats.data && Date.now() - memoryCache.totalStats.time < CACHE_TTL) {
       return memoryCache.totalStats.data;
     }
-    const data = await dbGetAdminTotalStats();
+    let data = await dbGetAdminTotalStats().catch(() => null);
+    if (!data || (data.invoices === 0 && data.customers === 0 && data.products === 0)) {
+      const [invs, custs, prods] = await Promise.all([
+        BillQyroDB.getAll('invoices').catch(() => []),
+        BillQyroDB.getAll('customers').catch(() => []),
+        BillQyroDB.getAll('products').catch(() => [])
+      ]);
+      data = {
+        invoices: invs.length,
+        customers: custs.length,
+        products: prods.length
+      };
+    }
     memoryCache.totalStats = { data, time: Date.now() };
     return data;
   },
@@ -331,9 +358,9 @@ export const adminEngine = {
   // --- Comprehensive Backup & Restore Engine ---
   async createPlatformBackup() {
     const backupData = {
-      version: '8.0.0',
+      version: '9.0.0',
       exportedAt: new Date().toISOString(),
-      schemaVersion: 8,
+      schemaVersion: 9,
       invoices: await BillQyroDB.getAll('invoices').catch(() => []),
       customers: await BillQyroDB.getAll('customers').catch(() => []),
       products: await BillQyroDB.getAll('products').catch(() => []),
@@ -344,14 +371,17 @@ export const adminEngine = {
       appointments: await BillQyroDB.getAll('appointments').catch(() => []),
       orders: await BillQyroDB.getAll('orders').catch(() => []),
       activities: await BillQyroDB.getAll('activities').catch(() => []),
-      announcements: await BillQyroDB.getAll('announcements').catch(() => [])
+      announcements: await BillQyroDB.getAll('announcements').catch(() => []),
+      vendors: await BillQyroDB.getAll('vendors').catch(() => []),
+      outsourceJobs: await BillQyroDB.getAll('outsourceJobs').catch(() => []),
+      outsourcePayments: await BillQyroDB.getAll('outsourcePayments').catch(() => [])
     };
 
     await this.logAdminAudit({
       action: 'PLATFORM_BACKUP_CREATED',
       target: 'ALL_COLLECTIONS',
       result: 'SUCCESS',
-      details: `Generated snapshot with ${backupData.invoices.length} invoices, ${backupData.customers.length} customers, ${backupData.products.length} products.`
+      details: `Generated snapshot with ${backupData.invoices.length} invoices, ${backupData.customers.length} customers, ${backupData.products.length} products, ${backupData.vendors.length} vendors.`
     });
 
     return backupData;
@@ -364,7 +394,8 @@ export const adminEngine = {
 
     const stores = [
       'invoices', 'customers', 'products', 'expenses', 'settings',
-      'bankLedger', 'bankCredit', 'appointments', 'orders', 'activities', 'announcements'
+      'bankLedger', 'bankCredit', 'appointments', 'orders', 'activities', 'announcements',
+      'vendors', 'outsourceJobs', 'outsourcePayments'
     ];
 
     let restoredCount = 0;
