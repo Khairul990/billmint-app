@@ -61,6 +61,93 @@ export const getInvoicePaymentStatus = (inv) => {
 };
 
 /**
+ * CANONICAL PAYMENT ALLOCATION ENGINE
+ * Deterministically allocates an incoming payment when creating/updating an invoice with previous outstanding due.
+ * 
+ * Order of Priority:
+ * 1. Settle Previous / Old Due first.
+ * 2. Any remaining payment is allocated toward the Current Invoice.
+ */
+export const allocatePayment = (paymentAmount = 0, oldDue = 0, currentInvoiceTotal = 0) => {
+  const payVal = roundTo2(parseFloat(paymentAmount) || 0);
+  const previousDueVal = roundTo2(parseFloat(oldDue) || 0);
+  const currentTotalVal = roundTo2(parseFloat(currentInvoiceTotal) || 0);
+
+  // 1. Priority: Settle Old / Previous Due
+  const allocatedToOldDue = roundTo2(Math.min(payVal, previousDueVal));
+  const remainingOldDue = roundTo2(Math.max(0, previousDueVal - allocatedToOldDue));
+
+  // 2. Priority: Settle Current Invoice with remainder
+  const unallocatedPayment = roundTo2(Math.max(0, payVal - allocatedToOldDue));
+  const allocatedToCurrentInvoice = roundTo2(Math.min(unallocatedPayment, currentTotalVal));
+  const remainingCurrentInvoiceDue = roundTo2(Math.max(0, currentTotalVal - allocatedToCurrentInvoice));
+
+  // 3. Overall Customer Balance Due
+  const totalReceivable = roundTo2(previousDueVal + currentTotalVal);
+  const customerTotalDue = roundTo2(remainingOldDue + remainingCurrentInvoiceDue);
+
+  let currentInvoicePaymentStatus = 'Unpaid';
+  if (allocatedToCurrentInvoice >= currentTotalVal && currentTotalVal > 0) {
+    currentInvoicePaymentStatus = 'Paid';
+  } else if (allocatedToCurrentInvoice > 0) {
+    currentInvoicePaymentStatus = 'Partial';
+  }
+
+  return {
+    paymentAmount: payVal,
+    previousDue: previousDueVal,
+    currentInvoiceTotal: currentTotalVal,
+    totalReceivable,
+    allocatedToOldDue,
+    remainingOldDue,
+    allocatedToCurrentInvoice,
+    remainingCurrentInvoiceDue,
+    customerTotalDue,
+    currentInvoicePaymentStatus,
+    isCurrentInvoicePaid: currentInvoicePaymentStatus === 'Paid',
+    isSettled: customerTotalDue === 0
+  };
+};
+
+/**
+ * CANONICAL MULTI-PAYMENT ALLOCATION
+ * Allocates an array of payment entries (or numbers) chronologically against Old Due then Current Invoice.
+ */
+export const allocateMultiplePayments = (payments = [], oldDue = 0, currentInvoiceTotal = 0) => {
+  const totalPaid = Array.isArray(payments)
+    ? payments.reduce((sum, p) => sum + (typeof p === 'number' ? p : (parseFloat(p?.amount) || 0)), 0)
+    : (parseFloat(payments) || 0);
+
+  const allocation = allocatePayment(totalPaid, oldDue, currentInvoiceTotal);
+
+  let runningOldDueToCover = roundTo2(parseFloat(oldDue) || 0);
+  let runningCurrentTotalToCover = roundTo2(parseFloat(currentInvoiceTotal) || 0);
+
+  const paymentBreakdown = (Array.isArray(payments) ? payments : []).map(p => {
+    const amt = roundTo2(typeof p === 'number' ? p : (parseFloat(p?.amount) || 0));
+    const toOldDue = roundTo2(Math.min(amt, runningOldDueToCover));
+    runningOldDueToCover = roundTo2(Math.max(0, runningOldDueToCover - toOldDue));
+
+    const rem = roundTo2(Math.max(0, amt - toOldDue));
+    const toCurrent = roundTo2(Math.min(rem, runningCurrentTotalToCover));
+    runningCurrentTotalToCover = roundTo2(Math.max(0, runningCurrentTotalToCover - toCurrent));
+
+    return {
+      ...(typeof p === 'object' ? p : { amount: amt }),
+      amount: amt,
+      allocatedToOldDue: toOldDue,
+      allocatedToCurrentInvoice: toCurrent
+    };
+  });
+
+  return {
+    ...allocation,
+    totalPaid: roundTo2(totalPaid),
+    paymentBreakdown
+  };
+};
+
+/**
  * NORMALIZE INVOICE FINANCIALS
  * Enforces zero divergence between amountPaid, paidAmount, balanceDue, and paymentStatus.
  */
