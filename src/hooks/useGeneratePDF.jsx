@@ -3,6 +3,7 @@ import { pdf } from '@react-pdf/renderer';
 import PdfDocument from '../components/PdfDocument';
 import { toast } from 'react-hot-toast';
 import QRCode from 'qrcode';
+import { calculateCanonicalInvoiceFinancials } from '../utils/invoiceMath';
 
 export const useGeneratePDF = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -24,7 +25,8 @@ export const useGeneratePDF = () => {
     const payeeName = businessSettings?.payeeName || businessSettings?.businessName || paySnap.payeeName || '';
     const currencyCode = businessSettings?.currencyCode || invoice?.regionalSettingsSnapshot?.currencyCode || 'INR';
 
-    const dueAmount = invoice?.balanceDue !== undefined ? invoice.balanceDue : (invoice?.grandTotal || 0);
+    const canonical = calculateCanonicalInvoiceFinancials(invoice);
+    const dueAmount = canonical.balanceDue > 0 ? canonical.balanceDue : (canonical.totalReceivable || 0);
     
     let qrText = '';
     if (paymentMethod === 'UPI') {

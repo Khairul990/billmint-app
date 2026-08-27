@@ -16,7 +16,7 @@ import { UNIVERSAL_TEMPLATES } from '../services/TemplateEngine';
 import { getStudioHeaderTarget } from '../utils/portalTargets';
 import { getInvoiceColumns } from '../utils/invoiceSchema';
 import { customerEngine } from '../services/customerEngine';
-import { computeCustomerLedger } from '../utils/financialCalculations';
+import { computeCustomerLedger, allocatePayment } from '../utils/financialCalculations';
 import { toast } from 'react-hot-toast';
 
 const CreateInvoice = ({ 
@@ -124,17 +124,10 @@ const CreateInvoice = ({
     
     // Canonical arithmetic invariants
     const grandTotal = Math.round((afterDiscount + tax + shippingVal) * 100) / 100;
-    const totalReceivable = Math.round((grandTotal + oldDueVal) * 100) / 100;
     const paidVal = parseFloat(amountPaid) || 0;
-    const balanceDue = Math.max(0, Math.round((totalReceivable - paidVal) * 100) / 100);
-    const currentBillDue = Math.max(0, Math.round((grandTotal - paidVal) * 100) / 100);
 
-    let paymentStatus = 'Unpaid';
-    if (paidVal >= grandTotal && grandTotal > 0) {
-      paymentStatus = 'Paid';
-    } else if (paidVal > 0) {
-      paymentStatus = 'Partial';
-    }
+    // Canonical Allocation: Settle Old Due first, then Current Invoice
+    const allocation = allocatePayment(paidVal, oldDueVal, grandTotal);
 
     return { 
       subtotal: Math.round(subtotal * 100) / 100, 
@@ -142,12 +135,15 @@ const CreateInvoice = ({
       tax: Math.round(tax * 100) / 100, 
       grandTotal, 
       oldDue: oldDueVal, 
-      totalDue: totalReceivable, 
-      totalReceivable, 
+      totalDue: allocation.totalReceivable, 
+      totalReceivable: allocation.totalReceivable, 
       paidVal, 
-      balanceDue, 
-      currentBillDue,
-      paymentStatus 
+      allocatedToOldDue: allocation.allocatedToOldDue,
+      remainingOldDue: allocation.remainingOldDue,
+      allocatedToCurrentInvoice: allocation.allocatedToCurrentInvoice,
+      currentBillDue: allocation.remainingCurrentInvoiceDue,
+      balanceDue: allocation.customerTotalDue, 
+      paymentStatus: allocation.currentInvoicePaymentStatus 
     };
   }, [items, discountType, discountAmount, taxPercent, shipping, oldDue, amountPaid]);
 
@@ -1140,6 +1136,19 @@ const CreateInvoice = ({
                       {formatCurrency(totals.paidVal)}
                     </span>
                   </div>
+
+                  {totals.oldDue > 0 && totals.paidVal > 0 && (
+                    <div className="p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft space-y-1 text-2xs font-semibold">
+                      <div className="flex justify-between text-amber-700 dark:text-amber-300">
+                        <span>Paid toward Old Due:</span>
+                        <span className="font-bold">{formatCurrency(totals.allocatedToOldDue)} {totals.remainingOldDue > 0 ? `(${formatCurrency(totals.remainingOldDue)} left)` : '(Cleared)'}</span>
+                      </div>
+                      <div className="flex justify-between text-theme-primary">
+                        <span>Paid toward Current Bill:</span>
+                        <span className="font-bold">{formatCurrency(totals.allocatedToCurrentInvoice)} {totals.currentBillDue > 0 ? `(${formatCurrency(totals.currentBillDue)} left)` : '(Cleared)'}</span>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="pt-3 mt-1 border-t-2 border-dashed border-theme-border-soft flex flex-col gap-2">
                     <div className="flex justify-between items-center">

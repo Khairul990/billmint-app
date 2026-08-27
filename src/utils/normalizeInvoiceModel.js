@@ -1,5 +1,6 @@
 import { getTemplateLayoutFamily } from '../services/TemplateEngine';
 import { getCategoryWording } from '../config/businessPresets';
+import { calculateCanonicalInvoiceFinancials } from './invoiceMath';
 
 /**
  * Normalizes invoice data and business settings into a single canonical render model.
@@ -75,6 +76,9 @@ export const buildCanonicalRenderModel = (invoice, businessSettings, previewOver
   const billType = invoice.billType || 'default';
   const categoryWords = getCategoryWording(billType);
 
+  // 5. Canonical Financial Calculation
+  const financials = calculateCanonicalInvoiceFinancials(invoice);
+
   return {
     rawTemplateId,
     templateId,
@@ -85,6 +89,7 @@ export const buildCanonicalRenderModel = (invoice, businessSettings, previewOver
     paymentPrefs,
     bankDetails,
     currencySymbol,
-    categoryWords
+    categoryWords,
+    financials
   };
 };

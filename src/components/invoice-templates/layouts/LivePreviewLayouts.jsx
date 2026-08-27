@@ -1,6 +1,91 @@
 import React from 'react';
 import { getInvoiceColumns, getItemValue } from '../../../utils/invoiceSchema';
 import { formatCurrency } from '../../../utils/invoiceUtils';
+import { calculateCanonicalInvoiceFinancials } from '../../../utils/invoiceMath';
+
+export const HtmlTotalsSummary = ({ 
+  data, 
+  accentClass = "text-gray-900", 
+  badgeClass = "", 
+  isDark = false, 
+  widthClass = "w-64" 
+}) => {
+  const fin = calculateCanonicalInvoiceFinancials(data);
+  const currencySymbol = data.regionalSettingsSnapshot?.currency || data.businessSettings?.currency || '₹';
+  const numFormat = data.regionalSettingsSnapshot?.numberFormat || data.businessSettings?.numberFormat || 'Indian';
+  const fmt = (val) => formatCurrency(val, currencySymbol, numFormat);
+
+  const showOldDue = Boolean(data.businessSettings?.invoiceBuilderSettings?.showOldDue || fin.previousDue > 0);
+  const showDiscount = data.businessSettings?.invoiceBuilderSettings?.showDiscount !== false && fin.discountAmount > 0;
+  const showTax = data.businessSettings?.invoiceBuilderSettings?.showTax !== false && fin.taxAmount > 0;
+  const showShipping = Boolean(data.businessSettings?.invoiceBuilderSettings?.showShipping && fin.shipping > 0);
+
+  const labelColor = isDark ? 'text-gray-400' : 'text-gray-500';
+  const valColor = isDark ? 'text-gray-200 font-bold' : 'text-gray-800 font-bold';
+
+  return (
+    <div className={`${widthClass} space-y-1.5 text-xs`}>
+      <div className="flex justify-between">
+        <span className={labelColor}>Subtotal:</span>
+        <span className={`${valColor} tabular-nums`}>{fmt(fin.subtotal)}</span>
+      </div>
+
+      {showDiscount && (
+        <div className="flex justify-between text-red-500 font-bold">
+          <span>Discount:</span>
+          <span className="tabular-nums">-{fmt(fin.discountAmount)}</span>
+        </div>
+      )}
+
+      {showTax && (
+        <div className="flex justify-between">
+          <span className={labelColor}>{data.businessSettings?.invoiceBuilderSettings?.taxLabel || 'Tax'} ({data.taxPercentage || 0}%):</span>
+          <span className={`${valColor} tabular-nums`}>{fmt(fin.taxAmount)}</span>
+        </div>
+      )}
+
+      {showShipping && (
+        <div className="flex justify-between">
+          <span className={labelColor}>Shipping:</span>
+          <span className={`${valColor} tabular-nums`}>{fmt(fin.shipping)}</span>
+        </div>
+      )}
+
+      {(fin.previousDue > 0 || fin.amountPaid > 0) && (
+        <div className={`flex justify-between pt-1 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'} font-bold`}>
+          <span className={labelColor}>Current Invoice:</span>
+          <span className={`${valColor} tabular-nums`}>{fmt(fin.currentInvoiceTotal)}</span>
+        </div>
+      )}
+
+      {showOldDue && (
+        <div className="flex justify-between text-amber-600 font-bold">
+          <span>Previous / Old Due:</span>
+          <span className="tabular-nums">+{fmt(fin.previousDue)}</span>
+        </div>
+      )}
+
+      {showOldDue && (
+        <div className={`flex justify-between pt-1 border-t border-dashed ${isDark ? 'border-gray-700' : 'border-gray-200'} font-bold`}>
+          <span className={labelColor}>Total Receivable:</span>
+          <span className={`${valColor} tabular-nums`}>{fmt(fin.totalReceivable)}</span>
+        </div>
+      )}
+
+      {fin.amountPaid > 0 && (
+        <div className="flex justify-between text-emerald-600 font-bold">
+          <span>Amount Paid:</span>
+          <span className="tabular-nums">-{fmt(fin.amountPaid)}</span>
+        </div>
+      )}
+
+      <div className={`flex justify-between items-center ${badgeClass ? badgeClass : `pt-2 border-t-2 ${isDark ? 'border-gray-700' : 'border-gray-900'} font-extrabold text-sm`}`}>
+        <span className={accentClass}>{(fin.amountPaid > 0 || fin.previousDue > 0) ? 'Balance Due:' : 'Total:'}</span>
+        <span className={`${accentClass} tabular-nums font-black`}>{fmt(fin.balanceDue)}</span>
+      </div>
+    </div>
+  );
+};
 
 const MinimalClassic = ({ data }) => (
   <div className="bg-white p-10 font-sans text-gray-800 shadow-xl w-[595px] min-h-fit mx-auto ">
@@ -58,20 +143,7 @@ const MinimalClassic = ({ data }) => (
     </table>
 
     <div className="flex justify-end mb-10">
-      <div className="w-64">
-        <div className="flex justify-between py-1 text-sm"><span className="text-gray-600">Subtotal:</span><span>{formatCurrency(data.totals?.subtotal)}</span></div>
-        <div className="flex justify-between py-1 text-sm"><span className="text-gray-600">Discount:</span><span>{formatCurrency(data.totals?.discount)}</span></div>
-        <div className="flex justify-between py-1 text-sm"><span className="text-gray-600">Tax:</span><span>{formatCurrency(data.totals?.tax)}</span></div>
-        <div className="flex justify-between py-3 text-lg font-bold border-t-2 border-gray-900 mt-2">
-          <span>Total:</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-          {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-            <>
-                        <span>Old Due:</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                        <span>Total Due:</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-            </>
-          )}
-        </div>
-      </div>
+      <HtmlTotalsSummary data={data} widthClass="w-64" />
     </div>
 
     <div className="flex justify-between items-end mt-12">
@@ -165,18 +237,7 @@ const ModernCorporate = ({ data }) => (
 
       <div className="flex justify-end mb-10">
         <div className="w-64 bg-gray-50 rounded-lg p-4">
-          <div className="flex justify-between py-1 text-sm"><span className="text-gray-600">Subtotal</span><span className="font-medium">{formatCurrency(data.totals?.subtotal)}</span></div>
-          <div className="flex justify-between py-1 text-sm"><span className="text-gray-600">Discount</span><span className="font-medium">{formatCurrency(data.totals?.discount)}</span></div>
-          <div className="flex justify-between py-1 text-sm"><span className="text-gray-600">Tax</span><span className="font-medium">{formatCurrency(data.totals?.tax)}</span></div>
-          <div className="flex justify-between py-3 text-lg font-black text-blue-600 border-t border-gray-200 mt-2">
-            <span>Total</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-              </>
-            )}
-          </div>
+          <HtmlTotalsSummary data={data} accentClass="text-blue-600" widthClass="w-full" />
         </div>
       </div>
 
@@ -274,18 +335,7 @@ const TealBoldHeader = ({ data }) => (
 
       <div className="flex justify-end mt-8">
         <div className="w-full max-w-[200px]">
-          <div className="flex justify-between py-1.5 text-sm"><span className="text-gray-500">Subtotal</span><span className="font-medium text-gray-800">{formatCurrency(data.totals?.subtotal)}</span></div>
-          <div className="flex justify-between py-1.5 text-sm"><span className="text-gray-500">Discount</span><span className="font-medium text-gray-800">{formatCurrency(data.totals?.discount)}</span></div>
-          <div className="flex justify-between py-1.5 text-sm border-b border-gray-200 pb-3"><span className="text-gray-500">Tax</span><span className="font-medium text-gray-800">{formatCurrency(data.totals?.tax)}</span></div>
-          <div className="flex justify-between py-4 text-xl font-black text-teal-900">
-            <span>Total</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-              </>
-            )}
-          </div>
+          <HtmlTotalsSummary data={data} accentClass="text-teal-900" widthClass="w-full" />
         </div>
       </div>
 
@@ -387,18 +437,7 @@ const SageGreenCurved = ({ data }) => (
 
       <div className="flex justify-end">
         <div className="w-64 bg-white p-6 rounded-2xl shadow-sm border border-[#e8efe9]">
-          <div className="flex justify-between py-1.5 text-sm"><span className="text-gray-500">Subtotal</span><span className="font-medium">{formatCurrency(data.totals?.subtotal)}</span></div>
-          <div className="flex justify-between py-1.5 text-sm"><span className="text-gray-500">Discount</span><span className="font-medium">{formatCurrency(data.totals?.discount)}</span></div>
-          <div className="flex justify-between py-1.5 text-sm"><span className="text-gray-500">Tax</span><span className="font-medium">{formatCurrency(data.totals?.tax)}</span></div>
-          <div className="flex justify-between py-4 text-xl font-bold text-[#3d5a49] border-t border-gray-100 mt-2">
-            <span>Total</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-              </>
-            )}
-          </div>
+          <HtmlTotalsSummary data={data} accentClass="text-[#3d5a49]" widthClass="w-full" />
         </div>
       </div>
       <div className="flex justify-between items-center mt-12">
@@ -479,18 +518,7 @@ const CreativeAgency = ({ data }) => (
 
         <div className="flex justify-end">
           <div className="w-64 border border-gray-800 rounded-xl p-6 bg-[#161616]">
-            <div className="flex justify-between py-1 text-sm"><span className="text-gray-500">Subtotal</span><span className="text-gray-300">{formatCurrency(data.totals?.subtotal)}</span></div>
-            <div className="flex justify-between py-1 text-sm"><span className="text-gray-500">Discount</span><span className="text-gray-300">{formatCurrency(data.totals?.discount)}</span></div>
-            <div className="flex justify-between py-1 text-sm"><span className="text-gray-500">Tax</span><span className="text-gray-300">{formatCurrency(data.totals?.tax)}</span></div>
-            <div className="flex justify-between py-4 mt-4 border-t border-gray-800 text-xl font-black text-white">
-              <span className="text-[#ff4a6e]">Total</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-              {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-                <>
-                                <span className="text-[#ff4a6e]">Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                                <span className="text-[#ff4a6e]">Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-                </>
-              )}
-            </div>
+            <HtmlTotalsSummary data={data} accentClass="text-[#ff4a6e]" isDark={true} widthClass="w-full" />
           </div>
         </div>
         <div className="flex justify-between mt-16 pt-8 border-t border-gray-900 items-center">
@@ -621,18 +649,7 @@ const PurpleCorporate = ({ data }) => (
       </div>
       <div className="w-1/2 flex justify-end">
         <div className="w-64">
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Subtotal</span><span className="font-medium">{formatCurrency(data.totals?.subtotal)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Discount</span><span className="font-medium">{formatCurrency(data.totals?.discount)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Tax</span><span className="font-medium">{formatCurrency(data.totals?.tax)}</span></div>
-          <div className="flex justify-between py-4 px-5 mt-4 text-[15px] font-bold text-white bg-gradient-to-br from-[#6A5ACD] to-[#7B68EE] rounded-lg shadow-lg">
-            <span>TOTAL DUE</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-              </>
-            )}
-          </div>
+          <HtmlTotalsSummary data={data} accentClass="text-white" badgeClass="flex justify-between items-center py-4 px-5 mt-4 text-[15px] font-bold text-white bg-gradient-to-br from-[#6A5ACD] to-[#7B68EE] rounded-lg shadow-lg" widthClass="w-full" />
         </div>
       </div>
     </div>
@@ -759,18 +776,7 @@ const OrangeGradientModern = ({ data }) => (
       </div>
       <div className="w-[45%]">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-50"><span className="text-gray-500">Subtotal</span><span className="font-bold">{formatCurrency(data.totals?.subtotal)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-50"><span className="text-gray-500">Discount</span><span className="font-bold">{formatCurrency(data.totals?.discount)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] mb-4"><span className="text-gray-500">Tax</span><span className="font-bold">{formatCurrency(data.totals?.tax)}</span></div>
-          <div className="flex justify-between py-4 px-5 text-lg font-black text-white bg-gradient-to-br from-[#FF8C00] to-[#FFA500] rounded-xl shadow-md">
-            <span>Total</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-              </>
-            )}
-          </div>
+          <HtmlTotalsSummary data={data} accentClass="text-white" badgeClass="flex justify-between items-center py-4 px-5 text-lg font-black text-white bg-gradient-to-br from-[#FF8C00] to-[#FFA500] rounded-xl shadow-md" widthClass="w-full" />
         </div>
       </div>
     </div>
@@ -871,18 +877,7 @@ const OrangeGeometricCorner = ({ data }) => (
       </div>
       <div className="w-1/2 flex justify-end">
         <div className="w-64">
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Subtotal</span><span>{formatCurrency(data.totals?.subtotal)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Discount</span><span>{formatCurrency(data.totals?.discount)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Tax</span><span>{formatCurrency(data.totals?.tax)}</span></div>
-          <div className="flex justify-between py-4 px-4 mt-4 text-lg font-bold text-[#FF8C00] bg-gradient-to-r from-[#FF8C00]/10 to-[#FFA500]/5 border-l-4 border-[#FF8C00]">
-            <span>TOTAL DUE</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-              </>
-            )}
-          </div>
+          <HtmlTotalsSummary data={data} accentClass="text-[#FF8C00]" badgeClass="flex justify-between items-center py-4 px-4 mt-4 text-lg font-bold text-[#FF8C00] bg-gradient-to-r from-[#FF8C00]/10 to-[#FFA500]/5 border-l-4 border-[#FF8C00]" widthClass="w-full" />
         </div>
       </div>
     </div>
@@ -985,18 +980,7 @@ const BlackOrangeBold = ({ data }) => (
       </div>
       <div className="w-1/2 flex justify-end">
         <div className="w-64">
-          <div className="flex justify-between py-2 text-[13px] border-b border-[#333]"><span className="text-gray-400">Subtotal</span><span>{formatCurrency(data.totals?.subtotal)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-[#333]"><span className="text-gray-400">Discount</span><span>{formatCurrency(data.totals?.discount)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-[#333]"><span className="text-gray-400">Tax</span><span>{formatCurrency(data.totals?.tax)}</span></div>
-          <div className="flex justify-between py-4 px-5 mt-4 text-lg font-black text-white bg-gradient-to-br from-[#FF8C00] to-[#FFA500] rounded-md shadow-lg shadow-[#FF8C00]/30">
-            <span>TOTAL</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-              </>
-            )}
-          </div>
+          <HtmlTotalsSummary data={data} accentClass="text-white" isDark={true} badgeClass="flex justify-between items-center py-4 px-5 mt-4 text-lg font-black text-white bg-gradient-to-br from-[#FF8C00] to-[#FFA500] rounded-md shadow-lg shadow-[#FF8C00]/30" widthClass="w-full" />
         </div>
       </div>
     </div>
@@ -1100,18 +1084,7 @@ const LuxuryGoldBlack = ({ data }) => (
       </div>
       <div className="w-1/2 flex justify-end">
         <div className="w-64">
-          <div className="flex justify-between py-2 text-[13px] border-b border-[#333]"><span className="text-gray-400">Subtotal</span><span>{formatCurrency(data.totals?.subtotal)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-[#333]"><span className="text-gray-400">Discount</span><span>{formatCurrency(data.totals?.discount)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-[#333]"><span className="text-gray-400">Tax</span><span>{formatCurrency(data.totals?.tax)}</span></div>
-          <div className="flex justify-between py-4 px-5 mt-4 text-lg font-bold text-[#1a1a1a] bg-gradient-to-br from-[#D4AF37] to-[#E6C200] shadow-lg shadow-[#D4AF37]/20 rounded-sm">
-            <span>GRAND TOTAL</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-              </>
-            )}
-          </div>
+          <HtmlTotalsSummary data={data} accentClass="text-[#1a1a1a]" isDark={true} badgeClass="flex justify-between items-center py-4 px-5 mt-4 text-lg font-bold text-[#1a1a1a] bg-gradient-to-br from-[#D4AF37] to-[#E6C200] shadow-lg shadow-[#D4AF37]/20 rounded-sm" widthClass="w-full" />
         </div>
       </div>
     </div>
@@ -1210,18 +1183,7 @@ const BlackHeaderProfessional = ({ data }) => (
       </div>
       <div className="w-1/2 flex justify-end">
         <div className="w-64">
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Subtotal</span><span>{formatCurrency(data.totals?.subtotal)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Discount</span><span>{formatCurrency(data.totals?.discount)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Tax</span><span>{formatCurrency(data.totals?.tax)}</span></div>
-          <div className="flex justify-between py-4 px-4 mt-4 text-lg font-black text-[#1a1a1a] bg-gray-100 border-2 border-[#1a1a1a] rounded-sm shadow-sm">
-            <span>TOTAL DUE</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-              </>
-            )}
-          </div>
+          <HtmlTotalsSummary data={data} accentClass="text-[#1a1a1a]" badgeClass="flex justify-between items-center py-4 px-4 mt-4 text-lg font-black text-[#1a1a1a] bg-gray-100 border-2 border-[#1a1a1a] rounded-sm shadow-sm" widthClass="w-full" />
         </div>
       </div>
     </div>
@@ -1312,18 +1274,7 @@ const BlueRoundedModern = ({ data }) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="flex justify-between py-1.5 text-[13px] border-b border-gray-50"><span className="text-gray-500">Subtotal</span><span className="font-medium text-gray-800">{formatCurrency(data.totals?.subtotal)}</span></div>
-          <div className="flex justify-between py-1.5 text-[13px] border-b border-gray-50"><span className="text-gray-500">Discount</span><span className="font-medium text-gray-800">{formatCurrency(data.totals?.discount)}</span></div>
-          <div className="flex justify-between py-1.5 text-[13px] mb-4"><span className="text-gray-500">Tax</span><span className="font-medium text-gray-800">{formatCurrency(data.totals?.tax)}</span></div>
-          <div className="flex justify-between py-4 px-5 text-lg font-black text-white bg-gradient-to-r from-[#1e90ff] to-[#4169e1] rounded-xl shadow-lg shadow-[#1e90ff]/30">
-            <span>TOTAL</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-              </>
-            )}
-          </div>
+          <HtmlTotalsSummary data={data} accentClass="text-white" badgeClass="flex justify-between items-center py-4 px-5 text-lg font-black text-white bg-gradient-to-r from-[#1e90ff] to-[#4169e1] rounded-xl shadow-lg shadow-[#1e90ff]/30" widthClass="w-full" />
         </div>
       </div>
 
@@ -1431,18 +1382,7 @@ const RedCorporateClean = ({ data }) => (
       </div>
       <div className="w-1/2 flex justify-end">
         <div className="w-64">
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Subtotal</span><span className="font-medium text-gray-900">{formatCurrency(data.totals?.subtotal)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Discount</span><span className="font-medium text-gray-900">{formatCurrency(data.totals?.discount)}</span></div>
-          <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-600">Tax</span><span className="font-medium text-gray-900">{formatCurrency(data.totals?.tax)}</span></div>
-          <div className="flex justify-between py-4 px-5 mt-4 text-lg font-black text-white bg-gradient-to-br from-[#DC143C] to-[#FF1744] shadow-lg shadow-[#DC143C]/30 rounded-sm">
-            <span>TOTAL DUE</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-            {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <span>Old Due</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                            <span>Total Due</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-              </>
-            )}
-          </div>
+          <HtmlTotalsSummary data={data} accentClass="text-white" badgeClass="flex justify-between items-center py-4 px-5 mt-4 text-lg font-black text-white bg-gradient-to-br from-[#DC143C] to-[#FF1744] shadow-lg shadow-[#DC143C]/30 rounded-sm" widthClass="w-full" />
         </div>
       </div>
     </div>
@@ -1536,18 +1476,7 @@ const CleanTwoColumnModern = ({ data }) => (
         ) : <div />}
       </div>
       <div className="text-right">
-        <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-500">Subtotal</span><span className="font-medium text-gray-800">{formatCurrency(data.totals?.subtotal)}</span></div>
-        <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-500">Discount</span><span className="font-medium text-gray-800">{formatCurrency(data.totals?.discount)}</span></div>
-        <div className="flex justify-between py-2 text-[13px] border-b border-gray-100"><span className="text-gray-500">Tax</span><span className="font-medium text-gray-800">{formatCurrency(data.totals?.tax)}</span></div>
-        <div className="flex justify-between py-4 mt-4 text-lg font-black text-gray-900 border-l-4 border-gray-900 pl-4 bg-gray-50">
-          <span>AMOUNT DUE</span><span>{formatCurrency(data.totals?.grandTotal)}</span>
-          {((data.totals?.oldDue > 0) || (data.oldDue > 0) || (data.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-            <>
-                        <span>AMOUNT DUE</span><span>{formatCurrency(data.totals?.oldDue)}</span>
-                        <span>AMOUNT DUE</span><span>{formatCurrency(data.totals?.totalDue)}</span>
-            </>
-          )}
-        </div>
+        <HtmlTotalsSummary data={data} accentClass="text-gray-900" badgeClass="flex justify-between items-center py-4 mt-4 text-lg font-black text-gray-900 border-l-4 border-gray-900 pl-4 bg-gray-50" widthClass="w-full" />
       </div>
     </div>
 

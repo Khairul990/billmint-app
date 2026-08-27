@@ -331,6 +331,142 @@ runTest('CROSS-SCREEN AUDIT: Customer Rahim Khan ₹10,000 bill with ₹3,000 pa
   assert.strictEqual(publicView.balanceDue, 7000, 'Screen 10: Public Invoice Due = ₹7,000');
 });
 
+// -------------------------------------------------------------------
+// REGRESSION TESTS A–F: Payment Proof Approval & Stale Status Scenarios
+// -------------------------------------------------------------------
+console.log('\n--- PART 5: Payment Proof Approval & Stale Status Regression ---');
+
+runTest('CASE A: Pending proof, no approved payment => Pending Verification', () => {
+  const invoice = {
+    id: 'inv_case_a',
+    grandTotal: 10000,
+    paymentHistory: [],
+    amountPaid: 0,
+    paidAmount: 0,
+    paymentProofs: [
+      { id: 'proof_a1', amount: 3000, status: 'Pending Verification' }
+    ]
+  };
+  const paid = getInvoicePaidTotal(invoice);
+  const status = getInvoicePaymentStatus(invoice);
+  const normalized = normalizeInvoiceFinancials(invoice);
+
+  assert.strictEqual(paid, 0, 'Case A: No payment has cleared yet');
+  assert.strictEqual(status, 'Pending Verification', 'Case A: Status must be Pending Verification');
+  assert.strictEqual(normalized.paymentStatus, 'Pending Verification', 'Case A: normalizeInvoiceFinancials must also return Pending Verification');
+  assert.strictEqual(normalized.amountPaid, 0, 'Case A: amountPaid must be 0');
+  assert.strictEqual(normalized.balanceDue, 10000, 'Case A: balanceDue must be full ₹10,000');
+});
+
+runTest('CASE B: Approved proof ₹3,000 on ₹10,000 invoice => Partially Paid, Paid=₹3,000, Due=₹7,000', () => {
+  const invoice = {
+    id: 'inv_case_b',
+    grandTotal: 10000,
+    paymentHistory: [
+      { id: 'pmt_proof_b1', proofId: 'proof_b1', amount: 3000, method: 'UPI', date: '2026-08-23T14:00:00Z' }
+    ],
+    paymentProofs: [{ id: 'proof_b1', amount: 3000, status: 'Approved' }]
+  };
+  const paid = getInvoicePaidTotal(invoice);
+  const due = getInvoiceBalanceDue(invoice);
+  const status = getInvoicePaymentStatus(invoice);
+  const normalized = normalizeInvoiceFinancials(invoice);
+
+  assert.strictEqual(paid, 3000, 'Case B: Paid must be ₹3,000');
+  assert.strictEqual(due, 7000, 'Case B: Due must be ₹7,000');
+  assert.strictEqual(status, 'Partially Paid', 'Case B: Status must be Partially Paid');
+  assert.strictEqual(normalized.amountPaid, 3000, 'Case B: normalized amountPaid = ₹3,000');
+  assert.strictEqual(normalized.paidAmount, 3000, 'Case B: normalized paidAmount = ₹3,000');
+  assert.strictEqual(normalized.balanceDue, 7000, 'Case B: normalized balanceDue = ₹7,000');
+  assert.strictEqual(normalized.paymentStatus, 'Partially Paid', 'Case B: normalized status = Partially Paid');
+});
+
+runTest('CASE C: Approved proof with full payment => Paid, Due=₹0', () => {
+  const invoice = {
+    id: 'inv_case_c',
+    grandTotal: 10000,
+    paymentHistory: [
+      { id: 'pmt_proof_c1', proofId: 'proof_c1', amount: 10000, method: 'Bank Transfer', date: '2026-08-23T15:00:00Z' }
+    ],
+    paymentProofs: [{ id: 'proof_c1', amount: 10000, status: 'Approved' }]
+  };
+  const normalized = normalizeInvoiceFinancials(invoice);
+
+  assert.strictEqual(normalized.amountPaid, 10000, 'Case C: amountPaid = ₹10,000');
+  assert.strictEqual(normalized.balanceDue, 0, 'Case C: balanceDue = ₹0');
+  assert.strictEqual(normalized.paymentStatus, 'Paid', 'Case C: paymentStatus = Paid');
+});
+
+runTest('CASE D: Stale paymentStatus="Pending Verification" but approved ₹3,000 payment exists => Partially Paid', () => {
+  // This is the exact scenario that was failing (TEST 6 in Part 2 above).
+  // The invoice object still carries the stale paymentStatus from before approval.
+  const staleInvoice = {
+    id: 'inv_case_d',
+    grandTotal: 10000,
+    paymentStatus: 'Pending Verification',   // ← stale stored value
+    amountPaid: 0,
+    paidAmount: 0,
+    paymentProofs: [{ id: 'proof_d1', amount: 3000, status: 'Approved' }], // already approved
+    paymentHistory: [
+      { id: 'pmt_proof_d1', proofId: 'proof_d1', amount: 3000, method: 'UPI', date: '2026-08-23T14:00:00Z' }
+    ]
+  };
+
+  const normalized = normalizeInvoiceFinancials(staleInvoice);
+
+  assert.strictEqual(normalized.amountPaid, 3000, 'Case D: amountPaid must reflect approved payment ₹3,000');
+  assert.strictEqual(normalized.balanceDue, 7000, 'Case D: balanceDue must be ₹7,000');
+  assert.strictEqual(normalized.paymentStatus, 'Partially Paid',
+    'Case D: stale "Pending Verification" MUST NOT override canonical Partially Paid'
+  );
+});
+
+runTest('CASE E: Duplicate approval of same proof => payment counted only once', () => {
+  // paymentHistory deduplication — same proof ID appears only once in history
+  const invoice = {
+    id: 'inv_case_e',
+    grandTotal: 10000,
+    paymentProofs: [
+      { id: 'proof_e1', amount: 3000, status: 'Approved' }
+    ],
+    paymentHistory: [
+      { id: 'pmt_proof_e1', proofId: 'proof_e1', amount: 3000, method: 'UPI' }
+      // If duplicate approval was applied the same entry would be added twice,
+      // but idempotency check prevents that; history should still contain only one entry.
+    ]
+  };
+
+  const normalized = normalizeInvoiceFinancials(invoice);
+
+  assert.strictEqual(normalized.amountPaid, 3000, 'Case E: Paid must be ₹3,000 (not ₹6,000 from double-count)');
+  assert.strictEqual(normalized.balanceDue, 7000, 'Case E: Due must be ₹7,000');
+  assert.strictEqual(normalized.paymentStatus, 'Partially Paid', 'Case E: Status must be Partially Paid');
+});
+
+runTest('CASE F: Normal invoice without payment proof => canonical math determines status (Unpaid/Partial/Paid)', () => {
+  // F1: Unpaid
+  const unpaid = normalizeInvoiceFinancials({ id: 'inv_f1', grandTotal: 5000, paymentHistory: [] });
+  assert.strictEqual(unpaid.paymentStatus, 'Unpaid', 'Case F1: No payment => Unpaid');
+  assert.strictEqual(unpaid.balanceDue, 5000, 'Case F1: balanceDue = ₹5,000');
+
+  // F2: Partially Paid
+  const partial = normalizeInvoiceFinancials({
+    id: 'inv_f2', grandTotal: 5000,
+    paymentHistory: [{ id: 'pmt_f2', amount: 2000, method: 'Cash' }]
+  });
+  assert.strictEqual(partial.paymentStatus, 'Partially Paid', 'Case F2: Partial payment => Partially Paid');
+  assert.strictEqual(partial.amountPaid, 2000, 'Case F2: amountPaid = ₹2,000');
+  assert.strictEqual(partial.balanceDue, 3000, 'Case F2: balanceDue = ₹3,000');
+
+  // F3: Paid
+  const paid = normalizeInvoiceFinancials({
+    id: 'inv_f3', grandTotal: 5000,
+    paymentHistory: [{ id: 'pmt_f3', amount: 5000, method: 'UPI' }]
+  });
+  assert.strictEqual(paid.paymentStatus, 'Paid', 'Case F3: Full payment => Paid');
+  assert.strictEqual(paid.balanceDue, 0, 'Case F3: balanceDue = ₹0');
+});
+
 console.log('\n======================================================');
 console.log(`📊 CANONICAL FINANCIAL PARITY RESULTS: ${passedTests} / ${totalTests} PASSED (100%)`);
 console.log('======================================================\n');

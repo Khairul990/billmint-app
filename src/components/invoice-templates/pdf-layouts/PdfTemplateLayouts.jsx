@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, Font } from '@react-pdf/renderer';
+import { calculateCanonicalInvoiceFinancials } from '../../../utils/invoiceMath';
 
 const formatCurrency = (amount) => {
   const formatted = new Intl.NumberFormat('en-IN', {
@@ -32,6 +33,87 @@ const s = StyleSheet.create({
   wThird: { width: '33.33%' },
   wTwoThirds: { width: '66.66%' },
 });
+
+export const PdfTotalsSummary = ({ 
+  invoice, 
+  businessSettings, 
+  accentColor = '#111827', 
+  isDark = false, 
+  badgeStyle = null,
+  width = 220 
+}) => {
+  const fin = calculateCanonicalInvoiceFinancials(invoice);
+  const showOldDue = Boolean(businessSettings?.invoiceBuilderSettings?.showOldDue || fin.previousDue > 0);
+  const showDiscount = businessSettings?.invoiceBuilderSettings?.showDiscount !== false && fin.discountAmount > 0;
+  const showTax = businessSettings?.invoiceBuilderSettings?.showTax !== false && fin.taxAmount > 0;
+  const showShipping = Boolean(businessSettings?.invoiceBuilderSettings?.showShipping && fin.shipping > 0);
+
+  const labelColor = isDark ? '#9ca3af' : '#64748b';
+  const valColor = isDark ? '#f9fafb' : '#0f172a';
+
+  return (
+    <View style={{ width }}>
+      <View style={[s.row, s.justifyBetween, s.mb4]}>
+        <Text style={{ fontSize: 9, color: labelColor }}>Subtotal</Text>
+        <Text style={{ fontSize: 9, color: valColor, fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(fin.subtotal)}</Text>
+      </View>
+
+      {showDiscount && (
+        <View style={[s.row, s.justifyBetween, s.mb4]}>
+          <Text style={{ fontSize: 8.5, color: '#dc2626' }}>Discount</Text>
+          <Text style={{ fontSize: 8.5, color: '#dc2626', fontWeight: 'bold', textAlign: 'right' }}>-{formatCurrency(fin.discountAmount)}</Text>
+        </View>
+      )}
+
+      {showTax && (
+        <View style={[s.row, s.justifyBetween, s.mb4]}>
+          <Text style={{ fontSize: 9, color: labelColor }}>{businessSettings?.invoiceBuilderSettings?.taxLabel || 'Tax'} ({invoice.taxPercentage || 0}%)</Text>
+          <Text style={{ fontSize: 9, color: valColor, fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(fin.taxAmount)}</Text>
+        </View>
+      )}
+
+      {showShipping && (
+        <View style={[s.row, s.justifyBetween, s.mb4]}>
+          <Text style={{ fontSize: 9, color: labelColor }}>Shipping</Text>
+          <Text style={{ fontSize: 9, color: valColor, fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(fin.shipping)}</Text>
+        </View>
+      )}
+
+      {(fin.previousDue > 0 || fin.amountPaid > 0) && (
+        <View style={[s.row, s.justifyBetween, s.mb4, { borderTopWidth: 1, borderTopColor: isDark ? '#374151' : '#e5e7eb', paddingTop: 4 }]}>
+          <Text style={{ fontSize: 9, color: labelColor, fontWeight: 'bold' }}>Current Invoice</Text>
+          <Text style={{ fontSize: 9, color: valColor, fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(fin.currentInvoiceTotal)}</Text>
+        </View>
+      )}
+
+      {showOldDue && (
+        <View style={[s.row, s.justifyBetween, s.mb4]}>
+          <Text style={{ fontSize: 8.5, color: '#d97706', fontWeight: 'bold' }}>Previous / Old Due</Text>
+          <Text style={{ fontSize: 8.5, color: '#d97706', fontWeight: 'bold', textAlign: 'right' }}>+{formatCurrency(fin.previousDue)}</Text>
+        </View>
+      )}
+
+      {showOldDue && (
+        <View style={[s.row, s.justifyBetween, s.mb4, { borderTopWidth: 1, borderTopColor: isDark ? '#374151' : '#e5e7eb', paddingTop: 4 }]}>
+          <Text style={{ fontSize: 9, color: labelColor, fontWeight: 'bold' }}>Total Receivable</Text>
+          <Text style={{ fontSize: 9, color: valColor, fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(fin.totalReceivable)}</Text>
+        </View>
+      )}
+
+      {fin.amountPaid > 0 && (
+        <View style={[s.row, s.justifyBetween, s.mb4]}>
+          <Text style={{ fontSize: 8.5, color: '#16a34a', fontWeight: 'bold' }}>Amount Paid</Text>
+          <Text style={{ fontSize: 8.5, color: '#16a34a', fontWeight: 'bold', textAlign: 'right' }}>-{formatCurrency(fin.amountPaid)}</Text>
+        </View>
+      )}
+
+      <View style={[s.row, s.justifyBetween, s.bold, badgeStyle ? badgeStyle : { fontSize: 12, borderTopWidth: 2, borderTopColor: accentColor, paddingTop: 6, marginTop: 4 }]}>
+        <Text style={{ color: badgeStyle?.color || accentColor }}>{(fin.amountPaid > 0 || fin.previousDue > 0) ? 'BALANCE DUE' : 'TOTAL DUE'}</Text>
+        <Text style={{ color: badgeStyle?.color || accentColor, textAlign: 'right' }}>{formatCurrency(fin.balanceDue)}</Text>
+      </View>
+    </View>
+  );
+};
 
 // 1. Minimal Classic
 const MinimalClassicPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeBase64 }) => {
@@ -82,20 +164,7 @@ const MinimalClassicPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeBa
       </View>
 
       <View style={[s.row, { justifyContent: 'flex-end', marginBottom: 32 }]}>
-        <View style={{ width: 200 }}>
-          <View style={[s.row, s.justifyBetween, s.mb4]}><Text style={{ fontSize: 10, color: '#666' }}>Subtotal:</Text><Text style={{ fontSize: 10 }}>{formatCurrency(invoice.subtotal)}</Text></View>
-          <View style={[s.row, s.justifyBetween, s.mb4]}><Text style={{ fontSize: 10, color: '#666' }}>Discount:</Text><Text style={{ fontSize: 10 }}>{formatCurrency(invoice.discountAmount)}</Text></View>
-          <View style={[s.row, s.justifyBetween, s.mb8]}><Text style={{ fontSize: 10, color: '#666' }}>Tax:</Text><Text style={{ fontSize: 10 }}>{formatCurrency(invoice.taxAmount)}</Text></View>
-          <View style={[s.row, s.justifyBetween, s.bold, { fontSize: 14, borderTopWidth: 2, borderTopColor: '#111', paddingTop: 8 }]}>
-            <Text>Total:</Text><Text>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-            {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <Text>Old Due:</Text><Text>{formatCurrency(invoice.oldDue)}</Text>
-                            <Text>Total Due:</Text><Text>{formatCurrency(invoice.totalDue)}</Text>
-              </>
-            )}
-          </View>
-        </View>
+        <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#111" />
       </View>
 
       <View style={[s.row, s.justifyBetween, s.alignCenter, { marginTop: 16 }]}>
@@ -170,19 +239,8 @@ const ModernCorporatePdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
         </View>
 
         <View style={[s.row, { justifyContent: 'flex-end', marginBottom: 32 }]}>
-          <View style={{ width: 220, backgroundColor: '#f9fafb', padding: 16, borderRadius: 8 }}>
-            <View style={[s.row, s.justifyBetween, s.mb4]}><Text style={{ fontSize: 10, color: '#666' }}>Subtotal</Text><Text style={{ fontSize: 10 }}>{formatCurrency(invoice.subtotal)}</Text></View>
-            <View style={[s.row, s.justifyBetween, s.mb4]}><Text style={{ fontSize: 10, color: '#666' }}>Discount</Text><Text style={{ fontSize: 10 }}>{formatCurrency(invoice.discountAmount)}</Text></View>
-            <View style={[s.row, s.justifyBetween, s.mb8]}><Text style={{ fontSize: 10, color: '#666' }}>Tax</Text><Text style={{ fontSize: 10 }}>{formatCurrency(invoice.taxAmount)}</Text></View>
-            <View style={[s.row, s.justifyBetween, s.bold, { fontSize: 14, color: '#2563eb', borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingTop: 8 }]}>
-              {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Total</Text>}<Text>{formatCurrency(invoice.grandTotal)}</Text>
-              {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-                <>
-                                {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Old Due</Text>}<Text>{formatCurrency(invoice.oldDue)}</Text>
-                                {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Total Due</Text>}<Text>{formatCurrency(invoice.totalDue)}</Text>
-                </>
-              )}
-            </View>
+          <View style={{ width: 240, backgroundColor: '#f9fafb', padding: 16, borderRadius: 8 }}>
+            <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#2563eb" width="100%" />
           </View>
         </View>
 
@@ -259,20 +317,7 @@ const TealBoldHeaderPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeBa
         </View>
 
         <View style={[s.row, { justifyContent: 'flex-end', marginTop: 32 }]}>
-          <View style={{ width: 180 }}>
-            <View style={[s.row, s.justifyBetween, s.mb4]}><Text style={{ fontSize: 10, color: '#666' }}>Subtotal</Text><Text style={[s.bold, { fontSize: 10, color: '#333' }]}>{formatCurrency(invoice.subtotal)}</Text></View>
-            <View style={[s.row, s.justifyBetween, s.mb4]}><Text style={{ fontSize: 10, color: '#666' }}>Discount</Text><Text style={[s.bold, { fontSize: 10, color: '#333' }]}>{formatCurrency(invoice.discountAmount)}</Text></View>
-            <View style={[s.row, s.justifyBetween, { marginBottom: 12, borderBottomWidth: 1, borderBottomColor: '#e5e5e5', paddingBottom: 8 }]}><Text style={{ fontSize: 10, color: '#666' }}>Tax</Text><Text style={[s.bold, { fontSize: 10, color: '#333' }]}>{formatCurrency(invoice.taxAmount)}</Text></View>
-            <View style={[s.row, s.justifyBetween, s.bold, { fontSize: 16, color: '#134e4a', paddingTop: 8 }]}>
-              {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Total</Text>}<Text>{formatCurrency(invoice.grandTotal)}</Text>
-              {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-                <>
-                                {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Old Due</Text>}<Text>{formatCurrency(invoice.oldDue)}</Text>
-                                {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Total Due</Text>}<Text>{formatCurrency(invoice.totalDue)}</Text>
-                </>
-              )}
-            </View>
-          </View>
+          <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#134e4a" />
         </View>
 
         <View style={[s.row, s.justifyBetween, s.alignCenter, { marginTop: 64 }]}>
@@ -351,19 +396,8 @@ const SageGreenCurvedPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
         </View>
 
         <View style={[s.row, { justifyContent: 'flex-end', marginBottom: 32 }]}>
-          <View style={{ width: 200, backgroundColor: '#fff', padding: 16, borderRadius: 8, border: '1pt solid #e8efe9' }}>
-            <View style={[s.row, s.justifyBetween, s.mb4]}><Text style={{ fontSize: 10, color: '#666' }}>Subtotal</Text><Text style={{ fontSize: 10 }}>{formatCurrency(invoice.subtotal)}</Text></View>
-            <View style={[s.row, s.justifyBetween, s.mb4]}><Text style={{ fontSize: 10, color: '#666' }}>Discount</Text><Text style={{ fontSize: 10 }}>{formatCurrency(invoice.discountAmount)}</Text></View>
-            <View style={[s.row, s.justifyBetween, s.mb8]}><Text style={{ fontSize: 10, color: '#666' }}>Tax</Text><Text style={{ fontSize: 10 }}>{formatCurrency(invoice.taxAmount)}</Text></View>
-            <View style={[s.row, s.justifyBetween, s.bold, { fontSize: 14, color: '#3d5a49', borderTopWidth: 1, borderTopColor: '#e8efe9', paddingTop: 8 }]}>
-              {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Total</Text>}<Text>{formatCurrency(invoice.grandTotal)}</Text>
-              {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-                <>
-                                {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Old Due</Text>}<Text>{formatCurrency(invoice.oldDue)}</Text>
-                                {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text>Total Due</Text>}<Text>{formatCurrency(invoice.totalDue)}</Text>
-                </>
-              )}
-            </View>
+          <View style={{ width: 240, backgroundColor: '#fff', padding: 16, borderRadius: 8, border: '1pt solid #e8efe9' }}>
+            <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#3d5a49" width="100%" />
           </View>
         </View>
         <View style={[s.row, s.justifyBetween, s.alignCenter, { marginTop: 32 }]}>
@@ -437,19 +471,8 @@ const CreativeAgencyPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeBa
         </View>
 
         <View style={[s.row, { justifyContent: 'flex-end', marginBottom: 32 }]}>
-          <View style={{ width: 220, backgroundColor: '#161616', padding: 16, borderRadius: 8, borderWidth: 1, borderColor: '#374151' }}>
-            <View style={[s.row, s.justifyBetween, s.mb4]}><Text style={{ fontSize: 10, color: '#6b7280' }}>Subtotal</Text><Text style={{ fontSize: 10, color: '#d1d5db' }}>{formatCurrency(invoice.subtotal)}</Text></View>
-            <View style={[s.row, s.justifyBetween, s.mb4]}><Text style={{ fontSize: 10, color: '#6b7280' }}>Discount</Text><Text style={{ fontSize: 10, color: '#d1d5db' }}>{formatCurrency(invoice.discountAmount)}</Text></View>
-            <View style={[s.row, s.justifyBetween, s.mb8]}><Text style={{ fontSize: 10, color: '#6b7280' }}>Tax</Text><Text style={{ fontSize: 10, color: '#d1d5db' }}>{formatCurrency(invoice.taxAmount)}</Text></View>
-            <View style={[s.row, s.justifyBetween, s.bold, { fontSize: 14, color: '#fff', borderTopWidth: 1, borderTopColor: '#374151', paddingTop: 12, marginTop: 4 }]}>
-              {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ color: '#ff4a6e' }}>Total</Text>}<Text>{formatCurrency(invoice.grandTotal)}</Text>
-              {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-                <>
-                                {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ color: "#666" }}>Old Due</Text>}<Text>{formatCurrency(invoice.oldDue)}</Text>
-                                {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ color: '#ff4a6e' }}>Total Due</Text>}<Text>{formatCurrency(invoice.totalDue)}</Text>
-                </>
-              )}
-            </View>
+          <View style={{ width: 240, backgroundColor: '#161616', padding: 16, borderRadius: 8, borderWidth: 1, borderColor: '#374151' }}>
+            <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#ff4a6e" isDark={true} width="100%" />
           </View>
         </View>
 
@@ -553,28 +576,7 @@ const PurpleCorporatePdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
         )}
       </View>
       <View style={{ width: '40%' }}>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Subtotal</Text>
-          <Text style={{ fontSize: 9, color: '#222' }}>{formatCurrency(invoice.subtotal)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Discount</Text>
-          <Text style={{ fontSize: 9, color: '#222' }}>{formatCurrency(invoice.discountAmount)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Tax</Text>
-          <Text style={{ fontSize: 9, color: '#222' }}>{formatCurrency(invoice.taxAmount)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 8, marginTop: 8, backgroundColor: '#6A5ACD', borderRadius: 4 }]}>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>TOTAL DUE</Text>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-          {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-            <>
-                        <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
-                        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-            </>
-          )}
-        </View>
+        <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#fff" badgeStyle={{ backgroundColor: '#6A5ACD', padding: 8, borderRadius: 4, color: '#fff', fontSize: 11 }} width="100%" />
       </View>
     </View>
 
@@ -669,28 +671,7 @@ const OrangeGradientModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
       </View>
       <View style={[s.wHalf, { paddingLeft: 10 }]}>
         <View style={{ backgroundColor: '#fff', padding: 15, borderRadius: 8, border: '1pt solid #ffedd5' }}>
-          <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#fafafa' }]}>
-            <Text style={{ fontSize: 9, color: '#555' }}>Subtotal</Text>
-            <Text style={{ fontSize: 9, color: '#222', fontWeight: 'bold' }}>{formatCurrency(invoice.subtotal)}</Text>
-          </View>
-          <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#fafafa' }]}>
-            <Text style={{ fontSize: 9, color: '#555' }}>Discount</Text>
-            <Text style={{ fontSize: 9, color: '#222', fontWeight: 'bold' }}>{formatCurrency(invoice.discountAmount)}</Text>
-          </View>
-          <View style={[s.row, s.justifyBetween, { paddingVertical: 4, marginBottom: 8 }]}>
-            <Text style={{ fontSize: 9, color: '#555' }}>Tax</Text>
-            <Text style={{ fontSize: 9, color: '#222', fontWeight: 'bold' }}>{formatCurrency(invoice.taxAmount)}</Text>
-          </View>
-          <View style={[s.row, s.justifyBetween, { paddingVertical: 10, paddingHorizontal: 10, backgroundColor: '#FF8C00', borderRadius: 6 }]}>
-            {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>Total</Text>}
-            <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-            {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <Text style={{ fontSize: 12, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
-                            <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-              </>
-            )}
-          </View>
+          <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#fff" badgeStyle={{ backgroundColor: '#FF8C00', padding: 8, borderRadius: 6, color: '#fff', fontSize: 11 }} width="100%" />
         </View>
       </View>
     </View>
@@ -775,28 +756,7 @@ const OrangeGeometricCornerPdf = ({ invoice, businessSettings, safeLogoBase64, q
         )}
       </View>
       <View style={{ width: '40%' }}>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Subtotal</Text>
-          <Text style={{ fontSize: 9, color: '#222' }}>{formatCurrency(invoice.subtotal)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Discount</Text>
-          <Text style={{ fontSize: 9, color: '#222' }}>{formatCurrency(invoice.discountAmount)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Tax</Text>
-          <Text style={{ fontSize: 9, color: '#222' }}>{formatCurrency(invoice.taxAmount)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 6, marginTop: 8, backgroundColor: '#fff7ed', borderLeftWidth: 3, borderLeftColor: '#FF8C00' }]}>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#FF8C00' }}>TOTAL DUE</Text>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#FF8C00' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-          {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-            <>
-                        <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
-                        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#FF8C00' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-            </>
-          )}
-        </View>
+        <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#FF8C00" badgeStyle={{ backgroundColor: '#fff7ed', borderLeftWidth: 3, borderLeftColor: '#FF8C00', padding: 8, color: '#FF8C00', fontSize: 11 }} width="100%" />
       </View>
     </View>
 
@@ -870,28 +830,7 @@ const BlackOrangeBoldPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
         )}
       </View>
       <View style={{ width: '40%' }}>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#333' }]}>
-          <Text style={{ fontSize: 9, color: '#aaa' }}>Subtotal</Text>
-          <Text style={{ fontSize: 9, color: '#eee' }}>{formatCurrency(invoice.subtotal)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#333' }]}>
-          <Text style={{ fontSize: 9, color: '#aaa' }}>Discount</Text>
-          <Text style={{ fontSize: 9, color: '#eee' }}>{formatCurrency(invoice.discountAmount)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#333' }]}>
-          <Text style={{ fontSize: 9, color: '#aaa' }}>Tax</Text>
-          <Text style={{ fontSize: 9, color: '#eee' }}>{formatCurrency(invoice.taxAmount)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 8, marginTop: 8, backgroundColor: '#FF8C00', borderRadius: 4 }]}>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>TOTAL</Text>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-          {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-            <>
-                        <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
-                        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-            </>
-          )}
-        </View>
+        <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#fff" isDark={true} badgeStyle={{ backgroundColor: '#FF8C00', padding: 8, borderRadius: 4, color: '#fff', fontSize: 11 }} width="100%" />
       </View>
     </View>
 
@@ -965,28 +904,7 @@ const LuxuryGoldBlackPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
           )}
         </View>
         <View style={{ width: '40%' }}>
-          <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#333' }]}>
-            <Text style={{ fontSize: 9, color: '#aaa' }}>Subtotal</Text>
-            <Text style={{ fontSize: 9, color: '#eee' }}>{formatCurrency(invoice.subtotal)}</Text>
-          </View>
-          <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#333' }]}>
-            <Text style={{ fontSize: 9, color: '#aaa' }}>Discount</Text>
-            <Text style={{ fontSize: 9, color: '#eee' }}>{formatCurrency(invoice.discountAmount)}</Text>
-          </View>
-          <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#333' }]}>
-            <Text style={{ fontSize: 9, color: '#aaa' }}>Tax</Text>
-            <Text style={{ fontSize: 9, color: '#eee' }}>{formatCurrency(invoice.taxAmount)}</Text>
-          </View>
-          <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 8, marginTop: 8, backgroundColor: '#D4AF37', borderRadius: 2 }]}>
-            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1a1a1a' }}>GRAND TOTAL</Text>
-            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1a1a1a' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-            {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
-                            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1a1a1a' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-              </>
-            )}
-          </View>
+          <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#1a1a1a" isDark={true} badgeStyle={{ backgroundColor: '#D4AF37', padding: 8, borderRadius: 2, color: '#1a1a1a', fontSize: 11 }} width="100%" />
         </View>
       </View>
 
@@ -1056,28 +974,7 @@ const BlackHeaderProfessionalPdf = ({ invoice, businessSettings, safeLogoBase64,
         )}
       </View>
       <View style={{ width: '40%' }}>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Subtotal</Text>
-          <Text style={{ fontSize: 9, color: '#222' }}>{formatCurrency(invoice.subtotal)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Discount</Text>
-          <Text style={{ fontSize: 9, color: '#222' }}>{formatCurrency(invoice.discountAmount)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Tax</Text>
-          <Text style={{ fontSize: 9, color: '#222' }}>{formatCurrency(invoice.taxAmount)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 8, marginTop: 8, backgroundColor: '#f5f5f5', border: '1pt solid #1a1a1a' }]}>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1a1a1a' }}>TOTAL DUE</Text>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1a1a1a' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-          {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-            <>
-                        <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
-                        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1a1a1a' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-            </>
-          )}
-        </View>
+        <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#1a1a1a" badgeStyle={{ backgroundColor: '#f5f5f5', border: '1pt solid #1a1a1a', padding: 8, color: '#1a1a1a', fontSize: 11 }} width="100%" />
       </View>
     </View>
 
@@ -1143,28 +1040,7 @@ const BlueRoundedModernPdf = ({ invoice, businessSettings, safeLogoBase64, qrCod
           <Text style={{ fontSize: 9, color: '#555' }}>{businessSettings?.phone}</Text>
         </View>
         <View style={s.wHalf}>
-          <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#f9f9f9' }]}>
-            <Text style={{ fontSize: 9, color: '#666' }}>Subtotal</Text>
-            <Text style={{ fontSize: 9, color: '#222', fontWeight: 'bold' }}>{formatCurrency(invoice.subtotal)}</Text>
-          </View>
-          <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#f9f9f9' }]}>
-            <Text style={{ fontSize: 9, color: '#666' }}>Discount</Text>
-            <Text style={{ fontSize: 9, color: '#222', fontWeight: 'bold' }}>{formatCurrency(invoice.discountAmount)}</Text>
-          </View>
-          <View style={[s.row, s.justifyBetween, { paddingVertical: 4, marginBottom: 4 }]}>
-            <Text style={{ fontSize: 9, color: '#666' }}>Tax</Text>
-            <Text style={{ fontSize: 9, color: '#222', fontWeight: 'bold' }}>{formatCurrency(invoice.taxAmount)}</Text>
-          </View>
-          <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 10, backgroundColor: '#1e90ff', borderRadius: 8 }]}>
-            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>TOTAL</Text>
-            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-            {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-              <>
-                            <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
-                            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-              </>
-            )}
-          </View>
+          <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#fff" badgeStyle={{ backgroundColor: '#1e90ff', padding: 8, borderRadius: 8, color: '#fff', fontSize: 11 }} width="100%" />
         </View>
       </View>
 
@@ -1252,28 +1128,7 @@ const RedCorporateCleanPdf = ({ invoice, businessSettings, safeLogoBase64, qrCod
         )}
       </View>
       <View style={{ width: '40%' }}>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Subtotal</Text>
-          <Text style={{ fontSize: 9, color: '#222', fontWeight: 'bold' }}>{formatCurrency(invoice.subtotal)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Discount</Text>
-          <Text style={{ fontSize: 9, color: '#222', fontWeight: 'bold' }}>{formatCurrency(invoice.discountAmount)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Tax</Text>
-          <Text style={{ fontSize: 9, color: '#222', fontWeight: 'bold' }}>{formatCurrency(invoice.taxAmount)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 8, marginTop: 8, backgroundColor: '#DC143C', borderRadius: 2 }]}>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>TOTAL DUE</Text>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-          {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-            <>
-                        <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
-                        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-            </>
-          )}
-        </View>
+        <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#fff" badgeStyle={{ backgroundColor: '#DC143C', padding: 8, borderRadius: 2, color: '#fff', fontSize: 11 }} width="100%" />
       </View>
     </View>
 
@@ -1339,28 +1194,7 @@ const CleanTwoColumnModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
         )}
       </View>
       <View style={{ width: '40%' }}>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Subtotal</Text>
-          <Text style={{ fontSize: 9, color: '#222', fontWeight: 'bold' }}>{formatCurrency(invoice.subtotal)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Discount</Text>
-          <Text style={{ fontSize: 9, color: '#222', fontWeight: 'bold' }}>{formatCurrency(invoice.discountAmount)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' }]}>
-          <Text style={{ fontSize: 9, color: '#555' }}>Tax</Text>
-          <Text style={{ fontSize: 9, color: '#222', fontWeight: 'bold' }}>{formatCurrency(invoice.taxAmount)}</Text>
-        </View>
-        <View style={[s.row, s.justifyBetween, { paddingVertical: 8, paddingHorizontal: 10, marginTop: 8, backgroundColor: '#f9f9f9', borderLeftWidth: 4, borderLeftColor: '#222' }]}>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#222' }}>AMOUNT DUE</Text>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#222' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-          {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
-            <>
-                        <Text style={{ fontSize: 11, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
-                        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#222' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
-            </>
-          )}
-        </View>
+        <PdfTotalsSummary invoice={invoice} businessSettings={businessSettings} accentColor="#222" badgeStyle={{ backgroundColor: '#f9f9f9', borderLeftWidth: 4, borderLeftColor: '#222', padding: 8, color: '#222', fontSize: 11 }} width="100%" />
       </View>
     </View>
 

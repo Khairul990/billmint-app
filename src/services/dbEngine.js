@@ -1231,8 +1231,6 @@ export const getAuthSession = () => {
 
 
 export const logout = async () => {
-  const currentUserId = getRealUserId();
-  
   // 1. Sign out Firebase Auth
   if (firebaseReady && auth) {
     try {
@@ -1261,19 +1259,6 @@ export const logout = async () => {
   keysToRemove.forEach(k => localStorage.removeItem(k));
   
   sessionStorage.clear();
-
-  // 4. Safely clean active user's pending sync transactions without wiping other accounts' local caches
-  try {
-    if (currentUserId) {
-      const queue = await BillQyroDB.getAll('syncQueue');
-      const userItems = queue.filter(tx => tx.userId === currentUserId);
-      for (const item of userItems) {
-        await BillQyroDB.delete('syncQueue', item.id);
-      }
-    }
-  } catch (e) {
-    console.error('Failed to cleanup syncQueue on logout', e);
-  }
 };
 
 export const resetBusinessDataOnly = async () => {
@@ -1826,24 +1811,11 @@ export const getSettings = () => {
     }
   }
 
-  // Ensure default theme is locked to the account instead of floating, 
-  // preventing it from randomly changing if the admin default changes later.
+  // Ensure default theme is present locally without pushing uninitialized defaults to cloud
   if (settings) {
-    let shouldSave = false;
-    
     if (!settings.themeColor) {
       settings.themeColor = localStorage.getItem('billqyro_admin_default_theme') || 'obsidian-gold';
-      shouldSave = true;
-    }
-
-    if (shouldSave) {
       localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
-      // Using direct firestore push bypassing syncEngine because this is a core init fix
-      
-      const userId = getRealUserId();
-      if (userId && firebaseReady) {
-         pushDataUpdate('settings', userId, userId, settings);
-      }
     }
   }
 
@@ -3308,12 +3280,7 @@ export const syncFromFirestore = async (force = false) => {
     // Backup local data before clearing cache (non-blocking)
     await backupLocalData();
     
-    // Check for UID drift / stale caching
-    const lastUid = localStorage.getItem('billqyro_last_uid');
-    if (lastUid && lastUid !== userId) {
-      console.warn('UID has changed. Wiping local device data to prevent leakage.');
-      await clearAllLocalData();
-    }
+    // Keep track of active UID without wiping local database
     localStorage.setItem('billqyro_last_uid', userId);
 
     // 1. Flush offline transactions first to avoid losing offline work
@@ -3383,7 +3350,7 @@ export const syncFromFirestore = async (force = false) => {
       localStorage.setItem(`billqyro_${userId}_last_workspace`, activeWorkspaceId);
     }
 
-    // Generic Merge Helper
+    // Generic Merge Helper (additive & non-destructive)
     const mergeData = async (storeName, snap, storageKey, formatInvoice = false) => {
       const cloudItems = [];
       snap.forEach(docSnap => {
@@ -3398,9 +3365,10 @@ export const syncFromFirestore = async (force = false) => {
       });
       
       const localItems = await BillQyroDB.getAll(storeName);
+      const userLocalItems = (localItems || []).filter(item => item.userId === userId || !item.userId);
       const mergedMap = new Map();
       
-      for (const item of localItems) {
+      for (const item of userLocalItems) {
         mergedMap.set(item.id, item);
       }
       
@@ -3412,7 +3380,6 @@ export const syncFromFirestore = async (force = false) => {
       }
       
       const finalItems = Array.from(mergedMap.values());
-      await BillQyroDB.clear(storeName);
       for (const item of finalItems) {
         await BillQyroDB.put(storeName, item);
       }
@@ -3424,6 +3391,7 @@ export const syncFromFirestore = async (force = false) => {
 
     // 5-9. Apply merged data
     await mergeData('customers', customersSnap, KEYS.CUSTOMERS);
+    await mergeData('staff', staffSnap, KEYS.STAFF);
     await mergeData('invoices', invoicesSnap, KEYS.INVOICES, true);
     await mergeData('products', productsSnap, KEYS.PRODUCTS);
     await mergeData('expenses', expensesSnap, KEYS.EXPENSES);
@@ -3435,12 +3403,11 @@ export const syncFromFirestore = async (force = false) => {
     }
 
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
-    // User requested: "Do not show repeated success toasts. I want sync notifications only when actual changes are synced."
-    // Given the difficulty of deep equality checking here, we rely on the UI updating silently.
     
     return {
       settings: JSON.parse(localStorage.getItem(KEYS.SETTINGS)),
       customers: JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [],
+      staff: JSON.parse(localStorage.getItem(KEYS.STAFF)) || [],
       products: JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [],
       invoices: JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [],
       expenses: JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [],

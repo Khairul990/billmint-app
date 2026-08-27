@@ -22,7 +22,8 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
     paymentPrefs,
     bankDetails,
     currencySymbol,
-    categoryWords
+    categoryWords,
+    financials
   } = buildCanonicalRenderModel(invoice, businessSettings, businessSettings?.selectedPdfTemplate);
 
   const getStatusBadgeStyle = (status) => {
@@ -30,6 +31,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
       case 'Paid':
         return 'bg-theme-accent-light text-theme-primary border-theme-border-soft dark:bg-theme-accent-light/20 dark:text-theme-accent dark:border-theme-accent/30';
       case 'Pending':
+      case 'Partially Paid':
         return 'bg-theme-warning/5 text-amber-800 border-theme-warning/30 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
       case 'Unpaid':
       default:
@@ -261,61 +263,63 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
         </div>
 
         {/* Math summary */}
-        <div className="w-full sm:w-64 space-y-2 text-xs font-semibold text-theme-muted dark:text-theme-muted">
+        <div className="w-full sm:w-72 space-y-2 text-xs font-semibold text-theme-muted dark:text-theme-muted">
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span className="text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-bold">{formatCurrency(invoice.subtotal, currencySymbol, regionalPrefs.numberFormat)}</span>
+            <span className="text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-bold tabular-nums">{formatCurrency(financials.subtotal, currencySymbol, regionalPrefs.numberFormat)}</span>
           </div>
-          {(businessSettings?.invoiceBuilderSettings?.showDiscount !== false) && invoice.discountAmount > 0 && (
+          {(businessSettings?.invoiceBuilderSettings?.showDiscount !== false) && financials.discountAmount > 0 && (
             <div className="flex justify-between text-theme-danger dark:text-rose-450 font-bold">
               <span>Discount</span>
-              <span>-{formatCurrency(invoice.discountAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
+              <span className="tabular-nums">-{formatCurrency(financials.discountAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
-          {(businessSettings?.invoiceBuilderSettings?.showTax !== false) && (
+          {(businessSettings?.invoiceBuilderSettings?.showTax !== false) && financials.taxAmount > 0 && (
             <div className="flex justify-between">
               <span>{regionalPrefs.taxLabel || 'Tax'} ({invoice.taxPercentage || 0}%)</span>
-              <span className="text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-bold">{formatCurrency(invoice.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
+              <span className="text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-bold tabular-nums">{formatCurrency(financials.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
-          {(businessSettings?.invoiceBuilderSettings?.showShipping) && invoice.shipping > 0 && (
+          {(businessSettings?.invoiceBuilderSettings?.showShipping) && financials.shipping > 0 && (
             <div className="flex justify-between text-theme-primary dark:text-theme-secondary font-bold">
               <span>Shipping</span>
-              <span>{formatCurrency(invoice.shipping, currencySymbol, regionalPrefs.numberFormat)}</span>
+              <span className="tabular-nums">{formatCurrency(financials.shipping, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
-          <div className={`flex justify-between items-center border-t pt-2 text-theme-primary dark:text-theme-secondary font-bold ${templateId === 'classic-elegant' ? 'border-emerald-800/30' : 'border-theme-border-soft'}`}>
-            <span>Current Invoice</span>
-            <span className="font-extrabold">{formatCurrency(invoice.grandTotal || 0, currencySymbol, regionalPrefs.numberFormat)}</span>
-          </div>
+          {(financials.previousDue > 0 || financials.amountPaid > 0) && (
+            <div className={`flex justify-between items-center border-t pt-2 text-theme-primary dark:text-theme-secondary font-bold ${templateId === 'classic-elegant' ? 'border-emerald-800/30' : 'border-theme-border-soft'}`}>
+              <span>Current Invoice</span>
+              <span className="font-extrabold tabular-nums">{formatCurrency(financials.currentInvoiceTotal, currencySymbol, regionalPrefs.numberFormat)}</span>
+            </div>
+          )}
 
-          {((businessSettings?.invoiceBuilderSettings?.showOldDue) || invoice.oldDue > 0) && (
+          {((businessSettings?.invoiceBuilderSettings?.showOldDue) || financials.previousDue > 0) && (
             <div className="flex justify-between text-amber-600 dark:text-amber-400 font-bold">
               <span>Previous / Old Due</span>
-              <span>+{formatCurrency(invoice.oldDue || 0, currencySymbol, regionalPrefs.numberFormat)}</span>
+              <span className="tabular-nums">+{formatCurrency(financials.previousDue, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
 
-          {((businessSettings?.invoiceBuilderSettings?.showOldDue) || invoice.oldDue > 0) && (
+          {((businessSettings?.invoiceBuilderSettings?.showOldDue) || financials.previousDue > 0) && (
             <div className="flex justify-between items-center text-theme-primary dark:text-theme-primary font-bold text-xs pt-1 border-t border-dashed border-theme-border-soft">
               <span>Total Receivable</span>
-              <span className="font-black">{formatCurrency(invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0)), currencySymbol, regionalPrefs.numberFormat)}</span>
+              <span className="font-black tabular-nums">{formatCurrency(financials.totalReceivable, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
 
-          {(invoice.amountPaid > 0 || invoice.paidAmount > 0) && (
+          {financials.amountPaid > 0 && (
             <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold">
               <span>Amount Paid</span>
-              <span>-{formatCurrency(invoice.amountPaid ?? invoice.paidAmount ?? 0, currencySymbol, regionalPrefs.numberFormat)}</span>
+              <span className="tabular-nums">-{formatCurrency(financials.amountPaid, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
           
           <div className={`flex justify-between items-center border-t pt-3 text-theme-primary dark:text-theme-primary ${templateId === 'classic-elegant' ? 'border-emerald-800/50' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
             <span className="text-sm font-extrabold text-theme-primary dark:text-theme-secondary">
-              {(invoice.amountPaid > 0 || invoice.oldDue > 0) ? 'Balance Due' : 'Grand Total'}
+              {(financials.amountPaid > 0 || financials.previousDue > 0) ? 'Balance Due' : 'Grand Total'}
             </span>
-            <span className="text-lg font-black text-theme-accent dark:text-theme-accent">
-              {formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0))), currencySymbol, regionalPrefs.numberFormat)}
+            <span className="text-lg font-black text-theme-accent dark:text-theme-accent tabular-nums">
+              {formatCurrency(financials.balanceDue, currencySymbol, regionalPrefs.numberFormat)}
             </span>
           </div>
         </div>
@@ -324,9 +328,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
       {/* 4.5. PREMIUM PAYMENT QR CARD (CLIENT VIEW) */}
       {paymentPrefs?.paymentQrEnabled && paymentPrefs?.showQrInPreview && (
         (() => {
-          const dueAmount = (invoice.balanceDue !== undefined && invoice.balanceDue !== null && invoice.balanceDue !== 0)
-            ? invoice.balanceDue
-            : invoice.grandTotal;
+          const dueAmount = financials.balanceDue > 0 ? financials.balanceDue : financials.totalReceivable;
           const paymentMethod = paymentPrefs.paymentMethod || 'UPI';
           
           let qrText = '';
