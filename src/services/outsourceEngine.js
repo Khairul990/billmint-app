@@ -93,21 +93,29 @@ export const getVendors = async (includeDeleted = false) => {
 export const saveVendor = async (vendor) => {
   const userId = getLocalUserId();
   const workspaceId = getActiveWorkspaceId();
-  const vendors = await getVendors(true);
+  let allVendors = [];
+  try {
+    allVendors = await BillQyroDB.getAll('vendors');
+  } catch (e) {
+    allVendors = getCachedList(KEYS.VENDORS);
+  }
+  if (!allVendors || !Array.isArray(allVendors) || allVendors.length === 0) {
+    allVendors = getCachedList(KEYS.VENDORS);
+  }
 
   if (!vendor.id) {
     vendor.id = 'vnd-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
   }
 
   const stamped = stampRecord(vendor, userId, workspaceId);
-  const idx = vendors.findIndex(v => v.id === stamped.id);
+  const idx = allVendors.findIndex(v => v.id === stamped.id);
   if (idx !== -1) {
-    vendors[idx] = stamped;
+    allVendors[idx] = stamped;
   } else {
-    vendors.push(stamped);
+    allVendors.push(stamped);
   }
 
-  setCachedList(KEYS.VENDORS, vendors);
+  setCachedList(KEYS.VENDORS, allVendors);
   try {
     await BillQyroDB.put('vendors', stamped);
   } catch (e) { console.warn(e); }
@@ -117,20 +125,29 @@ export const saveVendor = async (vendor) => {
 };
 
 export const deleteVendor = async (id, permanent = false) => {
-  const vendors = await getVendors(true);
-  const idx = vendors.findIndex(v => v.id === id);
+  let allVendors = [];
+  try {
+    allVendors = await BillQyroDB.getAll('vendors');
+  } catch (e) {
+    allVendors = getCachedList(KEYS.VENDORS);
+  }
+  if (!allVendors || !Array.isArray(allVendors) || allVendors.length === 0) {
+    allVendors = getCachedList(KEYS.VENDORS);
+  }
+
+  const idx = allVendors.findIndex(v => v.id === id);
   if (idx === -1) return false;
 
   if (permanent) {
-    const updated = vendors.filter(v => v.id !== id);
+    const updated = allVendors.filter(v => v.id !== id);
     setCachedList(KEYS.VENDORS, updated);
     try { await BillQyroDB.delete('vendors', id); } catch (e) { console.warn(e); }
   } else {
-    vendors[idx].isDeleted = true;
-    vendors[idx].deletedAt = new Date().toISOString();
-    vendors[idx] = stampRecord(vendors[idx]);
-    setCachedList(KEYS.VENDORS, vendors);
-    try { await BillQyroDB.put('vendors', vendors[idx]); } catch (e) { console.warn(e); }
+    allVendors[idx].isDeleted = true;
+    allVendors[idx].deletedAt = new Date().toISOString();
+    allVendors[idx] = stampRecord(allVendors[idx]);
+    setCachedList(KEYS.VENDORS, allVendors);
+    try { await BillQyroDB.put('vendors', allVendors[idx]); } catch (e) { console.warn(e); }
   }
 
   window.dispatchEvent(new CustomEvent('billqyro_outsource_updated'));
@@ -170,7 +187,15 @@ export const getOutsourceJobs = async (includeDeleted = false) => {
 export const saveOutsourceJob = async (job) => {
   const userId = getLocalUserId();
   const workspaceId = getActiveWorkspaceId();
-  const jobs = await getOutsourceJobs(true);
+  let allJobs = [];
+  try {
+    allJobs = await BillQyroDB.getAll('outsourceJobs');
+  } catch (e) {
+    allJobs = getCachedList(KEYS.JOBS);
+  }
+  if (!allJobs || !Array.isArray(allJobs) || allJobs.length === 0) {
+    allJobs = getCachedList(KEYS.JOBS);
+  }
 
   if (!job.id) {
     job.id = 'job-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
@@ -180,14 +205,14 @@ export const saveOutsourceJob = async (job) => {
   }
 
   const stamped = stampRecord(job, userId, workspaceId);
-  const idx = jobs.findIndex(j => j.id === stamped.id);
+  const idx = allJobs.findIndex(j => j.id === stamped.id);
   if (idx !== -1) {
-    jobs[idx] = stamped;
+    allJobs[idx] = stamped;
   } else {
-    jobs.push(stamped);
+    allJobs.push(stamped);
   }
 
-  setCachedList(KEYS.JOBS, jobs);
+  setCachedList(KEYS.JOBS, allJobs);
   try {
     await BillQyroDB.put('outsourceJobs', stamped);
   } catch (e) { console.warn(e); }
@@ -197,20 +222,29 @@ export const saveOutsourceJob = async (job) => {
 };
 
 export const deleteOutsourceJob = async (id, permanent = false) => {
-  const jobs = await getOutsourceJobs(true);
-  const idx = jobs.findIndex(j => j.id === id);
+  let allJobs = [];
+  try {
+    allJobs = await BillQyroDB.getAll('outsourceJobs');
+  } catch (e) {
+    allJobs = getCachedList(KEYS.JOBS);
+  }
+  if (!allJobs || !Array.isArray(allJobs) || allJobs.length === 0) {
+    allJobs = getCachedList(KEYS.JOBS);
+  }
+
+  const idx = allJobs.findIndex(j => j.id === id);
   if (idx === -1) return false;
 
   if (permanent) {
-    const updated = jobs.filter(j => j.id !== id);
+    const updated = allJobs.filter(j => j.id !== id);
     setCachedList(KEYS.JOBS, updated);
     try { await BillQyroDB.delete('outsourceJobs', id); } catch (e) { console.warn(e); }
   } else {
-    jobs[idx].isDeleted = true;
-    jobs[idx].deletedAt = new Date().toISOString();
-    jobs[idx] = stampRecord(jobs[idx]);
-    setCachedList(KEYS.JOBS, jobs);
-    try { await BillQyroDB.put('outsourceJobs', jobs[idx]); } catch (e) { console.warn(e); }
+    allJobs[idx].isDeleted = true;
+    allJobs[idx].deletedAt = new Date().toISOString();
+    allJobs[idx] = stampRecord(allJobs[idx]);
+    setCachedList(KEYS.JOBS, allJobs);
+    try { await BillQyroDB.put('outsourceJobs', allJobs[idx]); } catch (e) { console.warn(e); }
   }
 
   window.dispatchEvent(new CustomEvent('billqyro_outsource_updated'));
@@ -255,7 +289,15 @@ export const getOutsourcePayments = async (includeDeleted = false) => {
 export const recordOutsourcePayment = async (paymentData) => {
   const userId = getLocalUserId();
   const workspaceId = getActiveWorkspaceId();
-  const payments = await getOutsourcePayments(true);
+  let allPayments = [];
+  try {
+    allPayments = await BillQyroDB.getAll('outsourcePayments');
+  } catch (e) {
+    allPayments = getCachedList(KEYS.PAYMENTS);
+  }
+  if (!allPayments || !Array.isArray(allPayments) || allPayments.length === 0) {
+    allPayments = getCachedList(KEYS.PAYMENTS);
+  }
 
   const amount = Number(paymentData.amount) || 0;
   if (amount <= 0) {
@@ -278,19 +320,27 @@ export const recordOutsourcePayment = async (paymentData) => {
   };
 
   const stamped = stampRecord(paymentRecord, userId, workspaceId);
-  payments.push(stamped);
-  setCachedList(KEYS.PAYMENTS, payments);
+  allPayments.push(stamped);
+  setCachedList(KEYS.PAYMENTS, allPayments);
   try {
     await BillQyroDB.put('outsourcePayments', stamped);
   } catch (e) { console.warn(e); }
 
   // Check and update related Outsource Job status if jobId is provided
   if (paymentData.jobId) {
-    const jobs = await getOutsourceJobs(true);
-    const jobIdx = jobs.findIndex(j => j.id === paymentData.jobId);
+    let allJobs = [];
+    try {
+      allJobs = await BillQyroDB.getAll('outsourceJobs');
+    } catch (e) {
+      allJobs = getCachedList(KEYS.JOBS);
+    }
+    if (!allJobs || !Array.isArray(allJobs) || allJobs.length === 0) {
+      allJobs = getCachedList(KEYS.JOBS);
+    }
+    const jobIdx = allJobs.findIndex(j => j.id === paymentData.jobId);
     if (jobIdx !== -1) {
-      const job = jobs[jobIdx];
-      const validJobPayments = payments.filter(p => p.jobId === job.id && !p.isDeleted);
+      const job = allJobs[jobIdx];
+      const validJobPayments = allPayments.filter(p => p.jobId === job.id && !p.isDeleted);
       const totalPaid = validJobPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
       const agreedCost = Number(job.agreedCost) || 0;
       const outstanding = Math.max(0, agreedCost - totalPaid);
@@ -301,9 +351,9 @@ export const recordOutsourcePayment = async (paymentData) => {
         job.status = 'Approved';
       }
       job.updatedAt = new Date().toISOString();
-      jobs[jobIdx] = stampRecord(job);
-      setCachedList(KEYS.JOBS, jobs);
-      try { await BillQyroDB.put('outsourceJobs', jobs[jobIdx]); } catch (e) { console.warn(e); }
+      allJobs[jobIdx] = stampRecord(job);
+      setCachedList(KEYS.JOBS, allJobs);
+      try { await BillQyroDB.put('outsourceJobs', allJobs[jobIdx]); } catch (e) { console.warn(e); }
     }
   }
 
@@ -332,37 +382,53 @@ export const recordOutsourcePayment = async (paymentData) => {
 };
 
 export const deleteOutsourcePayment = async (paymentId, permanent = false) => {
-  const payments = await getOutsourcePayments(true);
-  const idx = payments.findIndex(p => p.id === paymentId);
+  let allPayments = [];
+  try {
+    allPayments = await BillQyroDB.getAll('outsourcePayments');
+  } catch (e) {
+    allPayments = getCachedList(KEYS.PAYMENTS);
+  }
+  if (!allPayments || !Array.isArray(allPayments) || allPayments.length === 0) {
+    allPayments = getCachedList(KEYS.PAYMENTS);
+  }
+  const idx = allPayments.findIndex(p => p.id === paymentId);
   if (idx === -1) return false;
 
-  const payment = payments[idx];
+  const payment = allPayments[idx];
 
   if (permanent) {
-    const updated = payments.filter(p => p.id !== paymentId);
+    const updated = allPayments.filter(p => p.id !== paymentId);
     setCachedList(KEYS.PAYMENTS, updated);
     try { await BillQyroDB.delete('outsourcePayments', paymentId); } catch (e) { console.warn(e); }
   } else {
-    payments[idx].isDeleted = true;
-    payments[idx].deletedAt = new Date().toISOString();
-    payments[idx] = stampRecord(payments[idx]);
-    setCachedList(KEYS.PAYMENTS, payments);
-    try { await BillQyroDB.put('outsourcePayments', payments[idx]); } catch (e) { console.warn(e); }
+    allPayments[idx].isDeleted = true;
+    allPayments[idx].deletedAt = new Date().toISOString();
+    allPayments[idx] = stampRecord(allPayments[idx]);
+    setCachedList(KEYS.PAYMENTS, allPayments);
+    try { await BillQyroDB.put('outsourcePayments', allPayments[idx]); } catch (e) { console.warn(e); }
   }
 
   // Recalculate Job
   if (payment.jobId) {
-    const jobs = await getOutsourceJobs(true);
-    const jobIdx = jobs.findIndex(j => j.id === payment.jobId);
+    let allJobs = [];
+    try {
+      allJobs = await BillQyroDB.getAll('outsourceJobs');
+    } catch (e) {
+      allJobs = getCachedList(KEYS.JOBS);
+    }
+    if (!allJobs || !Array.isArray(allJobs) || allJobs.length === 0) {
+      allJobs = getCachedList(KEYS.JOBS);
+    }
+    const jobIdx = allJobs.findIndex(j => j.id === payment.jobId);
     if (jobIdx !== -1) {
-      const activePayments = payments.filter(p => p.jobId === payment.jobId && !p.isDeleted);
+      const activePayments = allPayments.filter(p => p.jobId === payment.jobId && !p.isDeleted);
       const totalPaid = activePayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-      const agreedCost = Number(jobs[jobIdx].agreedCost) || 0;
-      jobs[jobIdx].totalPaid = totalPaid;
-      jobs[jobIdx].remainingPayable = Math.max(0, agreedCost - totalPaid);
-      jobs[jobIdx] = stampRecord(jobs[jobIdx]);
-      setCachedList(KEYS.JOBS, jobs);
-      try { await BillQyroDB.put('outsourceJobs', jobs[jobIdx]); } catch (e) { console.warn(e); }
+      const agreedCost = Number(allJobs[jobIdx].agreedCost) || 0;
+      allJobs[jobIdx].totalPaid = totalPaid;
+      allJobs[jobIdx].remainingPayable = Math.max(0, agreedCost - totalPaid);
+      allJobs[jobIdx] = stampRecord(allJobs[jobIdx]);
+      setCachedList(KEYS.JOBS, allJobs);
+      try { await BillQyroDB.put('outsourceJobs', allJobs[jobIdx]); } catch (e) { console.warn(e); }
     }
   }
 
