@@ -58,10 +58,12 @@ export const getInvoicePaymentStatus = (inv) => {
   const paidTotal = getInvoicePaidTotal(inv);
   if (paidTotal >= totalReceivable && totalReceivable > 0) return 'Paid';
   if (paidTotal > 0 && paidTotal < totalReceivable) return 'Partially Paid';
-  if (inv.paymentStatus === 'Pending Verification' || (Array.isArray(inv.paymentProofs) && inv.paymentProofs.some(p => p.status === 'Pending Verification' || p.status === 'pending'))) {
+  // 'Pending Verification' only when NO payment has landed AND a real pending proof exists
+  if (Array.isArray(inv.paymentProofs) && inv.paymentProofs.some(p => p.status === 'Pending Verification' || p.status === 'pending')) {
     return 'Pending Verification';
   }
   return 'Unpaid';
+
 };
 
 /**
@@ -106,18 +108,40 @@ export const calculateCanonicalInvoiceFinancials = (inv) => {
   const allocation = allocatePayment(amountPaid, previousDue, currentInvoiceTotal);
   const balanceDue = roundTo2(Math.max(0, totalReceivable - amountPaid));
 
-  let paymentStatus = inv.paymentStatus;
+  // ─── Canonical payment status resolution ─────────────────────────────────
+  // Rule: derive status purely from the canonical math; never let a stale
+  // stored string override the true financial state.
+  //
+  // Exception 1 (hard): Cancelled / Void always wins regardless.
+  // Exception 2 (conditional): 'Pending Verification' is only honoured when
+  //   – canonical amountPaid is still 0 (no approved payment has landed), AND
+  //   – at least one paymentProof is genuinely in 'Pending Verification' /
+  //     'pending' state.
+  //   If amountPaid > 0 (i.e. an approved payment already exists), the
+  //   canonical math result (Partially Paid / Paid) takes precedence.
+
+  let paymentStatus;
   if (inv.status === 'Cancelled' || inv.status === 'Void') {
     paymentStatus = inv.status;
-  } else if (inv.paymentStatus === 'Pending Verification') {
-    paymentStatus = 'Pending Verification';
   } else if (balanceDue === 0 && totalReceivable > 0) {
     paymentStatus = 'Paid';
   } else if (amountPaid > 0 && balanceDue > 0) {
     paymentStatus = 'Partially Paid';
-  } else if (amountPaid === 0 && balanceDue > 0) {
-    paymentStatus = 'Unpaid';
+  } else {
+    // amountPaid === 0 — check for genuinely unresolved pending proofs
+    const hasPendingProof = (
+      Array.isArray(inv.paymentProofs) &&
+      inv.paymentProofs.some(p =>
+        p.status === 'Pending Verification' || p.status === 'pending'
+      )
+    );
+    if (hasPendingProof) {
+      paymentStatus = 'Pending Verification';
+    } else {
+      paymentStatus = 'Unpaid';
+    }
   }
+
 
   return {
     subtotal,
