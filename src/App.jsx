@@ -535,33 +535,40 @@ function App() {
     }
   }, [isAppBooting]);
 
-  // Async Data Loader & Boot Sequence
-  useEffect(() => {
-    let isBooted = false;
-
-    const loadLocalData = async () => {
+  const loadLocalData = useCallback(async () => {
+    try {
       sendEmpireEvent({ eventType: "app_opened", message: "BillQyro Web App Opened", page: "init" });
       sendEmpireHealth({ status: "Healthy", healthScore: 100, note: "App initialized successfully" });
       
-      try {
-        setInvoices(await invoiceEngine.getInvoices() || []);
-        setCustomers(await customerEngine.getCustomers() || []);
-        setStaffs(await staffEngine.getStaffs() || []);
-        setProducts(await productEngine.getProducts() || []);
-        setStudents(await customerEngine.getCustomers() || []);
-        setExpenses(await expenseEngine.getExpenses() || []);
-      } catch (err) {
-        console.error("Error loading local data:", err);
-      } finally {
-        setIsDataHydrating(false);
-        isBooted = true;
-        setIsAppBooting(false);
-      }
-    };
+      const [invs, custs, stfs, prods, exps, stt] = await Promise.all([
+        invoiceEngine.getInvoices().catch(() => []),
+        customerEngine.getCustomers().catch(() => []),
+        staffEngine.getStaffs().catch(() => []),
+        productEngine.getProducts().catch(() => []),
+        expenseEngine.getExpenses().catch(() => []),
+        settingsEngine.getSettings().catch(() => null)
+      ]);
+
+      setInvoices(invs || []);
+      setCustomers(custs || []);
+      setStaffs(stfs || []);
+      setProducts(prods || []);
+      setStudents(custs || []);
+      setExpenses(exps || []);
+      if (stt) setSettings(stt);
+    } catch (err) {
+      console.error("Error loading local data:", err);
+    } finally {
+      setIsDataHydrating(false);
+      setIsAppBooting(false);
+    }
+  }, []);
+
+  // Async Data Loader & Boot Sequence
+  useEffect(() => {
     loadLocalData();
 
     const handleSync = async () => {
-      if (!isBooted) return;
       try {
         setInvoices(await invoiceEngine.getInvoices() || []);
         setCustomers(await customerEngine.getCustomers() || []);
@@ -596,8 +603,9 @@ function App() {
       const col = e.detail?.collectionName;
       if (col === 'invoices') setInvoices(await invoiceEngine.getInvoices() || []);
       if (col === 'customers') setCustomers(await customerEngine.getCustomers() || []);
-        setStaffs(await staffEngine.getStaffs() || []);
+      if (col === 'staff') setStaffs(await staffEngine.getStaffs() || []);
       if (col === 'products') setProducts(await productEngine.getProducts() || []);
+      if (col === 'expenses') setExpenses(await expenseEngine.getExpenses() || []);
       if (col === 'students') setStudents(await customerEngine.getCustomers() || []);
       if (col === 'bankLedger' || col === 'bankCredit') {
         window.dispatchEvent(new CustomEvent('billqyro_bank_updated'));
@@ -638,7 +646,7 @@ function App() {
       window.removeEventListener('billqyro:sync-status', handleSyncStatus);
       window.removeEventListener('navigate_tab', handleNavigate);
     };
-  }, []);
+  }, [loadLocalData]);
 
   // Canonical Payment Recorded State Propagator
   const handlePaymentRecorded = useCallback((updatedInvoice) => {
@@ -1421,6 +1429,12 @@ function App() {
   // --- AUTH & ONBOARDING LIFECYCLE HANDLERS ---
   const handleLogout = useCallback(async () => {
     try {
+      const { stopRealTimeSync } = await import('./services/syncEngine');
+      stopRealTimeSync();
+    } catch (e) {
+      console.warn('Could not stop real-time sync on logout:', e);
+    }
+    try {
       await authEngine.logout();
     } catch (e) {
       console.error('Logout error:', e);
@@ -1447,11 +1461,8 @@ function App() {
     setCurrentTab('dashboard');
     setIsAppBooting(true);
     setIsDataHydrating(true);
-    setTimeout(() => {
-      setIsAppBooting(false);
-      setIsDataHydrating(false);
-    }, 600);
-  }, []);
+    loadLocalData();
+  }, [loadLocalData]);
 
   const handleOnboardingComplete = useCallback(async (newSettings) => {
     await settingsEngine.saveSettings(newSettings);

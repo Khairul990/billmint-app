@@ -84,6 +84,10 @@ export const invoiceEngine = {
     return await dbSyncFromFirestore();
   },
 
+  async syncFromCloud(force = false) {
+    return await dbSyncFromFirestore(force);
+  },
+
   async getInvoiceByPublicToken(token) {
     return await dbGetInvoiceByPublicToken(token);
   },
