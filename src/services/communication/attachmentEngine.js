@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
-import { pdf, Font } from '@react-pdf/renderer';
-import PdfDocument from '../../components/PdfDocument';
+import { pdf } from '@react-pdf/renderer';
 import QRCode from 'qrcode';
+import PdfDocument from '../../components/PdfDocument';
+import { calculateCanonicalInvoiceFinancials } from '../../utils/invoiceMath';
 
 /**
  * Build the payment QR code base64 (same logic as the main PDF downloader).
@@ -32,7 +33,8 @@ const buildQrBase64 = async (invoice, businessSettings) => {
   const nagadNumber = businessSettings?.nagadNumber || paySnap.nagadNumber || '';
   const payeeName = businessSettings?.payeeName || businessSettings?.businessName || paySnap.payeeName || '';
   const currencyCode = businessSettings?.currencyCode || invoice.regionalSettingsSnapshot?.currencyCode || 'INR';
-  const dueAmount = invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.grandTotal || 0);
+  const canonical = calculateCanonicalInvoiceFinancials(invoice);
+  const dueAmount = canonical.balanceDue > 0 ? canonical.balanceDue : (canonical.totalReceivable || 0);
 
   let qrText = '';
   if (paymentMethod === 'UPI') {

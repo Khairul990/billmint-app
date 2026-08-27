@@ -30,6 +30,7 @@ import {
 import InvoicePreview from '../components/InvoicePreview';
 // Removed unused import: getPublicInvoice
 import { downloadInvoicePDF } from '../utils/pdfUtils';
+import { calculateCanonicalInvoiceFinancials } from '../utils/invoiceMath';
 import DynamicQRCode from '../components/DynamicQRCode';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -359,6 +360,9 @@ const PublicInvoice = ({ initialInvoice }) => {
   const taxLabelText = regionalPrefs.taxLabel || 'Tax';
   const country = regionalPrefs.country || 'India';
 
+  const canonical = calculateCanonicalInvoiceFinancials(invoice);
+  const dueAmount = canonical.balanceDue > 0 ? canonical.balanceDue : canonical.totalReceivable;
+
   // Format currency helpers using active numberFormat
   const formatVal = (val) => formatCurrency(val, currencySymbol, regionalPrefs.numberFormat || 'Indian');
 
@@ -473,7 +477,6 @@ const PublicInvoice = ({ initialInvoice }) => {
   const tplStyles = getTemplateStyles();
 
   // Generate UPI pay link (TASK 4)
-  const dueAmount = invoice.balanceDue !== undefined ? invoice.balanceDue : invoice.grandTotal;
   const verifStr = invoice.verificationCode ? ` [Code: ${invoice.verificationCode}]` : '';
   const txnNote = `Invoice ${invoice.invoiceNumber}${verifStr}`;
   const upiLink = `upi://pay?pa=${paymentPrefs.upiId}&pn=${encodeURIComponent(paymentPrefs.payeeName || business.businessName)}&am=${dueAmount}&cu=INR&tn=${encodeURIComponent(txnNote)}`;
@@ -780,39 +783,59 @@ const PublicInvoice = ({ initialInvoice }) => {
                     </div>
                   )}
                 </div>
-                <div className="w-full sm:w-[45%] space-y-1 md:space-y-1.5">
-                  <div className="flex justify-between py-1 md:py-1.5 text-[10px] md:text-xs border-b border-theme-border-soft">
+                <div className="w-full sm:w-[48%] space-y-1.5 md:space-y-2">
+                  <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft">
                     <span className="text-theme-muted font-semibold">Subtotal</span>
-                    <span className="text-theme-primary font-bold">{formatVal(invoice.subtotal)}</span>
+                    <span className="text-theme-primary font-bold tabular-nums">{formatVal(canonical.subtotal)}</span>
                   </div>
-                  {invoice.discountAmount > 0 && (
-                    <div className="flex justify-between py-1 md:py-1.5 text-[10px] md:text-xs border-b border-theme-border-soft">
+                  {canonical.discountAmount > 0 && (
+                    <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft">
                       <span className="text-theme-muted font-semibold">Discount</span>
-                      <span className="text-theme-danger font-bold">-{formatVal(invoice.discountAmount)}</span>
+                      <span className="text-theme-danger font-bold tabular-nums">-{formatVal(canonical.discountAmount)}</span>
                     </div>
                   )}
-                  {invoice.taxAmount > 0 && (
-                    <div className="flex justify-between py-1 md:py-1.5 text-[10px] md:text-xs border-b border-theme-border-soft">
-                      <span className="text-theme-muted font-semibold">{taxLabelText} ({invoice.taxPercentage}%)</span>
-                      <span className="text-theme-primary font-bold">{formatVal(invoice.taxAmount)}</span>
+                  {canonical.taxAmount > 0 && (
+                    <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft">
+                      <span className="text-theme-muted font-semibold">{taxLabelText} ({invoice.taxPercentage || 0}%)</span>
+                      <span className="text-theme-primary font-bold tabular-nums">{formatVal(canonical.taxAmount)}</span>
+                    </div>
+                  )}
+                  {canonical.shipping > 0 && (
+                    <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft">
+                      <span className="text-theme-muted font-semibold">Shipping</span>
+                      <span className="text-theme-primary font-bold tabular-nums">{formatVal(canonical.shipping)}</span>
+                    </div>
+                  )}
+                  {(canonical.previousDue > 0 || canonical.amountPaid > 0) && (
+                    <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft font-bold">
+                      <span className="text-theme-muted">Current Invoice</span>
+                      <span className="text-theme-primary tabular-nums">{formatVal(canonical.currentInvoiceTotal)}</span>
+                    </div>
+                  )}
+                  {canonical.previousDue > 0 && (
+                    <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft text-amber-600 font-bold">
+                      <span>Previous / Old Due</span>
+                      <span className="tabular-nums">+{formatVal(canonical.previousDue)}</span>
+                    </div>
+                  )}
+                  {canonical.previousDue > 0 && (
+                    <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-dashed border-theme-border-soft font-bold">
+                      <span className="text-theme-primary">Total Receivable</span>
+                      <span className="text-theme-primary tabular-nums">{formatVal(canonical.totalReceivable)}</span>
+                    </div>
+                  )}
+                  {canonical.amountPaid > 0 && (
+                    <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft text-emerald-600 font-bold">
+                      <span>Amount Paid</span>
+                      <span className="tabular-nums">-{formatVal(canonical.amountPaid)}</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center py-2 md:py-2.5 px-3 md:px-3.5 bg-theme-accent/5 border border-theme-accent/20 rounded-xl text-xs md:text-sm">
-                    <span className="font-extrabold text-theme-primary">Grand Total</span>
-                    <span className="font-black text-theme-accent text-sm md:text-base">{formatVal(invoice.grandTotal)}</span>
+                    <span className="font-extrabold text-theme-primary">
+                      {(canonical.amountPaid > 0 || canonical.previousDue > 0) ? 'Balance Due' : 'Grand Total'}
+                    </span>
+                    <span className="font-black text-theme-accent text-sm md:text-base tabular-nums">{formatVal(canonical.balanceDue)}</span>
                   </div>
-                  {liveLinkPrefs.showPaidDueAmount && invoice.amountPaid > 0 && (
-                    <div className="flex justify-between py-1 md:py-1.5 text-[10px] md:text-xs border-b border-theme-border-soft">
-                      <span className="text-emerald-600 font-bold">Amount Paid</span>
-                      <span className="text-emerald-600 font-extrabold">{formatVal(invoice.amountPaid)}</span>
-                    </div>
-                  )}
-                  {liveLinkPrefs.showPaidDueAmount && invoice.balanceDue > 0 && (
-                    <div className="flex justify-between py-1.5 md:py-2 px-2.5 md:px-3 bg-rose-500/5 border border-rose-500/20 rounded-xl text-[10px] md:text-xs">
-                      <span className="text-rose-600 font-black">Balance Due</span>
-                      <span className="text-rose-600 font-black text-xs md:text-sm">{formatVal(invoice.balanceDue)}</span>
-                    </div>
-                  )}
                 </div>
               </div>
 

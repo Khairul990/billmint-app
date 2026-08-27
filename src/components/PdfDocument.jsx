@@ -329,7 +329,8 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
     paymentPrefs,
     bankDetails,
     currencySymbol: rawCurrencySymbol,
-    categoryWords
+    categoryWords,
+    financials
   } = buildCanonicalRenderModel(invoice, businessSettings, businessSettings?.selectedPdfTemplate);
   let currencySymbol = rawCurrencySymbol || '₹';
   // PDF standard fonts (Helvetica) do not support Unicode symbols like ₹ or ৳. Fallback to ASCII text.
@@ -394,8 +395,8 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
           </View>
 
           <View style={styles.invoiceInfoBox}>
-            <View style={[styles.statusBadge, getStatusStyle(invoice.paymentStatus)]}>
-              <Text>{invoice.paymentStatus}</Text>
+            <View style={[styles.statusBadge, getStatusStyle(financials.paymentStatus)]}>
+              <Text>{financials.paymentStatus}</Text>
             </View>
             {templateId === 'retail' && (
               <View style={{ marginBottom: 6, padding: 4, borderWidth: 1, borderStyle: 'solid', borderColor: '#e2e8f0', borderRadius: 2, alignItems: 'center', backgroundColor: '#fff' }}>
@@ -554,62 +555,64 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
           <View style={styles.totalsSection}>
             <View style={styles.totalRow}>
               <Text style={styles.metaText}>Subtotal</Text>
-              <Text style={{ fontWeight: 'bold' }}>{formatCurrency(invoice.subtotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
+              <Text style={{ fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(financials.subtotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
             </View>
             
-            {(businessSettings?.invoiceBuilderSettings?.showDiscount !== false) && invoice.discountAmount > 0 && (
+            {(businessSettings?.invoiceBuilderSettings?.showDiscount !== false) && financials.discountAmount > 0 && (
               <View style={styles.totalRow}>
                 <Text style={{ fontSize: 8.5, color: '#dc2626' }}>Discount</Text>
-                <Text style={{ fontSize: 8.5, color: '#dc2626', fontWeight: 'bold' }}>-{formatCurrency(invoice.discountAmount, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontSize: 8.5, color: '#dc2626', fontWeight: 'bold', textAlign: 'right' }}>-{formatCurrency(financials.discountAmount, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
-            {(businessSettings?.invoiceBuilderSettings?.showTax !== false) && (
+            {(businessSettings?.invoiceBuilderSettings?.showTax !== false) && financials.taxAmount > 0 && (
               <View style={styles.totalRow}>
                 <Text style={styles.metaText}>{regionalPrefs.taxLabel || 'Tax'} ({invoice.taxPercentage || 0}%)</Text>
-                <Text style={{ fontWeight: 'bold' }}>{formatCurrency(invoice.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(financials.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
-            {(businessSettings?.invoiceBuilderSettings?.showShipping) && invoice.shipping > 0 && (
+            {(businessSettings?.invoiceBuilderSettings?.showShipping) && financials.shipping > 0 && (
               <View style={styles.totalRow}>
                 <Text style={styles.metaText}>Shipping</Text>
-                <Text style={{ fontWeight: 'bold' }}>{formatCurrency(invoice.shipping, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(financials.shipping, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
-            <View style={styles.totalRow}>
-              <Text style={styles.metaText}>Current Invoice</Text>
-              <Text style={{ fontWeight: 'bold' }}>{formatCurrency(invoice.grandTotal || 0, currencySymbol, regionalPrefs.numberFormat)}</Text>
-            </View>
+            {(financials.previousDue > 0 || financials.amountPaid > 0) && (
+              <View style={styles.totalRow}>
+                <Text style={styles.metaText}>Current Invoice</Text>
+                <Text style={{ fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(financials.currentInvoiceTotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
+              </View>
+            )}
 
-            {((businessSettings?.invoiceBuilderSettings?.showOldDue) || invoice.oldDue > 0) && (
+            {((businessSettings?.invoiceBuilderSettings?.showOldDue) || financials.previousDue > 0) && (
               <View style={styles.totalRow}>
                 <Text style={{ fontSize: 8.5, color: '#d97706' }}>Previous / Old Due</Text>
-                <Text style={{ fontSize: 8.5, color: '#d97706', fontWeight: 'bold' }}>+{formatCurrency(invoice.oldDue || 0, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontSize: 8.5, color: '#d97706', fontWeight: 'bold', textAlign: 'right' }}>+{formatCurrency(financials.previousDue, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
-            {((businessSettings?.invoiceBuilderSettings?.showOldDue) || invoice.oldDue > 0) && (
+            {((businessSettings?.invoiceBuilderSettings?.showOldDue) || financials.previousDue > 0) && (
               <View style={styles.totalRow}>
                 <Text style={styles.metaText}>Total Receivable</Text>
-                <Text style={{ fontWeight: 'bold' }}>{formatCurrency(invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0)), currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(financials.totalReceivable, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
-            {(invoice.amountPaid > 0 || invoice.paidAmount > 0) && (
+            {financials.amountPaid > 0 && (
               <View style={styles.totalRow}>
                 <Text style={{ fontSize: 8.5, color: '#16a34a' }}>Amount Paid</Text>
-                <Text style={{ fontSize: 8.5, color: '#16a34a', fontWeight: 'bold' }}>-{formatCurrency(invoice.amountPaid ?? invoice.paidAmount ?? 0, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontSize: 8.5, color: '#16a34a', fontWeight: 'bold', textAlign: 'right' }}>-{formatCurrency(financials.amountPaid, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
             <View style={styles.grandTotalRow}>
               <Text style={[styles.grandTotalLabel, { color: tPrimary }]}>
-                {(invoice.amountPaid > 0 || invoice.oldDue > 0) ? 'Balance Due' : 'Grand Total'}
+                {(financials.amountPaid > 0 || financials.previousDue > 0) ? 'Balance Due' : 'Grand Total'}
               </Text>
-              <Text style={[styles.grandTotalValue, { color: tAccent }]}>
-                {formatCurrency(invoice.balanceDue !== undefined ? invoice.balanceDue : (invoice.totalDue || ((invoice.grandTotal || 0) + (Number(invoice.oldDue) || 0))), currencySymbol, regionalPrefs.numberFormat)}
+              <Text style={[styles.grandTotalValue, { color: tAccent, textAlign: 'right' }]}>
+                {formatCurrency(financials.balanceDue, currencySymbol, regionalPrefs.numberFormat)}
               </Text>
             </View>
           </View>
@@ -640,7 +643,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
                 {paymentPrefs?.paymentMethod === 'Manual' ? 'Scan to View Live Invoice' : `Scan to Pay with ${paymentPrefs?.paymentMethod || 'UPI'}`}
               </Text>
               <Text style={[styles.paymentTitle, useA5 ? { fontSize: 10 } : {}, { color: tPrimary }]}>{paymentPrefs.payeeName}</Text>
-              <Text style={styles.metaText}>Due: {formatCurrency(invoice.balanceDue || invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
+              <Text style={styles.metaText}>Due: {formatCurrency(financials.balanceDue > 0 ? financials.balanceDue : financials.totalReceivable, currencySymbol, regionalPrefs.numberFormat)}</Text>
               <Text style={styles.metaText}>Invoice: {invoice.invoiceNumber}</Text>
               {paymentPrefs.paymentNote && (
                 <Text style={{ fontSize: 7.5, color: '#64748b', marginTop: 3 }}>Note: {paymentPrefs.paymentNote}</Text>

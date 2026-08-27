@@ -4,6 +4,7 @@ import PdfDocument from '../components/PdfDocument';
 import { toast } from 'react-hot-toast';
 import QRCode from 'qrcode';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.js?url';
+import { calculateCanonicalInvoiceFinancials } from './invoiceMath';
 
 // Emoji source registration removed because we strip emojis manually below to prevent hangs.
 let isDownloadingPDF = false;
@@ -38,7 +39,8 @@ const buildInvoicePdfBlob = async (invoice, businessSettings) => {
   const currencyCode = businessSettings?.currencyCode || invoice?.regionalSettingsSnapshot?.currencyCode || 'INR';
 
   const enableQr = paymentQrEnabled && showQrInPreview;
-  const amountDue = invoice?.balanceDue !== undefined ? invoice.balanceDue : (invoice?.grandTotal || 0);
+  const canonical = calculateCanonicalInvoiceFinancials(invoice);
+  const amountDue = canonical.balanceDue > 0 ? canonical.balanceDue : (canonical.totalReceivable || 0);
   
   if (enableQr && amountDue > 0) {
     let qrText;
