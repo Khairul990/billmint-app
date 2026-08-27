@@ -55,55 +55,55 @@ export const PdfTotalsSummary = ({
     <View style={{ width }}>
       <View style={[s.row, s.justifyBetween, s.mb4]}>
         <Text style={{ fontSize: 9, color: labelColor }}>Subtotal</Text>
-        <Text style={{ fontSize: 9, color: valColor, fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(fin.subtotal)}</Text>
+        <Text style={{ fontSize: 9, color: valColor, fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(fin.subtotal)}</Text>
       </View>
 
       {showDiscount && (
         <View style={[s.row, s.justifyBetween, s.mb4]}>
           <Text style={{ fontSize: 8.5, color: '#dc2626' }}>Discount</Text>
-          <Text style={{ fontSize: 8.5, color: '#dc2626', fontWeight: 'bold', textAlign: 'right' }}>-{formatCurrency(fin.discountAmount)}</Text>
+          <Text style={{ fontSize: 8.5, color: '#dc2626', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>-{formatCurrency(fin.discountAmount)}</Text>
         </View>
       )}
 
       {showTax && (
         <View style={[s.row, s.justifyBetween, s.mb4]}>
           <Text style={{ fontSize: 9, color: labelColor }}>{businessSettings?.invoiceBuilderSettings?.taxLabel || 'Tax'} ({invoice.taxPercentage || 0}%)</Text>
-          <Text style={{ fontSize: 9, color: valColor, fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(fin.taxAmount)}</Text>
+          <Text style={{ fontSize: 9, color: valColor, fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(fin.taxAmount)}</Text>
         </View>
       )}
 
       {showShipping && (
         <View style={[s.row, s.justifyBetween, s.mb4]}>
           <Text style={{ fontSize: 9, color: labelColor }}>Shipping</Text>
-          <Text style={{ fontSize: 9, color: valColor, fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(fin.shipping)}</Text>
+          <Text style={{ fontSize: 9, color: valColor, fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(fin.shipping)}</Text>
         </View>
       )}
 
       {(fin.previousDue > 0 || fin.amountPaid > 0) && (
         <View style={[s.row, s.justifyBetween, s.mb4, { borderTopWidth: 1, borderTopColor: isDark ? '#374151' : '#e5e7eb', paddingTop: 4 }]}>
-          <Text style={{ fontSize: 9, color: labelColor, fontWeight: 'bold' }}>Current Invoice</Text>
-          <Text style={{ fontSize: 9, color: valColor, fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(fin.currentInvoiceTotal)}</Text>
+          <Text style={{ fontSize: 9, color: labelColor, fontFamily: 'Helvetica-Bold' }}>Current Invoice</Text>
+          <Text style={{ fontSize: 9, color: valColor, fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(fin.currentInvoiceTotal)}</Text>
         </View>
       )}
 
       {showOldDue && (
         <View style={[s.row, s.justifyBetween, s.mb4]}>
-          <Text style={{ fontSize: 8.5, color: '#d97706', fontWeight: 'bold' }}>Previous / Old Due</Text>
-          <Text style={{ fontSize: 8.5, color: '#d97706', fontWeight: 'bold', textAlign: 'right' }}>+{formatCurrency(fin.previousDue)}</Text>
+          <Text style={{ fontSize: 8.5, color: '#d97706', fontFamily: 'Helvetica-Bold' }}>Previous / Old Due</Text>
+          <Text style={{ fontSize: 8.5, color: '#d97706', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>+{formatCurrency(fin.previousDue)}</Text>
         </View>
       )}
 
       {showOldDue && (
         <View style={[s.row, s.justifyBetween, s.mb4, { borderTopWidth: 1, borderTopColor: isDark ? '#374151' : '#e5e7eb', paddingTop: 4 }]}>
-          <Text style={{ fontSize: 9, color: labelColor, fontWeight: 'bold' }}>Total Receivable</Text>
-          <Text style={{ fontSize: 9, color: valColor, fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(fin.totalReceivable)}</Text>
+          <Text style={{ fontSize: 9, color: labelColor, fontFamily: 'Helvetica-Bold' }}>Total Receivable</Text>
+          <Text style={{ fontSize: 9, color: valColor, fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(fin.totalReceivable)}</Text>
         </View>
       )}
 
       {fin.amountPaid > 0 && (
         <View style={[s.row, s.justifyBetween, s.mb4]}>
-          <Text style={{ fontSize: 8.5, color: '#16a34a', fontWeight: 'bold' }}>Amount Paid</Text>
-          <Text style={{ fontSize: 8.5, color: '#16a34a', fontWeight: 'bold', textAlign: 'right' }}>-{formatCurrency(fin.amountPaid)}</Text>
+          <Text style={{ fontSize: 8.5, color: '#16a34a', fontFamily: 'Helvetica-Bold' }}>Amount Paid</Text>
+          <Text style={{ fontSize: 8.5, color: '#16a34a', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>-{formatCurrency(fin.amountPaid)}</Text>
         </View>
       )}
 
@@ -507,29 +507,29 @@ const PurpleCorporatePdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
         {safeLogoBase64 ? (
           <Image src={safeLogoBase64} style={{ width: 40, height: 40, objectFit: 'contain' }} />
         ) : (
-          <Text style={{ color: '#fff', fontSize: 24, fontWeight: 'bold' }}>{businessSettings?.businessName?.charAt(0) || 'B'}</Text>
+          <Text style={{ color: '#fff', fontSize: 24, fontFamily: 'Helvetica-Bold' }}>{businessSettings?.businessName?.charAt(0) || 'B'}</Text>
         )}
       </View>
       <View style={{ alignItems: 'flex-end' }}>
-        <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#6A5ACD', textTransform: 'uppercase' }}>Invoice</Text>
-        <Text style={{ fontSize: 10, color: '#6A5ACD', marginTop: 2, fontWeight: 'bold' }}>#{invoice.invoiceNumber}</Text>
+        <Text style={{ fontSize: 32, fontFamily: 'Helvetica-Bold', color: '#6A5ACD', textTransform: 'uppercase' }}>Invoice</Text>
+        <Text style={{ fontSize: 10, color: '#6A5ACD', marginTop: 2, fontFamily: 'Helvetica-Bold' }}>#{invoice.invoiceNumber}</Text>
       </View>
     </View>
 
     <View style={[s.row, { backgroundColor: '#f0e6ff', padding: 15, borderRadius: 6, marginBottom: 20 }]}>
       <View style={s.wHalf}>
-        <Text style={{ fontSize: 8, color: '#555', textTransform: 'uppercase', marginBottom: 2, fontWeight: 'bold' }}>Invoice Date</Text>
+        <Text style={{ fontSize: 8, color: '#555', textTransform: 'uppercase', marginBottom: 2, fontFamily: 'Helvetica-Bold' }}>Invoice Date</Text>
         <Text style={{ fontSize: 10, color: '#222', marginBottom: 6 }}>{invoice.date}</Text>
-        <Text style={{ fontSize: 8, color: '#555', textTransform: 'uppercase', marginBottom: 2, fontWeight: 'bold' }}>Due Date</Text>
+        <Text style={{ fontSize: 8, color: '#555', textTransform: 'uppercase', marginBottom: 2, fontFamily: 'Helvetica-Bold' }}>Due Date</Text>
         <Text style={{ fontSize: 10, color: '#222' }}>{invoice.date}</Text>
       </View>
       <View style={[s.wHalf, { alignItems: 'flex-end', justifyContent: 'center' }]}>
-        <Text style={{ fontSize: 8, color: '#555', textTransform: 'uppercase', marginBottom: 2, fontWeight: 'bold' }}>Amount Due</Text>
-        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#6A5ACD' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
+        <Text style={{ fontSize: 8, color: '#555', textTransform: 'uppercase', marginBottom: 2, fontFamily: 'Helvetica-Bold' }}>Amount Due</Text>
+        <Text style={{ fontSize: 18, fontFamily: 'Helvetica-Bold', color: '#6A5ACD' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
         {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
           <>
-                    <Text style={{ fontSize: 18, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#6A5ACD' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
+                    <Text style={{ fontSize: 18, fontFamily: 'Helvetica', color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
+                    <Text style={{ fontSize: 18, fontFamily: 'Helvetica-Bold', color: '#6A5ACD' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
           </>
         )}
       </View>
@@ -537,31 +537,31 @@ const PurpleCorporatePdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
 
     <View style={[s.row, { marginBottom: 20 }]}>
       <View style={s.wHalf}>
-        <Text style={{ fontSize: 8, color: '#555', textTransform: 'uppercase', marginBottom: 4, fontWeight: 'bold' }}>From</Text>
-        <Text style={{ fontSize: 10, color: '#222', fontWeight: 'bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
+        <Text style={{ fontSize: 8, color: '#555', textTransform: 'uppercase', marginBottom: 4, fontFamily: 'Helvetica-Bold' }}>From</Text>
+        <Text style={{ fontSize: 10, color: '#222', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
         <Text style={{ fontSize: 9, color: '#444' }}>{businessSettings?.email}</Text>
         <Text style={{ fontSize: 9, color: '#444' }}>{businessSettings?.phone}</Text>
       </View>
       <View style={s.wHalf}>
-        <Text style={{ fontSize: 8, color: '#555', textTransform: 'uppercase', marginBottom: 4, fontWeight: 'bold' }}>Bill To</Text>
-        <Text style={{ fontSize: 10, color: '#222', fontWeight: 'bold', marginBottom: 2 }}>{invoice.customerName}</Text>
+        <Text style={{ fontSize: 8, color: '#555', textTransform: 'uppercase', marginBottom: 4, fontFamily: 'Helvetica-Bold' }}>Bill To</Text>
+        <Text style={{ fontSize: 10, color: '#222', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{invoice.customerName}</Text>
         <Text style={{ fontSize: 9, color: '#444' }}>{invoice.customerPhone}</Text>
       </View>
     </View>
 
     <View style={{ marginBottom: 20 }}>
       <View style={[s.row, { backgroundColor: '#6A5ACD', padding: 8, borderTopLeftRadius: 4, borderTopRightRadius: 4 }]}>
-        {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 9, color: '#fff', fontWeight: 'bold', textTransform: 'uppercase' }}>Description</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Price</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' }}>Description</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Price</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
       </View>
       {invoice.items?.map((item, i) => (
         <View key={i} wrap={false} style={[s.row, { padding: 8, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#444', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#444', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
-          <Text style={{ width: '20%', fontSize: 9, color: '#222', fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
+          <Text style={{ width: '20%', fontSize: 9, color: '#222', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
         </View>
       ))}
     </View>
@@ -570,7 +570,7 @@ const PurpleCorporatePdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
       <View style={s.wHalf}>
         {qrCodeBase64 && (
           <View style={{ backgroundColor: '#f0e6ff', padding: 8, borderRadius: 6, width: 70, alignItems: 'center' }}>
-            <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#6A5ACD', marginBottom: 4, textTransform: 'uppercase' }}>Scan & Pay</Text>
+            <Text style={{ fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#6A5ACD', marginBottom: 4, textTransform: 'uppercase' }}>Scan & Pay</Text>
             <Image src={qrCodeBase64} style={{ width: 50, height: 50 }} />
           </View>
         )}
@@ -582,7 +582,7 @@ const PurpleCorporatePdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
 
     {invoice.notes && (
       <View style={{ marginTop: 20, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#eee' }}>
-        <Text style={{ fontSize: 8, color: '#444' }}><Text style={{ fontWeight: 'bold', color: '#222' }}>Terms / Notes:</Text> {invoice.notes}</Text>
+        <Text style={{ fontSize: 8, color: '#444' }}><Text style={{ fontFamily: 'Helvetica-Bold', color: '#222' }}>Terms / Notes:</Text> {invoice.notes}</Text>
       </View>
     )}
   </View>
@@ -593,42 +593,42 @@ const OrangeGradientModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
   <View style={[{ padding: 30, backgroundColor: '#fcfaf8', minHeight: '100%', fontFamily: 'Helvetica' }]} wrap={true}>
     <View style={{ alignItems: 'center', marginBottom: 20 }}>
       <View style={{ backgroundColor: '#FF8C00', paddingVertical: 8, paddingHorizontal: 20, borderRadius: 20 }}>
-        <Text style={{ color: '#fff', fontSize: 24, fontWeight: 'bold', letterSpacing: 2 }}>INVOICE</Text>
+        <Text style={{ color: '#fff', fontSize: 24, fontFamily: 'Helvetica-Bold', letterSpacing: 2 }}>INVOICE</Text>
       </View>
     </View>
 
     <View style={[s.row, { marginBottom: 20 }]}>
       <View style={[s.wHalf, { backgroundColor: '#fff', padding: 15, borderRadius: 8, border: '1pt solid #ffedd5', marginRight: 10 }]}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 6 }}>From</Text>
-        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#222', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 6 }}>From</Text>
+        <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#222', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
         <Text style={{ fontSize: 9, color: '#555' }}>{businessSettings?.email}</Text>
         <Text style={{ fontSize: 9, color: '#555' }}>{businessSettings?.phone}</Text>
       </View>
       <View style={[s.wHalf, { backgroundColor: '#fff', padding: 15, borderRadius: 8, border: '1pt solid #ffedd5', marginLeft: 10 }]}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 6 }}>Bill To</Text>
-        <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#222', marginBottom: 2 }}>{invoice.customerName}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 6 }}>Bill To</Text>
+        <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#222', marginBottom: 2 }}>{invoice.customerName}</Text>
         <Text style={{ fontSize: 9, color: '#555' }}>{invoice.customerPhone}</Text>
       </View>
     </View>
 
     <View style={[s.row, { backgroundColor: '#fff', padding: 15, borderRadius: 8, border: '1pt solid #ffedd5', marginBottom: 20, alignItems: 'center' }]}>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>Invoice Number</Text>
-        <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#222' }}>#{invoice.invoiceNumber}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>Invoice Number</Text>
+        <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#222' }}>#{invoice.invoiceNumber}</Text>
       </View>
       <View style={{ width: 1, height: 20, backgroundColor: '#eee', marginHorizontal: 15 }}></View>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>Issue Date</Text>
-        <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#222' }}>{invoice.date}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>Issue Date</Text>
+        <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#222' }}>{invoice.date}</Text>
       </View>
       <View style={{ width: 1, height: 20, backgroundColor: '#eee', marginHorizontal: 15 }}></View>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>Amount Due</Text>
-        <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#FF8C00' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>Amount Due</Text>
+        <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#FF8C00' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
         {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
           <>
-                    <Text style={{ fontSize: 12, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
-                    <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#FF8C00' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
+                    <Text style={{ fontSize: 12, fontFamily: 'Helvetica', color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
+                    <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#FF8C00' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
           </>
         )}
       </View>
@@ -636,17 +636,17 @@ const OrangeGradientModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
 
     <View style={{ marginBottom: 20 }}>
       <View style={[s.row, { backgroundColor: '#FF8C00', padding: 10, borderTopLeftRadius: 6, borderTopRightRadius: 6 }]}>
-        <Text style={{ width: '40%', fontSize: 9, color: '#fff', fontWeight: 'bold', textTransform: 'uppercase' }}>Item Description</Text>
-        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Rate</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Amount</Text>}
+        <Text style={{ width: '40%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' }}>Item Description</Text>
+        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Rate</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Amount</Text>}
       </View>
       {invoice.items?.map((item, i) => (
         <View key={i} wrap={false} style={[s.row, { backgroundColor: '#fff', padding: 10, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
-          <Text style={{ width: '20%', fontSize: 9, color: '#222', fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
+          <Text style={{ width: '20%', fontSize: 9, color: '#222', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
         </View>
       ))}
     </View>
@@ -657,14 +657,14 @@ const OrangeGradientModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
           <View style={[s.row, { backgroundColor: '#fff', padding: 10, borderRadius: 8, border: '1pt solid #ffedd5', alignItems: 'center' }]}>
             <Image src={qrCodeBase64} style={{ width: 40, height: 40, marginRight: 10 }} />
             <View>
-              <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 2 }}>Scan to Pay</Text>
+              <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 2 }}>Scan to Pay</Text>
               <Text style={{ fontSize: 7, color: '#888' }}>Use any payment app</Text>
             </View>
           </View>
         )}
         {invoice.notes && (
           <View style={{ marginTop: 15, backgroundColor: '#fff7ed', borderLeftWidth: 3, borderLeftColor: '#FF8C00', padding: 10, borderRadius: 4 }}>
-            <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 2 }}>Notes</Text>
+            <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 2 }}>Notes</Text>
             <Text style={{ fontSize: 8, color: '#555' }}>{invoice.notes}</Text>
           </View>
         )}
@@ -692,24 +692,24 @@ const OrangeGeometricCornerPdf = ({ invoice, businessSettings, safeLogoBase64, q
         )}
       </View>
       <View style={{ width: '60%', alignItems: 'flex-end', paddingRight: 20 }}>
-        <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#FF8C00', letterSpacing: 2, textTransform: 'uppercase' }}>INVOICE</Text>
+        <Text style={{ fontSize: 28, fontFamily: 'Helvetica-Bold', color: '#FF8C00', letterSpacing: 2, textTransform: 'uppercase' }}>INVOICE</Text>
       </View>
     </View>
 
     <View style={[s.row, { marginBottom: 20 }]}>
       <View style={s.wHalf}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', textTransform: 'uppercase', marginBottom: 2 }}>Invoice Number</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#555', textTransform: 'uppercase', marginBottom: 2 }}>Invoice Number</Text>
         <Text style={{ fontSize: 10, color: '#222', marginBottom: 8 }}>{invoice.invoiceNumber}</Text>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', textTransform: 'uppercase', marginBottom: 2 }}>Date</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#555', textTransform: 'uppercase', marginBottom: 2 }}>Date</Text>
         <Text style={{ fontSize: 10, color: '#222' }}>{invoice.date}</Text>
       </View>
       <View style={[s.wHalf, { alignItems: 'flex-end' }]}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', textTransform: 'uppercase', marginBottom: 2 }}>Amount Due</Text>
-        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#FF8C00' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#555', textTransform: 'uppercase', marginBottom: 2 }}>Amount Due</Text>
+        <Text style={{ fontSize: 18, fontFamily: 'Helvetica-Bold', color: '#FF8C00' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
         {((invoice.oldDue > 0) || (invoice.oldDue > 0) || (invoice.businessSettings?.invoiceBuilderSettings?.showOldDue)) && (
           <>
-                    <Text style={{ fontSize: 18, fontWeight: "normal", color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#FF8C00' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
+                    <Text style={{ fontSize: 18, fontFamily: 'Helvetica', color: "#666" }}>{formatCurrency(invoice.oldDue)}</Text>
+                    <Text style={{ fontSize: 18, fontFamily: 'Helvetica-Bold', color: '#FF8C00' }}>{formatCurrency((invoice.totalDue || invoice.grandTotal))}</Text>
           </>
         )}
       </View>
@@ -717,31 +717,31 @@ const OrangeGeometricCornerPdf = ({ invoice, businessSettings, safeLogoBase64, q
 
     <View style={[s.row, { marginBottom: 20 }]}>
       <View style={s.wHalf}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#FF8C00', paddingBottom: 2, width: '80%' }}>From</Text>
-        <Text style={{ fontSize: 10, color: '#222', fontWeight: 'bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#FF8C00', paddingBottom: 2, width: '80%' }}>From</Text>
+        <Text style={{ fontSize: 10, color: '#222', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
         <Text style={{ fontSize: 9, color: '#444' }}>{businessSettings?.email}</Text>
         <Text style={{ fontSize: 9, color: '#444' }}>{businessSettings?.phone}</Text>
       </View>
       <View style={s.wHalf}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#FF8C00', paddingBottom: 2, width: '80%' }}>Bill To</Text>
-        <Text style={{ fontSize: 10, color: '#222', fontWeight: 'bold', marginBottom: 2 }}>{invoice.customerName}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#FF8C00', paddingBottom: 2, width: '80%' }}>Bill To</Text>
+        <Text style={{ fontSize: 10, color: '#222', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{invoice.customerName}</Text>
         <Text style={{ fontSize: 9, color: '#444' }}>{invoice.customerPhone}</Text>
       </View>
     </View>
 
     <View style={{ marginBottom: 20 }}>
       <View style={[s.row, { borderBottomWidth: 2, borderBottomColor: '#FF8C00', paddingBottom: 6, marginBottom: 6 }]}>
-        <Text style={{ width: '40%', fontSize: 9, color: '#FF8C00', fontWeight: 'bold', textTransform: 'uppercase' }}>Item</Text>
-        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#FF8C00', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
-        <Text style={{ width: '20%', fontSize: 9, color: '#FF8C00', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Unit Price</Text>
-        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#FF8C00', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
+        <Text style={{ width: '40%', fontSize: 9, color: '#FF8C00', fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' }}>Item</Text>
+        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#FF8C00', fontFamily: 'Helvetica-Bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
+        <Text style={{ width: '20%', fontSize: 9, color: '#FF8C00', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Unit Price</Text>
+        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#FF8C00', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
       </View>
       {invoice.items?.map((item, i) => (
         <View key={i} wrap={false} style={[s.row, { paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
-          <Text style={{ width: '20%', fontSize: 9, color: '#222', fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
+          <Text style={{ width: '20%', fontSize: 9, color: '#222', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
         </View>
       ))}
     </View>
@@ -751,7 +751,7 @@ const OrangeGeometricCornerPdf = ({ invoice, businessSettings, safeLogoBase64, q
         {qrCodeBase64 && (
           <View style={{ alignItems: 'center', width: 60 }}>
             <Image src={qrCodeBase64} style={{ width: 50, height: 50, marginBottom: 4 }} />
-            <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#FF8C00', textTransform: 'uppercase' }}>Scan to Pay</Text>
+            <Text style={{ fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#FF8C00', textTransform: 'uppercase' }}>Scan to Pay</Text>
           </View>
         )}
       </View>
@@ -762,7 +762,7 @@ const OrangeGeometricCornerPdf = ({ invoice, businessSettings, safeLogoBase64, q
 
     {invoice.notes && (
       <View style={{ marginTop: 20, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#eee' }}>
-        <Text style={{ fontSize: 8, color: '#444' }}><Text style={{ fontWeight: 'bold', color: '#222' }}>Terms:</Text> {invoice.notes}</Text>
+        <Text style={{ fontSize: 8, color: '#444' }}><Text style={{ fontFamily: 'Helvetica-Bold', color: '#222' }}>Terms:</Text> {invoice.notes}</Text>
       </View>
     )}
   </View>
@@ -779,43 +779,43 @@ const BlackOrangeBoldPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
           </View>
         ) : (
           <View style={{ backgroundColor: '#FF8C00', borderRadius: 4, width: 50, height: 50, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>{businessSettings?.businessName?.charAt(0) || 'B'}</Text>
+            <Text style={{ fontSize: 24, fontFamily: 'Helvetica-Bold', color: '#fff' }}>{businessSettings?.businessName?.charAt(0) || 'B'}</Text>
           </View>
         )}
       </View>
       <View style={{ width: '80%' }}>
-        <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#FF8C00', textTransform: 'uppercase', letterSpacing: 2 }}>INVOICE</Text>
+        <Text style={{ fontSize: 28, fontFamily: 'Helvetica-Bold', color: '#FF8C00', textTransform: 'uppercase', letterSpacing: 2 }}>INVOICE</Text>
         <Text style={{ fontSize: 10, color: '#aaa', marginTop: 4 }}>{invoice.invoiceNumber} | {invoice.date}</Text>
       </View>
     </View>
 
     <View style={[s.row, { marginBottom: 20 }]}>
       <View style={s.wHalf}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 4 }}>From</Text>
-        <Text style={{ fontSize: 10, color: '#fff', fontWeight: 'bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 4 }}>From</Text>
+        <Text style={{ fontSize: 10, color: '#fff', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
         <Text style={{ fontSize: 9, color: '#ccc' }}>{businessSettings?.email}</Text>
         <Text style={{ fontSize: 9, color: '#ccc' }}>{businessSettings?.phone}</Text>
       </View>
       <View style={s.wHalf}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 4 }}>To</Text>
-        <Text style={{ fontSize: 10, color: '#fff', fontWeight: 'bold', marginBottom: 2 }}>{invoice.customerName}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#FF8C00', textTransform: 'uppercase', marginBottom: 4 }}>To</Text>
+        <Text style={{ fontSize: 10, color: '#fff', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{invoice.customerName}</Text>
         <Text style={{ fontSize: 9, color: '#ccc' }}>{invoice.customerPhone}</Text>
       </View>
     </View>
 
     <View style={{ marginBottom: 20 }}>
       <View style={[s.row, { backgroundColor: '#FF8C00', padding: 8 }]}>
-        {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 9, color: '#fff', fontWeight: 'bold', textTransform: 'uppercase' }}>Description</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Price</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' }}>Description</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Price</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
       </View>
       {invoice.items?.map((item, i) => (
         <View key={i} wrap={false} style={[s.row, { padding: 8, borderBottomWidth: 1, borderBottomColor: '#333' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#eee' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#aaa', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#aaa', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
-          <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
+          <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
         </View>
       ))}
     </View>
@@ -825,7 +825,7 @@ const BlackOrangeBoldPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
         {qrCodeBase64 && (
           <View style={{ backgroundColor: '#fff', padding: 4, borderRadius: 4, width: 60, alignItems: 'center' }}>
             <Image src={qrCodeBase64} style={{ width: 50, height: 50 }} />
-            <Text style={{ fontSize: 6, fontWeight: 'bold', color: '#FF8C00', textTransform: 'uppercase', marginTop: 2 }}>Scan to Pay</Text>
+            <Text style={{ fontSize: 6, fontFamily: 'Helvetica-Bold', color: '#FF8C00', textTransform: 'uppercase', marginTop: 2 }}>Scan to Pay</Text>
           </View>
         )}
       </View>
@@ -836,7 +836,7 @@ const BlackOrangeBoldPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
 
     {invoice.notes && (
       <View style={{ marginTop: 20, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#333' }}>
-        <Text style={{ fontSize: 8, color: '#aaa' }}><Text style={{ fontWeight: 'bold', color: '#FF8C00' }}>Notes:</Text> {invoice.notes}</Text>
+        <Text style={{ fontSize: 8, color: '#aaa' }}><Text style={{ fontFamily: 'Helvetica-Bold', color: '#FF8C00' }}>Notes:</Text> {invoice.notes}</Text>
       </View>
     )}
   </View>
@@ -854,22 +854,22 @@ const LuxuryGoldBlackPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
           </View>
         ) : (
           <View style={{ backgroundColor: '#D4AF37', borderRadius: 50, width: 60, height: 60, justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
-            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#1a1a1a' }}>{businessSettings?.businessName?.charAt(0) || 'L'}</Text>
+            <Text style={{ fontSize: 24, fontFamily: 'Helvetica-Bold', color: '#1a1a1a' }}>{businessSettings?.businessName?.charAt(0) || 'L'}</Text>
           </View>
         )}
-        <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#D4AF37', textTransform: 'uppercase', letterSpacing: 4, marginBottom: 4 }}>INVOICE</Text>
+        <Text style={{ fontSize: 28, fontFamily: 'Helvetica-Bold', color: '#D4AF37', textTransform: 'uppercase', letterSpacing: 4, marginBottom: 4 }}>INVOICE</Text>
         <Text style={{ fontSize: 9, color: '#aaa', textTransform: 'uppercase', letterSpacing: 1 }}>{invoice.invoiceNumber} • {invoice.date}</Text>
       </View>
 
       <View style={[s.row, { marginBottom: 20 }]}>
         <View style={s.wHalf}>
-          <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#D4AF37', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Prepared For</Text>
-          <Text style={{ fontSize: 11, color: '#fff', fontWeight: 'bold', marginBottom: 2 }}>{invoice.customerName}</Text>
+          <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#D4AF37', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Prepared For</Text>
+          <Text style={{ fontSize: 11, color: '#fff', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{invoice.customerName}</Text>
           <Text style={{ fontSize: 9, color: '#ccc' }}>{invoice.customerPhone}</Text>
         </View>
         <View style={[s.wHalf, { alignItems: 'flex-end' }]}>
-          <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#D4AF37', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Issued By</Text>
-          <Text style={{ fontSize: 11, color: '#fff', fontWeight: 'bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
+          <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#D4AF37', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Issued By</Text>
+          <Text style={{ fontSize: 11, color: '#fff', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
           <Text style={{ fontSize: 9, color: '#ccc' }}>{businessSettings?.email}</Text>
           <Text style={{ fontSize: 9, color: '#ccc' }}>{businessSettings?.phone}</Text>
         </View>
@@ -877,17 +877,17 @@ const LuxuryGoldBlackPdf = ({ invoice, businessSettings, safeLogoBase64, qrCodeB
 
       <View style={{ marginBottom: 20 }}>
         <View style={[s.row, { borderTopWidth: 1, borderBottomWidth: 1, borderColor: '#D4AF37', paddingVertical: 8 }]}>
-          {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 8, color: '#D4AF37', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>Description</Text>}
-          {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 8, color: '#D4AF37', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase', letterSpacing: 1 }}>Qty</Text>}
-          {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 8, color: '#D4AF37', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase', letterSpacing: 1 }}>Rate</Text>}
-          {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 8, color: '#D4AF37', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase', letterSpacing: 1 }}>Total</Text>}
+          {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 8, color: '#D4AF37', fontFamily: 'Helvetica-Bold', textTransform: 'uppercase', letterSpacing: 1 }}>Description</Text>}
+          {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 8, color: '#D4AF37', fontFamily: 'Helvetica-Bold', textAlign: 'center', textTransform: 'uppercase', letterSpacing: 1 }}>Qty</Text>}
+          {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 8, color: '#D4AF37', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase', letterSpacing: 1 }}>Rate</Text>}
+          {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 8, color: '#D4AF37', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase', letterSpacing: 1 }}>Total</Text>}
         </View>
         {invoice.items?.map((item, i) => (
           <View key={i} wrap={false} style={[s.row, { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#333' }]}>
             <Text style={{ width: '40%', fontSize: 9, color: '#eee' }}>{item.name || 'Item'}</Text>
             <Text style={{ width: '20%', fontSize: 9, color: '#aaa', textAlign: 'center' }}>{item.qty}</Text>
             <Text style={{ width: '20%', fontSize: 9, color: '#aaa', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
-            <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
+            <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
           </View>
         ))}
       </View>
@@ -925,41 +925,41 @@ const BlackHeaderProfessionalPdf = ({ invoice, businessSettings, safeLogoBase64,
         {safeLogoBase64 ? (
           <Image src={safeLogoBase64} style={{ width: 40, height: 40, objectFit: 'contain' }} />
         ) : (
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#1a1a1a' }}>{businessSettings?.businessName?.charAt(0) || 'B'}</Text>
+          <Text style={{ fontSize: 24, fontFamily: 'Helvetica-Bold', color: '#1a1a1a' }}>{businessSettings?.businessName?.charAt(0) || 'B'}</Text>
         )}
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>{businessSettings?.businessName || 'Your Business'}</Text>
+        <Text style={{ fontSize: 24, fontFamily: 'Helvetica-Bold', color: '#fff', marginBottom: 4 }}>{businessSettings?.businessName || 'Your Business'}</Text>
         <Text style={{ fontSize: 9, color: '#ccc' }}>{businessSettings?.email} | {businessSettings?.phone}</Text>
       </View>
     </View>
 
     <View style={[s.row, { marginBottom: 30 }]}>
       <View style={s.wHalf}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '80%' }}>Bill To</Text>
-        <Text style={{ fontSize: 11, color: '#222', fontWeight: 'bold', marginBottom: 2 }}>{invoice.customerName}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '80%' }}>Bill To</Text>
+        <Text style={{ fontSize: 11, color: '#222', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{invoice.customerName}</Text>
         <Text style={{ fontSize: 9, color: '#555' }}>{invoice.customerPhone}</Text>
       </View>
       <View style={[s.wHalf, { alignItems: 'flex-end' }]}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '80%', textAlign: 'right' }}>Invoice Details</Text>
-        <Text style={{ fontSize: 9, color: '#222', marginBottom: 2 }}><Text style={{ fontWeight: 'bold' }}>Invoice #:</Text> {invoice.invoiceNumber}</Text>
-        <Text style={{ fontSize: 9, color: '#222' }}><Text style={{ fontWeight: 'bold' }}>Date:</Text> {invoice.date}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '80%', textAlign: 'right' }}>Invoice Details</Text>
+        <Text style={{ fontSize: 9, color: '#222', marginBottom: 2 }}><Text style={{ fontFamily: 'Helvetica-Bold' }}>Invoice #:</Text> {invoice.invoiceNumber}</Text>
+        <Text style={{ fontSize: 9, color: '#222' }}><Text style={{ fontFamily: 'Helvetica-Bold' }}>Date:</Text> {invoice.date}</Text>
       </View>
     </View>
 
     <View style={{ marginBottom: 20 }}>
       <View style={[s.row, { borderBottomWidth: 2, borderBottomStyle: 'dashed', borderBottomColor: '#1a1a1a', paddingBottom: 8, marginBottom: 8 }]}>
-        {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 9, color: '#1a1a1a', fontWeight: 'bold', textTransform: 'uppercase' }}>Description</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#1a1a1a', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#1a1a1a', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Price</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#1a1a1a', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 9, color: '#1a1a1a', fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' }}>Description</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#1a1a1a', fontFamily: 'Helvetica-Bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#1a1a1a', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Price</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#1a1a1a', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
       </View>
       {invoice.items?.map((item, i) => (
         <View key={i} wrap={false} style={[s.row, { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#eee' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
-          <Text style={{ width: '20%', fontSize: 9, color: '#222', fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
+          <Text style={{ width: '20%', fontSize: 9, color: '#222', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
         </View>
       ))}
     </View>
@@ -969,7 +969,7 @@ const BlackHeaderProfessionalPdf = ({ invoice, businessSettings, safeLogoBase64,
         {qrCodeBase64 && (
           <View style={{ alignItems: 'center', width: 60 }}>
             <Image src={qrCodeBase64} style={{ width: 50, height: 50, border: '1pt solid #1a1a1a', padding: 2, marginBottom: 4 }} />
-            <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#1a1a1a', textTransform: 'uppercase' }}>Scan to Pay</Text>
+            <Text style={{ fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#1a1a1a', textTransform: 'uppercase' }}>Scan to Pay</Text>
           </View>
         )}
       </View>
@@ -980,7 +980,7 @@ const BlackHeaderProfessionalPdf = ({ invoice, businessSettings, safeLogoBase64,
 
     {invoice.notes && (
       <View style={{ marginTop: 20, padding: 15, backgroundColor: '#f9f9f9', border: '1pt solid #eee' }}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#1a1a1a', textTransform: 'uppercase', marginBottom: 4 }}>Terms / Notes</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#1a1a1a', textTransform: 'uppercase', marginBottom: 4 }}>Terms / Notes</Text>
         <Text style={{ fontSize: 9, color: '#555' }}>{invoice.notes}</Text>
       </View>
     )}
@@ -993,49 +993,49 @@ const BlueRoundedModernPdf = ({ invoice, businessSettings, safeLogoBase64, qrCod
     <View style={{ backgroundColor: '#ffffff', padding: 25, borderRadius: 16, minHeight: '100%' }}>
       
       <View style={[s.row, s.justifyBetween, { marginBottom: 30, alignItems: 'center' }]}>
-        <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#1e90ff' }}>Invoice</Text>
+        <Text style={{ fontSize: 32, fontFamily: 'Helvetica-Bold', color: '#1e90ff' }}>Invoice</Text>
         {safeLogoBase64 ? (
           <Image src={safeLogoBase64} style={{ width: 50, height: 50, objectFit: 'contain' }} />
         ) : (
           <View style={{ width: 50, height: 50, backgroundColor: '#f0f8ff', borderRadius: 25, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1e90ff' }}>{businessSettings?.businessName?.charAt(0) || 'B'}</Text>
+            <Text style={{ fontSize: 20, fontFamily: 'Helvetica-Bold', color: '#1e90ff' }}>{businessSettings?.businessName?.charAt(0) || 'B'}</Text>
           </View>
         )}
       </View>
 
       <View style={[s.row, { marginBottom: 20 }]}>
         <View style={s.wHalf}>
-          <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 4 }}>Billed To</Text>
-          <Text style={{ fontSize: 11, color: '#222', fontWeight: 'bold', marginBottom: 2 }}>{invoice.customerName}</Text>
+          <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 4 }}>Billed To</Text>
+          <Text style={{ fontSize: 11, color: '#222', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{invoice.customerName}</Text>
           <Text style={{ fontSize: 9, color: '#555' }}>{invoice.customerPhone}</Text>
         </View>
         <View style={[s.wHalf, { alignItems: 'flex-end' }]}>
-          <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 4 }}>Invoice #{invoice.invoiceNumber}</Text>
+          <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 4 }}>Invoice #{invoice.invoiceNumber}</Text>
           <Text style={{ fontSize: 9, color: '#555' }}>Date: {invoice.date}</Text>
         </View>
       </View>
 
       <View style={{ marginBottom: 20 }}>
         <View style={[s.row, { backgroundColor: '#1e90ff', padding: 8, borderRadius: 6 }]}>
-          {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 9, color: '#fff', fontWeight: 'bold', textTransform: 'uppercase' }}>Description</Text>}
-          {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
-          {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Price</Text>}
-          {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
+          {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' }}>Description</Text>}
+          {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
+          {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Price</Text>}
+          {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
         </View>
         {invoice.items?.map((item, i) => (
           <View key={i} wrap={false} style={[s.row, { padding: 8, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' }]}>
             <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
             <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'center' }}>{item.qty}</Text>
             <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
-            <Text style={{ width: '20%', fontSize: 9, color: '#222', fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
+            <Text style={{ width: '20%', fontSize: 9, color: '#222', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
           </View>
         ))}
       </View>
 
       <View style={[s.row, { marginBottom: 20 }]}>
         <View style={s.wHalf}>
-          <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 4 }}>From</Text>
-          <Text style={{ fontSize: 10, color: '#222', fontWeight: 'bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
+          <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 4 }}>From</Text>
+          <Text style={{ fontSize: 10, color: '#222', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
           <Text style={{ fontSize: 9, color: '#555' }}>{businessSettings?.email}</Text>
           <Text style={{ fontSize: 9, color: '#555' }}>{businessSettings?.phone}</Text>
         </View>
@@ -1048,17 +1048,17 @@ const BlueRoundedModernPdf = ({ invoice, businessSettings, safeLogoBase64, qrCod
         <View style={{ flex: 1 }}>
           {invoice.notes ? (
             <View>
-              <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#1e90ff', textTransform: 'uppercase', marginBottom: 2 }}>Notes</Text>
+              <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#1e90ff', textTransform: 'uppercase', marginBottom: 2 }}>Notes</Text>
               <Text style={{ fontSize: 9, color: '#555' }}>{invoice.notes}</Text>
             </View>
           ) : (
-            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1e90ff' }}>Thank you for your business!</Text>
+            <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#1e90ff' }}>Thank you for your business!</Text>
           )}
         </View>
         {qrCodeBase64 && (
           <View style={{ alignItems: 'center', marginLeft: 15 }}>
             <Image src={qrCodeBase64} style={{ width: 40, height: 40, backgroundColor: '#fff', padding: 2, borderRadius: 4, marginBottom: 4 }} />
-            <Text style={{ fontSize: 6, fontWeight: 'bold', color: '#1e90ff', textTransform: 'uppercase' }}>Pay Now</Text>
+            <Text style={{ fontSize: 6, fontFamily: 'Helvetica-Bold', color: '#1e90ff', textTransform: 'uppercase' }}>Pay Now</Text>
           </View>
         )}
       </View>
@@ -1075,45 +1075,45 @@ const RedCorporateCleanPdf = ({ invoice, businessSettings, safeLogoBase64, qrCod
         {safeLogoBase64 ? (
           <Image src={safeLogoBase64} style={{ width: 40, height: 40, objectFit: 'contain' }} />
         ) : (
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>{businessSettings?.businessName?.charAt(0) || 'B'}</Text>
+          <Text style={{ fontSize: 24, fontFamily: 'Helvetica-Bold', color: '#fff' }}>{businessSettings?.businessName?.charAt(0) || 'B'}</Text>
         )}
       </View>
       <View>
-        <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#DC143C', letterSpacing: 2, textTransform: 'uppercase' }}>INVOICE</Text>
-        <Text style={{ fontSize: 9, fontWeight: 'bold', color: '#666', textTransform: 'uppercase', marginTop: 2 }}>Invoice #{invoice.invoiceNumber}</Text>
+        <Text style={{ fontSize: 28, fontFamily: 'Helvetica-Bold', color: '#DC143C', letterSpacing: 2, textTransform: 'uppercase' }}>INVOICE</Text>
+        <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#666', textTransform: 'uppercase', marginTop: 2 }}>Invoice #{invoice.invoiceNumber}</Text>
       </View>
     </View>
 
     <View style={[s.row, { marginBottom: 30 }]}>
       <View style={s.wHalf}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '80%' }}>From</Text>
-        <Text style={{ fontSize: 10, color: '#222', fontWeight: 'bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '80%' }}>From</Text>
+        <Text style={{ fontSize: 10, color: '#222', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
         <Text style={{ fontSize: 9, color: '#555' }}>{businessSettings?.email}</Text>
         <Text style={{ fontSize: 9, color: '#555', marginBottom: 8 }}>{businessSettings?.phone}</Text>
 
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '80%' }}>Bill To</Text>
-        <Text style={{ fontSize: 10, color: '#222', fontWeight: 'bold', marginBottom: 2 }}>{invoice.customerName}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '80%' }}>Bill To</Text>
+        <Text style={{ fontSize: 10, color: '#222', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{invoice.customerName}</Text>
         <Text style={{ fontSize: 9, color: '#555' }}>{invoice.customerPhone}</Text>
       </View>
       <View style={[s.wHalf, { alignItems: 'flex-end' }]}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '60%', textAlign: 'right' }}>Invoice Date</Text>
-        <Text style={{ fontSize: 10, color: '#222', fontWeight: 'bold' }}>{invoice.date}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '60%', textAlign: 'right' }}>Invoice Date</Text>
+        <Text style={{ fontSize: 10, color: '#222', fontFamily: 'Helvetica-Bold' }}>{invoice.date}</Text>
       </View>
     </View>
 
     <View style={{ marginBottom: 30 }}>
       <View style={[s.row, { backgroundColor: '#DC143C', padding: 8 }]}>
-        {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 9, color: '#fff', fontWeight: 'bold', textTransform: 'uppercase' }}>Description</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Price</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' }}>Description</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Price</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#fff', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
       </View>
       {invoice.items?.map((item, i) => (
         <View key={i} wrap={false} style={[s.row, { padding: 8, borderBottomWidth: 1, borderBottomColor: '#eee', backgroundColor: i % 2 === 0 ? '#fff' : '#fcfcfc' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
-          <Text style={{ width: '20%', fontSize: 9, color: '#222', fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
+          <Text style={{ width: '20%', fontSize: 9, color: '#222', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
         </View>
       ))}
     </View>
@@ -1123,7 +1123,7 @@ const RedCorporateCleanPdf = ({ invoice, businessSettings, safeLogoBase64, qrCod
         {qrCodeBase64 && (
           <View style={{ alignItems: 'center', width: 60 }}>
             <Image src={qrCodeBase64} style={{ width: 50, height: 50, border: '1pt solid #eee', padding: 2, marginBottom: 4 }} />
-            <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#DC143C', textTransform: 'uppercase' }}>Scan & Pay</Text>
+            <Text style={{ fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#DC143C', textTransform: 'uppercase' }}>Scan & Pay</Text>
           </View>
         )}
       </View>
@@ -1134,7 +1134,7 @@ const RedCorporateCleanPdf = ({ invoice, businessSettings, safeLogoBase64, qrCod
 
     {invoice.notes && (
       <View style={{ marginTop: 20, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#eee' }}>
-        <Text style={{ fontSize: 8, color: '#555' }}><Text style={{ fontWeight: 'bold', color: '#222' }}>Terms / Notes:</Text> {invoice.notes}</Text>
+        <Text style={{ fontSize: 8, color: '#555' }}><Text style={{ fontFamily: 'Helvetica-Bold', color: '#222' }}>Terms / Notes:</Text> {invoice.notes}</Text>
       </View>
     )}
   </View>
@@ -1145,23 +1145,23 @@ const CleanTwoColumnModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
   <View style={[{ padding: 30, backgroundColor: '#ffffff', minHeight: '100%', fontFamily: 'Helvetica' }]} wrap={true}>
     <View style={[s.row, s.justifyBetween, { marginBottom: 30, alignItems: 'flex-start' }]}>
       <View style={s.wHalf}>
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '80%' }}>From</Text>
-        <Text style={{ fontSize: 10, color: '#222', fontWeight: 'bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '80%' }}>From</Text>
+        <Text style={{ fontSize: 10, color: '#222', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{businessSettings?.businessName || 'Your Business'}</Text>
         <Text style={{ fontSize: 9, color: '#555' }}>{businessSettings?.email}</Text>
         <Text style={{ fontSize: 9, color: '#555', marginBottom: 10 }}>{businessSettings?.phone}</Text>
 
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '80%' }}>Bill To</Text>
-        <Text style={{ fontSize: 10, color: '#222', fontWeight: 'bold', marginBottom: 2 }}>{invoice.customerName}</Text>
+        <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase', marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 2, width: '80%' }}>Bill To</Text>
+        <Text style={{ fontSize: 10, color: '#222', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>{invoice.customerName}</Text>
         <Text style={{ fontSize: 9, color: '#555' }}>{invoice.customerPhone}</Text>
       </View>
       <View style={[s.wHalf, { backgroundColor: '#f9f9f9', padding: 15, borderRadius: 8, border: '1pt solid #eee', alignItems: 'flex-end' }]}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#222', marginBottom: 4 }}>{invoice.invoiceNumber}</Text>
-        <Text style={{ fontSize: 9, color: '#666', fontWeight: 'bold', marginBottom: 15 }}>Issue Date: {invoice.date}</Text>
+        <Text style={{ fontSize: 24, fontFamily: 'Helvetica-Bold', color: '#222', marginBottom: 4 }}>{invoice.invoiceNumber}</Text>
+        <Text style={{ fontSize: 9, color: '#666', fontFamily: 'Helvetica-Bold', marginBottom: 15 }}>Issue Date: {invoice.date}</Text>
         {safeLogoBase64 ? (
           <Image src={safeLogoBase64} style={{ width: 40, height: 40, objectFit: 'contain' }} />
         ) : (
           <View style={{ width: 40, height: 40, backgroundColor: '#eee', borderRadius: 4, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#888' }}>{businessSettings?.businessName?.charAt(0) || 'B'}</Text>
+            <Text style={{ fontSize: 16, fontFamily: 'Helvetica-Bold', color: '#888' }}>{businessSettings?.businessName?.charAt(0) || 'B'}</Text>
           </View>
         )}
       </View>
@@ -1169,17 +1169,17 @@ const CleanTwoColumnModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
 
     <View style={{ marginBottom: 30 }}>
       <View style={[s.row, { borderBottomWidth: 2, borderBottomColor: '#eee', paddingBottom: 6, marginBottom: 6 }]}>
-        {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 9, color: '#222', fontWeight: 'bold', textTransform: 'uppercase' }}>Description</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#222', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#222', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Price</Text>}
-        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#222', fontWeight: 'bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'description')?.visible !== false && <Text style={{ width: '40%', fontSize: 9, color: '#222', fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' }}>Description</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'qty')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#222', fontFamily: 'Helvetica-Bold', textAlign: 'center', textTransform: 'uppercase' }}>Qty</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'rate')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#222', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Price</Text>}
+        {invoice.invoiceColumns?.find(c => c.id === 'total')?.visible !== false && <Text style={{ width: '20%', fontSize: 9, color: '#222', fontFamily: 'Helvetica-Bold', textAlign: 'right', textTransform: 'uppercase' }}>Total</Text>}
       </View>
       {invoice.items?.map((item, i) => (
         <View key={i} wrap={false} style={[s.row, { paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' }]}>
           <Text style={{ width: '40%', fontSize: 9, color: '#222' }}>{item.name || 'Item'}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'center' }}>{item.qty}</Text>
           <Text style={{ width: '20%', fontSize: 9, color: '#666', textAlign: 'right' }}>{formatCurrency(item.price)}</Text>
-          <Text style={{ width: '20%', fontSize: 9, color: '#222', fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
+          <Text style={{ width: '20%', fontSize: 9, color: '#222', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(item.qty * item.price)}</Text>
         </View>
       ))}
     </View>
@@ -1189,7 +1189,7 @@ const CleanTwoColumnModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
         {qrCodeBase64 && (
           <View style={{ backgroundColor: '#f9f9f9', padding: 6, borderRadius: 6, border: '1pt solid #eee', width: 60, alignItems: 'center' }}>
             <Image src={qrCodeBase64} style={{ width: 46, height: 46, marginBottom: 4 }} />
-            <Text style={{ fontSize: 6, fontWeight: 'bold', color: '#888', textTransform: 'uppercase' }}>Scan & Pay</Text>
+            <Text style={{ fontSize: 6, fontFamily: 'Helvetica-Bold', color: '#888', textTransform: 'uppercase' }}>Scan & Pay</Text>
           </View>
         )}
       </View>
@@ -1200,7 +1200,7 @@ const CleanTwoColumnModernPdf = ({ invoice, businessSettings, safeLogoBase64, qr
 
     {invoice.notes && (
       <View style={{ marginTop: 20, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#eee' }}>
-        <Text style={{ fontSize: 8, color: '#555' }}><Text style={{ fontWeight: 'bold', color: '#222' }}>Terms & Conditions:</Text> {invoice.notes}</Text>
+        <Text style={{ fontSize: 8, color: '#555' }}><Text style={{ fontFamily: 'Helvetica-Bold', color: '#222' }}>Terms & Conditions:</Text> {invoice.notes}</Text>
       </View>
     )}
   </View>

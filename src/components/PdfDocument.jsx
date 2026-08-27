@@ -57,11 +57,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: 22,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
   },
   businessName: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     color: '#0f172a',
     marginBottom: 3,
   },
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 12,
     fontSize: 8,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     marginBottom: 6,
   },
   statusPaid: {
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   invoiceValue: {
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     color: '#0f172a',
   },
   crmGrid: {
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 8,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     color: '#94a3b8',
     textTransform: 'uppercase',
     marginBottom: 6,
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   },
   customerName: {
     fontSize: 11,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     color: '#0f172a',
     marginBottom: 3,
   },
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   },
   tableHeaderCell: {
     fontSize: 8,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     color: '#475569',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   colDesc: { width: '45%', paddingRight: 10 },
   colQty: { width: '15%', textAlign: 'center' },
   colRate: { width: '20%', textAlign: 'right' },
-  colAmt: { width: '20%', textAlign: 'right', fontWeight: 'bold', color: '#0f172a' },
+  colAmt: { width: '20%', textAlign: 'right', fontFamily: 'Helvetica-Bold', color: '#0f172a' },
   totalsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -205,12 +205,12 @@ const styles = StyleSheet.create({
   },
   grandTotalLabel: {
     fontSize: 11,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     color: '#0f172a',
   },
   grandTotalValue: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     color: '#4f46e5',
   },
   paymentSection: {
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   },
   paymentTitle: {
     fontSize: 12,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     color: '#0f172a',
     marginBottom: 6,
   },
@@ -252,13 +252,13 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 7,
     color: '#94a3b8',
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     textTransform: 'uppercase',
   },
   businessFooterName: {
     fontSize: 9,
     color: '#64748b',
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     marginBottom: 2,
   },
   thanksSection: {
@@ -288,12 +288,12 @@ const styles = StyleSheet.create({
   balanceDueLabel: {
     fontSize: 9,
     color: '#dc2626',
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
   },
   balanceDueValue: {
     fontSize: 9,
     color: '#dc2626',
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
   },
 });
 
@@ -400,7 +400,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
             </View>
             {templateId === 'retail' && (
               <View style={{ marginBottom: 6, padding: 4, borderWidth: 1, borderStyle: 'solid', borderColor: '#e2e8f0', borderRadius: 2, alignItems: 'center', backgroundColor: '#fff' }}>
-                <Text style={{ fontFamily: 'Courier', fontSize: 6, letterSpacing: 2, fontWeight: 'bold', color: '#1e293b', marginBottom: 2 }}>||| |||| || |||</Text>
+                <Text style={{ fontFamily: 'Courier', fontSize: 6, letterSpacing: 2, fontFamily: 'Helvetica-Bold', color: '#1e293b', marginBottom: 2 }}>||| |||| || |||</Text>
                 <Text style={{ fontSize: 5, color: '#94a3b8', letterSpacing: 1 }}>{invoice.invoiceNumber}</Text>
               </View>
             )}
@@ -429,7 +429,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
             
             {templateId === 'doctor' && (
               <View style={{ marginTop: 6, marginBottom: 4, paddingLeft: 6, borderLeftWidth: 2, borderStyle: 'solid', borderLeftColor: tAccent }}>
-                <Text style={{ fontSize: 8, fontWeight: 'bold', color: tPrimary, marginBottom: 2 }}>Patient Details</Text>
+                <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: tPrimary, marginBottom: 2 }}>Patient Details</Text>
                 <Text style={styles.metaText}>Name: {invoice.customerName}</Text>
                 {invoice.orderNotes && <Text style={styles.metaText}>Diagnosis/Ref: {invoice.orderNotes}</Text>}
               </View>
@@ -450,7 +450,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
             ) : (
               <>
                 <Text style={styles.sectionTitle}>Payment Terms</Text>
-                <Text style={[styles.metaText, { textAlign: 'right', fontWeight: 'bold' }]}>
+                <Text style={[styles.metaText, { textAlign: 'right', fontFamily: 'Helvetica-Bold' }]}>
                   Please pay on or before the due date.
                 </Text>
                 <Text style={[styles.metaText, { textAlign: 'right' }]}>
@@ -487,11 +487,11 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
                 if (col.id === 'item') {
                   return (
                     <View key={col.id} style={{ width: col.width, paddingRight: 4 }}>
-                      <Text style={{ fontWeight: 'bold', color: tPrimary, marginBottom: 2 }}>
+                      <Text style={{ fontFamily: 'Helvetica-Bold', color: tPrimary, marginBottom: 2 }}>
                         {item.description || item.name || item.productName || item.serviceName || item.itemService || item.designNo || 'Item'}
                       </Text>
-                      {item.workType && <Text style={[(templateId === 'embroidery' || templateId === 'tailor') ? { fontSize: 8, fontWeight: 'bold', color: '#be185d', marginTop: 2 } : { fontSize: 7.5, color: '#64748b' }]}>Work Type: {item.workType}</Text>}
-                      {item.size && <Text style={[(templateId === 'embroidery' || templateId === 'tailor') ? { fontSize: 8, fontWeight: 'bold', color: '#4338ca', marginTop: 1 } : { fontSize: 7.5, color: '#64748b' }]}>Size: {item.size}</Text>}
+                      {item.workType && <Text style={[(templateId === 'embroidery' || templateId === 'tailor') ? { fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#be185d', marginTop: 2 } : { fontSize: 7.5, color: '#64748b' }]}>Work Type: {item.workType}</Text>}
+                      {item.size && <Text style={[(templateId === 'embroidery' || templateId === 'tailor') ? { fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#4338ca', marginTop: 1 } : { fontSize: 7.5, color: '#64748b' }]}>Size: {item.size}</Text>}
                       {item.sizeVariant && <Text style={{ fontSize: 7.5, color: '#64748b' }}>Variant: {item.sizeVariant}</Text>}
                     </View>
                   );
@@ -499,7 +499,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
 
                 if (col.id === 'amount') {
                   return (
-                    <Text key={col.id} style={[styles.tableCell, { width: col.width, textAlign: col.align === 'center' ? 'center' : col.align === 'right' ? 'right' : 'left', fontWeight: 'bold', color: '#0f172a' }]}>
+                    <Text key={col.id} style={[styles.tableCell, { width: col.width, textAlign: col.align === 'center' ? 'center' : col.align === 'right' ? 'right' : 'left', fontFamily: 'Helvetica-Bold', color: '#0f172a' }]}>
                       {formatCurrency(val, currencySymbol, regionalPrefs.numberFormat)}
                     </Text>
                   );
@@ -515,7 +515,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
                 
                 if (col.id === 'qty') {
                   return (
-                    <Text key={col.id} style={[styles.tableCell, { width: col.width, textAlign: col.align === 'center' ? 'center' : col.align === 'right' ? 'right' : 'left', fontWeight: 'bold', color: '#64748b' }]}>
+                    <Text key={col.id} style={[styles.tableCell, { width: col.width, textAlign: col.align === 'center' ? 'center' : col.align === 'right' ? 'right' : 'left', fontFamily: 'Helvetica-Bold', color: '#64748b' }]}>
                       {val} {item.unit ? item.unit.toUpperCase() : ''}
                     </Text>
                   );
@@ -555,55 +555,55 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
           <View style={styles.totalsSection}>
             <View style={styles.totalRow}>
               <Text style={styles.metaText}>Subtotal</Text>
-              <Text style={{ fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(financials.subtotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
+              <Text style={{ fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(financials.subtotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
             </View>
             
             {(businessSettings?.invoiceBuilderSettings?.showDiscount !== false) && financials.discountAmount > 0 && (
               <View style={styles.totalRow}>
                 <Text style={{ fontSize: 8.5, color: '#dc2626' }}>Discount</Text>
-                <Text style={{ fontSize: 8.5, color: '#dc2626', fontWeight: 'bold', textAlign: 'right' }}>-{formatCurrency(financials.discountAmount, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontSize: 8.5, color: '#dc2626', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>-{formatCurrency(financials.discountAmount, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
             {(businessSettings?.invoiceBuilderSettings?.showTax !== false) && financials.taxAmount > 0 && (
               <View style={styles.totalRow}>
                 <Text style={styles.metaText}>{regionalPrefs.taxLabel || 'Tax'} ({invoice.taxPercentage || 0}%)</Text>
-                <Text style={{ fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(financials.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(financials.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
             {(businessSettings?.invoiceBuilderSettings?.showShipping) && financials.shipping > 0 && (
               <View style={styles.totalRow}>
                 <Text style={styles.metaText}>Shipping</Text>
-                <Text style={{ fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(financials.shipping, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(financials.shipping, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
             {(financials.previousDue > 0 || financials.amountPaid > 0) && (
               <View style={styles.totalRow}>
                 <Text style={styles.metaText}>Current Invoice</Text>
-                <Text style={{ fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(financials.currentInvoiceTotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(financials.currentInvoiceTotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
             {((businessSettings?.invoiceBuilderSettings?.showOldDue) || financials.previousDue > 0) && (
               <View style={styles.totalRow}>
                 <Text style={{ fontSize: 8.5, color: '#d97706' }}>Previous / Old Due</Text>
-                <Text style={{ fontSize: 8.5, color: '#d97706', fontWeight: 'bold', textAlign: 'right' }}>+{formatCurrency(financials.previousDue, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontSize: 8.5, color: '#d97706', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>+{formatCurrency(financials.previousDue, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
             {((businessSettings?.invoiceBuilderSettings?.showOldDue) || financials.previousDue > 0) && (
               <View style={styles.totalRow}>
                 <Text style={styles.metaText}>Total Receivable</Text>
-                <Text style={{ fontWeight: 'bold', textAlign: 'right' }}>{formatCurrency(financials.totalReceivable, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(financials.totalReceivable, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
             {financials.amountPaid > 0 && (
               <View style={styles.totalRow}>
                 <Text style={{ fontSize: 8.5, color: '#16a34a' }}>Amount Paid</Text>
-                <Text style={{ fontSize: 8.5, color: '#16a34a', fontWeight: 'bold', textAlign: 'right' }}>-{formatCurrency(financials.amountPaid, currencySymbol, regionalPrefs.numberFormat)}</Text>
+                <Text style={{ fontSize: 8.5, color: '#16a34a', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>-{formatCurrency(financials.amountPaid, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
@@ -655,7 +655,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
         {templateId === 'professional' && (
           <View style={{ marginTop: 24, paddingRight: 24, alignItems: 'flex-end' }} wrap={false}>
             <View style={{ width: 140, borderBottomWidth: 1, borderStyle: 'solid', borderBottomColor: tPrimary, marginBottom: 4 }} />
-            <Text style={{ fontSize: 8, fontWeight: 'bold', color: tPrimary, textTransform: 'uppercase', textAlign: 'center', width: 140 }}>Authorized Signatory</Text>
+            <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: tPrimary, textTransform: 'uppercase', textAlign: 'center', width: 140 }}>Authorized Signatory</Text>
           </View>
         )}
 
