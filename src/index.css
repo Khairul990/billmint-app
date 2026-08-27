@@ -148,7 +148,7 @@ body {
 }
 
 .font-numbers, .tabular-nums, .price-display, .stat-value {
-  font-family: 'Space Grotesk', 'JetBrains Mono', monospace;
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
 }
 
