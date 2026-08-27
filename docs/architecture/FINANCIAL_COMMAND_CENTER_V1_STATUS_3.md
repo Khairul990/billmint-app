@@ -1,0 +1,1 @@
+Financial command center aggregation and regression test are staged on this branch. Dashboard integration and persistent Vendor/Outsource workflow still require implementation and verification before production merge.
