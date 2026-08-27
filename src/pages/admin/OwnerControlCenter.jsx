@@ -62,6 +62,18 @@ const OwnerControlCenter = () => {
         await adminEngine.resetBusinessDataOnly();
         return 'Local business data reset complete.';
       }
+    },
+    {
+      id: 'factory_reset_all',
+      title: 'Platform Factory Reset',
+      description: 'Completely wipes all local IndexedDB stores, offline queues, and cached platform states on this machine.',
+      confirmPhrase: 'FACTORY RESET ALL DATA',
+      level: 'danger',
+      icon: Power,
+      handler: async () => {
+        await adminEngine.factoryResetAllData();
+        return 'Platform factory reset executed successfully.';
+      }
     }
   ];
 

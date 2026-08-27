@@ -134,6 +134,7 @@ const Sidebar = ({
         { id: 'pending-payments', label: 'Payments', icon: CreditCard, featureId: 'payment', badge: pendingPaymentsCount },
         { id: 'due-ledger', label: 'Collections', icon: BookOpen, featureId: 'treasury' },
         { id: 'expenses', label: t('expenses') || 'Expenses', icon: TrendingDown, featureId: 'treasury.moneyOut' },
+        { id: 'outsource', label: 'Outsource & Vendors', icon: Briefcase, featureId: 'outsource' },
         { id: 'bank', label: 'Bank & Cash', icon: Landmark, featureId: 'treasury' },
       ]
     },

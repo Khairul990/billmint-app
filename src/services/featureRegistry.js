@@ -14,7 +14,8 @@ export const FEATURE_CATEGORIES = {
   APPEARANCE: 'appearance',
   BACKUP: 'backup',
   ADVANCED: 'advanced',
-  OPERATIONS: 'operations'
+  OPERATIONS: 'operations',
+  OUTSOURCE: 'outsource'
 };
 
 // Default category states for new workspaces
@@ -32,7 +33,8 @@ export const DEFAULT_CATEGORY_STATE = {
   [FEATURE_CATEGORIES.APPEARANCE]: true,
   [FEATURE_CATEGORIES.BACKUP]: true,
   [FEATURE_CATEGORIES.ADVANCED]: false,
-  [FEATURE_CATEGORIES.OPERATIONS]: false
+  [FEATURE_CATEGORIES.OPERATIONS]: false,
+  [FEATURE_CATEGORIES.OUTSOURCE]: true
 };
 
 // Feature Registry Definition
@@ -325,6 +327,58 @@ export const FEATURE_REGISTRY = {
     description: 'Workflows for Tailoring, Cyber Cafe, Clinic, Repair, and Delivery.',
     defaultEnabled: false,
     dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+
+  // --- OUTSOURCE & VENDORS ---
+  'outsource': {
+    id: 'outsource',
+    category: FEATURE_CATEGORIES.OUTSOURCE || 'outsource',
+    name: 'Outsource & Freelancer Hub',
+    description: 'Manage external freelancers, vendors, outsource job costing, advances, and profit margins.',
+    defaultEnabled: true,
+    dependencies: [],
+    settingsSchema: {},
+    version: 1
+  },
+  'outsource.vendors': {
+    id: 'outsource.vendors',
+    category: FEATURE_CATEGORIES.OUTSOURCE || 'outsource',
+    name: 'Vendor Directory & 360 Profiles',
+    description: 'Vendor contact information, default rates, and lifetime job statistics.',
+    defaultEnabled: true,
+    dependencies: ['outsource'],
+    settingsSchema: {},
+    version: 1
+  },
+  'outsource.jobs': {
+    id: 'outsource.jobs',
+    category: FEATURE_CATEGORIES.OUTSOURCE || 'outsource',
+    name: 'Outsource Job Costing',
+    description: 'Assign jobs, agreed costs, milestones, and client invoice linkage.',
+    defaultEnabled: true,
+    dependencies: ['outsource'],
+    settingsSchema: {},
+    version: 1
+  },
+  'outsource.payments': {
+    id: 'outsource.payments',
+    category: FEATURE_CATEGORIES.OUTSOURCE || 'outsource',
+    name: 'Vendor Payouts & Advances',
+    description: 'Record partial/final payments and sync directly with Internal Bank.',
+    defaultEnabled: true,
+    dependencies: ['outsource'],
+    settingsSchema: {},
+    version: 1
+  },
+  'outsource.profit': {
+    id: 'outsource.profit',
+    category: FEATURE_CATEGORIES.OUTSOURCE || 'outsource',
+    name: 'Job Profitability & Margin Analysis',
+    description: 'Calculate gross profit and margins between client invoice revenue and outsource cost.',
+    defaultEnabled: true,
+    dependencies: ['outsource'],
     settingsSchema: {},
     version: 1
   }

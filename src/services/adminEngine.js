@@ -358,9 +358,9 @@ export const adminEngine = {
   // --- Comprehensive Backup & Restore Engine ---
   async createPlatformBackup() {
     const backupData = {
-      version: '8.0.0',
+      version: '9.0.0',
       exportedAt: new Date().toISOString(),
-      schemaVersion: 8,
+      schemaVersion: 9,
       invoices: await BillQyroDB.getAll('invoices').catch(() => []),
       customers: await BillQyroDB.getAll('customers').catch(() => []),
       products: await BillQyroDB.getAll('products').catch(() => []),
@@ -371,14 +371,17 @@ export const adminEngine = {
       appointments: await BillQyroDB.getAll('appointments').catch(() => []),
       orders: await BillQyroDB.getAll('orders').catch(() => []),
       activities: await BillQyroDB.getAll('activities').catch(() => []),
-      announcements: await BillQyroDB.getAll('announcements').catch(() => [])
+      announcements: await BillQyroDB.getAll('announcements').catch(() => []),
+      vendors: await BillQyroDB.getAll('vendors').catch(() => []),
+      outsourceJobs: await BillQyroDB.getAll('outsourceJobs').catch(() => []),
+      outsourcePayments: await BillQyroDB.getAll('outsourcePayments').catch(() => [])
     };
 
     await this.logAdminAudit({
       action: 'PLATFORM_BACKUP_CREATED',
       target: 'ALL_COLLECTIONS',
       result: 'SUCCESS',
-      details: `Generated snapshot with ${backupData.invoices.length} invoices, ${backupData.customers.length} customers, ${backupData.products.length} products.`
+      details: `Generated snapshot with ${backupData.invoices.length} invoices, ${backupData.customers.length} customers, ${backupData.products.length} products, ${backupData.vendors.length} vendors.`
     });
 
     return backupData;
@@ -391,7 +394,8 @@ export const adminEngine = {
 
     const stores = [
       'invoices', 'customers', 'products', 'expenses', 'settings',
-      'bankLedger', 'bankCredit', 'appointments', 'orders', 'activities', 'announcements'
+      'bankLedger', 'bankCredit', 'appointments', 'orders', 'activities', 'announcements',
+      'vendors', 'outsourceJobs', 'outsourcePayments'
     ];
 
     let restoredCount = 0;
