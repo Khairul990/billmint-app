@@ -375,18 +375,60 @@ const CreateInvoice = ({
 
   const handleSave = async () => {
     const isEditing = Boolean(editingInvoice?.id);
-    const existingPaymentHistory = Array.isArray(editingInvoice?.paymentHistory) ? editingInvoice.paymentHistory : [];
+    const existingPaymentHistory = Array.isArray(editingInvoice?.paymentHistory) ? [...editingInvoice.paymentHistory] : [];
     
-    // In edit mode: preserve payment history if not explicitly wiped
+    // In edit mode: if legacy invoice had paid amount > 0 but empty history, initialize baseline
     let finalPaymentHistory = [...existingPaymentHistory];
-    if (!isEditing && totals.paidVal > 0) {
+    const initialPaid = parseFloat(editingInvoice?.amountPaid ?? editingInvoice?.paidAmount) || 0;
+    if (isEditing && finalPaymentHistory.length === 0 && initialPaid > 0) {
       finalPaymentHistory = [{
-        id: 'pmt_' + Date.now(),
-        amount: totals.paidVal,
-        method: paymentMethod || 'Cash',
-        date: date || new Date().toISOString(),
-        note: 'Payment on creation'
+        id: 'pmt_init_' + (editingInvoice.id || Date.now()),
+        amount: initialPaid,
+        method: editingInvoice.paymentMethod || 'Cash',
+        date: editingInvoice.date || new Date().toISOString(),
+        note: 'Initial payment'
       }];
+    }
+
+    const currentHistorySum = Math.round(finalPaymentHistory.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) * 100) / 100;
+    const paidVal = Math.round((parseFloat(totals.paidVal) || 0) * 100) / 100;
+
+    if (isEditing) {
+      if (paidVal > currentHistorySum) {
+        const delta = Math.round((paidVal - currentHistorySum) * 100) / 100;
+        if (delta > 0) {
+          finalPaymentHistory.push({
+            id: 'pmt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+            amount: delta,
+            method: paymentMethod || 'Cash',
+            date: new Date().toISOString(),
+            note: 'Payment on edit'
+          });
+        }
+      } else if (paidVal === 0) {
+        finalPaymentHistory = [];
+      } else if (paidVal < currentHistorySum) {
+        finalPaymentHistory = [{
+          id: 'pmt_adj_' + Date.now(),
+          amount: paidVal,
+          method: paymentMethod || 'Cash',
+          date: new Date().toISOString(),
+          note: 'Adjusted payment'
+        }];
+      }
+    } else {
+      // Create mode
+      if (paidVal > 0) {
+        finalPaymentHistory = [{
+          id: 'pmt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+          amount: paidVal,
+          method: paymentMethod || 'Cash',
+          date: date || new Date().toISOString(),
+          note: 'Payment on creation'
+        }];
+      } else {
+        finalPaymentHistory = [];
+      }
     }
 
     const payload = {
@@ -411,6 +453,7 @@ const CreateInvoice = ({
       shipping: parseFloat(shipping) || 0,
       grandTotal: totals.grandTotal,
       oldDue: totals.oldDue,
+      totalReceivable: totals.totalReceivable,
       amountPaid: totals.paidVal,
       paidAmount: totals.paidVal,
       balanceDue: totals.balanceDue,

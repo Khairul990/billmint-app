@@ -369,8 +369,8 @@ export const computeCustomerReport = (invoices = [], customers = []) => {
   const customerStats = {};
 
   billable.forEach(inv => {
-    const custId = inv.customerId || inv.customerName || 'Unknown';
-    const custName = inv.customerName || 'Unknown';
+    const custId = inv.customerId ? String(inv.customerId).trim() : (inv.customer?.id ? String(inv.customer.id).trim() : (inv.customerName ? ('name_' + inv.customerName.trim().toLowerCase()) : 'Unknown'));
+    const custName = inv.customerName || inv.customer?.name || 'Unknown';
     const total = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
     const paid = getInvoicePaidTotal(inv);
     const due = Math.max(0, roundTo2(total - paid));
@@ -503,25 +503,34 @@ export const computeCustomerLedger = (customer, invoices = [], excludeInvoiceId 
     };
   }
 
-  const custId = customer.id ? String(customer.id) : null;
+  const custId = customer.id ? String(customer.id).trim() : null;
   const custName = (customer.name || '').trim().toLowerCase();
+  const custPhone = (customer.phone || '').trim().replace(/[^0-9]/g, '');
 
   const customerInvoices = invoices.filter(inv => {
     if (!inv || inv.isDeleted) return false;
     if (inv.status === 'Cancelled' || inv.status === 'Void') return false;
     if (excludeInvoiceId && (inv.id === excludeInvoiceId || inv.invoiceNumber === excludeInvoiceId)) return false;
 
-    // Match by ID if available, otherwise match by customerName
-    const matchesId = custId && (
-      (inv.customerId && String(inv.customerId) === custId) ||
-      (inv.customer?.id && String(inv.customer.id) === custId)
-    );
-    const matchesName = custName && (
-      (inv.customerName && inv.customerName.trim().toLowerCase() === custName) ||
-      (inv.customer?.name && inv.customer.name.trim().toLowerCase() === custName)
-    );
+    const invCustId = inv.customerId ? String(inv.customerId).trim() : (inv.customer?.id ? String(inv.customer.id).trim() : null);
+    const invCustName = (inv.customerName || inv.customer?.name || '').trim().toLowerCase();
+    const invCustPhone = (inv.customerPhone || inv.customer?.phone || '').trim().replace(/[^0-9]/g, '');
 
-    return matchesId || matchesName;
+    // 1. Primary Identity: customerId
+    if (custId && invCustId) {
+      return custId === invCustId;
+    }
+
+    // 2. Safe Fallback: only if customerId is missing from either customer or invoice
+    if (custPhone && invCustPhone && custPhone.length >= 7 && invCustPhone.length >= 7) {
+      if (custPhone === invCustPhone) return true;
+    }
+
+    if (custName && invCustName) {
+      return custName === invCustName;
+    }
+
+    return false;
   });
 
   let totalBilled = 0;
