@@ -20,6 +20,10 @@ const isActiveInvoice = (invoice) => (
   (invoice.documentType || (invoice.billType === 'Estimate' ? 'Estimate' : 'Invoice')) === 'Invoice'
 );
 
+const isActiveOutsourceJob = (job) => (
+  job && !job.isDeleted && job.status !== 'Cancelled'
+);
+
 const amount = (value) => roundTo2(parseFloat(value) || 0);
 
 const sameDay = (a, b) => {
@@ -32,14 +36,11 @@ const dateOf = (item) => item?.date || item?.createdAt || item?.updatedAt || nul
 
 /**
  * Calculate dashboard-level financial metrics without changing source records.
+ * Client revenue remains the full invoice amount; outsource work is tracked as
+ * a separate direct cost and therefore never reduces the client invoice.
  *
- * Revenue/billed is based on valid invoice grand totals.
- * Cash collected is based on payment history when available, otherwise the
- * canonical invoice paid resolver.
- * Client due uses the canonical invoice balance resolver.
- *
- * `outsourceJobs` is intentionally optional so the dashboard can safely adopt
- * this utility before the full Vendor/Outsource persistence model is enabled.
+ * `outsourceJobs` is optional so the dashboard remains compatible while the
+ * Vendor/Outsource persistence model is rolled out.
  */
 export const calculateFinancialCommandCenter = ({
   invoices = [],
@@ -49,7 +50,9 @@ export const calculateFinancialCommandCenter = ({
 } = {}) => {
   const activeInvoices = Array.isArray(invoices) ? invoices.filter(isActiveInvoice) : [];
   const validExpenses = Array.isArray(expenses) ? expenses.filter(Boolean) : [];
-  const validOutsourceJobs = Array.isArray(outsourceJobs) ? outsourceJobs.filter(Boolean) : [];
+  const validOutsourceJobs = Array.isArray(outsourceJobs)
+    ? outsourceJobs.filter(isActiveOutsourceJob)
+    : [];
 
   const totalBilled = amount(activeInvoices.reduce(
     (sum, invoice) => sum + amount(invoice.grandTotal ?? invoice.total ?? invoice.totals?.grandTotal),
@@ -92,14 +95,34 @@ export const calculateFinancialCommandCenter = ({
   }, 0));
 
   const outsourcePayable = amount(Math.max(0, totalOutsourceCost - outsourcePaid));
+
   const totalExpenses = amount(validExpenses.reduce(
     (sum, expense) => sum + amount(expense.amount ?? expense.total),
     0,
   ));
 
+  const todaysOutsourceCost = amount(validOutsourceJobs
+    .filter((job) => sameDay(dateOf(job), now))
+    .reduce((sum, job) => sum + amount(job.agreedCost ?? job.totalCost ?? job.cost), 0));
+
+  const todaysOutsourcePaid = amount(validOutsourceJobs.reduce((sum, job) => {
+    if (!Array.isArray(job.paymentHistory)) return sum;
+    return sum + job.paymentHistory
+      .filter((payment) => sameDay(payment.date || payment.createdAt, now))
+      .reduce((inner, payment) => inner + amount(payment.amount), 0);
+  }, 0));
+
+  const todaysExpenses = amount(validExpenses
+    .filter((expense) => sameDay(dateOf(expense), now))
+    .reduce((sum, expense) => sum + amount(expense.amount ?? expense.total), 0));
+
   const directCosts = amount(totalOutsourceCost + totalExpenses);
   const grossProfit = amount(totalBilled - directCosts);
   const profitMargin = totalBilled > 0 ? amount((grossProfit / totalBilled) * 100) : 0;
+
+  const todaysDirectCosts = amount(todaysOutsourceCost + todaysExpenses);
+  const todaysProfit = amount(todaysBilling - todaysDirectCosts);
+  const todaysProfitMargin = todaysBilling > 0 ? amount((todaysProfit / todaysBilling) * 100) : 0;
 
   return {
     totalBilled,
@@ -114,6 +137,12 @@ export const calculateFinancialCommandCenter = ({
     profitMargin,
     todaysBilling,
     todaysCollection,
+    todaysOutsourceCost,
+    todaysOutsourcePaid,
+    todaysExpenses,
+    todaysDirectCosts,
+    todaysProfit,
+    todaysProfitMargin,
     invoiceCount: activeInvoices.length,
     outsourceJobCount: validOutsourceJobs.length,
   };

@@ -1,39 +1,16 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper to check if user is authenticated
-    function isAuth() {
-      return request.auth != null;
-    }
+    function isAuth() { return request.auth != null; }
+    function isOwner(userId) { return isAuth() && request.auth.uid == userId; }
+    function isAdmin() { return isAuth() && request.auth.token.superAdmin == true; }
 
-    // Helper to check if user is owner
-    function isOwner(userId) {
-      return isAuth() && request.auth.uid == userId;
-    }
-
-    // Helper to check if user is Super Admin
-    function isAdmin() {
-      return isAuth() && request.auth.token.superAdmin == true;
-    }
-
-    // Helper to validate workspace isolation: user can only access their own workspace
-    function isWorkspaceOwner(userId, workspaceId) {
-      return isOwner(userId) && request.resource.data.activeWorkspaceId == workspaceId;
-    }
-
-    // Helper to validate public invoice fields (no sensitive internal data)
     function isValidPublicInvoiceData() {
       let diff = request.resource.data.diff(resource.data);
       let allowedKeysOnly = diff.affectedKeys().hasOnly(['paymentProofs', 'paymentStatus', 'updatedAt']);
-      let allowedStatusUpdate = !diff.affectedKeys().hasAny(['paymentStatus']) || 
-                                request.resource.data.paymentStatus == 'Pending Verification';
+      let allowedStatusUpdate = !diff.affectedKeys().hasAny(['paymentStatus']) || request.resource.data.paymentStatus == 'Pending Verification';
       return allowedKeysOnly && allowedStatusUpdate;
     }
-
-    // -------------------------------------------------------------------------
-    // Private Workspace Data (Subcollections under user ID)
-    // -------------------------------------------------------------------------
 
     match /invoices/{userId}/items/{itemId} {
       allow read, delete: if isOwner(userId) || isAdmin();
@@ -95,17 +72,12 @@ service cloud.firestore {
       allow update: if isOwner(userId) && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
     }
 
-    // -------------------------------------------------------------------------
-    // Settings and Profiles
-    // -------------------------------------------------------------------------
-
     match /settings/{userId} {
       allow read, delete: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId);
-      allow update: if isOwner(userId)
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'role', 'subscription']);
+      allow update: if isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'role', 'subscription']);
     }
-    
+
     match /invoice_counters/{userId} {
       allow read, write: if isOwner(userId) || isAdmin();
     }
@@ -115,41 +87,21 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // UsersList - Role escalation protection
     match /usersList/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      
-      // Super admin can do anything
       allow write: if isAdmin();
-      
-      // Normal users cannot set dangerous role/subscription fields
-      allow create: if isOwner(userId)
-        && !request.resource.data.keys().hasAny(['role', 'isAdmin', 'plan', 'permissions', 'subscription', 'businessId']);
-        
-      allow update: if isOwner(userId)
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin', 'plan', 'permissions', 'subscription', 'businessId']);
-        
+      allow create: if isOwner(userId) && !request.resource.data.keys().hasAny(['role', 'isAdmin', 'plan', 'permissions', 'subscription', 'businessId']);
+      allow update: if isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin', 'plan', 'permissions', 'subscription', 'businessId']);
       allow delete: if isOwner(userId);
     }
 
-    // -------------------------------------------------------------------------
-    // Public Assets (Live Invoice Links)
-    // -------------------------------------------------------------------------
-
     match /publicInvoices/{publicToken} {
-      // Anyone can read a public invoice (by design for live links)
       allow read: if true;
-      
-      // Only authenticated owners can create or delete public invoices fully
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
       allow delete: if isAuth() && resource.data.userId == request.auth.uid;
-      
-      // Unauthenticated users (customers) can only update payment proofs
-      // Validates that only allowed fields are modified
       allow update: if (isAuth() && (!("userId" in resource.data) || resource.data.userId == request.auth.uid)) || isValidPublicInvoiceData();
     }
 
-    // Legacy fallback
     match /public_invoices/{publicToken} {
       allow read: if true;
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
@@ -157,46 +109,35 @@ service cloud.firestore {
       allow update: if (isAuth() && (!("userId" in resource.data) || resource.data.userId == request.auth.uid)) || isValidPublicInvoiceData();
     }
 
-    // -------------------------------------------------------------------------
-    // Admin & Billing
-    // -------------------------------------------------------------------------
-
     match /premiumRequests/{requestId} {
-      // Users can only read/write their own requests
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
       allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
       allow update, delete: if isAdmin();
     }
-    
+
     match /payment_proofs/{proofId} {
-      // Allow unauthenticated customers to submit payment proofs (status must be pending)
-      allow create: if (isAuth() && request.resource.data.ownerId == request.auth.uid) || 
-                       (!isAuth() && request.resource.data.status == 'pending' && request.resource.data.publicInvoiceId != null);
+      allow create: if (isAuth() && request.resource.data.ownerId == request.auth.uid) || (!isAuth() && request.resource.data.status == 'pending' && request.resource.data.publicInvoiceId != null);
       allow read: if isAuth() && (resource.data.ownerId == request.auth.uid || isAdmin());
-      allow update: if isAuth() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow update: if isAdmin();
       allow delete: if isAdmin();
     }
-    
+
     match /platformConfig/{configId} {
       allow read: if isAuth();
       allow write: if isAdmin();
     }
-    
+
     match /globalAdminSettings/{configId} {
       allow read: if isAuth();
       allow write: if isAdmin();
     }
-
-    // -------------------------------------------------------------------------
-    // Support & Announcements (Plan 20)
-    // -------------------------------------------------------------------------
 
     match /supportTickets/{ticketId} {
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
       allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
       allow update, delete: if isAdmin();
     }
-    
+
     match /featureRequests/{requestId} {
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
       allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
@@ -207,10 +148,6 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
-
-    // -------------------------------------------------------------------------
-    // Revenue & Billing Admin
-    // -------------------------------------------------------------------------
 
     match /adminRevenueSettings/{configId} {
       allow read: if isAuth();
@@ -238,10 +175,6 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // -------------------------------------------------------------------------
-    // Telemetry & Monitoring
-    // -------------------------------------------------------------------------
-
     match /control_website_events/{eventId} {
       allow read, write: if isAdmin();
     }
@@ -253,19 +186,5 @@ service cloud.firestore {
     match /control_website_health/{healthId} {
       allow read, write: if isAdmin();
     }
-
-    // -------------------------------------------------------------------------
-    // Rate Limiting & Security Notes
-    // -------------------------------------------------------------------------
-    // NOTE: Firestore native rules do NOT support rate limiting.
-    // For production rate limiting, deploy a Cloud Function that sits
-    // in front of write operations, or use Firebase Extensions.
-    //
-    // All collections follow the principle of least privilege:
-    // - Users can only read/write their own data (userId subcollections)
-    // - Admin/owner email is hardcoded for rule-level access
-    // - Public invoice reads are open (by design for live links)
-    // - Payment proof updates are restricted to allowed fields only
-    // - Role escalation fields (role, isAdmin, plan) are blocked on usersList
   }
 }
