@@ -10,7 +10,7 @@ import {
   getInvoicePaidTotal,
   getInvoiceBalanceDue,
   roundTo2,
-} from './financialCalculations';
+} from './financialCalculations.js';
 
 const isActiveInvoice = (invoice) => (
   invoice &&
