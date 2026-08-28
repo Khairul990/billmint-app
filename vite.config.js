@@ -16,14 +16,19 @@ export default defineConfig(({ mode }) => ({
     ]
   },
   plugins: [
-    react(),
+    react({
+      // pdfUtils.js contains JSX for the existing PDF document pipeline.
+      // Keep the JSX handling scoped to that utility instead of changing the
+      // loader for every .js file in the application.
+      include: [/[\\/]src[\\/]utils[\\/]pdfUtils\.js$/, /\.[jt]sx?$/]
+    }),
     nodePolyfills({
       globals: {
         Buffer: true,
         global: true,
         process: true,
       },
-    }), // Required by @react-pdf/renderer in Vite production builds
+    }),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
@@ -79,17 +84,10 @@ export default defineConfig(({ mode }) => ({
     })
   ],
   server: {
-    host: '0.0.0.0', // Listen on all local IPs so it's accessible from phone
+    host: '0.0.0.0',
     watch: {
       ignored: ['**/*.md', '**/dist/**', '**/.git/**', '**/dev-dist/**', '**/docs/**']
     }
-  },
-  // pdfUtils.js intentionally contains React JSX. Keep it as .js for backwards
-  // compatible imports, but make Vite parse that specific utility as JSX.
-  esbuild: {
-    loader: 'jsx',
-    include: /src[\\/]utils[\\/]pdfUtils\.js$/,
-    drop: mode === 'android' ? [] : ['console', 'debugger'],
   },
   build: {
     sourcemap: false,
