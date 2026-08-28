@@ -74,6 +74,60 @@ const waitForAssets = async (root) => {
   }));
 };
 
+const sanitizeClonedColors = (clonedDocument) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const toRgb = (colorStr) => {
+    if (!colorStr || typeof colorStr !== 'string') return colorStr;
+    if (!colorStr.includes('color(') && !colorStr.includes('oklch') && !colorStr.includes('color-mix') && !colorStr.includes('lab(')) {
+      return colorStr;
+    }
+    try {
+      ctx.fillStyle = '#000000';
+      ctx.fillStyle = colorStr;
+      return ctx.fillStyle;
+    } catch {
+      return '#000000';
+    }
+  };
+
+  const sanitizeColorText = (val) => {
+    if (!val || typeof val !== 'string') return val;
+    return val
+      .replace(/color\([^)]+\)/g, (match) => toRgb(match))
+      .replace(/oklch\([^)]+\)/g, (match) => toRgb(match))
+      .replace(/color-mix\([^)]+\)/g, (match) => toRgb(match))
+      .replace(/lab\([^)]+\)/g, (match) => toRgb(match));
+  };
+
+  const colorProps = [
+    'color', 'backgroundColor', 'borderColor',
+    'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
+    'outlineColor', 'fill', 'stroke'
+  ];
+
+  const allElements = clonedDocument.querySelectorAll('*');
+  allElements.forEach((node) => {
+    if (!(node instanceof HTMLElement || node instanceof SVGElement)) return;
+    try {
+      const computed = window.getComputedStyle(node);
+      colorProps.forEach((prop) => {
+        const val = computed[prop];
+        if (val && (val.includes('color(') || val.includes('oklch') || val.includes('color-mix') || val.includes('lab('))) {
+          node.style[prop] = toRgb(val);
+        }
+      });
+      if (computed.boxShadow && (computed.boxShadow.includes('color(') || computed.boxShadow.includes('oklch'))) {
+        node.style.boxShadow = sanitizeColorText(computed.boxShadow);
+      }
+    } catch {}
+  });
+};
+
 const renderExactPreview = async (root) => {
   await waitForAssets(root);
   await nextPaint();
@@ -104,6 +158,7 @@ const renderExactPreview = async (root) => {
       windowWidth: 1200, // Forces full desktop layout and grid/flex alignment
       removeContainer: true,
       onclone: (clonedDocument) => {
+        sanitizeClonedColors(clonedDocument);
         const clonedRoot = clonedDocument.querySelector('#invoice-preview-capture');
         if (clonedRoot) {
           clonedRoot.style.width = '794px';
