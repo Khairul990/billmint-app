@@ -14,9 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Patch financial balance semantics and PDF fallback
-        shell: python
+      - name: Patch financial balance and PDF fallback
+        shell: bash
         run: |
+          python3 - <<'PY'
           from pathlib import Path
 
           p = Path('src/utils/financialCalculations.js')
@@ -58,7 +59,6 @@ jobs:
             const paidTotal = getInvoicePaidTotal(inv);
             return Math.max(0, roundTo2(currentInvoiceTotal + oldDue - paidTotal));
           };'''
-
           if old_balance in s:
               s = s.replace(old_balance, new_balance, 1)
 
@@ -78,21 +78,13 @@ jobs:
           if old_status in s:
               s = s.replace(old_status, new_status, 1)
 
-          # Canonical render model must expose current bill due separately from old due.
           s = s.replace('balanceDue: canonical.balanceDue,', 'balanceDue: canonical.currentBillDue,\n    totalReceivableDue: canonical.totalReceivable,', 1)
           p.write_text(s, encoding='utf-8')
 
           q = Path('src/utils/pdfUtils.js')
           s = q.read_text(encoding='utf-8')
-          marker = "  const pdfPromise = pdf(doc).toBlob();\n"
-          replacement = """  const pdfPromise = pdf(doc).toBlob();
-"""
-          # Make PDF generation resilient: if a complex premium template hangs,
-          # retry once with the safe built-in Helvetica layout instead of leaving
-          # the user with a hard failure.
-          old_race = """  return Promise.race([pdfPromise, timeoutPromise]);
-};"""
-          new_race = """  try {
+          old_race = '  return Promise.race([pdfPromise, timeoutPromise]);\n};'
+          new_race = '''  try {
     return await Promise.race([pdfPromise, timeoutPromise]);
   } catch (firstError) {
     console.warn('[PDF] Primary template failed; retrying with safe standard layout.', firstError);
@@ -109,10 +101,11 @@ jobs:
       new Promise((_, reject) => setTimeout(() => reject(firstError), 15000))
     ]);
   }
-};"""
+};'''
           if old_race in s:
               s = s.replace(old_race, new_race, 1)
           q.write_text(s, encoding='utf-8')
+          PY
 
       - name: Remove one-time repair workflow
         run: rm -f .github/workflows/repair-financial-and-pdf.yml
