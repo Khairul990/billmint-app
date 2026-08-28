@@ -1,5 +1,5 @@
 import React from 'react';
-import { pdf, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { pdf } from '@react-pdf/renderer';
 import PdfDocument from '../components/PdfDocument';
 import { toast } from 'react-hot-toast';
 import QRCode from 'qrcode';
@@ -13,7 +13,7 @@ const IMAGE_BASE_SCALE = 3;
 const MAX_CANVAS_AREA = 25000000;
 const MAX_CANVAS_SIDE = 16384;
 const LOGO_FETCH_TIMEOUT_MS = 1500;
-const PDF_GENERATION_TIMEOUT_MS = 30000;
+const PDF_GENERATION_TIMEOUT_MS = 20000;
 const LARGE_INVOICE_ITEM_THRESHOLD = 10;
 
 const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu;
@@ -60,139 +60,141 @@ const safeMoney = (value) => {
   return Number.isFinite(n) ? n.toFixed(2) : '0.00';
 };
 
-const safePdfStyles = StyleSheet.create({
-  page: { padding: 32, fontFamily: 'Helvetica', fontSize: 9, color: '#1f2937', lineHeight: 1.35 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 14, marginBottom: 16, borderBottomWidth: 1, borderBottomColor: '#d1d5db' },
-  business: { fontSize: 17, fontFamily: 'Helvetica-Bold', marginBottom: 4, color: '#111827' },
-  muted: { fontSize: 8, color: '#6b7280', marginBottom: 2 },
-  title: { fontSize: 18, fontFamily: 'Helvetica-Bold', textAlign: 'right', color: '#111827' },
-  meta: { fontSize: 8, textAlign: 'right', color: '#6b7280', marginTop: 3 },
-  customer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
-  sectionLabel: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#6b7280', textTransform: 'uppercase', marginBottom: 4 },
-  customerName: { fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#111827' },
-  table: { width: '100%', marginBottom: 14 },
-  row: { flexDirection: 'row', borderBottomWidth: 0.6, borderBottomColor: '#e5e7eb', paddingVertical: 6 },
-  head: { flexDirection: 'row', backgroundColor: '#f3f4f6', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#d1d5db' },
-  desc: { width: '58%', paddingHorizontal: 4 },
-  qty: { width: '12%', textAlign: 'right', paddingHorizontal: 4 },
-  rate: { width: '15%', textAlign: 'right', paddingHorizontal: 4 },
-  amount: { width: '15%', textAlign: 'right', paddingHorizontal: 4 },
-  headText: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#4b5563' },
-  cell: { fontSize: 8.5 },
-  totals: { width: '42%', marginLeft: '58%' },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
-  totalLabel: { fontSize: 8, color: '#6b7280' },
-  totalValue: { fontSize: 9, fontFamily: 'Helvetica-Bold' },
-  grand: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: '#111827', marginTop: 4, paddingTop: 7 },
-  grandText: { fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#111827' },
-  paid: { color: '#059669' },
-  due: { color: '#dc2626' },
-  payment: { marginTop: 18, padding: 10, backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e5e7eb' },
-  footer: { marginTop: 20, paddingTop: 8, borderTopWidth: 0.6, borderTopColor: '#e5e7eb', textAlign: 'center', fontSize: 7, color: '#9ca3af' },
-});
+// React-PDF can stall indefinitely on some data-heavy browser renders. For
+// large invoices we use a tiny deterministic PDF writer instead. It has no
+// fonts/images/plugins to resolve, so it cannot hang on template pagination.
+const pdfEscape = (value) => String(value ?? '')
+  .replace(/\\/g, '\\\\')
+  .replace(/\(/g, '\\(')
+  .replace(/\)/g, '\\)')
+  .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, '');
 
-// Deterministic renderer used for large invoices. It intentionally avoids all
-// custom template components and images, which can make React-PDF pagination
-// stall on data-heavy invoices. The financial values remain canonical.
-const createLargeInvoiceSafeDocument = (invoice, businessSettings, pageSize) => {
-  const safeInvoice = sanitizePdfValue(invoice || {});
-  const settings = sanitizePdfValue(businessSettings || {});
-  const items = Array.isArray(safeInvoice.items) ? safeInvoice.items : [];
-  const financials = calculateCanonicalInvoiceFinancials(invoice || {});
-  const currency = settings?.currencySymbol || safeInvoice?.currencySymbol || 'Rs. ';
-  const businessName = settings?.businessName || 'BillQyro Business';
-  const customer = safeInvoice?.customer || safeInvoice?.client || {};
-  const customerName = customer?.name || safeInvoice?.customerName || 'Customer';
-  const number = safeInvoice?.invoiceNumber || '000';
-  const date = safeInvoice?.date || safeInvoice?.createdAt || '';
-
-  return (
-    <Document title={`Invoice ${number}`} author="BillQyro">
-      <Page size={pageSize} style={safePdfStyles.page} wrap>
-        <View style={safePdfStyles.header}>
-          <View>
-            <Text style={safePdfStyles.business}>{safeText(businessName)}</Text>
-            {settings?.address ? <Text style={safePdfStyles.muted}>{safeText(settings.address)}</Text> : null}
-            {settings?.phone ? <Text style={safePdfStyles.muted}>Ph: {safeText(settings.phone)}</Text> : null}
-            {settings?.email ? <Text style={safePdfStyles.muted}>{safeText(settings.email)}</Text> : null}
-          </View>
-          <View>
-            <Text style={safePdfStyles.title}>INVOICE</Text>
-            <Text style={safePdfStyles.meta}>#{safeText(number)}</Text>
-            <Text style={safePdfStyles.meta}>{safeText(date)}</Text>
-          </View>
-        </View>
-
-        <View style={safePdfStyles.customer}>
-          <View>
-            <Text style={safePdfStyles.sectionLabel}>Bill To</Text>
-            <Text style={safePdfStyles.customerName}>{safeText(customerName)}</Text>
-            {customer?.phone ? <Text style={safePdfStyles.muted}>{safeText(customer.phone)}</Text> : null}
-            {customer?.address ? <Text style={safePdfStyles.muted}>{safeText(customer.address)}</Text> : null}
-          </View>
-          <View>
-            <Text style={safePdfStyles.sectionLabel}>Status</Text>
-            <Text style={safePdfStyles.customerName}>{safeText(financials.status || safeInvoice.status || 'Pending')}</Text>
-          </View>
-        </View>
-
-        <View style={safePdfStyles.table}>
-          <View style={safePdfStyles.head} fixed>
-            <Text style={[safePdfStyles.desc, safePdfStyles.headText]}>DESCRIPTION</Text>
-            <Text style={[safePdfStyles.qty, safePdfStyles.headText]}>QTY</Text>
-            <Text style={[safePdfStyles.rate, safePdfStyles.headText]}>RATE</Text>
-            <Text style={[safePdfStyles.amount, safePdfStyles.headText]}>AMOUNT</Text>
-          </View>
-          {items.map((item, index) => {
-            const qty = Number(item?.quantity ?? item?.qty ?? 1) || 0;
-            const rate = Number(item?.rate ?? item?.price ?? item?.unitPrice ?? 0) || 0;
-            const amount = Number(item?.amount ?? item?.total ?? qty * rate) || 0;
-            return (
-              <View style={safePdfStyles.row} key={item?.id || item?.itemId || `item-${index}`} wrap={false}>
-                <Text style={[safePdfStyles.desc, safePdfStyles.cell]}>{safeText(item?.description || item?.name || `Item ${index + 1}`)}</Text>
-                <Text style={[safePdfStyles.qty, safePdfStyles.cell]}>{safeMoney(qty)}</Text>
-                <Text style={[safePdfStyles.rate, safePdfStyles.cell]}>{currency}{safeMoney(rate)}</Text>
-                <Text style={[safePdfStyles.amount, safePdfStyles.cell]}>{currency}{safeMoney(amount)}</Text>
-              </View>
-            );
-          })}
-        </View>
-
-        <View style={safePdfStyles.totals}>
-          <View style={safePdfStyles.totalRow}><Text style={safePdfStyles.totalLabel}>Subtotal</Text><Text style={safePdfStyles.totalValue}>{currency}{safeMoney(financials.subtotal)}</Text></View>
-          <View style={safePdfStyles.totalRow}><Text style={safePdfStyles.totalLabel}>Discount</Text><Text style={safePdfStyles.totalValue}>-{currency}{safeMoney(financials.discount)}</Text></View>
-          <View style={safePdfStyles.totalRow}><Text style={safePdfStyles.totalLabel}>Tax</Text><Text style={safePdfStyles.totalValue}>{currency}{safeMoney(financials.tax)}</Text></View>
-          <View style={safePdfStyles.grand}><Text style={safePdfStyles.grandText}>Grand Total</Text><Text style={safePdfStyles.grandText}>{currency}{safeMoney(financials.grandTotal)}</Text></View>
-          <View style={safePdfStyles.totalRow}><Text style={safePdfStyles.totalLabel}>Paid</Text><Text style={[safePdfStyles.totalValue, safePdfStyles.paid]}>{currency}{safeMoney(financials.totalPaid)}</Text></View>
-          <View style={safePdfStyles.grand}><Text style={[safePdfStyles.grandText, safePdfStyles.due]}>Balance Due</Text><Text style={[safePdfStyles.grandText, safePdfStyles.due]}>{currency}{safeMoney(financials.balanceDue)}</Text></View>
-        </View>
-
-        {(safeInvoice?.paymentMethod || safeInvoice?.paymentNote) ? (
-          <View style={safePdfStyles.payment}>
-            <Text style={safePdfStyles.sectionLabel}>Payment Information</Text>
-            {safeInvoice.paymentMethod ? <Text>Method: {safeText(safeInvoice.paymentMethod)}</Text> : null}
-            {safeInvoice.paymentNote ? <Text>Note: {safeText(safeInvoice.paymentNote)}</Text> : null}
-          </View>
-        ) : null}
-
-        <Text style={safePdfStyles.footer} fixed>Generated by BillQyro • Smart Billing. Premium Invoicing Platform</Text>
-      </Page>
-    </Document>
-  );
+const wrapPdfText = (value, maxChars = 92) => {
+  const text = pdfEscape(value);
+  if (!text) return [''];
+  const words = text.split(/\s+/);
+  const lines = [];
+  let line = '';
+  for (const word of words) {
+    if ((line + (line ? ' ' : '') + word).length <= maxChars) {
+      line += (line ? ' ' : '') + word;
+    } else {
+      if (line) lines.push(line);
+      line = word.slice(0, maxChars);
+    }
+  }
+  if (line) lines.push(line);
+  return lines.length ? lines : [''];
 };
 
-const createPdfDocument = (invoice, businessSettings, qrCodeBase64, safeLogoBase64, pageSize, forceSafeLayout) => {
-  if (forceSafeLayout) return createLargeInvoiceSafeDocument(invoice, businessSettings, pageSize);
-  return React.createElement(PdfDocument, { invoice, businessSettings, qrCodeBase64, safeLogoBase64, pageSize });
+const buildRawPdf = (pages) => {
+  const objects = [];
+  const addObject = (body) => { objects.push(body); return objects.length; };
+  const pageIds = [];
+  const contentIds = [];
+  const fontId = addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+  const pagesId = addObject('');
+
+  pages.forEach((lines) => {
+    const commands = ['BT', '/F1 9 Tf', '40 800 Td', '12 TL'];
+    lines.forEach((line, index) => {
+      if (index > 0) commands.push('T*');
+      commands.push(`(${pdfEscape(line)}) Tj`);
+    });
+    commands.push('ET');
+    const contentId = addObject(`<< /Length ${commands.join('\n').length} >>\nstream\n${commands.join('\n')}\nendstream`);
+    contentIds.push(contentId);
+    pageIds.push(addObject(''));
+  });
+
+  objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(' ')}] /Count ${pageIds.length} >>`;
+  pageIds.forEach((id, index) => {
+    objects[id - 1] = `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${fontId} 0 R >> >> /Contents ${contentIds[index]} 0 R >>`;
+  });
+
+  const catalogId = addObject(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
+  let output = '%PDF-1.4\n%\xFF\xFF\xFF\xFF\n';
+  const offsets = [0];
+  objects.forEach((body, index) => {
+    offsets[index + 1] = output.length;
+    output += `${index + 1} 0 obj\n${body}\nendobj\n`;
+  });
+  const xrefOffset = output.length;
+  output += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (let i = 1; i <= objects.length; i += 1) output += `${String(offsets[i]).padStart(10, '0')} 00000 n \n`;
+  output += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+  return new Blob([output], { type: 'application/pdf' });
+};
+
+const buildLargeInvoiceRawPdf = (invoice, businessSettings) => {
+  const financials = calculateCanonicalInvoiceFinancials(invoice || {});
+  const settings = businessSettings || {};
+  const items = Array.isArray(invoice?.items) ? invoice.items : [];
+  const currency = safeText(settings?.currencySymbol || invoice?.currencySymbol || 'Rs. ');
+  const businessName = safeText(settings?.businessName || 'BillQyro Business');
+  const customer = invoice?.customer || invoice?.client || {};
+  const customerName = safeText(customer?.name || invoice?.customerName || 'Customer');
+  const number = safeText(invoice?.invoiceNumber || '000');
+  const date = safeText(invoice?.date || invoice?.createdAt || '');
+  const status = safeText(financials.status || invoice?.status || 'Pending');
+
+  const allLines = [];
+  allLines.push(`BillQyro - INVOICE #${number}`);
+  allLines.push(businessName);
+  if (settings?.address) allLines.push(safeText(settings.address));
+  if (settings?.phone) allLines.push(`Phone: ${safeText(settings.phone)}`);
+  allLines.push('');
+  allLines.push(`Bill To: ${customerName}`);
+  if (customer?.phone) allLines.push(`Phone: ${safeText(customer.phone)}`);
+  allLines.push(`Date: ${date}    Status: ${status}`);
+  allLines.push('');
+  allLines.push('DESCRIPTION                         QTY        RATE        AMOUNT');
+  allLines.push('--------------------------------------------------------------------------');
+
+  items.forEach((item, index) => {
+    const qty = Number(item?.quantity ?? item?.qty ?? 1) || 0;
+    const rate = Number(item?.rate ?? item?.price ?? item?.unitPrice ?? 0) || 0;
+    const amount = Number(item?.amount ?? item?.total ?? qty * rate) || 0;
+    const description = safeText(item?.description || item?.name || `Item ${index + 1}`);
+    const wrapped = wrapPdfText(description, 34);
+    wrapped.forEach((line, lineIndex) => {
+      if (lineIndex === 0) allLines.push(`${line.padEnd(34)} ${String(qty).padStart(8)} ${currency}${safeMoney(rate).padStart(10)} ${currency}${safeMoney(amount).padStart(11)}`);
+      else allLines.push(`  ${line}`);
+    });
+  });
+
+  allLines.push('');
+  allLines.push(`Subtotal: ${currency}${safeMoney(financials.subtotal)}`);
+  allLines.push(`Discount: -${currency}${safeMoney(financials.discount)}`);
+  allLines.push(`Tax: ${currency}${safeMoney(financials.tax)}`);
+  allLines.push(`GRAND TOTAL: ${currency}${safeMoney(financials.grandTotal)}`);
+  allLines.push(`PAID: ${currency}${safeMoney(financials.totalPaid)}`);
+  allLines.push(`BALANCE DUE: ${currency}${safeMoney(financials.balanceDue)}`);
+  if (invoice?.paymentMethod) allLines.push(`Payment Method: ${safeText(invoice.paymentMethod)}`);
+  if (invoice?.paymentNote) allLines.push(`Payment Note: ${safeText(invoice.paymentNote)}`);
+  allLines.push('');
+  allLines.push('Generated by BillQyro - Smart Billing. Premium Invoicing Platform');
+
+  const pages = [];
+  const linesPerPage = 58;
+  for (let i = 0; i < allLines.length; i += linesPerPage) pages.push(allLines.slice(i, i + linesPerPage));
+  return buildRawPdf(pages.length ? pages : [['BillQyro Invoice']]);
 };
 
 const buildInvoicePdfBlob = async (invoice, businessSettings) => {
+  const itemCount = Array.isArray(invoice?.items) ? invoice.items.length : 0;
+
+  // Critical fix: large invoices no longer enter React-PDF at all.
+  // This removes the browser-side 30/45 second rendering stall entirely.
+  if (itemCount > LARGE_INVOICE_ITEM_THRESHOLD) {
+    return buildLargeInvoiceRawPdf(invoice, businessSettings);
+  }
+
   const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
   const bankDetails = invoiceBuilderSettings.bankDetails || {};
   const paySnap = invoice?.paymentSettingsSnapshot || {};
   const paymentQrEnabled = bankDetails?.showQr ?? businessSettings?.paymentQrEnabled ?? paySnap.paymentQrEnabled ?? false;
   const showQrInPreview = businessSettings?.showQrInPreview !== undefined ? businessSettings.showQrInPreview : (paySnap.showQrInPreview !== undefined ? paySnap.showQrInPreview : true);
-  const paymentMethod = (bankDetails?.upiId ? 'UPI' : businessSettings?.paymentMethod) || paySnap.paymentMethod || 'Manual';
   const upiId = bankDetails?.upiId || businessSettings?.upiId || paySnap.upiId || '';
   const payeeName = businessSettings?.payeeName || businessSettings?.businessName || paySnap.payeeName || '';
   const currencyCode = businessSettings?.currencyCode || invoice?.regionalSettingsSnapshot?.currencyCode || 'INR';
@@ -204,16 +206,12 @@ const buildInvoicePdfBlob = async (invoice, businessSettings) => {
     try {
       const qrText = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${amountDue}&cu=${currencyCode}&tn=${encodeURIComponent(invoice?.invoiceNumber || '')}`;
       qrCodeDataUrl = await QRCode.toDataURL(qrText, { errorCorrectionLevel: 'H', margin: 1, width: 150 });
-    } catch { /* QR is optional; PDF must continue without it. */ }
+    } catch { /* optional */ }
   }
 
-  const itemCount = Array.isArray(invoice?.items) ? invoice.items.length : 0;
-  const forceSafeLayout = itemCount > LARGE_INVOICE_ITEM_THRESHOLD;
-  // The large-invoice renderer deliberately skips logo/template/QR work. This
-  // removes the known sources of React-PDF stalls while keeping all financial data.
-  const safeLogoBase64 = forceSafeLayout ? null : await fetchLogoSafely(businessSettings?.logoUrl);
+  const safeLogoBase64 = await fetchLogoSafely(businessSettings?.logoUrl);
   const pageSize = businessSettings?.pdfPageSize || 'A4';
-  const doc = createPdfDocument(invoice, businessSettings, qrCodeDataUrl, safeLogoBase64, pageSize, forceSafeLayout);
+  const doc = React.createElement(PdfDocument, { invoice, businessSettings, qrCodeBase64: qrCodeDataUrl, safeLogoBase64, pageSize });
   return withTimeout(pdf(doc).toBlob(), PDF_GENERATION_TIMEOUT_MS);
 };
 
@@ -235,7 +233,7 @@ const renderPdfPagesToSinglePng = async (arrayBuffer) => {
       maxWidth = Math.max(maxWidth, viewport.width);
       totalHeight += viewport.height;
     }
-    let scale = Math.min(IMAGE_BASE_SCALE, Math.sqrt(MAX_CANVAS_AREA / (maxWidth * totalHeight)), MAX_CANVAS_SIDE / totalHeight, MAX_CANVAS_SIDE / maxWidth);
+    const scale = Math.min(IMAGE_BASE_SCALE, Math.sqrt(MAX_CANVAS_AREA / (maxWidth * totalHeight)), MAX_CANVAS_SIDE / totalHeight, MAX_CANVAS_SIDE / maxWidth);
     const canvasWidth = Math.ceil(maxWidth * scale);
     const canvasHeight = Math.ceil(totalHeight * scale);
     const canvas = document.createElement('canvas');
@@ -259,7 +257,7 @@ const renderPdfPagesToSinglePng = async (arrayBuffer) => {
     return await new Promise((resolve, reject) => canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('PNG encoding failed'))), 'image/png'));
   } finally {
     if (typeof loadingTask.destroy === 'function') {
-      try { await loadingTask.destroy(); } catch { /* cleanup best effort */ }
+      try { await loadingTask.destroy(); } catch { /* cleanup */ }
     }
   }
 };
