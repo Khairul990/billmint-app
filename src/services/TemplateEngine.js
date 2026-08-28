@@ -1,6 +1,6 @@
 import { 
   LayoutTemplate, Palette, Globe, Monitor, Smartphone, Tablet, 
-  Building2, Briefcase, Stethoscope, Wrench, ShoppingBag
+  Building2, Briefcase, Stethoscope, Wrench, ShoppingBag, Crown
 } from 'lucide-react';
 
 export const UNIVERSAL_TEMPLATES = [
@@ -68,5 +68,3 @@ export const getTemplateGradient = (templateId) => {
   }
 };
 
-// Reusable mock icon since we used Crown inside UNIVERSAL_TEMPLATES but lucide might not have it loaded if we don't import
-import { Crown } from 'lucide-react';

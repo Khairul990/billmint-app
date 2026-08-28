@@ -197,14 +197,17 @@ const loadRatings = () => {
 };
 const saveRatings = (r) => localStorage.setItem('ll_template_ratings', JSON.stringify(r));
 
-const LiveLinkTemplateStudio = ({ settings, onSaveSettings, setCurrentTab, userSubscription }) => {
+const LiveLinkTemplateStudio = ({ settings, businessSettings, onSaveSettings, setSettings, setCurrentTab, userSubscription }) => {
+  const currentSettings = businessSettings || settings || {};
+  const saveHandler = onSaveSettings || setSettings || (() => {});
+
   const [selectedTemplate, setSelectedTemplate] = useState(
-    settings?.customerLiveLinkSettings?.selectedLiveLinkTemplate || 'classic-minimal'
+    currentSettings?.customerLiveLinkSettings?.selectedLiveLinkTemplate || currentSettings?.selectedLiveLinkTemplate || 'classic'
   );
   const [filterCategory, setFilterCategory] = useState('All');
   const [ratings, setRatings] = useState(loadRatings);
   const [previewModal, setPreviewModal] = useState(null);
-  const portalLabel = getPortalLabelByType(settings?.businessType);
+  const portalLabel = getPortalLabelByType(currentSettings?.businessType);
   const [previewDevice, setPreviewDevice] = useState('mobile');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('light');
@@ -226,13 +229,13 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, setCurrentTab, userS
   });
 
   useEffect(() => {
-    const settingsLL = settings?.customerLiveLinkSettings;
-    if (!settingsLL) return;
-    if (settingsLL.selectedLiveLinkTemplate) setSelectedTemplate(settingsLL.selectedLiveLinkTemplate);
-    if (settingsLL.themePreset) setSelectedTheme(settingsLL.themePreset);
-    if (settingsLL.ctaPreset) setSelectedCta(settingsLL.ctaPreset);
-    if (settingsLL.conversionLayout) setSelectedConversion(settingsLL.conversionLayout);
-  }, [settings]);
+    const activeConf = currentSettings?.customerLiveLinkSettings || {};
+    const tpl = activeConf.selectedLiveLinkTemplate || currentSettings?.selectedLiveLinkTemplate;
+    if (tpl) setSelectedTemplate(tpl);
+    if (activeConf.themePreset) setSelectedTheme(activeConf.themePreset);
+    if (activeConf.ctaPreset) setSelectedCta(activeConf.ctaPreset);
+    if (activeConf.conversionLayout) setSelectedConversion(activeConf.conversionLayout);
+  }, [currentSettings]);
 
   const handleApplyTemplate = async (template) => {
     if (template.type === 'pro' && !isProUser) {
@@ -241,10 +244,12 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, setCurrentTab, userS
       return;
     }
 
+    const currentConf = currentSettings?.customerLiveLinkSettings || {};
     const updatedSettings = {
-      ...settings,
+      ...currentSettings,
+      selectedLiveLinkTemplate: template.id,
       customerLiveLinkSettings: {
-        ...(settings.customerLiveLinkSettings || {}),
+        ...currentConf,
         selectedLiveLinkTemplate: template.id,
         themePreset: selectedTheme,
         ctaPreset: selectedCta,
@@ -252,8 +257,8 @@ const LiveLinkTemplateStudio = ({ settings, onSaveSettings, setCurrentTab, userS
       }
     };
 
-    if (onSaveSettings) {
-      await onSaveSettings(updatedSettings);
+    if (saveHandler) {
+      await saveHandler(updatedSettings);
       setSelectedTemplate(template.id);
       toast.success(`${template.name} template applied to ${portalLabel}!`);
     }
