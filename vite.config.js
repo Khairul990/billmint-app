@@ -84,7 +84,11 @@ export default defineConfig(({ mode }) => ({
       ignored: ['**/*.md', '**/dist/**', '**/.git/**', '**/dev-dist/**', '**/docs/**']
     }
   },
+  // pdfUtils.js intentionally contains React JSX. Keep it as .js for backwards
+  // compatible imports, but make Vite parse that specific utility as JSX.
   esbuild: {
+    loader: 'jsx',
+    include: /src[\\/]utils[\\/]pdfUtils\.js$/,
     drop: mode === 'android' ? [] : ['console', 'debugger'],
   },
   build: {
