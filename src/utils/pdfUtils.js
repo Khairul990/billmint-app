@@ -10,21 +10,102 @@ import { calculateCanonicalInvoiceFinancials } from './invoiceMath';
 let isDownloadingPDF = false;
 let isDownloadingImage = false;
 
-// Image export safety limits (keeps the combined canvas within browser limits)
 const IMAGE_BASE_SCALE = 3;
 const MAX_CANVAS_AREA = 25000000;
 const MAX_CANVAS_SIDE = 16384;
-
-// Remote assets must never be allowed to block PDF generation for long periods.
 const LOGO_FETCH_TIMEOUT_MS = 2500;
-const PDF_GENERATION_TIMEOUT_MS = 45000;
+const PDF_GENERATION_TIMEOUT_MS = 30000;
+const LARGE_INVOICE_ITEM_THRESHOLD = 10;
+
+const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu;
+
+const sanitizePdfValue = (value) => {
+  if (typeof value === 'string') {
+    return value.replace(/₹/g, 'Rs. ').replace(/৳/g, 'Tk. ').replace(emojiRegex, '');
+  }
+  if (Array.isArray(value)) return value.map(sanitizePdfValue);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, sanitizePdfValue(item)]));
+  }
+  return value;
+};
+
+const createPdfDocument = (invoice, businessSettings, qrCodeBase64, safeLogoBase64, pageSize, forceSafeLayout = false) => {
+  const safeInvoice = sanitizePdfValue(invoice);
+  const safeSettings = forceSafeLayout
+    ? { ...businessSettings, selectedPdfTemplate: null }
+    : businessSettings;
+
+  // Large/custom invoices are rendered through the stable canonical layout.
+  // This avoids React-PDF pagination deadlocks in some highly dynamic templates.
+  if (forceSafeLayout) {
+    safeInvoice.selectedTemplate = null;
+    safeInvoice.templateId = null;
+  }
+
+  return React.createElement(PdfDocument, {
+    invoice: safeInvoice,
+    businessSettings: safeSettings,
+    qrCodeBase64: qrCodeBase64,
+    safeLogoBase64,
+    pageSize
+  });
+};
+
+const fetchLogoSafely = async (logoUrl) => {
+  if (!logoUrl) return null;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), LOGO_FETCH_TIMEOUT_MS);
+    const response = await fetch(logoUrl, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!response.ok) return null;
+
+    const blob = await response.blob();
+    const dataUrl = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+    if (!dataUrl) return null;
+
+    return await new Promise((resolve) => {
+      const img = new window.Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        } catch {
+          resolve(null);
+        }
+      };
+      img.onerror = () => resolve(null);
+      img.src = dataUrl;
+    });
+  } catch (error) {
+    console.warn('Could not fetch logo for PDF; continuing without logo.', error);
+    return null;
+  }
+};
+
+const withTimeout = (promise, timeoutMs) => Promise.race([
+  promise,
+  new Promise((_, reject) => {
+    setTimeout(() => reject(new Error(`PDF generation exceeded ${timeoutMs / 1000} seconds.`)), timeoutMs);
+  })
+]);
 
 const buildInvoicePdfBlob = async (invoice, businessSettings) => {
-  let qrCodeDataUrl = null;
   const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
   const bankDetails = invoiceBuilderSettings.bankDetails || {};
-
   const paySnap = invoice?.paymentSettingsSnapshot || {};
+
   const paymentQrEnabled = bankDetails?.showQr ?? businessSettings?.paymentQrEnabled ?? paySnap.paymentQrEnabled ?? false;
   const showQrInPreview = businessSettings?.showQrInPreview !== undefined
     ? businessSettings.showQrInPreview
@@ -36,10 +117,10 @@ const buildInvoicePdfBlob = async (invoice, businessSettings) => {
   const payeeName = businessSettings?.payeeName || businessSettings?.businessName || paySnap.payeeName || '';
   const currencyCode = businessSettings?.currencyCode || invoice?.regionalSettingsSnapshot?.currencyCode || 'INR';
 
-  const enableQr = paymentQrEnabled && showQrInPreview;
+  let qrCodeDataUrl = null;
   const canonical = calculateCanonicalInvoiceFinancials(invoice);
-  // QR must request only the current invoice balance. Old due is shown separately.
   const amountDue = canonical.balanceDue > 0 ? canonical.balanceDue : 0;
+  const enableQr = paymentQrEnabled && showQrInPreview;
 
   if (enableQr && amountDue > 0) {
     let qrText;
@@ -56,70 +137,15 @@ const buildInvoicePdfBlob = async (invoice, businessSettings) => {
     try {
       qrCodeDataUrl = await QRCode.toDataURL(qrText, { errorCorrectionLevel: 'H', margin: 1, width: 150 });
     } catch (err) {
-      console.error('Failed to generate QR code for PDF:', err);
+      console.warn('Failed to generate QR code for PDF:', err);
     }
   }
 
-  let safeLogoBase64 = null;
-  if (businessSettings?.logoUrl) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), LOGO_FETCH_TIMEOUT_MS);
-      const response = await fetch(businessSettings.logoUrl, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      if (response.ok) {
-        const blob = await response.blob();
-        const dataUrl = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = () => resolve(null);
-          reader.readAsDataURL(blob);
-        });
-
-        if (dataUrl) {
-          safeLogoBase64 = await new Promise((resolve) => {
-            const img = new window.Image();
-            img.crossOrigin = 'Anonymous';
-            img.onload = () => {
-              try {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                resolve(canvas.toDataURL('image/png'));
-              } catch (error) {
-                console.warn('Logo conversion failed; continuing without logo.', error);
-                resolve(null);
-              }
-            };
-            img.onerror = () => resolve(null);
-            img.src = dataUrl;
-          });
-        }
-      }
-    } catch (err) {
-      // A logo/network failure must never prevent the invoice PDF from being generated.
-      console.warn('Could not fetch logo for PDF; continuing without logo.', err);
-    }
-  }
-
-  // Deeply sanitize unsupported characters that can make React-PDF hang.
-  const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu;
-  const safeInvoiceStr = JSON.stringify(invoice)
-    .replace(/₹/g, 'Rs. ')
-    .replace(/৳/g, 'Tk. ')
-    .replace(emojiRegex, '');
-  const safeInvoice = JSON.parse(safeInvoiceStr);
-
+  const safeLogoBase64 = await fetchLogoSafely(businessSettings?.logoUrl);
   const pageSize = businessSettings?.pdfPageSize || 'A4';
-  const doc = React.createElement(PdfDocument, {
-    invoice: safeInvoice,
-    businessSettings,
-    qrCodeBase64: qrCodeDataUrl,
-    safeLogoBase64,
-    pageSize
-  });
+  const itemCount = Array.isArray(invoice?.items) ? invoice.items.length : 0;
+  const hasDynamicTemplate = Boolean(invoice?.selectedTemplate || businessSettings?.selectedPdfTemplate);
+  const forceSafeLayout = itemCount > LARGE_INVOICE_ITEM_THRESHOLD && hasDynamicTemplate;
 
   const hasBuffer = typeof Buffer !== 'undefined'
     || (typeof window !== 'undefined' && window.Buffer)
@@ -128,18 +154,8 @@ const buildInvoicePdfBlob = async (invoice, businessSettings) => {
     throw new Error('Fatal: Node.js polyfills (Buffer) are missing. Please force-refresh the PWA after deployment.');
   }
 
-  // React-PDF can legitimately take longer on first use while its renderer is
-  // initialized. Use a generous ceiling instead of the previous 15s cutoff.
-  // Network assets are already bounded separately above.
-  const pdfPromise = pdf(doc).toBlob();
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(
-      () => reject(new Error('PDF generation timed out after 45 seconds. The invoice data is safe; please retry once.')),
-      PDF_GENERATION_TIMEOUT_MS
-    );
-  });
-
-  return Promise.race([pdfPromise, timeoutPromise]);
+  const doc = createPdfDocument(invoice, businessSettings, qrCodeDataUrl, safeLogoBase64, pageSize, forceSafeLayout);
+  return withTimeout(pdf(doc).toBlob(), PDF_GENERATION_TIMEOUT_MS);
 };
 
 const renderPdfPagesToSinglePng = async (arrayBuffer) => {
@@ -178,8 +194,7 @@ const renderPdfPagesToSinglePng = async (arrayBuffer) => {
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     let y = 0;
-    for (let i = 0; i < pageSizes.length; i++) {
-      const { page } = pageSizes[i];
+    for (const { page } of pageSizes) {
       const viewport = page.getViewport({ scale });
       const pageHeight = Math.floor(viewport.height);
       const pageCanvas = document.createElement('canvas');
@@ -196,10 +211,7 @@ const renderPdfPagesToSinglePng = async (arrayBuffer) => {
     }
 
     return await new Promise((resolve, reject) => {
-      canvas.toBlob(
-        (blob) => (blob ? resolve(blob) : reject(new Error('PNG encoding failed'))),
-        'image/png'
-      );
+      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('PNG encoding failed'))), 'image/png');
     });
   } finally {
     if (typeof loadingTask.destroy === 'function') {
@@ -209,8 +221,7 @@ const renderPdfPagesToSinglePng = async (arrayBuffer) => {
 };
 
 export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) => {
-  if (isDownloadingPDF) return false;
-  if (!invoice) return false;
+  if (isDownloadingPDF || !invoice) return false;
   isDownloadingPDF = true;
   const toastId = toast.loading('Generating your PDF... please wait');
   try {
@@ -238,8 +249,7 @@ export const downloadInvoicePDF = async (invoice, businessSettings, isPremium) =
 };
 
 export const downloadInvoiceImage = async (invoice, businessSettings) => {
-  if (isDownloadingImage) return false;
-  if (!invoice) return false;
+  if (isDownloadingImage || !invoice) return false;
   isDownloadingImage = true;
   try {
     const blob = await buildInvoicePdfBlob(invoice, businessSettings);
