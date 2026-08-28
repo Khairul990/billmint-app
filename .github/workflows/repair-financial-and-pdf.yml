@@ -1,0 +1,130 @@
+name: One-time BillQyro repair
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: "!contains(github.event.head_commit.message, '[billqyro-repair]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch financial balance semantics and PDF fallback
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('src/utils/financialCalculations.js')
+          s = p.read_text(encoding='utf-8')
+
+          old_balance = '''/**
+           * CANONICAL BALANCE DUE RESOLVER
+           * Invariant: balanceDue = Math.max(0, (grandTotal + oldDue) - paidTotal)
+           */
+          export const getInvoiceBalanceDue = (inv) => {
+            if (!inv) return 0;
+            const currentInvoiceTotal = roundTo2(parseFloat(inv.totals?.grandTotal ?? inv.grandTotal ?? inv.total) || 0);
+            const oldDue = roundTo2(parseFloat(inv.totals?.oldDue ?? inv.oldDue ?? inv.previousDue) || 0);
+            const totalReceivable = roundTo2(currentInvoiceTotal + oldDue);
+            const paidTotal = getInvoicePaidTotal(inv);
+            return Math.max(0, roundTo2(totalReceivable - paidTotal));
+          };'''
+
+          new_balance = '''/**
+           * CANONICAL CURRENT-INVOICE BALANCE RESOLVER
+           * Old/previous due is a separate receivable and must NEVER be added
+           * to the balance displayed for the new/current invoice.
+           * Payment allocation settles previous due first, then the current bill.
+           */
+          export const getInvoiceBalanceDue = (inv) => {
+            if (!inv) return 0;
+            const currentInvoiceTotal = roundTo2(parseFloat(inv.totals?.grandTotal ?? inv.grandTotal ?? inv.total) || 0);
+            const oldDue = roundTo2(parseFloat(inv.totals?.oldDue ?? inv.oldDue ?? inv.previousDue) || 0);
+            const paidTotal = getInvoicePaidTotal(inv);
+            const allocation = allocatePayment(paidTotal, oldDue, currentInvoiceTotal);
+            return allocation.remainingCurrentInvoiceDue;
+          };
+
+          /** Total customer receivable including previous/old due. */
+          export const getInvoiceTotalReceivableDue = (inv) => {
+            if (!inv) return 0;
+            const currentInvoiceTotal = roundTo2(parseFloat(inv.totals?.grandTotal ?? inv.grandTotal ?? inv.total) || 0);
+            const oldDue = roundTo2(parseFloat(inv.totals?.oldDue ?? inv.oldDue ?? inv.previousDue) || 0);
+            const paidTotal = getInvoicePaidTotal(inv);
+            return Math.max(0, roundTo2(currentInvoiceTotal + oldDue - paidTotal));
+          };'''
+
+          if old_balance in s:
+              s = s.replace(old_balance, new_balance, 1)
+
+          old_status = '''  const currentInvoiceTotal = roundTo2(parseFloat(inv.totals?.grandTotal ?? inv.grandTotal ?? inv.total) || 0);
+          const oldDue = roundTo2(parseFloat(inv.totals?.oldDue ?? inv.oldDue ?? inv.previousDue) || 0);
+          const totalReceivable = roundTo2(currentInvoiceTotal + oldDue);
+          const paidTotal = getInvoicePaidTotal(inv);
+          if (paidTotal >= totalReceivable && totalReceivable > 0) return 'Paid';
+          if (paidTotal > 0 && paidTotal < totalReceivable) return 'Partially Paid';'''
+          new_status = '''  const currentInvoiceTotal = roundTo2(parseFloat(inv.totals?.grandTotal ?? inv.grandTotal ?? inv.total) || 0);
+          const oldDue = roundTo2(parseFloat(inv.totals?.oldDue ?? inv.oldDue ?? inv.previousDue) || 0);
+          const paidTotal = getInvoicePaidTotal(inv);
+          const allocation = allocatePayment(paidTotal, oldDue, currentInvoiceTotal);
+          const currentPaid = allocation.allocatedToCurrentInvoice;
+          if (currentPaid >= currentInvoiceTotal && currentInvoiceTotal > 0) return 'Paid';
+          if (currentPaid > 0 && allocation.remainingCurrentInvoiceDue > 0) return 'Partially Paid';'''
+          if old_status in s:
+              s = s.replace(old_status, new_status, 1)
+
+          # Canonical render model must expose current bill due separately from old due.
+          s = s.replace('balanceDue: canonical.balanceDue,', 'balanceDue: canonical.currentBillDue,\n    totalReceivableDue: canonical.totalReceivable,', 1)
+          p.write_text(s, encoding='utf-8')
+
+          q = Path('src/utils/pdfUtils.js')
+          s = q.read_text(encoding='utf-8')
+          marker = "  const pdfPromise = pdf(doc).toBlob();\n"
+          replacement = """  const pdfPromise = pdf(doc).toBlob();
+"""
+          # Make PDF generation resilient: if a complex premium template hangs,
+          # retry once with the safe built-in Helvetica layout instead of leaving
+          # the user with a hard failure.
+          old_race = """  return Promise.race([pdfPromise, timeoutPromise]);
+};"""
+          new_race = """  try {
+    return await Promise.race([pdfPromise, timeoutPromise]);
+  } catch (firstError) {
+    console.warn('[PDF] Primary template failed; retrying with safe standard layout.', firstError);
+    const fallbackInvoice = { ...safeInvoice, selectedTemplate: null };
+    const fallbackDoc = React.createElement(PdfDocument, {
+      invoice: fallbackInvoice,
+      businessSettings,
+      qrCodeBase64: qrCodeDataUrl,
+      safeLogoBase64,
+      pageSize
+    });
+    return await Promise.race([
+      pdf(fallbackDoc).toBlob(),
+      new Promise((_, reject) => setTimeout(() => reject(firstError), 15000))
+    ]);
+  }
+};"""
+          if old_race in s:
+              s = s.replace(old_race, new_race, 1)
+          q.write_text(s, encoding='utf-8')
+
+      - name: Remove one-time repair workflow
+        run: rm -f .github/workflows/repair-financial-and-pdf.yml
+
+      - name: Commit repair
+        run: |
+          git config user.name "BillQyro Repair Bot"
+          git config user.email "actions@github.com"
+          git add src/utils/financialCalculations.js src/utils/pdfUtils.js .github/workflows/repair-financial-and-pdf.yml
+          if git diff --cached --quiet; then
+            echo "No repair changes required."
+            exit 0
+          fi
+          git commit -m "fix: separate current balance from old due and add PDF fallback [billqyro-repair]"
+          git push
