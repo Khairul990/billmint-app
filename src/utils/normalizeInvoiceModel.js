@@ -16,12 +16,20 @@ export const buildCanonicalRenderModel = (invoice, businessSettings, previewOver
   if (!invoice) return null;
 
   // 1. Template Resolution
-  // The studio preview might override the template. Otherwise, use the one saved in settings or invoice.
-  const rawTemplateId = (previewOverrideTemplateId || businessSettings?.selectedPdfTemplate || invoice.pdfTemplate || 'classic').toLowerCase();
+  // Priority: 1. Preview override -> 2. Invoice's own selectedTemplate/pdfTemplate -> 3. Global businessSettings -> 4. Default 'classic'
+  const rawTemplateId = String(
+    previewOverrideTemplateId || 
+    invoice.selectedTemplate || 
+    invoice.pdfTemplate || 
+    businessSettings?.selectedPdfTemplate || 
+    businessSettings?.defaultBillingTemplate || 
+    businessSettings?.pdfTemplate || 
+    'classic'
+  ).toLowerCase().trim();
   const templateFamily = getTemplateLayoutFamily(rawTemplateId);
-  const templateId = (rawTemplateId === 'repair' || rawTemplateId === 'teacher' || rawTemplateId === 'doctor') 
+  const templateId = (rawTemplateId === 'repair' || rawTemplateId === 'teacher' || rawTemplateId === 'doctor' || rawTemplateId === 'minimal' || rawTemplateId === 'retail') 
     ? rawTemplateId 
-    : templateFamily;
+    : (templateFamily || rawTemplateId || 'classic');
   
   const isDarkTheme = templateId === 'modern' || templateId === 'gold' || templateId === 'corporate';
 

@@ -3,6 +3,16 @@ import { getInvoiceColumns, getItemValue } from '../../../utils/invoiceSchema';
 import { formatCurrency } from '../../../utils/invoiceUtils';
 import { calculateCanonicalInvoiceFinancials } from '../../../utils/invoiceMath';
 
+export const getCurrencyHelper = (data) => {
+  const currencySymbol = data?.regionalSettingsSnapshot?.currency || data?.businessSettings?.currency || data?.currencySymbol || '₹';
+  const numFormat = data?.regionalSettingsSnapshot?.numberFormat || data?.businessSettings?.numberFormat || 'Indian';
+  return {
+    currencySymbol,
+    numFormat,
+    fmt: (val) => (val !== undefined && val !== null && val !== '') ? formatCurrency(val, currencySymbol, numFormat) : ''
+  };
+};
+
 export const HtmlTotalsSummary = ({ 
   data, 
   accentClass = "text-gray-900", 

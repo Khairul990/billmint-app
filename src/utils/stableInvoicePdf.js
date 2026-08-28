@@ -57,10 +57,7 @@ const getExportTarget = async (invoice, businessSettings, targetElement) => {
   const explicit = targetElement instanceof HTMLElement ? findPreviewRoot(targetElement) : null;
   if (explicit) return { target: explicit, cleanup: () => {} };
 
-  const visible = Array.from(document.querySelectorAll('#invoice-preview-capture'))
-    .find((node) => node instanceof HTMLElement && node.offsetWidth > 0 && node.offsetHeight > 0);
-  if (visible) return { target: visible, cleanup: () => {} };
-
+  // Mount dedicated invoice preview container to ensure exact template and data matching
   return mountTemporaryInvoicePreview(invoice, businessSettings);
 };
 

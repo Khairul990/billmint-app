@@ -2,20 +2,29 @@ import React from 'react';
 import DynamicQRCode from './DynamicQRCode';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
-import { ShieldCheck, Calendar, Hash, FileText, Phone, Mail, Globe, MapPin, Building2, Receipt, CheckCircle2, Zap, Scissors, Briefcase, QrCode } from 'lucide-react';
+import { ShieldCheck, Calendar, Hash, FileText, Phone, Mail, Globe, MapPin, Building2, Receipt, CheckCircle2, Zap, Scissors, Briefcase, QrCode, Stethoscope, Wrench, GraduationCap, Sparkles } from 'lucide-react';
 import { getCategoryWording } from '../config/businessPresets';
 import { getTemplateLayoutFamily } from '../services/TemplateEngine';
 import { buildCanonicalRenderModel } from '../utils/normalizeInvoiceModel';
+import { LivePreviewLayouts } from './invoice-templates/layouts/LivePreviewLayouts';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * High-fidelity Printable Invoice Letterhead Layout
+ * Unified Master Render Engine for Screen, Print & PDF Export
  * @param {Object} invoice - Invoice object
  * @param {Object} businessSettings - Company's active profile settings
  */
-const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
+const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templateOverride = null }) => {
+  if (!invoice) return null;
+
+  const canonical = buildCanonicalRenderModel(invoice, businessSettings, templateOverride);
+  if (!canonical) return null;
+
   const {
+    rawTemplateId,
     templateId,
+    templateFamily,
     isDarkTheme,
     businessPrefs,
     regionalPrefs,
@@ -24,7 +33,80 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false }) => {
     currencySymbol,
     categoryWords,
     financials
-  } = buildCanonicalRenderModel(invoice, businessSettings, businessSettings?.selectedPdfTemplate);
+  } = canonical;
+
+  // Check if a dedicated rich layout exists in LivePreviewLayouts (e.g. minimal-classic, modern-corporate, teal-bold-header, etc.)
+  const SelectedLayout = LivePreviewLayouts[rawTemplateId] || LivePreviewLayouts[templateId];
+  if (SelectedLayout) {
+    const dueAmount = financials.balanceDue > 0 ? financials.balanceDue : financials.totalReceivable;
+    const paymentMethod = paymentPrefs?.paymentMethod || 'UPI';
+    let qrValue = '';
+    if (paymentMethod === 'UPI' && paymentPrefs?.upiId) {
+      qrValue = `upi://pay?pa=${paymentPrefs.upiId}&pn=${encodeURIComponent(paymentPrefs.payeeName || businessPrefs.businessName || '')}&am=${dueAmount}&cu=${regionalPrefs.currencyCode || 'INR'}&tn=${encodeURIComponent(invoice.invoiceNumber || '')}`;
+    } else if (paymentMethod === 'bKash' && paymentPrefs?.bkashNumber) {
+      qrValue = `bKash Payment\nNumber: ${paymentPrefs.bkashNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
+    } else if (paymentMethod === 'Nagad' && paymentPrefs?.nagadNumber) {
+      qrValue = `Nagad Payment\nNumber: ${paymentPrefs.nagadNumber}\nAmount: ${dueAmount}\nInvoice: ${invoice.invoiceNumber}`;
+    } else if (paymentPrefs?.customPaymentLink) {
+      qrValue = paymentPrefs.customPaymentLink;
+    }
+
+    const layoutData = {
+      ...invoice,
+      invoiceNumber: invoice.invoiceNumber || invoice.number || 'INV-001',
+      date: invoice.date || new Date().toISOString().split('T')[0],
+      dueDate: invoice.dueDate || invoice.date || '',
+      customerName: invoice.customerName || 'Customer',
+      customerPhone: invoice.customerPhone || '',
+      customerEmail: invoice.customerEmail || '',
+      customerAddress: invoice.customerAddress || '',
+      orderNotes: invoice.orderNotes || '',
+      notes: invoice.notes || '',
+      items: invoice.items || [],
+      subtotal: financials.subtotal,
+      taxAmount: financials.taxAmount,
+      discountAmount: financials.discountAmount,
+      grandTotal: financials.grandTotal,
+      oldDue: financials.previousDue,
+      totalDue: financials.totalReceivable,
+      balanceDue: financials.balanceDue,
+      amountPaid: financials.amountPaid,
+      totals: {
+        subtotal: financials.subtotal,
+        tax: financials.taxAmount,
+        discount: financials.discountAmount,
+        shipping: financials.shipping,
+        grandTotal: financials.grandTotal,
+        oldDue: financials.previousDue,
+        totalDue: financials.totalReceivable,
+        amountPaid: financials.amountPaid,
+        balanceDue: financials.balanceDue
+      },
+      businessSettings: {
+        ...businessSettings,
+        businessName: businessPrefs.businessName,
+        logoUrl: businessPrefs.logoUrl,
+        email: businessPrefs.email,
+        phone: businessPrefs.phone,
+        address: businessPrefs.address,
+        gstNumber: businessPrefs.gstNumber,
+        currency: currencySymbol,
+        bankDetails: bankDetails
+      },
+      regionalSettingsSnapshot: regionalPrefs,
+      paymentSettingsSnapshot: paymentPrefs,
+      businessSnapshot: businessPrefs,
+      currencySymbol,
+      qrValue,
+      qrCodeBase64: invoice.qrCodeBase64 || null
+    };
+
+    return (
+      <div id="invoice-preview-capture" className="billqyro-template-export-container w-full max-w-4xl mx-auto transition-all duration-300 relative">
+        <SelectedLayout data={layoutData} />
+      </div>
+    );
+  }
 
   const getStatusBadgeStyle = (status) => {
     switch (status) {

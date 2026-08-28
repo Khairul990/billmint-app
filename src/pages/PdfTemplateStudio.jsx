@@ -24,7 +24,10 @@ import {
   Minimize,
   Download,
   Filter,
-  ArrowLeft
+  ArrowLeft,
+  Sparkles,
+  Check,
+  Printer
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { settingsEngine } from '../services/settingsEngine';
@@ -35,12 +38,13 @@ import { getDemoInvoice } from '../utils/demoDataGenerator';
 import { LivePreviewLayouts } from '../components/invoice-templates/layouts/LivePreviewLayouts';
 import PublicInvoice from './PublicInvoice';
 import { UNIVERSAL_TEMPLATES, getTemplateFeatures, getTemplateGradient } from '../services/TemplateEngine';
+import { downloadInvoicePDF } from '../utils/pdfUtils';
 
 const templateStyles = {
   classic: 'Clean', cartoon: 'Modern', modern: 'Modern', minimal: 'Minimal',
   retail: 'Thermal', 'premium-gold': 'Luxury', 'classic-elegant': 'Corporate',
-  corporate: 'Corporate', boutique: 'Fashion', clinic: 'Clean', repair: 'Utility',
-  executive: 'Luxury', saas: 'Modern', teacher: 'Clean', medical: 'Clean', tailor: 'Fashion', embroidery: 'Clean',
+  corporate: 'Corporate', boutique: 'Fashion', clinic: 'Healthcare', repair: 'Utility',
+  executive: 'Luxury', saas: 'Modern', teacher: 'Education', medical: 'Healthcare', tailor: 'Fashion', embroidery: 'Design',
   'minimal-classic': 'Minimal', 'modern-corporate': 'Corporate', 'teal-bold-header': 'Modern',
   'sage-green-curved': 'Modern', 'creative-agency': 'Creative', 'purple-corporate': 'Corporate',
   'orange-gradient-modern': 'Modern', 'orange-geometric': 'Modern', 'black-orange-bold': 'Bold',
@@ -54,28 +58,12 @@ const pageVariants = {
 };
 
 const staggerContainer = {
-  animate: { transition: { staggerChildren: 0.05 } }
+  animate: { transition: { staggerChildren: 0.04 } }
 };
 
 const staggerItem = {
   initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] } }
-};
-
-// Removed old template dictionaries
-
-const brandPresetIcons = {
-  retail: 'Store',
-  grocery: 'Store',
-  service: 'Wrench',
-  doctor: 'Stethoscope',
-  teacher: 'GraduationCap',
-  tailor: 'Scissors',
-  embroidery: 'Palette',
-  freelance: 'Briefcase',
-  restaurant: 'Coffee',
-  custom: 'Settings',
-  billing_only: 'FileText'
+  animate: { opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] } }
 };
 
 const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subscription, viewMode, setViewMode, templateOverride, onSelectTemplate }) => {
@@ -83,60 +71,79 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
   const [filterCategory, setFilterCategory] = useState('All');
   const [useAnimId, setUseAnimId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [enableWatermark, setEnableWatermark] = useState(false);
-  const [signaturePlacement, setSignaturePlacement] = useState('none');
-  const [qrPlacement, setQrPlacement] = useState('none');
+  const [enableWatermark, setEnableWatermark] = useState(Boolean(businessSettings?.pdfWatermark));
+  const [signaturePlacement, setSignaturePlacement] = useState(businessSettings?.pdfSignaturePlacement || 'none');
+  const [qrPlacement, setQrPlacement] = useState(businessSettings?.pdfQrPlacement || 'none');
   const [previewSize, setPreviewSize] = useState('A4');
   const [showOptions, setShowOptions] = useState(false);
   const [showBrandPresets, setShowBrandPresets] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null);
   const [internalViewMode, setInternalViewMode] = useState('pdf');
+  const [downloadingSample, setDownloadingSample] = useState(false);
 
   const activeViewMode = viewMode || internalViewMode;
   const handleSetViewMode = setViewMode || setInternalViewMode;
 
-  const activeTemplate = templateOverride || businessSettings?.selectedPdfTemplate || 'classic';
+  const activeTemplate = templateOverride || businessSettings?.selectedPdfTemplate || businessSettings?.defaultBillingTemplate || 'classic';
   const [pendingTemplate, setPendingTemplate] = useState(activeTemplate);
   const isDirty = pendingTemplate !== activeTemplate;
   const isPremium = subscription?.features?.includes('premiumTemplates') || subscription?.status === 'premium' || businessSettings?.planStatus === 'premium' || businessSettings?.planStatus === 'Monthly' || businessSettings?.plan === 'Monthly';
-  const categories = ['All', 'Classic', 'Modern', 'Business', 'Professional'];
+  
+  const categories = ['All', 'Classic', 'Modern', 'Corporate', 'Luxury', 'Minimal', 'Business', 'Healthcare', 'Utility'];
 
   const filteredTemplates = UNIVERSAL_TEMPLATES.filter(t => {
-    const matchesCategory = filterCategory === 'All' || t.tags.includes(filterCategory) || templateStyles[t.id] === filterCategory;
+    const styleTag = templateStyles[t.id] || '';
+    const matchesCategory = filterCategory === 'All' || 
+      t.tags.some(tag => tag.toLowerCase() === filterCategory.toLowerCase()) || 
+      styleTag.toLowerCase() === filterCategory.toLowerCase();
     const matchesSearch = searchQuery === '' || 
       t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      t.desc.toLowerCase().includes(searchQuery.toLowerCase());
+      t.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.id.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  const handleApply = (templateId, type) => {
+  const handleApplyInstant = async (templateId, type) => {
     if (type === 'PRO' && !isPremium) {
       setCurrentTab?.('subscription');
       toast('Upgrade to Premium to unlock this template!', { icon: '👑' });
       return;
     }
+    
     setPendingTemplate(templateId);
     onSelectTemplate?.(templateId);
-  };
 
-  const handleSaveAndApply = async () => {
-    if (!pendingTemplate) return;
+    const updated = { 
+      ...businessSettings, 
+      selectedPdfTemplate: templateId, 
+      defaultBillingTemplate: templateId,
+      pdfTemplate: templateId
+    };
     
-    const updated = { ...businessSettings, selectedPdfTemplate: pendingTemplate, defaultBillingTemplate: pendingTemplate };
-    
-    // Also update Live Link settings to match
     updated.customerLiveLinkSettings = {
       ...(updated.customerLiveLinkSettings || {}),
-      selectedLiveLinkTemplate: pendingTemplate
+      selectedLiveLinkTemplate: templateId
     };
 
     if (enableWatermark) updated.pdfWatermark = true;
     if (signaturePlacement !== 'none') updated.pdfSignaturePlacement = signaturePlacement;
     if (qrPlacement !== 'none') updated.pdfQrPlacement = qrPlacement;
-    
-    await settingsEngine.saveSettings(updated);
-    if (setSettings) setSettings(updated);
-    toast.success('Universal template applied to all formats!');
+
+    setUseAnimId(templateId);
+    setTimeout(() => setUseAnimId(null), 2000);
+
+    try {
+      await settingsEngine.saveSettings(updated);
+      if (setSettings) setSettings(updated);
+      toast.success(`${UNIVERSAL_TEMPLATES.find(t => t.id === templateId)?.name || 'Template'} applied successfully!`);
+    } catch (err) {
+      toast.error('Failed to save template selection.');
+    }
+  };
+
+  const handleSaveAndApply = async () => {
+    if (!pendingTemplate) return;
+    await handleApplyInstant(pendingTemplate, UNIVERSAL_TEMPLATES.find(t => t.id === pendingTemplate)?.type);
   };
 
   const handleDiscard = () => {
@@ -148,19 +155,38 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
     const presetCategories = {
       retail: 'Business',
       grocery: 'Business',
-      service: 'Business',
-      doctor: 'Professional',
-      teacher: 'Classic',
-      tailor: 'Business',
-      embroidery: 'Business',
-      freelance: 'Professional',
+      service: 'Utility',
+      doctor: 'Healthcare',
+      teacher: 'Education',
+      tailor: 'Fashion',
+      embroidery: 'Design',
+      freelance: 'Creative',
       restaurant: 'Business',
       custom: 'All',
       billing_only: 'Classic'
     };
     const targetCat = presetCategories[preset.id] || 'All';
     setFilterCategory(targetCat);
-    toast.success(`Showing ${preset.label} templates`);
+    toast.success(`Filtered for ${preset.label}`);
+  };
+
+  const handleDownloadSamplePDF = async (templateId) => {
+    try {
+      setDownloadingSample(true);
+      const demoInvoice = getDemoInvoice(businessSettings?.businessCategory);
+      demoInvoice.selectedTemplate = templateId;
+      demoInvoice.pdfTemplate = templateId;
+      const sampleSettings = {
+        ...businessSettings,
+        selectedPdfTemplate: templateId,
+        defaultBillingTemplate: templateId
+      };
+      await downloadInvoicePDF(demoInvoice, sampleSettings, isPremium);
+    } catch (error) {
+      toast.error('Sample PDF export failed.');
+    } finally {
+      setDownloadingSample(false);
+    }
   };
 
   return (
@@ -169,257 +195,237 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
       {setCurrentTab && (
         <button
           onClick={() => setCurrentTab('settings')}
-          className="btn-premium flex items-center gap-2 px-4 py-2 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-xl font-bold text-xs mb-4 shadow-sm w-fit transition-all active:scale-95"
+          className="btn-premium flex items-center gap-2 px-4 py-2 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-xl font-bold text-xs mb-2 shadow-xs w-fit transition-all active:scale-95"
         >
           <ArrowLeft className="w-4 h-4 text-theme-muted" /> Back to Settings Studio
         </button>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 section-header">
-        <div>
-          <h2 className="text-sm font-bold text-theme-primary tracking-tight flex items-center gap-2">
-            <Palette className="w-4 h-4 text-theme-accent" />
-            PDF Template Studio
-          </h2>
-          <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">
-            CUSTOMIZE YOUR INVOICE DESIGN
-          </p>
+      {/* Header Banner */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-theme-card via-theme-surface to-theme-card border border-theme-border-soft shadow-xs relative overflow-hidden">
+        <div className="space-y-1 relative z-10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-theme-accent/15 flex items-center justify-center text-theme-accent border border-theme-accent/20 shadow-xs">
+              <Palette className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-extrabold text-theme-primary tracking-tight">
+                PDF Invoice Template Studio
+              </h2>
+              <p className="text-xs text-theme-muted font-medium">
+                Choose and apply high-definition billing templates for all downloaded PDFs, print bills & online links.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Current Active Indicator */}
+        <div className="flex items-center gap-3 self-start md:self-auto bg-theme-app/80 border border-theme-border-soft px-4 py-2 rounded-xl">
+          <span className="text-[11px] font-bold text-theme-muted uppercase tracking-wider">Active Style:</span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-theme-accent/10 text-theme-accent border border-theme-accent/30 rounded-lg text-xs font-black tracking-tight">
+            <CheckCircle2 className="w-3.5 h-3.5 text-theme-accent" />
+            {UNIVERSAL_TEMPLATES.find(t => t.id === activeTemplate)?.name || activeTemplate}
+          </span>
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
-        <input
-          type="text"
-          placeholder="Search templates..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 rounded-xl bg-theme-surface border border-theme-border-soft text-theme-primary text-sm font-semibold placeholder:text-theme-muted/60 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent/30 transition-all shadow-sm"
-        />
-        {searchQuery && (
-          <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">
-            <X className="w-4 h-4" />
-          </button>
-        )}
-      </div>
+      {/* Search & Category Filter Bar */}
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row gap-3 items-center">
+          {/* Search Input */}
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+            <input
+              type="text"
+              placeholder="Search templates by name, style, or industry..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-theme-card border border-theme-border-soft text-theme-primary text-xs font-semibold placeholder:text-theme-muted/60 focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all shadow-xs"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary p-1">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
 
-      {/* Category Filter */}
-      <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setFilterCategory(cat)}
-            className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all shadow-sm ${filterCategory === cat
-                ? 'bg-theme-accent text-white border-theme-accent'
-                : 'bg-theme-surface text-theme-muted hover:text-theme-primary border border-theme-border-soft'
-              }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+          {/* Options & Presets Toggles */}
+          <div className="flex gap-2 w-full sm:w-auto shrink-0">
+            <button
+              onClick={() => setShowOptions(!showOptions)}
+              className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shadow-xs ${showOptions ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-card border-theme-border-soft text-theme-muted hover:text-theme-primary'}`}
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>Options</span>
+            </button>
+            <button
+              onClick={() => setShowBrandPresets(!showBrandPresets)}
+              className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shadow-xs ${showBrandPresets ? 'bg-theme-accent text-white border-theme-accent' : 'bg-theme-card border-theme-border-soft text-theme-muted hover:text-theme-primary'}`}
+            >
+              <Image className="w-3.5 h-3.5" />
+              <span>Industry Presets</span>
+            </button>
+          </div>
+        </div>
 
-      {/* Options Toggle */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => setShowOptions(!showOptions)}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${showOptions ? 'bg-theme-accent text-white shadow-md' : 'bg-theme-card border border-theme-border-soft text-theme-muted hover:border-theme-accent/50'}`}
-        >
-          <Sliders className="w-3.5 h-3.5" />
-          Design Options
-          <motion.span animate={{ rotate: showOptions ? 180 : 0 }}><ArrowRight className="w-3 h-3" /></motion.span>
-        </button>
-        <button
-          onClick={() => setShowBrandPresets(!showBrandPresets)}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${showBrandPresets ? 'bg-theme-accent text-white shadow-md' : 'bg-theme-card border border-theme-border-soft text-theme-muted hover:border-theme-accent/50'}`}
-        >
-          <Image className="w-3.5 h-3.5" />
-          Brand Presets
-          <motion.span animate={{ rotate: showBrandPresets ? 180 : 0 }}><ArrowRight className="w-3 h-3" /></motion.span>
-        </button>
+        {/* Category Filter Pills */}
+        <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setFilterCategory(cat)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border shadow-2xs ${filterCategory === cat
+                  ? 'bg-theme-accent text-white border-theme-accent shadow-sm scale-102'
+                  : 'bg-theme-card text-theme-muted hover:text-theme-primary border-theme-border-soft hover:border-theme-accent/40'
+                }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Collapsible Design Options */}
-      {showOptions && (
-        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 space-y-4 glass">
-          <div className="flex items-center gap-2 mb-1">
-            <Sliders className="w-4 h-4 text-theme-accent" />
-            <span className="text-xs font-extrabold text-theme-primary uppercase tracking-wider">Invoice Design Options</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Watermark Toggle */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-theme-app border border-theme-border-soft">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-theme-accent/10 flex items-center justify-center">
-                  <Pen className="w-4 h-4 text-theme-accent" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-theme-primary">Watermark</p>
-                  <p className="text-[9px] text-theme-muted font-medium">Add watermark to PDF</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setEnableWatermark(!enableWatermark)}
-                className={`relative w-10 h-5 rounded-full transition-all ${enableWatermark ? 'bg-theme-accent' : 'bg-theme-border-soft'}`}
-              >
-                <motion.div animate={{ x: enableWatermark ? 20 : 2 }} className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow" />
-              </button>
+      <AnimatePresence>
+        {showOptions && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 space-y-4 shadow-xs overflow-hidden">
+            <div className="flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-theme-accent" />
+              <span className="text-xs font-extrabold text-theme-primary uppercase tracking-wider">PDF Export Preferences</span>
             </div>
-
-            {/* Signature Placement */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-theme-app border border-theme-border-soft">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-theme-accent/10 flex items-center justify-center">
-                  <Pen className="w-4 h-4 text-theme-accent" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+              {/* Watermark Toggle */}
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-theme-surface border border-theme-border-soft">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-theme-accent/10 flex items-center justify-center">
+                    <Pen className="w-4 h-4 text-theme-accent" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-theme-primary">PDF Watermark</p>
+                    <p className="text-[10px] text-theme-muted font-medium">Render subtle company watermark</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-theme-primary">Signature Area</p>
-                  <p className="text-[9px] text-theme-muted font-medium">Placement option</p>
-                </div>
+                <button
+                  onClick={() => setEnableWatermark(!enableWatermark)}
+                  className={`relative w-11 h-6 rounded-full transition-all ${enableWatermark ? 'bg-theme-accent' : 'bg-theme-border-soft'}`}
+                >
+                  <motion.div animate={{ x: enableWatermark ? 22 : 2 }} className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-xs" />
+                </button>
               </div>
-              <select
-                value={signaturePlacement}
-                onChange={e => setSignaturePlacement(e.target.value)}
-                className="text-[10px] font-bold bg-theme-card border border-theme-border-soft rounded-lg px-2 py-1.5 text-theme-primary focus:outline-none focus:border-theme-accent"
-              >
-                <option value="none">None</option>
-                <option value="bottom">Bottom</option>
-                <option value="right">Right Side</option>
-                <option value="left">Left Side</option>
-              </select>
-            </div>
 
-            {/* Online Layout Toggle */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-theme-app border border-theme-border-soft">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-theme-accent/10 flex items-center justify-center">
-                  <Globe className="w-4 h-4 text-theme-accent" />
+              {/* Signature Placement */}
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-theme-surface border border-theme-border-soft">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-theme-accent/10 flex items-center justify-center">
+                    <FileText className="w-4 h-4 text-theme-accent" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-theme-primary">Signatory Zone</p>
+                    <p className="text-[10px] text-theme-muted font-medium">Authorized signature box</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-theme-primary">Online Layout</p>
-                  <p className="text-[9px] text-theme-muted font-medium">Extra UI for Live Link</p>
-                </div>
+                <select
+                  value={signaturePlacement}
+                  onChange={e => setSignaturePlacement(e.target.value)}
+                  className="text-xs font-bold bg-theme-card border border-theme-border-soft rounded-lg px-2.5 py-1.5 text-theme-primary focus:outline-none focus:border-theme-accent"
+                >
+                  <option value="none">None</option>
+                  <option value="right">Bottom Right</option>
+                  <option value="left">Bottom Left</option>
+                  <option value="bottom">Bottom Full</option>
+                </select>
               </div>
-              <button
-                onClick={() => {
-                  const updated = { ...businessSettings };
-                  updated.customerLiveLinkSettings = {
-                    ...(updated.customerLiveLinkSettings || {}),
-                    enableOnlineLayout: !(businessSettings?.customerLiveLinkSettings?.enableOnlineLayout ?? true)
-                  };
-                  if (setSettings) setSettings(updated);
-                }}
-                className={`relative w-10 h-5 rounded-full transition-all ${(businessSettings?.customerLiveLinkSettings?.enableOnlineLayout ?? true) ? 'bg-theme-accent' : 'bg-theme-border-soft'}`}
-              >
-                <motion.div animate={{ x: (businessSettings?.customerLiveLinkSettings?.enableOnlineLayout ?? true) ? 20 : 2 }} className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow" />
-              </button>
-            </div>
 
-            {/* QR Code Placement */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-theme-app border border-theme-border-soft">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-theme-accent/10 flex items-center justify-center">
-                  <QrCode className="w-4 h-4 text-theme-accent" />
+              {/* QR Code Placement */}
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-theme-surface border border-theme-border-soft">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-theme-accent/10 flex items-center justify-center">
+                    <QrCode className="w-4 h-4 text-theme-accent" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-theme-primary">Payment QR</p>
+                    <p className="text-[10px] text-theme-muted font-medium">Dynamic scannable QR</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-theme-primary">QR Code</p>
-                  <p className="text-[9px] text-theme-muted font-medium">Payment QR placement</p>
-                </div>
+                <select
+                  value={qrPlacement}
+                  onChange={e => setQrPlacement(e.target.value)}
+                  className="text-xs font-bold bg-theme-card border border-theme-border-soft rounded-lg px-2.5 py-1.5 text-theme-primary focus:outline-none focus:border-theme-accent"
+                >
+                  <option value="none">Standard</option>
+                  <option value="header">Header Badge</option>
+                  <option value="footer">Footer Card</option>
+                </select>
               </div>
-              <select
-                value={qrPlacement}
-                onChange={e => setQrPlacement(e.target.value)}
-                className="text-[10px] font-bold bg-theme-card border border-theme-border-soft rounded-lg px-2 py-1.5 text-theme-primary focus:outline-none focus:border-theme-accent"
-              >
-                <option value="none">None</option>
-                <option value="header">Header</option>
-                <option value="footer">Footer</option>
-                <option value="right">Right Side</option>
-              </select>
             </div>
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Collapsible Brand Presets */}
-      {showBrandPresets && (
-        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 space-y-4 glass">
-          <div className="flex items-center gap-2 mb-1">
-            <Image className="w-4 h-4 text-theme-accent" />
-            <span className="text-xs font-extrabold text-theme-primary uppercase tracking-wider">Brand Presets</span>
-            <span className="text-[8px] text-theme-muted font-bold ml-auto">Select your business type for tailored templates</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-            {BUSINESS_PRESETS.filter(p => p.id !== 'billing_only').slice(0, 10).map(preset => (
-              <button
-                key={preset.id}
-                onClick={() => handlePresetSelect(preset)}
-                className={`p-3 rounded-xl border text-left transition-all hover:scale-[1.03] ${selectedPreset === preset.id
-                    ? 'bg-theme-accent/10 border-theme-accent text-theme-accent'
-                    : 'bg-theme-app border-theme-border-soft text-theme-muted hover:border-theme-accent/50'
-                  }`}
-              >
-                <p className="text-[10px] font-extrabold text-theme-primary truncate">{preset.label}</p>
-                <p className="text-[7px] text-theme-muted font-medium mt-0.5 line-clamp-1">{preset.shortDesc}</p>
-              </button>
-            ))}
-          </div>
-        </motion.div>
-      )}
+      {/* Collapsible Industry Presets */}
+      <AnimatePresence>
+        {showBrandPresets && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 space-y-3 shadow-xs overflow-hidden">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Image className="w-4 h-4 text-theme-accent" />
+                <span className="text-xs font-extrabold text-theme-primary uppercase tracking-wider">Tailored Industry Presets</span>
+              </div>
+              <span className="text-[10px] text-theme-muted font-semibold">Click to filter tailored templates</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              {BUSINESS_PRESETS.filter(p => p.id !== 'billing_only').slice(0, 12).map(preset => (
+                <button
+                  key={preset.id}
+                  onClick={() => handlePresetSelect(preset)}
+                  className={`p-3 rounded-xl border text-left transition-all hover:scale-102 ${selectedPreset === preset.id
+                      ? 'bg-theme-accent/10 border-theme-accent text-theme-accent shadow-xs'
+                      : 'bg-theme-surface border-theme-border-soft text-theme-muted hover:border-theme-accent/40'
+                    }`}
+                >
+                  <p className="text-xs font-extrabold text-theme-primary truncate">{preset.label}</p>
+                  <p className="text-[9px] text-theme-muted font-medium mt-0.5 line-clamp-1">{preset.shortDesc}</p>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-6">
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-4 gap-4">
-          <p className="text-sm font-semibold text-theme-muted">
-            Select a design. It will automatically apply to your PDF invoices, Online Live Links, and Print bills.
-          </p>
-          <div className="flex bg-theme-app border border-theme-border-soft rounded-lg p-1 w-full xl:w-auto shrink-0 overflow-x-auto hide-scrollbar">
-            <button
-              onClick={() => { handleSetViewMode('pdf'); setPreviewSize('A4'); }}
-              className={`flex-1 xl:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${activeViewMode === 'pdf' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
-            >
-              PDF View
-            </button>
-            <button
-              onClick={() => handleSetViewMode('livelink')}
-              className={`flex-1 xl:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${activeViewMode === 'livelink' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
-            >
-              Live Link
-            </button>
-            <button
-              onClick={() => { handleSetViewMode('print'); setPreviewSize('A5'); }}
-              className={`flex-1 xl:flex-none px-4 py-2 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${activeViewMode === 'print' ? 'bg-theme-accent text-white shadow-sm' : 'text-theme-muted hover:text-theme-primary'}`}
-            >
-              Print Bill
-            </button>
-          </div>
-        </div>
-
-        {/* Dirty State Action Bar */}
+      {/* Template Grid Container */}
+      <div className="space-y-4">
+        {/* Unsaved Changes Action Bar */}
         <AnimatePresence>
           {isDirty && (
             <motion.div
-              initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-              animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
-              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-              className="bg-theme-warning/10 border border-theme-warning/30 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-theme-warning/20 flex items-center justify-center">
-                  <Palette className="w-4 h-4 text-amber-600" />
+                <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                  <Palette className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-amber-700 dark:text-amber-500">Unsaved Template Selection</p>
-                  <p className="text-xs text-amber-600/80 dark:text-amber-500/80">You have selected a new design. Save to apply.</p>
+                  <p className="text-xs font-extrabold text-amber-800 dark:text-amber-300">Pending Template Selection</p>
+                  <p className="text-[11px] text-amber-700/80 dark:text-amber-400/80">
+                    Selected <strong className="font-black">{UNIVERSAL_TEMPLATES.find(t => t.id === pendingTemplate)?.name || pendingTemplate}</strong>. Click Save & Apply to update all PDF exports.
+                  </p>
                 </div>
               </div>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <button onClick={handleDiscard} className="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold text-theme-muted bg-theme-app hover:bg-theme-border-soft transition-colors border border-theme-border-soft">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  onClick={handleDiscard}
+                  className="flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold text-theme-muted bg-theme-card hover:bg-theme-surface border border-theme-border-soft transition-colors"
+                >
                   Discard
                 </button>
-                <button onClick={handleSaveAndApply} className="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold text-white bg-theme-accent hover:bg-theme-accent/90 transition-all shadow-md flex items-center justify-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" /> Save & Apply
+                <button
+                  onClick={handleSaveAndApply}
+                  className="flex-1 sm:flex-none px-5 py-2 rounded-xl text-xs font-black text-white bg-theme-accent hover:bg-theme-accent-dark transition-all shadow-md flex items-center justify-center gap-1.5 active:scale-95"
+                >
+                  <CheckCircle2 className="w-4 h-4" /> Save & Apply Template
                 </button>
               </div>
             </motion.div>
@@ -427,14 +433,19 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
         </AnimatePresence>
 
         {filteredTemplates.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-sm text-theme-muted font-semibold">No templates matching your search.</p>
-            <button onClick={() => { setSearchQuery(''); setFilterCategory('All'); }} className="mt-2 text-xs text-theme-accent font-bold hover:underline flex items-center gap-1 justify-center">
-              <RefreshCw className="w-3 h-3" /> Reset filters
+          <div className="text-center py-16 bg-theme-card rounded-2xl border border-theme-border-soft">
+            <Palette className="w-10 h-10 text-theme-muted/40 mx-auto mb-3" />
+            <p className="text-sm font-bold text-theme-primary">No templates found matching your query.</p>
+            <p className="text-xs text-theme-muted mt-1">Try searching with a different keyword or resetting filters.</p>
+            <button
+              onClick={() => { setSearchQuery(''); setFilterCategory('All'); }}
+              className="mt-4 px-4 py-2 bg-theme-accent/10 text-theme-accent border border-theme-accent/30 rounded-xl text-xs font-bold hover:bg-theme-accent hover:text-white transition-all inline-flex items-center gap-1.5"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Reset Filters
             </button>
           </div>
         ) : (
-          <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
+          <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filteredTemplates.map((tpl) => {
               const isActive = activeTemplate === tpl.id;
               const isPending = pendingTemplate === tpl.id;
@@ -447,139 +458,120 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                 <motion.div
                   key={tpl.id}
                   variants={staggerItem}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  onClick={() => { if(!isLocked) { handleApply(tpl.id, tpl.type); setUseAnimId(tpl.id); setTimeout(() => setUseAnimId(null), 1500); } }}
-                  className={`relative rounded-2xl overflow-hidden border transition-all flex flex-col bg-theme-surface cursor-pointer ${
-                    isActive ? 'border-theme-accent shadow-[0_0_0_1px_var(--accent)]' :
-                    isPending ? 'border-theme-accent/50 border-dashed' : 'border-theme-border-soft hover:border-theme-accent/30 hover:shadow-md hover:-translate-y-1'
+                  whileHover={{ y: -4 }}
+                  className={`group relative rounded-2xl overflow-hidden border transition-all flex flex-col bg-theme-card shadow-xs ${
+                    isActive 
+                      ? 'border-theme-accent ring-2 ring-theme-accent/30 shadow-md' 
+                      : isPending 
+                      ? 'border-theme-accent/60 border-dashed ring-1 ring-theme-accent/20' 
+                      : 'border-theme-border-soft hover:border-theme-accent/40 hover:shadow-md'
                   }`}
                 >
-                  {/* Status Badges */}
-                  <div className="absolute top-3 left-3 z-10 flex gap-1">
+                  {/* Top Badges */}
+                  <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5">
                     {tpl.type === 'PRO' ? (
-                      <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-black uppercase px-2 py-1 rounded shadow-sm flex items-center gap-1 badge-premium">
+                      <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-xs flex items-center gap-1">
                         <Crown className="w-3 h-3" /> PRO
                       </span>
                     ) : (
-                      <span className="bg-theme-border-soft dark:bg-theme-surface text-theme-muted dark:text-theme-primary text-[9px] font-black uppercase px-2 py-1 rounded shadow-sm badge-premium">
+                      <span className="bg-theme-card/90 backdrop-blur-xs text-theme-muted text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-theme-border-soft shadow-2xs">
                         FREE
                       </span>
                     )}
                   </div>
 
                   {isActive && (
-                    <div className="absolute top-3 right-3 z-10">
-                      <div className="bg-theme-accent text-white rounded-full p-1 shadow-md">
-                        <CheckCircle2 className="w-4 h-4" />
+                    <div className="absolute top-3 right-3 z-20">
+                      <span className="bg-theme-accent text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5 stroke-[3]" /> Active
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Thumbnail / Mockup Viewport */}
+                  <div 
+                    onClick={() => setPreviewTemplate(tpl.id)}
+                    className={`h-48 w-full bg-gradient-to-br ${previewGradient} flex items-center justify-center relative overflow-hidden cursor-pointer group-hover:opacity-95 transition-opacity`}
+                  >
+                    <LazyPreview fallback={<div className="text-white/70 text-[10px] font-bold uppercase tracking-widest animate-pulse">Loading {tpl.name}...</div>}>
+                      <div className="w-[595px] origin-top scale-[0.32] pointer-events-none mt-14 bg-white shadow-2xl rounded-sm overflow-hidden select-none">
+                        <InvoicePreview invoice={getDemoInvoice(businessSettings?.businessCategory)} businessSettings={{ ...businessSettings, selectedPdfTemplate: tpl.id }} templateOverride={tpl.id} />
                       </div>
-                    </div>
-                  )}
-
-                  {/* Size + Style Badges */}
-                  <div className="absolute bottom-3 left-3 z-10 flex flex-wrap gap-1">
-                    {tags.filter(t => t === 'A4' || t === 'A5' || t === 'Letter').map(sz => (
-                      <span key={sz} className="bg-black/60 backdrop-blur-sm text-white text-[7px] font-bold uppercase px-1.5 py-0.5 rounded border border-white/10 flex items-center gap-1">
-                        <FileSpreadsheet className="w-2 h-2" /> {sz}
-                      </span>
-                    ))}
-                    <span className={`bg-black/50 backdrop-blur-sm text-white text-[7px] font-bold uppercase px-1.5 py-0.5 rounded border border-white/10 flex items-center gap-1 ${templateStyles[tpl.id] === 'Professional' ? 'border-amber-300/30' : ''}`}>
-                      <Palette className="w-2 h-2" /> {templateStyles[tpl.id]}
-                    </span>
-                  </div>
-
-                  {tpl.id === 'classic' && (
-                    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20">
-                      <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[7px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1">
-                        <Star className="w-2.5 h-2.5" /> Featured
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Mockup Preview Area */}
-                  <div className={`h-40 w-full bg-gradient-to-br ${previewGradient} flex items-center justify-center relative overflow-hidden`}>
-                    <LazyPreview fallback={<div className="text-white/60 text-[10px] font-bold uppercase tracking-widest animate-pulse">Loading {tpl.name}...</div>}>
-                      {viewMode === 'livelink' ? (
-                        <div className="w-[320px] h-[550px] transform origin-top scale-[0.3] pointer-events-none mt-20 bg-theme-app rounded-3xl overflow-hidden shadow-2xl border-4 border-gray-800">
-                          <PublicInvoice initialInvoice={{...getDemoInvoice(businessSettings?.businessCategory), paymentSettingsSnapshot: { customerLiveLinkSettings: { selectedLiveLinkTemplate: tpl.id } }}} />
-                        </div>
-                      ) : (
-                        <div className={`w-[800px] ${previewSize === 'A5' ? 'h-[600px]' : 'h-[1000px]'} transform origin-top-left scale-[0.35] lg:scale-[0.4] pointer-events-none mt-20 ml-20 bg-white shadow-xl`}>
-                          {(() => {
-                            const demoInv = getDemoInvoice(businessSettings?.businessCategory);
-                            const Layout = LivePreviewLayouts[tpl.id];
-                            if (Layout) {
-                              return (
-                                <div className="w-[595px] origin-top-left scale-[1.34]">
-                                  <Layout data={{
-                                    invoiceNumber: demoInv.invoiceNumber,
-                                    date: demoInv.date,
-                                    customerName: demoInv.customerName,
-                                    items: demoInv.items,
-                                    totals: { subtotal: demoInv.subtotal, tax: demoInv.taxAmount, discount: demoInv.discountAmount, grandTotal: demoInv.grandTotal },
-                                    businessSettings: { ...businessSettings, selectedPdfTemplate: tpl.id },
-                                    invoiceColumns: businessSettings?.invoiceColumns || [],
-                                    qrCodeBase64: null
-                                  }} />
-                                </div>
-                              );
-                            }
-                            return <InvoicePreview invoice={demoInv} businessSettings={{ ...businessSettings, selectedPdfTemplate: tpl.id }} />;
-                          })()}
-                        </div>
-                      )}
                     </LazyPreview>
 
-                    {enableWatermark && tpl.type === 'PRO' && viewMode !== 'livelink' && (
-                      <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-                        <span className="text-black/10 text-[32px] font-black uppercase tracking-[0.3em] -rotate-30 select-none">Watermark</span>
-                      </div>
-                    )}
+                    {/* Hover Overlay with Preview Icon */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-10">
+                      <span className="px-3 py-1.5 rounded-xl bg-white/90 text-slate-900 text-xs font-black shadow-lg flex items-center gap-1.5 backdrop-blur-xs transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                        <Eye className="w-3.5 h-3.5 text-theme-accent" /> Click to Preview
+                      </span>
+                    </div>
 
                     {isLocked && (
-                      <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center z-20">
-                        <div className="bg-black/80 p-3 rounded-xl">
-                          <Lock className="w-6 h-6 text-amber-400" />
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-20">
+                        <div className="bg-black/80 p-3 rounded-2xl text-center border border-amber-500/30">
+                          <Lock className="w-6 h-6 text-amber-400 mx-auto mb-1" />
+                          <span className="text-[10px] font-black text-amber-300 uppercase tracking-wider block">Pro Template</span>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Details Area */}
-                  <div className="p-4 bg-theme-card flex flex-col flex-1 border-t border-theme-border-soft">
-                    <h3 className="font-extrabold text-sm text-theme-primary mb-1">{tpl.name}</h3>
-                    <p className="text-[10px] font-semibold text-theme-muted mb-2 line-clamp-2">{tpl.desc}</p>
+                  {/* Card Info & Actions */}
+                  <div className="p-4 flex flex-col flex-1 justify-between gap-3 border-t border-theme-border-soft bg-theme-card">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <h3 className="font-extrabold text-sm text-theme-primary truncate">{tpl.name}</h3>
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-theme-surface text-theme-muted border border-theme-border-soft shrink-0">
+                          {templateStyles[tpl.id] || 'Modern'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] font-medium text-theme-muted line-clamp-2 leading-relaxed">{tpl.desc}</p>
+                    </div>
 
-                    {/* Feature Badges */}
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {features.map(feat => (
-                        <span key={feat} className="text-[7px] font-bold bg-theme-accent/10 text-theme-accent px-1.5 py-0.5 rounded border border-theme-accent/20 flex items-center gap-1">
-                          <Star className="w-2 h-2" /> {feat}
+                    {/* Features list */}
+                    <div className="flex flex-wrap gap-1">
+                      {features.slice(0, 3).map(feat => (
+                        <span key={feat} className="text-[8px] font-bold bg-theme-accent/10 text-theme-accent px-1.5 py-0.5 rounded border border-theme-accent/20 flex items-center gap-1">
+                          <Star className="w-2.5 h-2.5" /> {feat}
                         </span>
                       ))}
                     </div>
 
-                    <div className="mt-auto flex gap-2">
+                    {/* Action Buttons */}
+                    <div className="pt-2 border-t border-theme-border-soft flex items-center gap-2">
                       {isLocked ? (
                         <button
-                          className="flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md hover:scale-[1.02]"
+                          onClick={() => { setCurrentTab?.('subscription'); toast('Upgrade to Pro to unlock all templates!', { icon: '👑' }); }}
+                          className="flex-1 py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs hover:scale-102"
                         >
                           <Lock className="w-3.5 h-3.5" /> Unlock Pro
                         </button>
                       ) : (
-                        <div className="flex-1">
-                          {useAnimId === tpl.id && (
-                            <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center justify-center gap-1 text-theme-accent font-bold text-xs py-2"><CheckCircle2 className="w-3.5 h-3.5" /> Applied!</motion.span>
-                          )}
-                        </div>
-                      )}
-                      {!isLocked && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); setPreviewTemplate(tpl.id); }}
-                          className="py-2 px-3 rounded-xl text-xs font-bold transition-all bg-theme-app border border-theme-border-soft text-theme-muted hover:bg-theme-accent hover:text-white flex items-center gap-1"
+                          onClick={() => handleApplyInstant(tpl.id, tpl.type)}
+                          className={`flex-1 py-2 px-3 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
+                            isActive
+                              ? 'bg-theme-accent/15 text-theme-accent border border-theme-accent/30 hover:bg-theme-accent/25'
+                              : 'bg-theme-accent text-white hover:bg-theme-accent-dark active:scale-95 shadow-xs'
+                          }`}
                         >
-                          <Eye className="w-3.5 h-3.5" />
+                          {useAnimId === tpl.id ? (
+                            <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Applied!</span>
+                          ) : isActive ? (
+                            <span className="flex items-center gap-1 text-theme-accent"><CheckCircle2 className="w-3.5 h-3.5" /> Active</span>
+                          ) : (
+                            <span>Apply Template</span>
+                          )}
                         </button>
                       )}
+
+                      <button
+                        onClick={() => setPreviewTemplate(tpl.id)}
+                        title="Full Screen Preview"
+                        className="py-2 px-2.5 rounded-xl text-xs font-bold transition-all bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-theme-primary hover:bg-theme-app flex items-center justify-center"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </motion.div>
@@ -589,36 +581,75 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
         )}
       </div>
 
+      {/* Interactive Full-Screen Preview Modal */}
       {previewTemplate && (() => {
         const tpl = UNIVERSAL_TEMPLATES.find(t => t.id === previewTemplate);
         if (!tpl) return null;
+        const isCurrentActive = activeTemplate === tpl.id;
 
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 md:p-4" onClick={() => setPreviewTemplate(null)}>
-            <div className="bg-theme-card rounded-3xl w-full max-w-5xl max-h-[95vh] overflow-y-auto shadow-2xl border border-theme-border-soft" onClick={e => e.stopPropagation()}>
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-theme-border-soft sticky top-0 bg-theme-card z-10 rounded-t-3xl">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-2 md:p-6" onClick={() => setPreviewTemplate(null)}>
+            <div className="bg-theme-card rounded-3xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl border border-theme-border-soft overflow-hidden" onClick={e => e.stopPropagation()}>
+              
+              {/* Modal Top Bar */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-theme-border-soft bg-theme-card/90 backdrop-blur-md sticky top-0 z-20">
                 <div className="flex items-center gap-3">
-                  <h3 className="font-extrabold text-theme-primary text-sm">{tpl.name} Preview</h3>
-                  <span className="text-[9px] font-bold bg-theme-accent/10 text-theme-accent px-2 py-0.5 rounded-full border border-theme-accent/20">Live Preview</span>
+                  <div className="w-9 h-9 rounded-xl bg-theme-accent/10 flex items-center justify-center text-theme-accent border border-theme-accent/20">
+                    <Palette className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-theme-primary text-sm flex items-center gap-2">
+                      {tpl.name}
+                      {tpl.type === 'PRO' && (
+                        <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-xs">
+                          PRO
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-[11px] text-theme-muted font-medium">{tpl.desc}</p>
+                  </div>
                 </div>
-                <button onClick={() => setPreviewTemplate(null)} className="p-2 rounded-xl hover:bg-theme-app text-theme-muted hover:text-theme-primary transition-all">
-                  <X className="w-5 h-5" />
-                </button>
+
+                {/* Direct Action Controls */}
+                <div className="flex items-center gap-2">
+                  <button
+                    disabled={downloadingSample}
+                    onClick={() => handleDownloadSamplePDF(tpl.id)}
+                    className="px-4 py-2 rounded-xl text-xs font-bold bg-theme-surface hover:bg-theme-app text-theme-primary border border-theme-border-soft flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50"
+                  >
+                    <Download className="w-3.5 h-3.5 text-theme-accent" />
+                    <span>{downloadingSample ? 'Generating PDF...' : 'Download Sample PDF'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handleApplyInstant(tpl.id, tpl.type);
+                      setPreviewTemplate(null);
+                    }}
+                    className="px-4 py-2 rounded-xl text-xs font-black bg-theme-accent hover:bg-theme-accent-dark text-white flex items-center gap-1.5 transition-all shadow-md active:scale-95"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>{isCurrentActive ? 'Active Template' : 'Apply This Template'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => setPreviewTemplate(null)}
+                    className="p-2 rounded-xl bg-theme-surface hover:bg-theme-app text-theme-muted hover:text-theme-primary transition-all border border-theme-border-soft ml-1"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <div className="p-2 md:p-4 lg:p-6 flex justify-center bg-theme-surface">
-                {viewMode === 'livelink' ? (
-                  <div className="w-[375px] max-w-full transform origin-top bg-theme-app border-8 border-gray-800 rounded-[2.5rem] overflow-hidden shadow-2xl relative min-h-[700px]">
-                    <div className="h-6 bg-gray-800 w-full absolute top-0 z-50 flex items-center justify-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-red-500"></div><div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div><div className="w-1.5 h-1.5 rounded-full bg-green-500"></div></div>
-                    <div className="mt-6 h-full overflow-y-auto">
-                      <PublicInvoice initialInvoice={{...getDemoInvoice(businessSettings?.businessCategory), paymentSettingsSnapshot: { customerLiveLinkSettings: { selectedLiveLinkTemplate: tpl.id } }}} />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="transform scale-[0.85] md:scale-[0.9] lg:scale-100 origin-top bg-white">
-                    <InvoicePreview invoice={getDemoInvoice(businessSettings?.businessCategory)} businessSettings={{ ...businessSettings, selectedPdfTemplate: tpl.id }} />
-                  </div>
-                )}
+
+              {/* Scrollable Preview Canvas */}
+              <div className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-slate-900/5 dark:bg-black/30">
+                <div className="w-full max-w-4xl bg-white shadow-2xl rounded-2xl overflow-hidden border border-slate-200">
+                  <InvoicePreview 
+                    invoice={getDemoInvoice(businessSettings?.businessCategory)} 
+                    businessSettings={{ ...businessSettings, selectedPdfTemplate: tpl.id }} 
+                    templateOverride={tpl.id} 
+                  />
+                </div>
               </div>
             </div>
           </div>
