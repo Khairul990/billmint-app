@@ -50,7 +50,7 @@ const normalizeInvoiceForTemplate = (invoice, businessSettings = {}) => {
 
   return {
     ...invoice,
-    selectedTemplate: invoice?.selectedTemplate || businessSettings?.selectedPdfTemplate || 'classic',
+    selectedTemplate: invoice?.selectedTemplate || invoice?.pdfTemplate || businessSettings?.selectedPdfTemplate || businessSettings?.defaultBillingTemplate || 'classic',
     invoiceColumns: invoice?.invoiceColumns || businessSettings?.invoiceColumns || [],
     customerName: invoice?.customerName || invoice?.customer?.name || invoice?.client?.name || 'Walk-in Customer',
     customerPhone: invoice?.customerPhone || invoice?.customer?.phone || invoice?.client?.phone || '',
