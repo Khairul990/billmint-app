@@ -1,36 +1,36 @@
 import { invoiceEngine } from './invoiceEngine.js';
-import { getInvoicePaymentStatus, getInvoicePaidTotal } from '../utils/invoiceMath.js';
-
+import {
+  getInvoicePaymentStatus,
+  getInvoicePaidTotal,
+  calculateCanonicalInvoiceFinancials
+} from '../utils/invoiceMath.js';
 import { db, firebaseReady } from './firebaseConfig.js';
 import { doc, runTransaction } from 'firebase/firestore';
-import {  submitPlatformPaymentProof as dbSubmitPlatformPaymentProof, getUserPaymentProofs as dbGetUserPaymentProofs, getUserRevenueState as dbGetUserRevenueState  } from './dbEngine.js';
+import {
+  submitPlatformPaymentProof as dbSubmitPlatformPaymentProof,
+  getUserPaymentProofs as dbGetUserPaymentProofs,
+  getUserRevenueState as dbGetUserRevenueState
+} from './dbEngine.js';
 
 class PaymentEngine {
-  // Add payment transaction to an invoice (Canonical Unified Flow)
-  async addPayment(invoiceId, paymentData) {
+  // Every direct/manual payment enters the same canonical invoice payment ledger.
+  async addPayment(invoiceId, paymentData = {}) {
     return await invoiceEngine.markAsPaid(invoiceId, paymentData);
   }
 
-  // Remove a payment transaction (Canonical Unified Flow)
   async removePayment(invoiceId, paymentId) {
     const invoices = await invoiceEngine.getInvoices(true);
     const invoice = invoices.find(inv => inv.id === invoiceId);
     if (!invoice) return null;
-
-    if (!invoice.paymentHistory) invoice.paymentHistory = [];
-    invoice.paymentHistory = invoice.paymentHistory.filter(p => p.id !== paymentId && p.proofId !== paymentId);
-    if (invoice.payments) {
-      invoice.payments = invoice.payments.filter(p => p.id !== paymentId);
-    }
-
-    const totalPaid = Math.round(invoice.paymentHistory.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) * 100) / 100;
+    invoice.paymentHistory = Array.isArray(invoice.paymentHistory)
+      ? invoice.paymentHistory.filter(p => p.id !== paymentId && p.proofId !== paymentId)
+      : [];
+    if (invoice.payments) invoice.payments = invoice.payments.filter(p => p.id !== paymentId);
+    const totalPaid = Math.round(invoice.paymentHistory.reduce((s, p) => s + (Number(p.amount) || 0), 0) * 100) / 100;
     invoice.amountPaid = totalPaid;
     invoice.paidAmount = totalPaid;
-    const grandTotal = Math.round((parseFloat(invoice.grandTotal || invoice.total) || 0) * 100) / 100;
-    invoice.balanceDue = Math.max(0, Math.round((grandTotal - totalPaid) * 100) / 100);
     invoice.paymentStatus = getInvoicePaymentStatus(invoice);
     invoice.updatedAt = new Date().toISOString();
-
     const saved = await invoiceEngine.saveInvoice(invoice);
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('billqyro_invoice_updated', { detail: saved }));
@@ -41,39 +41,37 @@ class PaymentEngine {
     return saved;
   }
 
-  // Calculate total paid amount from payment transactions
   calculateTotalPaid(payments = []) {
     return payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
   }
 
-  // Record a payment proof (e.g., uploaded screenshot)
   async recordPaymentProof(invoiceId, proofData) {
-    // This could also interact with storageEngine to upload the file first
-    // For now, we assume proofData contains the uploaded URL
     return await this.addPayment(invoiceId, {
       amount: proofData.amount,
       method: proofData.method || 'Transfer',
       date: new Date().toISOString(),
-      proofUrl: proofData.url
+      proofUrl: proofData.url,
+      transactionId: proofData.transactionId || ''
     });
   }
 
-  // Fetch all transactions across a set of invoices
   getAllTransactions(invoices = []) {
-    let transactions = [];
+    const transactions = [];
     invoices.forEach(inv => {
-      if (inv.payments && inv.payments.length > 0) {
-        inv.payments.forEach(p => {
-          transactions.push({
-            ...p,
-            invoiceId: inv.id,
-            invoiceNumber: inv.invoiceNumber,
-            customerName: inv.customer?.name || inv.customerName || 'Unknown'
-          });
-        });
-      }
+      (inv.payments || []).forEach(p => transactions.push({
+        ...p,
+        invoiceId: inv.id,
+        invoiceNumber: inv.invoiceNumber,
+        customerName: inv.customer?.name || inv.customerName || 'Unknown'
+      }));
+      // Also expose canonical paymentHistory so every payment source is visible.
+      (inv.paymentHistory || []).forEach(p => transactions.push({
+        ...p,
+        invoiceId: inv.id,
+        invoiceNumber: inv.invoiceNumber,
+        customerName: inv.customer?.name || inv.customerName || 'Unknown'
+      }));
     });
-    // Sort by date descending
     return transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
   }
 
@@ -81,200 +79,137 @@ class PaymentEngine {
     return await dbSubmitPlatformPaymentProof(proofData);
   }
 
-  // Atomically approve a payment proof
+  // Payment-proof approval is atomic in Firestore and then persisted through
+  // invoiceEngine.saveInvoice(), which is the single canonical normalization path.
   async approvePaymentProof(payment) {
-    if (!firebaseReady || !db) throw new Error("Database not initialized");
+    if (!firebaseReady || !db) throw new Error('Database not initialized');
 
     const proofRef = doc(db, 'payment_proofs', payment.id);
+    const paymentAmount = Math.max(0, Math.round((parseFloat(payment.amount) || 0) * 100) / 100);
+    if (paymentAmount <= 0) throw new Error('Payment amount must be greater than zero.');
 
     await runTransaction(db, async (transaction) => {
       const proofDoc = await transaction.get(proofRef);
-      if (!proofDoc.exists()) {
-        throw new Error('Payment proof not found.');
-      }
+      if (!proofDoc.exists()) throw new Error('Payment proof not found.');
       const proofData = proofDoc.data();
-      if (proofData.status === 'approved') {
-        throw new Error('This payment has already been approved.');
-      }
+      if (proofData.status === 'approved') throw new Error('This payment has already been approved.');
+      if (proofData.status === 'rejected') throw new Error('This payment has already been rejected.');
 
-      transaction.update(proofRef, { 
+      transaction.update(proofRef, {
         status: 'approved',
         updatedAt: new Date().toISOString()
       });
 
-      if (payment.invoiceId) {
-        const localInvoices = await invoiceEngine.getInvoices();
-        const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
-        
-        if (existingInvoice && existingInvoice.publicToken) {
-          const publicInvRef = doc(db, 'publicInvoices', existingInvoice.publicToken);
-          const pInvDoc = await transaction.get(publicInvRef);
-          if (pInvDoc.exists()) {
-            const pData = pInvDoc.data();
-            const grandTotal = pData.grandTotal || 0;
-            const currentPaid = parseFloat(pData.amountPaid) || 0;
-            const paymentAmount = parseFloat(payment.amount) || 0;
-            const newPaid = currentPaid + paymentAmount;
-            const newBalance = Math.max(0, grandTotal - newPaid);
-            let newStatus;
-            if (newBalance <= 0) newStatus = 'Paid';
-            else if (newPaid > 0) newStatus = 'Partially Paid';
-            else newStatus = pData.paymentStatus;
-            
-            transaction.update(publicInvRef, { 
-              paymentStatus: newStatus,
-              status: newStatus,
-              amountPaid: newPaid,
-              balanceDue: newBalance
-            });
-          }
-        }
+      if (!payment.invoiceId) return;
+      const localInvoices = await invoiceEngine.getInvoices(true);
+      const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
+      if (!existingInvoice?.publicToken) return;
+
+      const publicInvRef = doc(db, 'publicInvoices', existingInvoice.publicToken);
+      const publicDoc = await transaction.get(publicInvRef);
+      if (!publicDoc.exists()) return;
+
+      const publicData = publicDoc.data();
+      const history = Array.isArray(publicData.paymentHistory) ? [...publicData.paymentHistory] : [];
+      const alreadyRecorded = history.some(p => p.proofId === payment.id || p.id === payment.id || p.id === `pmt_${payment.id}`);
+      if (!alreadyRecorded) {
+        history.push({
+          id: `pmt_${payment.id}`,
+          proofId: payment.id,
+          amount: paymentAmount,
+          method: payment.paymentMethod || 'Proof Approval',
+          transactionId: payment.transactionId || '',
+          date: new Date().toISOString(),
+          note: payment.notes || payment.note || 'Payment proof approved',
+          source: 'payment_proof'
+        });
       }
+
+      // Use the same canonical resolver for the public invoice snapshot.
+      const canonical = calculateCanonicalInvoiceFinancials({
+        ...publicData,
+        paymentHistory: history
+      });
+
+      transaction.update(publicInvRef, {
+        paymentHistory: history,
+        amountPaid: canonical.amountPaid,
+        paidAmount: canonical.amountPaid,
+        balanceDue: canonical.balanceDue,
+        paymentStatus: canonical.paymentStatus,
+        status: canonical.paymentStatus,
+        updatedAt: new Date().toISOString()
+      });
     });
 
+    // Persist the same payment in the owner's canonical invoice ledger.
     if (payment.invoiceId) {
-      const localInvoices = await invoiceEngine.getInvoices();
+      const localInvoices = await invoiceEngine.getInvoices(true);
       const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
-      
       if (existingInvoice) {
-        const paymentAmount = parseFloat(payment.amount) || 0;
-        const invoice = { ...existingInvoice };
-        if (!invoice.paymentHistory) invoice.paymentHistory = [];
-
-        // Deduplication check: prevent applying same proof twice
-        const alreadyApplied = invoice.paymentHistory.some(p => p.proofId === payment.id || p.id === payment.id || p.id === ('pmt_' + payment.id));
-        if (!alreadyApplied && paymentAmount > 0) {
-          const paymentEntry = {
-            id: 'pmt_' + payment.id,
+        const history = Array.isArray(existingInvoice.paymentHistory) ? [...existingInvoice.paymentHistory] : [];
+        const alreadyRecorded = history.some(p => p.proofId === payment.id || p.id === payment.id || p.id === `pmt_${payment.id}`);
+        if (!alreadyRecorded) {
+          history.push({
+            id: `pmt_${payment.id}`,
             proofId: payment.id,
             amount: paymentAmount,
-            method: payment.paymentMethod || invoice.paymentMethod || 'Proof Approval',
+            method: payment.paymentMethod || existingInvoice.paymentMethod || 'Proof Approval',
+            transactionId: payment.transactionId || '',
             date: new Date().toISOString(),
-            note: payment.notes || 'Payment proof approved'
-          };
-          invoice.paymentHistory.push(paymentEntry);
-
-          // Mirror into Internal Bank ledger (idempotent)
-          try {
-            const { bankEngine } = await import('./bankEngine');
-            await bankEngine.autoPostPayment({
-              id: paymentEntry.id,
-              amount: paymentEntry.amount,
-              method: paymentEntry.method,
-              date: paymentEntry.date,
-              invoiceId: invoice.id,
-              invoiceNumber: invoice.invoiceNumber,
-              customerId: invoice.customer?.id || invoice.customerId || null,
-              customerName: invoice.customer?.name || invoice.customerName || '',
-              note: paymentEntry.note
-            });
-          } catch (e) {
-            console.warn('[BANK] auto-post proof payment skipped:', e);
-          }
+            note: payment.notes || payment.note || 'Payment proof approved',
+            source: 'payment_proof'
+          });
         }
 
-        const totalPaid = Math.round(invoice.paymentHistory.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) * 100) / 100;
-        const grandTotal = Math.round((parseFloat(invoice.grandTotal || invoice.total) || 0) * 100) / 100;
-        const newBalance = Math.max(0, Math.round((grandTotal - totalPaid) * 100) / 100);
-        
-        let newStatus;
-        if (newBalance <= 0 && grandTotal > 0) newStatus = 'Paid';
-        else if (totalPaid > 0) newStatus = 'Partially Paid';
-        else newStatus = invoice.paymentStatus || 'Unpaid';
-
-        await invoiceEngine.saveInvoice({
-          ...invoice,
-          status: newStatus,
-          paymentStatus: newStatus,
-          amountPaid: totalPaid,
-          paidAmount: totalPaid,
-          balanceDue: newBalance,
-          paymentMethod: payment.paymentMethod || invoice.paymentMethod || 'UPI'
+        const normalized = await invoiceEngine.saveInvoice({
+          ...existingInvoice,
+          paymentHistory: history,
+          paymentMethod: payment.paymentMethod || existingInvoice.paymentMethod || 'UPI'
         });
-        if (typeof window !== 'undefined') window.dispatchEvent(new Event('billqyro_sync'));
+
+        // Idempotent internal-bank record: one ledger entry per approved payment.
+        try {
+          const { bankEngine } = await import('./bankEngine.js');
+          const entry = history.find(p => p.proofId === payment.id || p.id === `pmt_${payment.id}`);
+          if (entry) {
+            await bankEngine.autoPostPayment({
+              id: entry.id,
+              amount: entry.amount,
+              method: entry.method,
+              date: entry.date,
+              invoiceId: normalized.id,
+              invoiceNumber: normalized.invoiceNumber,
+              customerId: normalized.customer?.id || normalized.customerId || null,
+              customerName: normalized.customer?.name || normalized.customerName || '',
+              note: entry.note
+            });
+          }
+        } catch (e) {
+          console.warn('[BANK] auto-post proof payment skipped:', e);
+        }
+
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('billqyro_invoice_updated', { detail: normalized }));
+          window.dispatchEvent(new Event('billqyro_bank_updated'));
+          window.dispatchEvent(new Event('billqyro_sync'));
+          window.dispatchEvent(new CustomEvent('billqyro:data-updated', { detail: { collectionName: 'invoices', doc: normalized } }));
+        }
       }
     }
   }
 
-
-  // Atomically reject a payment proof
   async rejectPaymentProof(payment) {
-    if (!firebaseReady || !db) throw new Error("Database not initialized");
-
+    if (!firebaseReady || !db) throw new Error('Database not initialized');
     const proofRef = doc(db, 'payment_proofs', payment.id);
-
     await runTransaction(db, async (transaction) => {
       const proofDoc = await transaction.get(proofRef);
-      if (!proofDoc.exists()) {
-        throw new Error('Payment proof not found.');
-      }
+      if (!proofDoc.exists()) throw new Error('Payment proof not found.');
       const proofData = proofDoc.data();
-      if (proofData.status === 'rejected') {
-        throw new Error('This payment has already been rejected.');
-      }
-      if (proofData.status === 'approved') {
-        throw new Error('This payment has already been approved and cannot be rejected.');
-      }
-
-      transaction.update(proofRef, { 
-        status: 'rejected',
-        updatedAt: new Date().toISOString()
-      });
-
-      if (payment.invoiceId) {
-        const localInvoices = await invoiceEngine.getInvoices();
-        const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
-        
-        if (existingInvoice && existingInvoice.publicToken) {
-          const publicInvRef = doc(db, 'publicInvoices', existingInvoice.publicToken);
-          const pInvDoc = await transaction.get(publicInvRef);
-          if (pInvDoc.exists()) {
-            const pData = pInvDoc.data();
-            const grandTotal = pData.grandTotal || 0;
-            const currentPaid = parseFloat(pData.amountPaid) || 0;
-            const paymentAmount = parseFloat(payment.amount) || 0;
-            const revertedPaid = Math.max(0, currentPaid - paymentAmount);
-            const revertedBalance = Math.max(0, grandTotal - revertedPaid);
-            let revertedStatus;
-            if (revertedBalance <= 0 && revertedPaid > 0) revertedStatus = 'Paid';
-            else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
-            else revertedStatus = 'Partially Paid';
-
-            transaction.update(publicInvRef, {
-              paymentStatus: revertedStatus,
-              status: revertedStatus,
-              amountPaid: revertedPaid,
-              balanceDue: revertedBalance
-            });
-          }
-        }
-      }
+      if (proofData.status === 'rejected') throw new Error('This payment has already been rejected.');
+      if (proofData.status === 'approved') throw new Error('This payment has already been approved and cannot be rejected.');
+      transaction.update(proofRef, { status: 'rejected', updatedAt: new Date().toISOString() });
     });
-
-    if (payment.invoiceId) {
-      const localInvoices = await invoiceEngine.getInvoices();
-      const existingInvoice = localInvoices.find(inv => inv.id === payment.invoiceId);
-      if (existingInvoice) {
-        const grandTotal = parseFloat(existingInvoice.grandTotal) || 0;
-        const currentPaid = parseFloat(existingInvoice.amountPaid) || 0;
-        const paymentAmount = parseFloat(payment.amount) || 0;
-        const revertedPaid = Math.max(0, currentPaid - paymentAmount);
-        const revertedBalance = Math.max(0, grandTotal - revertedPaid);
-        let revertedStatus;
-        if (revertedBalance <= 0 && revertedPaid > 0) revertedStatus = 'Paid';
-        else if (revertedPaid <= 0) revertedStatus = 'Unpaid';
-        else revertedStatus = 'Partially Paid';
-
-        await invoiceEngine.saveInvoice({
-          ...existingInvoice,
-          status: revertedStatus,
-          paymentStatus: revertedStatus,
-          amountPaid: revertedPaid,
-          balanceDue: revertedBalance
-        });
-        if (typeof window !== 'undefined') window.dispatchEvent(new Event('billqyro_sync'));
-      }
-    }
   }
 
   async getUserPaymentProofs(userId) {
