@@ -77,28 +77,44 @@ const waitForAssets = async (root) => {
 const renderExactPreview = async (root) => {
   await waitForAssets(root);
   await nextPaint();
-  const width = Math.max(root.scrollWidth, root.offsetWidth, root.clientWidth);
-  const height = Math.max(root.scrollHeight, root.offsetHeight, root.clientHeight);
+  const width = Math.max(root.scrollWidth, root.offsetWidth, root.clientWidth, 794);
+  const height = Math.max(root.scrollHeight, root.offsetHeight, root.clientHeight, 1123);
   if (!width || !height) throw new Error('Invoice preview has no printable content.');
 
-  const scale = Math.min(2, MAX_CAPTURE_WIDTH / Math.max(width, 1), MAX_CAPTURE_HEIGHT / Math.max(height, 1));
   const exportClass = 'billqyro-export-freeze';
   root.classList.add(exportClass);
   const style = document.createElement('style');
-  style.textContent = `.${exportClass}, .${exportClass} * { animation: none !important; transition: none !important; caret-color: transparent !important; }`;
+  style.textContent = `
+    .${exportClass}, .${exportClass} * { animation: none !important; transition: none !important; caret-color: transparent !important; }
+    .${exportClass} img { max-width: 100%; object-fit: contain; }
+  `;
   root.appendChild(style);
 
   try {
     return await withTimeout(html2canvas(root, {
-      scale: Math.max(0.5, scale), useCORS: true, allowTaint: false, backgroundColor: '#ffffff',
-      imageTimeout: 8000, logging: false, scrollX: 0, scrollY: 0, width, height,
-      windowWidth: Math.max(document.documentElement.clientWidth, width),
-      windowHeight: Math.max(document.documentElement.clientHeight, height), removeContainer: true,
+      scale: 2, // Crisp 2x retina print resolution
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#ffffff',
+      imageTimeout: 8000,
+      logging: false,
+      scrollX: 0,
+      scrollY: 0,
+      width: Math.min(width, 850),
+      windowWidth: 1200, // Forces full desktop layout and grid/flex alignment
+      removeContainer: true,
       onclone: (clonedDocument) => {
         const clonedRoot = clonedDocument.querySelector('#invoice-preview-capture');
-        if (clonedRoot) clonedRoot.querySelectorAll('*').forEach((node) => {
-          if (node instanceof HTMLElement) { node.style.animation = 'none'; node.style.transition = 'none'; }
-        });
+        if (clonedRoot) {
+          clonedRoot.style.width = '794px';
+          clonedRoot.style.minHeight = '1123px';
+          clonedRoot.querySelectorAll('*').forEach((node) => {
+            if (node instanceof HTMLElement) {
+              node.style.animation = 'none';
+              node.style.transition = 'none';
+            }
+          });
+        }
       },
     }), EXPORT_TIMEOUT_MS, 'PDF/image export timed out. Please try again.');
   } finally { style.remove(); root.classList.remove(exportClass); }

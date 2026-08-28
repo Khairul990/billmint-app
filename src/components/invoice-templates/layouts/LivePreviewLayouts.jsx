@@ -107,7 +107,7 @@ const MinimalClassic = ({ data }) => (
       </div>
       <div className="text-right">
         {data.businessSettings?.logoUrl && (
-          <img src={data.businessSettings.logoUrl} alt="Logo" className="h-12 object-contain ml-auto mb-2" />
+          <img src={data.businessSettings.logoUrl} alt="Logo" className="h-12 object-contain ml-auto mb-2" style={{ maxWidth: '120px', maxHeight: '48px', objectFit: 'contain' }} />
         )}
         <h2 className="text-lg font-bold text-gray-900">{data.businessSettings?.businessName || 'Your Business'}</h2>
         <p className="text-sm text-gray-600">{data.businessSettings?.email}</p>
@@ -194,7 +194,7 @@ const ModernCorporate = ({ data }) => (
         <p className="text-blue-200 text-sm mt-1"># {data.invoiceNumber} | {data.date}</p>
       </div>
       {data.businessSettings?.logoUrl ? (
-        <img src={data.businessSettings.logoUrl} alt="Logo" className="h-12 bg-white p-1 rounded object-contain" />
+        <img src={data.businessSettings.logoUrl} alt="Logo" className="h-12 bg-white p-1 rounded object-contain" style={{ maxWidth: '140px', maxHeight: '48px', objectFit: 'contain' }} />
       ) : (
         <h2 className="text-xl font-bold">{data.businessSettings?.businessName || 'Your Business'}</h2>
       )}
@@ -286,7 +286,7 @@ const TealBoldHeader = ({ data }) => (
   <div className="bg-white font-sans text-gray-800 shadow-xl w-[595px] min-h-fit mx-auto  flex">
     <div className="w-1/3 bg-teal-800 p-8 text-white">
       {data.businessSettings?.logoUrl ? (
-        <img src={data.businessSettings.logoUrl} alt="Logo" className="h-16 w-16 rounded-xl bg-white p-1 object-contain mb-6" />
+        <img src={data.businessSettings.logoUrl} alt="Logo" className="h-16 w-16 rounded-xl bg-white p-1 object-contain mb-6" style={{ maxWidth: '64px', maxHeight: '64px', objectFit: 'contain' }} />
       ) : (
         <div className="w-16 h-16 rounded-xl bg-teal-600 flex items-center justify-center font-black text-2xl mb-6">
           {data.businessSettings?.businessName?.charAt(0) || 'B'}

@@ -143,23 +143,24 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
     >
 
       {/* 1. BRAND HEADER & METADATA GRID */}
-      <div className={`flex flex-col md:flex-row justify-between items-start gap-6 border-b pb-8 ${templateId === 'modern' ? 'bg-slate-900 text-slate-200 -mx-6 -mt-6 md:-mx-10 md:-mt-10 p-6 md:p-10 rounded-t-3xl border-slate-800' : templateId === 'gold' ? 'bg-slate-900 text-amber-100 -mx-6 -mt-6 md:-mx-10 md:-mt-10 p-6 md:p-10 rounded-t-3xl border-amber-500/30' : templateId === 'corporate' ? 'border-b-4 border-emerald-800' : templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
+      <div className={`flex flex-row justify-between items-start gap-6 border-b pb-8 ${templateId === 'modern' ? 'bg-slate-900 text-slate-200 -mx-6 -mt-6 md:-mx-10 md:-mt-10 p-6 md:p-10 rounded-t-3xl border-slate-800' : templateId === 'gold' ? 'bg-slate-900 text-amber-100 -mx-6 -mt-6 md:-mx-10 md:-mt-10 p-6 md:p-10 rounded-t-3xl border-amber-500/30' : templateId === 'corporate' ? 'border-b-4 border-emerald-800' : templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
         {/* Left Side: Business logo & details */}
-        <div>
+        <div className="flex-1 max-w-[55%]">
           <div className="flex items-center gap-3">
             {businessPrefs?.logoUrl ? (
               <img
                 src={businessPrefs.logoUrl}
                 alt="Business Logo"
-                className={`w-12 h-12 object-cover shadow-sm bg-theme-app dark:bg-theme-surface border ${templateId === 'minimal' ? 'rounded-none border-black' : 'rounded-xl border-theme-border-soft dark:border-theme-border-soft'}`}
+                className={`w-14 h-14 object-contain shadow-xs bg-theme-app dark:bg-theme-surface border ${templateId === 'minimal' ? 'rounded-none border-black' : 'rounded-xl border-theme-border-soft dark:border-theme-border-soft'}`}
+                style={{ width: '56px', height: '56px', maxWidth: '56px', maxHeight: '56px', minWidth: '56px', objectFit: 'contain' }}
               />
             ) : (
-              <div className={`w-12 h-12 bg-gradient-to-tr from-theme-accent to-theme-accent-dark flex items-center justify-center text-white font-extrabold text-lg ${templateId === 'minimal' ? 'rounded-none' : 'rounded-xl'}`}>
+              <div className={`w-14 h-14 bg-gradient-to-tr from-theme-accent to-theme-accent-dark flex items-center justify-center text-white font-extrabold text-lg shrink-0 ${templateId === 'minimal' ? 'rounded-none' : 'rounded-xl'}`} style={{ width: '56px', height: '56px' }}>
                 {businessPrefs?.businessName?.charAt(0) || 'B'}
               </div>
             )}
             <div>
-              <h3 className={`font-extrabold text-xl tracking-tight ${templateId === 'modern' ? 'text-white' : templateId === 'gold' ? 'text-amber-400' : templateId === 'corporate' ? 'text-emerald-900' : 'text-theme-primary dark:text-theme-primary'}`}>{businessPrefs?.businessName || 'BillQyro Client'}</h3>
+              <h3 className={`font-extrabold text-lg tracking-tight ${templateId === 'modern' ? 'text-white' : templateId === 'gold' ? 'text-amber-400' : templateId === 'corporate' ? 'text-emerald-900' : 'text-theme-primary dark:text-theme-primary'}`}>{businessPrefs?.businessName || 'BillQyro Client'}</h3>
               {businessPrefs?.gstNumber && (
                 <p className="text-xs text-theme-muted dark:text-theme-muted font-semibold uppercase tracking-wider mt-0.5">{regionalPrefs.taxLabel || 'GST'}: {businessPrefs.gstNumber}</p>
               )}
@@ -168,49 +169,51 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
           
           <div className="mt-4 space-y-1 text-xs text-theme-muted dark:text-theme-muted font-medium max-w-sm leading-relaxed">
             <p>{businessPrefs?.address || 'Company Address Not Set'}</p>
-            <p>Phone: {businessPrefs?.phone}</p>
-            <p>Email: {businessPrefs?.email}</p>
+            {businessPrefs?.phone && <p>Phone: {businessPrefs.phone}</p>}
+            {businessPrefs?.email && <p>Email: {businessPrefs.email}</p>}
           </div>
         </div>
 
         {/* Right Side: Invoice Info */}
-        <div className="flex flex-col items-start md:items-end justify-start md:text-right gap-3">
+        <div className="flex flex-col items-end text-right gap-3 flex-1 max-w-[45%]">
           <div className="flex items-center gap-2">
             <span className={`text-xs px-3 py-1 rounded-full border font-bold ${getStatusBadgeStyle(invoice.paymentStatus)}`}>
               {invoice.paymentStatus}
             </span>
           </div>
           
-          <div className="space-y-1 text-xs font-semibold text-theme-muted dark:text-theme-muted">
-            <div className="flex flex-col md:items-end gap-1.5">
-              <div className="flex items-center gap-1.5 justify-start md:justify-end text-theme-primary dark:text-theme-secondary text-sm">
+          <div className="space-y-1.5 text-xs font-semibold text-theme-muted dark:text-theme-muted">
+            <div className="flex flex-col items-end gap-1.5">
+              <div className="flex items-center gap-1.5 justify-end text-theme-primary dark:text-theme-secondary text-sm">
                 <Hash className="w-3.5 h-3.5 text-theme-accent" />
                 <span>Invoice: <strong className="font-extrabold">{invoice.invoiceNumber}</strong></span>
               </div>
               {templateId === 'retail' && (
-                <div className="px-3 py-1 bg-white border border-slate-200 rounded text-center text-slate-800 hidden md:block">
+                <div className="px-3 py-1 bg-white border border-slate-200 rounded text-center text-slate-800">
                   <div className="font-mono text-[8px] tracking-[0.3em] font-bold opacity-80 leading-none mb-0.5">||| |||| || |||</div>
                   <div className="text-[7px] uppercase tracking-widest font-black leading-none opacity-50">{invoice.invoiceNumber}</div>
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-1.5 justify-start md:justify-end">
+            <div className="flex items-center gap-1.5 justify-end">
               <Calendar className="w-3.5 h-3.5 text-theme-muted dark:text-theme-muted" />
               <span>Date: {invoice.date}</span>
             </div>
-            <div className="flex items-center gap-1.5 justify-start md:justify-end">
-              <Calendar className="w-3.5 h-3.5 text-theme-muted dark:text-theme-muted" />
-              <span className="text-theme-danger dark:text-theme-danger">Due Date: {invoice.dueDate}</span>
-            </div>
+            {invoice.dueDate && (
+              <div className="flex items-center gap-1.5 justify-end">
+                <Calendar className="w-3.5 h-3.5 text-theme-muted dark:text-theme-muted" />
+                <span className="text-theme-danger dark:text-theme-danger">Due Date: {invoice.dueDate}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* 2. CLIENT CRM GRID */}
-      <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 py-8 border-b text-xs ${templateId === 'minimal' ? 'border-black' : templateId === 'corporate' ? 'border-emerald-800/30' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
+      <div className={`grid grid-cols-2 gap-6 py-8 border-b text-xs ${templateId === 'minimal' ? 'border-black' : templateId === 'corporate' ? 'border-emerald-800/30' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
         <div>
           <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block mb-2">{templateId === 'teacher' ? 'Student Details' : 'Billed To'}</span>
-          <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary dark:text-theme-primary">{invoice.customerName}</h4>
+          <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary">{invoice.customerName}</h4>
           
           {templateId === 'doctor' && (
             <div className="mt-3 p-3 bg-teal-50 dark:bg-teal-900/20 border-l-2 border-teal-500 rounded-r-md mb-2">
@@ -223,16 +226,16 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
           )}
           <div className="text-theme-muted dark:text-theme-muted space-y-1 mt-2 max-w-xs leading-relaxed font-medium">
             <p>{invoice.customerAddress || 'No address provided'}</p>
-            <p>Phone: {invoice.customerPhone || 'N/A'}</p>
-            <p>Email: {invoice.customerEmail || 'N/A'}</p>
+            {invoice.customerPhone && <p>Phone: {invoice.customerPhone}</p>}
+            {invoice.customerEmail && <p>Email: {invoice.customerEmail}</p>}
           </div>
         </div>
         
-        <div className="md:text-right">
+        <div className="text-right">
           {templateId === 'repair' && invoice.orderNotes ? (
             <>
               <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block mb-2">Device & Job Notes</span>
-              <div className="flex md:justify-end">
+              <div className="flex justify-end">
                 <p className="font-medium text-theme-primary leading-relaxed bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg border border-amber-200 dark:border-amber-700/30 text-amber-900 dark:text-amber-200 text-left text-xs max-w-xs w-full">
                   {invoice.orderNotes}
                 </p>
@@ -241,7 +244,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
           ) : (
             <>
               <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block mb-2">Payment Terms</span>
-              <p className="font-semibold text-theme-primary dark:text-theme-muted dark:text-theme-muted leading-relaxed">
+              <p className="font-semibold text-theme-primary dark:text-theme-muted leading-relaxed">
                 Please pay online on or before the due date.<br />
                 Amounts are calculated in <strong className="text-theme-accent dark:text-theme-accent font-extrabold">{currencySymbol}</strong>.
               </p>
@@ -331,7 +334,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
       </div>
 
       {/* 4. TOTALS SUM BLOCK */}
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-6 border-t border-theme-border-soft dark:border-theme-border-soft pt-6">
+      <div className="flex flex-row justify-between items-start gap-6 border-t border-theme-border-soft dark:border-theme-border-soft pt-6">
         {/* Invoice Notes */}
         <div className="flex-1 max-w-sm">
           {invoice.notes && (
@@ -345,7 +348,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
         </div>
 
         {/* Math summary */}
-        <div className="w-full sm:w-72 space-y-2 text-xs font-semibold text-theme-muted dark:text-theme-muted">
+        <div className="w-72 space-y-2 text-xs font-semibold text-theme-muted dark:text-theme-muted shrink-0">
           <div className="flex justify-between">
             <span>Subtotal</span>
             <span className="text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-bold tabular-nums">{formatCurrency(financials.subtotal, currencySymbol, regionalPrefs.numberFormat)}</span>
