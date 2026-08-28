@@ -2,11 +2,24 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { toast } from 'react-hot-toast';
 
-let generating = false;
+let exporting = false;
+const EXPORT_TIMEOUT_MS = 30000;
 
-const cleanFilename = (value) => {
-  const safe = String(value ?? '000').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
-  return safe || '000';
+const safeFilename = (value) => String(value ?? '000').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80) || '000';
+
+const withTimeout = (promise, ms, message) => {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+};
+
+const getExportTarget = (targetElement) => {
+  if (targetElement instanceof HTMLElement) return targetElement;
+  const target = document.getElementById('invoice-preview-capture');
+  if (target instanceof HTMLElement) return target;
+  throw new Error('Invoice preview is not available for export.');
 };
 
 const waitForAssets = async (root) => {
@@ -24,65 +37,21 @@ const waitForAssets = async (root) => {
   }));
 };
 
-const findExportTarget = (targetElement) => {
-  if (targetElement instanceof HTMLElement) return targetElement;
-  const target = document.getElementById('invoice-preview-capture');
-  if (target instanceof HTMLElement) return target;
-  throw new Error('Invoice preview is not available for PDF export.');
-};
-
-const canvasToPdfBlob = async (canvas) => {
-  const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait', compress: true });
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const pagePixelHeight = Math.floor(canvas.width * (pageHeight / pageWidth));
-  const pageCount = Math.max(1, Math.ceil(canvas.height / pagePixelHeight));
-
-  for (let page = 0; page < pageCount; page += 1) {
-    const sourceY = page * pagePixelHeight;
-    const sourceHeight = Math.min(pagePixelHeight, canvas.height - sourceY);
-    const pageCanvas = document.createElement('canvas');
-    pageCanvas.width = canvas.width;
-    pageCanvas.height = sourceHeight;
-    const ctx = pageCanvas.getContext('2d', { alpha: false });
-    if (!ctx) throw new Error('PDF canvas could not be created.');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-    ctx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
-
-    if (page > 0) pdf.addPage();
-    const image = pageCanvas.toDataURL('image/jpeg', 0.96);
-    const renderedHeight = (sourceHeight / canvas.width) * pageWidth;
-    pdf.addImage(image, 'JPEG', 0, 0, pageWidth, renderedHeight, undefined, 'FAST');
-    pageCanvas.width = 1;
-    pageCanvas.height = 1;
-  }
-
-  return pdf.output('blob');
-};
-
-/**
- * IMPORTANT: PDF export intentionally does NOT recreate an invoice design.
- * It captures the already-rendered InvoicePreview DOM. Therefore the selected
- * BillQyro template, fields, spacing, branding, QR area and business layout
- * are exactly the same source used by the visible preview.
- */
-export const generateInvoicePdfBlob = async (invoice, businessSettings = {}, targetElement = null) => {
-  if (!invoice) throw new Error('Invoice data is missing.');
-  const root = findExportTarget(targetElement);
+const renderCanvas = async (root) => {
   await waitForAssets(root);
-
-  const width = Math.max(root.scrollWidth, root.offsetWidth);
-  const height = Math.max(root.scrollHeight, root.offsetHeight);
+  const width = Math.max(root.scrollWidth, root.offsetWidth, root.clientWidth);
+  const height = Math.max(root.scrollHeight, root.offsetHeight, root.clientHeight);
   if (!width || !height) throw new Error('Invoice preview has no printable content.');
 
-  const scale = Math.min(2, Math.max(1, 6000 / Math.max(width, height)));
-  const canvas = await html2canvas(root, {
+  // Keep the export faithful to the already-rendered template while bounding
+  // memory usage on large invoices. No invoice layout is recreated here.
+  const scale = Math.min(2, Math.max(1, 2400 / Math.max(width, 1)));
+  return withTimeout(html2canvas(root, {
     scale,
     useCORS: true,
     allowTaint: false,
     backgroundColor: '#ffffff',
-    imageTimeout: 10000,
+    imageTimeout: 8000,
     logging: false,
     scrollX: 0,
     scrollY: -window.scrollY,
@@ -91,37 +60,109 @@ export const generateInvoicePdfBlob = async (invoice, businessSettings = {}, tar
     windowWidth: Math.max(document.documentElement.clientWidth, width),
     windowHeight: Math.max(document.documentElement.clientHeight, height),
     removeContainer: true,
-  });
-
-  return canvasToPdfBlob(canvas);
+  }), EXPORT_TIMEOUT_MS, 'PDF export timed out. Please try again.');
 };
 
-export const downloadStableInvoicePDF = async (invoice, businessSettings = {}, targetElement = null) => {
-  if (!invoice || generating) return false;
-  generating = true;
-  const toastId = toast.loading('Generating PDF…');
+const canvasToPdfBlob = (canvas) => {
+  const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait', compress: true });
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const pagePixelHeight = Math.max(1, Math.floor(canvas.width * (pageHeight / pageWidth)));
+
+  for (let sourceY = 0, page = 0; sourceY < canvas.height; sourceY += pagePixelHeight, page += 1) {
+    const sourceHeight = Math.min(pagePixelHeight, canvas.height - sourceY);
+    const pageCanvas = document.createElement('canvas');
+    pageCanvas.width = canvas.width;
+    pageCanvas.height = sourceHeight;
+    const ctx = pageCanvas.getContext('2d', { alpha: false });
+    if (!ctx) throw new Error('PDF canvas could not be created.');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+    ctx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
+    if (page > 0) pdf.addPage();
+    const image = pageCanvas.toDataURL('image/jpeg', 0.9);
+    pdf.addImage(image, 'JPEG', 0, 0, pageWidth, (sourceHeight / canvas.width) * pageWidth, undefined, 'FAST');
+    pageCanvas.width = 1;
+    pageCanvas.height = 1;
+  }
+  return pdf.output('blob');
+};
+
+const downloadBlob = (blob, filename) => {
+  if (!(blob instanceof Blob) || blob.size < 100) throw new Error('Export produced an empty file.');
+  const url = URL.createObjectURL(blob);
   try {
-    const blob = await generateInvoicePdfBlob(invoice, businessSettings, targetElement);
-    const url = URL.createObjectURL(blob);
-    const number = cleanFilename(invoice?.invoiceNumber || invoice?.number || '000');
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Invoice_${number}.pdf`;
+    link.download = filename;
     link.rel = 'noopener';
+    link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
     link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } finally {
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+};
+
+/**
+ * Export the exact rendered InvoicePreview. This module never recreates a
+ * BillQyro template. PDF and image exports both use the same DOM source.
+ */
+export const generateInvoicePdfBlob = async (invoice, businessSettings = {}, targetElement = null) => {
+  if (!invoice) throw new Error('Invoice data is missing.');
+  const root = getExportTarget(targetElement);
+  const canvas = await renderCanvas(root);
+  return canvasToPdfBlob(canvas);
+};
+
+export const generateInvoiceImageBlob = async (invoice, targetElement = null, format = 'image/png') => {
+  if (!invoice) throw new Error('Invoice data is missing.');
+  const root = getExportTarget(targetElement);
+  const canvas = await renderCanvas(root);
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, format, format === 'image/jpeg' ? 0.94 : undefined));
+  if (!blob) throw new Error('Image export failed.');
+  return blob;
+};
+
+export const downloadStableInvoicePDF = async (invoice, businessSettings = {}, targetElement = null) => {
+  if (!invoice || exporting) return false;
+  exporting = true;
+  const toastId = toast.loading('Preparing your invoice PDF…');
+  try {
+    const blob = await generateInvoicePdfBlob(invoice, businessSettings, targetElement);
+    downloadBlob(blob, `Invoice_${safeFilename(invoice?.invoiceNumber || invoice?.number || '000')}.pdf`);
     toast.dismiss(toastId);
     toast.success('PDF downloaded');
     return true;
   } catch (error) {
+    console.error('Invoice PDF export failed:', error);
     toast.dismiss(toastId);
-    console.error('DOM-faithful PDF export failed:', error);
     toast.error(error?.message || 'PDF তৈরি করা যায়নি।');
     return false;
   } finally {
-    generating = false;
+    exporting = false;
+  }
+};
+
+export const downloadInvoiceImage = async (invoice, targetElement = null, format = 'image/png') => {
+  if (!invoice || exporting) return false;
+  exporting = true;
+  const toastId = toast.loading('Preparing invoice image…');
+  try {
+    const blob = await generateInvoiceImageBlob(invoice, targetElement, format);
+    const ext = format === 'image/jpeg' ? 'jpg' : 'png';
+    downloadBlob(blob, `Invoice_${safeFilename(invoice?.invoiceNumber || invoice?.number || '000')}.${ext}`);
+    toast.dismiss(toastId);
+    toast.success('Invoice image downloaded');
+    return true;
+  } catch (error) {
+    console.error('Invoice image export failed:', error);
+    toast.dismiss(toastId);
+    toast.error(error?.message || 'Image তৈরি করা যায়নি।');
+    return false;
+  } finally {
+    exporting = false;
   }
 };
 
