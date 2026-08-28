@@ -11,11 +11,8 @@ class StaffEngine {
   }
 
   async saveStaff(staffData) {
-    if (!staffData.createdAt) {
-      staffData.createdAt = new Date().toISOString();
-    }
+    if (!staffData.createdAt) staffData.createdAt = new Date().toISOString();
     staffData.updatedAt = new Date().toISOString();
-    
     return await saveStaff(staffData);
   }
 
@@ -27,30 +24,38 @@ class StaffEngine {
     return await restoreStaff(staffId);
   }
 
-  // Calculate Payable Ledger for a single staff member
+  // Canonical staff payable ledger. New invoices use line-level workAllocations;
+  // legacy invoices using staffId are still supported for backward compatibility.
   calculatePayableLedger(staff, invoices = [], bankTransactions = []) {
-    const staffBills = invoices.filter(inv => inv.staffId === staff.id);
     let totalEarned = 0;
-    
-    staffBills.forEach(inv => {
-      totalEarned += (inv.total || 0);
+
+    invoices.forEach(inv => {
+      const allocations = Array.isArray(inv.workAllocations) ? inv.workAllocations : [];
+      const allocated = allocations
+        .filter(a => a.type === 'staff' && a.staffId === staff.id)
+        .reduce((sum, a) => sum + (Number(a.costAmount) || 0), 0);
+
+      if (allocated > 0) {
+        totalEarned += allocated;
+      } else if (inv.staffId === staff.id) {
+        // Legacy invoice compatibility: old records may have only staffId.
+        totalEarned += Number(inv.total || inv.grandTotal || 0) || 0;
+      }
     });
 
-    const staffPayments = bankTransactions.filter(tx => tx.staffId === staff.id);
+    const staffPayments = bankTransactions.filter(tx =>
+      tx.staffId === staff.id || tx.staff?.id === staff.id
+    );
     let totalPaid = 0;
     let totalAdvance = 0;
 
     staffPayments.forEach(tx => {
-      if (tx.category === 'Staff Payment' && tx.direction === 'OUT') {
-        totalPaid += (tx.amountRupees || 0);
-      }
-      if (tx.category === 'Staff Advance' && tx.direction === 'OUT') {
-        totalAdvance += (tx.amountRupees || 0);
-      }
+      const amount = Number(tx.amountRupees || tx.amount || 0) || 0;
+      if (tx.category === 'Staff Payment' && tx.direction === 'OUT') totalPaid += amount;
+      if (tx.category === 'Staff Advance' && tx.direction === 'OUT') totalAdvance += amount;
     });
 
-    const remainingPayable = totalEarned - totalPaid - totalAdvance;
-
+    const remainingPayable = Math.max(0, totalEarned - totalPaid - totalAdvance);
     return { totalEarned, totalPaid, totalAdvance, remainingPayable };
   }
 }
