@@ -456,7 +456,8 @@ export const downloadInvoiceImage = async (invoice, businessSettings = {}, targe
   try {
     const blob = await generateInvoiceImageBlob(invoice, businessSettings, targetElement, format);
     const ext = format === 'image/jpeg' ? 'jpg' : 'png';
-    downloadBlob(blob, `Invoice_${safeFilename(invoice?.invoiceNumber || invoice?.number || '000')}.${ext}`);
+    const invNum = safeFilename(invoice?.invoiceNumber || invoice?.number || invoice?.id || '000');
+    downloadBlob(blob, `BillQyro-Invoice-${invNum}.${ext}`);
     toast.dismiss(toastId);
     toast.success('Invoice image downloaded');
     return true;

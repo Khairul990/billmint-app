@@ -3,29 +3,36 @@ import { getCategoryWording } from '../config/businessPresets.js';
 import { calculateCanonicalInvoiceFinancials } from './invoiceMath.js';
 
 /**
- * Normalizes invoice data and business settings into a single canonical render model.
- * This ensures that InvoicePreview (HTML) and PdfDocument (React-PDF) receive identically
- * structured data, preventing rendering mismatches.
- *
- * Fallback Priority:
- * 1. Invoice Snapshot (Immutable historical data)
- * 2. Business Settings (Live workspace data)
- * 3. Hardcoded Defaults
+ * Resolves the canonical invoice template ID using strict precedence:
+ * 1. Override (preview override or explicit parameter)
+ * 2. Invoice's own selectedTemplate / selectedPdfTemplate / pdfTemplate
+ * 3. Business / Workspace settings (selectedPdfTemplate / defaultBillingTemplate / pdfTemplate)
+ * 4. Safe default ('classic')
  */
-export const buildCanonicalRenderModel = (invoice, businessSettings, previewOverrideTemplateId = null) => {
-  if (!invoice) return null;
-
-  // 1. Template Resolution
-  // Priority: 1. Preview override -> 2. Invoice's own selectedTemplate/pdfTemplate -> 3. Global businessSettings -> 4. Default 'classic'
-  const rawTemplateId = String(
+export const resolveInvoiceTemplate = (invoice, businessSettings, previewOverrideTemplateId = null) => {
+  const raw = String(
     previewOverrideTemplateId || 
-    invoice.selectedTemplate || 
-    invoice.pdfTemplate || 
+    invoice?.selectedTemplate || 
+    invoice?.selectedPdfTemplate || 
+    invoice?.pdfTemplate || 
     businessSettings?.selectedPdfTemplate || 
     businessSettings?.defaultBillingTemplate || 
     businessSettings?.pdfTemplate || 
     'classic'
   ).toLowerCase().trim();
+  return raw || 'classic';
+};
+
+/**
+ * Normalizes invoice data and business settings into a single canonical render model.
+ * This ensures that InvoicePreview (HTML) and PdfDocument (React-PDF) receive identically
+ * structured data, preventing rendering mismatches.
+ */
+export const buildCanonicalRenderModel = (invoice, businessSettings, previewOverrideTemplateId = null) => {
+  if (!invoice) return null;
+
+  // 1. Template Resolution
+  const rawTemplateId = resolveInvoiceTemplate(invoice, businessSettings, previewOverrideTemplateId);
   const templateFamily = getTemplateLayoutFamily(rawTemplateId);
   const templateId = (rawTemplateId === 'repair' || rawTemplateId === 'teacher' || rawTemplateId === 'doctor' || rawTemplateId === 'minimal' || rawTemplateId === 'retail') 
     ? rawTemplateId 

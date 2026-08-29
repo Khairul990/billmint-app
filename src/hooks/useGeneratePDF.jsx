@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { downloadStableInvoicePDF } from '../utils/stableInvoicePdf';
+import { downloadInvoicePDF } from '../utils/pdfUtils';
 
 export const useGeneratePDF = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -11,7 +11,7 @@ export const useGeneratePDF = () => {
     generatingRef.current = true;
     setIsGenerating(true);
     try {
-      return await downloadStableInvoicePDF(invoice, businessSettings);
+      return await downloadInvoicePDF(invoice, businessSettings);
     } finally {
       generatingRef.current = false;
       setIsGenerating(false);

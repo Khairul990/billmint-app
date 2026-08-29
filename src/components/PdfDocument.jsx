@@ -299,14 +299,16 @@ const styles = StyleSheet.create({
 
 import { getCategoryWording } from '../config/businessPresets';
 import { getTemplateLayoutFamily } from '../services/TemplateEngine';
-import { buildCanonicalRenderModel } from '../utils/normalizeInvoiceModel';
+import { buildCanonicalRenderModel, resolveInvoiceTemplate } from '../utils/normalizeInvoiceModel';
 
-const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, pageSize = 'A4' }) => {
+const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, pageSize = 'A4', templateOverride = null }) => {
   if (!invoice) return null;
 
-  const selectedTemplate = invoice.selectedTemplate;
-  if (selectedTemplate && PdfTemplateLayouts[selectedTemplate]) {
-    const SelectedPdfLayout = PdfTemplateLayouts[selectedTemplate];
+  const canonical = buildCanonicalRenderModel(invoice, businessSettings, templateOverride);
+  const resolvedTemplateId = canonical?.rawTemplateId || resolveInvoiceTemplate(invoice, businessSettings, templateOverride);
+
+  if (resolvedTemplateId && PdfTemplateLayouts[resolvedTemplateId]) {
+    const SelectedPdfLayout = PdfTemplateLayouts[resolvedTemplateId];
     return (
       <Document>
         <Page size={pageSize} wrap>
@@ -331,7 +333,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
     currencySymbol: rawCurrencySymbol,
     categoryWords,
     financials
-  } = buildCanonicalRenderModel(invoice, businessSettings, businessSettings?.selectedPdfTemplate);
+  } = canonical || buildCanonicalRenderModel(invoice, businessSettings, templateOverride);
   let currencySymbol = rawCurrencySymbol || '₹';
   // PDF standard fonts (Helvetica) do not support Unicode symbols like ₹ or ৳. Fallback to ASCII text.
   if (currencySymbol === '₹') currencySymbol = 'Rs. ';
