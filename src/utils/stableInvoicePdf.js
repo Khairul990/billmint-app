@@ -88,39 +88,69 @@ const imageToBase64 = async (img) => {
   }
 };
 
-const sanitizeClonedColors = (clonedDocument) => {
-  const canvas = document.createElement('canvas');
-  canvas.width = 1;
-  canvas.height = 1;
-  const ctx = canvas.getContext('2d');
+const cleanColorString = (val) => {
+  if (!val || typeof val !== 'string') return val;
+  if (!val.includes('color(') && !val.includes('oklch') && !val.includes('color-mix') && !val.includes('lab(')) return val;
+  
+  return val
+    .replace(/color\([^)]+\)/g, '#111827')
+    .replace(/oklch\([^)]+\)/g, '#111827')
+    .replace(/color-mix\([^)]+\)/g, '#111827')
+    .replace(/lab\([^)]+\)/g, '#111827');
+};
 
-  const toRgb = (colorStr) => {
-    if (!colorStr || typeof colorStr !== 'string') return colorStr;
-    if (!colorStr.includes('color(') && !colorStr.includes('oklch') && !colorStr.includes('color-mix') && !colorStr.includes('lab(')) return colorStr;
-    if (!ctx) return '#000000';
-    try {
-      ctx.fillStyle = '#000000';
-      ctx.fillStyle = colorStr;
-      return ctx.fillStyle || '#000000';
-    } catch {
-      return '#000000';
-    }
-  };
-
-  // 1. Sanitize all stylesheet text to eliminate html2canvas parser crash on color()
+const sanitizeClonedDocument = (clonedDocument, width) => {
+  // 1. Sanitize all <style> elements in clonedDocument head to stop html2canvas parser crash
   try {
     const styleTags = clonedDocument.querySelectorAll('style');
     styleTags.forEach((style) => {
-      if (style.textContent && (style.textContent.includes('color(') || style.textContent.includes('oklch(') || style.textContent.includes('lab('))) {
-        style.textContent = style.textContent
-          .replace(/color\([^)]+\)/g, '#111827')
-          .replace(/oklch\([^)]+\)/g, '#111827')
-          .replace(/color-mix\([^)]+\)/g, '#111827')
-          .replace(/lab\([^)]+\)/g, '#111827');
+      if (style.textContent && (style.textContent.includes('color(') || style.textContent.includes('oklch') || style.textContent.includes('lab('))) {
+        style.textContent = cleanColorString(style.textContent);
       }
     });
   } catch {}
 
+  // 2. Set strict document dimensions & font fallbacks
+  if (clonedDocument.documentElement) {
+    clonedDocument.documentElement.style.margin = '0';
+    clonedDocument.documentElement.style.padding = '0';
+    clonedDocument.documentElement.style.width = `${width}px`;
+    clonedDocument.documentElement.style.background = '#ffffff';
+  }
+  if (clonedDocument.body) {
+    clonedDocument.body.style.margin = '0';
+    clonedDocument.body.style.padding = '0';
+    clonedDocument.body.style.width = `${width}px`;
+    clonedDocument.body.style.minWidth = `${width}px`;
+    clonedDocument.body.style.maxWidth = `${width}px`;
+    clonedDocument.body.style.background = '#ffffff';
+    clonedDocument.body.style.color = '#111827';
+    clonedDocument.body.style.fontFamily = "'Inter', 'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif";
+  }
+
+  const clonedHost = clonedDocument.querySelector('[data-invoice-export-host="true"]');
+  if (clonedHost) {
+    clonedHost.style.position = 'static';
+    clonedHost.style.left = '0';
+    clonedHost.style.top = '0';
+    clonedHost.style.width = `${width}px`;
+    clonedHost.style.margin = '0';
+    clonedHost.style.padding = '0';
+  }
+
+  const clonedRoot = clonedDocument.querySelector('#invoice-preview-capture');
+  if (clonedRoot) {
+    clonedRoot.style.width = `${width}px`;
+    clonedRoot.style.minWidth = `${width}px`;
+    clonedRoot.style.maxWidth = `${width}px`;
+    clonedRoot.style.margin = '0 auto';
+    clonedRoot.style.boxSizing = 'border-box';
+    clonedRoot.style.fontFamily = "'Inter', 'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif";
+    clonedRoot.style.visibility = 'visible';
+    clonedRoot.style.opacity = '1';
+  }
+
+  // 3. Sanitize inline and computed styles on all cloned nodes
   const colorProps = [
     'color', 'backgroundColor', 'borderColor',
     'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
@@ -130,88 +160,31 @@ const sanitizeClonedColors = (clonedDocument) => {
   clonedDocument.querySelectorAll('*').forEach((node) => {
     if (!(node instanceof HTMLElement || node instanceof SVGElement)) return;
     try {
-      const computed = window.getComputedStyle(node);
+      node.style.animation = 'none';
+      node.style.transition = 'none';
+
       colorProps.forEach((prop) => {
-        const val = computed[prop];
-        if (val && (val.includes('color(') || val.includes('oklch') || val.includes('color-mix') || val.includes('lab('))) {
-          node.style[prop] = toRgb(val);
+        const inlineVal = node.style[prop];
+        if (inlineVal && (inlineVal.includes('color(') || inlineVal.includes('oklch') || inlineVal.includes('color-mix') || inlineVal.includes('lab('))) {
+          node.style[prop] = cleanColorString(inlineVal);
         }
       });
-      if (computed.boxShadow && (computed.boxShadow.includes('color(') || computed.boxShadow.includes('oklch'))) {
-        node.style.boxShadow = computed.boxShadow
-          .replace(/color\([^)]+\)/g, '#111827')
-          .replace(/oklch\([^)]+\)/g, '#111827');
+
+      if (node.style.boxShadow && (node.style.boxShadow.includes('color(') || node.style.boxShadow.includes('oklch'))) {
+        node.style.boxShadow = cleanColorString(node.style.boxShadow);
       }
     } catch {}
   });
 };
 
-/**
- * Native Engine: SVG ForeignObject Renderer
- * Uses browser's native Blink/WebKit GPU rasterizer.
- * Supports all CSS color spaces, Bengali ligatures, gradients, and fonts with zero parser errors.
- */
-const renderViaSvgForeignObject = async (root, width, height) => {
-  const cloned = root.cloneNode(true);
-  
-  // Convert all images to inline base64 to avoid tainted canvas
-  const images = Array.from(cloned.querySelectorAll('img'));
-  await Promise.all(images.map(async (img) => {
-    const base64 = await imageToBase64(img);
-    img.src = base64;
-  }));
+const renderExactPreview = async (root) => {
+  await waitForAssets(root);
+  await nextPaint();
+  const width = A4_CSS_WIDTH;
+  const height = Math.max(root.scrollHeight, root.offsetHeight, root.clientHeight, A4_CSS_HEIGHT);
+  if (!width || !height) throw new Error('Invoice preview has no printable content.');
+  if (height > MAX_CAPTURE_HEIGHT) throw new Error('Invoice is too long to export safely.');
 
-  const serialized = new XMLSerializer().serializeToString(cloned);
-  const svgString = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-      <foreignObject width="100%" height="100%">
-        <div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;background:#ffffff;font-family:'Inter','Noto Sans Bengali','Hind Siliguri',system-ui,sans-serif;-webkit-font-smoothing:antialiased;">
-          <style>
-            * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            img { max-width: 100%; object-fit: contain; }
-          </style>
-          ${serialized}
-        </div>
-      </foreignObject>
-    </svg>
-  `;
-
-  const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(svgBlob);
-
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = width * 2;
-        canvas.height = height * 2;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) throw new Error('2D context could not be created.');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.scale(2, 2);
-        ctx.drawImage(img, 0, 0, width, height);
-        URL.revokeObjectURL(url);
-        resolve(canvas);
-      } catch (err) {
-        URL.revokeObjectURL(url);
-        reject(err);
-      }
-    };
-    img.onerror = (err) => {
-      URL.revokeObjectURL(url);
-      reject(err || new Error('SVG rasterization failed'));
-    };
-    img.src = url;
-  });
-};
-
-/**
- * Hardened Fallback Engine: Sanitized html2canvas
- */
-const renderViaHtml2Canvas = async (root, width, height) => {
   const exportClass = 'billqyro-export-freeze';
   root.classList.add(exportClass);
   const style = document.createElement('style');
@@ -231,7 +204,7 @@ const renderViaHtml2Canvas = async (root, width, height) => {
   root.appendChild(style);
 
   try {
-    return await withTimeout(html2canvas(root, {
+    const canvas = await withTimeout(html2canvas(root, {
       scale: 2,
       useCORS: true,
       allowTaint: false,
@@ -244,76 +217,14 @@ const renderViaHtml2Canvas = async (root, width, height) => {
       windowWidth: width,
       removeContainer: true,
       onclone: (clonedDocument) => {
-        sanitizeClonedColors(clonedDocument);
-
-        if (clonedDocument.documentElement) {
-          clonedDocument.documentElement.style.margin = '0';
-          clonedDocument.documentElement.style.padding = '0';
-          clonedDocument.documentElement.style.width = `${width}px`;
-          clonedDocument.documentElement.style.background = '#ffffff';
-        }
-        if (clonedDocument.body) {
-          clonedDocument.body.style.margin = '0';
-          clonedDocument.body.style.padding = '0';
-          clonedDocument.body.style.width = `${width}px`;
-          clonedDocument.body.style.minWidth = `${width}px`;
-          clonedDocument.body.style.maxWidth = `${width}px`;
-          clonedDocument.body.style.background = '#ffffff';
-          clonedDocument.body.style.fontFamily = "'Inter', 'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif";
-        }
-
-        const clonedHost = clonedDocument.querySelector('[data-invoice-export-host="true"]');
-        if (clonedHost) {
-          clonedHost.style.position = 'static';
-          clonedHost.style.left = '0';
-          clonedHost.style.top = '0';
-          clonedHost.style.width = `${width}px`;
-          clonedHost.style.margin = '0';
-          clonedHost.style.padding = '0';
-        }
-
-        const clonedRoot = clonedDocument.querySelector('#invoice-preview-capture');
-        if (clonedRoot) {
-          clonedRoot.style.width = `${width}px`;
-          clonedRoot.style.minWidth = `${width}px`;
-          clonedRoot.style.maxWidth = `${width}px`;
-          clonedRoot.style.margin = '0 auto';
-          clonedRoot.style.boxSizing = 'border-box';
-          clonedRoot.style.fontFamily = "'Inter', 'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif";
-          clonedRoot.querySelectorAll('*').forEach((node) => {
-            if (node instanceof HTMLElement) {
-              node.style.animation = 'none';
-              node.style.transition = 'none';
-            }
-          });
-        }
+        sanitizeClonedDocument(clonedDocument, width);
       },
     }), EXPORT_TIMEOUT_MS, 'PDF/image export timed out. Please try again.');
+
+    return canvas;
   } finally {
     style.remove();
     root.classList.remove(exportClass);
-  }
-};
-
-/**
- * Universal Master Preview Renderer
- * Attempts Native High-Fidelity SVG ForeignObject first, with automatic failover to Hardened html2canvas.
- */
-const renderExactPreview = async (root) => {
-  await waitForAssets(root);
-  await nextPaint();
-  const width = A4_CSS_WIDTH;
-  const height = Math.max(root.scrollHeight, root.offsetHeight, root.clientHeight, A4_CSS_HEIGHT);
-  if (!width || !height) throw new Error('Invoice preview has no printable content.');
-  if (height > MAX_CAPTURE_HEIGHT) throw new Error('Invoice is too long to export safely.');
-
-  try {
-    // Primary: Native Browser GPU Canvas Engine
-    return await renderViaSvgForeignObject(root, width, height);
-  } catch (svgErr) {
-    console.warn('[PDF Engine] SVG ForeignObject rasterizer failed, falling back to Hardened html2canvas:', svgErr);
-    // Secondary: Hardened html2canvas with sanitized styles
-    return await renderViaHtml2Canvas(root, width, height);
   }
 };
 
