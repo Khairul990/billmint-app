@@ -1,8 +1,38 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import PremiumClock from './PremiumClock';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
-import { Search, Bell, Settings as SettingsIcon, Sparkles, ShieldCheck, User, Briefcase, Activity, HelpCircle, LogOut, Cloud, CloudOff, RefreshCw, Crown } from 'lucide-react';
+import { 
+  Search, 
+  Bell, 
+  Settings as SettingsIcon, 
+  Sparkles, 
+  ShieldCheck, 
+  User, 
+  Briefcase, 
+  Activity, 
+  HelpCircle, 
+  LogOut, 
+  Cloud, 
+  CloudOff, 
+  RefreshCw, 
+  Crown,
+  Menu,
+  X,
+  LayoutDashboard,
+  FileSpreadsheet,
+  Users,
+  Layers,
+  TrendingDown,
+  BookOpen,
+  BarChart3,
+  CreditCard,
+  Landmark,
+  Plus,
+  ChevronRight,
+  Database
+} from 'lucide-react';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import Logo from './Logo';
 import { settingsEngine } from '../services/settingsEngine';
@@ -17,6 +47,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   const { isDarkMode } = useTheme();
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const searchInputRef = React.useRef(null);
@@ -51,6 +82,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   useEffect(() => {
     setIsAccountMenuOpen(false);
     setIsNotificationMenuOpen(false);
+    setIsMobileDrawerOpen(false);
   }, [currentTab]);
 
   useEffect(() => {
@@ -418,8 +450,17 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
           {/* ===== MOBILE HEADER: Compact 2-Row (max 110px) ===== */}
           <div className="md:hidden flex flex-col relative z-10">
-            {/* Row 1: Workspace + Sync Badge */}
-            <div className="flex items-center justify-between px-4 pt-2 pb-1">
+            {/* Row 1: Drawer Toggle + Workspace + Sync Badge */}
+            <div className="flex items-center justify-between px-3 pt-2 pb-1 gap-2">
+              <button
+                onClick={() => setIsMobileDrawerOpen(true)}
+                title="Open Navigation Menu"
+                aria-label="Open Navigation Menu"
+                className="w-8 h-8 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary active:scale-95 transition-all shrink-0 cursor-pointer shadow-2xs"
+              >
+                <Menu className="w-4 h-4 text-theme-primary" />
+              </button>
+
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <WorkspaceSwitcher
                   businessWorkspaces={businessWorkspaces}
@@ -582,6 +623,266 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         pendingPaymentsCount={pendingPaymentsCount}
         businessSettings={businessSettings}
       />
+
+      {/* ===== MOBILE NAVIGATION DRAWER (Slide-in) ===== */}
+      <AnimatePresence>
+        {isMobileDrawerOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileDrawerOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            />
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+              className="relative w-4/5 max-w-xs bg-theme-card h-full shadow-2xl z-10 flex flex-col border-r border-theme-border-soft overflow-hidden"
+            >
+              {/* Drawer Brand Header */}
+              <div className="p-4 border-b border-theme-border-soft flex items-center justify-between bg-theme-surface/50">
+                <div className="flex items-center gap-2.5">
+                  <Logo className="w-7 h-7" />
+                  <div>
+                    <span className="font-black text-sm text-theme-primary tracking-tight block">BillQyro</span>
+                    <span className="text-[10px] font-bold text-theme-accent">Smart Billing Platform</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  className="w-8 h-8 rounded-xl bg-theme-surface flex items-center justify-center text-theme-muted hover:text-theme-primary cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Quick Create Invoice Action */}
+              <div className="p-3 border-b border-theme-border-soft">
+                <button
+                  onClick={() => {
+                    setCurrentTab('create-invoice');
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  className="w-full py-2.5 px-3 rounded-xl bg-[image:var(--accent-gradient)] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm active:scale-98 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Create Invoice</span>
+                </button>
+              </div>
+
+              {/* Categorized Navigation Items */}
+              <div className="flex-1 overflow-y-auto p-3 space-y-4 text-xs font-bold custom-scrollbar">
+                {/* Main */}
+                <div>
+                  <span className="text-[10px] font-black tracking-wider text-theme-muted uppercase px-2 block mb-1.5">Main</span>
+                  <button
+                    onClick={() => { setCurrentTab('dashboard'); setIsMobileDrawerOpen(false); }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'dashboard' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <LayoutDashboard className="w-4 h-4" />
+                      <span>Dashboard</span>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                  </button>
+                </div>
+
+                {/* Billing */}
+                <div>
+                  <span className="text-[10px] font-black tracking-wider text-theme-muted uppercase px-2 block mb-1.5">Billing</span>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => { setCurrentTab('invoices'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'invoices' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <FileSpreadsheet className="w-4 h-4" />
+                        <span>Invoices</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                    <button
+                      onClick={() => { setCurrentTab('estimates'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'estimates' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <FileSpreadsheet className="w-4 h-4" />
+                        <span>Estimates & Quotes</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Customers & Products */}
+                <div>
+                  <span className="text-[10px] font-black tracking-wider text-theme-muted uppercase px-2 block mb-1.5">Customers</span>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => { setCurrentTab('customers'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'customers' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Users className="w-4 h-4" />
+                        <span>Clients & Customers</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                    <button
+                      onClick={() => { setCurrentTab('products'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'products' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Layers className="w-4 h-4" />
+                        <span>Products & Services</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Finance */}
+                <div>
+                  <span className="text-[10px] font-black tracking-wider text-theme-muted uppercase px-2 block mb-1.5">Finance</span>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => { setCurrentTab('pending-payments'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'pending-payments' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <CreditCard className="w-4 h-4" />
+                        <span>Payments & Proofs</span>
+                      </div>
+                      {pendingPaymentsCount > 0 && (
+                        <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold">{pendingPaymentsCount}</span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => { setCurrentTab('due-ledger'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'due-ledger' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <BookOpen className="w-4 h-4" />
+                        <span>Due Ledger & Collections</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                    <button
+                      onClick={() => { setCurrentTab('expenses'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'expenses' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <TrendingDown className="w-4 h-4" />
+                        <span>Expenses</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                    <button
+                      onClick={() => { setCurrentTab('bank'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'bank' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Landmark className="w-4 h-4" />
+                        <span>Bank & Cash</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Insights */}
+                <div>
+                  <span className="text-[10px] font-black tracking-wider text-theme-muted uppercase px-2 block mb-1.5">Insights</span>
+                  <button
+                    onClick={() => { setCurrentTab('reports'); setIsMobileDrawerOpen(false); }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'reports' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <BarChart3 className="w-4 h-4" />
+                      <span>Reports & Analytics</span>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                  </button>
+                </div>
+
+                {/* System */}
+                <div>
+                  <span className="text-[10px] font-black tracking-wider text-theme-muted uppercase px-2 block mb-1.5">System</span>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => { setCurrentTab('settings'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'settings' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <SettingsIcon className="w-4 h-4" />
+                        <span>Business Settings</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                    <button
+                      onClick={() => { setCurrentTab('workspace-manager'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'workspace-manager' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Briefcase className="w-4 h-4" />
+                        <span>Workspace Manager</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                    <button
+                      onClick={() => { setCurrentTab('backup-restore'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'backup-restore' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Database className="w-4 h-4" />
+                        <span>Backup & Restore</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                    <button
+                      onClick={() => { setCurrentTab('help-center'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'help-center' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <HelpCircle className="w-4 h-4" />
+                        <span>Help Center</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="p-3 border-t border-theme-border-soft bg-theme-surface/60 flex items-center justify-between">
+                <div className="min-w-0 pr-2">
+                  <p className="text-xs font-bold text-theme-primary truncate">{businessSettings?.businessName || 'BillQyro'}</p>
+                  <p className="text-[10px] text-theme-muted truncate">{userEmail || 'Active Session'}</p>
+                </div>
+                {isAuthenticated ? (
+                  <button
+                    onClick={() => { setIsMobileDrawerOpen(false); if(onLogout) onLogout(); }}
+                    title="Log Out"
+                    className="p-2 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setCurrentTab('login'); setIsMobileDrawerOpen(false); }}
+                    className="px-2.5 py-1 rounded-lg bg-theme-accent text-white text-xs font-bold"
+                  >
+                    Log In
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Safe area spacer for mobile notch/home indicator */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 h-[env(safe-area-inset-bottom)] bg-theme-card pointer-events-none z-50" />
