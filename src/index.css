@@ -674,19 +674,18 @@ body {
 
 /* Custom Scrollbar for better UI experience */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 10px;
-  transition: background var(--transition-base) ease;
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+  background: rgba(148, 163, 184, 0.45);
 }
 
 /* Custom Range Input */

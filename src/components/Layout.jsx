@@ -224,7 +224,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             </div>
 
             {/* COMMAND BAR CONTROLS (Right) */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 pr-1">
               <div id="studio-header-actions-portal" className="flex items-center"></div>
               
               {/* Notification Hub */}

@@ -22,22 +22,19 @@ body {
   color: var(--text-primary, #111827);
 }
 
-/* Premium scrollbar — restrained, never decorative-heavy. */
+/* Premium scrollbar — restrained, neutral, never decorative-heavy. */
 * {
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--accent, #10b981) 32%, var(--border-soft, #d1d5db)) transparent;
+  scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
 }
-*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--accent, #10b981) 28%, var(--border-soft, #d1d5db));
+  background: rgba(148, 163, 184, 0.25);
   border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--accent, #10b981) 48%, var(--border-soft, #d1d5db));
-  background-clip: padding-box;
+  background: rgba(148, 163, 184, 0.45);
 }
 
 /* Shared surface language for older cards. */
