@@ -69,23 +69,38 @@ This enforces strict database-level mathematical tenant isolation independently 
 
 ### Authenticated Workspace Endpoints (Requires Firebase Bearer Token):
 - `GET /api/v1/auth/me` — Authenticated profile & idempotent user auto-provisioning
-- `GET /api/v1/workspaces` — List workspaces owned/shared with authenticated user
-- `POST /api/v1/workspaces` — Atomic workspace creation with owner assignment
-- `GET /api/v1/customers` — Paginated customers query with search & workspace isolation
-- `POST /api/v1/customers` — Customer creation within authorized workspace
-- `GET /api/v1/invoices` — Paginated invoices query with status, search & date range filters
-- `POST /api/v1/invoices` — Server-authoritative canonical invoice creation with row-level locking & sequence allocation
+- `GET /api/v1/workspaces` — List workspaces where authenticated user is a member
+- `POST /api/v1/workspaces` — Create workspace
+- `POST /api/v1/customers` — Create customer with duplicate check & workspace isolation
+- `GET /api/v1/customers` — Paginated list of customers with search filtering
+- `POST /api/v1/invoices` — Atomically create invoice with sequence lock & financial calculation
+- `GET /api/v1/invoices` — Paginated list of invoices with search and date filtering
+- `GET /api/v1/invoices/:id/pdf` — Retrieve cached immutable PDF or generate deterministically
+- `POST /api/v1/payments` — Record immutable payment with row-level lock and audit log
+- `GET /api/v1/payments` — Paginated list of payment ledger history
 
 ### Public Endpoints (Unauthenticated):
-- `GET /api/v1/public/invoices/:token` — Secure public invoice retrieval:
-  - Located exclusively via high-entropy `public_token`.
-  - Zero internal leaks: internal DB UUIDs, private notes, and user IDs are 100% stripped.
-  - Returns sanitized Public DTO containing invoice details, line items, business display info, customer display name, and presentation metadata.
-  - Conservative `Cache-Control: no-store` and rate limiting enforced.
+- `GET /api/v1/public/invoices/:token` — Secure public invoice retrieval via cryptographic token (strips internal UUIDs/notes)
 
 ---
 
-## 5. Atomic Concurrency Function
+## 5. Local MinIO S3 Object Storage Emulator
+
+MinIO runs locally via Docker Compose:
+- **API Endpoint**: `http://localhost:9000`
+- **Console UI**: `http://localhost:9001`
+- **Access Key**: `minio_admin`
+- **Secret Key**: `minio_dev_secret_123`
+- **Bucket**: `billqyro-storage-dev`
+
+Immutable PDF Storage Key convention:
+```
+pdfs/{workspaceId}/{invoiceId}/{contentHash}.pdf
+```
+
+---
+
+## 6. Atomic Concurrency Function
 
 ```sql
 -- Generates next sequential invoice number with row-level lock:

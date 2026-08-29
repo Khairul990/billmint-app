@@ -2,8 +2,12 @@ import { Router } from 'express';
 import { requireAuth } from '../../middleware/auth.js';
 import { validateInvoiceInput, validateInvoiceQuery } from './invoiceValidation.js';
 import { InvoiceService } from './invoiceService.js';
+import { pdfRouter } from '../pdf/pdfRoutes.js';
 
 export const invoiceRouter = Router();
+
+// Mount PDF Sub-Router (GET /api/v1/invoices/:id/pdf)
+invoiceRouter.use('/', pdfRouter);
 
 /**
  * POST /api/v1/invoices

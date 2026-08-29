@@ -34,5 +34,14 @@ export const config = {
 
   auth: {
     jwtSecret: process.env.JWT_SECRET || 'billqyro_dev_jwt_super_secret_key_minimum_32_chars'
+  },
+
+  storage: {
+    endpoint: process.env.S3_ENDPOINT || process.env.R2_ENDPOINT || 'http://localhost:9000',
+    region: process.env.S3_REGION || 'auto',
+    bucket: process.env.S3_BUCKET || process.env.R2_BUCKET_NAME || 'billqyro-storage-dev',
+    accessKeyId: process.env.S3_ACCESS_KEY || process.env.R2_ACCESS_KEY_ID || 'minio_admin',
+    secretAccessKey: process.env.S3_SECRET_KEY || process.env.R2_SECRET_ACCESS_KEY || 'minio_dev_secret_123',
+    forcePathStyle: process.env.S3_FORCE_PATH_STYLE !== 'false'
   }
 };
