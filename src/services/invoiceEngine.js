@@ -96,6 +96,10 @@ export const invoiceEngine = {
     return await dbEnsureInvoicePublicToken(invoiceId);
   },
 
+  generateSecureToken(length = 16) {
+    return dbGenerateSecureToken(length);
+  },
+
   calculatePaymentStatus(invoice) {
     if (!invoice) return 'Unknown';
     return getInvoicePaymentStatus(invoice);

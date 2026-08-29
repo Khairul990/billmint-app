@@ -2387,12 +2387,34 @@ export const getInvoices = async (includeDeleted = false) => {
   return [];
 };
 
-export const generateSecureToken = () => {
+export const generateSecureToken = (length = 16) => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let token = '';
-  for (let i = 0; i < 16; i++) {
-    token += chars.charAt(Math.floor(Math.random() * chars.length));
+  const cryptoObj = (typeof globalThis !== 'undefined' && globalThis.crypto)
+    ? globalThis.crypto
+    : (typeof window !== 'undefined' && window.crypto ? window.crypto : null);
+
+  if (!cryptoObj || typeof cryptoObj.getRandomValues !== 'function') {
+    throw new Error('Cryptographically secure random number generator is unavailable in this environment.');
   }
+
+  const bytes = new Uint8Array(length * 2);
+  cryptoObj.getRandomValues(bytes);
+  
+  let token = '';
+  let byteIndex = 0;
+  const maxValidByte = 256 - (256 % chars.length); // 248 to prevent modulo bias
+
+  while (token.length < length) {
+    if (byteIndex >= bytes.length) {
+      cryptoObj.getRandomValues(bytes);
+      byteIndex = 0;
+    }
+    const byte = bytes[byteIndex++];
+    if (byte < maxValidByte) {
+      token += chars[byte % chars.length];
+    }
+  }
+
   return token;
 };
 

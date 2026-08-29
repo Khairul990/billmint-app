@@ -7,12 +7,12 @@ import { getStorage } from 'firebase/storage';
 // import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env?.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env?.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env?.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env?.VITE_FIREBASE_APP_ID,
 };
 
 let app;
@@ -23,8 +23,8 @@ let firebaseReady = false;
 
 // Check if critical config variables are defined
 const hasConfig = 
-  import.meta.env.VITE_FIREBASE_API_KEY && 
-  import.meta.env.VITE_FIREBASE_PROJECT_ID;
+  import.meta.env?.VITE_FIREBASE_API_KEY && 
+  import.meta.env?.VITE_FIREBASE_PROJECT_ID;
 
 if (hasConfig) {
   try {
@@ -52,12 +52,11 @@ if (hasConfig) {
     // }
 
   } catch (error) {
-    window.billqyro_firebaseReady = false;
+    if (typeof window !== 'undefined') window.billqyro_firebaseReady = false;
     console.warn('Firebase initialization failed, falling back to LocalStorage offline mode.', error);
   }
 } else {
-  window.billqyro_firebaseReady = false;
-
+  if (typeof window !== 'undefined') window.billqyro_firebaseReady = false;
 }
 
 export { app, auth, db, storage, firebaseReady };

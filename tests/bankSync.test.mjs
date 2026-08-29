@@ -27,7 +27,11 @@ function resetEnv() {
     setItem: (k, v) => store.set(k, String(v)),
     removeItem: (k) => store.delete(k)
   };
-  global.window = { dispatchEvent: () => true };
+  global.window = {
+    dispatchEvent: () => true,
+    addEventListener: () => {},
+    removeEventListener: () => {}
+  };
 }
 
 const { bankEngine, rupeesToPaise, paiseToRupees, mergeBankItems, bankCloudWins, BANK_CATEGORIES } = await import('../src/services/bankEngine.js');

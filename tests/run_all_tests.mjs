@@ -2,6 +2,36 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// Provide global browser mock for Node.js test runner
+const mockStyle = { innerHTML: '', data: '', setAttribute: () => {}, appendChild: () => {}, firstChild: { data: '' } };
+if (typeof globalThis.window === 'undefined' || typeof globalThis.window.addEventListener !== 'function') {
+  globalThis.window = {
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => {},
+    _goober: mockStyle
+  };
+} else {
+  globalThis.window._goober = mockStyle;
+}
+if (typeof globalThis.document === 'undefined') {
+  globalThis.document = {
+    createElement: () => mockStyle,
+    head: { appendChild: () => {} },
+    body: { appendChild: () => {} },
+    querySelector: () => mockStyle
+  };
+}
+if (typeof globalThis.localStorage === 'undefined') {
+  const store = new Map();
+  globalThis.localStorage = {
+    getItem: (k) => store.get(k) || null,
+    setItem: (k, v) => store.set(k, String(v)),
+    removeItem: (k) => store.delete(k),
+    clear: () => store.clear()
+  };
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const files = fs.readdirSync(__dirname)
   .filter(f => f.endsWith('.test.mjs'))

@@ -9,8 +9,8 @@ export function getUserEmail(user) {
 }
 
 export function getAdminEmail() {
-  const envEmail = import.meta.env.VITE_ADMIN_EMAIL;
-  const envOwnerEmail = import.meta.env.VITE_ADMIN_OWNER_EMAIL;
+  const envEmail = import.meta.env?.VITE_ADMIN_EMAIL;
+  const envOwnerEmail = import.meta.env?.VITE_ADMIN_OWNER_EMAIL;
   
   if (envEmail && envEmail !== 'undefined') return envEmail.toLowerCase().trim();
   if (envOwnerEmail && envOwnerEmail !== 'undefined') return envOwnerEmail.toLowerCase().trim();
