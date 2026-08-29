@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Search, CheckCircle2, AlertCircle, CreditCard, ChevronRight, Calendar, X, Bell, User, DollarSign, TrendingUp, TrendingDown, Send, Eye, Ban, Download, FileText } from 'lucide-react';
-import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
+import { Clock, Search, CheckCircle2, AlertCircle, CreditCard, Calendar, X, Bell, User, Send, Eye, Download } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { CardSkeleton } from '../components/PremiumSkeleton';
 import CustomerLedger from '../components/customers/CustomerLedger';
@@ -9,6 +8,123 @@ import { getInvoicePaidTotal, getInvoiceBalanceDue } from '../utils/financialCal
 import { invoiceEngine } from '../services/invoiceEngine';
 import { shareOnWhatsApp } from '../services/invoiceShareService2';
 import { toast } from 'react-hot-toast';
+
+const getUrgencyBadge = (bill) => {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const diffDays = Math.floor((now - bill.dueDate) / (1000 * 60 * 60 * 24));
+
+  if (diffDays > 7) return { label: 'Critical', class: 'badge-danger' };
+  if (diffDays > 0) return { label: 'Overdue', class: 'badge-warning' };
+  if (diffDays === 0) return { label: 'Due Today', class: 'badge-danger' };
+  return { label: 'Upcoming', class: 'badge-info' };
+};
+
+const getStatusBadge = (bill) => {
+  if (bill.status === 'partial') return { label: 'Partial', class: 'badge-warning' };
+  return { label: 'Unpaid', class: 'badge-danger' };
+};
+
+const DueSection = React.memo(({ 
+  title, 
+  icon: Icon, 
+  bills, 
+  accentBg, 
+  badgeColor, 
+  currencySymbol, 
+  onMarkPaid, 
+  onSendReminder, 
+  onOpenCustomer,
+  searchQuery 
+}) => {
+  if (bills.length === 0 && !searchQuery) return null;
+  return (
+    <div className="mb-6">
+      <div className="flex items-center justify-between mb-3 px-1">
+        <div className="flex items-center gap-2">
+          <div className={`w-7 h-7 rounded-lg ${accentBg} flex items-center justify-center text-white shadow-xs`}>
+            <Icon className="w-3.5 h-3.5" />
+          </div>
+          <div>
+            <h3 className="text-xs font-black text-theme-primary tracking-tight">{title}</h3>
+            <p className="text-[10px] font-semibold text-theme-muted">{bills.length} bill{bills.length !== 1 ? 's' : ''}</p>
+          </div>
+        </div>
+        <span className={`badge-premium ${badgeColor}`}>{bills.length} pending</span>
+      </div>
+
+      <div className="bg-theme-card border border-theme-border-soft rounded-2xl overflow-hidden divide-y divide-theme-border-soft/60 shadow-xs">
+        {bills.map((bill) => {
+          const urgency = getUrgencyBadge(bill);
+          const status = getStatusBadge(bill);
+          return (
+            <div
+              key={bill.id}
+              className="py-3 px-4 hover:bg-theme-surface/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 group text-xs"
+            >
+              {/* Left: Customer & Details */}
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-secondary group-hover:text-theme-accent shrink-0">
+                  <User className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-bold text-theme-primary truncate">{bill.customerName || 'Walk-in Customer'}</p>
+                    <span className={`badge-premium ${urgency.class}`}>{urgency.label}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5 text-[11px] text-theme-muted font-semibold flex-wrap">
+                    <span className="font-numbers">{bill.invoiceNumber || `#${bill.id?.slice(0, 6)}`}</span>
+                    <span>•</span>
+                    <span>Due {bill.dueDate ? new Date(bill.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent'}</span>
+                    <span className={`badge-premium ${status.class}`}>{status.label}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Amount & Actions */}
+              <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-theme-border-soft/40">
+                <div className="text-left sm:text-right">
+                  <p className="text-xs text-theme-muted font-bold sm:hidden uppercase">Due Amount</p>
+                  <p className="text-sm font-black text-theme-primary font-numbers tabular-nums">
+                    {formatCurrency(bill.dueAmount, currencySymbol)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => onMarkPaid(bill)}
+                    className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
+                    title="Record Payment"
+                  >
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>Mark Paid</span>
+                  </button>
+                  <button
+                    onClick={() => onSendReminder(bill)}
+                    className="px-2 py-1.5 rounded-lg hover:bg-theme-surface text-theme-muted hover:text-theme-primary font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
+                    title="Send Reminder"
+                  >
+                    <Send className="w-3 h-3" />
+                    <span className="hidden md:inline">Remind</span>
+                  </button>
+                  <button
+                    onClick={() => onOpenCustomer(bill)}
+                    className="px-2 py-1.5 rounded-lg hover:bg-theme-surface text-theme-muted hover:text-theme-primary font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
+                    title="View Customer"
+                  >
+                    <Eye className="w-3 h-3" />
+                    <span className="hidden md:inline">Customer</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+DueSection.displayName = 'DueSection';
 
 const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentRecorded }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,7 +135,7 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
   const [paymentNotes, setPaymentNotes] = useState('');
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const currencySymbol = businessSettings?.currency || '₹';
 
   const dueBills = useMemo(() => {
@@ -80,10 +196,6 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
     grouped.thisWeek.reduce((sum, b) => sum + b.dueAmount, 0)
   , [grouped.thisWeek]);
 
-  const totalOverdue = useMemo(() => 
-    grouped.today.length
-  , [grouped.today]);
-
   const totalUpcoming = useMemo(() => 
     grouped.older.reduce((sum, b) => sum + b.dueAmount, 0)
   , [grouped.older]);
@@ -92,44 +204,30 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
     dueBills.reduce((sum, b) => sum + b.dueAmount, 0)
   , [dueBills]);
 
-  const filteredToday = grouped.today.filter(b => 
+  const filteredToday = useMemo(() => grouped.today.filter(b => 
     b.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     b.invoiceNumber?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  const filteredThisWeek = grouped.thisWeek.filter(b =>
+  ), [grouped.today, searchQuery]);
+
+  const filteredThisWeek = useMemo(() => grouped.thisWeek.filter(b => 
     b.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     b.invoiceNumber?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  const filteredOlder = grouped.older.filter(b =>
+  ), [grouped.thisWeek, searchQuery]);
+
+  const filteredOlder = useMemo(() => grouped.older.filter(b => 
     b.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     b.invoiceNumber?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [grouped.older, searchQuery]);
 
   const allFilteredEmpty = filteredToday.length === 0 && filteredThisWeek.length === 0 && filteredOlder.length === 0;
 
-  const getUrgencyBadge = (bill) => {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const diffDays = Math.floor((now - bill.dueDate) / (1000 * 60 * 60 * 24));
-
-    if (diffDays > 7) return { label: 'Critical', class: 'badge-danger' };
-    if (diffDays > 0) return { label: 'Overdue', class: 'badge-warning' };
-    if (diffDays === 0) return { label: 'Due Today', class: 'badge-danger' };
-    return { label: 'Upcoming', class: 'badge-info' };
-  };
-
-  const getStatusBadge = (bill) => {
-    if (bill.status === 'partial') return { label: 'Partial', class: 'badge-warning' };
-    return { label: 'Unpaid', class: 'badge-danger' };
-  };
-
-  const handleMarkPaid = (bill) => {
+  const handleMarkPaid = useCallback((bill) => {
     setRecordingPaymentBill(bill);
     setPaymentAmount(bill.dueAmount.toString());
     setPaymentMethod('Cash');
     setPaymentDate(new Date().toISOString().split('T')[0]);
     setPaymentNotes('');
-  };
+  }, []);
 
   const handleSubmitPayment = async (e) => {
     e?.preventDefault?.();
@@ -158,111 +256,23 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
     }
   };
 
-  const handleOpenCustomer = (bill) => {
+  const handleOpenCustomer = useCallback((bill) => {
     if (bill.customerId) {
       const customer = customers.find(c => c.id === bill.customerId);
       setSelectedCustomer(customer || { id: bill.customerId, name: bill.customerName, phone: bill.customerPhone });
     } else {
       setSelectedCustomer({ id: null, name: bill.customerName, phone: bill.customerPhone });
     }
-  };
+  }, [customers]);
 
-  const handleSendReminder = async (bill) => {
+  const handleSendReminder = useCallback(async (bill) => {
     try {
       const updatedBill = { ...bill };
       await shareOnWhatsApp(null, updatedBill, businessSettings);
     } catch (err) {
       toast.error(err.message || 'Could not send reminder.');
     }
-  };
-
-  const Section = ({ title, icon: Icon, bills, accent, accentBg, badgeColor }) => {
-    if (bills.length === 0 && !searchQuery) return null;
-    return (
-      <motion.div variants={staggerItem} className="mb-6">
-        <div className="flex items-center justify-between mb-3 px-1">
-          <div className="flex items-center gap-2">
-            <div className={`w-7 h-7 rounded-lg ${accentBg} flex items-center justify-center text-white shadow-xs`}>
-              <Icon className="w-3.5 h-3.5" />
-            </div>
-            <div>
-              <h3 className="text-xs font-black text-theme-primary tracking-tight">{title}</h3>
-              <p className="text-[10px] font-semibold text-theme-muted">{bills.length} bill{bills.length !== 1 ? 's' : ''}</p>
-            </div>
-          </div>
-          <span className={`badge-premium ${badgeColor}`}>{bills.length} pending</span>
-        </div>
-
-        <div className="bg-theme-card border border-theme-border-soft rounded-2xl overflow-hidden divide-y divide-theme-border-soft/60 shadow-xs">
-          {bills.map((bill) => {
-            const urgency = getUrgencyBadge(bill);
-            const status = getStatusBadge(bill);
-            return (
-              <div
-                key={bill.id}
-                className="py-3 px-4 hover:bg-theme-surface/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 group text-xs"
-              >
-                {/* Left: Customer & Details */}
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-8 h-8 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-secondary group-hover:text-theme-accent shrink-0">
-                    <User className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-bold text-theme-primary truncate">{bill.customerName || 'Walk-in Customer'}</p>
-                      <span className={`badge-premium ${urgency.class}`}>{urgency.label}</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-0.5 text-[11px] text-theme-muted font-semibold flex-wrap">
-                      <span className="font-numbers">{bill.invoiceNumber || `#${bill.id?.slice(0, 6)}`}</span>
-                      <span>•</span>
-                      <span>Due {bill.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                      <span className={`badge-premium ${status.class}`}>{status.label}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right: Amount & Actions */}
-                <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-theme-border-soft/40">
-                  <div className="text-left sm:text-right">
-                    <p className="text-xs text-theme-muted font-bold sm:hidden uppercase">Due Amount</p>
-                    <p className="text-sm font-black text-theme-primary font-numbers tabular-nums">
-                      {formatCurrency(bill.dueAmount, currencySymbol)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => handleMarkPaid(bill)}
-                      className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
-                      title="Record Payment"
-                    >
-                      <CheckCircle2 className="w-3 h-3" />
-                      <span>Mark Paid</span>
-                    </button>
-                    <button
-                      onClick={() => handleSendReminder(bill)}
-                      className="px-2 py-1.5 rounded-lg hover:bg-theme-surface text-theme-muted hover:text-theme-primary font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
-                      title="Send Reminder"
-                    >
-                      <Send className="w-3 h-3" />
-                      <span className="hidden md:inline">Remind</span>
-                    </button>
-                    <button
-                      onClick={() => handleOpenCustomer(bill)}
-                      className="px-2 py-1.5 rounded-lg hover:bg-theme-surface text-theme-muted hover:text-theme-primary font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
-                      title="View Customer"
-                    >
-                      <Eye className="w-3 h-3" />
-                      <span className="hidden md:inline">Customer</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </motion.div>
-    );
-  };
+  }, [businessSettings]);
 
   if (loading) {
     return (
@@ -278,12 +288,7 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
   }
 
   return (
-    <motion.div
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      className="page-premium w-full max-w-full pb-24 space-y-5"
-    >
+    <div className="page-premium w-full max-w-full pb-24 space-y-5">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -368,32 +373,44 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
         )}
       </div>
 
-      <motion.div variants={staggerContainer} initial="hidden" animate="visible">
-        <Section
+      <div className="space-y-4">
+        <DueSection
           title="Due Now / Overdue"
           icon={AlertCircle}
           bills={filteredToday}
-          accent="bg-rose-500"
           accentBg="bg-rose-500"
           badgeColor="badge-danger"
+          currencySymbol={currencySymbol}
+          onMarkPaid={handleMarkPaid}
+          onSendReminder={handleSendReminder}
+          onOpenCustomer={handleOpenCustomer}
+          searchQuery={searchQuery}
         />
-        <Section
+        <DueSection
           title="Due This Week"
           icon={Calendar}
           bills={filteredThisWeek}
-          accent="bg-amber-500"
           accentBg="bg-amber-500"
           badgeColor="badge-warning"
+          currencySymbol={currencySymbol}
+          onMarkPaid={handleMarkPaid}
+          onSendReminder={handleSendReminder}
+          onOpenCustomer={handleOpenCustomer}
+          searchQuery={searchQuery}
         />
-        <Section
+        <DueSection
           title="Upcoming"
           icon={Clock}
           bills={filteredOlder}
-          accent="bg-theme-accent"
           accentBg="bg-theme-accent"
           badgeColor="badge-info"
+          currencySymbol={currencySymbol}
+          onMarkPaid={handleMarkPaid}
+          onSendReminder={handleSendReminder}
+          onOpenCustomer={handleOpenCustomer}
+          searchQuery={searchQuery}
         />
-      </motion.div>
+      </div>
 
       {!searchQuery && grouped.today.length === 0 && grouped.thisWeek.length === 0 && grouped.older.length === 0 && (
         <div className="card-premium p-5">
@@ -572,7 +589,7 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
           th, td { border: 1px solid #ddd; padding: 6px !important; color: black !important; font-size: 10px !important; }
         }
       `}} />
-    </motion.div>
+    </div>
   );
 };
 
