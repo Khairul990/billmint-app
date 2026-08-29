@@ -7,7 +7,8 @@ import InvoicePreview from '../components/InvoicePreview';
 
 let exporting = false;
 const EXPORT_TIMEOUT_MS = 30000;
-const MAX_CAPTURE_WIDTH = 2200;
+const A4_CSS_WIDTH = 794;
+const A4_CSS_HEIGHT = 1123;
 const MAX_CAPTURE_HEIGHT = 30000;
 
 const safeFilename = (value) => String(value ?? '000').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80) || '000';
@@ -29,7 +30,7 @@ const mountTemporaryInvoicePreview = async (invoice, businessSettings) => {
   const host = document.createElement('div');
   host.setAttribute('data-invoice-export-host', 'true');
   Object.assign(host.style, {
-    position: 'fixed', left: '-100000px', top: '0', width: '794px', minHeight: '1123px',
+    position: 'fixed', left: '-100000px', top: '0', width: `${A4_CSS_WIDTH}px`, minHeight: `${A4_CSS_HEIGHT}px`,
     background: '#ffffff', pointerEvents: 'none', zIndex: '-2147483647',
   });
   document.body.appendChild(host);
@@ -56,8 +57,6 @@ const mountTemporaryInvoicePreview = async (invoice, businessSettings) => {
 const getExportTarget = async (invoice, businessSettings, targetElement) => {
   const explicit = targetElement instanceof HTMLElement ? findPreviewRoot(targetElement) : null;
   if (explicit) return { target: explicit, cleanup: () => {} };
-
-  // Mount dedicated invoice preview container to ensure exact template and data matching
   return mountTemporaryInvoicePreview(invoice, businessSettings);
 };
 
@@ -83,9 +82,7 @@ const sanitizeClonedColors = (clonedDocument) => {
 
   const toRgb = (colorStr) => {
     if (!colorStr || typeof colorStr !== 'string') return colorStr;
-    if (!colorStr.includes('color(') && !colorStr.includes('oklch') && !colorStr.includes('color-mix') && !colorStr.includes('lab(')) {
-      return colorStr;
-    }
+    if (!colorStr.includes('color(') && !colorStr.includes('oklch') && !colorStr.includes('color-mix') && !colorStr.includes('lab(')) return colorStr;
     try {
       ctx.fillStyle = '#000000';
       ctx.fillStyle = colorStr;
@@ -95,23 +92,13 @@ const sanitizeClonedColors = (clonedDocument) => {
     }
   };
 
-  const sanitizeColorText = (val) => {
-    if (!val || typeof val !== 'string') return val;
-    return val
-      .replace(/color\([^)]+\)/g, (match) => toRgb(match))
-      .replace(/oklch\([^)]+\)/g, (match) => toRgb(match))
-      .replace(/color-mix\([^)]+\)/g, (match) => toRgb(match))
-      .replace(/lab\([^)]+\)/g, (match) => toRgb(match));
-  };
-
   const colorProps = [
     'color', 'backgroundColor', 'borderColor',
     'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
     'outlineColor', 'fill', 'stroke'
   ];
 
-  const allElements = clonedDocument.querySelectorAll('*');
-  allElements.forEach((node) => {
+  clonedDocument.querySelectorAll('*').forEach((node) => {
     if (!(node instanceof HTMLElement || node instanceof SVGElement)) return;
     try {
       const computed = window.getComputedStyle(node);
@@ -122,7 +109,7 @@ const sanitizeClonedColors = (clonedDocument) => {
         }
       });
       if (computed.boxShadow && (computed.boxShadow.includes('color(') || computed.boxShadow.includes('oklch'))) {
-        node.style.boxShadow = sanitizeColorText(computed.boxShadow);
+        node.style.boxShadow = computed.boxShadow.replace(/oklch\([^)]+\)/g, (match) => toRgb(match));
       }
     } catch {}
   });
@@ -131,9 +118,11 @@ const sanitizeClonedColors = (clonedDocument) => {
 const renderExactPreview = async (root) => {
   await waitForAssets(root);
   await nextPaint();
-  const width = Math.max(root.scrollWidth, root.offsetWidth, root.clientWidth, 794);
-  const height = Math.max(root.scrollHeight, root.offsetHeight, root.clientHeight, 1123);
+
+  const width = Math.max(root.scrollWidth, root.offsetWidth, root.clientWidth, A4_CSS_WIDTH);
+  const height = Math.max(root.scrollHeight, root.offsetHeight, root.clientHeight, A4_CSS_HEIGHT);
   if (!width || !height) throw new Error('Invoice preview has no printable content.');
+  if (height > MAX_CAPTURE_HEIGHT) throw new Error('Invoice is too long to export safely.');
 
   const exportClass = 'billqyro-export-freeze';
   root.classList.add(exportClass);
@@ -146,7 +135,7 @@ const renderExactPreview = async (root) => {
 
   try {
     return await withTimeout(html2canvas(root, {
-      scale: 2, // Crisp 2x retina print resolution
+      scale: 2,
       useCORS: true,
       allowTaint: false,
       backgroundColor: '#ffffff',
@@ -154,15 +143,15 @@ const renderExactPreview = async (root) => {
       logging: false,
       scrollX: 0,
       scrollY: 0,
-      width: Math.min(width, 850),
-      windowWidth: 1200, // Forces full desktop layout and grid/flex alignment
+      width: A4_CSS_WIDTH,
+      windowWidth: 1200,
       removeContainer: true,
       onclone: (clonedDocument) => {
         sanitizeClonedColors(clonedDocument);
         const clonedRoot = clonedDocument.querySelector('#invoice-preview-capture');
         if (clonedRoot) {
-          clonedRoot.style.width = '794px';
-          clonedRoot.style.minHeight = '1123px';
+          clonedRoot.style.width = `${A4_CSS_WIDTH}px`;
+          clonedRoot.style.minHeight = `${A4_CSS_HEIGHT}px`;
           clonedRoot.querySelectorAll('*').forEach((node) => {
             if (node instanceof HTMLElement) {
               node.style.animation = 'none';
@@ -172,27 +161,98 @@ const renderExactPreview = async (root) => {
         }
       },
     }), EXPORT_TIMEOUT_MS, 'PDF/image export timed out. Please try again.');
-  } finally { style.remove(); root.classList.remove(exportClass); }
+  } finally {
+    style.remove();
+    root.classList.remove(exportClass);
+  }
 };
 
-const canvasToPdfBlob = (canvas) => {
+// Find safe page boundaries in CSS pixels so a PDF page never cuts through an invoice row/card.
+const getSafeBreakPoints = (root, canvasWidth, canvasHeight) => {
+  const scale = canvasWidth / A4_CSS_WIDTH;
+  const pageCssHeight = A4_CSS_HEIGHT;
+  const pagePixelHeight = Math.max(1, Math.floor(pageCssHeight * scale));
+  if (canvasHeight <= pagePixelHeight) return [canvasHeight];
+
+  const rootRect = root.getBoundingClientRect();
+  const candidates = new Set([0, canvasHeight]);
+  const selectors = [
+    'tr',
+    '[data-pdf-break]',
+    'section',
+    'article',
+  ];
+
+  selectors.forEach((selector) => {
+    root.querySelectorAll(selector).forEach((node) => {
+      const rect = node.getBoundingClientRect();
+      const top = rect.top - rootRect.top;
+      const bottom = rect.bottom - rootRect.top;
+      if (top > 8 && bottom - top < pageCssHeight * 0.75) {
+        candidates.add(Math.round(top * scale));
+      }
+    });
+  });
+
+  // Also consider substantial direct layout blocks. This covers the div-based templates.
+  Array.from(root.children).forEach((node) => {
+    const rect = node.getBoundingClientRect();
+    const top = rect.top - rootRect.top;
+    const bottom = rect.bottom - rootRect.top;
+    if (top > 8 && bottom - top < pageCssHeight * 0.75) candidates.add(Math.round(top * scale));
+  });
+
+  const sorted = [...candidates].sort((a, b) => a - b);
+  const breaks = [0];
+  let current = 0;
+
+  while (current < canvasHeight) {
+    const ideal = Math.min(canvasHeight, current + pagePixelHeight);
+    if (ideal >= canvasHeight) {
+      breaks.push(canvasHeight);
+      break;
+    }
+
+    const minAcceptable = current + Math.floor(pagePixelHeight * 0.55);
+    const safe = sorted
+      .filter((point) => point >= minAcceptable && point <= ideal)
+      .sort((a, b) => Math.abs(ideal - a) - Math.abs(ideal - b))[0];
+
+    // If there is no safe DOM boundary, keep the exact page boundary as a last resort.
+    const next = safe && safe > current ? safe : ideal;
+    breaks.push(next);
+    current = next;
+  }
+
+  return breaks;
+};
+
+const canvasToPdfBlob = (canvas, root) => {
   const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait', compress: true });
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const pagePixelHeight = Math.max(1, Math.floor(canvas.width * (pageHeight / pageWidth)));
+  const breaks = getSafeBreakPoints(root, canvas.width, canvas.height);
 
-  for (let sourceY = 0, page = 0; sourceY < canvas.height; sourceY += pagePixelHeight, page += 1) {
-    const sourceHeight = Math.min(pagePixelHeight, canvas.height - sourceY);
+  for (let page = 0; page < breaks.length - 1; page += 1) {
+    const sourceY = breaks[page];
+    const nextY = breaks[page + 1];
+    const sourceHeight = Math.max(1, nextY - sourceY);
     const pageCanvas = document.createElement('canvas');
-    pageCanvas.width = canvas.width; pageCanvas.height = sourceHeight;
+    pageCanvas.width = canvas.width;
+    pageCanvas.height = sourceHeight;
     const ctx = pageCanvas.getContext('2d', { alpha: false });
     if (!ctx) throw new Error('PDF canvas could not be created.');
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
     ctx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
+
     if (page > 0) pdf.addPage();
-    const image = pageCanvas.toDataURL('image/jpeg', 0.88);
-    pdf.addImage(image, 'JPEG', 0, 0, pageWidth, (sourceHeight / canvas.width) * pageWidth, undefined, 'FAST');
-    pageCanvas.width = 1; pageCanvas.height = 1;
+    const image = pageCanvas.toDataURL('image/jpeg', 0.92);
+    const renderedHeight = Math.min(pageHeight, (sourceHeight / canvas.width) * pageWidth);
+    pdf.addImage(image, 'JPEG', 0, 0, pageWidth, renderedHeight, undefined, 'FAST');
+    pageCanvas.width = 1;
+    pageCanvas.height = 1;
   }
 
   const blob = pdf.output('blob');
@@ -213,16 +273,27 @@ const downloadBlob = (blob, filename) => {
   const url = URL.createObjectURL(blob);
   try {
     const link = document.createElement('a');
-    link.href = url; link.download = filename; link.rel = 'noopener'; link.style.display = 'none';
-    document.body.appendChild(link); link.click(); link.remove();
-  } finally { setTimeout(() => URL.revokeObjectURL(url), 15000); }
+    link.href = url;
+    link.download = filename;
+    link.rel = 'noopener';
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } finally {
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
+  }
 };
 
 export const generateInvoicePdfBlob = async (invoice, businessSettings = {}, targetElement = null) => {
   if (!invoice) throw new Error('Invoice data is missing.');
   const session = await getExportTarget(invoice, businessSettings, targetElement);
-  try { return await validateBlob(canvasToPdfBlob(await renderExactPreview(session.target)), 'pdf'); }
-  finally { session.cleanup(); }
+  try {
+    const canvas = await renderExactPreview(session.target);
+    return await validateBlob(canvasToPdfBlob(canvas, session.target), 'pdf');
+  } finally {
+    session.cleanup();
+  }
 };
 
 export const generateInvoiceImageBlob = async (invoice, businessSettings = {}, targetElement = null, format = 'image/png') => {
@@ -232,7 +303,9 @@ export const generateInvoiceImageBlob = async (invoice, businessSettings = {}, t
     const canvas = await renderExactPreview(session.target);
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, format, format === 'image/jpeg' ? 0.94 : undefined));
     return await validateBlob(blob, 'image');
-  } finally { session.cleanup(); }
+  } finally {
+    session.cleanup();
+  }
 };
 
 export const downloadStableInvoicePDF = async (invoice, businessSettings = {}, targetElement = null) => {
@@ -242,11 +315,17 @@ export const downloadStableInvoicePDF = async (invoice, businessSettings = {}, t
   try {
     const blob = await generateInvoicePdfBlob(invoice, businessSettings, targetElement);
     downloadBlob(blob, `Invoice_${safeFilename(invoice?.invoiceNumber || invoice?.number || '000')}.pdf`);
-    toast.dismiss(toastId); toast.success('PDF downloaded'); return true;
+    toast.dismiss(toastId);
+    toast.success('PDF downloaded');
+    return true;
   } catch (error) {
-    console.error('Invoice PDF export failed:', error); toast.dismiss(toastId);
-    toast.error(error?.message || 'PDF তৈরি করা যায়নি।'); return false;
-  } finally { exporting = false; }
+    console.error('Invoice PDF export failed:', error);
+    toast.dismiss(toastId);
+    toast.error(error?.message || 'PDF তৈরি করা যায়নি।');
+    return false;
+  } finally {
+    exporting = false;
+  }
 };
 
 export const downloadInvoiceImage = async (invoice, businessSettings = {}, targetElement = null, format = 'image/png') => {
@@ -257,11 +336,17 @@ export const downloadInvoiceImage = async (invoice, businessSettings = {}, targe
     const blob = await generateInvoiceImageBlob(invoice, businessSettings, targetElement, format);
     const ext = format === 'image/jpeg' ? 'jpg' : 'png';
     downloadBlob(blob, `Invoice_${safeFilename(invoice?.invoiceNumber || invoice?.number || '000')}.${ext}`);
-    toast.dismiss(toastId); toast.success('Invoice image downloaded'); return true;
+    toast.dismiss(toastId);
+    toast.success('Invoice image downloaded');
+    return true;
   } catch (error) {
-    console.error('Invoice image export failed:', error); toast.dismiss(toastId);
-    toast.error(error?.message || 'Image তৈরি করা যায়নি।'); return false;
-  } finally { exporting = false; }
+    console.error('Invoice image export failed:', error);
+    toast.dismiss(toastId);
+    toast.error(error?.message || 'Image তৈরি করা যায়নি।');
+    return false;
+  } finally {
+    exporting = false;
+  }
 };
 
 export default downloadStableInvoicePDF;
