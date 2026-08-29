@@ -8,6 +8,7 @@ import { authRouter } from './modules/auth/authRoutes.js';
 import { workspaceRouter } from './modules/workspaces/workspaceRoutes.js';
 import { customerRouter } from './modules/customers/customerRoutes.js';
 import { invoiceRouter } from './modules/invoices/invoiceRoutes.js';
+import { publicInvoiceRouter } from './modules/public/publicInvoiceRoutes.js';
 
 // Native Security Headers (Zero-dependency Helmet equivalent)
 export const securityHeadersMiddleware = (req, res, next) => {
@@ -52,6 +53,7 @@ export const createApp = () => {
   app.use(`${config.apiPrefix}/workspaces`, workspaceRouter);
   app.use(`${config.apiPrefix}/customers`, customerRouter);
   app.use(`${config.apiPrefix}/invoices`, invoiceRouter);
+  app.use(`${config.apiPrefix}/public/invoices`, publicInvoiceRouter);
 
   // 4. 404 Not Found Handler (Express 5 compatible)
   app.use((req, res) => {

@@ -61,7 +61,31 @@ This enforces strict database-level mathematical tenant isolation independently 
 
 ---
 
-## 4. Atomic Concurrency Function
+## 4. REST API v1 Endpoints
+
+### System & Health:
+- `GET /health` — Public health probe
+- `GET /ready` — Service readiness probe
+
+### Authenticated Workspace Endpoints (Requires Firebase Bearer Token):
+- `GET /api/v1/auth/me` — Authenticated profile & idempotent user auto-provisioning
+- `GET /api/v1/workspaces` — List workspaces owned/shared with authenticated user
+- `POST /api/v1/workspaces` — Atomic workspace creation with owner assignment
+- `GET /api/v1/customers` — Paginated customers query with search & workspace isolation
+- `POST /api/v1/customers` — Customer creation within authorized workspace
+- `GET /api/v1/invoices` — Paginated invoices query with status, search & date range filters
+- `POST /api/v1/invoices` — Server-authoritative canonical invoice creation with row-level locking & sequence allocation
+
+### Public Endpoints (Unauthenticated):
+- `GET /api/v1/public/invoices/:token` — Secure public invoice retrieval:
+  - Located exclusively via high-entropy `public_token`.
+  - Zero internal leaks: internal DB UUIDs, private notes, and user IDs are 100% stripped.
+  - Returns sanitized Public DTO containing invoice details, line items, business display info, customer display name, and presentation metadata.
+  - Conservative `Cache-Control: no-store` and rate limiting enforced.
+
+---
+
+## 5. Atomic Concurrency Function
 
 ```sql
 -- Generates next sequential invoice number with row-level lock:
