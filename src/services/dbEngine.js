@@ -226,63 +226,113 @@ export const cloudWins = (localRecord, cloudRecord) => {
 
 // --- OFFLINE SYNC QUEUE ENGINE & MIGRATOR ---
 export const migrateLocalStorageToIndexedDB = async () => {
+  if (typeof localStorage === 'undefined') return { status: 'skipped_no_localstorage' };
   try {
-    const migrationFlag = localStorage.getItem('billqyro_indexeddb_migrated');
-    
-    // If it's fully migrated with the new timestamp format (numeric string), we are good
-    if (migrationFlag && migrationFlag !== 'true' && !isNaN(Number(migrationFlag))) {
-      return;
+    const migrationFlag = localStorage.getItem('billqyro_idb_migration_v1');
+    if (migrationFlag === 'VERIFIED') {
+      return { status: 'already_verified' };
     }
+
+    localStorage.setItem('billqyro_idb_migration_v1', 'IN_PROGRESS');
 
     const userId = getRealUserId() || 'local-user';
     const localSettings = JSON.parse(localStorage.getItem(KEYS.SETTINGS) || '{}');
     const workspaceId = localSettings?.activeWorkspaceId || 'default';
 
-    const migrateCollection = async (localKey, storeName) => {
-      const itemsStr = localStorage.getItem(localKey);
-      if (!itemsStr) return; // Nothing to migrate or cleanup
+    const collectionsToMigrate = [
+      { key: KEYS.INVOICES, store: 'invoices' },
+      { key: KEYS.CUSTOMERS, store: 'customers' },
+      { key: KEYS.PRODUCTS, store: 'products' },
+      { key: KEYS.EXPENSES, store: 'expenses' },
+      { key: KEYS.STUDENTS, store: 'students' },
+      { key: KEYS.STAFF, store: 'staff' },
+      { key: KEYS.BANK_LEDGER, store: 'bankLedger' }
+    ];
 
-      // Only perform the DB push if it's NOT an already completed old migration
-      if (migrationFlag !== 'true') {
-        const items = JSON.parse(itemsStr) || [];
-        for (const item of items) {
-          if (!item.userId) item.userId = userId;
-          if (!item.workspaceId) item.workspaceId = workspaceId;
-          
-          try {
-            const existing = await BillQyroDB.get(storeName, item.id);
-            if (existing) {
-              const existingTime = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
-              const itemTime = new Date(item.updatedAt || item.createdAt || 0).getTime();
-              const existingVer = existing.__version || 0;
-              const itemVer = item.__version || 0;
+    let totalMigrated = 0;
+    const verifiedEntries = [];
 
-              if (existingVer > itemVer) continue;
-              if (existingVer === itemVer && existingTime >= itemTime) continue;
-            }
-            await BillQyroDB.put(storeName, item);
-          } catch (e) {
-            console.warn(`Ignored error in dbEngine.js during migration item ${item.id}:`, e);
+    for (const { key, store } of collectionsToMigrate) {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+
+      let items = [];
+      try {
+        items = JSON.parse(raw);
+      } catch (parseErr) {
+        console.warn(`[MIGRATION] Parse failed for ${key}:`, parseErr);
+        continue;
+      }
+
+      if (!Array.isArray(items) || items.length === 0) continue;
+
+      for (const item of items) {
+        if (!item || typeof item !== 'object') continue;
+        if (!item.id) {
+          item.id = `${store}-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+        }
+        if (!item.userId) item.userId = userId;
+        if (!item.workspaceId) item.workspaceId = workspaceId;
+
+        try {
+          const existing = await BillQyroDB.get(store, item.id);
+          if (existing) {
+            const existingTime = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
+            const itemTime = new Date(item.updatedAt || item.createdAt || 0).getTime();
+            const existingVer = existing.__version || 0;
+            const itemVer = item.__version || 0;
+
+            if (existingVer > itemVer) continue;
+            if (existingVer === itemVer && existingTime >= itemTime) continue;
           }
+          await BillQyroDB.put(store, item);
+          totalMigrated++;
+        } catch (itemErr) {
+          console.warn(`[MIGRATION] Error saving ${store} item ${item.id}:`, itemErr);
         }
       }
-      
-      // Verified Cleanup: Backup and remove old LocalStorage data
-      localStorage.setItem(`${localKey}_backup`, itemsStr);
-      localStorage.removeItem(localKey);
-    };
 
-    await migrateCollection(KEYS.INVOICES, 'invoices');
-    await migrateCollection(KEYS.CUSTOMERS, 'customers');
-    await migrateCollection(KEYS.PRODUCTS, 'products');
-    await migrateCollection(KEYS.EXPENSES, 'expenses');
-    await migrateCollection(KEYS.STUDENTS, 'students');
+      // Verification check: count & sample
+      const idbCount = await BillQyroDB.count(store);
+      if (idbCount < items.length) {
+        throw new Error(`Count verification mismatch for ${store}: expected >= ${items.length}, found ${idbCount}`);
+      }
 
+      const sampleItem = items[0];
+      if (sampleItem && sampleItem.id) {
+        const verifiedSample = await BillQyroDB.get(store, sampleItem.id);
+        if (!verifiedSample) {
+          throw new Error(`Sample record verification failed for ${store}:${sampleItem.id}`);
+        }
+      }
+
+      verifiedEntries.push({ key, store, count: items.length });
+    }
+
+    // Mark VERIFIED only after all collections successfully pass verification
+    localStorage.setItem('billqyro_idb_migration_v1', 'VERIFIED');
     localStorage.setItem('billqyro_indexeddb_migrated', Date.now().toString());
 
+    // Safely remove legacy full-arrays from localStorage and replace with lightweight metadata
+    for (const { key, count, store } of verifiedEntries) {
+      try {
+        localStorage.setItem(`${key}_meta`, JSON.stringify({
+          count,
+          migratedAt: new Date().toISOString(),
+          persistedIn: 'IndexedDB',
+          store
+        }));
+        localStorage.removeItem(key);
+      } catch (cleanErr) {
+        console.warn(`[MIGRATION] Could not cleanup legacy key ${key}:`, cleanErr);
+      }
+    }
+
+    return { status: 'success', migratedCount: totalMigrated, verifiedCount: verifiedEntries.length };
   } catch (error) {
-    console.error('[MIGRATION] LocalStorage to IndexedDB migration failed:', error);
-    toast.error("কিছু পুরনো ডেটা সিঙ্ক করা যায়নি, সাপোর্টে যোগাযোগ করুন।", { duration: 5000 });
+    console.error('[MIGRATION] LocalStorage to IndexedDB migration failed verification:', error);
+    localStorage.setItem('billqyro_idb_migration_v1', 'FAILED');
+    return { status: 'failed', error: error.message };
   }
 };
 
@@ -635,24 +685,15 @@ export const syncOfflineTransactions = async () => {
 
 const markLocalRecordSynced = async (storeName, docId) => {
   if (!docId) return;
-  let key = null;
-  if (storeName === 'invoices') key = KEYS.INVOICES;
-  else if (storeName === 'customers') key = KEYS.CUSTOMERS;
-  else if (storeName === 'products') key = KEYS.PRODUCTS;
-  else if (storeName === 'expenses') key = KEYS.EXPENSES;
-  else if (storeName === 'bankLedger') key = KEYS.BANK_LEDGER;
-  else if (storeName === 'bankCredit') key = KEYS.BANK_CREDIT;
-  if (!key) return;
-
-  if (typeof localStorage !== 'undefined') {
-    const items = JSON.parse(localStorage.getItem(key) || '[]');
-    const localIdx = items.findIndex(item => item.id === docId);
-    if (localIdx !== -1) {
-      items[localIdx].syncStatus = 'synced';
-      if (storeName === 'invoices') items[localIdx].updatedAt = new Date().toISOString();
-      updateLocalCache(key, items);
-      await BillQyroDB.put(storeName, items[localIdx]);
+  try {
+    const record = await BillQyroDB.get(storeName, docId);
+    if (record) {
+      record.syncStatus = 'synced';
+      if (storeName === 'invoices') record.updatedAt = new Date().toISOString();
+      await BillQyroDB.put(storeName, record);
     }
+  } catch (err) {
+    console.warn(`[SYNC] Could not mark local record synced in IDB (${storeName}:${docId}):`, err);
   }
 };
 
@@ -954,21 +995,52 @@ export const migrateGlobalToScopedStorage = async () => {
 };
 
 export const updateLocalCache = (key, items) => {
+  if (typeof localStorage === 'undefined') return;
+
+  const isDemo = localStorage.getItem('billqyro_demo_session_active') === 'true';
   let targetKey = key;
-  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+  if (isDemo) {
     if (key.includes('invoices')) targetKey = 'billqyro_demo_invoices';
     else if (key.includes('customers')) targetKey = 'billqyro_demo_customers';
     else if (key.includes('products')) targetKey = 'billqyro_demo_products';
     else if (key.includes('expenses')) targetKey = 'billqyro_demo_expenses';
     else if (key.includes('settings')) targetKey = 'billqyro_demo_settings';
+
+    const sorted = [...items].sort((a,b) => {
+      const da = a.createdAt ? new Date(a.createdAt) : 0;
+      const db = b.createdAt ? new Date(b.createdAt) : 0;
+      return db - da;
+    });
+    try {
+      localStorage.setItem(targetKey, JSON.stringify(sorted));
+    } catch (e) { /* ignore */ }
+    return;
   }
 
-  const sorted = [...items].sort((a,b) => {
-    const da = a.createdAt ? new Date(a.createdAt) : 0;
-    const db = b.createdAt ? new Date(b.createdAt) : 0;
-    return db - da;
-  });
-  localStorage.setItem(targetKey, JSON.stringify(sorted));
+  // Settings, auth, theme, subscription are safe small metadata
+  const isSmallMetadata = key.includes('settings') || key.includes('auth') || key.includes('subscription') || key.includes('theme');
+  if (isSmallMetadata) {
+    try {
+      localStorage.setItem(targetKey, JSON.stringify(items));
+    } catch (e) {
+      console.warn('[LocalStorage] Could not write settings metadata:', e);
+    }
+    return;
+  }
+
+  // Large business data (invoices, customers, products, expenses, students, staff, bankLedger):
+  // Persist only lightweight metadata in LocalStorage, preventing QuotaExceededError.
+  try {
+    const meta = {
+      count: Array.isArray(items) ? items.length : 0,
+      lastUpdated: Date.now(),
+      persistedIn: 'IndexedDB'
+    };
+    localStorage.setItem(`${targetKey}_meta`, JSON.stringify(meta));
+    localStorage.removeItem(targetKey);
+  } catch (e) {
+    console.warn('[LocalStorage] Meta cache update warning:', e);
+  }
 };
 
 const DEFAULT_SETTINGS = {
@@ -2573,7 +2645,7 @@ export const deleteStudent = async (id, permanent = false) => {
 
 // --- INVOICES ---
 export const getInvoices = async (includeDeleted = false) => {
-  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+  if (typeof localStorage !== 'undefined' && localStorage.getItem('billqyro_demo_session_active') === 'true') {
     return JSON.parse(localStorage.getItem('billqyro_demo_invoices') || '[]');
   }
   initializeStorage();
@@ -2593,6 +2665,92 @@ export const getInvoices = async (includeDeleted = false) => {
     }
   } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   return [];
+};
+
+/**
+ * Paginated Invoices Query for Scalable Memory Management
+ */
+export const getInvoicesPaged = async ({ workspaceId = null, limit = 25, offset = 0, status = null, search = '', includeDeleted = false } = {}) => {
+  const allInvoices = await getInvoices(includeDeleted);
+  let filtered = allInvoices;
+  if (workspaceId) {
+    filtered = filtered.filter(inv => inv.workspaceId === workspaceId);
+  }
+  if (status) {
+    filtered = filtered.filter(inv => (inv.status || '').toLowerCase() === status.toLowerCase());
+  }
+  if (search) {
+    const q = search.trim().toLowerCase();
+    filtered = filtered.filter(inv =>
+      (inv.invoiceNumber || '').toLowerCase().includes(q) ||
+      (inv.customerName || '').toLowerCase().includes(q) ||
+      (inv.customerPhone || '').includes(q)
+    );
+  }
+  const total = filtered.length;
+  const items = filtered.slice(offset, offset + limit);
+  return {
+    items,
+    total,
+    limit,
+    offset,
+    hasMore: offset + limit < total
+  };
+};
+
+/**
+ * Paginated Customers Query
+ */
+export const getCustomersPaged = async ({ workspaceId = null, limit = 25, offset = 0, search = '', includeDeleted = false } = {}) => {
+  const all = await getCustomers(includeDeleted);
+  let filtered = all;
+  if (workspaceId) {
+    filtered = filtered.filter(c => c.workspaceId === workspaceId);
+  }
+  if (search) {
+    const q = search.trim().toLowerCase();
+    filtered = filtered.filter(c =>
+      (c.name || '').toLowerCase().includes(q) ||
+      (c.phone || '').includes(q) ||
+      (c.email || '').toLowerCase().includes(q)
+    );
+  }
+  const total = filtered.length;
+  const items = filtered.slice(offset, offset + limit);
+  return {
+    items,
+    total,
+    limit,
+    offset,
+    hasMore: offset + limit < total
+  };
+};
+
+/**
+ * Paginated Products Query
+ */
+export const getProductsPaged = async ({ workspaceId = null, limit = 25, offset = 0, search = '', includeDeleted = false } = {}) => {
+  const all = await getProducts(includeDeleted);
+  let filtered = all;
+  if (workspaceId) {
+    filtered = filtered.filter(p => p.workspaceId === workspaceId);
+  }
+  if (search) {
+    const q = search.trim().toLowerCase();
+    filtered = filtered.filter(p =>
+      (p.name || p.productName || '').toLowerCase().includes(q) ||
+      (p.description || '').toLowerCase().includes(q)
+    );
+  }
+  const total = filtered.length;
+  const items = filtered.slice(offset, offset + limit);
+  return {
+    items,
+    total,
+    limit,
+    offset,
+    hasMore: offset + limit < total
+  };
 };
 
 export const generateSecureToken = (length = 16) => {

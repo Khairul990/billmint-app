@@ -229,6 +229,30 @@ export class BillQyroDB {
     });
   }
 
+  static async queryPaged(storeName, { indexName = null, key = undefined, limit = 25, offset = 0, filterFn = null, sortFn = null } = {}) {
+    let items = indexName
+      ? await this.getAllByIndex(storeName, indexName, key)
+      : await this.getAll(storeName);
+
+    if (typeof filterFn === 'function') {
+      items = items.filter(filterFn);
+    }
+    if (typeof sortFn === 'function') {
+      items.sort(sortFn);
+    }
+
+    const total = items.length;
+    const paginated = items.slice(offset, offset + limit);
+
+    return {
+      items: paginated,
+      total,
+      limit,
+      offset,
+      hasMore: offset + limit < total
+    };
+  }
+
   static close() {
     if (_dbInstance) {
       try { _dbInstance.close(); } catch (e) { /* ignore */ }
