@@ -564,7 +564,7 @@ let isSyncing = false;
 const SYNC_LOCK_KEY = 'billqyro_sync_active_lock';
 const SYNC_LOCK_TTL_MS = 25000;
 
-const acquireSyncLock = () => {
+export const acquireSyncLock = () => {
   try {
     if (typeof localStorage === 'undefined') return true;
     const currentLock = localStorage.getItem(SYNC_LOCK_KEY);
@@ -583,14 +583,14 @@ const acquireSyncLock = () => {
   }
 };
 
-const releaseSyncLock = () => {
+export const releaseSyncLock = () => {
   try {
     if (typeof localStorage !== 'undefined') localStorage.removeItem(SYNC_LOCK_KEY);
   } catch (e) { /* ignore */ }
 };
 
 // In-Flight Transaction Recovery for Crashed/Closed Tabs
-const recoverInFlightTransactions = async (userId) => {
+export const recoverInFlightTransactions = async (userId) => {
   try {
     const queue = await BillQyroDB.getAll('syncQueue');
     const now = Date.now();
@@ -2644,14 +2644,14 @@ export const deleteStudent = async (id, permanent = false) => {
 };
 
 // --- INVOICES ---
-export const getInvoices = async (includeDeleted = false) => {
+export const getInvoices = async (includeDeleted = false, targetWorkspaceId = null) => {
   if (typeof localStorage !== 'undefined' && localStorage.getItem('billqyro_demo_session_active') === 'true') {
     return JSON.parse(localStorage.getItem('billqyro_demo_invoices') || '[]');
   }
   initializeStorage();
   const userId = getRealUserId() || 'local-user';
   const settings = getSettings();
-  const workspaceId = settings?.activeWorkspaceId;
+  const workspaceId = targetWorkspaceId || settings?.activeWorkspaceId;
   try {
     const data = await BillQyroDB.getAll('invoices');
     if (data && data.length > 0) {
@@ -2671,11 +2671,8 @@ export const getInvoices = async (includeDeleted = false) => {
  * Paginated Invoices Query for Scalable Memory Management
  */
 export const getInvoicesPaged = async ({ workspaceId = null, limit = 25, offset = 0, status = null, search = '', includeDeleted = false } = {}) => {
-  const allInvoices = await getInvoices(includeDeleted);
+  const allInvoices = await getInvoices(includeDeleted, workspaceId);
   let filtered = allInvoices;
-  if (workspaceId) {
-    filtered = filtered.filter(inv => inv.workspaceId === workspaceId);
-  }
   if (status) {
     filtered = filtered.filter(inv => (inv.status || '').toLowerCase() === status.toLowerCase());
   }
