@@ -1,15 +1,24 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Clock, Search, CheckCircle2, AlertCircle, CreditCard, ChevronRight, Calendar, X, Bell, User, DollarSign, TrendingUp, TrendingDown, Send, Eye, Ban, Download } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Clock, Search, CheckCircle2, AlertCircle, CreditCard, ChevronRight, Calendar, X, Bell, User, DollarSign, TrendingUp, TrendingDown, Send, Eye, Ban, Download, FileText } from 'lucide-react';
 import { pageVariants, staggerContainer, staggerItem } from '../utils/animations';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { CardSkeleton } from '../components/PremiumSkeleton';
 import CustomerLedger from '../components/customers/CustomerLedger';
 import { getInvoicePaidTotal, getInvoiceBalanceDue } from '../utils/financialCalculations';
+import { invoiceEngine } from '../services/invoiceEngine';
+import { shareOnWhatsApp } from '../services/invoiceShareService2';
+import { toast } from 'react-hot-toast';
 
 const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentRecorded }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [recordingPaymentBill, setRecordingPaymentBill] = useState(null);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('Cash');
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [paymentNotes, setPaymentNotes] = useState('');
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
   const [loading, setLoading] = useState(false);
   const currencySymbol = businessSettings?.currency || '₹';
 
@@ -115,29 +124,55 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
   };
 
   const handleMarkPaid = (bill) => {
-    if (bill.customerId) {
-      const customer = customers.find(c => c.id === bill.customerId);
-      setSelectedCustomer(customer || { id: bill.customerId, name: bill.customerName });
-    } else {
-      setSelectedCustomer({ id: null, name: bill.customerName });
+    setRecordingPaymentBill(bill);
+    setPaymentAmount(bill.dueAmount.toString());
+    setPaymentMethod('Cash');
+    setPaymentDate(new Date().toISOString().split('T')[0]);
+    setPaymentNotes('');
+  };
+
+  const handleSubmitPayment = async (e) => {
+    e?.preventDefault?.();
+    if (!recordingPaymentBill) return;
+    const amount = parseFloat(paymentAmount) || 0;
+    if (amount <= 0) {
+      toast.error('Please enter a valid payment amount.');
+      return;
+    }
+    setIsSubmittingPayment(true);
+    try {
+      await invoiceEngine.recordPayment(recordingPaymentBill.id, {
+        amount,
+        method: paymentMethod,
+        date: paymentDate,
+        notes: paymentNotes
+      });
+      toast.success(`Payment of ${formatCurrency(amount, currencySymbol)} recorded!`);
+      setRecordingPaymentBill(null);
+      if (onPaymentRecorded) onPaymentRecorded();
+      window.dispatchEvent(new CustomEvent('billqyro_sync'));
+    } catch (err) {
+      toast.error(err.message || 'Payment could not be recorded.');
+    } finally {
+      setIsSubmittingPayment(false);
     }
   };
 
   const handleOpenCustomer = (bill) => {
     if (bill.customerId) {
       const customer = customers.find(c => c.id === bill.customerId);
-      setSelectedCustomer(customer || { id: bill.customerId, name: bill.customerName });
+      setSelectedCustomer(customer || { id: bill.customerId, name: bill.customerName, phone: bill.customerPhone });
     } else {
-      setSelectedCustomer({ id: null, name: bill.customerName });
+      setSelectedCustomer({ id: null, name: bill.customerName, phone: bill.customerPhone });
     }
   };
 
-  const handleSendReminder = (bill) => {
-    if (bill.customerId) {
-      const customer = customers.find(c => c.id === bill.customerId);
-      setSelectedCustomer(customer || { id: bill.customerId, name: bill.customerName });
-    } else {
-      setSelectedCustomer({ id: null, name: bill.customerName });
+  const handleSendReminder = async (bill) => {
+    try {
+      const updatedBill = { ...bill };
+      await shareOnWhatsApp(null, updatedBill, businessSettings);
+    } catch (err) {
+      toast.error(err.message || 'Could not send reminder.');
     }
   };
 
@@ -400,6 +435,124 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
           </div>
         </div>
       )}
+
+      {/* RECORD PAYMENT POPUP MODAL */}
+      <AnimatePresence>
+        {recordingPaymentBill && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="w-full max-w-md bg-theme-card border border-theme-border-soft rounded-2xl shadow-2xl overflow-hidden p-6 space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-theme-border-soft pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                    <CreditCard className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-theme-primary">Record Payment</h3>
+                    <p className="text-[11px] font-semibold text-theme-muted font-mono">{recordingPaymentBill.invoiceNumber || 'Invoice'}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setRecordingPaymentBill(null)}
+                  className="w-7 h-7 rounded-lg hover:bg-theme-surface flex items-center justify-center text-theme-muted hover:text-theme-primary cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-3 bg-theme-surface/60 rounded-xl border border-theme-border-soft flex items-center justify-between text-xs font-semibold">
+                <div>
+                  <span className="text-theme-muted block text-[10px] uppercase font-bold">Customer</span>
+                  <span className="font-bold text-theme-primary">{recordingPaymentBill.customerName || 'Walk-in Customer'}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-theme-muted block text-[10px] uppercase font-bold">Balance Due</span>
+                  <span className="text-sm font-black text-rose-500 font-numbers tabular-nums">
+                    {formatCurrency(recordingPaymentBill.dueAmount, currencySymbol)}
+                  </span>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmitPayment} className="space-y-3.5">
+                <div>
+                  <label className="block text-xs font-bold text-theme-secondary mb-1">Payment Amount ({currencySymbol}) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max={recordingPaymentBill.dueAmount}
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-black text-theme-primary font-numbers focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-theme-secondary mb-1">Payment Method</label>
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-full px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:border-theme-accent"
+                    >
+                      <option value="Cash">Cash</option>
+                      <option value="UPI">UPI / QR</option>
+                      <option value="Bank Transfer">Bank Transfer</option>
+                      <option value="Cheque">Cheque</option>
+                      <option value="bKash">bKash</option>
+                      <option value="Nagad">Nagad</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-theme-secondary mb-1">Payment Date</label>
+                    <input
+                      type="date"
+                      value={paymentDate}
+                      onChange={(e) => setPaymentDate(e.target.value)}
+                      className="w-full px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none focus:border-theme-accent"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-theme-secondary mb-1">Notes / Transaction ID (Optional)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. UPI Ref #123456"
+                    value={paymentNotes}
+                    onChange={(e) => setPaymentNotes(e.target.value)}
+                    className="w-full px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary placeholder-theme-muted focus:outline-none focus:border-theme-accent"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setRecordingPaymentBill(null)}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-theme-muted hover:text-theme-primary hover:bg-theme-surface cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingPayment}
+                    className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>{isSubmittingPayment ? 'Recording...' : 'Confirm Payment'}</span>
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <CustomerLedger
         isOpen={!!selectedCustomer}
