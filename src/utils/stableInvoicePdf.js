@@ -30,8 +30,15 @@ const mountTemporaryInvoicePreview = async (invoice, businessSettings) => {
   const host = document.createElement('div');
   host.setAttribute('data-invoice-export-host', 'true');
   Object.assign(host.style, {
-    position: 'fixed', left: '-100000px', top: '0', width: `${A4_CSS_WIDTH}px`, minHeight: `${A4_CSS_HEIGHT}px`,
-    background: '#ffffff', pointerEvents: 'none', zIndex: '-2147483647',
+    position: 'fixed',
+    left: '0px',
+    top: '0px',
+    width: `${A4_CSS_WIDTH}px`,
+    minHeight: `${A4_CSS_HEIGHT}px`,
+    background: '#ffffff',
+    pointerEvents: 'none',
+    zIndex: '-999999',
+    opacity: '0.001',
   });
   document.body.appendChild(host);
 
@@ -187,6 +194,9 @@ const sanitizeClonedDocument = (clonedDocument, width) => {
     clonedHost.style.width = `${width}px`;
     clonedHost.style.margin = '0';
     clonedHost.style.padding = '0';
+    clonedHost.style.opacity = '1';
+    clonedHost.style.visibility = 'visible';
+    clonedHost.style.zIndex = '1';
   }
 
   const clonedRoot = clonedDocument.querySelector('#invoice-preview-capture');
