@@ -417,7 +417,7 @@ const InvoiceCard = ({
                   </button>
 
                   {/* Organized More Actions Dropdown */}
-                  <div className="relative" ref={menuRef}>
+                  <div className="relative inline-block shrink-0" ref={menuRef}>
                     <button
                       onClick={() => setShowMoreMenu(!showMoreMenu)}
                       title="More Options"
@@ -438,7 +438,8 @@ const InvoiceCard = ({
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95, y: -6 }}
                           transition={{ duration: 0.12 }}
-                          className="absolute right-0 top-full mt-1.5 w-56 bg-theme-card border border-theme-border-soft rounded-2xl p-1.5 shadow-2xl z-50 flex flex-col gap-0.5 text-xs"
+                          style={{ position: 'absolute', right: 0, top: '100%', marginTop: '6px', zIndex: 9999 }}
+                          className="w-56 bg-theme-card border border-theme-border-soft rounded-2xl p-1.5 shadow-2xl flex flex-col gap-0.5 text-xs max-h-[380px] overflow-y-auto"
                         >
                           <button
                             onClick={() => {
