@@ -13,7 +13,7 @@
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc } from 'firebase/firestore';
 import { storage, db, firebaseReady } from './firebaseConfig.js';
-import { generateInvoicePdfBlob } from './communication/attachmentEngine.js';
+import { getOrGenerateInvoicePdfBlob as generateInvoicePdfBlob } from '../utils/pdfCacheEngine.js';
 import { buildPortalUrl } from './paymentLinkService.js';
 import { getRealUserId } from './dbEngine.js';
 import { cleanPhoneNumber } from '../utils/shareUtils.js';

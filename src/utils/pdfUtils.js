@@ -1,8 +1,22 @@
 import { toast } from 'react-hot-toast';
-import { generateInvoicePdfBlob as generateReactPdfBlob, prepareInvoicePdf } from '../services/communication/attachmentEngine';
-import { generateInvoicePdfBlob as generateStablePdfBlob } from './stableInvoicePdf';
-export { downloadInvoiceImage } from './invoiceImageExport';
-export { generateStablePdfBlob as generateInvoicePdfBlob, prepareInvoicePdf };
+import {
+  getOrGenerateInvoicePdfBlob,
+  calculateInvoicePdfHash,
+  validatePdfBlob,
+  invalidateInvoicePdfCache
+} from './pdfCacheEngine.js';
+import { prepareInvoicePdf } from '../services/communication/attachmentEngine.js';
+import { generateInvoicePdfBlob as generateStablePdfBlob } from './stableInvoicePdf.js';
+
+export { downloadInvoiceImage } from './invoiceImageExport.js';
+export {
+  getOrGenerateInvoicePdfBlob,
+  getOrGenerateInvoicePdfBlob as generateInvoicePdfBlob,
+  calculateInvoicePdfHash,
+  validatePdfBlob,
+  invalidateInvoicePdfCache,
+  prepareInvoicePdf
+};
 
 let isDownloadingPdf = false;
 
@@ -25,27 +39,9 @@ const downloadBlob = (blob, filename) => {
 };
 
 /**
- * Validates that the generated blob is a non-empty, authentic PDF document.
- */
-export const validatePdfBlob = async (blob) => {
-  if (!(blob instanceof Blob) || blob.size < 100) {
-    throw new Error('PDF generation produced an invalid or empty file.');
-  }
-  try {
-    const header = await blob.slice(0, 5).text();
-    if (header !== '%PDF-') {
-      throw new Error('Generated file does not have a valid PDF header.');
-    }
-  } catch (err) {
-    if (err.message.includes('PDF')) throw err;
-  }
-  return blob;
-};
-
-/**
  * Canonical Browser PDF Download Function.
  * Single entry point for PDF generation across all screens, modals, and portals.
- * Uses exact on-screen HTML template rendering with automatic vector fallback.
+ * Integrates with Immutable PDF Cache ("Generate Once & Reuse").
  */
 export const downloadInvoicePDF = async (invoice, businessSettings = {}, isPremium = false) => {
   if (!invoice) return false;
@@ -55,15 +51,8 @@ export const downloadInvoicePDF = async (invoice, businessSettings = {}, isPremi
   const toastId = toast.loading('Preparing PDF...');
 
   try {
-    let blob = null;
-    try {
-      blob = await generateStablePdfBlob(invoice, businessSettings);
-      await validatePdfBlob(blob);
-    } catch (primaryErr) {
-      console.warn('[PDF Download] Primary canvas PDF engine encountered issue, trying vector engine fallback:', primaryErr);
-      blob = await generateReactPdfBlob(invoice, businessSettings);
-      await validatePdfBlob(blob);
-    }
+    const blob = await getOrGenerateInvoicePdfBlob(invoice, businessSettings);
+    await validatePdfBlob(blob);
 
     const invNum = safeFilename(invoice?.invoiceNumber || invoice?.number || invoice?.id || '000');
     downloadBlob(blob, `BillQyro-Invoice-${invNum}.pdf`);
