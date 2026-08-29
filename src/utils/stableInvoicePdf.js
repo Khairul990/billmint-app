@@ -294,7 +294,7 @@ const getSafeBreakPoints = (root, canvasWidth, canvasHeight) => {
   const scale = canvasWidth / A4_CSS_WIDTH;
   const pageCssHeight = A4_CSS_HEIGHT;
   const pagePixelHeight = Math.max(1, Math.floor(pageCssHeight * scale));
-  if (canvasHeight <= pagePixelHeight) return [canvasHeight];
+  if (canvasHeight <= pagePixelHeight) return [0, canvasHeight];
 
   const rootRect = root.getBoundingClientRect();
   const candidates = new Set([0, canvasHeight]);
@@ -355,6 +355,7 @@ const canvasToPdfBlob = (canvas, root) => {
   const pageHeight = pdf.internal.pageSize.getHeight();
   const breaks = getSafeBreakPoints(root, canvas.width, canvas.height);
 
+  let pagesRendered = 0;
   for (let page = 0; page < breaks.length - 1; page += 1) {
     const sourceY = breaks[page];
     const nextY = breaks[page + 1];
@@ -368,12 +369,20 @@ const canvasToPdfBlob = (canvas, root) => {
     ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
     ctx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
 
-    if (page > 0) pdf.addPage();
+    if (pagesRendered > 0) pdf.addPage();
     const renderedHeightOnPdf = (sourceHeight / canvas.width) * pageWidth;
-    const image = pageCanvas.toDataURL('image/jpeg', 0.92);
+    const image = pageCanvas.toDataURL('image/jpeg', 0.94);
     pdf.addImage(image, 'JPEG', 0, 0, pageWidth, renderedHeightOnPdf, undefined, 'FAST');
+    pagesRendered += 1;
     pageCanvas.width = 1;
     pageCanvas.height = 1;
+  }
+
+  if (pagesRendered === 0) {
+    // Unconditional failsafe: Always draw the canvas onto the PDF
+    const renderedHeightOnPdf = (canvas.height / canvas.width) * pageWidth;
+    const image = canvas.toDataURL('image/jpeg', 0.94);
+    pdf.addImage(image, 'JPEG', 0, 0, pageWidth, renderedHeightOnPdf, undefined, 'FAST');
   }
 
   const blob = pdf.output('blob');

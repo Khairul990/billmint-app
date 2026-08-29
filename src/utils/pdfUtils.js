@@ -1,7 +1,8 @@
 import { toast } from 'react-hot-toast';
-import { generateInvoicePdfBlob, prepareInvoicePdf } from '../services/communication/attachmentEngine';
+import { generateInvoicePdfBlob as generateReactPdfBlob, prepareInvoicePdf } from '../services/communication/attachmentEngine';
+import { generateInvoicePdfBlob as generateStablePdfBlob } from './stableInvoicePdf';
 export { downloadInvoiceImage } from './invoiceImageExport';
-export { generateInvoicePdfBlob, prepareInvoicePdf };
+export { generateStablePdfBlob as generateInvoicePdfBlob, prepareInvoicePdf };
 
 let isDownloadingPdf = false;
 
@@ -44,6 +45,7 @@ export const validatePdfBlob = async (blob) => {
 /**
  * Canonical Browser PDF Download Function.
  * Single entry point for PDF generation across all screens, modals, and portals.
+ * Uses exact on-screen HTML template rendering with automatic vector fallback.
  */
 export const downloadInvoicePDF = async (invoice, businessSettings = {}, isPremium = false) => {
   if (!invoice) return false;
@@ -53,8 +55,15 @@ export const downloadInvoicePDF = async (invoice, businessSettings = {}, isPremi
   const toastId = toast.loading('Preparing PDF...');
 
   try {
-    const blob = await generateInvoicePdfBlob(invoice, businessSettings);
-    await validatePdfBlob(blob);
+    let blob = null;
+    try {
+      blob = await generateStablePdfBlob(invoice, businessSettings);
+      await validatePdfBlob(blob);
+    } catch (primaryErr) {
+      console.warn('[PDF Download] Primary canvas PDF engine encountered issue, trying vector engine fallback:', primaryErr);
+      blob = await generateReactPdfBlob(invoice, businessSettings);
+      await validatePdfBlob(blob);
+    }
 
     const invNum = safeFilename(invoice?.invoiceNumber || invoice?.number || invoice?.id || '000');
     downloadBlob(blob, `BillQyro-Invoice-${invNum}.pdf`);
@@ -79,4 +88,5 @@ export const downloadInvoicePDF = async (invoice, businessSettings = {}, isPremi
 
 export const downloadStableInvoicePDF = downloadInvoicePDF;
 export default downloadInvoicePDF;
+
 
