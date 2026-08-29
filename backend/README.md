@@ -1,0 +1,70 @@
+# BillQyro — Phase 2 Backend & Database Architecture
+
+> **Notice:** This directory contains the **isolated local PostgreSQL backend foundation** for Phase 2.  
+> It does **NOT** interfere with, replace, or alter the active frontend or Firebase data storage.
+
+---
+
+## 1. Directory Structure
+
+```
+backend/
+├── migrations/
+│   └── 001_initial_schema.sql    # Idempotent DDL schema for PostgreSQL 16+
+├── seeds/
+│   └── 001_dev_seed.sql          # Local testing mock data (Zero real user info)
+├── scripts/
+│   └── migrate.mjs               # Node.js deterministic migration runner
+├── .env.example                  # Local environment template
+└── README.md                     # Architecture & setup documentation
+```
+
+---
+
+## 2. Quick Start (Local ₹0 Development)
+
+### Prerequisites:
+- Docker Desktop or Docker Engine installed.
+- Node.js 18+
+
+### Step 1: Start PostgreSQL and MinIO Containers
+```bash
+docker-compose up -d
+```
+
+### Step 2: Verify PostgreSQL Health
+```bash
+docker ps --filter "name=billqyro-postgres-dev"
+```
+
+### Step 3: Run Database Migrations
+```bash
+# Direct psql migration:
+docker exec -i billqyro-postgres-dev psql -U billqyro_dev_user -d billqyro_dev < backend/migrations/001_initial_schema.sql
+
+# Or apply dev seed:
+docker exec -i billqyro-postgres-dev psql -U billqyro_dev_user -d billqyro_dev < backend/seeds/001_dev_seed.sql
+```
+
+---
+
+## 3. Multi-Tenant Cross-Workspace Referential Guardrails
+
+To eliminate the risk of Workspace A referencing a Customer or Invoice from Workspace B, all parent entity tables expose composite unique constraints `(id, workspace_id)` and child tables use composite foreign keys:
+
+```sql
+-- Invoices table foreign key to Customers table:
+FOREIGN KEY (customer_id, workspace_id) REFERENCES customers(id, workspace_id) ON DELETE SET NULL
+```
+
+This enforces strict database-level mathematical tenant isolation independently of application bugs.
+
+---
+
+## 4. Atomic Concurrency Function
+
+```sql
+-- Generates next sequential invoice number with row-level lock:
+SELECT generate_next_invoice_number('b0000000-0000-0000-0000-000000000001'::uuid, 'Invoice');
+-- Result: 'AFS-0101'
+```
