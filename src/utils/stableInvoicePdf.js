@@ -38,13 +38,13 @@ const mountTemporaryInvoicePreview = async (invoice, businessSettings) => {
   const root = createRoot(host);
   root.render(React.createElement(InvoicePreview, { invoice, businessSettings, isPreviewMode: true }));
   await withTimeout((async () => {
-    for (let i = 0; i < 100; i += 1) {
+    for (let i = 0; i < 120; i += 1) {
       const target = findPreviewRoot(host);
-      if (target) return target;
+      if (target && target.children.length > 0) return target;
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
     throw new Error('Invoice preview could not be prepared for export.');
-  })(), 6000, 'Invoice preview could not be prepared for export.');
+  })(), 8000, 'Invoice preview could not be prepared for export.');
   await nextPaint();
 
   const target = findPreviewRoot(host);
@@ -88,15 +88,66 @@ const imageToBase64 = async (img) => {
   }
 };
 
-const cleanColorString = (val) => {
-  if (!val || typeof val !== 'string') return val;
-  if (!val.includes('color(') && !val.includes('oklch') && !val.includes('color-mix') && !val.includes('lab(')) return val;
-  
-  return val
-    .replace(/color\([^)]+\)/g, '#111827')
-    .replace(/oklch\([^)]+\)/g, '#111827')
-    .replace(/color-mix\([^)]+\)/g, '#111827')
-    .replace(/lab\([^)]+\)/g, '#111827');
+const sanitizeColorValue = (str) => {
+  if (!str || typeof str !== 'string') return str;
+  if (!str.includes('color(') && !str.includes('oklch') && !str.includes('color-mix') && !str.includes('lab(')) {
+    return str;
+  }
+  return str
+    .replace(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)/gi, (_, r, g, b, a) => {
+      const red = Math.round(parseFloat(r) * 255);
+      const green = Math.round(parseFloat(g) * 255);
+      const blue = Math.round(parseFloat(b) * 255);
+      return a !== undefined ? `rgba(${red}, ${green}, ${blue}, ${a})` : `rgb(${red}, ${green}, ${blue})`;
+    })
+    .replace(/color\([^)]+\)/gi, '#111827')
+    .replace(/oklch\([^)]+\)/gi, '#111827')
+    .replace(/color-mix\([^)]+\)/gi, '#111827')
+    .replace(/lab\([^)]+\)/gi, '#111827');
+};
+
+const runWithSafeColorEnvironment = async (fn) => {
+  const originalGetComputedStyle = window.getComputedStyle;
+  const originalGetPropertyValue = CSSStyleDeclaration.prototype.getPropertyValue;
+
+  CSSStyleDeclaration.prototype.getPropertyValue = function(prop) {
+    const val = originalGetPropertyValue.call(this, prop);
+    return sanitizeColorValue(val);
+  };
+
+  window.getComputedStyle = function(el, pseudo) {
+    const style = originalGetComputedStyle.call(window, el, pseudo);
+    if (!style) return style;
+    return new Proxy(style, {
+      get(target, prop) {
+        try {
+          const originalVal = target[prop];
+          if (typeof originalVal === 'function') {
+            if (prop === 'getPropertyValue') {
+              return function(name) {
+                const v = target.getPropertyValue(name);
+                return sanitizeColorValue(v);
+              };
+            }
+            return originalVal.bind(target);
+          }
+          if (typeof originalVal === 'string') {
+            return sanitizeColorValue(originalVal);
+          }
+          return originalVal;
+        } catch {
+          return target[prop];
+        }
+      }
+    });
+  };
+
+  try {
+    return await fn();
+  } finally {
+    window.getComputedStyle = originalGetComputedStyle;
+    CSSStyleDeclaration.prototype.getPropertyValue = originalGetPropertyValue;
+  }
 };
 
 const sanitizeClonedDocument = (clonedDocument, width) => {
@@ -105,7 +156,7 @@ const sanitizeClonedDocument = (clonedDocument, width) => {
     const styleTags = clonedDocument.querySelectorAll('style');
     styleTags.forEach((style) => {
       if (style.textContent && (style.textContent.includes('color(') || style.textContent.includes('oklch') || style.textContent.includes('lab('))) {
-        style.textContent = cleanColorString(style.textContent);
+        style.textContent = sanitizeColorValue(style.textContent);
       }
     });
   } catch {}
@@ -166,12 +217,12 @@ const sanitizeClonedDocument = (clonedDocument, width) => {
       colorProps.forEach((prop) => {
         const inlineVal = node.style[prop];
         if (inlineVal && (inlineVal.includes('color(') || inlineVal.includes('oklch') || inlineVal.includes('color-mix') || inlineVal.includes('lab('))) {
-          node.style[prop] = cleanColorString(inlineVal);
+          node.style[prop] = sanitizeColorValue(inlineVal);
         }
       });
 
       if (node.style.boxShadow && (node.style.boxShadow.includes('color(') || node.style.boxShadow.includes('oklch'))) {
-        node.style.boxShadow = cleanColorString(node.style.boxShadow);
+        node.style.boxShadow = sanitizeColorValue(node.style.boxShadow);
       }
     } catch {}
   });
@@ -204,24 +255,24 @@ const renderExactPreview = async (root) => {
   root.appendChild(style);
 
   try {
-    const canvas = await withTimeout(html2canvas(root, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: false,
-      backgroundColor: '#ffffff',
-      imageTimeout: 10000,
-      logging: false,
-      scrollX: 0,
-      scrollY: 0,
-      width: width,
-      windowWidth: width,
-      removeContainer: true,
-      onclone: (clonedDocument) => {
-        sanitizeClonedDocument(clonedDocument, width);
-      },
-    }), EXPORT_TIMEOUT_MS, 'PDF/image export timed out. Please try again.');
-
-    return canvas;
+    return await runWithSafeColorEnvironment(async () => {
+      return await withTimeout(html2canvas(root, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff',
+        imageTimeout: 10000,
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        width: width,
+        windowWidth: width,
+        removeContainer: true,
+        onclone: (clonedDocument) => {
+          sanitizeClonedDocument(clonedDocument, width);
+        },
+      }), EXPORT_TIMEOUT_MS, 'PDF/image export timed out. Please try again.');
+    });
   } finally {
     style.remove();
     root.classList.remove(exportClass);
