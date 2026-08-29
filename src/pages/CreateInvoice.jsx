@@ -267,6 +267,8 @@ const CreateInvoice = ({
     customerName: billingTarget === 'staff' ? (staff?.name || 'Walk-in Staff') : (customer ? customer.name : 'Walk-in Customer'),
     customerPhone: billingTarget === 'staff' ? (staff?.phone || '') : (customer?.phone || ''),
     billingTarget,
+    selectedTemplate,
+    pdfTemplate: selectedTemplate,
     items: items.map(i => ({ 
       ...i, 
       description: i.name, 
@@ -274,6 +276,18 @@ const CreateInvoice = ({
       qty: parseFloat(i.qty) || 0, 
       amount: (parseFloat(i.qty) || 0) * (parseFloat(i.price) || 0) 
     })),
+    subtotal: totals.subtotal,
+    taxAmount: totals.tax,
+    discountAmount: totals.discount,
+    shipping: parseFloat(shipping) || 0,
+    grandTotal: totals.grandTotal,
+    oldDue: totals.oldDue,
+    totalDue: totals.totalReceivable,
+    totalReceivable: totals.totalReceivable,
+    amountPaid: totals.paidVal,
+    paidAmount: totals.paidVal,
+    balanceDue: totals.balanceDue,
+    paymentStatus: totals.paymentStatus,
     totals: { 
       ...totals, 
       tax: totals.tax, 
@@ -284,12 +298,28 @@ const CreateInvoice = ({
     notes,
     businessSettings: {
       ...draftBusinessSettings,
+      selectedPdfTemplate: selectedTemplate,
       bankDetails: { ...(draftBusinessSettings?.bankDetails || {}), ...bankDetails },
       upiId: bankDetails.upiId || draftBusinessSettings?.bankDetails?.upiId || draftBusinessSettings?.upiId
     },
+    regionalSettingsSnapshot: {
+      country: draftBusinessSettings?.country || 'India',
+      currency: draftBusinessSettings?.currency || '₹',
+      currencyCode: draftBusinessSettings?.currencyCode || 'INR',
+      numberFormat: draftBusinessSettings?.numberFormat || 'Indian',
+      dateFormat: draftBusinessSettings?.dateFormat || 'DD/MM/YYYY'
+    },
+    paymentSettingsSnapshot: {
+      paymentMethod,
+      upiId: bankDetails.upiId || draftBusinessSettings?.bankDetails?.upiId || draftBusinessSettings?.upiId || '',
+      bkashNumber: draftBusinessSettings?.bkashNumber || '',
+      nagadNumber: draftBusinessSettings?.nagadNumber || '',
+      payeeName: draftBusinessSettings?.payeeName || draftBusinessSettings?.businessName || ''
+    },
+    currencySymbol: draftBusinessSettings?.currency || '₹',
     invoiceColumns,
     qrCodeBase64: previewQrCode
-  }), [invoiceNumber, date, customer, staff, billingTarget, items, totals, notes, draftBusinessSettings, bankDetails, invoiceColumns, previewQrCode]);
+  }), [invoiceNumber, date, customer, staff, billingTarget, selectedTemplate, items, shipping, totals, notes, draftBusinessSettings, bankDetails, paymentMethod, invoiceColumns, previewQrCode]);
 
   const handleAddItem = () => {
     const sNo = items.length > 0 ? (parseInt(items[items.length-1].sNo) + 1).toString() : '1';
@@ -468,6 +498,7 @@ const CreateInvoice = ({
         customFields: i.customFields || {}
       })),
       selectedTemplate,
+      pdfTemplate: selectedTemplate,
       invoiceColumns
     };
     

@@ -1499,7 +1499,8 @@ function App() {
 
   // --- PDF GENERATOR WORKER ---
   const handleDownloadPDF = async (invoice) => {
-    if (!settings || !settings.businessName) {
+    const effectiveSettings = activeSettings || settings;
+    if (!effectiveSettings || !effectiveSettings.businessName) {
       toast.error('⚠️ Business settings are incomplete. Please complete your business settings first.');
       setCurrentTab('settings');
       return;
@@ -1507,7 +1508,7 @@ function App() {
     try {
       const { downloadInvoicePDF } = await import('./utils/pdfUtils');
       const isPremium = subscription.status === 'premium';
-      const ok = await downloadInvoicePDF(invoice, settings, isPremium);
+      const ok = await downloadInvoicePDF(invoice, effectiveSettings, isPremium);
       if (ok) {
         sendEmpireEvent({
           eventType: "pdf_downloaded",
@@ -1529,14 +1530,15 @@ function App() {
 
   // --- IMAGE GENERATOR WORKER ---
   const handleDownloadImage = async (invoice) => {
-    if (!settings || !settings.businessName) {
+    const effectiveSettings = activeSettings || settings;
+    if (!effectiveSettings || !effectiveSettings.businessName) {
       toast.error('⚠️ Business settings are incomplete. Please complete your business settings first.');
       setCurrentTab('settings');
       return;
     }
     try {
       const { downloadInvoiceImage } = await import('./utils/pdfUtils');
-      const ok = await downloadInvoiceImage(invoice, settings);
+      const ok = await downloadInvoiceImage(invoice, effectiveSettings);
       if (ok) {
         sendEmpireEvent({
           eventType: "image_downloaded",

@@ -1,6 +1,6 @@
-import { getTemplateLayoutFamily } from '../services/TemplateEngine';
-import { getCategoryWording } from '../config/businessPresets';
-import { calculateCanonicalInvoiceFinancials } from './invoiceMath';
+import { getTemplateLayoutFamily } from '../services/TemplateEngine.js';
+import { getCategoryWording } from '../config/businessPresets.js';
+import { calculateCanonicalInvoiceFinancials } from './invoiceMath.js';
 
 /**
  * Normalizes invoice data and business settings into a single canonical render model.

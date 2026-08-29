@@ -118,8 +118,7 @@ const sanitizeClonedColors = (clonedDocument) => {
 const renderExactPreview = async (root) => {
   await waitForAssets(root);
   await nextPaint();
-
-  const width = Math.max(root.scrollWidth, root.offsetWidth, root.clientWidth, A4_CSS_WIDTH);
+  const width = A4_CSS_WIDTH;
   const height = Math.max(root.scrollHeight, root.offsetHeight, root.clientHeight, A4_CSS_HEIGHT);
   if (!width || !height) throw new Error('Invoice preview has no printable content.');
   if (height > MAX_CAPTURE_HEIGHT) throw new Error('Invoice is too long to export safely.');
@@ -128,7 +127,16 @@ const renderExactPreview = async (root) => {
   root.classList.add(exportClass);
   const style = document.createElement('style');
   style.textContent = `
-    .${exportClass}, .${exportClass} * { animation: none !important; transition: none !important; caret-color: transparent !important; }
+    .${exportClass}, .${exportClass} * { 
+      animation: none !important; 
+      transition: none !important; 
+      caret-color: transparent !important;
+      font-family: 'Inter', 'Noto Sans Bengali', 'Hind Siliguri', system-ui, -apple-system, sans-serif !important;
+      font-variant-ligatures: normal !important;
+      font-feature-settings: normal !important;
+      text-rendering: geometricPrecision !important;
+      -webkit-font-smoothing: antialiased !important;
+    }
     .${exportClass} img { max-width: 100%; object-fit: contain; }
   `;
   root.appendChild(style);
@@ -139,19 +147,51 @@ const renderExactPreview = async (root) => {
       useCORS: true,
       allowTaint: false,
       backgroundColor: '#ffffff',
-      imageTimeout: 8000,
+      imageTimeout: 10000,
       logging: false,
       scrollX: 0,
       scrollY: 0,
       width: A4_CSS_WIDTH,
-      windowWidth: 1200,
+      windowWidth: A4_CSS_WIDTH, // Matches exact A4 layout width preventing horizontal offset
       removeContainer: true,
       onclone: (clonedDocument) => {
         sanitizeClonedColors(clonedDocument);
+
+        // Normalize cloned document body and host container to eliminate margin shifts
+        if (clonedDocument.documentElement) {
+          clonedDocument.documentElement.style.margin = '0';
+          clonedDocument.documentElement.style.padding = '0';
+          clonedDocument.documentElement.style.width = `${A4_CSS_WIDTH}px`;
+          clonedDocument.documentElement.style.background = '#ffffff';
+        }
+        if (clonedDocument.body) {
+          clonedDocument.body.style.margin = '0';
+          clonedDocument.body.style.padding = '0';
+          clonedDocument.body.style.width = `${A4_CSS_WIDTH}px`;
+          clonedDocument.body.style.minWidth = `${A4_CSS_WIDTH}px`;
+          clonedDocument.body.style.maxWidth = `${A4_CSS_WIDTH}px`;
+          clonedDocument.body.style.background = '#ffffff';
+          clonedDocument.body.style.fontFamily = "'Inter', 'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif";
+        }
+
+        const clonedHost = clonedDocument.querySelector('[data-invoice-export-host="true"]');
+        if (clonedHost) {
+          clonedHost.style.position = 'static';
+          clonedHost.style.left = '0';
+          clonedHost.style.top = '0';
+          clonedHost.style.width = `${A4_CSS_WIDTH}px`;
+          clonedHost.style.margin = '0';
+          clonedHost.style.padding = '0';
+        }
+
         const clonedRoot = clonedDocument.querySelector('#invoice-preview-capture');
         if (clonedRoot) {
           clonedRoot.style.width = `${A4_CSS_WIDTH}px`;
-          clonedRoot.style.minHeight = `${A4_CSS_HEIGHT}px`;
+          clonedRoot.style.minWidth = `${A4_CSS_WIDTH}px`;
+          clonedRoot.style.maxWidth = `${A4_CSS_WIDTH}px`;
+          clonedRoot.style.margin = '0 auto';
+          clonedRoot.style.boxSizing = 'border-box';
+          clonedRoot.style.fontFamily = "'Inter', 'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif";
           clonedRoot.querySelectorAll('*').forEach((node) => {
             if (node instanceof HTMLElement) {
               node.style.animation = 'none';
@@ -242,15 +282,14 @@ const canvasToPdfBlob = (canvas, root) => {
     pageCanvas.height = sourceHeight;
     const ctx = pageCanvas.getContext('2d', { alpha: false });
     if (!ctx) throw new Error('PDF canvas could not be created.');
-
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
     ctx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
 
     if (page > 0) pdf.addPage();
+    const renderedHeightOnPdf = (sourceHeight / canvas.width) * pageWidth;
     const image = pageCanvas.toDataURL('image/jpeg', 0.92);
-    const renderedHeight = Math.min(pageHeight, (sourceHeight / canvas.width) * pageWidth);
-    pdf.addImage(image, 'JPEG', 0, 0, pageWidth, renderedHeight, undefined, 'FAST');
+    pdf.addImage(image, 'JPEG', 0, 0, pageWidth, renderedHeightOnPdf, undefined, 'FAST');
     pageCanvas.width = 1;
     pageCanvas.height = 1;
   }
