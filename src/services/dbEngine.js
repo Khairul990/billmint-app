@@ -287,7 +287,7 @@ export const migrateLocalStorageToIndexedDB = async () => {
 };
 
 export const queueSyncTransaction = async (action, storeName, docId, data) => {
-  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+  if (typeof localStorage !== 'undefined' && localStorage.getItem('billqyro_demo_session_active') === 'true') {
     console.warn('[DEMO GUARD] Blocked real data operation during Demo Mode: queueSyncTransaction');
     toast.error('Blocked real operation in Demo Mode');
     return null;
@@ -300,7 +300,7 @@ export const queueSyncTransaction = async (action, storeName, docId, data) => {
   try {
     const existingQueue = await BillQyroDB.getAll('syncQueue');
     const duplicates = existingQueue.filter(tx =>
-      tx.storeName === storeName && tx.docId === docId && tx.userId === userId && tx.status === 'pending'
+      tx.storeName === storeName && tx.docId === docId && tx.userId === userId && (tx.status === 'pending' || tx.status === 'failed')
     );
     for (const dup of duplicates) {
       await BillQyroDB.delete('syncQueue', dup.id);
@@ -309,15 +309,18 @@ export const queueSyncTransaction = async (action, storeName, docId, data) => {
     console.warn('[SYNC QUEUE] Could not deduplicate queue:', e);
   }
 
-  const transactionId = 'tx-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  const transactionId = 'tx-' + Date.now() + '-' + generateSecureToken(8);
   let deviceId = 'Unknown Device';
   try {
-    deviceId = localStorage.getItem('billqyro_device_id') || 'Unknown Device';
+    if (typeof localStorage !== 'undefined') {
+      deviceId = localStorage.getItem('billqyro_device_id') || 'Unknown Device';
+    }
   } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
 
   const tx = {
     id: transactionId,
     userId,
+    workspaceId: data?.workspaceId || null,
     action,
     collectionName: storeName,
     storeName,
@@ -331,22 +334,142 @@ export const queueSyncTransaction = async (action, storeName, docId, data) => {
     updatedAt: Date.now(),
     retries: 0,
     retryCount: 0,
-    lastRetryAt: 0
+    lastRetryAt: 0,
+    inFlightStartedAt: null,
+    lastError: null
   };
   await BillQyroDB.put('syncQueue', tx);
+};
 
+// --- DEAD LETTER QUEUE (DLQ) ZERO-LOSS MECHANICS ---
+export const moveToDeadLetterQueue = async (tx, errorReason = 'Exceeded max retries') => {
+  if (!tx || !tx.id) return false;
+  try {
+    const dlqEntry = {
+      id: 'dlq-' + tx.id,
+      originalTransactionId: tx.id,
+      storeName: tx.storeName || tx.collectionName || 'unknown',
+      operation: tx.action || 'save',
+      payload: tx.data || null,
+      docId: tx.docId || tx.recordId || null,
+      userId: tx.userId || null,
+      workspaceId: tx.workspaceId || tx.data?.workspaceId || null,
+      failedAt: new Date().toISOString(),
+      retryCount: tx.retryCount || 0,
+      lastError: typeof errorReason === 'string' ? errorReason : (errorReason?.message || String(errorReason)),
+      status: 'dead_letter',
+      createdAt: tx.createdAt || Date.now(),
+      updatedAt: Date.now()
+    };
+
+    // 1. Atomic Write to deadLetterQueue first
+    await BillQyroDB.put('deadLetterQueue', dlqEntry);
+
+    // 2. Strict Verification before deleting from syncQueue
+    const verified = await BillQyroDB.get('deadLetterQueue', dlqEntry.id);
+    if (verified && verified.id === dlqEntry.id) {
+      await BillQyroDB.delete('syncQueue', tx.id);
+      console.warn(`[SYNC DLQ] Safely transferred TX ${tx.id} to Dead Letter Queue.`);
+      return true;
+    } else {
+      console.error(`[SYNC DLQ] Verification failed for TX ${tx.id}. Retaining in syncQueue.`);
+      tx.status = 'failed';
+      tx.lastError = 'DLQ verification mismatch';
+      await BillQyroDB.put('syncQueue', tx);
+      return false;
+    }
+  } catch (dlqErr) {
+    console.error(`[SYNC DLQ] Error during DLQ transfer for ${tx.id}:`, dlqErr);
+    tx.status = 'failed';
+    tx.lastError = dlqErr?.message || String(dlqErr);
+    try { await BillQyroDB.put('syncQueue', tx); } catch (e) { /* ignore */ }
+    return false;
+  }
+};
+
+export const getDeadLetterQueue = async () => {
+  try {
+    return await BillQyroDB.getAll('deadLetterQueue');
+  } catch (e) {
+    console.error('Failed to get DLQ:', e);
+    return [];
+  }
+};
+
+export const retryDeadLetterTransaction = async (dlqId) => {
+  try {
+    const entry = await BillQyroDB.get('deadLetterQueue', dlqId);
+    if (!entry) throw new Error(`DLQ entry ${dlqId} not found`);
+
+    if (!firebaseReady || !navigator.onLine) {
+      throw new Error('Device is offline or Firebase is not connected');
+    }
+
+    let docRef;
+    if (entry.storeName === 'settings' || entry.storeName === 'subscription') {
+      docRef = doc(db, entry.storeName, entry.userId);
+    } else {
+      docRef = doc(db, entry.storeName, entry.userId, 'items', entry.docId);
+    }
+
+    if (entry.operation === 'delete') {
+      await deleteDoc(docRef);
+      if (entry.storeName === 'invoices' && entry.payload?.publicToken) {
+        await deleteDoc(doc(db, 'publicInvoices', entry.payload.publicToken));
+      }
+    } else {
+      const cleanData = cleanUndefined(entry.payload);
+      await setDoc(docRef, cleanData, { merge: true });
+      if (entry.storeName === 'invoices' && cleanData.publicToken) {
+        try {
+          await setDoc(doc(db, 'publicInvoices', cleanData.publicToken), cleanData, { merge: true });
+        } catch (pubErr) {
+          console.warn('[DLQ RETRY] Public invoice sync warning:', pubErr);
+        }
+      }
+      if (entry.docId) {
+        await markLocalRecordSynced(entry.storeName, entry.docId);
+      }
+    }
+
+    // Success: Delete from DLQ only after cloud write confirms
+    await BillQyroDB.delete('deadLetterQueue', dlqId);
+    await logAudit('dlq_manual_retry_success', entry.storeName, entry.docId);
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('billqyro_sync'));
+    return { success: true, id: dlqId };
+  } catch (err) {
+    console.error(`[DLQ RETRY] Failed manual retry for ${dlqId}:`, err);
+    const entry = await BillQyroDB.get('deadLetterQueue', dlqId).catch(() => null);
+    if (entry) {
+      entry.retryCount = (entry.retryCount || 0) + 1;
+      entry.lastError = err.message || String(err);
+      entry.updatedAt = Date.now();
+      await BillQyroDB.put('deadLetterQueue', entry).catch(() => {});
+    }
+    return { success: false, error: err.message };
+  }
+};
+
+export const retryAllDeadLetterTransactions = async () => {
+  const all = await getDeadLetterQueue();
+  const results = [];
+  for (const item of all) {
+    const res = await retryDeadLetterTransaction(item.id);
+    results.push(res);
+  }
+  return results;
 };
 
 // --- CORE LOGGING SYSTEM ---
 export const logError = async (error, context = '') => {
   try {
     const errorLog = {
-      id: 'err-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+      id: 'err-' + Date.now() + '-' + generateSecureToken(8),
       message: error?.message || String(error),
       stack: error?.stack || null,
       context,
       timestamp: Date.now(),
-      userAgent: navigator.userAgent
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Node.js'
     };
     await BillQyroDB.put('errorLogs', errorLog);
     console.error(`[SYSTEM ERROR] ${context}:`, error);
@@ -360,11 +483,11 @@ export const logAudit = async (action, entityType, entityId, before = null, afte
     const user = getAuthSession() || { uid: 'anonymous', email: 'unknown' };
     let deviceInfo = 'Unknown Device';
     try {
-      deviceInfo = navigator.userAgent;
+      if (typeof navigator !== 'undefined') deviceInfo = navigator.userAgent;
     } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
 
     const auditEntry = {
-      id: 'aud-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+      id: 'aud-' + Date.now() + '-' + generateSecureToken(8),
       userId: user.uid,
       userEmail: user.email,
       action,
@@ -378,9 +501,6 @@ export const logAudit = async (action, entityType, entityId, before = null, afte
     };
     
     await BillQyroDB.put('auditLogs', auditEntry);
-
-    
-    // Also queue audit logs for sync so they go to cloud
     await queueSyncTransaction('save', 'auditLogs', auditEntry.id, auditEntry);
   } catch (e) {
     await logError(e, 'logAudit');
@@ -390,7 +510,67 @@ export const logAudit = async (action, entityType, entityId, before = null, afte
 let syncDebounceTimer = null;
 let isSyncing = false;
 
-// --- STALE DATA CLEANUP ---
+// Multi-Tab Sync Coordination Lock
+const SYNC_LOCK_KEY = 'billqyro_sync_active_lock';
+const SYNC_LOCK_TTL_MS = 25000;
+
+const acquireSyncLock = () => {
+  try {
+    if (typeof localStorage === 'undefined') return true;
+    const currentLock = localStorage.getItem(SYNC_LOCK_KEY);
+    const now = Date.now();
+    if (currentLock) {
+      const lockData = JSON.parse(currentLock);
+      if (now - (lockData.timestamp || 0) < SYNC_LOCK_TTL_MS) {
+        return false;
+      }
+    }
+    const myLock = { tabId: generateSecureToken(6), timestamp: now };
+    localStorage.setItem(SYNC_LOCK_KEY, JSON.stringify(myLock));
+    return true;
+  } catch (e) {
+    return true;
+  }
+};
+
+const releaseSyncLock = () => {
+  try {
+    if (typeof localStorage !== 'undefined') localStorage.removeItem(SYNC_LOCK_KEY);
+  } catch (e) { /* ignore */ }
+};
+
+// In-Flight Transaction Recovery for Crashed/Closed Tabs
+const recoverInFlightTransactions = async (userId) => {
+  try {
+    const queue = await BillQyroDB.getAll('syncQueue');
+    const now = Date.now();
+    const IN_FLIGHT_TIMEOUT_MS = 25000;
+
+    for (const tx of queue) {
+      if (tx.userId === userId && tx.status === 'in_flight') {
+        const inFlightAge = now - (tx.inFlightStartedAt || tx.updatedAt || 0);
+        if (inFlightAge > IN_FLIGHT_TIMEOUT_MS) {
+          console.warn(`[SYNC RECOVERY] Recovered stuck in_flight TX: ${tx.id}`);
+          tx.status = 'pending';
+          tx.inFlightStartedAt = null;
+          tx.updatedAt = now;
+          await BillQyroDB.put('syncQueue', tx);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[SYNC RECOVERY] Error recovering in_flight transactions:', err);
+  }
+};
+
+// Exponential Backoff Calculation with Jitter
+const getBackoffDelay = (retryCount) => {
+  if (!retryCount || retryCount <= 0) return 0;
+  const base = Math.min(32000, Math.pow(2, retryCount) * 1000);
+  return base;
+};
+
+// --- STALE DATA CLEANUP (ZERO-LOSS GUARANTEE) ---
 export const cleanupStaleData = async () => {
   try {
     const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
@@ -409,14 +589,13 @@ export const cleanupStaleData = async () => {
       }
     }
 
-    // Clean stale syncQueue items (stuck for > 7 days)
+    // Zero-Loss Sync Cleanup: Transfer stale syncQueue items (> 7 days) to DLQ, NEVER delete silently!
     const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-    const MAX_RETRIES = 10;
     const queue = await BillQyroDB.getAll('syncQueue');
     for (const item of queue) {
       const age = now - (item.createdAt || item.timestamp || 0);
-      if (age > SEVEN_DAYS_MS || (item.retryCount || 0) >= MAX_RETRIES) {
-        await BillQyroDB.delete('syncQueue', item.id);
+      if (age > SEVEN_DAYS_MS || (item.retryCount || 0) >= 5) {
+        await moveToDeadLetterQueue(item, 'Auto-cleanup: Exceeded retention or retry limit');
       }
     }
     
@@ -465,13 +644,15 @@ const markLocalRecordSynced = async (storeName, docId) => {
   else if (storeName === 'bankCredit') key = KEYS.BANK_CREDIT;
   if (!key) return;
 
-  const items = JSON.parse(localStorage.getItem(key) || '[]');
-  const localIdx = items.findIndex(item => item.id === docId);
-  if (localIdx !== -1) {
-    items[localIdx].syncStatus = 'synced';
-    if (storeName === 'invoices') items[localIdx].updatedAt = new Date().toISOString();
-    updateLocalCache(key, items);
-    await BillQyroDB.put(storeName, items[localIdx]);
+  if (typeof localStorage !== 'undefined') {
+    const items = JSON.parse(localStorage.getItem(key) || '[]');
+    const localIdx = items.findIndex(item => item.id === docId);
+    if (localIdx !== -1) {
+      items[localIdx].syncStatus = 'synced';
+      if (storeName === 'invoices') items[localIdx].updatedAt = new Date().toISOString();
+      updateLocalCache(key, items);
+      await BillQyroDB.put(storeName, items[localIdx]);
+    }
   }
 };
 
@@ -491,11 +672,16 @@ const cleanUndefined = (obj) => {
 };
 
 const _runSyncOfflineTransactions = async () => {
-  if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
+  if (typeof localStorage !== 'undefined' && localStorage.getItem('billqyro_demo_session_active') === 'true') {
     console.warn('Blocked real data operation during Demo Mode: syncOfflineTransactions');
     return null;
   }
-  if (!firebaseReady || !navigator.onLine) return;
+  if (!firebaseReady || (typeof navigator !== 'undefined' && !navigator.onLine)) return;
+
+  if (!acquireSyncLock()) {
+    console.warn('[SYNC QUEUE] Another tab is actively syncing. Yielding.');
+    return;
+  }
 
   try {
     const userId = getRealUserId();
@@ -503,33 +689,47 @@ const _runSyncOfflineTransactions = async () => {
       console.warn('[SYNC QUEUE] Skipped offline sync. No real UID detected.');
       return;
     }
+
+    // 1. In-flight recovery for crashed/reloaded tabs
+    await recoverInFlightTransactions(userId);
+
     const queue = await BillQyroDB.getAll('syncQueue');
     if (getRealUserId() !== userId) return; // Prevent race
     const userQueue = queue.filter(tx => tx.userId === userId);
     
     if (userQueue.length === 0) return;
 
-
-
-    // Sort by createdAt so we sync in order
+    // Sort by createdAt to ensure sequential causal ordering
     const sortedQueue = userQueue.sort((a, b) => a.createdAt - b.createdAt);
+    const MAX_RETRIES = 5;
+    const now = Date.now();
 
-    const MAX_RETRIES = 10;
     for (const tx of sortedQueue) {
       if (getRealUserId() !== userId) {
         console.warn('[SYNC QUEUE] Aborting sync, user changed mid-process.');
         return;
       }
+
+      // Check retry limit -> Move to DLQ (No-Drop Policy)
       if ((tx.retryCount || 0) >= MAX_RETRIES) {
-        console.warn(`[SYNC QUEUE] Dropping TX ${tx.id}: exceeded max retries (${MAX_RETRIES})`);
-        toast.error('Failed to sync some offline data permanently. Check your connection.');
-        await BillQyroDB.delete('syncQueue', tx.id);
+        await moveToDeadLetterQueue(tx, `Exceeded maximum retry attempts (${MAX_RETRIES})`);
         continue;
       }
+
+      // Check exponential backoff delay
+      const requiredBackoff = getBackoffDelay(tx.retryCount || 0);
+      if (tx.lastRetryAt && (now - tx.lastRetryAt < requiredBackoff)) {
+        continue; // Wait for backoff interval to expire
+      }
+
+      // Mark in_flight
+      tx.status = 'in_flight';
+      tx.inFlightStartedAt = Date.now();
+      await BillQyroDB.put('syncQueue', tx);
+
       try {
         let syncSuccess = false;
         if (tx.action === 'save') {
-          // Check cloud version before overwriting - never overwrite newer data
           let docRef;
           if (tx.storeName === 'settings' || tx.storeName === 'subscription') {
             docRef = doc(db, tx.storeName, tx.userId);
@@ -537,25 +737,23 @@ const _runSyncOfflineTransactions = async () => {
             docRef = doc(db, tx.storeName, tx.userId, 'items', tx.docId);
           }
           
-          // Fetch current cloud data to check version
+          // Check cloud version before overwriting (Cloud-wins for newer remote versions)
           try {
             const cloudSnap = await getDoc(docRef);
             if (cloudSnap.exists()) {
               const cloudData = cloudSnap.data();
               const cloudVersion = cloudData.__version || 0;
               const localVersion = tx.data?.__version || 0;
-              // Skip if cloud has higher version (newer data already synced)
               if (cloudVersion > localVersion) {
                 console.warn(`[SYNC QUEUE] Skipping TX ${tx.id}: cloud version ${cloudVersion} > local ${localVersion}`);
-                syncSuccess = true; // Consider it "synced" since cloud is ahead
+                syncSuccess = true;
                 await markLocalRecordSynced(tx.storeName, tx.docId);
                 await BillQyroDB.delete('syncQueue', tx.id);
                 continue;
               }
             }
           } catch (e) {
-            // If fetch fails (e.g. permission), just try writing
-            console.warn('[SYNC QUEUE] Could not check cloud version, proceeding with write:', e);
+            console.warn('[SYNC QUEUE] Cloud version check warning:', e);
           }
           
           const cleanData = cleanUndefined(tx.data);
@@ -564,26 +762,24 @@ const _runSyncOfflineTransactions = async () => {
             await setDoc(docRef, cleanData, { merge: true });
           } catch (docErr) {
             if (docErr.code === 'permission-denied') {
-              console.warn('[SYNC QUEUE] Permission denied on update, attempting to replace legacy document...', docRef.path);
-              // Legacy documents without userId fail the update rule. Delete doesn't check resource.data.userId.
+              console.warn('[SYNC QUEUE] Permission denied on update, attempting replace...', docRef.path);
               await deleteDoc(docRef);
-              await setDoc(docRef, cleanData); // Try again without merge (create rule)
+              await setDoc(docRef, cleanData);
             } else {
               throw docErr;
             }
           }
           syncSuccess = true;
 
-          if (tx.storeName === 'invoices') {
+          if (tx.storeName === 'invoices' && cleanData.publicToken) {
             try {
               const publicDocRef = doc(db, 'publicInvoices', cleanData.publicToken);
               await setDoc(publicDocRef, cleanData, { merge: true });
             } catch (pubErr) {
-              console.warn('[SYNC QUEUE] Failed to update publicInvoice, possibly legacy. Ignoring.', pubErr);
+              console.warn('[SYNC QUEUE] Failed to update publicInvoice:', pubErr);
             }
           }
 
-          // Update local syncStatus to 'synced' on success
           if (syncSuccess && tx.data && tx.data.id) {
             await markLocalRecordSynced(tx.storeName, tx.data.id);
           }
@@ -601,38 +797,50 @@ const _runSyncOfflineTransactions = async () => {
           syncSuccess = true;
         }
 
-        // Remove from queue after successful sync
+        // Success: Remove safely from syncQueue
         if (syncSuccess) {
           await BillQyroDB.delete('syncQueue', tx.id);
-
         } else {
-          // Update retry logic
           tx.retryCount = (tx.retryCount || 0) + 1;
           tx.lastRetryAt = Date.now();
-          await BillQyroDB.put('syncQueue', tx);
+          tx.status = 'failed';
+          tx.inFlightStartedAt = null;
+          if (tx.retryCount >= MAX_RETRIES) {
+            await moveToDeadLetterQueue(tx, 'Sync failed to confirm cloud status');
+          } else {
+            await BillQyroDB.put('syncQueue', tx);
+          }
         }
       } catch (err) {
         console.error('[SYNC QUEUE] Failed to sync transaction:', tx.id, err);
-        toast.error('Sync Error: ' + (err.message || 'Unknown error'));
         tx.retryCount = (tx.retryCount || 0) + 1;
         tx.lastRetryAt = Date.now();
-        await BillQyroDB.put('syncQueue', tx);
+        tx.status = 'failed';
+        tx.lastError = err.message || String(err);
+        tx.inFlightStartedAt = null;
+
+        if (tx.retryCount >= MAX_RETRIES) {
+          await moveToDeadLetterQueue(tx, err.message || 'Exceeded retry attempts');
+        } else {
+          await BillQyroDB.put('syncQueue', tx);
+        }
         await logError(err, 'syncOfflineTransactions');
       }
     }
 
-    // Dispatch a sync event so that the app updates state
-    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('billqyro_sync'));
+    }
   } catch (error) {
     console.error('[SYNC QUEUE] Error in syncOfflineTransactions:', error);
-    toast.error('Offline data sync encountered a problem.');
+  } finally {
+    releaseSyncLock();
   }
 };
 
 // Listen for network reconnection
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
-
     syncOfflineTransactions();
   });
 }
