@@ -1,0 +1,26 @@
+/*
+ * Android WebView performance layer.
+ * Only activates inside the native Android build; web/PWA styling is untouched.
+ */
+html[data-billqyro-platform="android"] {
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeSpeed;
+}
+
+/* Backdrop blur is one of the most expensive recurring effects on mobile GPUs. */
+html[data-billqyro-platform="android"] [style*="backdrop-filter"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* On lower-memory / lower-core devices, also remove animated CSS filter work. */
+html[data-billqyro-platform="android"][data-billqyro-low-end="true"] [style*="filter"] {
+  filter: none !important;
+}
+
+/* Avoid hover-only visual work on touch devices. */
+@media (hover: none) {
+  html[data-billqyro-platform="android"] .group:hover .group-hover\:translate-x-full {
+    transform: none !important;
+  }
+}
