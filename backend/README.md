@@ -87,6 +87,24 @@ This enforces strict database-level mathematical tenant isolation independently 
 - `GET /api/v1/expenses` — Paginated list of expenses with category and date filtering
 - `POST /api/v1/bank-ledger` — Record bank income or expense transaction
 - `GET /api/v1/bank-ledger` — Paginated list of bank ledger entries with type filtering
+- `POST /api/v1/products` — Create product with inventory and tax details
+- `GET /api/v1/products` — Paginated list of products with search, SKU, and lowStock filtering
+- `GET /api/v1/products/:id` — Product detail with low-stock status
+- `PATCH /api/v1/products/:id` — Update product details and inventory
+- `DELETE /api/v1/products/:id` — Soft-delete product
+- `GET /api/v1/reports/dashboard` — Dashboard revenue, invoice counts, expenses, and net summary
+- `GET /api/v1/reports/sales` — Filterable sales and invoice reporting
+- `GET /api/v1/reports/payments` — Aggregated payment totals & paginated payment history
+- `GET /api/v1/reports/expenses` — Total expenses & category-wise breakdown
+- `GET /api/v1/reports/bank-ledger` — Bank cashflow report (Income/Expense/Net balance)
+- `POST /api/v1/sync/batch` — Idempotent offline batch mutation engine
+- `GET /api/v1/notifications` — Notification activity center
+- `POST /api/v1/notifications/:id/read` — Mark notification as read
+- `POST /api/v1/notifications/read-all` — Mark all workspace notifications as read
+- `GET /api/v1/notifications/unread-count` — Unread notification count
+- `POST /api/v1/backups/export` — Trigger workspace data snapshot export
+- `GET /api/v1/backups` — List previous export jobs
+- `GET /api/v1/backups/:id` — Get export status and signed download URL
 
 ### Public Endpoints (Unauthenticated):
 - `GET /api/v1/public/invoices/:token` — Secure public invoice retrieval via cryptographic token (strips internal UUIDs/notes)
