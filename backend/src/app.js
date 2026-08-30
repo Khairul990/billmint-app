@@ -19,6 +19,7 @@ import { reportRouter } from './modules/reports/reportRoutes.js';
 import { syncRouter } from './modules/sync/syncRoutes.js';
 import { notificationRouter } from './modules/notifications/notificationRoutes.js';
 import { backupRouter } from './modules/backups/backupRoutes.js';
+import { backfillRouter } from './modules/backfill/backfillRoutes.js';
 
 // Native Security Headers (Zero-dependency Helmet equivalent)
 export const securityHeadersMiddleware = (req, res, next) => {
@@ -75,6 +76,7 @@ export const createApp = () => {
   app.use(`${config.apiPrefix}/sync`, syncRouter);
   app.use(`${config.apiPrefix}/notifications`, notificationRouter);
   app.use(`${config.apiPrefix}/backups`, backupRouter);
+  app.use(`${config.apiPrefix}/backfill`, backfillRouter);
 
   // 4. 404 Not Found Handler (Express 5 compatible)
   app.use((req, res) => {

@@ -29,10 +29,10 @@ const test = async (desc, fn) => {
 // 1. MIGRATIONS INTEGRITY AUDIT (001 - 008)
 // ============================================================================
 
-await test('1.1 Migrations: All 8 migrations exist in backend/migrations in strict sequence', () => {
+await test('1.1 Migrations: All migrations exist in backend/migrations in strict sequence', () => {
   const migrationsDir = 'backend/migrations';
   const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
-  assert.strictEqual(files.length, 8);
+  assert.strictEqual(files.length, 9);
   assert.strictEqual(files[0], '001_initial_schema.sql');
   assert.strictEqual(files[1], '002_payment_indexes.sql');
   assert.strictEqual(files[2], '003_pdf_storage_indexes.sql');
@@ -41,6 +41,7 @@ await test('1.1 Migrations: All 8 migrations exist in backend/migrations in stri
   assert.strictEqual(files[5], '006_products_inventory.sql');
   assert.strictEqual(files[6], '007_notifications.sql');
   assert.strictEqual(files[7], '008_backup_jobs.sql');
+  assert.strictEqual(files[8], '009_backfill_jobs.sql');
 });
 
 await test('1.2 Migrations: Migrations define necessary multi-tenant tables and indexes', () => {
@@ -60,6 +61,10 @@ await test('1.2 Migrations: Migrations define necessary multi-tenant tables and 
   const m8 = fs.readFileSync('backend/migrations/008_backup_jobs.sql', 'utf8');
   assert.ok(m8.includes('CREATE TABLE IF NOT EXISTS backup_jobs'));
   assert.ok(m8.includes('idx_backup_jobs_workspace'));
+
+  const m9 = fs.readFileSync('backend/migrations/009_backfill_jobs.sql', 'utf8');
+  assert.ok(m9.includes('CREATE TABLE IF NOT EXISTS backfill_jobs'));
+  assert.ok(m9.includes('idx_backfill_jobs_workspace'));
 });
 
 // ============================================================================
