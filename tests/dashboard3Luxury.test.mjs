@@ -48,7 +48,7 @@ const currentMonthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).pa
 
 await test('1.1 Dashboard 3.0 Source: Contains executive financial cockpit and animated prefix/suffix engine', () => {
   const code = fs.readFileSync('src/pages/Dashboard.jsx', 'utf-8');
-  assert.ok(code.includes('Monthly Revenue Volume'), 'Must define Monthly Revenue Volume anchor');
+  assert.ok(code.includes('Month Revenue'), 'Must define Month Revenue anchor');
   assert.ok(code.includes('AnimatedNumber'), 'Must include AnimatedNumber engine');
   assert.ok(code.includes('dueAging'), 'Must compute dueAging breakdown');
 });
