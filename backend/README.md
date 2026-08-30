@@ -78,6 +78,13 @@ This enforces strict database-level mathematical tenant isolation independently 
 - `GET /api/v1/invoices/:id/pdf` — Retrieve cached immutable PDF or generate deterministically
 - `POST /api/v1/payments` — Record immutable payment with row-level lock and audit log
 - `GET /api/v1/payments` — Paginated list of payment ledger history
+- `POST /api/v1/vendors` — Create vendor with workspace isolation
+- `GET /api/v1/vendors` — Paginated list of vendors with search filtering
+- `GET /api/v1/vendors/:id/ledger` — Vendor statement with jobs, payments, and server-side due balance
+- `POST /api/v1/outsource-jobs` — Assign outsource job linked to vendor and invoice
+- `GET /api/v1/outsource-jobs` — Paginated list of outsource jobs with vendor/invoice/status filters
+- `PATCH /api/v1/outsource-jobs/:id` — Update outsource job status (Pending/In Progress/Completed) & cost
+- `POST /api/v1/vendor-payments` — Record payment to vendor with idempotency check
 
 ### Public Endpoints (Unauthenticated):
 - `GET /api/v1/public/invoices/:token` — Secure public invoice retrieval via cryptographic token (strips internal UUIDs/notes)
