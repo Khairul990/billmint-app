@@ -7,7 +7,8 @@ import {
   CheckCircle, TrendingUp, TrendingDown,
   BarChart3, RefreshCw, Eye, Download,
   AlertTriangle, ChevronRight, ChevronDown, Building2,
-  Layers, ArrowUpRight, ArrowDownRight, Wallet, Activity, ShieldAlert
+  Layers, ArrowUpRight, ArrowDownRight, Wallet, Activity, ShieldAlert,
+  Calendar, PieChart as PieIcon
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid } from 'recharts';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -23,53 +24,61 @@ import { getInvoicePaidTotal, getInvoiceBalanceDue, getInvoicePaymentStatus } fr
 
 const AnimatedNumber = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(null);
-  const strValue = String(value);
-  const numericPart = strValue.replace(/[^0-9.-]/g, '');
-  const prefix = strValue.replace(/[0-9.,-]/g, '');
-  const numericValue = parseFloat(numericPart);
+  const strValue = String(value ?? '0');
 
   useEffect(() => {
-    if (isNaN(numericValue) || !numericValue) {
+    if (!strValue || strValue === 'undefined' || strValue === 'null') {
+      setDisplayValue('0');
+      return;
+    }
+
+    // Match leading non-digits (prefix like ₹, +₹, -₹), numeric digits, and trailing suffix (like %)
+    const match = strValue.match(/^([^0-9.-]*)(-?[0-9]+(?:\.[0-9]+)?)(.*)$/);
+    if (!match) {
       setDisplayValue(strValue);
       return;
     }
+
+    const prefix = match[1] || '';
+    const numericValue = parseFloat(match[2]);
+    const suffix = match[3] || '';
+
+    if (isNaN(numericValue)) {
+      setDisplayValue(strValue);
+      return;
+    }
+
+    // Strictly eliminate negative zero
+    if (Math.abs(numericValue) < 0.0001) {
+      const cleanPrefix = prefix.replace(/^[+-]/, '');
+      setDisplayValue(`${cleanPrefix}0${suffix}`);
+      return;
+    }
+
     let startTime = null;
     let rafId;
+    const hasDecimal = match[2].includes('.');
+    const decimalPlaces = hasDecimal ? match[2].split('.')[1].length : 0;
+
     const animate = (timestamp) => {
       if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / 800, 1);
+      const progress = Math.min((timestamp - startTime) / 600, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplayValue(prefix + Math.round(numericValue * eased).toLocaleString());
+      const currentVal = numericValue * eased;
+      const formattedNumber = decimalPlaces > 0
+        ? Math.abs(currentVal).toLocaleString('en-IN', { minimumFractionDigits: decimalPlaces, maximumFractionDigits: decimalPlaces })
+        : Math.round(Math.abs(currentVal)).toLocaleString('en-IN');
+
+      const sign = numericValue < 0 && !prefix.includes('-') ? '-' : '';
+      setDisplayValue(`${sign}${prefix}${formattedNumber}${suffix}`);
       if (progress < 1) rafId = requestAnimationFrame(animate);
     };
+
     rafId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafId);
-  }, [numericValue]);
+  }, [strValue]);
 
   return <>{displayValue ?? strValue}</>;
-};
-
-const MiniHealthCircle = ({ value, label }) => {
-  const size = 44;
-  const sw = 4;
-  const r = (size - sw) / 2;
-  const c = 2 * Math.PI * r;
-  const offset = c - (Math.min(100, Math.max(0, value)) / 100) * c;
-  const color = value >= 70 ? 'var(--theme-success, #10b981)' : value >= 40 ? 'var(--theme-warning, #f59e0b)' : 'var(--theme-danger, #ef4444)';
-  return (
-    <div className="flex flex-col items-center gap-1 group">
-      <div className="relative transition-transform duration-300 group-hover:scale-110" style={{ width: size, height: size }}>
-        <svg width={size} height={size} className="-rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--theme-border-soft, rgba(255,255,255,0.1))" strokeWidth={sw} />
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={offset} style={{ transition: 'stroke-dashoffset 0.8s ease' }} />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[10px] font-black tabular-nums" style={{ color }}>{value}</span>
-        </div>
-      </div>
-      <span className="text-[7px] font-bold text-theme-muted uppercase tracking-wider text-center leading-tight">{label}</span>
-    </div>
-  );
 };
 
 const KpiCard = ({ title, value, icon: Icon, subtext, trend, trendUp = true, highlight = false }) => (
@@ -97,12 +106,16 @@ const KpiCard = ({ title, value, icon: Icon, subtext, trend, trendUp = true, hig
   </motion.div>
 );
 
-const getLocalCalendarDate = (d = new Date()) => {
-  const dateObj = typeof d === 'string' ? new Date(d) : d;
-  if (isNaN(dateObj?.getTime?.())) return '';
-  const y = dateObj.getFullYear();
-  const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-  const day = String(dateObj.getDate()).padStart(2, '0');
+const getLocalCalendarDate = (dateInput = new Date()) => {
+  if (!dateInput) return '';
+  if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+    return dateInput;
+  }
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 };
 
@@ -156,11 +169,13 @@ const Dashboard = ({
     window.addEventListener('billqyro_bank_updated', handleDataChange);
     window.addEventListener('billqyro_sync', handleDataChange);
     window.addEventListener('billqyro:data-updated', handleDataChange);
+    window.addEventListener('storage', handleDataChange);
     return () => {
       window.removeEventListener('billqyro_invoice_updated', handleDataChange);
       window.removeEventListener('billqyro_bank_updated', handleDataChange);
       window.removeEventListener('billqyro_sync', handleDataChange);
       window.removeEventListener('billqyro:data-updated', handleDataChange);
+      window.removeEventListener('storage', handleDataChange);
     };
   }, []);
 
@@ -194,24 +209,30 @@ const Dashboard = ({
   // ==========================================================================
 
   const metrics = useMemo(() => {
-    const todayStr = getLocalCalendarDate(new Date());
     const now = new Date();
-    const currentMonthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const todayStr = getLocalCalendarDate(now);
     
-    // Previous Month for real delta trend computation
+    // Yesterday comparison date
+    const yesterdayDate = new Date(now);
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterdayStr = getLocalCalendarDate(yesterdayDate);
+
+    // Current Month & Previous Month
+    const currentMonthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const prevMonthPrefix = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2, '0')}`;
 
     const activeInvoices = invoices.filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void');
     const activeExpenses = expenses.filter(exp => !exp.isDeleted);
 
-    // 1. TODAY'S METRICS
+    // 1. TODAY'S & YESTERDAY'S METRICS
     let todaysSales = 0;
     let todaysOutstanding = 0;
     let todaysCollected = 0;
     let todaysPaymentCount = 0;
     let todaysLargestPayment = 0;
-    const todaysPaymentList = [];
+    let yesterdaySales = 0;
+    let yesterdayCollected = 0;
 
     // 2. MONTHLY METRICS
     let thisMonthRevenue = 0;
@@ -219,7 +240,7 @@ const Dashboard = ({
     let prevMonthRevenue = 0;
     let prevMonthCollected = 0;
 
-    // 3. LIFETIME METRICS & PIPELINE
+    // 3. LIFETIME METRICS & DUE INTELLIGENCE
     let totalRevenue = 0;
     let totalCollected = 0;
     let totalOutstanding = 0;
@@ -232,14 +253,21 @@ const Dashboard = ({
     const pipeline = { draft: 0, sent: 0, partial: 0, paid: 0, overdue: 0 };
     const allRecentPayments = [];
     const customerDueMap = new Map();
+    const customerOverdueMap = new Map();
+    const paymentMethodsMap = new Map();
+
+    // Due Aging Buckets (0-7d, 8-30d, 30+d)
+    const dueAging = { current: 0, moderate: 0, aged: 0 };
 
     activeInvoices.forEach(inv => {
       const invTotal = Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
       const invPaid = getInvoicePaidTotal(inv);
       const invDue = getInvoiceBalanceDue(inv);
       const invStatus = getInvoicePaymentStatus(inv);
-      const invDateStr = getLocalCalendarDate(inv.date || inv.createdAt);
+      const invDateStr = getLocalCalendarDate(inv.date) || getLocalCalendarDate(inv.createdAt);
+      
       const isTodayInv = invDateStr === todayStr;
+      const isYesterdayInv = invDateStr === yesterdayStr;
       const isThisMonthInv = invDateStr.startsWith(currentMonthPrefix);
       const isPrevMonthInv = invDateStr.startsWith(prevMonthPrefix);
 
@@ -251,15 +279,21 @@ const Dashboard = ({
         todaysSales += invTotal;
         todaysOutstanding += invDue;
       }
+      if (isYesterdayInv) {
+        yesterdaySales += invTotal;
+      }
       if (isThisMonthInv) thisMonthRevenue += invTotal;
       if (isPrevMonthInv) prevMonthRevenue += invTotal;
 
       // Pipeline & Due Intelligence
       const isOverdue = invDue > 0 && inv.dueDate && new Date(inv.dueDate) < now;
+      const cKey = inv.customerName || inv.customer?.name || 'Walk-in';
+
       if (isOverdue) {
         overdueCount++;
         overdueAmount += invDue;
         pipeline.overdue++;
+        customerOverdueMap.set(cKey, (customerOverdueMap.get(cKey) || 0) + invDue);
       } else if (invStatus === 'Paid') {
         pipeline.paid++;
       } else if (invStatus === 'Partially Paid') {
@@ -278,8 +312,13 @@ const Dashboard = ({
       }
 
       if (invDue > 0) {
-        const cKey = inv.customerId || inv.customerName || 'Unknown';
         customerDueMap.set(cKey, (customerDueMap.get(cKey) || 0) + invDue);
+
+        // Calculate Aging
+        const invAgeDays = Math.floor((now.getTime() - new Date(inv.date || inv.createdAt || now).getTime()) / (1000 * 60 * 60 * 24));
+        if (invAgeDays <= 7) dueAging.current += invDue;
+        else if (invAgeDays <= 30) dueAging.moderate += invDue;
+        else dueAging.aged += invDue;
       }
 
       // Payments from paymentHistory
@@ -287,15 +326,18 @@ const Dashboard = ({
         inv.paymentHistory.forEach(p => {
           const amt = Math.round((parseFloat(p.amount) || 0) * 100) / 100;
           if (amt <= 0) return;
-          const pDateStr = getLocalCalendarDate(p.date || inv.date || inv.createdAt);
+          const pDateStr = getLocalCalendarDate(p.date) || getLocalCalendarDate(inv.date) || getLocalCalendarDate(inv.createdAt);
+          const pMethod = p.method || inv.paymentMethod || 'Cash';
+
+          paymentMethodsMap.set(pMethod, (paymentMethodsMap.get(pMethod) || 0) + amt);
 
           const payRecord = {
             id: p.id || `pmt_${inv.id}_${amt}`,
             invoiceId: inv.id,
             invoiceNumber: inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`,
-            customerName: inv.customerName || inv.customer?.name || 'Walk-in',
+            customerName: cKey,
             amount: amt,
-            method: p.method || inv.paymentMethod || 'Cash',
+            method: pMethod,
             date: p.date || inv.date || inv.createdAt,
             dateStr: pDateStr,
             status: 'Paid'
@@ -307,19 +349,24 @@ const Dashboard = ({
             todaysCollected += amt;
             todaysPaymentCount++;
             if (amt > todaysLargestPayment) todaysLargestPayment = amt;
-            todaysPaymentList.push(payRecord);
+          }
+          if (pDateStr === yesterdayStr) {
+            yesterdayCollected += amt;
           }
           if (pDateStr.startsWith(currentMonthPrefix)) thisMonthCollected += amt;
           if (pDateStr.startsWith(prevMonthPrefix)) prevMonthCollected += amt;
         });
       } else if (invPaid > 0) {
+        const pMethod = inv.paymentMethod || 'Cash';
+        paymentMethodsMap.set(pMethod, (paymentMethodsMap.get(pMethod) || 0) + invPaid);
+
         const payRecord = {
           id: `pmt_init_${inv.id}`,
           invoiceId: inv.id,
           invoiceNumber: inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`,
-          customerName: inv.customerName || inv.customer?.name || 'Walk-in',
+          customerName: cKey,
           amount: invPaid,
-          method: inv.paymentMethod || 'Cash',
+          method: pMethod,
           date: inv.date || inv.createdAt,
           dateStr: invDateStr,
           status: 'Paid'
@@ -329,7 +376,9 @@ const Dashboard = ({
           todaysCollected += invPaid;
           todaysPaymentCount++;
           if (invPaid > todaysLargestPayment) todaysLargestPayment = invPaid;
-          todaysPaymentList.push(payRecord);
+        }
+        if (invDateStr === yesterdayStr) {
+          yesterdayCollected += invPaid;
         }
         if (isThisMonthInv) thisMonthCollected += invPaid;
         if (isPrevMonthInv) prevMonthCollected += invPaid;
@@ -341,7 +390,7 @@ const Dashboard = ({
     let thisMonthExpenses = 0;
     activeExpenses.forEach(exp => {
       const amt = Math.round((parseFloat(exp.amount) || 0) * 100) / 100;
-      const expDateStr = getLocalCalendarDate(exp.date || exp.createdAt);
+      const expDateStr = getLocalCalendarDate(exp.date) || getLocalCalendarDate(exp.createdAt);
       if (expDateStr === todayStr) todaysExpenses += amt;
       if (expDateStr.startsWith(currentMonthPrefix)) thisMonthExpenses += amt;
     });
@@ -379,6 +428,16 @@ const Dashboard = ({
       .sort((a, b) => b.collected - a.collected)
       .slice(0, 5);
 
+    // Top Overdue Customer
+    let topOverdueCustomer = null;
+    let maxOverdue = 0;
+    for (const [name, amt] of customerOverdueMap.entries()) {
+      if (amt > maxOverdue) {
+        maxOverdue = amt;
+        topOverdueCustomer = { name, amount: amt };
+      }
+    }
+
     // Business Health breakdown (Transparent real data calculations)
     const overdueRatio = totalOutstanding > 0 ? overdueAmount / totalOutstanding : 0;
     const riskLevel = overdueRatio > 0.35 ? 'Elevated' : overdueRatio > 0.15 ? 'Moderate' : 'Low';
@@ -392,6 +451,8 @@ const Dashboard = ({
       todaysAvgPayment,
       todaysLargestPayment,
       todaysProgress,
+      yesterdaySales: Math.round(yesterdaySales * 100) / 100,
+      yesterdayCollected: Math.round(yesterdayCollected * 100) / 100,
       thisMonthRevenue: Math.round(thisMonthRevenue * 100) / 100,
       thisMonthCollected: Math.round(thisMonthCollected * 100) / 100,
       totalRevenue: Math.round(totalRevenue * 100) / 100,
@@ -401,6 +462,12 @@ const Dashboard = ({
       overdueCount,
       dueTodayAmount: Math.round(dueTodayAmount * 100) / 100,
       largestDueInvoice,
+      topOverdueCustomer,
+      dueAging: {
+        current: Math.round(dueAging.current * 100) / 100,
+        moderate: Math.round(dueAging.moderate * 100) / 100,
+        aged: Math.round(dueAging.aged * 100) / 100
+      },
       customersWithDueCount: customerDueMap.size,
       todaysExpenses: Math.round(todaysExpenses * 100) / 100,
       thisMonthExpenses: Math.round(thisMonthExpenses * 100) / 100,
@@ -427,7 +494,7 @@ const Dashboard = ({
 
     let countDays = 7;
     if (chartTimeframe === '30d') countDays = 30;
-    else if (chartTimeframe === 'this_month') countDays = now.getDate();
+    else if (chartTimeframe === 'this_month') countDays = Math.max(1, now.getDate());
     else if (chartTimeframe === 'last_month') countDays = 30;
 
     for (let i = countDays - 1; i >= 0; i--) {
@@ -444,13 +511,13 @@ const Dashboard = ({
     const dayMap = new Map(days.map(item => [item.dateKey, item]));
 
     activeInvoices.forEach(inv => {
-      const invDate = getLocalCalendarDate(inv.date || inv.createdAt);
+      const invDate = getLocalCalendarDate(inv.date) || getLocalCalendarDate(inv.createdAt);
       if (dayMap.has(invDate)) {
         dayMap.get(invDate).sales += Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
       }
       if (Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0) {
         inv.paymentHistory.forEach(p => {
-          const pDate = getLocalCalendarDate(p.date || inv.date || inv.createdAt);
+          const pDate = getLocalCalendarDate(p.date) || getLocalCalendarDate(inv.date) || getLocalCalendarDate(inv.createdAt);
           if (dayMap.has(pDate)) {
             dayMap.get(pDate).collected += Math.round((parseFloat(p.amount) || 0) * 100) / 100;
           }
@@ -469,7 +536,7 @@ const Dashboard = ({
   const recentInvoices = useMemo(() => {
     return [...invoices]
       .filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void')
-      .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+      .sort((a, b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0))
       .slice(0, 5);
   }, [invoices]);
 
@@ -597,14 +664,56 @@ const Dashboard = ({
               {/* TOP 8 KPI EXECUTIVE METRICS GRID */}
               {/* ========================================================================= */}
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-                <KpiCard title="Today Sales" value={formatCurrency(metrics.todaysSales, currencySymbol)} icon={FileText} subtext="Invoices today" />
-                <KpiCard title="Today Collected" value={formatCurrency(metrics.todaysCollected, currencySymbol)} icon={CreditCard} highlight subtext={`${metrics.todaysPaymentCount} payments`} />
-                <KpiCard title="Today Due" value={formatCurrency(metrics.todaysOutstanding, currencySymbol)} icon={AlertCircle} subtext="Unpaid today" />
-                <KpiCard title="Payments" value={metrics.todaysPaymentCount} icon={CheckCircle} subtext="Received today" />
-                <KpiCard title="Month Revenue" value={formatCurrency(metrics.thisMonthRevenue, currencySymbol)} icon={TrendingUp} trend={metrics.revenueGrowthPercent !== 0 ? `${metrics.revenueGrowthPercent > 0 ? '+' : ''}${metrics.revenueGrowthPercent}%` : null} trendUp={metrics.revenueGrowthPercent >= 0} />
-                <KpiCard title="Month Collected" value={formatCurrency(metrics.thisMonthCollected, currencySymbol)} icon={Wallet} subtext="Cash Inflow" />
-                <KpiCard title="Total Due" value={formatCurrency(metrics.totalOutstanding, currencySymbol)} icon={AlertTriangle} subtext={`${metrics.customersWithDueCount} customers`} />
-                <KpiCard title="Collection Rate" value={`${metrics.collectionRate}%`} icon={Activity} subtext="All time" />
+                <KpiCard
+                  title="Today Sales"
+                  value={formatCurrency(metrics.todaysSales, currencySymbol)}
+                  icon={FileText}
+                  subtext={metrics.yesterdaySales > 0 ? `vs Yday (${formatCurrency(metrics.yesterdaySales, currencySymbol)})` : 'Invoices today'}
+                />
+                <KpiCard
+                  title="Today Collected"
+                  value={formatCurrency(metrics.todaysCollected, currencySymbol)}
+                  icon={CreditCard}
+                  highlight
+                  subtext={`${metrics.todaysPaymentCount} payment${metrics.todaysPaymentCount === 1 ? '' : 's'}`}
+                />
+                <KpiCard
+                  title="Today Due"
+                  value={formatCurrency(metrics.todaysOutstanding, currencySymbol)}
+                  icon={AlertCircle}
+                  subtext="Unpaid today"
+                />
+                <KpiCard
+                  title="Payments"
+                  value={metrics.todaysPaymentCount}
+                  icon={CheckCircle}
+                  subtext="Received today"
+                />
+                <KpiCard
+                  title="Month Revenue"
+                  value={formatCurrency(metrics.thisMonthRevenue, currencySymbol)}
+                  icon={TrendingUp}
+                  trend={metrics.revenueGrowthPercent !== 0 ? `${metrics.revenueGrowthPercent > 0 ? '+' : ''}${metrics.revenueGrowthPercent}%` : null}
+                  trendUp={metrics.revenueGrowthPercent >= 0}
+                />
+                <KpiCard
+                  title="Month Collected"
+                  value={formatCurrency(metrics.thisMonthCollected, currencySymbol)}
+                  icon={Wallet}
+                  subtext="Cash Inflow"
+                />
+                <KpiCard
+                  title="Total Due"
+                  value={formatCurrency(metrics.totalOutstanding, currencySymbol)}
+                  icon={AlertTriangle}
+                  subtext={`${metrics.customersWithDueCount} customer${metrics.customersWithDueCount === 1 ? '' : 's'}`}
+                />
+                <KpiCard
+                  title="Collection Rate"
+                  value={`${metrics.collectionRate}%`}
+                  icon={Activity}
+                  subtext="All time"
+                />
               </div>
 
               {/* ========================================================================= */}
@@ -677,7 +786,9 @@ const Dashboard = ({
                           <ArrowDownRight className="w-4 h-4 text-emerald-500" />
                           <span className="text-xs font-bold text-theme-primary">Money In (Collections)</span>
                         </div>
-                        <span className="text-xs font-black text-emerald-500 font-numbers">+{formatCurrency(metrics.thisMonthCollected, currencySymbol)}</span>
+                        <span className="text-xs font-black text-emerald-500 font-numbers">
+                          +{formatCurrency(metrics.thisMonthCollected, currencySymbol)}
+                        </span>
                       </div>
 
                       <div className="flex items-center justify-between p-2.5 rounded-xl bg-theme-surface/60 border border-theme-border-soft/40">
@@ -685,7 +796,9 @@ const Dashboard = ({
                           <ArrowUpRight className="w-4 h-4 text-rose-500" />
                           <span className="text-xs font-bold text-theme-primary">Money Out (Expenses)</span>
                         </div>
-                        <span className="text-xs font-black text-rose-500 font-numbers">-{formatCurrency(metrics.thisMonthExpenses, currencySymbol)}</span>
+                        <span className="text-xs font-black text-rose-500 font-numbers">
+                          {metrics.thisMonthExpenses > 0 ? `-${formatCurrency(metrics.thisMonthExpenses, currencySymbol)}` : formatCurrency(0, currencySymbol)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -693,8 +806,8 @@ const Dashboard = ({
                   <div className="mt-4 pt-3 border-t border-theme-border-soft flex items-center justify-between">
                     <div>
                       <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Net Cash Flow</p>
-                      <p className={`text-base font-black font-numbers ${metrics.thisMonthNetCash >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                        {formatCurrency(metrics.thisMonthNetCash, currencySymbol)}
+                      <p className={`text-base font-black font-numbers ${metrics.thisMonthNetCash > 0 ? 'text-emerald-500' : metrics.thisMonthNetCash < 0 ? 'text-rose-500' : 'text-theme-primary'}`}>
+                        {metrics.thisMonthNetCash > 0 ? `+${formatCurrency(metrics.thisMonthNetCash, currencySymbol)}` : metrics.thisMonthNetCash < 0 ? `-${formatCurrency(Math.abs(metrics.thisMonthNetCash), currencySymbol)}` : formatCurrency(0, currencySymbol)}
                       </p>
                     </div>
                     <button onClick={() => setCurrentTab('expenses')} className="text-xs font-bold text-theme-accent hover:underline flex items-center gap-1">
@@ -703,7 +816,7 @@ const Dashboard = ({
                   </div>
                 </div>
 
-                {/* Card 3: Due & Overdue Intelligence */}
+                {/* Card 3: Due & Overdue Intelligence with Aging */}
                 <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 shadow-xs flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-3">
@@ -728,9 +841,25 @@ const Dashboard = ({
                         <p className="text-base font-black text-rose-500 font-numbers">{formatCurrency(metrics.overdueAmount, currencySymbol)}</p>
                       </div>
                     </div>
+
+                    {/* Lightweight Due Aging Summary */}
+                    <div className="grid grid-cols-3 gap-1.5 pt-2.5 text-center">
+                      <div className="p-1.5 rounded-lg bg-theme-surface/50">
+                        <p className="text-[8px] font-bold text-theme-muted uppercase">0-7 Days</p>
+                        <p className="text-[10px] font-black text-theme-primary font-numbers">{formatCurrency(metrics.dueAging.current, currencySymbol)}</p>
+                      </div>
+                      <div className="p-1.5 rounded-lg bg-theme-surface/50">
+                        <p className="text-[8px] font-bold text-theme-muted uppercase">8-30 Days</p>
+                        <p className="text-[10px] font-black text-amber-500 font-numbers">{formatCurrency(metrics.dueAging.moderate, currencySymbol)}</p>
+                      </div>
+                      <div className="p-1.5 rounded-lg bg-theme-surface/50">
+                        <p className="text-[8px] font-bold text-theme-muted uppercase">30+ Days</p>
+                        <p className="text-[10px] font-black text-rose-500 font-numbers">{formatCurrency(metrics.dueAging.aged, currencySymbol)}</p>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="pt-3 flex items-center justify-between">
+                  <div className="pt-3 border-t border-theme-border-soft flex items-center justify-between">
                     <div>
                       <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Due Today</p>
                       <p className="text-xs font-bold text-theme-primary font-numbers">{formatCurrency(metrics.dueTodayAmount, currencySymbol)}</p>
@@ -851,7 +980,7 @@ const Dashboard = ({
                               <div className="min-w-0">
                                 <p className="font-bold text-theme-primary truncate">{inv.customerName || 'Walk-in Customer'}</p>
                                 <p className="text-[10px] text-theme-muted font-semibold font-numbers">
-                                  {inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`} &middot; {getLocalCalendarDate(inv.createdAt || inv.date)}
+                                  {inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`} &middot; {getLocalCalendarDate(inv.date) || getLocalCalendarDate(inv.createdAt)}
                                 </p>
                               </div>
                             </div>
