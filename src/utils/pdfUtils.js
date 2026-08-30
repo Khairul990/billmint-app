@@ -6,7 +6,6 @@ import {
   invalidateInvoicePdfCache
 } from './pdfCacheEngine.js';
 import { prepareInvoicePdf } from '../services/communication/attachmentEngine.js';
-import { generateInvoicePdfBlob as generateStablePdfBlob } from './stableInvoicePdf.js';
 
 export { downloadInvoiceImage } from './invoiceImageExport.js';
 export {
@@ -77,5 +76,3 @@ export const downloadInvoicePDF = async (invoice, businessSettings = {}, isPremi
 
 export const downloadStableInvoicePDF = downloadInvoicePDF;
 export default downloadInvoicePDF;
-
-
