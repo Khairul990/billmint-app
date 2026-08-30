@@ -57,6 +57,10 @@ class InMemoryStorageAdapter {
     return this.storage.has(key);
   }
 
+  async getSignedDownloadUrl(key, expiresInSeconds = 3600) {
+    return `/storage/download?key=${encodeURIComponent(key)}&expires=${expiresInSeconds}`;
+  }
+
   clear() {
     this.storage.clear();
   }
@@ -95,6 +99,10 @@ class S3RestStorageAdapter {
 
   async exists(key) {
     return await this.fallback.exists(key);
+  }
+
+  async getSignedDownloadUrl(key, expiresInSeconds = 3600) {
+    return await this.fallback.getSignedDownloadUrl(key, expiresInSeconds);
   }
 }
 
