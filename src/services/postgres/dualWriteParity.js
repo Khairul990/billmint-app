@@ -7,7 +7,7 @@
 export const normalizeMoney = (val) => {
   if (val === undefined || val === null || val === '') return '0.00';
   const num = typeof val === 'number' ? val : parseFloat(val);
-  if (isNaN(num)) return '0.00';
+  if (isNaN(num) || !isFinite(num)) return '0.00';
   return (Math.round(num * 100) / 100).toFixed(2);
 };
 

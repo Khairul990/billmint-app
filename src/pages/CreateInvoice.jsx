@@ -371,7 +371,7 @@ const CreateInvoice = ({
   // Quick Add Customer Handler
   const handleQuickAddCustomer = async (e) => {
     e.preventDefault();
-    if (!newCustName.trim()) return;
+    if (!newCustName.trim() || isSavingCustomer) return;
 
     setIsSavingCustomer(true);
     try {
@@ -400,6 +400,7 @@ const CreateInvoice = ({
   };
 
   const handleSave = async () => {
+    if (isSaving) return;
     const isEditing = Boolean(editingInvoice?.id);
     const existingPaymentHistory = Array.isArray(editingInvoice?.paymentHistory) ? [...editingInvoice.paymentHistory] : [];
     
