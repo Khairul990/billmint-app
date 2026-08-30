@@ -46,11 +46,10 @@ const currentMonthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).pa
 // 1. DASHBOARD 3.0 LUXURY SOURCE FILE INTEGRITY
 // ============================================================================
 
-await test('1.1 Dashboard 3.0 Source: Contains luxury command cockpit and animated prefix/suffix engine', () => {
+await test('1.1 Dashboard 3.0 Source: Contains executive financial cockpit and animated prefix/suffix engine', () => {
   const code = fs.readFileSync('src/pages/Dashboard.jsx', 'utf-8');
-  assert.ok(code.includes('LuxuryKpiCard'), 'Must define LuxuryKpiCard component');
-  assert.ok(code.includes('Financial Command Cockpit'), 'Must include luxury command cockpit title');
-  assert.ok(code.includes('Live Synced'), 'Must include Live Synced pill');
+  assert.ok(code.includes('Monthly Revenue Volume'), 'Must define Monthly Revenue Volume anchor');
+  assert.ok(code.includes('AnimatedNumber'), 'Must include AnimatedNumber engine');
   assert.ok(code.includes('dueAging'), 'Must compute dueAging breakdown');
 });
 
