@@ -565,7 +565,7 @@ const Dashboard = ({
       <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
         <div className="min-h-screen bg-theme-surface/40 pb-16">
           {(isInitialLoad || isLoading) ? (
-            <div className="p-4 sm:p-6 lg:p-8 space-y-6 w-full max-w-full">
+            <div className="w-full max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 pt-3 space-y-5">
               <KPISkeleton count={4} />
               <div className="grid lg:grid-cols-2 gap-6 mt-6">
                 <ChartSkeleton />
@@ -573,7 +573,7 @@ const Dashboard = ({
               </div>
             </div>
           ) : (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 space-y-6">
+            <div className="w-full max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 pt-3 space-y-5">
 
               {/* PENDING PROOFS NOTIFICATION BAR */}
               {pendingPaymentsCount > 0 && (
