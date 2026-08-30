@@ -97,14 +97,14 @@ const getLocalCalendarDate = (dateInput = new Date()) => {
 };
 
 // Mini Sparkline Generator
-const MiniSparkline = ({ color = '#38bdf8', height = 22, isPositive = true }) => (
-  <div className="w-14 h-5 overflow-hidden flex items-end">
+const MiniSparkline = ({ color = '#38bdf8', isPositive = true }) => (
+  <div className="w-12 h-5 overflow-hidden flex items-end">
     <svg viewBox="0 0 60 20" className="w-full h-full overflow-visible">
       <path
         d={isPositive ? "M0,16 Q15,18 25,10 T50,4 T60,2" : "M0,4 Q15,2 25,10 T50,16 T60,18"}
         fill="none"
         stroke={color}
-        strokeWidth="2"
+        strokeWidth="2.2"
         strokeLinecap="round"
       />
     </svg>
@@ -259,7 +259,6 @@ const Dashboard = ({
       const invTotal = Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
       const invPaid = getInvoicePaidTotal(inv);
       const invDue = getInvoiceBalanceDue(inv);
-      const invStatus = getInvoicePaymentStatus(inv);
       const invDateStr = getLocalCalendarDate(inv.date) || getLocalCalendarDate(inv.createdAt);
       
       const isTodayInv = invDateStr === todayStr;
@@ -401,7 +400,7 @@ const Dashboard = ({
 
     const sortedPayments = allRecentPayments.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
-    // Top Customers by billing & collected
+    // Top Customers
     const customerStatsMap = new Map();
     activeInvoices.forEach(inv => {
       const name = inv.customerName || inv.customer?.name || 'Walk-in';
@@ -420,7 +419,7 @@ const Dashboard = ({
       .sort((a, b) => b.collected - a.collected)
       .slice(0, 4);
 
-    // Payment methods array
+    // Payment methods
     const totalPaymentsVolume = Array.from(paymentMethodsMap.values()).reduce((s, v) => s + v, 0);
     const paymentMethodsList = Array.from(paymentMethodsMap.entries())
       .map(([method, amount]) => ({
@@ -430,15 +429,12 @@ const Dashboard = ({
       }))
       .sort((a, b) => b.value - a.value);
 
-    // If empty payment methods, provide default
     if (paymentMethodsList.length === 0) {
       paymentMethodsList.push({ name: 'Cash', value: 0, percentage: 100 });
     }
 
-    // Risk level
     const overdueRatio = totalOutstanding > 0 ? overdueAmount / totalOutstanding : 0;
     const healthStatus = overdueRatio > 0.35 ? 'Critical' : overdueRatio > 0.15 ? 'Attention' : 'Low';
-    const healthColor = healthStatus === 'Low' ? '#10b981' : healthStatus === 'Attention' ? '#f59e0b' : '#ef4444';
 
     return {
       todaysSales: Math.round(todaysSales * 100) / 100,
@@ -475,8 +471,7 @@ const Dashboard = ({
       recentPayments: sortedPayments.slice(0, 5),
       topCustomers: topCustomersList,
       paymentMethodsList,
-      healthStatus,
-      healthColor
+      healthStatus
     };
   }, [invoices, expenses]);
 
@@ -551,12 +546,12 @@ const Dashboard = ({
     return name.slice(0, 2).toUpperCase();
   };
 
-  const COLORS = ['#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'];
+  const PIE_COLORS = ['var(--status-success, #10b981)', 'var(--status-warning, #f59e0b)', 'var(--accent, #d4af7a)', '#8b5cf6'];
 
   return (
     <AnimatedPage>
       <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
-        <div className="min-h-screen bg-[#0d1117] text-slate-100 pb-16 font-sans">
+        <div className="min-h-screen bg-theme-app text-theme-primary pb-16 font-sans">
           {(isInitialLoad || isLoading) ? (
             <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 pt-4 space-y-6">
               <KPISkeleton count={4} />
@@ -571,23 +566,23 @@ const Dashboard = ({
               {/* ========================================================================= */}
               {/* 1. TOP HEADER / COMMAND CENTER BANNER */}
               {/* ========================================================================= */}
-              <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-lg">
+              <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-theme-card border border-theme-border-soft shadow-premium">
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-xl">👋</span>
-                    <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                      {greeting.text}, <span className="text-amber-400">{businessSettings?.ownerName?.split(' ')[0] || businessSettings?.businessName?.split(' ')[0] || 'Khairul'}</span>
+                    <h1 className="text-xl sm:text-2xl font-black text-theme-primary tracking-tight">
+                      {greeting.text}, <span className="text-theme-accent">{businessSettings?.ownerName?.split(' ')[0] || businessSettings?.businessName?.split(' ')[0] || 'Khairul'}</span>
                     </h1>
                     <span className="text-xl">✌️</span>
                   </div>
-                  <p className="text-xs text-slate-400 font-medium">Here's your business overview for today</p>
+                  <p className="text-xs text-theme-muted font-medium">Here's your business overview for today</p>
                 </div>
 
                 {/* Right Action Strip & Clock */}
                 <div className="flex flex-wrap items-center gap-2.5">
                   <button
                     onClick={onQuickBillOpen}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                    className="btn-premium flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black shadow-premium transition-all transform hover:-translate-y-0.5 active:translate-y-0"
                   >
                     <Plus className="w-4 h-4 stroke-[3]" />
                     <span>+ New Invoice</span>
@@ -595,18 +590,18 @@ const Dashboard = ({
 
                   <button
                     onClick={() => setCurrentTab('due-ledger')}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-slate-200 text-xs font-bold transition-all"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-theme-surface hover:bg-theme-surface-elevated border border-theme-border-soft text-theme-primary text-xs font-bold transition-all"
                   >
-                    <CreditCard className="w-3.5 h-3.5 text-amber-400" />
+                    <CreditCard className="w-3.5 h-3.5 text-theme-accent" />
                     <span>Record Payment</span>
                   </button>
 
                   {hasCustomers && (
                     <button
                       onClick={() => setShowAddCustomerSheet(true)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-slate-200 text-xs font-bold transition-all"
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-theme-surface hover:bg-theme-surface-elevated border border-theme-border-soft text-theme-primary text-xs font-bold transition-all"
                     >
-                      <Users className="w-3.5 h-3.5 text-amber-400" />
+                      <Users className="w-3.5 h-3.5 text-theme-accent" />
                       <span>Add Customer</span>
                     </button>
                   )}
@@ -614,9 +609,9 @@ const Dashboard = ({
                   {hasExpenses && (
                     <button
                       onClick={() => setCurrentTab('expenses')}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-slate-200 text-xs font-bold transition-all"
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-theme-surface hover:bg-theme-surface-elevated border border-theme-border-soft text-theme-primary text-xs font-bold transition-all"
                     >
-                      <TrendingDown className="w-3.5 h-3.5 text-amber-400" />
+                      <TrendingDown className="w-3.5 h-3.5 text-theme-accent" />
                       <span>Add Expense</span>
                     </button>
                   )}
@@ -624,28 +619,28 @@ const Dashboard = ({
                   {hasReports && (
                     <button
                       onClick={() => setCurrentTab('reports')}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-slate-200 text-xs font-bold transition-all"
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-theme-surface hover:bg-theme-surface-elevated border border-theme-border-soft text-theme-primary text-xs font-bold transition-all"
                     >
-                      <BarChart3 className="w-3.5 h-3.5 text-amber-400" />
+                      <BarChart3 className="w-3.5 h-3.5 text-theme-accent" />
                       <span>View Reports</span>
                     </button>
                   )}
 
                   {/* Live Clock & Sync State */}
-                  <div className="flex items-center gap-3 pl-2 sm:border-l border-[#30363d]">
-                    <div className="w-8 h-8 rounded-xl bg-[#21262d] border border-[#30363d] flex items-center justify-center text-slate-300">
-                      <Clock className="w-4 h-4 text-amber-400" />
+                  <div className="flex items-center gap-3 pl-2 sm:border-l border-theme-border-soft">
+                    <div className="w-8 h-8 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-muted">
+                      <Clock className="w-4 h-4 text-theme-accent" />
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider leading-none">
+                      <p className="text-[10px] font-semibold text-theme-muted uppercase tracking-wider leading-none">
                         {timeNow.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                       </p>
-                      <p className="text-xs font-black text-white font-numbers tracking-tight mt-0.5">
+                      <p className="text-xs font-black text-theme-primary font-numbers tracking-tight mt-0.5">
                         {timeNow.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
                       </p>
                       <div className="flex items-center justify-end gap-1 mt-0.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-[9px] font-bold text-emerald-400">{syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-[9px] font-bold text-emerald-500">{syncStatus === 'Synced' ? 'Cloud Synced' : syncStatus}</span>
                       </div>
                     </div>
                   </div>
@@ -658,179 +653,179 @@ const Dashboard = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
 
                 {/* 1. TODAY'S SALES */}
-                <div className="p-3.5 rounded-2xl bg-[#161b22] border border-[#30363d] flex flex-col justify-between hover:border-slate-600 transition-all group">
+                <div className="p-3.5 rounded-2xl bg-theme-card border border-theme-border-soft flex flex-col justify-between hover:border-theme-border-strong transition-all group shadow-xs">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-lg bg-blue-500/15 text-blue-500 flex items-center justify-center">
                         <ShoppingBag className="w-3.5 h-3.5" />
                       </div>
                     </div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Today's Sales</p>
-                    <p className="text-base font-black text-white tracking-tight font-numbers mt-0.5">
+                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Today's Sales</p>
+                    <p className="text-base font-black text-theme-primary tracking-tight font-numbers mt-0.5">
                       <AnimatedNumber value={formatCurrency(metrics.todaysSales, currencySymbol)} />
                     </p>
-                    <p className="text-[9px] font-medium text-slate-400">{metrics.todaysInvoicesCount} invoices</p>
+                    <p className="text-[9px] font-medium text-theme-muted">{metrics.todaysInvoicesCount} invoices</p>
                   </div>
-                  <div className="pt-2 mt-2 border-t border-[#21262d] flex items-center justify-between">
+                  <div className="pt-2 mt-2 border-t border-theme-border-soft/60 flex items-center justify-between">
                     <div>
-                      <span className="text-[8px] text-slate-400 block">vs Yesterday</span>
-                      <span className="text-[9px] font-bold text-slate-300 font-numbers">{formatCurrency(metrics.yesterdaySales, currencySymbol)} (0%)</span>
+                      <span className="text-[8px] text-theme-muted block">vs Yesterday</span>
+                      <span className="text-[9px] font-bold text-theme-secondary font-numbers">{formatCurrency(metrics.yesterdaySales, currencySymbol)} (0%)</span>
                     </div>
                     <MiniSparkline color="#38bdf8" isPositive={metrics.todaysSales >= metrics.yesterdaySales} />
                   </div>
                 </div>
 
                 {/* 2. TODAY'S COLLECTED */}
-                <div className="p-3.5 rounded-2xl bg-[#161b22] border border-[#30363d] flex flex-col justify-between hover:border-slate-600 transition-all group">
+                <div className="p-3.5 rounded-2xl bg-theme-card border border-theme-border-soft flex flex-col justify-between hover:border-theme-border-strong transition-all group shadow-xs">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
                         <Wallet className="w-3.5 h-3.5" />
                       </div>
                     </div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Today's Collected</p>
-                    <p className="text-base font-black text-emerald-400 tracking-tight font-numbers mt-0.5">
+                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Today's Collected</p>
+                    <p className="text-base font-black text-emerald-500 tracking-tight font-numbers mt-0.5">
                       <AnimatedNumber value={formatCurrency(metrics.todaysCollected, currencySymbol)} />
                     </p>
-                    <p className="text-[9px] font-medium text-slate-400">{metrics.todaysPaymentCount} payments</p>
+                    <p className="text-[9px] font-medium text-theme-muted">{metrics.todaysPaymentCount} payments</p>
                   </div>
-                  <div className="pt-2 mt-2 border-t border-[#21262d] flex items-center justify-between">
+                  <div className="pt-2 mt-2 border-t border-theme-border-soft/60 flex items-center justify-between">
                     <div>
-                      <span className="text-[8px] text-slate-400 block">vs Yesterday</span>
-                      <span className="text-[9px] font-bold text-emerald-400 font-numbers">{formatCurrency(metrics.yesterdayCollected, currencySymbol)} (0%)</span>
+                      <span className="text-[8px] text-theme-muted block">vs Yesterday</span>
+                      <span className="text-[9px] font-bold text-emerald-500 font-numbers">{formatCurrency(metrics.yesterdayCollected, currencySymbol)} (0%)</span>
                     </div>
                     <MiniSparkline color="#10b981" isPositive={metrics.todaysCollected >= metrics.yesterdayCollected} />
                   </div>
                 </div>
 
                 {/* 3. TODAY'S DUE */}
-                <div className="p-3.5 rounded-2xl bg-[#161b22] border border-[#30363d] flex flex-col justify-between hover:border-slate-600 transition-all group">
+                <div className="p-3.5 rounded-2xl bg-theme-card border border-theme-border-soft flex flex-col justify-between hover:border-theme-border-strong transition-all group shadow-xs">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-500 flex items-center justify-center">
                         <AlertCircle className="w-3.5 h-3.5" />
                       </div>
                     </div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Today's Due</p>
-                    <p className="text-base font-black text-white tracking-tight font-numbers mt-0.5">
+                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Today's Due</p>
+                    <p className="text-base font-black text-theme-primary tracking-tight font-numbers mt-0.5">
                       <AnimatedNumber value={formatCurrency(metrics.todaysOutstanding, currencySymbol)} />
                     </p>
-                    <p className="text-[9px] font-medium text-slate-400">Unpaid today</p>
+                    <p className="text-[9px] font-medium text-theme-muted">Unpaid today</p>
                   </div>
-                  <div className="pt-2 mt-2 border-t border-[#21262d] flex items-center justify-between">
+                  <div className="pt-2 mt-2 border-t border-theme-border-soft/60 flex items-center justify-between">
                     <div>
-                      <span className="text-[8px] text-slate-400 block">vs Yesterday</span>
-                      <span className="text-[9px] font-bold text-slate-300 font-numbers">{formatCurrency(0, currencySymbol)} (0%)</span>
+                      <span className="text-[8px] text-theme-muted block">vs Yesterday</span>
+                      <span className="text-[9px] font-bold text-theme-secondary font-numbers">{formatCurrency(0, currencySymbol)} (0%)</span>
                     </div>
                     <MiniSparkline color="#f59e0b" isPositive={false} />
                   </div>
                 </div>
 
                 {/* 4. TODAY'S PAYMENTS */}
-                <div className="p-3.5 rounded-2xl bg-[#161b22] border border-[#30363d] flex flex-col justify-between hover:border-slate-600 transition-all group">
+                <div className="p-3.5 rounded-2xl bg-theme-card border border-theme-border-soft flex flex-col justify-between hover:border-theme-border-strong transition-all group shadow-xs">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-500/15 text-purple-400 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-lg bg-purple-500/15 text-purple-500 flex items-center justify-center">
                         <CheckCircle className="w-3.5 h-3.5" />
                       </div>
                     </div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Today's Payments</p>
-                    <p className="text-base font-black text-white tracking-tight font-numbers mt-0.5">
+                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Today's Payments</p>
+                    <p className="text-base font-black text-theme-primary tracking-tight font-numbers mt-0.5">
                       <AnimatedNumber value={metrics.todaysPaymentCount} />
                     </p>
-                    <p className="text-[9px] font-medium text-slate-400">Payments received</p>
+                    <p className="text-[9px] font-medium text-theme-muted">Payments received</p>
                   </div>
-                  <div className="pt-2 mt-2 border-t border-[#21262d] flex items-center justify-between">
+                  <div className="pt-2 mt-2 border-t border-theme-border-soft/60 flex items-center justify-between">
                     <div>
-                      <span className="text-[8px] text-slate-400 block">vs Yesterday</span>
-                      <span className="text-[9px] font-bold text-purple-400 font-numbers">{metrics.yesterdayPaymentCount} (0%)</span>
+                      <span className="text-[8px] text-theme-muted block">vs Yesterday</span>
+                      <span className="text-[9px] font-bold text-purple-500 font-numbers">{metrics.yesterdayPaymentCount} (0%)</span>
                     </div>
                     <MiniSparkline color="#c084fc" isPositive={metrics.todaysPaymentCount >= metrics.yesterdayPaymentCount} />
                   </div>
                 </div>
 
                 {/* 5. MONTH REVENUE */}
-                <div className="p-3.5 rounded-2xl bg-[#161b22] border border-[#30363d] flex flex-col justify-between hover:border-slate-600 transition-all group">
+                <div className="p-3.5 rounded-2xl bg-theme-card border border-theme-border-soft flex flex-col justify-between hover:border-theme-border-strong transition-all group shadow-xs">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-cyan-500/15 text-cyan-400 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-lg bg-cyan-500/15 text-cyan-500 flex items-center justify-center">
                         <TrendingUp className="w-3.5 h-3.5" />
                       </div>
                     </div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Month Revenue</p>
-                    <p className="text-base font-black text-white tracking-tight font-numbers mt-0.5">
+                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Month Revenue</p>
+                    <p className="text-base font-black text-theme-primary tracking-tight font-numbers mt-0.5">
                       <AnimatedNumber value={formatCurrency(metrics.thisMonthRevenue, currencySymbol)} />
                     </p>
                   </div>
-                  <div className="pt-2 mt-2 border-t border-[#21262d] flex items-center justify-between">
+                  <div className="pt-2 mt-2 border-t border-theme-border-soft/60 flex items-center justify-between">
                     <div>
-                      <span className="text-[8px] text-slate-400 block">vs Last Month</span>
-                      <span className="text-[9px] font-bold text-emerald-400 font-numbers">+{metrics.revenueGrowthPercent}%</span>
+                      <span className="text-[8px] text-theme-muted block">vs Last Month</span>
+                      <span className="text-[9px] font-bold text-emerald-500 font-numbers">+{metrics.revenueGrowthPercent}%</span>
                     </div>
                     <MiniSparkline color="#22d3ee" isPositive={metrics.revenueGrowthPercent >= 0} />
                   </div>
                 </div>
 
                 {/* 6. MONTH COLLECTED */}
-                <div className="p-3.5 rounded-2xl bg-[#161b22] border border-[#30363d] flex flex-col justify-between hover:border-slate-600 transition-all group">
+                <div className="p-3.5 rounded-2xl bg-theme-card border border-theme-border-soft flex flex-col justify-between hover:border-theme-border-strong transition-all group shadow-xs">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
                         <Receipt className="w-3.5 h-3.5" />
                       </div>
                     </div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Month Collected</p>
-                    <p className="text-base font-black text-white tracking-tight font-numbers mt-0.5">
+                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Month Collected</p>
+                    <p className="text-base font-black text-theme-primary tracking-tight font-numbers mt-0.5">
                       <AnimatedNumber value={formatCurrency(metrics.thisMonthCollected, currencySymbol)} />
                     </p>
                   </div>
-                  <div className="pt-2 mt-2 border-t border-[#21262d] flex items-center justify-between">
+                  <div className="pt-2 mt-2 border-t border-theme-border-soft/60 flex items-center justify-between">
                     <div>
-                      <span className="text-[8px] text-slate-400 block">vs Last Month</span>
-                      <span className="text-[9px] font-bold text-emerald-400 font-numbers">+{metrics.collectedGrowthPercent}%</span>
+                      <span className="text-[8px] text-theme-muted block">vs Last Month</span>
+                      <span className="text-[9px] font-bold text-emerald-500 font-numbers">+{metrics.collectedGrowthPercent}%</span>
                     </div>
                     <MiniSparkline color="#10b981" isPositive={metrics.collectedGrowthPercent >= 0} />
                   </div>
                 </div>
 
                 {/* 7. TOTAL OUTSTANDING */}
-                <div className="p-3.5 rounded-2xl bg-[#161b22] border border-[#30363d] flex flex-col justify-between hover:border-slate-600 transition-all group">
+                <div className="p-3.5 rounded-2xl bg-theme-card border border-theme-border-soft flex flex-col justify-between hover:border-theme-border-strong transition-all group shadow-xs">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-500 flex items-center justify-center">
                         <AlertTriangle className="w-3.5 h-3.5" />
                       </div>
                     </div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Total Outstanding</p>
-                    <p className="text-base font-black text-white tracking-tight font-numbers mt-0.5">
+                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Total Outstanding</p>
+                    <p className="text-base font-black text-theme-primary tracking-tight font-numbers mt-0.5">
                       <AnimatedNumber value={formatCurrency(metrics.totalOutstanding, currencySymbol)} />
                     </p>
-                    <p className="text-[9px] font-medium text-slate-400">{metrics.customersWithDueCount} accounts</p>
+                    <p className="text-[9px] font-medium text-theme-muted">{metrics.customersWithDueCount} accounts</p>
                   </div>
-                  <div className="pt-2 mt-2 border-t border-[#21262d]">
-                    <div className="w-full bg-[#21262d] h-1.5 rounded-full overflow-hidden">
+                  <div className="pt-2 mt-2 border-t border-theme-border-soft/60">
+                    <div className="w-full bg-theme-surface h-1.5 rounded-full overflow-hidden border border-theme-border-soft/40">
                       <div className="h-full bg-rose-500 rounded-full" style={{ width: `${Math.min(100, (metrics.overdueAmount / (metrics.totalOutstanding || 1)) * 100)}%` }} />
                     </div>
                   </div>
                 </div>
 
                 {/* 8. COLLECTION RATE */}
-                <div className="p-3.5 rounded-2xl bg-[#161b22] border border-[#30363d] flex flex-col justify-between hover:border-slate-600 transition-all group">
+                <div className="p-3.5 rounded-2xl bg-theme-card border border-theme-border-soft flex flex-col justify-between hover:border-theme-border-strong transition-all group shadow-xs">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-indigo-500/15 text-indigo-400 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-lg bg-indigo-500/15 text-indigo-500 flex items-center justify-center">
                         <Activity className="w-3.5 h-3.5" />
                       </div>
                     </div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Collection Rate</p>
-                    <p className="text-base font-black text-white tracking-tight font-numbers mt-0.5">
+                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Collection Rate</p>
+                    <p className="text-base font-black text-theme-primary tracking-tight font-numbers mt-0.5">
                       <AnimatedNumber value={`${metrics.collectionRate}%`} />
                     </p>
-                    <p className="text-[9px] font-medium text-slate-400">All time</p>
+                    <p className="text-[9px] font-medium text-theme-muted">All time</p>
                   </div>
-                  <div className="pt-2 mt-2 border-t border-[#21262d]">
-                    <div className="w-full bg-[#21262d] h-1.5 rounded-full overflow-hidden">
-                      <div className="h-full bg-amber-400 rounded-full" style={{ width: `${metrics.collectionRate}%` }} />
+                  <div className="pt-2 mt-2 border-t border-theme-border-soft/60">
+                    <div className="w-full bg-theme-surface h-1.5 rounded-full overflow-hidden border border-theme-border-soft/40">
+                      <div className="h-full bg-theme-accent rounded-full" style={{ width: `${metrics.collectionRate}%` }} />
                     </div>
                   </div>
                 </div>
@@ -843,13 +838,13 @@ const Dashboard = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
                 {/* CARD 1: TODAY'S PERFORMANCE */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-[#161b22] border border-[#30363d] flex flex-col justify-between">
+                <div className="p-4 sm:p-5 rounded-2xl bg-theme-card border border-theme-border-soft flex flex-col justify-between shadow-xs">
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-500 flex items-center justify-center">
                         <BarChart3 className="w-3.5 h-3.5" />
                       </div>
-                      <h3 className="text-xs font-black text-white uppercase tracking-wider">Today's Performance</h3>
+                      <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Today's Performance</h3>
                     </div>
 
                     <div className="flex items-center gap-4 py-2">
@@ -857,14 +852,14 @@ const Dashboard = ({
                       <div className="relative w-24 h-24 flex items-center justify-center shrink-0">
                         <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                           <path
-                            className="text-[#21262d]"
+                            className="text-theme-surface"
                             strokeWidth="3.2"
                             stroke="currentColor"
                             fill="none"
                             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                           />
                           <path
-                            className="text-amber-400"
+                            className="text-theme-accent"
                             strokeDasharray={`${metrics.todaysProgress}, 100`}
                             strokeWidth="3.2"
                             strokeLinecap="round"
@@ -874,89 +869,89 @@ const Dashboard = ({
                           />
                         </svg>
                         <div className="absolute flex flex-col items-center justify-center text-center">
-                          <span className="text-base font-black text-white font-numbers">{metrics.todaysProgress}%</span>
-                          <span className="text-[7px] text-slate-400 uppercase font-bold leading-tight">Collection<br />Progress</span>
+                          <span className="text-base font-black text-theme-primary font-numbers">{metrics.todaysProgress}%</span>
+                          <span className="text-[7px] text-theme-muted uppercase font-bold leading-tight">Collection<br />Progress</span>
                         </div>
                       </div>
 
                       {/* Right Details */}
                       <div className="space-y-1.5 flex-1 text-xs">
-                        <div className="flex justify-between items-center py-0.5 border-b border-[#21262d]">
-                          <span className="text-slate-400 text-[11px]">Invoiced Today</span>
-                          <span className="font-bold text-white font-numbers">{formatCurrency(metrics.todaysSales, currencySymbol)}</span>
+                        <div className="flex justify-between items-center py-0.5 border-b border-theme-border-soft">
+                          <span className="text-theme-muted text-[11px]">Invoiced Today</span>
+                          <span className="font-bold text-theme-primary font-numbers">{formatCurrency(metrics.todaysSales, currencySymbol)}</span>
                         </div>
-                        <div className="flex justify-between items-center py-0.5 border-b border-[#21262d]">
-                          <span className="text-slate-400 text-[11px]">Collected Today</span>
-                          <span className="font-bold text-emerald-400 font-numbers">{formatCurrency(metrics.todaysCollected, currencySymbol)}</span>
+                        <div className="flex justify-between items-center py-0.5 border-b border-theme-border-soft">
+                          <span className="text-theme-muted text-[11px]">Collected Today</span>
+                          <span className="font-bold text-emerald-500 font-numbers">{formatCurrency(metrics.todaysCollected, currencySymbol)}</span>
                         </div>
                         <div className="flex justify-between items-center py-0.5">
-                          <span className="text-slate-400 text-[11px]">Pending Today</span>
-                          <span className="font-bold text-amber-400 font-numbers">{formatCurrency(metrics.todaysOutstanding, currencySymbol)}</span>
+                          <span className="text-theme-muted text-[11px]">Pending Today</span>
+                          <span className="font-bold text-amber-500 font-numbers">{formatCurrency(metrics.todaysOutstanding, currencySymbol)}</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#21262d] text-center">
-                    <div className="p-2 rounded-xl bg-[#21262d]">
-                      <p className="text-[8px] font-bold text-slate-400 uppercase">Payments</p>
-                      <p className="text-xs font-black text-white font-numbers mt-0.5">{metrics.todaysPaymentCount}</p>
+                  <div className="grid grid-cols-3 gap-2 pt-3 border-t border-theme-border-soft text-center">
+                    <div className="p-2 rounded-xl bg-theme-surface border border-theme-border-soft/40">
+                      <p className="text-[8px] font-bold text-theme-muted uppercase">Payments</p>
+                      <p className="text-xs font-black text-theme-primary font-numbers mt-0.5">{metrics.todaysPaymentCount}</p>
                     </div>
-                    <div className="p-2 rounded-xl bg-[#21262d]">
-                      <p className="text-[8px] font-bold text-slate-400 uppercase">Avg Payment</p>
-                      <p className="text-xs font-black text-white font-numbers mt-0.5">{formatCurrency(metrics.todaysAvgPayment, currencySymbol)}</p>
+                    <div className="p-2 rounded-xl bg-theme-surface border border-theme-border-soft/40">
+                      <p className="text-[8px] font-bold text-theme-muted uppercase">Avg Payment</p>
+                      <p className="text-xs font-black text-theme-primary font-numbers mt-0.5">{formatCurrency(metrics.todaysAvgPayment, currencySymbol)}</p>
                     </div>
-                    <div className="p-2 rounded-xl bg-[#21262d]">
-                      <p className="text-[8px] font-bold text-slate-400 uppercase">Largest Payment</p>
-                      <p className="text-xs font-black text-emerald-400 font-numbers mt-0.5">{formatCurrency(metrics.todaysLargestPayment, currencySymbol)}</p>
+                    <div className="p-2 rounded-xl bg-theme-surface border border-theme-border-soft/40">
+                      <p className="text-[8px] font-bold text-theme-muted uppercase">Largest Payment</p>
+                      <p className="text-xs font-black text-emerald-500 font-numbers mt-0.5">{formatCurrency(metrics.todaysLargestPayment, currencySymbol)}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* CARD 2: CASH FLOW MOVEMENT */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-[#161b22] border border-[#30363d] flex flex-col justify-between">
+                <div className="p-4 sm:p-5 rounded-2xl bg-theme-card border border-theme-border-soft flex flex-col justify-between shadow-xs">
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center">
+                        <div className="w-7 h-7 rounded-lg bg-theme-accent/15 text-theme-accent flex items-center justify-center">
                           <Wallet className="w-3.5 h-3.5" />
                         </div>
-                        <h3 className="text-xs font-black text-white uppercase tracking-wider">Cash Flow Movement</h3>
+                        <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Cash Flow Movement</h3>
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-[#21262d] border border-[#30363d] text-slate-300">This Month ▾</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-muted">This Month ▾</span>
                     </div>
 
                     <div className="space-y-2.5 py-1">
-                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#21262d] border border-[#30363d]/60">
+                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-theme-surface border border-theme-border-soft/60">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                          <div className="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
                             <ArrowDownRight className="w-3.5 h-3.5" />
                           </div>
-                          <span className="text-xs font-bold text-slate-200">Money In (Collections)</span>
+                          <span className="text-xs font-bold text-theme-primary">Money In (Collections)</span>
                         </div>
-                        <span className="text-xs font-black text-emerald-400 font-numbers">
+                        <span className="text-xs font-black text-emerald-500 font-numbers">
                           +{formatCurrency(metrics.thisMonthCollected, currencySymbol)} ∧
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#21262d] border border-[#30363d]/60">
+                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-theme-surface border border-theme-border-soft/60">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center">
+                          <div className="w-6 h-6 rounded-lg bg-rose-500/15 text-rose-500 flex items-center justify-center">
                             <ArrowUpRight className="w-3.5 h-3.5" />
                           </div>
-                          <span className="text-xs font-bold text-slate-200">Money Out (Expenses)</span>
+                          <span className="text-xs font-bold text-theme-primary">Money Out (Expenses)</span>
                         </div>
-                        <span className="text-xs font-black text-rose-400 font-numbers">
+                        <span className="text-xs font-black text-rose-500 font-numbers">
                           {metrics.thisMonthExpenses > 0 ? `-${formatCurrency(metrics.thisMonthExpenses, currencySymbol)}` : formatCurrency(0, currencySymbol)} ∨
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-[#21262d] flex items-center justify-between">
+                  <div className="pt-3 border-t border-theme-border-soft flex items-center justify-between">
                     <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Net Cash Flow</p>
-                      <p className="text-lg font-black text-emerald-400 font-numbers mt-0.5">
+                      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Net Cash Flow</p>
+                      <p className="text-lg font-black text-emerald-500 font-numbers mt-0.5">
                         {metrics.thisMonthNetCash >= 0 ? `+${formatCurrency(metrics.thisMonthNetCash, currencySymbol)}` : `-${formatCurrency(Math.abs(metrics.thisMonthNetCash), currencySymbol)}`}
                       </p>
                     </div>
@@ -966,7 +961,7 @@ const Dashboard = ({
                         <path
                           d="M0,25 Q30,30 50,15 T90,5 T100,2"
                           fill="none"
-                          stroke="#f59e0b"
+                          stroke="var(--accent, #d4af7a)"
                           strokeWidth="2.5"
                           strokeLinecap="round"
                         />
@@ -976,18 +971,18 @@ const Dashboard = ({
                 </div>
 
                 {/* CARD 3: DUE & AGING RISK */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-[#161b22] border border-[#30363d] flex flex-col justify-between">
+                <div className="p-4 sm:p-5 rounded-2xl bg-theme-card border border-theme-border-soft flex flex-col justify-between shadow-xs">
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center">
+                        <div className="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-500 flex items-center justify-center">
                           <ShieldAlert className="w-3.5 h-3.5" />
                         </div>
-                        <h3 className="text-xs font-black text-white uppercase tracking-wider">Due & Aging Risk</h3>
+                        <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Due & Aging Risk</h3>
                       </div>
                       <button
                         onClick={() => setCurrentTab('due-ledger')}
-                        className="text-[10px] font-bold px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-500/10 to-amber-600/20 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-all"
+                        className="text-[10px] font-bold px-2.5 py-1 rounded-xl bg-theme-surface border border-theme-border-soft text-theme-accent hover:bg-theme-surface-elevated transition-all"
                       >
                         View Due Ledger
                       </button>
@@ -995,47 +990,47 @@ const Dashboard = ({
 
                     <div className="grid grid-cols-3 gap-2 py-1 text-center">
                       <div>
-                        <p className="text-[8px] font-bold text-slate-400 uppercase">Total Outstanding</p>
-                        <p className="text-xs font-black text-amber-400 font-numbers mt-0.5">{formatCurrency(metrics.totalOutstanding, currencySymbol)}</p>
+                        <p className="text-[8px] font-bold text-theme-muted uppercase">Total Outstanding</p>
+                        <p className="text-xs font-black text-amber-500 font-numbers mt-0.5">{formatCurrency(metrics.totalOutstanding, currencySymbol)}</p>
                       </div>
                       <div>
-                        <p className="text-[8px] font-bold text-slate-400 uppercase">Overdue Amount</p>
-                        <p className="text-xs font-black text-rose-400 font-numbers mt-0.5">{formatCurrency(metrics.overdueAmount, currencySymbol)}</p>
+                        <p className="text-[8px] font-bold text-theme-muted uppercase">Overdue Amount</p>
+                        <p className="text-xs font-black text-rose-500 font-numbers mt-0.5">{formatCurrency(metrics.overdueAmount, currencySymbol)}</p>
                       </div>
                       <div>
-                        <p className="text-[8px] font-bold text-slate-400 uppercase">Due Today</p>
-                        <p className="text-xs font-black text-white font-numbers mt-0.5">{formatCurrency(metrics.dueTodayAmount, currencySymbol)}</p>
+                        <p className="text-[8px] font-bold text-theme-muted uppercase">Due Today</p>
+                        <p className="text-xs font-black text-theme-primary font-numbers mt-0.5">{formatCurrency(metrics.dueTodayAmount, currencySymbol)}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-[#21262d] flex items-center justify-between gap-2">
+                  <div className="pt-2 border-t border-theme-border-soft flex items-center justify-between gap-2">
                     <div className="flex-1">
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Aging Summary</p>
+                      <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider mb-1.5">Aging Summary</p>
                       <div className="grid grid-cols-3 gap-1 text-center">
-                        <div className="p-1 rounded-lg bg-[#21262d]">
-                          <p className="text-[7px] font-bold text-slate-400">0-7 DAYS</p>
-                          <p className="text-[9px] font-black text-white font-numbers">{formatCurrency(metrics.dueAging.current.amount, currencySymbol)}</p>
-                          <p className="text-[7px] text-slate-400">{metrics.dueAging.current.count} invoices</p>
+                        <div className="p-1 rounded-lg bg-theme-surface border border-theme-border-soft/40">
+                          <p className="text-[7px] font-bold text-theme-muted">0-7 DAYS</p>
+                          <p className="text-[9px] font-black text-theme-primary font-numbers">{formatCurrency(metrics.dueAging.current.amount, currencySymbol)}</p>
+                          <p className="text-[7px] text-theme-muted">{metrics.dueAging.current.count} invoices</p>
                         </div>
-                        <div className="p-1 rounded-lg bg-[#21262d]">
-                          <p className="text-[7px] font-bold text-slate-400">8-30 DAYS</p>
-                          <p className="text-[9px] font-black text-amber-400 font-numbers">{formatCurrency(metrics.dueAging.moderate.amount, currencySymbol)}</p>
-                          <p className="text-[7px] text-slate-400">{metrics.dueAging.moderate.count} invoice</p>
+                        <div className="p-1 rounded-lg bg-theme-surface border border-theme-border-soft/40">
+                          <p className="text-[7px] font-bold text-theme-muted">8-30 DAYS</p>
+                          <p className="text-[9px] font-black text-amber-500 font-numbers">{formatCurrency(metrics.dueAging.moderate.amount, currencySymbol)}</p>
+                          <p className="text-[7px] text-theme-muted">{metrics.dueAging.moderate.count} invoice</p>
                         </div>
-                        <div className="p-1 rounded-lg bg-[#21262d]">
-                          <p className="text-[7px] font-bold text-slate-400">30+ DAYS</p>
-                          <p className="text-[9px] font-black text-rose-400 font-numbers">{formatCurrency(metrics.dueAging.aged.amount, currencySymbol)}</p>
-                          <p className="text-[7px] text-slate-400">{metrics.dueAging.aged.count} invoices</p>
+                        <div className="p-1 rounded-lg bg-theme-surface border border-theme-border-soft/40">
+                          <p className="text-[7px] font-bold text-theme-muted">30+ DAYS</p>
+                          <p className="text-[9px] font-black text-rose-500 font-numbers">{formatCurrency(metrics.dueAging.aged.amount, currencySymbol)}</p>
+                          <p className="text-[7px] text-theme-muted">{metrics.dueAging.aged.count} invoices</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Shield Risk Badge */}
-                    <div className="w-18 h-18 rounded-full border-2 border-emerald-500/40 bg-emerald-500/5 flex flex-col items-center justify-center p-1 shrink-0 shadow-inner">
-                      <Shield className="w-4 h-4 text-emerald-400 mb-0.5" />
-                      <span className="text-[7px] text-slate-400 font-bold uppercase">Risk Level</span>
-                      <span className="text-xs font-black text-emerald-400">{metrics.healthStatus}</span>
+                    <div className="w-18 h-18 rounded-full border-2 border-emerald-500/40 bg-emerald-500/10 flex flex-col items-center justify-center p-1 shrink-0 shadow-inner">
+                      <Shield className="w-4 h-4 text-emerald-500 mb-0.5" />
+                      <span className="text-[7px] text-theme-muted font-bold uppercase">Risk Level</span>
+                      <span className="text-xs font-black text-emerald-500">{metrics.healthStatus}</span>
                     </div>
                   </div>
                 </div>
@@ -1048,13 +1043,13 @@ const Dashboard = ({
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
 
                 {/* LEFT: SALES VS COLLECTION TREND CHART (6 Cols) */}
-                <div className="lg:col-span-6 p-4 sm:p-5 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-sm space-y-3">
+                <div className="lg:col-span-6 p-4 sm:p-5 rounded-2xl bg-theme-card border border-theme-border-soft shadow-xs space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
-                      <h3 className="text-sm font-black text-white font-heading">Sales vs Collection Trend</h3>
-                      <p className="text-[10px] text-slate-400 font-medium">Real-time comparison of invoiced sales & actual collections</p>
+                      <h3 className="text-sm font-black text-theme-primary font-heading">Sales vs Collection Trend</h3>
+                      <p className="text-[10px] text-theme-muted font-medium">Real-time comparison of invoiced sales & actual collections</p>
                     </div>
-                    <div className="flex items-center gap-1 bg-[#21262d] p-1 rounded-xl border border-[#30363d] text-[10px] font-bold">
+                    <div className="flex items-center gap-1 bg-theme-surface p-1 rounded-xl border border-theme-border-soft text-[10px] font-bold">
                       {[
                         { key: '7d', label: '7 Days' },
                         { key: '30d', label: '30 Days' },
@@ -1064,7 +1059,7 @@ const Dashboard = ({
                         <button
                           key={tf.key}
                           onClick={() => setChartTimeframe(tf.key)}
-                          className={`px-2.5 py-1 rounded-lg transition-all ${chartTimeframe === tf.key ? 'bg-amber-500 text-slate-950 font-black shadow-xs' : 'text-slate-400 hover:text-white'}`}
+                          className={`px-2.5 py-1 rounded-lg transition-all ${chartTimeframe === tf.key ? 'bg-theme-accent text-theme-button-text font-black shadow-xs' : 'text-theme-muted hover:text-theme-primary'}`}
                         >
                           {tf.label}
                         </button>
@@ -1074,12 +1069,12 @@ const Dashboard = ({
 
                   <div className="flex items-center gap-4 text-[10px] font-bold pt-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                      <span className="text-slate-300">Invoiced Sales</span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                      <span className="text-theme-muted">Invoiced Sales</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                      <span className="text-slate-300">Collected Cash</span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                      <span className="text-theme-muted">Collected Cash</span>
                     </div>
                   </div>
 
@@ -1088,22 +1083,22 @@ const Dashboard = ({
                       <AreaChart data={chartSeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                           <linearGradient id="salesGradM" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.35} />
-                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                            <stop offset="5%" stopColor="var(--accent, #d4af7a)" stopOpacity={0.35} />
+                            <stop offset="95%" stopColor="var(--accent, #d4af7a)" stopOpacity={0} />
                           </linearGradient>
                           <linearGradient id="collectedGradM" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
                             <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#30363d" opacity={0.5} />
-                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#8b949e' }} dy={5} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#8b949e' }} dx={-3} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-soft, rgba(0,0,0,0.05))" opacity={0.5} />
+                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'var(--text-muted, #8b949e)' }} dy={5} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'var(--text-muted, #8b949e)' }} dx={-3} />
                         <Tooltip
-                          contentStyle={{ background: '#161b22', border: '1px solid #30363d', borderRadius: '12px', fontSize: '11px', color: '#fff' }}
+                          contentStyle={{ background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-soft, #e2e8f0)', borderRadius: '12px', fontSize: '11px', color: 'var(--text-primary, #000)' }}
                           formatter={(val, name) => [formatCurrency(val, currencySymbol), name === 'sales' ? 'Invoiced Sales' : 'Collected Cash']}
                         />
-                        <Area type="monotone" dataKey="sales" stroke="#f59e0b" strokeWidth={2.5} fill="url(#salesGradM)" />
+                        <Area type="monotone" dataKey="sales" stroke="var(--accent, #d4af7a)" strokeWidth={2.5} fill="url(#salesGradM)" />
                         <Area type="monotone" dataKey="collected" stroke="#10b981" strokeWidth={2.5} fill="url(#collectedGradM)" />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -1111,33 +1106,33 @@ const Dashboard = ({
                 </div>
 
                 {/* MIDDLE-RIGHT: RECENT PAYMENTS (3 Cols) */}
-                <div className="lg:col-span-3 p-4 sm:p-5 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-sm space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#21262d]">
-                    <h3 className="text-xs font-black text-white uppercase tracking-wider">Recent Payments</h3>
-                    <button onClick={() => setCurrentTab('due-ledger')} className="text-[10px] font-bold text-amber-400 hover:underline">
+                <div className="lg:col-span-3 p-4 sm:p-5 rounded-2xl bg-theme-card border border-theme-border-soft shadow-xs space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-theme-border-soft">
+                    <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Recent Payments</h3>
+                    <button onClick={() => setCurrentTab('due-ledger')} className="text-[10px] font-bold text-theme-accent hover:underline">
                       View All &gt;
                     </button>
                   </div>
 
                   {metrics.recentPayments.length === 0 ? (
-                    <div className="py-12 text-center text-xs text-slate-500">No payments recorded yet.</div>
+                    <div className="py-12 text-center text-xs text-theme-muted">No payments recorded yet.</div>
                   ) : (
                     <div className="space-y-2">
                       {metrics.recentPayments.map(p => (
-                        <div key={p.id} className="flex items-center justify-between p-2 rounded-xl bg-[#21262d]/60 border border-[#30363d]/50 hover:bg-[#21262d] transition-all">
+                        <div key={p.id} className="flex items-center justify-between p-2 rounded-xl bg-theme-surface/70 border border-theme-border-soft/60 hover:bg-theme-surface transition-all">
                           <div className="flex items-center gap-2 min-w-0">
-                            <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-[9px] flex items-center justify-center shrink-0">
+                            <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-500 font-bold text-[9px] flex items-center justify-center shrink-0">
                               {getInitials(p.customerName)}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-xs font-bold text-white truncate">{p.customerName}</p>
-                              <p className="text-[9px] text-slate-400 font-medium">{p.method} Payment</p>
+                              <p className="text-xs font-bold text-theme-primary truncate">{p.customerName}</p>
+                              <p className="text-[9px] text-theme-muted font-medium">{p.method} Payment</p>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
-                            <span className="text-[8px] text-slate-400 font-mono block">{p.invoiceNumber}</span>
-                            <p className="text-xs font-black text-emerald-400 font-numbers">+{formatCurrency(p.amount, currencySymbol)}</p>
-                            <span className="text-[8px] text-slate-400">{getLocalCalendarDate(p.date)}</span>
+                            <span className="text-[8px] text-theme-muted font-mono block">{p.invoiceNumber}</span>
+                            <p className="text-xs font-black text-emerald-500 font-numbers">+{formatCurrency(p.amount, currencySymbol)}</p>
+                            <span className="text-[8px] text-theme-muted">{getLocalCalendarDate(p.date)}</span>
                           </div>
                         </div>
                       ))}
@@ -1146,23 +1141,23 @@ const Dashboard = ({
 
                   <button
                     onClick={() => setCurrentTab('due-ledger')}
-                    className="w-full py-1.5 rounded-xl bg-[#21262d] border border-[#30363d] text-[10px] font-bold text-slate-300 hover:text-white transition-colors text-center block"
+                    className="w-full py-1.5 rounded-xl bg-theme-surface border border-theme-border-soft text-[10px] font-bold text-theme-muted hover:text-theme-primary transition-colors text-center block"
                   >
                     View All Payments ▾
                   </button>
                 </div>
 
                 {/* RIGHT: RECENT INVOICES (3 Cols) */}
-                <div className="lg:col-span-3 p-4 sm:p-5 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-sm space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#21262d]">
-                    <h3 className="text-xs font-black text-white uppercase tracking-wider">Recent Invoices</h3>
-                    <button onClick={() => setCurrentTab('invoices')} className="text-[10px] font-bold text-amber-400 hover:underline">
+                <div className="lg:col-span-3 p-4 sm:p-5 rounded-2xl bg-theme-card border border-theme-border-soft shadow-xs space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-theme-border-soft">
+                    <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Recent Invoices</h3>
+                    <button onClick={() => setCurrentTab('invoices')} className="text-[10px] font-bold text-theme-accent hover:underline">
                       View All &gt;
                     </button>
                   </div>
 
                   {recentInvoices.length === 0 ? (
-                    <div className="py-12 text-center text-xs text-slate-500">No invoices created yet.</div>
+                    <div className="py-12 text-center text-xs text-theme-muted">No invoices created yet.</div>
                   ) : (
                     <div className="space-y-2">
                       {recentInvoices.map(inv => {
@@ -1171,21 +1166,21 @@ const Dashboard = ({
                         const isPartial = status === 'partially paid' || status === 'partial';
 
                         return (
-                          <div key={inv.id} className="flex items-center justify-between p-2 rounded-xl bg-[#21262d]/60 border border-[#30363d]/50 hover:bg-[#21262d] transition-all">
+                          <div key={inv.id} className="flex items-center justify-between p-2 rounded-xl bg-theme-surface/70 border border-theme-border-soft/60 hover:bg-theme-surface transition-all">
                             <div className="flex items-center gap-2 min-w-0">
-                              <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">
+                              <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
                                 <FileText className="w-3.5 h-3.5" />
                               </div>
                               <div className="min-w-0">
-                                <p className="text-[10px] font-bold text-slate-200 font-mono truncate">{inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`}</p>
-                                <p className="text-[9px] text-slate-400 truncate">{inv.customerName || 'Walk-in'}</p>
+                                <p className="text-[10px] font-bold text-theme-primary font-mono truncate">{inv.invoiceNumber || `#${inv.id?.slice(0, 6)}`}</p>
+                                <p className="text-[9px] text-theme-muted truncate">{inv.customerName || 'Walk-in'}</p>
                               </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <span className="text-xs font-black text-white font-numbers">
+                              <span className="text-xs font-black text-theme-primary font-numbers">
                                 {formatCurrency(inv.grandTotal || inv.total || 0, currencySymbol)}
                               </span>
-                              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md ${isPaid ? 'bg-emerald-500/20 text-emerald-400' : isPartial ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md ${isPaid ? 'bg-emerald-500/20 text-emerald-500' : isPartial ? 'bg-amber-500/20 text-amber-500' : 'bg-rose-500/20 text-rose-500'}`}>
                                 {isPaid ? 'Paid' : isPartial ? 'Partial' : 'Due'}
                               </span>
                             </div>
@@ -1204,30 +1199,30 @@ const Dashboard = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
                 {/* 1. TOP CUSTOMERS */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-sm space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#21262d]">
-                    <h3 className="text-xs font-black text-white uppercase tracking-wider">Top Customers <span className="text-[9px] font-normal text-slate-400">(By Collected)</span></h3>
-                    <button onClick={() => setCurrentTab('customers')} className="text-[10px] font-bold text-amber-400 hover:underline">
+                <div className="p-4 sm:p-5 rounded-2xl bg-theme-card border border-theme-border-soft shadow-xs space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-theme-border-soft">
+                    <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Top Customers <span className="text-[9px] font-normal text-theme-muted">(By Collected)</span></h3>
+                    <button onClick={() => setCurrentTab('customers')} className="text-[10px] font-bold text-theme-accent hover:underline">
                       View All &gt;
                     </button>
                   </div>
 
                   {metrics.topCustomers.length === 0 ? (
-                    <div className="py-8 text-center text-xs text-slate-500">No customer records yet.</div>
+                    <div className="py-8 text-center text-xs text-theme-muted">No customer records yet.</div>
                   ) : (
                     <div className="space-y-2">
                       {metrics.topCustomers.map((c, idx) => (
                         <div key={c.name} className="flex items-center justify-between text-xs py-1">
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="w-4 h-4 rounded bg-[#21262d] text-[9px] font-bold text-amber-400 flex items-center justify-center shrink-0 border border-[#30363d]">{idx + 1}</span>
+                            <span className="w-4 h-4 rounded bg-theme-surface text-[9px] font-bold text-theme-accent flex items-center justify-center shrink-0 border border-theme-border-soft">{idx + 1}</span>
                             <div className="min-w-0">
-                              <p className="font-bold text-white truncate text-[11px]">{c.name}</p>
-                              <span className="text-[8px] text-slate-400">{c.invoicesCount} invoices</span>
+                              <p className="font-bold text-theme-primary truncate text-[11px]">{c.name}</p>
+                              <span className="text-[8px] text-theme-muted">{c.invoicesCount} invoices</span>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
-                            <span className="text-[8px] text-slate-400 block">Collected: <span className="font-bold text-white font-numbers">{formatCurrency(c.collected, currencySymbol)}</span></span>
-                            <span className="text-[8px] text-slate-400 block">Outstanding: <span className="font-bold text-amber-400 font-numbers">{formatCurrency(c.outstanding, currencySymbol)}</span></span>
+                            <span className="text-[8px] text-theme-muted block">Collected: <span className="font-bold text-theme-primary font-numbers">{formatCurrency(c.collected, currencySymbol)}</span></span>
+                            <span className="text-[8px] text-theme-muted block">Outstanding: <span className="font-bold text-amber-500 font-numbers">{formatCurrency(c.outstanding, currencySymbol)}</span></span>
                           </div>
                         </div>
                       ))}
@@ -1236,10 +1231,10 @@ const Dashboard = ({
                 </div>
 
                 {/* 2. PAYMENT METHODS */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-sm space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#21262d]">
-                    <h3 className="text-xs font-black text-white uppercase tracking-wider">Payment Methods</h3>
-                    <span className="text-[10px] font-bold text-slate-400">This Month ▾</span>
+                <div className="p-4 sm:p-5 rounded-2xl bg-theme-card border border-theme-border-soft shadow-xs space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-theme-border-soft">
+                    <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Payment Methods</h3>
+                    <span className="text-[10px] font-bold text-theme-muted">This Month ▾</span>
                   </div>
 
                   <div className="flex items-center gap-3 py-1">
@@ -1256,12 +1251,12 @@ const Dashboard = ({
                           dataKey="value"
                         >
                           {metrics.paymentMethodsList.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                           ))}
                         </Pie>
                       </PieChart>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xs font-black text-white font-numbers">100%</span>
+                        <span className="text-xs font-black text-theme-primary font-numbers">100%</span>
                       </div>
                     </div>
 
@@ -1270,10 +1265,10 @@ const Dashboard = ({
                       {metrics.paymentMethodsList.map((pm, idx) => (
                         <div key={pm.name} className="flex items-center justify-between text-[10px]">
                           <div className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
-                            <span className="text-slate-300 font-medium">{pm.name}</span>
+                            <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }} />
+                            <span className="text-theme-muted font-medium">{pm.name}</span>
                           </div>
-                          <span className="font-bold text-white font-numbers">{formatCurrency(pm.value, currencySymbol)} ({pm.percentage}%)</span>
+                          <span className="font-bold text-theme-primary font-numbers">{formatCurrency(pm.value, currencySymbol)} ({pm.percentage}%)</span>
                         </div>
                       ))}
                     </div>
@@ -1281,62 +1276,62 @@ const Dashboard = ({
                 </div>
 
                 {/* 3. BUSINESS HEALTH */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-sm space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#21262d]">
-                    <h3 className="text-xs font-black text-white uppercase tracking-wider">Business Health</h3>
-                    <button onClick={() => setCurrentTab('reports')} className="text-[10px] font-bold text-amber-400 hover:underline">
+                <div className="p-4 sm:p-5 rounded-2xl bg-theme-card border border-theme-border-soft shadow-xs space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-theme-border-soft">
+                    <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Business Health</h3>
+                    <button onClick={() => setCurrentTab('reports')} className="text-[10px] font-bold text-theme-accent hover:underline">
                       View Details &gt;
                     </button>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-2 rounded-xl bg-[#21262d]">
-                      <span className="text-[8px] font-bold text-slate-400 block uppercase">Collection Efficiency</span>
-                      <p className="text-sm font-black text-white font-numbers mt-0.5">{metrics.collectionRate}%</p>
-                      <span className="text-[8px] font-bold text-emerald-400 flex items-center gap-0.5 mt-0.5">● Good</span>
+                    <div className="p-2 rounded-xl bg-theme-surface border border-theme-border-soft/40">
+                      <span className="text-[8px] font-bold text-theme-muted block uppercase">Collection Efficiency</span>
+                      <p className="text-sm font-black text-theme-primary font-numbers mt-0.5">{metrics.collectionRate}%</p>
+                      <span className="text-[8px] font-bold text-emerald-500 flex items-center gap-0.5 mt-0.5">● Good</span>
                     </div>
 
-                    <div className="p-2 rounded-xl bg-[#21262d]">
-                      <span className="text-[8px] font-bold text-slate-400 block uppercase">Invoice Generation</span>
-                      <p className="text-sm font-black text-white font-numbers mt-0.5">{invoices.length}</p>
-                      <span className="text-[8px] text-slate-400 block mt-0.5">This Month</span>
+                    <div className="p-2 rounded-xl bg-theme-surface border border-theme-border-soft/40">
+                      <span className="text-[8px] font-bold text-theme-muted block uppercase">Invoice Generation</span>
+                      <p className="text-sm font-black text-theme-primary font-numbers mt-0.5">{invoices.length}</p>
+                      <span className="text-[8px] text-theme-muted block mt-0.5">This Month</span>
                     </div>
 
-                    <div className="p-2 rounded-xl bg-[#21262d]">
-                      <span className="text-[8px] font-bold text-slate-400 block uppercase">Customer Network</span>
-                      <p className="text-sm font-black text-white font-numbers mt-0.5">{customers.length}</p>
-                      <span className="text-[8px] text-slate-400 block mt-0.5">Active</span>
+                    <div className="p-2 rounded-xl bg-theme-surface border border-theme-border-soft/40">
+                      <span className="text-[8px] font-bold text-theme-muted block uppercase">Customer Network</span>
+                      <p className="text-sm font-black text-theme-primary font-numbers mt-0.5">{customers.length}</p>
+                      <span className="text-[8px] text-theme-muted block mt-0.5">Active</span>
                     </div>
 
-                    <div className="p-2 rounded-xl bg-[#21262d]">
-                      <span className="text-[8px] font-bold text-slate-400 block uppercase">Outstanding Risk</span>
-                      <p className="text-sm font-black text-emerald-400 mt-0.5">{metrics.healthStatus}</p>
-                      <span className="text-[8px] font-bold text-emerald-400 flex items-center gap-0.5 mt-0.5">💚 Healthy</span>
+                    <div className="p-2 rounded-xl bg-theme-surface border border-theme-border-soft/40">
+                      <span className="text-[8px] font-bold text-theme-muted block uppercase">Outstanding Risk</span>
+                      <p className="text-sm font-black text-emerald-500 mt-0.5">{metrics.healthStatus}</p>
+                      <span className="text-[8px] font-bold text-emerald-500 flex items-center gap-0.5 mt-0.5">💚 Healthy</span>
                     </div>
                   </div>
                 </div>
 
                 {/* 4. QUICK INSIGHTS */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-sm space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#21262d]">
-                    <h3 className="text-xs font-black text-white uppercase tracking-wider">Quick Insights</h3>
-                    <span className="text-[10px] font-bold text-slate-400">This Month ▾</span>
+                <div className="p-4 sm:p-5 rounded-2xl bg-theme-card border border-theme-border-soft shadow-xs space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-theme-border-soft">
+                    <h3 className="text-xs font-black text-theme-primary uppercase tracking-wider">Quick Insights</h3>
+                    <span className="text-[10px] font-bold text-theme-muted">This Month ▾</span>
                   </div>
 
                   <div className="space-y-2 text-xs">
-                    <div className="flex items-start gap-2 p-2 rounded-xl bg-[#21262d]/70">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                      <p className="text-[10px] text-slate-300 font-medium">Keep going! You're doing great.</p>
+                    <div className="flex items-start gap-2 p-2 rounded-xl bg-theme-surface/70 border border-theme-border-soft/40">
+                      <Sparkles className="w-3.5 h-3.5 text-theme-accent shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-theme-secondary font-medium">Keep going! You're doing great.</p>
                     </div>
 
-                    <div className="flex items-start gap-2 p-2 rounded-xl bg-[#21262d]/70">
-                      <BarChart3 className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                      <p className="text-[10px] text-slate-300 font-medium">Your collection is {metrics.collectionRate}% efficient this period.</p>
+                    <div className="flex items-start gap-2 p-2 rounded-xl bg-theme-surface/70 border border-theme-border-soft/40">
+                      <BarChart3 className="w-3.5 h-3.5 text-theme-accent shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-theme-secondary font-medium">Your collection is {metrics.collectionRate}% efficient this period.</p>
                     </div>
 
-                    <div className="flex items-start gap-2 p-2 rounded-xl bg-[#21262d]/70">
-                      <Lightbulb className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                      <p className="text-[10px] text-slate-300 font-medium">
+                    <div className="flex items-start gap-2 p-2 rounded-xl bg-theme-surface/70 border border-theme-border-soft/40">
+                      <Lightbulb className="w-3.5 h-3.5 text-theme-accent shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-theme-secondary font-medium">
                         {metrics.dueTodayInvoicesCount > 0 ? `${metrics.dueTodayInvoicesCount} invoices are due today.` : 'All today invoices are settled.'}
                       </p>
                     </div>
