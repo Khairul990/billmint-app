@@ -1,0 +1,132 @@
+/* BillQyro Dashboard — premium visual reference layer
+ * Scoped to the Dashboard root so the rest of the application is untouched.
+ * Uses the existing theme tokens; no fixed light/dark surface colors.
+ */
+
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans {
+  background:
+    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 28%),
+    radial-gradient(circle at 92% 10%, color-mix(in srgb, var(--accent) 5%, transparent), transparent 30%),
+    var(--app-bg) !important;
+  padding-bottom: 3rem;
+}
+
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans > div:not(.pointer-events-none) {
+  position: relative;
+}
+
+/* Main dashboard content width / breathing room */
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans > div > div.w-full {
+  padding-top: 1.25rem;
+}
+
+/* Command header */
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .shadow-premium {
+  border-radius: 1.25rem;
+  border-color: var(--border-soft);
+  background: color-mix(in srgb, var(--card-bg) 96%, var(--accent) 4%);
+  box-shadow: 0 14px 38px color-mix(in srgb, var(--accent) 8%, transparent),
+              0 2px 8px rgba(15, 23, 42, 0.035);
+}
+
+/* All dashboard cards — clean SaaS / luxury finish */
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .bg-theme-card {
+  background: color-mix(in srgb, var(--card-bg) 98%, var(--accent) 2%) !important;
+  border-color: color-mix(in srgb, var(--border-soft) 82%, var(--accent) 18%) !important;
+  border-radius: 1.05rem !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.035),
+              0 1px 3px rgba(15, 23, 42, 0.025) !important;
+}
+
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .bg-theme-card:hover {
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--accent) 9%, transparent),
+              0 2px 6px rgba(15, 23, 42, 0.035) !important;
+}
+
+/* KPI row: compact, premium, consistent visual rhythm */
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .grid.grid-cols-2.sm\:grid-cols-4.lg\:grid-cols-8 {
+  gap: 0.55rem;
+}
+
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .grid.grid-cols-2.sm\:grid-cols-4.lg\:grid-cols-8 > .bg-theme-card {
+  min-height: 9.4rem;
+  padding: 0.95rem !important;
+}
+
+/* KPI icon tiles */
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .grid.grid-cols-2.sm\:grid-cols-4.lg\:grid-cols-8 .w-7.h-7 {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.7rem;
+}
+
+/* Primary metrics */
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .font-numbers {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.015em;
+}
+
+/* Middle intelligence row */
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .grid.grid-cols-1.md\:grid-cols-3 {
+  gap: 0.8rem;
+}
+
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .grid.grid-cols-1.md\:grid-cols-3 > .bg-theme-card {
+  min-height: 12.7rem;
+}
+
+/* Nested data tiles */
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .bg-theme-surface {
+  background: color-mix(in srgb, var(--surface) 94%, var(--accent) 6%) !important;
+  border-color: color-mix(in srgb, var(--border-soft) 78%, var(--accent) 22%) !important;
+}
+
+/* Trend chart — make it the visual anchor */
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .lg\:col-span-6.bg-theme-card {
+  min-height: 18.5rem;
+}
+
+/* Lower information cards */
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .lg\:col-span-6 + .bg-theme-card,
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .lg\:col-span-6 ~ .bg-theme-card {
+  border-radius: 1.05rem !important;
+}
+
+/* Buttons: understated luxury rather than heavy fills */
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans button:not(.btn-premium) {
+  letter-spacing: -0.005em;
+}
+
+/* Keep semantic colours intact while softening their surfaces */
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .bg-emerald-500\/15,
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .bg-blue-500\/15,
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .bg-amber-500\/15,
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .bg-purple-500\/15,
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .bg-cyan-500\/15,
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .bg-rose-500\/15,
+.min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .bg-indigo-500\/15 {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 10%, transparent);
+}
+
+/* Dark mode: preserve the selected theme and simply increase depth */
+.dark .min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .bg-theme-card {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16),
+              inset 0 1px 0 color-mix(in srgb, var(--accent) 7%, transparent) !important;
+}
+
+@media (max-width: 1024px) {
+  .min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .grid.grid-cols-2.sm\:grid-cols-4.lg\:grid-cols-8 {
+    gap: 0.65rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans > div > div.w-full {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .min-h-screen.bg-theme-app.text-theme-primary.pb-16.font-sans .grid.grid-cols-2.sm\:grid-cols-4.lg\:grid-cols-8 > .bg-theme-card {
+    min-height: 8.5rem;
+  }
+}
