@@ -7,6 +7,9 @@ const config: CapacitorConfig = {
   bundledWebRuntime: false,
   android: {
     backgroundColor: '#f8f6f1'
+  },
+  server: {
+    androidScheme: 'https'
   }
 };
 
