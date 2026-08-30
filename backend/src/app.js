@@ -12,6 +12,8 @@ import { publicInvoiceRouter } from './modules/public/publicInvoiceRoutes.js';
 import { paymentRouter } from './modules/payments/paymentRoutes.js';
 import { vendorRouter, vendorPaymentRouter } from './modules/vendors/vendorRoutes.js';
 import { outsourceRouter } from './modules/outsource/outsourceRoutes.js';
+import { expenseRouter } from './modules/expenses/expenseRoutes.js';
+import { bankLedgerRouter } from './modules/bankLedger/bankLedgerRoutes.js';
 
 // Native Security Headers (Zero-dependency Helmet equivalent)
 export const securityHeadersMiddleware = (req, res, next) => {
@@ -61,6 +63,8 @@ export const createApp = () => {
   app.use(`${config.apiPrefix}/vendors`, vendorRouter);
   app.use(`${config.apiPrefix}/outsource-jobs`, outsourceRouter);
   app.use(`${config.apiPrefix}/vendor-payments`, vendorPaymentRouter);
+  app.use(`${config.apiPrefix}/expenses`, expenseRouter);
+  app.use(`${config.apiPrefix}/bank-ledger`, bankLedgerRouter);
 
   // 4. 404 Not Found Handler (Express 5 compatible)
   app.use((req, res) => {

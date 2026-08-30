@@ -83,8 +83,10 @@ This enforces strict database-level mathematical tenant isolation independently 
 - `GET /api/v1/vendors/:id/ledger` — Vendor statement with jobs, payments, and server-side due balance
 - `POST /api/v1/outsource-jobs` — Assign outsource job linked to vendor and invoice
 - `GET /api/v1/outsource-jobs` — Paginated list of outsource jobs with vendor/invoice/status filters
-- `PATCH /api/v1/outsource-jobs/:id` — Update outsource job status (Pending/In Progress/Completed) & cost
-- `POST /api/v1/vendor-payments` — Record payment to vendor with idempotency check
+- `POST /api/v1/expenses` — Record expense with amount, category, date, and description
+- `GET /api/v1/expenses` — Paginated list of expenses with category and date filtering
+- `POST /api/v1/bank-ledger` — Record bank income or expense transaction
+- `GET /api/v1/bank-ledger` — Paginated list of bank ledger entries with type filtering
 
 ### Public Endpoints (Unauthenticated):
 - `GET /api/v1/public/invoices/:token` — Secure public invoice retrieval via cryptographic token (strips internal UUIDs/notes)
