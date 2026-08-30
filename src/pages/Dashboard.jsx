@@ -8,7 +8,7 @@ import {
   BarChart3, RefreshCw, Eye, Download,
   AlertTriangle, ChevronRight, ChevronDown, Building2,
   Layers, ArrowUpRight, ArrowDownRight, Wallet, Activity, ShieldAlert,
-  Calendar, PieChart as PieIcon
+  Calendar, PieChart as PieIcon, ArrowUpDown, Sparkles, CircleDot
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid } from 'recharts';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -32,7 +32,7 @@ const AnimatedNumber = ({ value }) => {
       return;
     }
 
-    // Match leading non-digits (prefix like ₹, +₹, -₹), numeric digits, and trailing suffix (like %)
+    // Match leading prefix, numeric digits, and trailing suffix
     const match = strValue.match(/^([^0-9.-]*)(-?[0-9]+(?:\.[0-9]+)?)(.*)$/);
     if (!match) {
       setDisplayValue(strValue);
@@ -48,7 +48,7 @@ const AnimatedNumber = ({ value }) => {
       return;
     }
 
-    // Strictly eliminate negative zero
+    // Eliminate negative zero completely
     if (Math.abs(numericValue) < 0.0001) {
       const cleanPrefix = prefix.replace(/^[+-]/, '');
       setDisplayValue(`${cleanPrefix}0${suffix}`);
@@ -62,7 +62,7 @@ const AnimatedNumber = ({ value }) => {
 
     const animate = (timestamp) => {
       if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / 600, 1);
+      const progress = Math.min((timestamp - startTime) / 500, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       const currentVal = numericValue * eased;
       const formattedNumber = decimalPlaces > 0
@@ -81,18 +81,16 @@ const AnimatedNumber = ({ value }) => {
   return <>{displayValue ?? strValue}</>;
 };
 
-const KpiCard = ({ title, value, icon: Icon, subtext, trend, trendUp = true, highlight = false }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 12 }}
-    animate={{ opacity: 1, y: 0 }}
-    className={`bg-theme-card border ${highlight ? 'border-theme-accent/40 shadow-premium' : 'border-theme-border-soft shadow-xs'} rounded-2xl p-4 hover:shadow-premium-hover transition-all duration-200 relative overflow-hidden group`}
+const LuxuryKpiCard = ({ title, value, icon: Icon, subtext, trend, trendUp = true, highlight = false }) => (
+  <div
+    className={`bg-theme-card border ${highlight ? 'border-theme-accent/40 shadow-premium hover:border-theme-accent' : 'border-theme-border-soft/70 shadow-xs hover:border-theme-border-strong'} rounded-2xl p-4 transition-all duration-200 relative overflow-hidden group hover:-translate-y-0.5`}
   >
     <div className="flex items-start justify-between mb-2">
-      <div className={`p-2 rounded-xl ${highlight ? 'bg-theme-accent text-white' : 'bg-theme-accent/10 text-theme-accent'} group-hover:scale-105 transition-transform shrink-0`}>
+      <div className={`p-2.5 rounded-xl ${highlight ? 'bg-theme-accent text-white shadow-xs' : 'bg-theme-accent/10 text-theme-accent'} group-hover:scale-105 transition-transform shrink-0`}>
         {Icon && <Icon className="w-4 h-4" />}
       </div>
       {trend && (
-        <span className={`flex items-center gap-0.5 text-[9px] font-black px-2 py-0.5 rounded-full ${trendUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+        <span className={`flex items-center gap-0.5 text-[9px] font-black px-2 py-0.5 rounded-full ${trendUp ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'}`}>
           {trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
           {trend}
         </span>
@@ -103,7 +101,7 @@ const KpiCard = ({ title, value, icon: Icon, subtext, trend, trendUp = true, hig
       <AnimatedNumber value={value} />
     </p>
     {subtext && <p className="text-[10px] font-semibold text-theme-muted mt-1 truncate">{subtext}</p>}
-  </motion.div>
+  </div>
 );
 
 const getLocalCalendarDate = (dateInput = new Date()) => {
@@ -158,7 +156,7 @@ const Dashboard = ({
   const [, setTriggerSync] = useState(0);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsInitialLoad(false), 400);
+    const timer = setTimeout(() => setIsInitialLoad(false), 300);
     return () => clearTimeout(timer);
   }, []);
 
@@ -428,15 +426,10 @@ const Dashboard = ({
       .sort((a, b) => b.collected - a.collected)
       .slice(0, 5);
 
-    // Top Overdue Customer
-    let topOverdueCustomer = null;
-    let maxOverdue = 0;
-    for (const [name, amt] of customerOverdueMap.entries()) {
-      if (amt > maxOverdue) {
-        maxOverdue = amt;
-        topOverdueCustomer = { name, amount: amt };
-      }
-    }
+    // Payment methods array for breakdown pill
+    const paymentMethodsList = Array.from(paymentMethodsMap.entries())
+      .map(([method, amount]) => ({ method, amount }))
+      .sort((a, b) => b.amount - a.amount);
 
     // Business Health breakdown (Transparent real data calculations)
     const overdueRatio = totalOutstanding > 0 ? overdueAmount / totalOutstanding : 0;
@@ -462,7 +455,6 @@ const Dashboard = ({
       overdueCount,
       dueTodayAmount: Math.round(dueTodayAmount * 100) / 100,
       largestDueInvoice,
-      topOverdueCustomer,
       dueAging: {
         current: Math.round(dueAging.current * 100) / 100,
         moderate: Math.round(dueAging.moderate * 100) / 100,
@@ -477,6 +469,7 @@ const Dashboard = ({
       revenueGrowthPercent,
       recentPayments: sortedPayments.slice(0, 6),
       topCustomers: topCustomersList,
+      paymentMethodsList,
       pipeline,
       riskLevel,
       riskColor
@@ -601,9 +594,7 @@ const Dashboard = ({
 
               {/* PENDING PROOFS BANNER */}
               {pendingPaymentsCount > 0 && (
-                <motion.button
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <button
                   onClick={() => setCurrentTab('pending-payments')}
                   className="w-full flex items-center justify-between p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-left hover:bg-amber-500/15 transition-all group"
                 >
@@ -621,31 +612,47 @@ const Dashboard = ({
                   <span className="text-xs font-bold text-amber-500 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
                     Review <ArrowRight className="w-3.5 h-3.5" />
                   </span>
-                </motion.button>
+                </button>
               )}
 
-              {/* GREETING & WORKSPACE HEADER */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              {/* GREETING & WORKSPACE LUXURY COMMAND HEADER */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-theme-card border border-theme-border-soft shadow-xs">
                 <div>
-                  <h1 className="text-2xl font-black text-theme-primary tracking-tight">
-                    {greeting.text}, {businessSettings?.ownerName?.split(' ')[0] || businessSettings?.businessName?.split(' ')[0] || 'Admin'} 👋
-                  </h1>
-                  <p className="text-xs font-semibold text-theme-muted mt-0.5 flex items-center gap-1.5">
-                    <span>Active Workspace:</span>
-                    <span className="font-bold text-theme-primary">{workspaceName}</span>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h1 className="text-2xl font-black text-theme-primary tracking-tight font-heading">
+                      {greeting.text}, {businessSettings?.ownerName?.split(' ')[0] || businessSettings?.businessName?.split(' ')[0] || 'Admin'} 👋
+                    </h1>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-theme-muted">
+                    <span className="flex items-center gap-1 text-theme-primary font-bold">
+                      <Building2 className="w-3.5 h-3.5 text-theme-accent" /> {workspaceName}
+                    </span>
                     <span>&middot;</span>
-                    <span className="capitalize">{workspaceType}</span>
-                  </p>
+                    <span className="capitalize px-2 py-0.5 rounded-md bg-theme-surface text-theme-muted border border-theme-border-soft text-[10px] font-bold">
+                      {workspaceType}
+                    </span>
+                    <span>&middot;</span>
+                    <span className="text-theme-muted font-medium">Financial Command Cockpit</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-theme-card border border-theme-border-soft rounded-xl text-xs font-bold text-theme-muted">
+
+                {/* Right controls: Quick Date, Sync Status, Action Shortcuts */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-bold text-theme-muted">
                     <Clock className="w-3.5 h-3.5 text-theme-accent" />
                     <span className="font-numbers">{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
                   </div>
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-bold">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>{syncStatus === 'Synced' ? 'Live' : syncStatus}</span>
+                    <CircleDot className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+                    <span>{syncStatus === 'Synced' ? 'Live Synced' : syncStatus}</span>
                   </div>
+                  <button
+                    onClick={onQuickBillOpen}
+                    className="btn-premium flex items-center gap-1.5 text-xs py-2 px-3.5 rounded-xl shadow-premium"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ New Invoice</span>
+                  </button>
                 </div>
               </div>
 
@@ -664,51 +671,51 @@ const Dashboard = ({
               {/* TOP 8 KPI EXECUTIVE METRICS GRID */}
               {/* ========================================================================= */}
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-                <KpiCard
+                <LuxuryKpiCard
                   title="Today Sales"
                   value={formatCurrency(metrics.todaysSales, currencySymbol)}
                   icon={FileText}
                   subtext={metrics.yesterdaySales > 0 ? `vs Yday (${formatCurrency(metrics.yesterdaySales, currencySymbol)})` : 'Invoices today'}
                 />
-                <KpiCard
+                <LuxuryKpiCard
                   title="Today Collected"
                   value={formatCurrency(metrics.todaysCollected, currencySymbol)}
                   icon={CreditCard}
                   highlight
                   subtext={`${metrics.todaysPaymentCount} payment${metrics.todaysPaymentCount === 1 ? '' : 's'}`}
                 />
-                <KpiCard
+                <LuxuryKpiCard
                   title="Today Due"
                   value={formatCurrency(metrics.todaysOutstanding, currencySymbol)}
                   icon={AlertCircle}
                   subtext="Unpaid today"
                 />
-                <KpiCard
+                <LuxuryKpiCard
                   title="Payments"
                   value={metrics.todaysPaymentCount}
                   icon={CheckCircle}
                   subtext="Received today"
                 />
-                <KpiCard
+                <LuxuryKpiCard
                   title="Month Revenue"
                   value={formatCurrency(metrics.thisMonthRevenue, currencySymbol)}
                   icon={TrendingUp}
                   trend={metrics.revenueGrowthPercent !== 0 ? `${metrics.revenueGrowthPercent > 0 ? '+' : ''}${metrics.revenueGrowthPercent}%` : null}
                   trendUp={metrics.revenueGrowthPercent >= 0}
                 />
-                <KpiCard
+                <LuxuryKpiCard
                   title="Month Collected"
                   value={formatCurrency(metrics.thisMonthCollected, currencySymbol)}
                   icon={Wallet}
                   subtext="Cash Inflow"
                 />
-                <KpiCard
+                <LuxuryKpiCard
                   title="Total Due"
                   value={formatCurrency(metrics.totalOutstanding, currencySymbol)}
                   icon={AlertTriangle}
                   subtext={`${metrics.customersWithDueCount} customer${metrics.customersWithDueCount === 1 ? '' : 's'}`}
                 />
-                <KpiCard
+                <LuxuryKpiCard
                   title="Collection Rate"
                   value={`${metrics.collectionRate}%`}
                   icon={Activity}
@@ -717,12 +724,12 @@ const Dashboard = ({
               </div>
 
               {/* ========================================================================= */}
-              {/* TODAY'S COLLECTION CENTER & CASH FLOW SNAPSHOT */}
+              {/* TODAY'S COLLECTION CENTER, CASH FLOW SNAPSHOT & DUE INTELLIGENCE */}
               {/* ========================================================================= */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 {/* Card 1: Today's Collection Center */}
-                <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+                <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-theme-border-strong transition-all">
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -731,12 +738,14 @@ const Dashboard = ({
                         </div>
                         <h3 className="text-sm font-black text-theme-primary">Today's Collection</h3>
                       </div>
-                      <span className="text-xs font-black text-emerald-500 font-numbers">{metrics.todaysProgress}%</span>
+                      <span className="text-xs font-black text-emerald-500 font-numbers px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                        {metrics.todaysProgress}%
+                      </span>
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="w-full bg-theme-surface h-2 rounded-full overflow-hidden mb-4">
-                      <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${metrics.todaysProgress}%` }} />
+                    <div className="w-full bg-theme-surface h-2 rounded-full overflow-hidden mb-4 border border-theme-border-soft/40">
+                      <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-700" style={{ width: `${metrics.todaysProgress}%` }} />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 py-2 border-b border-theme-border-soft">
@@ -752,15 +761,15 @@ const Dashboard = ({
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 pt-3 text-center">
-                    <div className="p-2 rounded-xl bg-theme-surface/60">
+                    <div className="p-2 rounded-xl bg-theme-surface/70 border border-theme-border-soft/30">
                       <p className="text-[9px] font-bold text-theme-muted uppercase">Payments</p>
                       <p className="text-xs font-black text-theme-primary font-numbers mt-0.5">{metrics.todaysPaymentCount}</p>
                     </div>
-                    <div className="p-2 rounded-xl bg-theme-surface/60">
+                    <div className="p-2 rounded-xl bg-theme-surface/70 border border-theme-border-soft/30">
                       <p className="text-[9px] font-bold text-theme-muted uppercase">Avg Pay</p>
                       <p className="text-xs font-black text-theme-primary font-numbers mt-0.5">{formatCurrency(metrics.todaysAvgPayment, currencySymbol)}</p>
                     </div>
-                    <div className="p-2 rounded-xl bg-theme-surface/60">
+                    <div className="p-2 rounded-xl bg-theme-surface/70 border border-theme-border-soft/30">
                       <p className="text-[9px] font-bold text-theme-muted uppercase">Largest</p>
                       <p className="text-xs font-black text-emerald-500 font-numbers mt-0.5">{formatCurrency(metrics.todaysLargestPayment, currencySymbol)}</p>
                     </div>
@@ -768,7 +777,7 @@ const Dashboard = ({
                 </div>
 
                 {/* Card 2: Cash Flow Snapshot */}
-                <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+                <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-theme-border-strong transition-all">
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -777,11 +786,11 @@ const Dashboard = ({
                         </div>
                         <h3 className="text-sm font-black text-theme-primary">Cash Flow Snapshot</h3>
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-theme-surface text-theme-muted">This Month</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-theme-surface text-theme-muted border border-theme-border-soft">This Month</span>
                     </div>
 
                     <div className="space-y-3 pt-1">
-                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-theme-surface/60 border border-theme-border-soft/40">
+                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft/40">
                         <div className="flex items-center gap-2">
                           <ArrowDownRight className="w-4 h-4 text-emerald-500" />
                           <span className="text-xs font-bold text-theme-primary">Money In (Collections)</span>
@@ -791,7 +800,7 @@ const Dashboard = ({
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-theme-surface/60 border border-theme-border-soft/40">
+                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft/40">
                         <div className="flex items-center gap-2">
                           <ArrowUpRight className="w-4 h-4 text-rose-500" />
                           <span className="text-xs font-bold text-theme-primary">Money Out (Expenses)</span>
@@ -817,7 +826,7 @@ const Dashboard = ({
                 </div>
 
                 {/* Card 3: Due & Overdue Intelligence with Aging */}
-                <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+                <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-theme-border-strong transition-all">
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -826,7 +835,7 @@ const Dashboard = ({
                         </div>
                         <h3 className="text-sm font-black text-theme-primary">Due Intelligence</h3>
                       </div>
-                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${metrics.overdueCount > 0 ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${metrics.overdueCount > 0 ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'}`}>
                         {metrics.overdueCount > 0 ? `${metrics.overdueCount} Overdue` : 'Clean'}
                       </span>
                     </div>
@@ -844,15 +853,15 @@ const Dashboard = ({
 
                     {/* Lightweight Due Aging Summary */}
                     <div className="grid grid-cols-3 gap-1.5 pt-2.5 text-center">
-                      <div className="p-1.5 rounded-lg bg-theme-surface/50">
+                      <div className="p-1.5 rounded-lg bg-theme-surface/70 border border-theme-border-soft/30">
                         <p className="text-[8px] font-bold text-theme-muted uppercase">0-7 Days</p>
                         <p className="text-[10px] font-black text-theme-primary font-numbers">{formatCurrency(metrics.dueAging.current, currencySymbol)}</p>
                       </div>
-                      <div className="p-1.5 rounded-lg bg-theme-surface/50">
+                      <div className="p-1.5 rounded-lg bg-theme-surface/70 border border-theme-border-soft/30">
                         <p className="text-[8px] font-bold text-theme-muted uppercase">8-30 Days</p>
                         <p className="text-[10px] font-black text-amber-500 font-numbers">{formatCurrency(metrics.dueAging.moderate, currencySymbol)}</p>
                       </div>
-                      <div className="p-1.5 rounded-lg bg-theme-surface/50">
+                      <div className="p-1.5 rounded-lg bg-theme-surface/70 border border-theme-border-soft/30">
                         <p className="text-[8px] font-bold text-theme-muted uppercase">30+ Days</p>
                         <p className="text-[10px] font-black text-rose-500 font-numbers">{formatCurrency(metrics.dueAging.aged, currencySymbol)}</p>
                       </div>
@@ -878,7 +887,7 @@ const Dashboard = ({
               <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-6 shadow-xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                   <div>
-                    <h3 className="text-base font-black text-theme-primary">Sales & Collection Trend</h3>
+                    <h3 className="text-base font-black text-theme-primary font-heading">Sales & Collection Trend</h3>
                     <p className="text-xs text-theme-muted font-medium mt-0.5">Real-time revenue versus actual collected cash</p>
                   </div>
                   <div className="flex items-center gap-1 bg-theme-surface p-1 rounded-xl border border-theme-border-soft text-xs font-bold">
@@ -945,7 +954,7 @@ const Dashboard = ({
                 <div className="lg:col-span-8 bg-theme-card rounded-2xl border border-theme-border-soft shadow-xs p-5 space-y-4">
                   <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft">
                     <div>
-                      <h3 className="text-sm font-black text-theme-primary">Recent Invoices</h3>
+                      <h3 className="text-sm font-black text-theme-primary font-heading">Recent Invoices</h3>
                       <p className="text-[11px] text-theme-muted font-medium">Latest bills generated in this workspace</p>
                     </div>
                     <button onClick={() => setCurrentTab('invoices')} className="text-xs font-bold text-theme-accent hover:underline flex items-center gap-1">
@@ -1020,11 +1029,11 @@ const Dashboard = ({
                   )}
                 </div>
 
-                {/* Right Column: Recent Payments (4 Cols) */}
+                {/* Right Column: Recent Payments & Top Customers (4 Cols) */}
                 <div className="lg:col-span-4 bg-theme-card rounded-2xl border border-theme-border-soft shadow-xs p-5 space-y-4">
                   <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft">
                     <div>
-                      <h3 className="text-sm font-black text-theme-primary">Recent Payments</h3>
+                      <h3 className="text-sm font-black text-theme-primary font-heading">Recent Payments</h3>
                       <p className="text-[11px] text-theme-muted font-medium">Reconciled payment receipts</p>
                     </div>
                     <button onClick={() => setCurrentTab('due-ledger')} className="text-xs font-bold text-theme-accent hover:underline">
@@ -1037,7 +1046,7 @@ const Dashboard = ({
                   ) : (
                     <div className="space-y-2.5">
                       {metrics.recentPayments.map(p => (
-                        <div key={p.id} className="flex items-center justify-between p-2.5 rounded-xl bg-theme-surface/50 border border-theme-border-soft/40">
+                        <div key={p.id} className="flex items-center justify-between p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft/40">
                           <div className="flex items-center gap-2.5 min-w-0">
                             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
                               <CheckCircle className="w-3.5 h-3.5" />
@@ -1063,7 +1072,7 @@ const Dashboard = ({
                       {metrics.topCustomers.slice(0, 3).map((cust, idx) => (
                         <div key={cust.name} className="flex items-center justify-between text-xs py-1">
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="w-4 h-4 rounded-full bg-theme-surface text-[9px] font-bold flex items-center justify-center">{idx + 1}</span>
+                            <span className="w-4 h-4 rounded-full bg-theme-surface text-[9px] font-bold flex items-center justify-center border border-theme-border-soft">{idx + 1}</span>
                             <span className="font-semibold text-theme-primary truncate">{cust.name}</span>
                           </div>
                           <span className="font-black text-theme-primary font-numbers">{formatCurrency(cust.collected, currencySymbol)}</span>
@@ -1084,8 +1093,8 @@ const Dashboard = ({
                 {/* Business Health Card */}
                 <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 shadow-xs space-y-4">
                   <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft">
-                    <h3 className="text-sm font-black text-theme-primary">Business Financial Health</h3>
-                    <span className={`text-xs font-black px-2.5 py-0.5 rounded-full bg-theme-surface ${metrics.riskColor}`}>
+                    <h3 className="text-sm font-black text-theme-primary font-heading">Business Financial Health</h3>
+                    <span className={`text-xs font-black px-2.5 py-0.5 rounded-full bg-theme-surface border border-theme-border-soft ${metrics.riskColor}`}>
                       Risk: {metrics.riskLevel}
                     </span>
                   </div>
@@ -1096,7 +1105,7 @@ const Dashboard = ({
                         <span className="text-theme-muted">Collection Efficiency</span>
                         <span className="text-theme-primary font-numbers">{metrics.collectionRate}%</span>
                       </div>
-                      <div className="w-full bg-theme-surface h-2 rounded-full overflow-hidden mt-1">
+                      <div className="w-full bg-theme-surface h-2 rounded-full overflow-hidden mt-1 border border-theme-border-soft/40">
                         <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${metrics.collectionRate}%` }} />
                       </div>
                     </div>
@@ -1106,7 +1115,7 @@ const Dashboard = ({
                         <span className="text-theme-muted">Invoice Inflow</span>
                         <span className="text-theme-primary font-numbers">{invoices.length} Total</span>
                       </div>
-                      <div className="w-full bg-theme-surface h-2 rounded-full overflow-hidden mt-1">
+                      <div className="w-full bg-theme-surface h-2 rounded-full overflow-hidden mt-1 border border-theme-border-soft/40">
                         <div className="h-full bg-theme-accent rounded-full" style={{ width: `${Math.min(100, invoices.length * 5)}%` }} />
                       </div>
                     </div>
@@ -1116,7 +1125,7 @@ const Dashboard = ({
                         <span className="text-theme-muted">Customer Network</span>
                         <span className="text-theme-primary font-numbers">{customers.length} Accounts</span>
                       </div>
-                      <div className="w-full bg-theme-surface h-2 rounded-full overflow-hidden mt-1">
+                      <div className="w-full bg-theme-surface h-2 rounded-full overflow-hidden mt-1 border border-theme-border-soft/40">
                         <div className="h-full bg-theme-accent rounded-full" style={{ width: `${Math.min(100, customers.length * 10)}%` }} />
                       </div>
                     </div>
@@ -1126,8 +1135,8 @@ const Dashboard = ({
                 {/* Activity Feed Card */}
                 <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-5 shadow-xs space-y-3">
                   <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft">
-                    <h3 className="text-sm font-black text-theme-primary">Recent Activity Timeline</h3>
-                    <span className="text-[10px] font-bold text-theme-muted uppercase">Today & Earlier</span>
+                    <h3 className="text-sm font-black text-theme-primary font-heading">Recent Activity Timeline</h3>
+                    <span className="text-[10px] font-bold text-theme-muted uppercase">Live Activity</span>
                   </div>
                   <div className="-mx-2">
                     <ActivityFeed activities={activities} maxItems={4} />
