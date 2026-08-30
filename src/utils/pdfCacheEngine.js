@@ -62,13 +62,15 @@ export const calculateInvoicePdfHash = async (invoice, businessSettings = {}) =>
     // 3. Computed Financial Invariants
     financials: {
       subtotal: financials.subtotal,
-      totalTax: financials.totalTax,
-      totalDiscount: financials.totalDiscount,
-      grandTotal: financials.grandTotal,
-      amountPaid: financials.amountPaid,
-      balanceDue: financials.balanceDue,
-      oldDue: financials.oldDue,
-      totalReceivable: financials.totalReceivable
+      taxAmount: financials.taxAmount ?? financials.totalTax ?? 0,
+      discountAmount: financials.discountAmount ?? financials.totalDiscount ?? 0,
+      shipping: financials.shipping ?? 0,
+      grandTotal: financials.currentInvoiceTotal ?? financials.grandTotal ?? 0,
+      amountPaid: financials.amountPaid ?? 0,
+      balanceDue: financials.balanceDue ?? 0,
+      previousDue: financials.previousDue ?? financials.oldDue ?? 0,
+      totalReceivable: financials.totalReceivable ?? 0,
+      paymentStatus: financials.paymentStatus ?? invoice.paymentStatus ?? 'Unpaid'
     },
 
     // 4. Customer Info

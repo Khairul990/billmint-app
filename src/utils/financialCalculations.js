@@ -726,9 +726,10 @@ export const computeCustomerLedger = (customer, invoices = [], excludeInvoiceId 
     return false;
   });
 
+  const openingDue = roundTo2(parseFloat(customer.previousDue ?? customer.openingDue ?? customer.openingBalance) || 0);
   let totalBilled = 0;
   let totalPaid = 0;
-  let totalDue = 0;
+  let totalDue = openingDue;
   const paymentHistory = [];
 
   customerInvoices.forEach(inv => {

@@ -34,6 +34,10 @@ export const invoiceEngine = {
   async saveInvoice(invoice) {
     const normalized = normalizeInvoiceFinancials(invoice);
     const saved = await dbSaveInvoice(normalized);
+    try {
+      const { invalidateInvoicePdfCache } = await import('../utils/pdfCacheEngine.js');
+      await invalidateInvoicePdfCache(saved.id || invoice.id);
+    } catch (e) { /* non-blocking */ }
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('billqyro_invoice_updated', { detail: saved }));
       window.dispatchEvent(new Event('billqyro_sync'));
@@ -100,6 +104,28 @@ export const invoiceEngine = {
     return dbGenerateSecureToken(length);
   },
 
+  async calculateDueStats() {
+    const invoices = await dbGetInvoices();
+    const dueInvoices = invoices.filter(inv => {
+      if (inv.isDeleted || inv.status === 'Cancelled' || inv.status === 'Void') return false;
+      const grandTotal = Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
+      const paid = getInvoicePaidTotal(inv);
+      const due = Math.max(0, Math.round((grandTotal - paid) * 100) / 100);
+      return due > 0;
+    });
+
+    const totalDue = dueInvoices.reduce((sum, inv) => {
+      const grandTotal = Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
+      const paid = getInvoicePaidTotal(inv);
+      return sum + Math.max(0, Math.round((grandTotal - paid) * 100) / 100);
+    }, 0);
+
+    return { 
+      totalDue: Math.round(totalDue * 100) / 100, 
+      invoiceCount: dueInvoices.length 
+    };
+  },
+
   calculatePaymentStatus(invoice) {
     if (!invoice) return 'Unknown';
     return getInvoicePaymentStatus(invoice);
@@ -144,16 +170,28 @@ export const invoiceEngine = {
     if (!invoice.paymentHistory) invoice.paymentHistory = [];
     if (!invoice.paymentProofs) invoice.paymentProofs = [];
     
-    const paymentAmount = paymentData.amount !== undefined ? parseFloat(paymentData.amount) : (invoice.grandTotal || 0);
+    const paymentAmount = paymentData.amount !== undefined ? parseFloat(paymentData.amount) : (parseFloat(invoice.grandTotal || invoice.total) || 0);
+    if (isNaN(paymentAmount) || !isFinite(paymentAmount) || paymentAmount <= 0) {
+      throw new Error('Payment amount must be greater than zero.');
+    }
+    const roundedPaymentAmount = Math.round(paymentAmount * 100) / 100;
+
     const paymentEntry = {
       id: paymentData.id || ('pmt_' + Date.now() + Math.random().toString(36).substr(2, 9)),
-      amount: paymentAmount,
+      amount: roundedPaymentAmount,
       method: paymentData.method || invoice.paymentMethod || 'Manual',
       transactionId: paymentData.transactionId || '',
       date: paymentData.date || new Date().toISOString(),
-      note: paymentData.note || ''
+      note: paymentData.notes || paymentData.note || ''
     };
-    invoice.paymentHistory.push(paymentEntry);
+
+    // Idempotent duplicate check
+    const existingIndex = invoice.paymentHistory.findIndex(p => p.id === paymentEntry.id);
+    if (existingIndex >= 0) {
+      invoice.paymentHistory[existingIndex] = paymentEntry;
+    } else {
+      invoice.paymentHistory.push(paymentEntry);
+    }
 
     const totalPaid = Math.round(invoice.paymentHistory.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) * 100) / 100;
     invoice.paidAmount = totalPaid;
@@ -161,9 +199,18 @@ export const invoiceEngine = {
     invoice.grandTotal = Math.round((parseFloat(invoice.grandTotal || invoice.total) || 0) * 100) / 100;
     invoice.balanceDue = Math.max(0, Math.round((invoice.grandTotal - totalPaid) * 100) / 100);
     invoice.paymentStatus = getInvoicePaymentStatus(invoice);
+    if (invoice.status !== 'Cancelled' && invoice.status !== 'Void') {
+      invoice.status = invoice.paymentStatus;
+    }
 
     const result = await dbSaveInvoice(invoice);
     logAudit('payment_recorded', 'invoice', invoice.id, { oldPaid: invoices[idx].paidAmount ?? invoices[idx].amountPaid }, { newPaid: totalPaid });
+
+    // Invalidate PDF cache
+    try {
+      const { invalidateInvoicePdfCache } = await import('../utils/pdfCacheEngine.js');
+      await invalidateInvoicePdfCache(invoice.id);
+    } catch (e) { /* non-blocking */ }
 
     // Additive: mirror payment into Internal Bank ledger (idempotent, failure-isolated).
     try {
@@ -191,6 +238,10 @@ export const invoiceEngine = {
     }
 
     return result;
+  },
+
+  async recordPayment(invoiceId, paymentData = {}) {
+    return await this.markAsPaid(invoiceId, paymentData);
   },
 
   async getPaymentStats(userId) {
