@@ -27,9 +27,13 @@ import {
   GraduationCap,
   Wrench,
   Package
-} from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
-import { getInvoicePaidTotal, getInvoiceBalanceDue } from '../utils/financialCalculations';
+import { 
+  calculateCanonicalInvoiceFinancials, 
+  getInvoicePaidTotal, 
+  getInvoiceBalanceDue, 
+  getInvoicePaymentStatus 
+} from '../utils/invoiceMath';
 import { toast } from 'react-hot-toast';
 import {
   generateEmailShareLink,
@@ -95,9 +99,15 @@ const InvoiceCard = ({
     };
   }, [showMoreMenu]);
 
-  const grandTotal = parseFloat(invoice?.grandTotal || invoice?.total) || 0;
-  const paidTotal = invoice ? getInvoicePaidTotal(invoice) : 0;
-  const balanceDue = invoice ? getInvoiceBalanceDue(invoice) : 0;
+  const fin = useMemo(() => {
+    return calculateCanonicalInvoiceFinancials(invoice);
+  }, [invoice]);
+
+  const grandTotal = fin.previousDue > 0 ? fin.totalReceivable : fin.currentInvoiceTotal;
+  const currentBillTotal = fin.currentInvoiceTotal;
+  const previousDue = fin.previousDue;
+  const paidTotal = fin.amountPaid;
+  const balanceDue = fin.previousDue > 0 ? fin.customerTotalDue : fin.balanceDue;
 
   // Progress percentage
   const progressPercent = grandTotal > 0 ? Math.min(100, Math.max(0, Math.round((paidTotal / grandTotal) * 100))) : (paidTotal > 0 ? 100 : 0);
@@ -303,6 +313,12 @@ const InvoiceCard = ({
                   </span>
                 )}
 
+                {previousDue > 0 && (
+                  <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 font-numbers">
+                    +Old Due: {formatCurrency(previousDue, currencySymbol)}
+                  </span>
+                )}
+
                 <div className="flex items-center gap-1.5 text-[11px]">
                   <span>
                     Created {invoice.date ? new Date(invoice.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent'}
@@ -353,10 +369,17 @@ const InvoiceCard = ({
             {/* Tabular Financial Numbers */}
             <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-5 bg-theme-surface/60 rounded-xl px-4 py-2 border border-theme-border-soft font-numbers">
               <div className="text-left sm:text-right">
-                <span className="text-[9px] font-extrabold uppercase tracking-wider text-theme-muted block">Total</span>
+                <span className="text-[9px] font-extrabold uppercase tracking-wider text-theme-muted block">
+                  {previousDue > 0 ? 'Total Due' : 'Total'}
+                </span>
                 <span className="text-sm font-black text-theme-primary tabular-nums">
                   {formatCurrency(grandTotal, currencySymbol)}
                 </span>
+                {previousDue > 0 && (
+                  <span className="text-[8px] font-bold text-theme-muted block font-numbers">
+                    Bill: {formatCurrency(currentBillTotal, currencySymbol)}
+                  </span>
+                )}
               </div>
 
               <div className="w-px h-6 bg-theme-border-soft" />

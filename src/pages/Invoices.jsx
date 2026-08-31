@@ -39,7 +39,12 @@ import {
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { formatCurrency } from '../utils/invoiceUtils';
-import { getInvoicePaidTotal, getInvoiceBalanceDue, getInvoicePaymentStatus } from '../utils/financialCalculations';
+import { 
+  calculateCanonicalInvoiceFinancials, 
+  getInvoicePaidTotal, 
+  getInvoiceBalanceDue, 
+  getInvoicePaymentStatus 
+} from '../utils/invoiceMath';
 import { toast } from 'react-hot-toast';
 import { 
   generateWhatsAppReminderLink,
@@ -434,8 +439,17 @@ const Invoices = ({
   const topDueInvoice = useMemo(() => {
     if (summaryMetrics.totalDue <= 0) return null;
     return [...activeInvoices]
-      .filter(inv => getInvoiceBalanceDue(inv) > 0)
-      .sort((a, b) => getInvoiceBalanceDue(b) - getInvoiceBalanceDue(a))[0] || null;
+      .filter(inv => {
+        const fin = calculateCanonicalInvoiceFinancials(inv);
+        return (fin.previousDue > 0 ? fin.customerTotalDue : fin.balanceDue) > 0;
+      })
+      .sort((a, b) => {
+        const finA = calculateCanonicalInvoiceFinancials(a);
+        const finB = calculateCanonicalInvoiceFinancials(b);
+        const dueA = finA.previousDue > 0 ? finA.customerTotalDue : finA.balanceDue;
+        const dueB = finB.previousDue > 0 ? finB.customerTotalDue : finB.balanceDue;
+        return dueB - dueA;
+      })[0] || null;
   }, [activeInvoices, summaryMetrics.totalDue]);
 
   // --- FILTER & SORT LOGIC ---
@@ -776,7 +790,12 @@ const Invoices = ({
                   </div>
                   {topDueInvoice && (
                     <p className="text-[11px] font-medium text-theme-muted truncate mt-0.5">
-                      Highest pending balance: <strong className="text-theme-secondary">{topDueInvoice.customerName || 'Customer'}</strong> ({formatCurrency(getInvoiceBalanceDue(topDueInvoice), currencySymbol)} due)
+                      Highest pending balance: <strong className="text-theme-secondary">{topDueInvoice.customerName || 'Customer'}</strong> ({formatCurrency(
+                        calculateCanonicalInvoiceFinancials(topDueInvoice).previousDue > 0 
+                          ? calculateCanonicalInvoiceFinancials(topDueInvoice).customerTotalDue 
+                          : getInvoiceBalanceDue(topDueInvoice), 
+                        currencySymbol
+                      )} due)
                     </p>
                   )}
                 </div>
