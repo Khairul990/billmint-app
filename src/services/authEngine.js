@@ -4,18 +4,29 @@ import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  signOut
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { getAuthSession as dbGetAuthSession, getRealUserId as dbGetRealUserId, logout as dbLogout } from './dbEngine.js';
 import { deviceSessionEngine } from './deviceSessionEngine.js';
+
+const enforceDeviceApproval = async (session) => {
+  if (!session?.isNewDevice || !session?.approvalRequired || session?.status !== 'pending') return session;
+  await signOut(auth);
+  deviceSessionEngine.clearLocalSession();
+  const error = new Error('NEW_DEVICE_APPROVAL_REQUIRED');
+  error.code = 'new-device-approval-required';
+  throw error;
+};
 
 export const authEngine = {
   async signIn(email, password) {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     const requireApproval = await deviceSessionEngine.getNewDeviceApproval().catch(() => false);
-    await deviceSessionEngine.registerCurrentSession({ requireApproval });
+    const session = await deviceSessionEngine.registerCurrentSession({ requireApproval });
+    await enforceDeviceApproval(session);
     return user;
   },
 
@@ -31,14 +42,12 @@ export const authEngine = {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-
     const userDocRef = doc(db, 'usersList', user.uid);
     const userDocSnap = await getDoc(userDocRef);
-    if (!userDocSnap.exists()) {
-      await this.initializeUserProfile(user, name || user.displayName || '');
-    }
+    if (!userDocSnap.exists()) await this.initializeUserProfile(user, name || user.displayName || '');
     const requireApproval = await deviceSessionEngine.getNewDeviceApproval().catch(() => false);
-    await deviceSessionEngine.registerCurrentSession({ requireApproval });
+    const session = await deviceSessionEngine.registerCurrentSession({ requireApproval });
+    await enforceDeviceApproval(session);
     return user;
   },
 
@@ -54,7 +63,6 @@ export const authEngine = {
       createdAt: new Date().toISOString(),
       role: 'user'
     }, { merge: true });
-
     const settingsRef = doc(db, 'settings', user.uid);
     const settingsSnap = await getDoc(settingsRef);
     if (!settingsSnap.exists()) {
@@ -93,9 +101,7 @@ export const authEngine = {
       if (!settingsSnap.exists()) return false;
       const data = settingsSnap.data();
       if (data.setupCompleted === true) return true;
-      if (data.businessName && (data.profileSetupCompleted === true || data.businessSetupCompleted === true || (data.businessWorkspaces && data.businessWorkspaces.length > 0))) {
-        return true;
-      }
+      if (data.businessName && (data.profileSetupCompleted === true || data.businessSetupCompleted === true || (data.businessWorkspaces && data.businessWorkspaces.length > 0))) return true;
       return false;
     } catch {
       return false;
