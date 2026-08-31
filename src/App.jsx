@@ -1692,7 +1692,10 @@ function App() {
             businessSettings={activeSettings}
             activeWsId={activeWorkspaceId}
             onPaymentSuccess={() => {
-              setTriggerSync(prev => prev + 1);
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('billqyro_bank_updated'));
+                window.dispatchEvent(new Event('billqyro_sync'));
+              }
             }}
             setCurrentTab={setCurrentTab}
           />
