@@ -95,6 +95,24 @@ service cloud.firestore {
       allow delete: if isOwner(userId);
     }
 
+    match /users/{userId}/sessions/{sessionId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId)
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.sessionId == sessionId
+        && request.resource.data.deviceId is string
+        && request.resource.data.deviceId.size() <= 100
+        && request.resource.data.sessionSecretHash is string
+        && request.resource.data.sessionSecretHash.size() == 64;
+      allow update: if isOwner(userId)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.sessionId == resource.data.sessionId
+        && request.resource.data.deviceId == resource.data.deviceId
+        && request.resource.data.sessionSecretHash == resource.data.sessionSecretHash
+        && request.resource.data.status == resource.data.status;
+      allow delete: if false;
+    }
+
     match /publicInvoices/{publicToken} {
       allow read: if true;
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
@@ -179,7 +197,7 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
-    match /control_website_errors/{errorId} {
+    match /control_website_errors/{eventId} {
       allow read, write: if isAdmin();
     }
 
