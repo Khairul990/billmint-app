@@ -4,8 +4,8 @@ import fs from 'node:fs';
 const dashboardPath = new URL('../src/pages/Dashboard.jsx', import.meta.url);
 const source = fs.readFileSync(dashboardPath, 'utf8');
 
-// Step 1 release guard: the reference layout must use BillQyro theme tokens
-// rather than introducing a fixed dark dashboard background.
+// Step 1 release guard: the dashboard must use BillQyro theme tokens
+// and must not introduce the retired fixed dark dashboard backgrounds.
 const forbiddenFixedDarkBackgrounds = [
   'bg-[#0d1117]',
   'bg-[#161b22]',
@@ -17,34 +17,35 @@ for (const token of forbiddenFixedDarkBackgrounds) {
   assert.equal(source.includes(token), false, `Fixed dark background token found: ${token}`);
 }
 
-// The dashboard surface itself and its primary cards must be theme-driven.
+// The dashboard surface and primary cards must remain theme-driven.
 assert.match(source, /bg-theme-app/);
 assert.match(source, /bg-theme-card/);
 assert.match(source, /border-theme-border-soft/);
 assert.match(source, /text-theme-primary/);
 assert.match(source, /text-theme-muted/);
 
-// Step 1 layout guards: all eight executive financial stats are present.
-for (const label of [
-  "Today's Sales",
-  "Today's Collected",
-  "Today's Due",
-  "Today's Payments",
-  'Month Revenue',
-  'Month Collected',
-  'Total Outstanding',
-  'Collection Rate'
-]) {
-  assert.equal(source.includes(`>${label}</`), true, `Missing executive stat: ${label}`);
-}
+// Current command-center information architecture.
+assert.match(source, />TOTAL REVENUE \(THIS MONTH\)</);
+assert.match(source, />Today's Invoiced Volume</);
+assert.match(source, /Revenue & Collection Trend/);
+assert.match(source, /Collection Center/);
+assert.match(source, /Business Health/);
+assert.match(source, /Recent Invoices/);
+assert.match(source, />Create Invoice</);
+assert.match(source, />Record Payment</);
 
-// Today's Performance must retain the reference information architecture.
-assert.match(source, /Today's Performance/);
-assert.match(source, /Collection Progress/);
-assert.match(source, /Invoiced Today/);
-assert.match(source, /Collected Today/);
-assert.match(source, /Pending Today/);
-assert.match(source, /Avg Payment/);
-assert.match(source, /Largest Payment/);
+// Executive financial data must be calculated by the dashboard model.
+for (const metric of [
+  'todaysSales',
+  'todaysCollected',
+  'todaysOutstanding',
+  'todaysPaymentCount',
+  'thisMonthRevenue',
+  'thisMonthCollected',
+  'totalOutstanding',
+  'collectionRate'
+]) {
+  assert.match(source, new RegExp(`\\b${metric}\\b`), `Missing dashboard metric: ${metric}`);
+}
 
 console.log('DASHBOARD THEME + STEP 1 GUARD: 100% PASSED');
