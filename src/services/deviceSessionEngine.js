@@ -6,6 +6,7 @@ import {
   getDoc,
   getDocs,
   query,
+  where,
   orderBy,
   limit,
   serverTimestamp,
@@ -85,7 +86,6 @@ const describeDevice = () => {
 };
 
 const getFunctionsClient = () => (firebaseReady && app ? getFunctions(app) : null);
-
 const callSecurityFunction = async (name, data) => {
   const functions = getFunctionsClient();
   if (!functions) throw new Error('Security verification unavailable offline.');
@@ -107,22 +107,29 @@ export const deviceSessionEngine = {
     const secret = getOrCreateSessionSecret();
     const secretHash = await hashSecret(secret);
     const meta = describeDevice();
+    let knownDevice = false;
+    try {
+      const known = await getDocs(query(collection(db, 'users', uid, 'sessions'), where('deviceId', '==', deviceId), limit(5)));
+      knownDevice = known.docs.some((item) => !['revoked', 'blocked'].includes(item.data().status));
+    } catch { /* fail open for legacy account compatibility */ }
+
     const ref = doc(db, 'users', uid, 'sessions', sessionId);
     const existing = await getDoc(ref);
+    const approvalRequired = Boolean(requireApproval && !knownDevice);
     const data = {
       sessionId,
       userId: uid,
       deviceId,
       ...meta,
-      status: existing.exists() ? (existing.data().status || 'active') : (requireApproval ? 'pending' : 'active'),
-      approvalRequired: existing.exists() ? Boolean(existing.data().approvalRequired) : Boolean(requireApproval),
+      status: existing.exists() ? (existing.data().status || 'active') : (approvalRequired ? 'pending' : 'active'),
+      approvalRequired: existing.exists() ? Boolean(existing.data().approvalRequired) : approvalRequired,
       createdAt: existing.exists() ? (existing.data().createdAt || serverTimestamp()) : serverTimestamp(),
       lastActiveAt: serverTimestamp(),
       lastSeenAt: serverTimestamp(),
       sessionSecretHash: secretHash
     };
     await setDoc(ref, data, { merge: true });
-    return { ...data, sessionId, deviceId, isCurrentDevice: true };
+    return { ...data, sessionId, deviceId, isCurrentDevice: true, isNewDevice: !knownDevice };
   },
 
   async touchCurrentSession() {
@@ -164,41 +171,25 @@ export const deviceSessionEngine = {
     return snap.docs.map((item) => {
       const data = item.data();
       const lastSeen = data.lastSeenAt?.toMillis?.() || 0;
-      return {
-        id: item.id,
-        ...data,
-        isCurrentDevice: item.id === getOrCreateSessionId(),
-        presence: lastSeen && now - lastSeen <= STALE_MS ? 'active' : 'stale'
-      };
+      return { id: item.id, ...data, isCurrentDevice: item.id === getOrCreateSessionId(), presence: lastSeen && now - lastSeen <= STALE_MS ? 'active' : 'stale' };
     });
   },
 
   async revokeSession(sessionId) {
     if (!firebaseReady || !auth?.currentUser || !sessionId || sessionId === getOrCreateSessionId()) return false;
-    await callSecurityFunction('revokeDeviceSession', {
-      targetSessionId: sessionId,
-      callerSessionId: getOrCreateSessionId(),
-      callerSessionSecret: getOrCreateSessionSecret()
-    });
+    await callSecurityFunction('revokeDeviceSession', { targetSessionId: sessionId, callerSessionId: getOrCreateSessionId(), callerSessionSecret: getOrCreateSessionSecret() });
     return true;
   },
 
   async approveSession(sessionId) {
     if (!firebaseReady || !auth?.currentUser || !sessionId || sessionId === getOrCreateSessionId()) return false;
-    await callSecurityFunction('approveDeviceSession', {
-      targetSessionId: sessionId,
-      callerSessionId: getOrCreateSessionId(),
-      callerSessionSecret: getOrCreateSessionSecret()
-    });
+    await callSecurityFunction('approveDeviceSession', { targetSessionId: sessionId, callerSessionId: getOrCreateSessionId(), callerSessionSecret: getOrCreateSessionSecret() });
     return true;
   },
 
   async logoutOtherSessions() {
     if (!firebaseReady || !auth?.currentUser) return 0;
-    const result = await callSecurityFunction('logoutOtherDeviceSessions', {
-      callerSessionId: getOrCreateSessionId(),
-      callerSessionSecret: getOrCreateSessionSecret()
-    });
+    const result = await callSecurityFunction('logoutOtherDeviceSessions', { callerSessionId: getOrCreateSessionId(), callerSessionSecret: getOrCreateSessionSecret() });
     return Number(result?.data?.count || 0);
   },
 
