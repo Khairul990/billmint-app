@@ -3978,11 +3978,15 @@ export const flushSyncQueue = async () => {
     }
   } catch (e) {
     console.error('[SYNC ENGINE] Failed to flush queue:', e);
-    window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Sync Error' }));
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('billqyro:sync-status', { detail: 'Sync Error' }));
+    }
   }
 };
 
-window.addEventListener('online', flushSyncQueue);
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+  window.addEventListener('online', flushSyncQueue);
+}
 
 // --- Debounce Mechanism ---
 const debounceTimers = {};

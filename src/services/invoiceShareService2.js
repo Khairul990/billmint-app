@@ -18,6 +18,7 @@ import { buildPortalUrl } from './paymentLinkService.js';
 import { getRealUserId } from './dbEngine.js';
 import { cleanPhoneNumber } from '../utils/shareUtils.js';
 import { formatCurrency } from '../utils/invoiceUtils.js';
+import { calculateCanonicalInvoiceFinancials } from '../utils/invoiceMath.js';
 import { toast } from 'react-hot-toast';
 
 const CACHE_KEY = (invoiceId) => `billqyro_invoice_pdf_url_${invoiceId}`;
@@ -67,11 +68,12 @@ export function buildWhatsAppInvoiceMessage(invoice, businessSettings, pdfUrl, l
   const regionalPrefs = invoice.regionalSettingsSnapshot || {};
   const symbol        = regionalPrefs.currency     || businessSettings?.currency     || '\u20B9';
   const numberFormat  = regionalPrefs.numberFormat || businessSettings?.numberFormat || 'Indian';
-  const oldDueVal     = Number(invoice.totals?.oldDue || invoice.oldDue || 0);
-  const baseTotal     = Number(invoice.totals?.grandTotal || invoice.grandTotal || 0);
-  const finalTotal    = Number(invoice.totals?.totalDue || (baseTotal + oldDueVal));
-  const amountPaidVal = Number(invoice.amountPaid || invoice.totals?.amountPaid || 0);
-  const balanceDueVal = Math.max(0, finalTotal - amountPaidVal);
+  const fin           = calculateCanonicalInvoiceFinancials(invoice);
+  const oldDueVal     = fin.previousDue;
+  const baseTotal     = fin.currentInvoiceTotal;
+  const finalTotal    = fin.totalReceivable;
+  const amountPaidVal = fin.amountPaid;
+  const balanceDueVal = fin.customerTotalDue ?? (fin.previousDue > 0 ? (fin.remainingOldDue + fin.currentBillDue) : fin.balanceDue);
 
   const baseTotalStr  = formatCurrency(baseTotal, symbol, numberFormat);
   const oldDueStr     = formatCurrency(oldDueVal, symbol, numberFormat);

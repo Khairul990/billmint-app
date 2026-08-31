@@ -38,9 +38,14 @@ class CustomerEngine {
       totalBilled: result.totalBilled,
       totalPaid: result.totalPaid,
       totalDue: result.totalDue,
+      customerTotalDue: result.customerTotalDue,
       invoiceCount: result.invoiceCount,
       isSettled: result.isSettled,
-      invoices: result.invoices
+      invoices: result.invoices,
+      aging: result.aging,
+      priority: result.priority,
+      oldestOverdueInvoice: result.oldestOverdueInvoice,
+      oldestDueDate: result.oldestDueDate
     };
   }
 

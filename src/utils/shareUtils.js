@@ -2,8 +2,8 @@
  * Sharing Utilities for BillQyro Invoices
  */
 
-import { formatCurrency } from './invoiceUtils';
-import { buildPortalUrl } from '../services/paymentLinkService';
+import { formatCurrency } from './invoiceUtils.js';
+import { buildPortalUrl } from '../services/paymentLinkService.js';
 
 /**
  * Gets the base URL for public customer-facing links.

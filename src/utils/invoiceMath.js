@@ -727,16 +727,31 @@ export const computeInventoryReport = (products = [], invoices = []) => {
  * - Due Ledger
  * - Reports & Dashboard
  */
-export const computeCustomerLedger = (customer, invoices = [], excludeInvoiceId = null) => {
+export const computeCustomerLedger = (customer, invoices = [], excludeInvoiceId = null, asOfDate = new Date()) => {
   if (!customer) {
     return {
       totalBilled: 0,
       totalPaid: 0,
       totalDue: 0,
+      openingDue: 0,
       invoiceCount: 0,
       isSettled: true,
       invoices: [],
-      paymentHistory: []
+      paymentHistory: [],
+      aging: {
+        current: 0,
+        overdue0to30: 0,
+        overdue31to60: 0,
+        overdue61to90: 0,
+        overdue90Plus: 0,
+        totalDue: 0,
+        totalOverdue: 0,
+        overdueCount: 0,
+        maxDaysOverdue: 0
+      },
+      priority: calculateCollectionPriority({ maxDaysOverdue: 0, overdueAmount: 0, overdueCount: 0 }),
+      oldestOverdueInvoice: null,
+      oldestDueDate: null
     };
   }
 
@@ -812,13 +827,191 @@ export const computeCustomerLedger = (customer, invoices = [], excludeInvoiceId 
   const sortedInvoices = [...customerInvoices].sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
   const sortedPayments = [...paymentHistory].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
+  // Compute Customer Aging & Collection Priority
+  const aging = calculateAgingDistribution(customerInvoices, asOfDate);
+  // Add opening due to aging (if opening due > 0, consider it in oldest bucket if no invoices, or as current)
+  if (openingDue > 0) {
+    aging.totalDue = roundTo2(aging.totalDue + openingDue);
+  }
+
+  // Find oldest unpaid invoice
+  const unpaidInvoices = customerInvoices
+    .filter(inv => getInvoiceBalanceDue(inv) > 0 && (inv.dueDate || inv.createdAt))
+    .sort((a, b) => new Date(a.dueDate || a.createdAt) - new Date(b.dueDate || b.createdAt));
+
+  const oldestOverdueInvoice = unpaidInvoices.find(inv => getInvoiceDaysOverdue(inv, asOfDate) > 0) || unpaidInvoices[0] || null;
+  const oldestDueDate = oldestOverdueInvoice ? (oldestOverdueInvoice.dueDate || oldestOverdueInvoice.createdAt) : null;
+
   return {
     totalBilled,
     totalPaid,
     totalDue,
+    customerTotalDue: totalDue,
+    openingDue,
     invoiceCount: customerInvoices.length,
     isSettled: totalDue === 0,
     invoices: sortedInvoices,
-    paymentHistory: sortedPayments
+    paymentHistory: sortedPayments,
+    aging,
+    priority: aging.priority,
+    oldestOverdueInvoice,
+    oldestDueDate
   };
+};
+
+/**
+ * Calculate the number of days an invoice is overdue relative to a reference date.
+ * If dueDate is missing, returns 0 (preserves existing behavior, not overdue).
+ * @param {Object} invoice
+ * @param {Date|number|string} [asOfDate=new Date()]
+ * @returns {number} daysOverdue (positive = overdue, 0 or negative = not overdue)
+ */
+export const getInvoiceDaysOverdue = (invoice, asOfDate = new Date()) => {
+  if (!invoice) return 0;
+  const rawDueDate = invoice.dueDate || invoice.paymentDueDate;
+  if (!rawDueDate) return 0; // No due date -> preserve existing behavior
+
+  const due = new Date(rawDueDate);
+  if (isNaN(due.getTime())) return 0;
+
+  const asOf = asOfDate instanceof Date ? new Date(asOfDate) : new Date(asOfDate);
+  asOf.setHours(0, 0, 0, 0);
+  due.setHours(0, 0, 0, 0);
+
+  const diffMs = asOf.getTime() - due.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+};
+
+/**
+ * Classifies an outstanding balance into one of the 5 canonical aging buckets.
+ * @param {Object} invoice
+ * @param {Date|number|string} [asOfDate=new Date()]
+ * @returns {'current'|'overdue0to30'|'overdue31to60'|'overdue61to90'|'overdue90Plus'}
+ */
+export const getInvoiceAgingBucket = (invoice, asOfDate = new Date()) => {
+  const balanceDue = getInvoiceBalanceDue(invoice);
+  if (balanceDue <= 0) return 'current';
+
+  const days = getInvoiceDaysOverdue(invoice, asOfDate);
+  if (days <= 0) return 'current';
+  if (days <= 30) return 'overdue0to30';
+  if (days <= 60) return 'overdue31to60';
+  if (days <= 90) return 'overdue61to90';
+  return 'overdue90Plus';
+};
+
+/**
+ * Calculates deterministic collection priority / risk level for a customer or invoice.
+ * Factors: Max days overdue, total overdue amount, count of overdue invoices.
+ * @param {Object} params
+ * @param {number} params.maxDaysOverdue
+ * @param {number} params.overdueAmount
+ * @param {number} params.overdueCount
+ * @returns {{ level: 'LOW'|'MEDIUM'|'HIGH'|'CRITICAL', label: string, color: string, badgeClass: string, reason: string }}
+ */
+export const calculateCollectionPriority = ({ maxDaysOverdue = 0, overdueAmount = 0, overdueCount = 0 }) => {
+  if (overdueAmount <= 0 || maxDaysOverdue <= 0) {
+    return {
+      level: 'LOW',
+      label: 'Low Risk',
+      color: 'emerald',
+      badgeClass: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+      reason: 'Current / Not overdue'
+    };
+  }
+
+  if (maxDaysOverdue > 90) {
+    return {
+      level: 'CRITICAL',
+      label: 'Critical',
+      color: 'rose',
+      badgeClass: 'bg-rose-500/10 text-rose-600 border-rose-500/20',
+      reason: 'Overdue by 90+ days'
+    };
+  }
+
+  if (maxDaysOverdue > 60 || overdueCount >= 3) {
+    return {
+      level: 'HIGH',
+      label: 'High Priority',
+      color: 'amber',
+      badgeClass: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+      reason: maxDaysOverdue > 60 ? 'Overdue by 61–90 days' : '3+ overdue invoices'
+    };
+  }
+
+  if (maxDaysOverdue > 30) {
+    return {
+      level: 'MEDIUM',
+      label: 'Medium Priority',
+      color: 'blue',
+      badgeClass: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+      reason: 'Overdue by 31–60 days'
+    };
+  }
+
+  return {
+    level: 'LOW',
+    label: 'Low Priority',
+    color: 'emerald',
+    badgeClass: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+    reason: 'Overdue by 1–30 days'
+  };
+};
+
+/**
+ * Aggregates aging distribution across a set of invoices (single customer or entire workspace).
+ * @param {Array<Object>} invoices
+ * @param {Date|number|string} [asOfDate=new Date()]
+ * @returns {Object} { current, overdue0to30, overdue31to60, overdue61to90, overdue90Plus, totalDue, totalOverdue, overdueCount, maxDaysOverdue, priority }
+ */
+export const calculateAgingDistribution = (invoices = [], asOfDate = new Date()) => {
+  const result = {
+    current: 0,
+    overdue0to30: 0,
+    overdue31to60: 0,
+    overdue61to90: 0,
+    overdue90Plus: 0,
+    totalDue: 0,
+    totalOverdue: 0,
+    overdueCount: 0,
+    maxDaysOverdue: 0
+  };
+
+  if (!Array.isArray(invoices)) return { ...result, priority: calculateCollectionPriority(result) };
+
+  for (const inv of invoices) {
+    if (!inv || inv.isDeleted || inv.status === 'Cancelled' || inv.status === 'Void') continue;
+    const balanceDue = getInvoiceBalanceDue(inv);
+    if (balanceDue <= 0) continue;
+
+    result.totalDue = roundTo2(result.totalDue + balanceDue);
+    const days = getInvoiceDaysOverdue(inv, asOfDate);
+    if (days > result.maxDaysOverdue) result.maxDaysOverdue = days;
+
+    if (days <= 0) {
+      result.current = roundTo2(result.current + balanceDue);
+    } else {
+      result.totalOverdue = roundTo2(result.totalOverdue + balanceDue);
+      result.overdueCount++;
+      if (days <= 30) {
+        result.overdue0to30 = roundTo2(result.overdue0to30 + balanceDue);
+      } else if (days <= 60) {
+        result.overdue31to60 = roundTo2(result.overdue31to60 + balanceDue);
+      } else if (days <= 90) {
+        result.overdue61to90 = roundTo2(result.overdue61to90 + balanceDue);
+      } else {
+        result.overdue90Plus = roundTo2(result.overdue90Plus + balanceDue);
+      }
+    }
+  }
+
+  result.priority = calculateCollectionPriority({
+    maxDaysOverdue: result.maxDaysOverdue,
+    overdueAmount: result.totalOverdue,
+    overdueCount: result.overdueCount
+  });
+
+  return result;
 };

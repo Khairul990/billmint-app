@@ -4,19 +4,32 @@ import { Clock, Search, CheckCircle2, AlertCircle, CreditCard, Calendar, X, Bell
 import { formatCurrency } from '../utils/invoiceUtils';
 import { CardSkeleton } from '../components/PremiumSkeleton';
 import CustomerLedger from '../components/customers/CustomerLedger';
-import { getInvoicePaidTotal, getInvoiceBalanceDue } from '../utils/financialCalculations';
+import { 
+  getInvoicePaidTotal, 
+  getInvoiceBalanceDue, 
+  getInvoiceDaysOverdue, 
+  getInvoiceAgingBucket, 
+  calculateCollectionPriority, 
+  calculateAgingDistribution 
+} from '../utils/invoiceMath';
 import { invoiceEngine } from '../services/invoiceEngine';
 import { shareOnWhatsApp } from '../services/invoiceShareService2';
 import { toast } from 'react-hot-toast';
 
 const getUrgencyBadge = (bill) => {
+  const daysOverdue = getInvoiceDaysOverdue(bill);
+  if (daysOverdue > 90) return { label: '90d+ Overdue', class: 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30' };
+  if (daysOverdue > 60) return { label: '60d+ Overdue', class: 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30' };
+  if (daysOverdue > 30) return { label: '30d+ Overdue', class: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30' };
+  if (daysOverdue > 0) return { label: `${daysOverdue}d Overdue`, class: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30' };
+  
   const now = new Date();
   now.setHours(0, 0, 0, 0);
-  const diffDays = Math.floor((now - bill.dueDate) / (1000 * 60 * 60 * 24));
-
-  if (diffDays > 7) return { label: 'Critical', class: 'badge-danger' };
-  if (diffDays > 0) return { label: 'Overdue', class: 'badge-warning' };
-  if (diffDays === 0) return { label: 'Due Today', class: 'badge-danger' };
+  const due = bill.dueDate ? new Date(bill.dueDate) : null;
+  if (due) due.setHours(0, 0, 0, 0);
+  if (due && due.getTime() === now.getTime()) {
+    return { label: 'Due Today', class: 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30' };
+  }
   return { label: 'Upcoming', class: 'badge-info' };
 };
 
@@ -204,6 +217,10 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
     dueBills.reduce((sum, b) => sum + b.dueAmount, 0)
   , [dueBills]);
 
+  const agingData = useMemo(() => {
+    return calculateAgingDistribution(dueBills);
+  }, [dueBills]);
+
   const filteredToday = useMemo(() => grouped.today.filter(b => 
     b.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     b.invoiceNumber?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -348,6 +365,55 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
             <span className="badge-premium badge-info font-numbers">{grouped.older.length} bills</span>
           </div>
           <p className="text-xl font-black text-theme-primary font-numbers tabular-nums">{formatCurrency(totalUpcoming, currencySymbol)}</p>
+        </div>
+      </div>
+
+      {/* 5-BUCKET AGING & CREDIT INTELLIGENCE STRIP */}
+      <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-theme-border-soft/60 pb-2.5">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-theme-accent" />
+            <span className="text-xs font-black text-theme-primary tracking-tight uppercase">Credit Aging Intelligence</span>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] font-semibold text-theme-muted">
+            <span>Portfolio Risk:</span>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border ${agingData.priority?.badgeClass || 'bg-emerald-500/10 text-emerald-600'}`}>
+              {agingData.priority?.label || 'Low Risk'}
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          <div className="bg-theme-surface/50 rounded-xl p-2.5 border border-theme-border-soft/60">
+            <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider block">Current / Not Due</span>
+            <p className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-numbers tabular-nums mt-0.5">
+              {formatCurrency(agingData.current, currencySymbol)}
+            </p>
+          </div>
+          <div className="bg-theme-surface/50 rounded-xl p-2.5 border border-theme-border-soft/60">
+            <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider block">0–30 Days</span>
+            <p className="text-sm font-black text-amber-600 dark:text-amber-400 font-numbers tabular-nums mt-0.5">
+              {formatCurrency(agingData.overdue0to30, currencySymbol)}
+            </p>
+          </div>
+          <div className="bg-theme-surface/50 rounded-xl p-2.5 border border-theme-border-soft/60">
+            <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider block">31–60 Days</span>
+            <p className="text-sm font-black text-orange-600 dark:text-orange-400 font-numbers tabular-nums mt-0.5">
+              {formatCurrency(agingData.overdue31to60, currencySymbol)}
+            </p>
+          </div>
+          <div className="bg-theme-surface/50 rounded-xl p-2.5 border border-theme-border-soft/60">
+            <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider block">61–90 Days</span>
+            <p className="text-sm font-black text-rose-500 font-numbers tabular-nums mt-0.5">
+              {formatCurrency(agingData.overdue61to90, currencySymbol)}
+            </p>
+          </div>
+          <div className="bg-theme-surface/50 rounded-xl p-2.5 border border-theme-border-soft/60 col-span-2 sm:col-span-1">
+            <span className="text-[10px] font-bold text-rose-600 uppercase tracking-wider block">90+ Days</span>
+            <p className="text-sm font-black text-rose-600 font-numbers tabular-nums mt-0.5">
+              {formatCurrency(agingData.overdue90Plus, currencySymbol)}
+            </p>
+          </div>
         </div>
       </div>
 

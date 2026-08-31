@@ -34,13 +34,16 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
 
   if (!isOpen || !customer) return null;
 
-  // 1. Canonical Customer Ledger Calculation
+  // 1. Canonical Customer Ledger Calculation with Credit Intelligence & Aging
   const {
     totalBilled,
     totalPaid,
     totalDue,
     isSettled,
-    invoices: customerInvoices
+    invoices: customerInvoices,
+    aging,
+    priority,
+    oldestDueDate
   } = computeCustomerLedger(customer, invoices);
 
   const formatCurrency = (amount) => {
@@ -129,8 +132,8 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
                       <CheckCircle2 className="w-3 h-3" /> Settled
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50">
-                      Due
+                    <span className={`inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${priority?.badgeClass || 'bg-rose-100 text-rose-700 border-rose-200'}`}>
+                      {priority?.label || 'Due'}
                     </span>
                   )}
                 </div>
@@ -168,6 +171,38 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
                 <span className="block text-sm sm:text-base font-black text-rose-700 dark:text-rose-300 tabular-nums">{formatCurrency(totalDue)}</span>
               </div>
             </div>
+
+            {/* Credit Aging Distribution Card */}
+            {totalDue > 0 && aging && (
+              <div className="bg-theme-app/70 border border-theme-border-soft rounded-2xl p-3 space-y-2 shadow-xs">
+                <div className="flex items-center justify-between text-[11px] font-bold text-theme-muted border-b border-theme-border-soft/60 pb-1.5">
+                  <span className="uppercase tracking-wider">Credit Aging Breakdown</span>
+                  {oldestDueDate && (
+                    <span className="text-[10px] text-theme-muted font-normal">
+                      Oldest: {new Date(oldestDueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-4 gap-1.5 text-center">
+                  <div className="bg-theme-card/80 rounded-xl p-1.5 border border-theme-border-soft/50">
+                    <span className="block text-[9px] font-bold text-theme-muted uppercase">Current</span>
+                    <span className="block text-[11px] font-black text-emerald-600 dark:text-emerald-400 tabular-nums">{formatCurrency(aging.current)}</span>
+                  </div>
+                  <div className="bg-theme-card/80 rounded-xl p-1.5 border border-theme-border-soft/50">
+                    <span className="block text-[9px] font-bold text-theme-muted uppercase">1–30d</span>
+                    <span className="block text-[11px] font-black text-amber-600 dark:text-amber-400 tabular-nums">{formatCurrency(aging.overdue0to30)}</span>
+                  </div>
+                  <div className="bg-theme-card/80 rounded-xl p-1.5 border border-theme-border-soft/50">
+                    <span className="block text-[9px] font-bold text-theme-muted uppercase">31–60d</span>
+                    <span className="block text-[11px] font-black text-orange-600 dark:text-orange-400 tabular-nums">{formatCurrency(aging.overdue31to60)}</span>
+                  </div>
+                  <div className="bg-theme-card/80 rounded-xl p-1.5 border border-theme-border-soft/50">
+                    <span className="block text-[9px] font-bold text-theme-muted uppercase">61d+</span>
+                    <span className="block text-[11px] font-black text-rose-600 dark:text-rose-400 tabular-nums">{formatCurrency(aging.overdue61to90 + aging.overdue90Plus)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-2">
