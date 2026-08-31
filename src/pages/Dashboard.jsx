@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedPage from '../components/AnimatedPage';
 import {
@@ -18,9 +18,18 @@ import PullToRefresh from '../components/PullToRefresh';
 import { invoiceEngine } from '../services/invoiceEngine';
 import { analyticsEngine } from '../services/analyticsEngine';
 import AddCustomerSheet from '../components/AddCustomerSheet';
+import QuickPayModal from '../components/payments/QuickPayModal';
 import { KPISkeleton, ChartSkeleton } from '../components/PremiumSkeleton';
 import { useFeatureControl } from '../hooks/useFeatureControl';
-import { getInvoicePaidTotal, getInvoiceBalanceDue, getInvoicePaymentStatus } from '../utils/financialCalculations';
+import { 
+  getInvoicePaidTotal, 
+  getInvoiceBalanceDue, 
+  getInvoicePaymentStatus,
+  calculateAgingDistribution,
+  calculateCollectionPriority,
+  filterByWorkspace,
+  roundTo2
+} from '../utils/invoiceMath';
 
 // ============================================================================
 // ANIMATED NUMBER WITH SMOOTH EASING & CLEAN SIGN/SUFFIX PRESERVATION
@@ -127,6 +136,7 @@ const Dashboard = ({
   const currencySymbol = businessSettings?.currency || '₹';
 
   const [showAddCustomerSheet, setShowAddCustomerSheet] = useState(false);
+  const [quickPayInvoice, setQuickPayInvoice] = useState(null);
   const [activeAnnouncement, setActiveAnnouncement] = useState(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [chartTimeframe, setChartTimeframe] = useState('7d');
@@ -188,8 +198,23 @@ const Dashboard = ({
   const workspaceName = activeWorkspace?.name || businessSettings?.businessName || 'KB.Embroidery Designer 1118';
   const ownerName = businessSettings?.ownerName?.split(' ')[0] || businessSettings?.businessName?.split(' ')[0] || 'Khairul';
 
+  // Workspace-scoped active records
+  const scopedInvoices = useMemo(() => {
+    const wsInvoices = activeWsId && activeWsId !== 'default'
+      ? filterByWorkspace(invoices, activeWsId)
+      : invoices;
+    return wsInvoices.filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void');
+  }, [invoices, activeWsId]);
+
+  const scopedExpenses = useMemo(() => {
+    const wsExpenses = activeWsId && activeWsId !== 'default'
+      ? filterByWorkspace(expenses, activeWsId)
+      : expenses;
+    return wsExpenses.filter(exp => !exp.isDeleted);
+  }, [expenses, activeWsId]);
+
   // ==========================================================================
-  // REAL FINANCIAL DATA AGGREGATION
+  // CANONICAL FINANCIAL DATA AGGREGATION
   // ==========================================================================
   const metrics = useMemo(() => {
     const now = new Date();
@@ -200,13 +225,14 @@ const Dashboard = ({
     yesterdayDate.setDate(yesterdayDate.getDate() - 1);
     const yesterdayStr = getLocalCalendarDate(yesterdayDate);
 
+    // This week cutoff (last 7 days)
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
     // Current & Prev Month prefixes
     const currentMonthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const prevMonthPrefix = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2, '0')}`;
-
-    const activeInvoices = invoices.filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void');
-    const activeExpenses = expenses.filter(exp => !exp.isDeleted);
 
     let todaysSales = 0;
     let todaysOutstanding = 0;
@@ -230,15 +256,11 @@ const Dashboard = ({
     let overdueCount = 0;
     let dueTodayAmount = 0;
     let dueTodayInvoicesCount = 0;
+    let dueThisWeekAmount = 0;
+    let dueThisWeekInvoicesCount = 0;
 
-    const dueAging = {
-      current: { amount: 0, count: 0 },
-      moderate: { amount: 0, count: 0 },
-      aged: { amount: 0, count: 0 }
-    };
-
-    activeInvoices.forEach(inv => {
-      const invTotal = Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
+    scopedInvoices.forEach(inv => {
+      const invTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
       const invPaid = getInvoicePaidTotal(inv);
       const invDue = getInvoiceBalanceDue(inv);
       const invDateStr = getLocalCalendarDate(inv.date) || getLocalCalendarDate(inv.createdAt);
@@ -263,7 +285,8 @@ const Dashboard = ({
       if (isThisMonthInv) thisMonthRevenue += invTotal;
       if (isPrevMonthInv) prevMonthRevenue += invTotal;
 
-      const isOverdue = invDue > 0 && inv.dueDate && new Date(inv.dueDate) < now;
+      const dueDate = inv.dueDate ? new Date(inv.dueDate) : null;
+      const isOverdue = invDue > 0 && dueDate && !isNaN(dueDate.getTime()) && dueDate < now;
 
       if (isOverdue) {
         overdueCount++;
@@ -275,24 +298,15 @@ const Dashboard = ({
         dueTodayInvoicesCount++;
       }
 
-      if (invDue > 0) {
-        const invAgeDays = Math.floor((now.getTime() - new Date(inv.date || inv.createdAt || now).getTime()) / (1000 * 60 * 60 * 24));
-        if (invAgeDays <= 7) {
-          dueAging.current.amount += invDue;
-          dueAging.current.count++;
-        } else if (invAgeDays <= 30) {
-          dueAging.moderate.amount += invDue;
-          dueAging.moderate.count++;
-        } else {
-          dueAging.aged.amount += invDue;
-          dueAging.aged.count++;
-        }
+      if (dueDate && !isNaN(dueDate.getTime()) && dueDate >= now && (dueDate.getTime() - now.getTime()) <= (7 * 24 * 60 * 60 * 1000) && invDue > 0) {
+        dueThisWeekAmount += invDue;
+        dueThisWeekInvoicesCount++;
       }
 
       // Payments extraction
       if (Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0) {
         inv.paymentHistory.forEach(p => {
-          const amt = Math.round((parseFloat(p.amount) || 0) * 100) / 100;
+          const amt = roundTo2(parseFloat(p.amount) || 0);
           if (amt <= 0) return;
           const pDateStr = getLocalCalendarDate(p.date) || getLocalCalendarDate(inv.date) || getLocalCalendarDate(inv.createdAt);
 
@@ -324,55 +338,82 @@ const Dashboard = ({
     });
 
     let thisMonthExpenses = 0;
-    activeExpenses.forEach(exp => {
-      const amt = Math.round((parseFloat(exp.amount) || 0) * 100) / 100;
+    scopedExpenses.forEach(exp => {
+      const amt = roundTo2(parseFloat(exp.amount || exp.total) || 0);
       const expDateStr = getLocalCalendarDate(exp.date) || getLocalCalendarDate(exp.createdAt);
       if (expDateStr.startsWith(currentMonthPrefix)) thisMonthExpenses += amt;
     });
 
-    const thisMonthNetCash = Math.round((thisMonthCollected - thisMonthExpenses) * 100) / 100;
+    const thisMonthNetCash = roundTo2(thisMonthCollected - thisMonthExpenses);
     const collectionRate = totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0;
 
+    // Real comparison metrics (never fabricated)
     const revenueGrowthPercent = prevMonthRevenue > 0
-      ? Math.round(((thisMonthRevenue - prevMonthRevenue) / prevMonthRevenue) * 100)
-      : (thisMonthRevenue > 0 ? 40 : 0);
+      ? roundTo2(((thisMonthRevenue - prevMonthRevenue) / prevMonthRevenue) * 100)
+      : null;
 
     const collectedGrowthPercent = prevMonthCollected > 0
-      ? Math.round(((thisMonthCollected - prevMonthCollected) / prevMonthCollected) * 100)
-      : (thisMonthCollected > 0 ? 12.4 : 0);
+      ? roundTo2(((thisMonthCollected - prevMonthCollected) / prevMonthCollected) * 100)
+      : null;
 
-    const outstandingGrowthPercent = 8.7;
+    const aging = calculateAgingDistribution(scopedInvoices);
 
     return {
-      todaysSales: Math.round(todaysSales * 100) / 100,
-      todaysCollected: Math.round(todaysCollected * 100) / 100,
-      todaysOutstanding: Math.round(todaysOutstanding * 100) / 100,
+      todaysSales: roundTo2(todaysSales),
+      todaysCollected: roundTo2(todaysCollected),
+      todaysOutstanding: roundTo2(todaysOutstanding),
       todaysInvoicesCount,
       todaysPaymentCount,
-      thisMonthRevenue: Math.round(thisMonthRevenue * 100) / 100,
-      thisMonthCollected: Math.round(thisMonthCollected * 100) / 100,
-      thisMonthExpenses: Math.round(thisMonthExpenses * 100) / 100,
+      thisMonthRevenue: roundTo2(thisMonthRevenue),
+      thisMonthCollected: roundTo2(thisMonthCollected),
+      thisMonthExpenses: roundTo2(thisMonthExpenses),
       thisMonthNetCash,
-      totalRevenue: Math.round(totalRevenue * 100) / 100,
-      totalCollected: Math.round(totalCollected * 100) / 100,
-      totalOutstanding: Math.round(totalOutstanding * 100) / 100,
-      overdueAmount: Math.round(overdueAmount * 100) / 100,
+      totalRevenue: roundTo2(totalRevenue),
+      totalCollected: roundTo2(totalCollected),
+      totalOutstanding: roundTo2(totalOutstanding),
+      overdueAmount: roundTo2(overdueAmount),
       overdueCount,
-      dueTodayAmount: Math.round(dueTodayAmount * 100) / 100,
+      dueTodayAmount: roundTo2(dueTodayAmount),
       dueTodayInvoicesCount,
-      dueAging,
+      dueThisWeekAmount: roundTo2(dueThisWeekAmount),
+      dueThisWeekInvoicesCount,
+      aging,
+      dueAging: aging,
       collectionRate,
       revenueGrowthPercent,
-      collectedGrowthPercent,
-      outstandingGrowthPercent
+      collectedGrowthPercent
     };
-  }, [invoices, expenses]);
+  }, [scopedInvoices, scopedExpenses]);
+
+  // Top Outstanding Customer Intelligence
+  const topOutstandingCustomer = useMemo(() => {
+    const customerDueMap = new Map();
+    scopedInvoices.forEach(inv => {
+      const due = getInvoiceBalanceDue(inv);
+      if (due > 0) {
+        const cName = inv.customerName || inv.customer?.name || 'Walk-in Customer';
+        const cId = inv.customerId || inv.customer?.id || cName;
+        const current = customerDueMap.get(cId) || { 
+          id: cId, 
+          name: cName, 
+          totalDue: 0, 
+          count: 0, 
+          phone: inv.customerPhone || inv.customer?.phone || '' 
+        };
+        current.totalDue = roundTo2(current.totalDue + due);
+        current.count++;
+        customerDueMap.set(cId, current);
+      }
+    });
+
+    const list = Array.from(customerDueMap.values()).sort((a, b) => b.totalDue - a.totalDue);
+    return list.length > 0 ? list[0] : null;
+  }, [scopedInvoices]);
 
   // ==========================================================================
-  // CHART DATA GENERATION
+  // CANONICAL CHART DATA GENERATION (Revenue & Collected Trend)
   // ==========================================================================
   const chartSeries = useMemo(() => {
-    const activeInvoices = invoices.filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void');
     const now = new Date();
     const days = [];
 
@@ -385,41 +426,45 @@ const Dashboard = ({
       d.setDate(d.getDate() - i);
       const dateKey = getLocalCalendarDate(d);
       const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      days.push({ dateKey, label, sales: 0, collected: 0, value: 0 });
+      days.push({ dateKey, label, invoiced: 0, collected: 0, value: 0 });
     }
 
     const dayMap = new Map(days.map(item => [item.dateKey, item]));
 
-    activeInvoices.forEach(inv => {
+    scopedInvoices.forEach(inv => {
       const invDate = getLocalCalendarDate(inv.date) || getLocalCalendarDate(inv.createdAt);
+      const val = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
+
       if (dayMap.has(invDate)) {
-        const val = Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
-        dayMap.get(invDate).sales += val;
-        dayMap.get(invDate).value += val;
+        dayMap.get(invDate).invoiced = roundTo2(dayMap.get(invDate).invoiced + val);
+        dayMap.get(invDate).value = dayMap.get(invDate).invoiced;
+      }
+
+      // Exact payments on their real payment dates
+      if (Array.isArray(inv.paymentHistory)) {
+        inv.paymentHistory.forEach(p => {
+          const pAmt = roundTo2(parseFloat(p.amount) || 0);
+          const pDate = getLocalCalendarDate(p.date) || invDate;
+          if (pAmt > 0 && dayMap.has(pDate)) {
+            dayMap.get(pDate).collected = roundTo2(dayMap.get(pDate).collected + pAmt);
+          }
+        });
+      } else {
+        const paid = getInvoicePaidTotal(inv);
+        if (paid > 0 && dayMap.has(invDate)) {
+          dayMap.get(invDate).collected = roundTo2(dayMap.get(invDate).collected + paid);
+        }
       }
     });
 
-    // If all zeroes, create smooth wave preview based on month revenue so it never looks blank
-    const hasData = days.some(d => d.value > 0);
-    if (!hasData && metrics.thisMonthRevenue > 0) {
-      const peakIndex = Math.floor(days.length / 2);
-      days.forEach((d, idx) => {
-        const dist = Math.abs(idx - peakIndex);
-        if (dist === 0) d.value = Math.min(800, metrics.thisMonthRevenue * 0.45 || 750);
-        else if (dist === 1) d.value = Math.min(500, metrics.thisMonthRevenue * 0.25 || 350);
-        else d.value = 0;
-      });
-    }
-
     return days;
-  }, [invoices, chartTimeframe, metrics.thisMonthRevenue]);
+  }, [scopedInvoices, chartTimeframe]);
 
   const recentInvoicesList = useMemo(() => {
-    return [...invoices]
-      .filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void')
+    return [...scopedInvoices]
       .sort((a, b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0))
       .slice(0, 5);
-  }, [invoices]);
+  }, [scopedInvoices]);
 
   const handleRefresh = async () => {
     try {
@@ -494,9 +539,19 @@ const Dashboard = ({
                       <span className="text-[10px] font-bold text-[#a8a29e] dark:text-theme-muted tracking-wider uppercase" data-title="Month Revenue">
                         TOTAL REVENUE (THIS MONTH)
                       </span>
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#ecfdf5] dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-200/60 dark:border-emerald-500/20">
-                        + {metrics.revenueGrowthPercent}% vs last month
-                      </span>
+                      {metrics.revenueGrowthPercent !== null ? (
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                          metrics.revenueGrowthPercent >= 0 
+                            ? 'bg-[#ecfdf5] dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-500/20' 
+                            : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200/60 dark:border-rose-500/20'
+                        }`}>
+                          {metrics.revenueGrowthPercent >= 0 ? `+ ${metrics.revenueGrowthPercent}%` : `${metrics.revenueGrowthPercent}%`} vs last month
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#faf5ef] dark:bg-theme-surface text-[#78716c] dark:text-theme-muted text-[10px] font-bold border border-[#f0ece6] dark:border-theme-border-soft">
+                          Current Month
+                        </span>
+                      )}
                     </div>
 
                     {/* Big Revenue Number */}
@@ -511,9 +566,11 @@ const Dashboard = ({
                         <p className="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 font-numbers mt-0.5">
                           <AnimatedNumber value={formatCurrency(metrics.thisMonthCollected, currencySymbol)} />
                         </p>
-                        <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                          + {metrics.collectedGrowthPercent}%
-                        </p>
+                        {metrics.collectedGrowthPercent !== null && (
+                          <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                            {metrics.collectedGrowthPercent >= 0 ? `+ ${metrics.collectedGrowthPercent}%` : `${metrics.collectedGrowthPercent}%`}
+                          </p>
+                        )}
                       </div>
 
                       <div>
@@ -521,9 +578,15 @@ const Dashboard = ({
                         <p className="text-sm sm:text-base font-black text-[#ea580c] dark:text-amber-500 font-numbers mt-0.5">
                           <AnimatedNumber value={formatCurrency(metrics.totalOutstanding, currencySymbol)} />
                         </p>
-                        <p className="text-[9px] font-bold text-[#ea580c] dark:text-amber-500 mt-0.5">
-                          + {metrics.outstandingGrowthPercent}%
-                        </p>
+                        {metrics.overdueCount > 0 ? (
+                          <p className="text-[9px] font-bold text-rose-600 dark:text-rose-400 mt-0.5">
+                            {metrics.overdueCount} overdue
+                          </p>
+                        ) : (
+                          <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                            All on track
+                          </p>
+                        )}
                       </div>
 
                       <div>
@@ -531,8 +594,8 @@ const Dashboard = ({
                         <p className="text-sm sm:text-base font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-0.5">
                           <AnimatedNumber value={`${metrics.collectionRate}%`} />
                         </p>
-                        <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                          + 5.1%
+                        <p className="text-[9px] font-bold text-theme-muted mt-0.5">
+                          of total billed
                         </p>
                       </div>
                     </div>
@@ -555,9 +618,19 @@ const Dashboard = ({
                 {/* RIGHT CARD: REVENUE & COLLECTION TREND */}
                 <div className="lg:col-span-6 bg-white dark:bg-theme-card p-5 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
-                      Revenue & Collection Trend
-                    </h3>
+                    <div>
+                      <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
+                        Revenue & Collection Trend
+                      </h3>
+                      <div className="flex items-center gap-3 mt-0.5 text-[10px] font-bold">
+                        <span className="flex items-center gap-1 text-[#c2410c] dark:text-theme-accent">
+                          <span className="w-2 h-2 rounded-full bg-[#c2410c]" /> Invoiced
+                        </span>
+                        <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" /> Collected
+                        </span>
+                      </div>
+                    </div>
 
                     {/* Timeframe Dropdown */}
                     <div className="relative">
@@ -597,15 +670,23 @@ const Dashboard = ({
                             <stop offset="5%" stopColor="#c2410c" stopOpacity={0.28} />
                             <stop offset="95%" stopColor="#c2410c" stopOpacity={0.0} />
                           </linearGradient>
+                          <linearGradient id="emeraldGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                          </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0ece6" opacity={0.6} />
                         <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#a8a29e' }} dy={4} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#a8a29e' }} ticks={[0, 200, 400, 600, 800]} domain={[0, 800]} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#a8a29e' }} />
                         <Tooltip
                           contentStyle={{ background: '#ffffff', border: '1px solid #f0ece6', borderRadius: '12px', fontSize: '11px', color: '#1c1917', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-                          formatter={(val) => [formatCurrency(val, currencySymbol), 'Revenue']}
+                          formatter={(val, name) => [
+                            formatCurrency(val, currencySymbol), 
+                            name === 'invoiced' ? 'Invoiced' : 'Collected'
+                          ]}
                         />
-                        <Area type="monotone" dataKey="value" stroke="#c2410c" strokeWidth={2.2} fill="url(#warmTerracottaGrad)" />
+                        <Area type="monotone" dataKey="invoiced" name="invoiced" stroke="#c2410c" strokeWidth={2.2} fill="url(#warmTerracottaGrad)" />
+                        <Area type="monotone" dataKey="collected" name="collected" stroke="#10b981" strokeWidth={2} fill="url(#emeraldGrad)" />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -672,7 +753,63 @@ const Dashboard = ({
               </div>
 
               {/* ========================================================================= */}
-              {/* 4. BOTTOM TWO-COLUMN SECTION: RECENT INVOICES (LEFT) & RIGHT WIDGETS */}
+              {/* 4. NEEDS YOUR ATTENTION SECTION (Actionable Intelligence Strip) */}
+              {/* ========================================================================= */}
+              {(metrics.overdueCount > 0 || pendingPaymentsCount > 0 || metrics.dueTodayInvoicesCount > 0) ? (
+                <div className="p-3.5 bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-transparent dark:from-amber-500/5 dark:via-rose-500/5 border border-amber-500/20 dark:border-amber-500/30 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                      <AlertCircle className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-[#1c1917] dark:text-theme-primary uppercase tracking-wider">
+                        Needs Your Attention
+                      </h4>
+                      <p className="text-xs text-[#78716c] dark:text-theme-muted font-medium flex items-center gap-2 flex-wrap mt-0.5">
+                        {metrics.overdueCount > 0 && (
+                          <span className="font-bold text-rose-600 dark:text-rose-400">
+                            🔴 {metrics.overdueCount} overdue ({formatCurrency(metrics.overdueAmount, currencySymbol)})
+                          </span>
+                        )}
+                        {metrics.dueTodayInvoicesCount > 0 && (
+                          <span className="font-bold text-amber-600 dark:text-amber-400">
+                            🟠 {metrics.dueTodayInvoicesCount} due today ({formatCurrency(metrics.dueTodayAmount, currencySymbol)})
+                          </span>
+                        )}
+                        {pendingPaymentsCount > 0 && (
+                          <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                            🟡 {pendingPaymentsCount} proof awaiting verification
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <button
+                      onClick={() => setCurrentTab('due-ledger')}
+                      className="px-3 py-1.5 bg-white dark:bg-theme-surface text-xs font-bold text-[#c2410c] dark:text-theme-accent border border-[#f0ece6] dark:border-theme-border-soft hover:bg-[#faf5ef] rounded-xl transition-all cursor-pointer shadow-2xs"
+                    >
+                      View Dues →
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span className="font-bold text-emerald-800 dark:text-emerald-300">
+                      Everything looks good! Zero overdue invoices.
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-theme-muted hidden sm:inline font-numbers">
+                    {metrics.collectionRate}% Collection Rate
+                  </span>
+                </div>
+              )}
+
+              {/* ========================================================================= */}
+              {/* 5. BOTTOM TWO-COLUMN SECTION: RECENT INVOICES (LEFT) & RIGHT WIDGETS */}
               {/* ========================================================================= */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
 
@@ -719,7 +856,7 @@ const Dashboard = ({
                         </thead>
                         <tbody className="divide-y divide-[#faf7f2] dark:divide-theme-border-soft/40">
                           {recentInvoicesList.map(inv => {
-                            const total = Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
+                            const total = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
                             const paid = getInvoicePaidTotal(inv);
                             const due = getInvoiceBalanceDue(inv);
                             const status = (inv.paymentStatus || 'Unpaid').toLowerCase();
@@ -774,11 +911,22 @@ const Dashboard = ({
                                 </td>
 
                                 <td className="py-3 text-center">
-                                  <div className="flex items-center justify-center gap-1.5 text-[#a8a29e]">
+                                  <div className="flex items-center justify-center gap-1 text-[#a8a29e]">
+                                    {due > 0 && (
+                                      <button
+                                        onClick={() => setQuickPayInvoice(inv)}
+                                        className="p-1 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-md transition-colors cursor-pointer"
+                                        title="Quick Pay Collection"
+                                        aria-label="Quick Pay"
+                                      >
+                                        <CreditCard className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                                      </button>
+                                    )}
                                     <button
                                       onClick={() => onViewInvoice?.(inv)}
                                       className="p-1 hover:text-[#c2410c] hover:bg-[#faf5ef] rounded-md transition-colors cursor-pointer"
                                       title="View Invoice"
+                                      aria-label="View Invoice"
                                     >
                                       <Eye className="w-3.5 h-3.5" />
                                     </button>
@@ -786,6 +934,7 @@ const Dashboard = ({
                                       onClick={() => onDownloadPDF?.(inv)}
                                       className="p-1 hover:text-[#c2410c] hover:bg-[#faf5ef] rounded-md transition-colors cursor-pointer"
                                       title="Download PDF"
+                                      aria-label="Download PDF"
                                     >
                                       <Download className="w-3.5 h-3.5" />
                                     </button>
@@ -822,10 +971,6 @@ const Dashboard = ({
                       />
                     </div>
 
-                    <p className="text-[10px] text-[#78716c] dark:text-theme-muted font-medium pt-1">
-                      Keep going! You're doing great.
-                    </p>
-
                     {/* 2x2 Stats Grid */}
                     <div className="grid grid-cols-2 gap-3 pt-2">
                       <div>
@@ -856,6 +1001,27 @@ const Dashboard = ({
                         </p>
                       </div>
                     </div>
+
+                    {/* Top Debtor Highlight */}
+                    {topOutstandingCustomer && (
+                      <div className="mt-2 p-3 bg-[#faf8f5] dark:bg-theme-surface/70 rounded-xl border border-[#f0ece6] dark:border-theme-border-soft flex items-center justify-between text-xs">
+                        <div className="min-w-0 pr-2">
+                          <span className="text-[8px] font-bold text-[#a8a29e] uppercase tracking-wider block">Top Outstanding</span>
+                          <span className="font-bold text-[#1c1917] dark:text-theme-primary truncate block text-xs">{topOutstandingCustomer.name}</span>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="font-black text-rose-600 dark:text-rose-400 font-numbers block text-xs">
+                            {formatCurrency(topOutstandingCustomer.totalDue, currencySymbol)}
+                          </span>
+                          <button
+                            onClick={() => setCurrentTab('due-ledger')}
+                            className="text-[9px] font-bold text-[#c2410c] hover:underline inline-block mt-0.5 cursor-pointer"
+                          >
+                            Follow Up →
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* 2. BUSINESS HEALTH */}
@@ -887,22 +1053,30 @@ const Dashboard = ({
                       {/* Metric 2 */}
                       <div>
                         <div className="flex items-center justify-between text-[11px] font-semibold text-[#44403c] dark:text-theme-secondary mb-1">
-                          <span>Invoice Generation</span>
-                          <span className="font-bold text-[#1c1917] dark:text-theme-primary font-numbers">{invoices.length} Invoices</span>
+                          <span>Overdue Exposure</span>
+                          <span className="font-bold text-[#1c1917] dark:text-theme-primary">
+                            {metrics.totalOutstanding > 0 && (metrics.overdueAmount / metrics.totalOutstanding) > 0.4 ? 'High' : (metrics.overdueAmount > 0 ? 'Moderate' : 'Low')}
+                          </span>
                         </div>
                         <div className="w-full bg-[#faf5ef] dark:bg-theme-surface h-1.5 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#c2410c] rounded-full" style={{ width: `${Math.min(100, invoices.length * 15 || 50)}%` }} />
+                          <div 
+                            className="h-full rounded-full transition-all" 
+                            style={{ 
+                              width: `${metrics.totalOutstanding > 0 ? Math.min(100, Math.round((metrics.overdueAmount / metrics.totalOutstanding) * 100)) : 0}%`,
+                              backgroundColor: metrics.overdueAmount > 0 ? '#ef4444' : '#10b981'
+                            }} 
+                          />
                         </div>
                       </div>
 
                       {/* Metric 3 */}
                       <div>
                         <div className="flex items-center justify-between text-[11px] font-semibold text-[#44403c] dark:text-theme-secondary mb-1">
-                          <span>Customer Network</span>
-                          <span className="font-bold text-[#1c1917] dark:text-theme-primary font-numbers">{customers.length || 3} Active</span>
+                          <span>Active Ledger Size</span>
+                          <span className="font-bold text-[#1c1917] dark:text-theme-primary font-numbers">{scopedInvoices.length} Invoices</span>
                         </div>
                         <div className="w-full bg-[#faf5ef] dark:bg-theme-surface h-1.5 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#c2410c] rounded-full" style={{ width: `${Math.min(100, customers.length * 20 || 60)}%` }} />
+                          <div className="h-full bg-[#c2410c] rounded-full" style={{ width: `${Math.min(100, scopedInvoices.length * 10 || 20)}%` }} />
                         </div>
                       </div>
                     </div>
@@ -924,6 +1098,19 @@ const Dashboard = ({
             setShowAddCustomerSheet(false);
           }}
           businessSettings={businessSettings}
+        />
+
+        {/* QUICK PAY MODAL */}
+        <QuickPayModal
+          isOpen={Boolean(quickPayInvoice)}
+          onClose={() => setQuickPayInvoice(null)}
+          invoice={quickPayInvoice}
+          currencySymbol={currencySymbol}
+          businessSettings={businessSettings}
+          onPaymentSuccess={() => {
+            setQuickPayInvoice(null);
+            setTriggerSync(prev => prev + 1);
+          }}
         />
       </PullToRefresh>
     </AnimatedPage>
