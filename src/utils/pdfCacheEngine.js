@@ -70,6 +70,7 @@ export const calculateInvoicePdfHash = async (invoice, businessSettings = {}) =>
       balanceDue: financials.balanceDue ?? 0,
       previousDue: financials.previousDue ?? financials.oldDue ?? 0,
       totalReceivable: financials.totalReceivable ?? 0,
+      customerTotalDue: financials.customerTotalDue ?? (financials.previousDue > 0 ? (financials.remainingOldDue + financials.currentBillDue) : financials.balanceDue),
       paymentStatus: financials.paymentStatus ?? invoice.paymentStatus ?? 'Unpaid'
     },
 

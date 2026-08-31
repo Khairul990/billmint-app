@@ -244,9 +244,19 @@ export const calculateCanonicalInvoiceFinancials = (inv) => {
     };
   }
 
-  const subtotal = roundTo2(parseFloat(inv.totals?.subtotal ?? inv.subtotal) || 0);
+  let subtotal = roundTo2(parseFloat(inv.totals?.subtotal ?? inv.subtotal) || 0);
+  if (subtotal === 0 && Array.isArray(inv.items) && inv.items.length > 0) {
+    const itemSum = inv.items.reduce((acc, itm) => acc + calculateItemTotal(itm.qty || itm.quantity, itm.rate || itm.price || itm.unitPrice, itm.discount || 0), 0);
+    subtotal = roundTo2(itemSum);
+  }
+
   const discountAmount = roundTo2(parseFloat(inv.totals?.discount ?? inv.totals?.discountAmount ?? inv.discountAmount ?? inv.discount) || 0);
-  const taxAmount = roundTo2(parseFloat(inv.totals?.tax ?? inv.totals?.taxAmount ?? inv.taxAmount ?? inv.tax) || 0);
+  let taxAmount = roundTo2(parseFloat(inv.totals?.tax ?? inv.totals?.taxAmount ?? inv.taxAmount ?? inv.tax) || 0);
+  if (taxAmount === 0 && (inv.taxPercentage || inv.taxRate)) {
+    const taxPct = parseFloat(inv.taxPercentage || inv.taxRate) || 0;
+    const taxable = Math.max(0, subtotal - discountAmount);
+    taxAmount = roundTo2(taxable * (taxPct / 100));
+  }
   const shipping = roundTo2(parseFloat(inv.totals?.shipping ?? inv.shipping) || 0);
 
   let currentInvoiceTotal = roundTo2(parseFloat(inv.totals?.grandTotal ?? inv.grandTotal ?? inv.total) || 0);

@@ -32,11 +32,10 @@ const buildQrBase64 = async (invoice, businessSettings) => {
   const bkashNumber = businessSettings?.bkashNumber || paySnap.bkashNumber || '';
   const nagadNumber = businessSettings?.nagadNumber || paySnap.nagadNumber || '';
   const payeeName = businessSettings?.payeeName || businessSettings?.businessName || paySnap.payeeName || '';
-  const currencyCode = businessSettings?.currencyCode || invoice.regionalSettingsSnapshot?.currencyCode || 'INR';
   const canonical = calculateCanonicalInvoiceFinancials(invoice);
-  const dueAmount = (canonical.remainingOldDue !== undefined && canonical.currentBillDue !== undefined)
+  const dueAmount = canonical.customerTotalDue ?? ((canonical.remainingOldDue !== undefined && canonical.currentBillDue !== undefined)
     ? roundTo2(canonical.remainingOldDue + canonical.currentBillDue)
-    : (canonical.totalReceivable || canonical.balanceDue || 0);
+    : (canonical.totalReceivable || canonical.balanceDue || 0));
 
   let qrText = '';
   if (paymentMethod === 'UPI') {
@@ -148,9 +147,15 @@ export async function prepareInvoicePdf(invoice, businessSettings) {
     return { type: 'pdf', name: null, mimeType: null, size: null, blobUrl: null, blob: null, ready: false, error: 'Invoice missing' };
   }
   try {
-    const blob = await generateInvoicePdfBlob(invoice, businessSettings);
+    let blob = null;
+    try {
+      const { getOrGenerateInvoicePdfBlob } = await import('../../utils/pdfCacheEngine.js');
+      blob = await getOrGenerateInvoicePdfBlob(invoice, businessSettings);
+    } catch (cacheErr) {
+      console.warn('[AttachmentEngine] Cache engine generation fallback to direct React-PDF:', cacheErr);
+      blob = await generateInvoicePdfBlob(invoice, businessSettings);
+    }
     const url = URL.createObjectURL(blob);
-    const safeBusinessName = (businessSettings?.businessName || 'Business').replace(/[^a-zA-Z0-9]/g, '-');
     const name = `BillQyro-Invoice-${invoice.invoiceNumber || 'unknown'}.pdf`;
     return {
       type: 'pdf',

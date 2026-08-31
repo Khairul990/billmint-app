@@ -646,7 +646,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
                 {paymentPrefs?.paymentMethod === 'Manual' ? 'Scan to View Live Invoice' : `Scan to Pay with ${paymentPrefs?.paymentMethod || 'UPI'}`}
               </Text>
               <Text style={[styles.paymentTitle, useA5 ? { fontSize: 10 } : {}, { color: tPrimary }]}>{paymentPrefs.payeeName}</Text>
-              <Text style={styles.metaText}>Due: {formatCurrency((financials.remainingOldDue !== undefined && financials.currentBillDue !== undefined) ? roundTo2(financials.remainingOldDue + financials.currentBillDue) : (financials.totalReceivable || financials.balanceDue || 0), currencySymbol, regionalPrefs.numberFormat)}</Text>
+              <Text style={styles.metaText}>Due: {formatCurrency(financials.customerTotalDue ?? ((financials.remainingOldDue !== undefined && financials.currentBillDue !== undefined) ? roundTo2(financials.remainingOldDue + financials.currentBillDue) : (financials.totalReceivable || financials.balanceDue || 0)), currencySymbol, regionalPrefs.numberFormat)}</Text>
               <Text style={styles.metaText}>Invoice: {invoice.invoiceNumber}</Text>
               {paymentPrefs.paymentNote && (
                 <Text style={{ fontSize: 7.5, color: '#64748b', marginTop: 3 }}>Note: {paymentPrefs.paymentNote}</Text>

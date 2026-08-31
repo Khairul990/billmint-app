@@ -105,6 +105,7 @@ export const buildCanonicalRenderModel = (invoice, businessSettings, previewOver
     bankDetails,
     currencySymbol,
     categoryWords,
-    financials
+    financials,
+    invoice
   };
 };
