@@ -103,7 +103,11 @@ export const getInvoicePaidTotal = (inv) => {
  */
 export const getInvoiceBalanceDue = (inv) => {
   if (!inv) return 0;
-  const currentInvoiceTotal = roundTo2(parseFloat(inv.totals?.grandTotal ?? inv.grandTotal ?? inv.total) || 0);
+  let currentInvoiceTotal = roundTo2(parseFloat(inv.totals?.grandTotal ?? inv.grandTotal ?? inv.total) || 0);
+  if (currentInvoiceTotal === 0 && Array.isArray(inv.items) && inv.items.length > 0) {
+    const itemSum = inv.items.reduce((acc, itm) => acc + calculateItemTotal(itm.qty || itm.quantity, itm.rate || itm.price || itm.unitPrice, itm.discount || 0), 0);
+    currentInvoiceTotal = roundTo2(itemSum);
+  }
   const oldDue = roundTo2(parseFloat(inv.totals?.oldDue ?? inv.oldDue ?? inv.previousDue) || 0);
   const paidTotal = getInvoicePaidTotal(inv);
   const allocation = allocatePayment(paidTotal, oldDue, currentInvoiceTotal);
@@ -118,7 +122,11 @@ export const getInvoicePaymentStatus = (inv) => {
   if (!inv) return 'Unpaid';
   if (inv.status === 'Cancelled' || inv.status === 'Void') return inv.status;
 
-  const currentInvoiceTotal = roundTo2(parseFloat(inv.totals?.grandTotal ?? inv.grandTotal ?? inv.total) || 0);
+  let currentInvoiceTotal = roundTo2(parseFloat(inv.totals?.grandTotal ?? inv.grandTotal ?? inv.total) || 0);
+  if (currentInvoiceTotal === 0 && Array.isArray(inv.items) && inv.items.length > 0) {
+    const itemSum = inv.items.reduce((acc, itm) => acc + calculateItemTotal(itm.qty || itm.quantity, itm.rate || itm.price || itm.unitPrice, itm.discount || 0), 0);
+    currentInvoiceTotal = roundTo2(itemSum);
+  }
   const oldDue = roundTo2(parseFloat(inv.totals?.oldDue ?? inv.oldDue ?? inv.previousDue) || 0);
   const paidTotal = getInvoicePaidTotal(inv);
   const allocation = allocatePayment(paidTotal, oldDue, currentInvoiceTotal);
@@ -288,6 +296,7 @@ export const calculateCanonicalInvoiceFinancials = (inv) => {
     discountAmount,
     taxAmount,
     shipping,
+    grandTotal: currentInvoiceTotal,
     currentInvoiceTotal,
     previousDue,
     totalReceivable,
