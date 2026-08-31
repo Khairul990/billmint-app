@@ -214,7 +214,7 @@ export const invoiceEngine = {
 
     // Additive: mirror payment into Internal Bank ledger (idempotent, failure-isolated).
     try {
-      const { bankEngine } = await import('./bankEngine');
+      const { bankEngine } = await import('./bankEngine.js');
       await bankEngine.autoPostPayment({
         id: paymentEntry.id,
         amount: paymentEntry.amount,

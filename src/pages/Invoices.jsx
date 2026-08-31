@@ -4,6 +4,7 @@ import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import AnimatedPage from '../components/AnimatedPage';
 import InvoiceCard from '../components/InvoiceCard';
 import InvoicePreview from '../components/InvoicePreview';
+import QuickPayModal from '../components/payments/QuickPayModal';
 import { 
   Search, 
   Plus, 
@@ -1445,6 +1446,18 @@ const Invoices = ({
         </div>,
         document.body
       )}
+
+      {/* QUICK PAY MODAL */}
+      <QuickPayModal
+        isOpen={Boolean(recordingPaymentInvoice)}
+        onClose={() => setRecordingPaymentInvoice(null)}
+        invoice={recordingPaymentInvoice}
+        currencySymbol={currencySymbol}
+        businessSettings={businessSettings}
+        onPaymentSuccess={() => {
+          setRecordingPaymentInvoice(null);
+        }}
+      />
     </AnimatedPage>
   );
 };

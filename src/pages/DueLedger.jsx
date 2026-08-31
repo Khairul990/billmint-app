@@ -4,6 +4,7 @@ import { Clock, Search, CheckCircle2, AlertCircle, CreditCard, Calendar, X, Bell
 import { formatCurrency } from '../utils/invoiceUtils';
 import { CardSkeleton } from '../components/PremiumSkeleton';
 import CustomerLedger from '../components/customers/CustomerLedger';
+import QuickPayModal from '../components/payments/QuickPayModal';
 import { 
   getInvoicePaidTotal, 
   getInvoiceBalanceDue, 
@@ -519,123 +520,18 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
         </div>
       )}
 
-      {/* RECORD PAYMENT POPUP MODAL */}
-      <AnimatePresence>
-        {recordingPaymentBill && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="w-full max-w-md bg-theme-card border border-theme-border-soft rounded-2xl shadow-2xl overflow-hidden p-6 space-y-4"
-            >
-              <div className="flex items-center justify-between border-b border-theme-border-soft pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                    <CreditCard className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-black text-theme-primary">Record Payment</h3>
-                    <p className="text-[11px] font-semibold text-theme-muted font-mono">{recordingPaymentBill.invoiceNumber || 'Invoice'}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setRecordingPaymentBill(null)}
-                  className="w-7 h-7 rounded-lg hover:bg-theme-surface flex items-center justify-center text-theme-muted hover:text-theme-primary cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="p-3 bg-theme-surface/60 rounded-xl border border-theme-border-soft flex items-center justify-between text-xs font-semibold">
-                <div>
-                  <span className="text-theme-muted block text-[10px] uppercase font-bold">Customer</span>
-                  <span className="font-bold text-theme-primary">{recordingPaymentBill.customerName || 'Walk-in Customer'}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-theme-muted block text-[10px] uppercase font-bold">Balance Due</span>
-                  <span className="text-sm font-black text-rose-500 font-numbers tabular-nums">
-                    {formatCurrency(recordingPaymentBill.dueAmount, currencySymbol)}
-                  </span>
-                </div>
-              </div>
-
-              <form onSubmit={handleSubmitPayment} className="space-y-3.5">
-                <div>
-                  <label className="block text-xs font-bold text-theme-secondary mb-1">Payment Amount ({currencySymbol}) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    max={recordingPaymentBill.dueAmount}
-                    value={paymentAmount}
-                    onChange={(e) => setPaymentAmount(e.target.value)}
-                    required
-                    className="w-full px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-black text-theme-primary font-numbers focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-theme-secondary mb-1">Payment Method</label>
-                    <select
-                      value={paymentMethod}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-full px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:border-theme-accent"
-                    >
-                      <option value="Cash">Cash</option>
-                      <option value="UPI">UPI / QR</option>
-                      <option value="Bank Transfer">Bank Transfer</option>
-                      <option value="Cheque">Cheque</option>
-                      <option value="bKash">bKash</option>
-                      <option value="Nagad">Nagad</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-theme-secondary mb-1">Payment Date</label>
-                    <input
-                      type="date"
-                      value={paymentDate}
-                      onChange={(e) => setPaymentDate(e.target.value)}
-                      className="w-full px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none focus:border-theme-accent"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-theme-secondary mb-1">Notes / Transaction ID (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. UPI Ref #123456"
-                    value={paymentNotes}
-                    onChange={(e) => setPaymentNotes(e.target.value)}
-                    className="w-full px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary placeholder-theme-muted focus:outline-none focus:border-theme-accent"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setRecordingPaymentBill(null)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold text-theme-muted hover:text-theme-primary hover:bg-theme-surface cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmittingPayment}
-                    className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>{isSubmittingPayment ? 'Recording...' : 'Confirm Payment'}</span>
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* QUICK PAY MODAL */}
+      <QuickPayModal
+        isOpen={Boolean(recordingPaymentBill)}
+        onClose={() => setRecordingPaymentBill(null)}
+        invoice={recordingPaymentBill}
+        currencySymbol={currencySymbol}
+        businessSettings={businessSettings}
+        onPaymentSuccess={() => {
+          setRecordingPaymentBill(null);
+          if (onPaymentRecorded) onPaymentRecorded();
+        }}
+      />
 
       <CustomerLedger
         isOpen={!!selectedCustomer}
