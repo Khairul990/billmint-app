@@ -34,7 +34,9 @@ const buildQrBase64 = async (invoice, businessSettings) => {
   const payeeName = businessSettings?.payeeName || businessSettings?.businessName || paySnap.payeeName || '';
   const currencyCode = businessSettings?.currencyCode || invoice.regionalSettingsSnapshot?.currencyCode || 'INR';
   const canonical = calculateCanonicalInvoiceFinancials(invoice);
-  const dueAmount = canonical.balanceDue > 0 ? canonical.balanceDue : (canonical.totalReceivable || 0);
+  const dueAmount = (canonical.remainingOldDue !== undefined && canonical.currentBillDue !== undefined)
+    ? roundTo2(canonical.remainingOldDue + canonical.currentBillDue)
+    : (canonical.totalReceivable || canonical.balanceDue || 0);
 
   let qrText = '';
   if (paymentMethod === 'UPI') {

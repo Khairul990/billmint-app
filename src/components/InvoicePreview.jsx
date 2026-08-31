@@ -38,7 +38,9 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
   // Check if a dedicated rich layout exists in LivePreviewLayouts (e.g. minimal-classic, modern-corporate, teal-bold-header, etc.)
   const SelectedLayout = LivePreviewLayouts[rawTemplateId] || LivePreviewLayouts[templateId];
   if (SelectedLayout) {
-    const dueAmount = financials.balanceDue > 0 ? financials.balanceDue : financials.totalReceivable;
+    const dueAmount = (financials.remainingOldDue !== undefined && financials.currentBillDue !== undefined)
+      ? roundTo2(financials.remainingOldDue + financials.currentBillDue)
+      : (financials.totalReceivable || financials.balanceDue || 0);
     const paymentMethod = paymentPrefs?.paymentMethod || 'UPI';
     let qrValue = '';
     if (paymentMethod === 'UPI' && paymentPrefs?.upiId) {
@@ -417,7 +419,9 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
       {/* 4.5. PREMIUM PAYMENT QR CARD (CLIENT VIEW) */}
       {paymentPrefs?.paymentQrEnabled && paymentPrefs?.showQrInPreview && (
         (() => {
-          const dueAmount = financials.balanceDue > 0 ? financials.balanceDue : financials.totalReceivable;
+          const dueAmount = (financials.remainingOldDue !== undefined && financials.currentBillDue !== undefined)
+            ? roundTo2(financials.remainingOldDue + financials.currentBillDue)
+            : (financials.totalReceivable || financials.balanceDue || 0);
           const paymentMethod = paymentPrefs.paymentMethod || 'UPI';
           
           let qrText = '';

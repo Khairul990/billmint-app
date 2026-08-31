@@ -361,7 +361,9 @@ const PublicInvoice = ({ initialInvoice }) => {
   const country = regionalPrefs.country || 'India';
 
   const canonical = calculateCanonicalInvoiceFinancials(invoice);
-  const dueAmount = canonical.balanceDue > 0 ? canonical.balanceDue : canonical.totalReceivable;
+  const dueAmount = (canonical.remainingOldDue !== undefined && canonical.currentBillDue !== undefined)
+    ? roundTo2(canonical.remainingOldDue + canonical.currentBillDue)
+    : (canonical.totalReceivable || canonical.balanceDue || 0);
 
   // Format currency helpers using active numberFormat
   const formatVal = (val) => formatCurrency(val, currencySymbol, regionalPrefs.numberFormat || 'Indian');

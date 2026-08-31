@@ -571,7 +571,52 @@ runTest('TEST 18: Scenario H - Overpayment protection (Paid ₹1,500 on ₹1,000
   assert.strictEqual(canonical.paymentStatus, 'Paid', 'Status is Paid');
 });
 
+runTest('TEST 19: QR Payment Exact Scenario 1 (Current Invoice = ₹1,605, Previous Due = ₹1,190, Paid = ₹0)', () => {
+  const inv = {
+    id: 'inv_qr_1',
+    invoiceNumber: 'INV-QR-001',
+    grandTotal: 1605,
+    oldDue: 1190,
+    amountPaid: 0,
+    paymentHistory: []
+  };
+  const canonical = calculateCanonicalInvoiceFinancials(inv);
+  assert.strictEqual(canonical.currentInvoiceTotal, 1605, 'currentInvoiceTotal = 1605');
+  assert.strictEqual(canonical.balanceDue, 1605, 'currentInvoiceBalance = 1605');
+  assert.strictEqual(canonical.previousDue, 1190, 'previousDue = 1190');
+  assert.strictEqual(canonical.totalReceivable, 2795, 'totalReceivable = 2795 (1605 + 1190)');
+  
+  const qrDueAmount = (canonical.remainingOldDue !== undefined && canonical.currentBillDue !== undefined)
+    ? roundTo2(canonical.remainingOldDue + canonical.currentBillDue)
+    : canonical.totalReceivable;
+  assert.strictEqual(qrDueAmount, 2795, 'QR Due Amount must be ₹2,795');
+});
+
+runTest('TEST 20: QR Payment Exact Scenario 2 (Current Invoice = ₹1,605, Previous Due = ₹1,190, Paid = ₹500)', () => {
+  const inv = {
+    id: 'inv_qr_2',
+    invoiceNumber: 'INV-QR-002',
+    grandTotal: 1605,
+    oldDue: 1190,
+    amountPaid: 500,
+    paymentHistory: [{ id: 'p1', amount: 500 }]
+  };
+  const canonical = calculateCanonicalInvoiceFinancials(inv);
+  assert.strictEqual(canonical.currentInvoiceTotal, 1605, 'currentInvoiceTotal = 1605');
+  assert.strictEqual(canonical.previousDue, 1190, 'previousDue = 1190');
+  assert.strictEqual(canonical.allocatedToOldDue, 500, 'allocatedToOldDue = 500');
+  assert.strictEqual(canonical.remainingOldDue, 690, 'remainingOldDue = 690 (1190 - 500)');
+  assert.strictEqual(canonical.currentBillDue, 1605, 'currentBillDue = 1605');
+  assert.strictEqual(canonical.totalReceivable, 2795, 'Gross totalReceivable before payment = 2795');
+  
+  const qrDueAmount = (canonical.remainingOldDue !== undefined && canonical.currentBillDue !== undefined)
+    ? roundTo2(canonical.remainingOldDue + canonical.currentBillDue)
+    : canonical.totalReceivable;
+  assert.strictEqual(qrDueAmount, 2295, 'QR Due Amount must reflect remaining outstanding ₹2,295 (690 + 1605)');
+});
+
 console.log('\n======================================================');
 console.log(`📊 CANONICAL FINANCIAL PARITY RESULTS: ${passedTests} / ${totalTests} PASSED (100%)`);
 console.log('======================================================\n');
+
 
