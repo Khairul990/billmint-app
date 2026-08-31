@@ -24,15 +24,22 @@ assert.match(source, /border-theme-border-soft/);
 assert.match(source, /text-theme-primary/);
 assert.match(source, /text-theme-muted/);
 
-// Current command-center information architecture.
-assert.match(source, />TOTAL REVENUE \(THIS MONTH\)</);
-assert.match(source, />Today's Invoiced Volume</);
-assert.match(source, /Revenue & Collection Trend/);
-assert.match(source, /Collection Center/);
-assert.match(source, /Business Health/);
-assert.match(source, /Recent Invoices/);
-assert.match(source, />Create Invoice</);
-assert.match(source, />Record Payment</);
+// Current command-center information architecture. JSX whitespace/newlines
+// must not make these semantic labels brittle to formatting changes.
+const requiredLabels = [
+  'TOTAL REVENUE (THIS MONTH)',
+  "Today's Invoiced Volume",
+  'Revenue & Collection Trend',
+  'Collection Center',
+  'Business Health',
+  'Recent Invoices',
+  'Create Invoice',
+  'Record Payment'
+];
+
+for (const label of requiredLabels) {
+  assert.equal(source.includes(label), true, `Missing dashboard label: ${label}`);
+}
 
 // Executive financial data must be calculated by the dashboard model.
 for (const metric of [
