@@ -1,24 +1,29 @@
 import { auth, db } from './firebaseConfig.js';
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  sendPasswordResetEmail 
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { getAuthSession as dbGetAuthSession, getRealUserId as dbGetRealUserId, logout as dbLogout} from './dbEngine.js';
+import { getAuthSession as dbGetAuthSession, getRealUserId as dbGetRealUserId, logout as dbLogout } from './dbEngine.js';
+import { deviceSessionEngine } from './deviceSessionEngine.js';
 
 export const authEngine = {
   async signIn(email, password) {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
+    const user = userCredential.user;
+    const requireApproval = await deviceSessionEngine.getNewDeviceApproval().catch(() => false);
+    await deviceSessionEngine.registerCurrentSession({ requireApproval });
+    return user;
   },
 
   async register(email, password, name) {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     await this.initializeUserProfile(user, name);
+    await deviceSessionEngine.registerCurrentSession({ requireApproval: false });
     return user;
   },
 
@@ -26,12 +31,14 @@ export const authEngine = {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-    
+
     const userDocRef = doc(db, 'usersList', user.uid);
     const userDocSnap = await getDoc(userDocRef);
     if (!userDocSnap.exists()) {
       await this.initializeUserProfile(user, name || user.displayName || '');
     }
+    const requireApproval = await deviceSessionEngine.getNewDeviceApproval().catch(() => false);
+    await deviceSessionEngine.registerCurrentSession({ requireApproval });
     return user;
   },
 
@@ -47,7 +54,7 @@ export const authEngine = {
       createdAt: new Date().toISOString(),
       role: 'user'
     }, { merge: true });
-    
+
     const settingsRef = doc(db, 'settings', user.uid);
     const settingsSnap = await getDoc(settingsRef);
     if (!settingsSnap.exists()) {
@@ -85,7 +92,6 @@ export const authEngine = {
       const settingsSnap = await getDoc(doc(db, 'settings', user.uid));
       if (!settingsSnap.exists()) return false;
       const data = settingsSnap.data();
-      // Canonical check + legacy account migration check
       if (data.setupCompleted === true) return true;
       if (data.businessName && (data.profileSetupCompleted === true || data.businessSetupCompleted === true || (data.businessWorkspaces && data.businessWorkspaces.length > 0))) {
         return true;
@@ -96,7 +102,8 @@ export const authEngine = {
     }
   },
 
-  logout() {
+  async logout() {
+    deviceSessionEngine.clearLocalSession();
     return dbLogout();
   }
 };
