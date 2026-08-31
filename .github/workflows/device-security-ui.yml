@@ -1,0 +1,49 @@
+name: BillQyro Device Security Verification
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  device-security:
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore: wire device security panel') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wire security panel
+        run: node scripts/patch-device-security-ui.cjs
+
+      - name: Device security regression tests
+        run: node tests/deviceSessionSecurity.test.mjs
+
+      - name: Full regression suite
+        run: node tests/run_all_tests.mjs
+
+      - name: Production build
+        run: npm run build
+
+      - name: Commit wired UI
+        run: |
+          if git diff --quiet; then
+            echo "No UI changes required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/SettingsStudioV2.jsx
+          git commit -m "chore: wire device security panel"
+          git push
