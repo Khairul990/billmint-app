@@ -458,7 +458,7 @@ const Dashboard = ({
                   <h1 className="text-xl sm:text-2xl font-black text-[#1c1917] dark:text-theme-primary tracking-tight flex items-center gap-2">
                     <span>{greeting.text},</span>
                     <span className="text-[#c2410c] dark:text-theme-accent">{ownerName}</span>
-                    <span>👏</span>
+                    <span>👋</span>
                   </h1>
                   <p className="text-xs text-[#78716c] dark:text-theme-muted font-medium mt-0.5">
                     Here's what's happening with <span className="font-bold text-[#44403c] dark:text-theme-secondary">{workspaceName}</span> today.
@@ -466,7 +466,7 @@ const Dashboard = ({
                 </div>
 
                 {/* Right Time / Date Pill */}
-                <div className="flex items-center gap-3 self-start sm:self-auto bg-white dark:bg-theme-card px-3.5 py-2 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs">
+                <div className="flex items-center gap-3 self-start sm:self-auto bg-white dark:bg-theme-card px-4 py-2.5 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs">
                   <div className="w-8 h-8 rounded-full bg-[#faf5ef] dark:bg-theme-surface flex items-center justify-center text-[#c2410c] dark:text-theme-accent">
                     <Clock className="w-4 h-4" />
                   </div>
@@ -491,57 +491,57 @@ const Dashboard = ({
                   <div>
                     {/* Header Row */}
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black text-[#78716c] dark:text-theme-muted tracking-wider uppercase" data-title="Month Revenue">
+                      <span className="text-[10px] font-bold text-[#a8a29e] dark:text-theme-muted tracking-wider uppercase" data-title="Month Revenue">
                         TOTAL REVENUE (THIS MONTH)
                       </span>
                       <span className="px-2.5 py-0.5 rounded-full bg-[#ecfdf5] dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-200/60 dark:border-emerald-500/20">
-                        +{metrics.revenueGrowthPercent}% vs last month
+                        + {metrics.revenueGrowthPercent}% vs last month
                       </span>
                     </div>
 
                     {/* Big Revenue Number */}
-                    <div className="mt-2 text-3xl sm:text-4xl font-black text-[#1c1917] dark:text-theme-primary font-numbers tracking-tight">
+                    <div className="mt-2 text-3xl sm:text-4xl font-extrabold text-[#1c1917] dark:text-theme-primary font-numbers tracking-tight">
                       <AnimatedNumber value={formatCurrency(metrics.thisMonthRevenue, currencySymbol)} />
                     </div>
 
                     {/* 3 Sub-Metrics Row */}
                     <div className="grid grid-cols-3 gap-3 pt-5 pb-2">
                       <div>
-                        <p className="text-[9px] font-bold text-[#78716c] dark:text-theme-muted uppercase tracking-wider">COLLECTED</p>
+                        <p className="text-[9px] font-bold text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider">COLLECTED</p>
                         <p className="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 font-numbers mt-0.5">
                           <AnimatedNumber value={formatCurrency(metrics.thisMonthCollected, currencySymbol)} />
                         </p>
                         <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                          +{metrics.collectedGrowthPercent}%
+                          + {metrics.collectedGrowthPercent}%
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[9px] font-bold text-[#78716c] dark:text-theme-muted uppercase tracking-wider">OUTSTANDING</p>
+                        <p className="text-[9px] font-bold text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider">OUTSTANDING</p>
                         <p className="text-sm sm:text-base font-black text-[#ea580c] dark:text-amber-500 font-numbers mt-0.5">
                           <AnimatedNumber value={formatCurrency(metrics.totalOutstanding, currencySymbol)} />
                         </p>
                         <p className="text-[9px] font-bold text-[#ea580c] dark:text-amber-500 mt-0.5">
-                          +{metrics.outstandingGrowthPercent}%
+                          + {metrics.outstandingGrowthPercent}%
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[9px] font-bold text-[#78716c] dark:text-theme-muted uppercase tracking-wider">COLLECTION RATE</p>
+                        <p className="text-[9px] font-bold text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider">COLLECTION RATE</p>
                         <p className="text-sm sm:text-base font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-0.5">
                           <AnimatedNumber value={`${metrics.collectionRate}%`} />
                         </p>
                         <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                          +5.1%
+                          + 5.1%
                         </p>
                       </div>
                     </div>
                   </div>
 
                   {/* Bottom Strip: Today's Invoiced Volume */}
-                  <div className="mt-4 pt-3 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-xs">
+                  <div className="mt-4 p-2.5 rounded-xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2 text-[#44403c] dark:text-theme-secondary font-medium">
-                      <div className="w-6 h-6 rounded-lg bg-[#faf5ef] dark:bg-theme-surface flex items-center justify-center text-[#c2410c] dark:text-theme-accent">
+                      <div className="w-5 h-5 rounded-md bg-[#faf5ef] dark:bg-theme-surface flex items-center justify-center text-[#c2410c] dark:text-theme-accent">
                         <FileText className="w-3.5 h-3.5" />
                       </div>
                       <span className="text-xs font-semibold">Today's Invoiced Volume</span>
@@ -563,7 +563,7 @@ const Dashboard = ({
                     <div className="relative">
                       <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#faf5ef] dark:bg-theme-surface border border-[#f0ece6] dark:border-theme-border-soft text-[11px] font-bold text-[#44403c] dark:text-theme-secondary hover:border-[#c2410c] transition-colors cursor-pointer"
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-theme-surface border border-[#f0ece6] dark:border-theme-border-soft text-[11px] font-bold text-[#44403c] dark:text-theme-secondary hover:border-[#c2410c] transition-colors cursor-pointer shadow-2xs"
                       >
                         <span>{timeframeLabels[chartTimeframe]}</span>
                         <ChevronDown className="w-3 h-3 text-[#78716c]" />
@@ -600,12 +600,12 @@ const Dashboard = ({
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0ece6" opacity={0.6} />
                         <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#a8a29e' }} dy={4} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#a8a29e' }} domain={[0, 'auto']} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#a8a29e' }} ticks={[0, 200, 400, 600, 800]} domain={[0, 800]} />
                         <Tooltip
                           contentStyle={{ background: '#ffffff', border: '1px solid #f0ece6', borderRadius: '12px', fontSize: '11px', color: '#1c1917', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
                           formatter={(val) => [formatCurrency(val, currencySymbol), 'Revenue']}
                         />
-                        <Area type="natural" dataKey="value" stroke="#c2410c" strokeWidth={2.5} fill="url(#warmTerracottaGrad)" />
+                        <Area type="monotone" dataKey="value" stroke="#c2410c" strokeWidth={2.2} fill="url(#warmTerracottaGrad)" />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
