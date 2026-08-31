@@ -3,6 +3,7 @@ import {
   enqueueSync,
   flushSyncQueue,
   syncOfflineTransactions,
+  isSyncInProgress,
   startRealTimeSync as dbStartRealTimeSync,
   stopRealTimeSync as dbStopRealTimeSync,
   cloudWins,
@@ -85,6 +86,10 @@ export const offlineEngine = {
 
   isOnline() {
     return typeof navigator !== 'undefined' ? navigator.onLine : true;
+  },
+
+  isSyncing() {
+    return isSyncInProgress();
   },
 
   getDeviceId() {

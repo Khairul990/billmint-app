@@ -559,6 +559,10 @@ export const logAudit = async (action, entityType, entityId, before = null, afte
 
 let syncDebounceTimer = null;
 let isSyncing = false;
+let syncQueuedWhileBusy = false;
+let pendingSyncResolvers = [];
+
+export const isSyncInProgress = () => isSyncing;
 
 // Multi-Tab Sync Coordination Lock
 const SYNC_LOCK_KEY = 'billqyro_sync_active_lock';
@@ -657,29 +661,48 @@ export const cleanupStaleData = async () => {
   }
 };
 
-let pendingSyncResolvers = [];
-export const syncOfflineTransactions = async () => {
+export const syncOfflineTransactions = async (immediate = false) => {
   return new Promise((resolve) => {
     pendingSyncResolvers.push(resolve);
+
+    if (isSyncing) {
+      syncQueuedWhileBusy = true;
+      return;
+    }
+
     if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
     
-    syncDebounceTimer = setTimeout(async () => {
+    const executeSync = async () => {
       const resolvers = [...pendingSyncResolvers];
       pendingSyncResolvers = [];
+
       if (isSyncing) {
+        syncQueuedWhileBusy = true;
         resolvers.forEach(r => r(null));
         return;
       }
+
       isSyncing = true;
       try {
         await _runSyncOfflineTransactions();
       } catch (e) {
-        console.error('Background sync failed:', e);
+        console.error('[SYNC QUEUE] Background sync execution failed:', e);
       } finally {
         isSyncing = false;
         resolvers.forEach(r => r(true));
+
+        if (syncQueuedWhileBusy) {
+          syncQueuedWhileBusy = false;
+          syncOfflineTransactions(true).catch(() => {});
+        }
       }
-    }, 300); // 300ms batch window
+    };
+
+    if (immediate) {
+      executeSync();
+    } else {
+      syncDebounceTimer = setTimeout(executeSync, 300); // 300ms batch window for rapid events
+    }
   });
 };
 
@@ -879,12 +902,7 @@ const _runSyncOfflineTransactions = async () => {
   }
 };
 
-// Listen for network reconnection
-if (typeof window !== 'undefined') {
-  window.addEventListener('online', () => {
-    syncOfflineTransactions();
-  });
-}
+
 
 // LocalStorage Global Keys
 export const GLOBAL_KEYS = {
