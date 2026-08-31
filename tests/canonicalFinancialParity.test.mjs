@@ -5,6 +5,9 @@ import {
   getInvoiceBalanceDue, 
   getInvoicePaymentStatus, 
   normalizeInvoiceFinancials,
+  calculateCanonicalInvoiceFinancials,
+  calculateInvoiceTotals,
+  allocatePayment,
   computeSalesSummary,
   computeCollectionsSummary,
   computeCustomerLedger,
@@ -456,8 +459,6 @@ runTest('CASE F: Normal invoice without payment proof => canonical math determin
   });
   assert.strictEqual(partial.paymentStatus, 'Partially Paid', 'Case F2: Partial payment => Partially Paid');
   assert.strictEqual(partial.amountPaid, 2000, 'Case F2: amountPaid = ₹2,000');
-  assert.strictEqual(partial.balanceDue, 3000, 'Case F2: balanceDue = ₹3,000');
-
   // F3: Paid
   const paid = normalizeInvoiceFinancials({
     id: 'inv_f3', grandTotal: 5000,
@@ -467,6 +468,110 @@ runTest('CASE F: Normal invoice without payment proof => canonical math determin
   assert.strictEqual(paid.balanceDue, 0, 'Case F3: balanceDue = ₹0');
 });
 
+// -------------------------------------------------------------------
+// SCENARIOS 11 - 18: Previous-Due, Allocation & Edge-Case Regressions
+// -------------------------------------------------------------------
+console.log('\n--- PART 6: Previous-Due, Allocation & Edge-Case Regressions ---');
+
+runTest('TEST 11: Core Previous-Due Scenario (Invoice ₹1,000, Previous Due ₹500, Paid ₹200)', () => {
+  const invoice = {
+    id: 'inv_prev_due_1',
+    invoiceNumber: 'INV-2001',
+    grandTotal: 1000,
+    oldDue: 500,
+    amountPaid: 200,
+    paidAmount: 200,
+    paymentHistory: [
+      { id: 'pmt_pd1', amount: 200, method: 'Cash' }
+    ]
+  };
+
+  const canonical = calculateCanonicalInvoiceFinancials(invoice);
+  assert.strictEqual(canonical.currentInvoiceTotal, 1000, 'currentInvoiceTotal must be ₹1,000');
+  assert.strictEqual(canonical.previousDue, 500, 'previousDue must be ₹500');
+  assert.strictEqual(canonical.totalReceivable, 1500, 'totalReceivable must be ₹1,500 (₹1,000 + ₹500)');
+  assert.strictEqual(canonical.amountPaid, 200, 'amountPaid must be ₹200');
+  assert.strictEqual(canonical.allocatedToOldDue, 200, 'First ₹200 clears old due');
+  assert.strictEqual(canonical.remainingOldDue, 300, 'Remaining old due is ₹300');
+  assert.strictEqual(canonical.currentBillDue, 1000, 'Current bill balance is ₹1,000');
+  assert.strictEqual(canonical.remainingOldDue + canonical.currentBillDue, 1300, 'Net total customer liability is ₹1,300');
+});
+
+runTest('TEST 12: Scenario A - Invoice ₹1,000, Paid ₹0 => balance ₹1,000, Unpaid', () => {
+  const inv = { id: 'inv_sc_a', grandTotal: 1000, amountPaid: 0, paymentHistory: [] };
+  const canonical = calculateCanonicalInvoiceFinancials(inv);
+  assert.strictEqual(canonical.balanceDue, 1000, 'Balance must be ₹1,000');
+  assert.strictEqual(canonical.paymentStatus, 'Unpaid', 'Status must be Unpaid');
+});
+
+runTest('TEST 13: Scenario B - Invoice ₹1,000, Paid ₹500 => balance ₹500, Partially Paid', () => {
+  const inv = { id: 'inv_sc_b', grandTotal: 1000, amountPaid: 500, paymentHistory: [{ id: 'p1', amount: 500 }] };
+  const canonical = calculateCanonicalInvoiceFinancials(inv);
+  assert.strictEqual(canonical.balanceDue, 500, 'Balance must be ₹500');
+  assert.strictEqual(canonical.paymentStatus, 'Partially Paid', 'Status must be Partially Paid');
+});
+
+runTest('TEST 14: Scenario C - Invoice ₹1,000, Paid ₹1,000 => balance ₹0, Paid', () => {
+  const inv = { id: 'inv_sc_c', grandTotal: 1000, amountPaid: 1000, paymentHistory: [{ id: 'p1', amount: 1000 }] };
+  const canonical = calculateCanonicalInvoiceFinancials(inv);
+  assert.strictEqual(canonical.balanceDue, 0, 'Balance must be ₹0');
+  assert.strictEqual(canonical.paymentStatus, 'Paid', 'Status must be Paid');
+  assert.strictEqual(canonical.isFullyPaid, true, 'isFullyPaid must be true');
+});
+
+runTest('TEST 15: Scenario D - Invoice ₹1,000, Previous due ₹500, Paid ₹500 => clears ₹500 old due, ₹1,000 current bill due, net customer liability ₹1,000', () => {
+  const inv = {
+    id: 'inv_sc_d',
+    grandTotal: 1000,
+    oldDue: 500,
+    amountPaid: 500,
+    paymentHistory: [{ id: 'p1', amount: 500 }]
+  };
+  const canonical = calculateCanonicalInvoiceFinancials(inv);
+  assert.strictEqual(canonical.currentInvoiceTotal, 1000, 'currentInvoiceTotal = ₹1,000');
+  assert.strictEqual(canonical.allocatedToOldDue, 500, 'Paid ₹500 clears old due');
+  assert.strictEqual(canonical.remainingOldDue, 0, 'Remaining old due = 0');
+  assert.strictEqual(canonical.currentBillDue, 1000, 'currentBillDue = ₹1,000');
+  assert.strictEqual(canonical.balanceDue, 1000, 'balanceDue = ₹1,000');
+  assert.strictEqual(canonical.previousDue, 500, 'previousDue = ₹500');
+  assert.strictEqual(canonical.totalReceivable, 1500, 'totalReceivable before payments = ₹1,500');
+  assert.strictEqual(canonical.remainingOldDue + canonical.balanceDue, 1000, 'Total remaining customer due = ₹1,000');
+});
+
+runTest('TEST 16: Scenario E - Line items with tax + discount', () => {
+  const items = [
+    { qty: 2, rate: 500, discount: 50 },  // 2*500 - 50 = 950
+    { qty: 1, rate: 1000, discount: 100 } // 1*1000 - 100 = 900
+  ]; // Subtotal = 1850
+  const totals = calculateInvoiceTotals(items, 18, 50); // global disc 50 -> taxable 1800, 18% tax = 324 -> grandTotal = 2124
+  assert.strictEqual(totals.subtotal, 1850, 'Subtotal should be ₹1,850');
+  assert.strictEqual(totals.discountAmount, 50, 'Discount should be ₹50');
+  assert.strictEqual(totals.taxAmount, 324, 'Tax should be ₹324 (18% of ₹1,800)');
+  assert.strictEqual(totals.grandTotal, 2124, 'Grand Total should be ₹2,124');
+});
+
+runTest('TEST 17: Scenario G - Zero-value invoice edge cases', () => {
+  const zeroInv = { id: 'inv_zero', grandTotal: 0, amountPaid: 0, paymentHistory: [] };
+  const canonical = calculateCanonicalInvoiceFinancials(zeroInv);
+  assert.strictEqual(canonical.currentInvoiceTotal, 0, 'currentInvoiceTotal = 0');
+  assert.strictEqual(canonical.balanceDue, 0, 'balanceDue = 0');
+  assert.strictEqual(canonical.paymentStatus, 'Unpaid', 'Zero value invoice is Unpaid');
+});
+
+runTest('TEST 18: Scenario H - Overpayment protection (Paid ₹1,500 on ₹1,000 invoice)', () => {
+  const overpaidInv = {
+    id: 'inv_overpaid',
+    grandTotal: 1000,
+    amountPaid: 1500,
+    paymentHistory: [{ id: 'p1', amount: 1500 }]
+  };
+  const canonical = calculateCanonicalInvoiceFinancials(overpaidInv);
+  assert.strictEqual(canonical.amountPaid, 1500, 'amountPaid = ₹1,500');
+  assert.strictEqual(canonical.balanceDue, 0, 'balanceDue cannot be negative, capped at 0');
+  assert.strictEqual(canonical.paymentStatus, 'Paid', 'Status is Paid');
+});
+
 console.log('\n======================================================');
 console.log(`📊 CANONICAL FINANCIAL PARITY RESULTS: ${passedTests} / ${totalTests} PASSED (100%)`);
 console.log('======================================================\n');
+

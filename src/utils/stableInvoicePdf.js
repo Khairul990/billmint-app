@@ -158,7 +158,29 @@ const runWithSafeColorEnvironment = async (fn) => {
 };
 
 const sanitizeClonedDocument = (clonedDocument, width) => {
-  // 1. Sanitize all <style> elements in clonedDocument head to stop html2canvas parser crash
+  // 1. Ensure Google Fonts stylesheet is present in cloned document head for exact font metrics
+  try {
+    const existingLink = clonedDocument.head?.querySelector('link[href*="fonts.googleapis.com"]');
+    if (!existingLink && clonedDocument.head) {
+      const fontLink1 = clonedDocument.createElement('link');
+      fontLink1.rel = 'preconnect';
+      fontLink1.href = 'https://fonts.googleapis.com';
+      clonedDocument.head.appendChild(fontLink1);
+
+      const fontLink2 = clonedDocument.createElement('link');
+      fontLink2.rel = 'preconnect';
+      fontLink2.href = 'https://fonts.gstatic.com';
+      fontLink2.crossOrigin = 'anonymous';
+      clonedDocument.head.appendChild(fontLink2);
+
+      const fontLink3 = clonedDocument.createElement('link');
+      fontLink3.rel = 'stylesheet';
+      fontLink3.href = 'https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;600;700&display=swap';
+      clonedDocument.head.appendChild(fontLink3);
+    }
+  } catch {}
+
+  // 2. Sanitize all <style> elements in clonedDocument head to stop html2canvas parser crash
   try {
     const styleTags = clonedDocument.querySelectorAll('style');
     styleTags.forEach((style) => {
@@ -168,7 +190,7 @@ const sanitizeClonedDocument = (clonedDocument, width) => {
     });
   } catch {}
 
-  // 2. Set strict document dimensions & font fallbacks
+  // 3. Set strict document dimensions & font fallbacks
   if (clonedDocument.documentElement) {
     clonedDocument.documentElement.style.margin = '0';
     clonedDocument.documentElement.style.padding = '0';
@@ -183,7 +205,9 @@ const sanitizeClonedDocument = (clonedDocument, width) => {
     clonedDocument.body.style.maxWidth = `${width}px`;
     clonedDocument.body.style.background = '#ffffff';
     clonedDocument.body.style.color = '#111827';
-    clonedDocument.body.style.fontFamily = "'Inter', 'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif";
+    clonedDocument.body.style.fontFamily = "'Inter', system-ui, -apple-system, sans-serif";
+    clonedDocument.body.style.letterSpacing = 'normal';
+    clonedDocument.body.style.wordSpacing = 'normal';
   }
 
   const clonedHost = clonedDocument.querySelector('[data-invoice-export-host="true"]');
@@ -206,12 +230,14 @@ const sanitizeClonedDocument = (clonedDocument, width) => {
     clonedRoot.style.maxWidth = `${width}px`;
     clonedRoot.style.margin = '0 auto';
     clonedRoot.style.boxSizing = 'border-box';
-    clonedRoot.style.fontFamily = "'Inter', 'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif";
+    clonedRoot.style.fontFamily = "'Inter', system-ui, -apple-system, sans-serif";
+    clonedRoot.style.letterSpacing = 'normal';
+    clonedRoot.style.wordSpacing = 'normal';
     clonedRoot.style.visibility = 'visible';
     clonedRoot.style.opacity = '1';
   }
 
-  // 3. Sanitize inline and computed styles on all cloned nodes
+  // 4. Sanitize inline and computed styles on all cloned nodes
   const colorProps = [
     'color', 'backgroundColor', 'borderColor',
     'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
@@ -223,6 +249,13 @@ const sanitizeClonedDocument = (clonedDocument, width) => {
     try {
       node.style.animation = 'none';
       node.style.transition = 'none';
+      node.style.textRendering = 'auto';
+      node.style.fontKerning = 'normal';
+
+      if (!node.classList.contains('font-mono') && !node.closest('.font-mono')) {
+        node.style.letterSpacing = 'normal';
+        node.style.wordSpacing = 'normal';
+      }
 
       colorProps.forEach((prop) => {
         const inlineVal = node.style[prop];
@@ -254,11 +287,16 @@ const renderExactPreview = async (root) => {
       animation: none !important; 
       transition: none !important; 
       caret-color: transparent !important;
-      font-family: 'Inter', 'Noto Sans Bengali', 'Hind Siliguri', system-ui, -apple-system, sans-serif !important;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+      letter-spacing: normal !important;
+      word-spacing: normal !important;
       font-variant-ligatures: normal !important;
       font-feature-settings: normal !important;
-      text-rendering: geometricPrecision !important;
+      text-rendering: auto !important;
       -webkit-font-smoothing: antialiased !important;
+    }
+    .${exportClass} .font-mono, .${exportClass} .font-mono * {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
     }
     .${exportClass} img { max-width: 100%; object-fit: contain; }
   `;
@@ -294,7 +332,9 @@ const getSafeBreakPoints = (root, canvasWidth, canvasHeight) => {
   const scale = canvasWidth / A4_CSS_WIDTH;
   const pageCssHeight = A4_CSS_HEIGHT;
   const pagePixelHeight = Math.max(1, Math.floor(pageCssHeight * scale));
-  if (canvasHeight <= pagePixelHeight) return [0, canvasHeight];
+  
+  // If invoice height is within single-page threshold (up to 1.15x of page height), keep it on 1 single page
+  if (canvasHeight <= Math.floor(pagePixelHeight * 1.15)) return [0, canvasHeight];
 
   const rootRect = root.getBoundingClientRect();
   const candidates = new Set([0, canvasHeight]);
@@ -370,16 +410,26 @@ const canvasToPdfBlob = (canvas, root) => {
     ctx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
 
     if (pagesRendered > 0) pdf.addPage();
-    const renderedHeightOnPdf = (sourceHeight / canvas.width) * pageWidth;
-    const image = pageCanvas.toDataURL('image/jpeg', 0.94);
-    pdf.addImage(image, 'JPEG', 0, 0, pageWidth, renderedHeightOnPdf, undefined, 'FAST');
+    
+    let renderedWidthOnPdf = pageWidth;
+    let renderedHeightOnPdf = (sourceHeight / canvas.width) * pageWidth;
+    if (breaks.length === 2 && renderedHeightOnPdf > pageHeight) {
+      const fitScale = pageHeight / renderedHeightOnPdf;
+      renderedHeightOnPdf = pageHeight;
+      renderedWidthOnPdf = pageWidth * fitScale;
+      const offsetX = (pageWidth - renderedWidthOnPdf) / 2;
+      const image = pageCanvas.toDataURL('image/jpeg', 0.94);
+      pdf.addImage(image, 'JPEG', offsetX, 0, renderedWidthOnPdf, renderedHeightOnPdf, undefined, 'FAST');
+    } else {
+      const image = pageCanvas.toDataURL('image/jpeg', 0.94);
+      pdf.addImage(image, 'JPEG', 0, 0, pageWidth, renderedHeightOnPdf, undefined, 'FAST');
+    }
     pagesRendered += 1;
     pageCanvas.width = 1;
     pageCanvas.height = 1;
   }
 
   if (pagesRendered === 0) {
-    // Unconditional failsafe: Always draw the canvas onto the PDF
     const renderedHeightOnPdf = (canvas.height / canvas.width) * pageWidth;
     const image = canvas.toDataURL('image/jpeg', 0.94);
     pdf.addImage(image, 'JPEG', 0, 0, pageWidth, renderedHeightOnPdf, undefined, 'FAST');
