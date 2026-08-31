@@ -577,6 +577,7 @@ class PaymentEngine {
    */
   async recordOwnerSalary({
     amount,
+    salaryPeriod = '',
     paymentMethod = 'Bank Transfer',
     paymentDate = null,
     reference = '',
@@ -593,6 +594,9 @@ class PaymentEngine {
       ? (paymentDate.includes('T') ? paymentDate : `${paymentDate}T12:00:00.000Z`)
       : new Date().toISOString();
 
+    const periodNote = salaryPeriod ? ` [Period: ${salaryPeriod}]` : '';
+    const fullNote = `${(note || 'Owner salary allocated from business income').trim()}${periodNote}`.trim();
+
     const { bankEngine } = await import('./bankEngine.js');
     const transaction = await bankEngine.addTransaction({
       type: 'moneyOut',
@@ -602,16 +606,18 @@ class PaymentEngine {
       account: paymentMethod || 'Bank Transfer',
       sourceLocation: 'website_income',
       destinationLocation: 'owner_personal',
-      note: (note || 'Owner salary allocated from business income').trim(),
+      salaryPeriod: salaryPeriod || '',
+      note: fullNote,
       source: 'owner_salary',
       reference: reference || '',
       date: effectiveDate
     });
 
     try {
-      logAudit('salary_recorded', 'owner_salary', transaction.id, null, {
+      logAudit('owner_salary_recorded', 'owner_salary', transaction.id, null, {
         amount: salaryAmount,
         paymentMethod,
+        salaryPeriod,
         date: effectiveDate
       });
     } catch (e) {}
@@ -620,7 +626,94 @@ class PaymentEngine {
       window.dispatchEvent(new Event('billqyro_bank_updated'));
       window.dispatchEvent(new Event('billqyro_sync'));
     }
-    return { success: true, transaction, amount: salaryAmount };
+    return { success: true, transaction, amount: salaryAmount, salaryPeriod };
+  }
+
+  /**
+   * SALARY HISTORY EXTRACTOR & FILTER
+   */
+  getSalaryHistory({ bankLedger = [], workspaceId = null, timeframe = 'all', customStart = null, customEnd = null } = {}) {
+    const scopedLedger = Array.isArray(bankLedger)
+      ? bankLedger.filter(b => !b.reversed && (!workspaceId || !b.workspaceId || b.workspaceId === workspaceId))
+      : [];
+
+    const salaryTx = scopedLedger.filter(b => {
+      const cat = (b.category || '').toLowerCase();
+      const src = (b.source || '').toLowerCase();
+      return cat === 'my salary' || src === 'owner_salary';
+    });
+
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    let totalSalary = 0;
+    let thisMonthSalary = 0;
+    let lastMonthSalary = 0;
+    let thisYearSalary = 0;
+
+    const records = [];
+
+    salaryTx.forEach(b => {
+      const amt = roundTo2(b.amountRupees !== undefined ? b.amountRupees : (b.amountPaise ? b.amountPaise / 100 : 0));
+      if (amt <= 0) return;
+
+      totalSalary += amt;
+
+      const d = new Date(b.date || b.createdAt || 0);
+      const m = d.getMonth();
+      const y = d.getFullYear();
+
+      if (y === currentYear) {
+        thisYearSalary += amt;
+        if (m === currentMonth) {
+          thisMonthSalary += amt;
+        }
+      }
+      
+      const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+      if (m === lastMonth && y === lastMonthYear) {
+        lastMonthSalary += amt;
+      }
+
+      // Timeframe check for record list
+      let match = true;
+      if (timeframe === 'this_month') {
+        match = (m === currentMonth && y === currentYear);
+      } else if (timeframe === 'last_month') {
+        match = (m === lastMonth && y === lastMonthYear);
+      } else if (timeframe === 'this_year') {
+        match = (y === currentYear);
+      } else if (timeframe === 'custom' && customStart && customEnd) {
+        const start = new Date(customStart).getTime();
+        const end = new Date(customEnd).getTime();
+        const t = d.getTime();
+        match = (t >= start && t <= end);
+      }
+
+      if (match) {
+        records.push({
+          id: b.id,
+          amount: amt,
+          date: b.date || b.createdAt,
+          paymentMethod: b.account || 'Bank Transfer',
+          reference: b.reference || '',
+          salaryPeriod: b.salaryPeriod || '',
+          note: b.note || ''
+        });
+      }
+    });
+
+    records.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+    return {
+      totalSalary: roundTo2(totalSalary),
+      thisMonthSalary: roundTo2(thisMonthSalary),
+      lastMonthSalary: roundTo2(lastMonthSalary),
+      thisYearSalary: roundTo2(thisYearSalary),
+      records
+    };
   }
 
   /**
@@ -747,8 +840,8 @@ class PaymentEngine {
       let auditEvent = 'transfer_recorded';
       if (fromLocation === 'my_cash' && toLocation === 'phonepe') auditEvent = 'cash_transfer';
       else if (fromLocation === 'phonepe' && toLocation === 'my_cash') auditEvent = 'phonepe_transfer';
-      else if (toLocation === 'my_dream') auditEvent = 'dream_transfer';
-      else if (fromLocation === 'my_dream') auditEvent = 'dream_withdrawal';
+      else if (toLocation === 'my_dream') auditEvent = 'dream_transfer_in';
+      else if (fromLocation === 'my_dream') auditEvent = 'dream_transfer_out';
 
       logAudit(auditEvent, 'transfer', transaction.id, null, {
         amount: transferAmount,
@@ -827,46 +920,117 @@ class PaymentEngine {
   }
 
   getDreamGoals(workspaceId = null) {
+    const key = `billqyro_dream_goals_${workspaceId || 'default'}`;
+    if (!this._memoryDreamGoals) this._memoryDreamGoals = {};
+
     try {
-      const key = `billqyro_dream_goals_${workspaceId || 'default'}`;
       const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null;
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {}
-    return [
-      { id: 'dream_car', name: 'New Car', targetAmount: 500000, targetDate: '2027-12-31', note: 'Family vehicle' },
-      { id: 'dream_house', name: 'Home Renovation', targetAmount: 200000, targetDate: '2027-06-30', note: 'Home renovation fund' }
+
+    if (this._memoryDreamGoals[key] && Array.isArray(this._memoryDreamGoals[key])) {
+      return this._memoryDreamGoals[key];
+    }
+
+    const defaultGoals = [
+      { id: 'dream_laptop', dreamId: 'dream_laptop', dreamName: 'New Laptop', name: 'New Laptop', targetAmount: 50000, targetDate: '2027-12-31', status: 'ACTIVE', category: 'Technology', icon: 'Laptop', note: 'Work workstation upgrade' },
+      { id: 'dream_car', dreamId: 'dream_car', dreamName: 'New Car', name: 'New Car', targetAmount: 500000, targetDate: '2028-12-31', status: 'ACTIVE', category: 'Vehicle', icon: 'Car', note: 'Family vehicle' }
     ];
+    this._memoryDreamGoals[key] = defaultGoals;
+    return defaultGoals;
   }
 
   saveDreamGoal(goalData, workspaceId = null) {
-    const goals = this.getDreamGoals(workspaceId);
-    const id = goalData.id || `dream_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    const key = `billqyro_dream_goals_${workspaceId || 'default'}`;
+    if (!this._memoryDreamGoals) this._memoryDreamGoals = {};
+
+    const goals = [...this.getDreamGoals(workspaceId)];
+    const id = goalData.id || goalData.dreamId || `dream_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    const dreamName = goalData.dreamName || goalData.name || 'Dream Goal';
+    const isNew = !goals.some(g => g.id === id || g.dreamId === id);
+
     const newGoal = {
       id,
-      name: goalData.name || 'Dream Goal',
+      dreamId: id,
+      dreamName,
+      name: dreamName,
       targetAmount: roundTo2(Number(goalData.targetAmount) || 0),
       targetDate: goalData.targetDate || '',
-      note: goalData.note || '',
-      updatedAt: new Date().toISOString()
+      description: goalData.description || goalData.note || '',
+      note: goalData.note || goalData.description || '',
+      status: goalData.status || 'ACTIVE',
+      category: goalData.category || 'General',
+      icon: goalData.icon || 'Star',
+      workspaceId: workspaceId || null,
+      updatedAt: new Date().toISOString(),
+      createdAt: goalData.createdAt || new Date().toISOString()
     };
-    const idx = goals.findIndex(g => g.id === id);
+
+    const idx = goals.findIndex(g => g.id === id || g.dreamId === id);
     if (idx >= 0) {
-      goals[idx] = newGoal;
+      goals[idx] = { ...goals[idx], ...newGoal };
     } else {
       goals.push(newGoal);
     }
-    const key = `billqyro_dream_goals_${workspaceId || 'default'}`;
+
+    this._memoryDreamGoals[key] = goals;
+
     if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(key, JSON.stringify(goals));
+      try {
+        localStorage.setItem(key, JSON.stringify(goals));
+      } catch (e) {}
     }
+
+    try {
+      logAudit(isNew ? 'dream_created' : 'dream_updated', 'dream', id, null, {
+        dreamName,
+        targetAmount: newGoal.targetAmount
+      });
+    } catch (e) {}
+
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('billqyro_bank_updated'));
       window.dispatchEvent(new Event('billqyro_sync'));
     }
     return newGoal;
+  }
+
+  updateDreamStatus(dreamId, status, workspaceId = null) {
+    const key = `billqyro_dream_goals_${workspaceId || 'default'}`;
+    const goals = [...this.getDreamGoals(workspaceId)];
+    const idx = goals.findIndex(g => g.id === dreamId || g.dreamId === dreamId);
+    if (idx < 0) return null;
+
+    goals[idx] = {
+      ...goals[idx],
+      status,
+      updatedAt: new Date().toISOString()
+    };
+
+    if (!this._memoryDreamGoals) this._memoryDreamGoals = {};
+    this._memoryDreamGoals[key] = goals;
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(key, JSON.stringify(goals));
+      } catch (e) {}
+    }
+
+    try {
+      let event = 'dream_updated';
+      if (status === 'COMPLETED') event = 'dream_completed';
+      if (status === 'ARCHIVED') event = 'dream_archived';
+      logAudit(event, 'dream', dreamId, null, { status });
+    } catch (e) {}
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('billqyro_bank_updated'));
+      window.dispatchEvent(new Event('billqyro_sync'));
+    }
+    return goals[idx];
   }
 
   /**
@@ -913,6 +1077,7 @@ class PaymentEngine {
     let dreamInflow = 0;
     let dreamOutflow = 0;
     const dreamAllocations = {};
+    const dreamTxHistory = {}; // dreamId -> Array of transactions
 
     scopedBankLedger.forEach(b => {
       if (b.source === 'invoice_payment' && (seenInvoiceTxIds.has(b.sourceRefId) || seenInvoiceTxIds.has(b.id))) {
@@ -939,6 +1104,8 @@ class PaymentEngine {
           dreamOutflow += amt;
           if (b.dreamId) {
             dreamAllocations[b.dreamId] = (dreamAllocations[b.dreamId] || 0) - amt;
+            if (!dreamTxHistory[b.dreamId]) dreamTxHistory[b.dreamId] = [];
+            dreamTxHistory[b.dreamId].push(b);
           }
         }
 
@@ -950,6 +1117,8 @@ class PaymentEngine {
           dreamInflow += amt;
           if (b.dreamId) {
             dreamAllocations[b.dreamId] = (dreamAllocations[b.dreamId] || 0) + amt;
+            if (!dreamTxHistory[b.dreamId]) dreamTxHistory[b.dreamId] = [];
+            dreamTxHistory[b.dreamId].push(b);
           }
         }
         return;
@@ -1008,15 +1177,23 @@ class PaymentEngine {
     const personalAvailableTotal = roundTo2(myCashBalance + phonePeBalance + myDreamBalance);
 
     const dreamGoals = this.getDreamGoals(workspaceId).map(d => {
-      const saved = roundTo2(Math.max(0, dreamAllocations[d.id] || 0));
+      const saved = roundTo2(Math.max(0, dreamAllocations[d.id || d.dreamId] || 0));
       const target = Number(d.targetAmount) || 0;
-      const progress = target > 0 ? Math.min(100, Math.round((saved / target) * 100)) : 0;
+      const progress = target > 0 ? Math.min(100, Math.max(0, Math.round((saved / target) * 100))) : 0;
       const remaining = target > 0 ? Math.max(0, roundTo2(target - saved)) : 0;
+      const isAutoCompleted = target > 0 && saved >= target;
+      const status = d.status === 'ARCHIVED' || d.status === 'PAUSED' ? d.status : (isAutoCompleted ? 'COMPLETED' : (d.status || 'ACTIVE'));
+
       return {
         ...d,
+        dreamId: d.id || d.dreamId,
+        dreamName: d.dreamName || d.name,
+        name: d.dreamName || d.name,
         savedAmount: saved,
-        progressPercentage: progress,
-        remainingAmount: remaining
+        progressPercentage: isNaN(progress) ? 0 : progress,
+        remainingAmount: isNaN(remaining) ? 0 : remaining,
+        status,
+        transactionHistory: dreamTxHistory[d.id || d.dreamId] || []
       };
     });
 

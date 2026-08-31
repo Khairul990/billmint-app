@@ -182,6 +182,7 @@ const CollectionCenter = ({
   const [dreamTransferDirection, setDreamTransferDirection] = useState('to_dream'); // 'to_dream' | 'from_dream'
   const [dreamPaymentChannel, setDreamPaymentChannel] = useState('phonepe'); // 'phonepe' | 'my_cash'
 
+  const [salaryPeriod, setSalaryPeriod] = useState(() => new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }));
   const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [reference, setReference] = useState('');
   const [note, setNote] = useState('');
@@ -390,6 +391,8 @@ const CollectionCenter = ({
       // Type Filter
       if (historyTypeFilter !== 'all') {
         if (historyTypeFilter === 'customer' && p.type !== 'customer_payment') return false;
+        if (historyTypeFilter === 'salary' && p.category !== 'My Salary' && p.source !== 'owner_salary') return false;
+        if (historyTypeFilter === 'dream' && !p.dreamId && !p.category?.toLowerCase().includes('dream')) return false;
         if (historyTypeFilter === 'staff' && p.type !== 'staff_salary' && p.type !== 'staff_advance' && p.type !== 'other_staff_payment') return false;
         if (historyTypeFilter === 'vendor' && p.type !== 'vendor_payment') return false;
         if (historyTypeFilter === 'refund' && p.type !== 'customer_refund') return false;
@@ -564,6 +567,7 @@ const CollectionCenter = ({
       } else if (selectedTxType === 'my_salary') {
         result = await paymentEngine.recordOwnerSalary({
           amount: amt,
+          salaryPeriod,
           paymentMethod,
           paymentDate,
           reference,
@@ -1527,9 +1531,21 @@ const CollectionCenter = ({
                       </h3>
 
                       {selectedTxType === 'my_salary' && (
-                        <div className="p-3.5 rounded-xl bg-theme-surface border border-theme-border-soft text-2xs space-y-1 text-theme-muted">
-                          <div className="font-bold text-theme-primary">Owner Salary Allocation</div>
-                          <div>Allocates business revenue to your personal salary. Maintained separately from customer invoice payments.</div>
+                        <div className="space-y-3">
+                          <div className="p-3.5 rounded-xl bg-theme-surface border border-theme-border-soft text-2xs space-y-1 text-theme-muted">
+                            <div className="font-bold text-theme-primary">Owner Salary Allocation</div>
+                            <div>Allocates business revenue to your personal salary. Maintained separately from customer invoice payments.</div>
+                          </div>
+                          <div>
+                            <label className="text-2xs font-bold text-theme-muted uppercase block mb-1">Salary Period (Month / Year)</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. August 2026, Q3 2026"
+                              value={salaryPeriod}
+                              onChange={(e) => setSalaryPeriod(e.target.value)}
+                              className="input-premium w-full text-xs font-bold text-theme-primary"
+                            />
+                          </div>
                         </div>
                       )}
 
@@ -1868,6 +1884,8 @@ const CollectionCenter = ({
                   {[
                     { id: 'all', label: 'All Transactions' },
                     { id: 'customer', label: 'Customer Payments' },
+                    { id: 'salary', label: 'Owner Salary' },
+                    { id: 'dream', label: 'Dream Savings' },
                     { id: 'transfer', label: 'Transfers & Withdrawals' },
                     { id: 'staff', label: 'Staff Payments' },
                     { id: 'vendor', label: 'Vendor Payments' },

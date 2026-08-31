@@ -10,8 +10,12 @@ import {
   Layers, ArrowUpRight, ArrowDownRight, Wallet, Activity, ShieldAlert,
   Calendar, PieChart as PieIcon, ArrowUpDown, Sparkles, CircleDot,
   CheckCircle2, DollarSign, ArrowUp, ArrowDown, HelpCircle,
-  ShoppingBag, Shield, Check, Flame, Award, Lightbulb, Zap, UserPlus
+  ShoppingBag, Shield, Check, Flame, Award, Lightbulb, Zap, UserPlus,
+  Heart, Coins, Smartphone, Moon, Target, X
 } from 'lucide-react';
+import { paymentEngine } from '../services/paymentEngine';
+import { bankEngine } from '../services/bankEngine';
+import { toast } from 'react-hot-toast';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { formatCurrency } from '../utils/invoiceUtils';
 import PullToRefresh from '../components/PullToRefresh';
@@ -145,6 +149,19 @@ const Dashboard = ({
   const [timeNow, setTimeNow] = useState(new Date());
   const [, setTriggerSync] = useState(0);
 
+  // Live Bank Ledger & Personal Financial Buckets
+  const [liveBankLedger, setLiveBankLedger] = useState([]);
+  const [showDreamAddModal, setShowDreamAddModal] = useState(false);
+  const [showDreamWithdrawModal, setShowDreamWithdrawModal] = useState(false);
+  const [showDreamCreateModal, setShowDreamCreateModal] = useState(false);
+  const [dreamTransferSource, setDreamTransferSource] = useState('my_cash'); // 'my_cash' | 'phonepe'
+  const [dreamWithdrawDest, setDreamWithdrawDest] = useState('phonepe');     // 'phonepe' | 'my_cash'
+  const [dreamTransferAmount, setDreamTransferAmount] = useState('');
+  const [dreamGoalName, setDreamGoalName] = useState('');
+  const [dreamGoalTarget, setDreamGoalTarget] = useState('');
+  const [dreamGoalDate, setDreamGoalDate] = useState('');
+  const [isTransferring, setIsTransferring] = useState(false);
+
   // Live Clock
   useEffect(() => {
     const timer = setInterval(() => setTimeNow(new Date()), 1000);
@@ -154,6 +171,28 @@ const Dashboard = ({
   useEffect(() => {
     const timer = setTimeout(() => setIsInitialLoad(false), 200);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Fetch Live Bank Ledger
+  useEffect(() => {
+    let mounted = true;
+    const fetchBankData = async () => {
+      try {
+        const state = await bankEngine.getState();
+        if (mounted && Array.isArray(state?.ledger)) {
+          setLiveBankLedger(state.ledger);
+        }
+      } catch (e) {}
+    };
+    fetchBankData();
+    const handleBankUpdate = () => fetchBankData();
+    window.addEventListener('billqyro_bank_updated', handleBankUpdate);
+    window.addEventListener('billqyro_sync', handleBankUpdate);
+    return () => {
+      mounted = false;
+      window.removeEventListener('billqyro_bank_updated', handleBankUpdate);
+      window.removeEventListener('billqyro_sync', handleBankUpdate);
+    };
   }, []);
 
   // Real-time synchronization listeners
@@ -213,6 +252,107 @@ const Dashboard = ({
       : expenses;
     return wsExpenses.filter(exp => !exp.isDeleted);
   }, [expenses, activeWsId]);
+
+  // Canonical Financial Buckets
+  const bucketFinancials = useMemo(() => {
+    return paymentEngine.calculateFinancialBuckets({
+      invoices: scopedInvoices,
+      bankLedger: liveBankLedger,
+      workspaceId: activeWsId
+    });
+  }, [scopedInvoices, liveBankLedger, activeWsId]);
+
+  const activeDream = useMemo(() => {
+    if (!bucketFinancials.dreamGoals || bucketFinancials.dreamGoals.length === 0) return null;
+    return bucketFinancials.dreamGoals.find(g => g.status === 'ACTIVE') || bucketFinancials.dreamGoals[0];
+  }, [bucketFinancials.dreamGoals]);
+
+  const handleExecuteDreamTransfer = async () => {
+    const amt = parseFloat(dreamTransferAmount);
+    if (isNaN(amt) || amt <= 0) {
+      toast.error('Please enter a valid amount greater than zero.');
+      return;
+    }
+    const sourceBal = dreamTransferSource === 'my_cash' ? bucketFinancials.myCashBalance : bucketFinancials.phonePeBalance;
+    if (amt > sourceBal) {
+      toast.error(`Cannot transfer more than available source balance of ${formatCurrency(sourceBal, currencySymbol)}`);
+      return;
+    }
+    if (!activeDream) {
+      toast.error('No active dream goal selected.');
+      return;
+    }
+
+    setIsTransferring(true);
+    try {
+      await paymentEngine.recordMoneyTransfer({
+        fromLocation: dreamTransferSource,
+        toLocation: 'my_dream',
+        amount: amt,
+        dreamId: activeDream.id || activeDream.dreamId,
+        dreamName: activeDream.dreamName || activeDream.name,
+        workspaceId: activeWsId
+      });
+      toast.success(`Transferred ${formatCurrency(amt, currencySymbol)} to ${activeDream.dreamName || activeDream.name}!`, { icon: '🌙' });
+      setDreamTransferAmount('');
+      setShowDreamAddModal(false);
+    } catch (e) {
+      toast.error(e.message || 'Transfer failed.');
+    } finally {
+      setIsTransferring(false);
+    }
+  };
+
+  const handleExecuteDreamWithdraw = async () => {
+    const amt = parseFloat(dreamTransferAmount);
+    if (isNaN(amt) || amt <= 0) {
+      toast.error('Please enter a valid amount greater than zero.');
+      return;
+    }
+    const savedBal = activeDream?.savedAmount || 0;
+    if (amt > savedBal) {
+      toast.error(`Cannot withdraw more than saved dream balance of ${formatCurrency(savedBal, currencySymbol)}`);
+      return;
+    }
+
+    setIsTransferring(true);
+    try {
+      await paymentEngine.recordMoneyTransfer({
+        fromLocation: 'my_dream',
+        toLocation: dreamWithdrawDest,
+        amount: amt,
+        dreamId: activeDream.id || activeDream.dreamId,
+        dreamName: activeDream.dreamName || activeDream.name,
+        workspaceId: activeWsId
+      });
+      toast.success(`Returned ${formatCurrency(amt, currencySymbol)} from Dream to ${dreamWithdrawDest === 'phonepe' ? 'PhonePe' : 'My Cash'}!`, { icon: '✨' });
+      setDreamTransferAmount('');
+      setShowDreamWithdrawModal(false);
+    } catch (e) {
+      toast.error(e.message || 'Withdrawal failed.');
+    } finally {
+      setIsTransferring(false);
+    }
+  };
+
+  const handleCreateDreamGoal = () => {
+    if (!dreamGoalName.trim()) {
+      toast.error('Please enter a dream name.');
+      return;
+    }
+    const target = parseFloat(dreamGoalTarget) || 0;
+    paymentEngine.saveDreamGoal({
+      dreamName: dreamGoalName.trim(),
+      name: dreamGoalName.trim(),
+      targetAmount: target,
+      targetDate: dreamGoalDate
+    }, activeWsId);
+    toast.success('New Dream Goal created!', { icon: '🎯' });
+    setDreamGoalName('');
+    setDreamGoalTarget('');
+    setDreamGoalDate('');
+    setShowDreamCreateModal(false);
+  };
 
   // ==========================================================================
   // CANONICAL FINANCIAL DATA AGGREGATION
@@ -1083,6 +1223,137 @@ const Dashboard = ({
                     </div>
                   </div>
 
+                  {/* 3. PREMIUM MY DREAM CARD */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="bg-white dark:bg-theme-card p-5 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-3 relative overflow-hidden"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-6 h-6 rounded-lg bg-pink-500/10 text-pink-600 flex items-center justify-center">
+                          <Moon className="w-3.5 h-3.5" />
+                        </div>
+                        <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
+                          MY DREAM
+                        </h3>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        {activeDream?.status === 'COMPLETED' ? (
+                          <span className="px-2 py-0.5 text-[9px] font-black rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                            COMPLETED 🎉
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 text-[9px] font-black rounded-full bg-pink-500/10 text-pink-600 border border-pink-500/20">
+                            {activeDream?.status || 'ACTIVE'}
+                          </span>
+                        )}
+                        <button
+                          onClick={() => setShowDreamCreateModal(true)}
+                          className="p-1 rounded-lg text-theme-muted hover:text-pink-600 transition-colors"
+                          title="Create New Dream Goal"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {activeDream ? (
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-black text-[#1c1917] dark:text-theme-primary">
+                            {activeDream.dreamName || activeDream.name}
+                          </span>
+                          <span className="text-2xs font-bold text-theme-muted font-numbers">
+                            {activeDream.targetDate ? `Target: ${activeDream.targetDate.slice(0, 10)}` : ''}
+                          </span>
+                        </div>
+
+                        {/* Amount Numbers */}
+                        <div className="flex items-baseline justify-between text-xs">
+                          <span className="text-lg font-black text-pink-600 font-numbers tabular-nums">
+                            {formatCurrency(activeDream.savedAmount || 0, currencySymbol)}
+                          </span>
+                          <span className="text-2xs font-bold text-theme-muted font-numbers">
+                            / {formatCurrency(activeDream.targetAmount || 0, currencySymbol)}
+                          </span>
+                        </div>
+
+                        {/* Animated Progress Bar */}
+                        <div className="w-full bg-[#faf5ef] dark:bg-theme-surface h-2 rounded-full overflow-hidden relative">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${activeDream.progressPercentage || 0}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            className={`h-full rounded-full ${
+                              activeDream.progressPercentage >= 100 
+                                ? 'bg-gradient-to-r from-emerald-500 to-teal-400' 
+                                : 'bg-gradient-to-r from-pink-500 to-rose-400'
+                            }`}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] font-bold text-theme-muted">
+                          <span>{activeDream.progressPercentage || 0}% achieved</span>
+                          <span>{formatCurrency(activeDream.remainingAmount || 0, currencySymbol)} remaining</span>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="grid grid-cols-2 gap-2 pt-1">
+                          <button
+                            onClick={() => setShowDreamAddModal(true)}
+                            className="py-2 px-3 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-2xs font-black transition-all flex items-center justify-center gap-1 shadow-xs"
+                          >
+                            <Plus className="w-3 h-3 stroke-[3]" />
+                            <span>Add Money</span>
+                          </button>
+                          <button
+                            disabled={!activeDream.savedAmount}
+                            onClick={() => setShowDreamWithdrawModal(true)}
+                            className="py-2 px-3 rounded-xl bg-white dark:bg-theme-surface hover:bg-[#faf5ef] dark:hover:bg-theme-surface-elevated border border-[#f0ece6] dark:border-theme-border-soft text-theme-muted hover:text-theme-primary text-2xs font-bold transition-all flex items-center justify-center gap-1 disabled:opacity-50"
+                          >
+                            <ArrowUpRight className="w-3 h-3" />
+                            <span>Move Money</span>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-4 text-center text-xs text-theme-muted">
+                        <Target className="w-6 h-6 mx-auto mb-1 text-pink-400 opacity-60" />
+                        <p className="font-bold">No Dream Goals Yet</p>
+                        <button
+                          onClick={() => setShowDreamCreateModal(true)}
+                          className="mt-1 text-2xs font-bold text-pink-600 hover:underline"
+                        >
+                          + Set Your First Dream Goal
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Compact Personal Money Summary Strip */}
+                    <div className="mt-2 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 grid grid-cols-3 gap-1 text-center text-[9px]">
+                      <div>
+                        <span className="text-theme-muted block font-semibold">My Cash</span>
+                        <span className="font-black text-amber-600 font-numbers">
+                          {formatCurrency(bucketFinancials.myCashBalance, currencySymbol)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-theme-muted block font-semibold">PhonePe</span>
+                        <span className="font-black text-indigo-600 font-numbers">
+                          {formatCurrency(bucketFinancials.phonePeBalance, currencySymbol)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-theme-muted block font-semibold">Personal</span>
+                        <span className="font-black text-theme-accent font-numbers">
+                          {formatCurrency(bucketFinancials.personalAvailableTotal, currencySymbol)}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+
                 </div>
 
               </div>
@@ -1113,6 +1384,315 @@ const Dashboard = ({
             setTriggerSync(prev => prev + 1);
           }}
         />
+
+        {/* DREAM ADD MONEY MODAL */}
+        <AnimatePresence>
+          {showDreamAddModal && activeDream && (
+            <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white dark:bg-theme-card max-w-md w-full p-6 rounded-2xl shadow-2xl border border-[#f0ece6] dark:border-theme-border-soft space-y-4"
+              >
+                <div className="flex items-center justify-between pb-3 border-b border-[#f0ece6] dark:border-theme-border-soft">
+                  <h3 className="text-sm font-black text-[#1c1917] dark:text-theme-primary flex items-center gap-2">
+                    <Heart className="w-4 h-4 text-pink-500" />
+                    Save Money for Dream
+                  </h3>
+                  <button onClick={() => setShowDreamAddModal(false)} className="p-1 text-theme-muted hover:text-theme-primary">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-[#faf8f5] dark:bg-theme-surface/70 border border-[#f0ece6] dark:border-theme-border-soft space-y-1 text-xs">
+                  <div className="flex justify-between font-bold">
+                    <span className="text-theme-muted">Dream Goal:</span>
+                    <span className="text-[#1c1917] dark:text-theme-primary">{activeDream.dreamName || activeDream.name}</span>
+                  </div>
+                  <div className="flex justify-between text-2xs">
+                    <span className="text-theme-muted">Target: {formatCurrency(activeDream.targetAmount || 0, currencySymbol)}</span>
+                    <span className="text-pink-600 font-bold">Saved: {formatCurrency(activeDream.savedAmount || 0, currencySymbol)}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-2xs font-bold text-theme-muted uppercase block mb-1.5">
+                      Transfer From Source
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setDreamTransferSource('my_cash')}
+                        className={`p-3 rounded-xl border text-center transition-all ${
+                          dreamTransferSource === 'my_cash'
+                            ? 'bg-amber-500/10 border-amber-500 text-amber-600 font-black'
+                            : 'bg-white dark:bg-theme-surface border-[#f0ece6] dark:border-theme-border-soft text-theme-muted'
+                        }`}
+                      >
+                        <Coins className="w-4 h-4 mx-auto mb-1" />
+                        <div className="text-xs">My Cash</div>
+                        <div className="text-[10px] text-theme-muted">Bal: {formatCurrency(bucketFinancials.myCashBalance, currencySymbol)}</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDreamTransferSource('phonepe')}
+                        className={`p-3 rounded-xl border text-center transition-all ${
+                          dreamTransferSource === 'phonepe'
+                            ? 'bg-indigo-500/10 border-indigo-500 text-indigo-600 font-black'
+                            : 'bg-white dark:bg-theme-surface border-[#f0ece6] dark:border-theme-border-soft text-theme-muted'
+                        }`}
+                      >
+                        <Smartphone className="w-4 h-4 mx-auto mb-1" />
+                        <div className="text-xs">PhonePe</div>
+                        <div className="text-[10px] text-theme-muted">Bal: {formatCurrency(bucketFinancials.phonePeBalance, currencySymbol)}</div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-2xs font-bold text-theme-muted uppercase block mb-1">
+                      Amount to Save ({currencySymbol}) *
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="0.00"
+                      min="1"
+                      value={dreamTransferAmount}
+                      onChange={(e) => setDreamTransferAmount(e.target.value)}
+                      className="input-premium w-full text-base font-black text-[#1c1917] dark:text-theme-primary"
+                    />
+                  </div>
+
+                  {parseFloat(dreamTransferAmount) > 0 && (
+                    <div className="p-3 rounded-xl bg-pink-500/5 border border-pink-500/20 text-2xs space-y-1">
+                      <div className="font-bold text-pink-600 uppercase text-[10px]">Transfer Preview:</div>
+                      <div className="flex justify-between text-theme-muted">
+                        <span>From {dreamTransferSource === 'phonepe' ? 'PhonePe' : 'My Cash'}:</span>
+                        <span className="font-bold text-rose-500">-{formatCurrency(parseFloat(dreamTransferAmount) || 0, currencySymbol)}</span>
+                      </div>
+                      <div className="flex justify-between text-theme-muted">
+                        <span>To My Dream:</span>
+                        <span className="font-bold text-emerald-600">+{formatCurrency(parseFloat(dreamTransferAmount) || 0, currencySymbol)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-theme-primary pt-1 border-t border-pink-500/20">
+                        <span>New Dream Saved:</span>
+                        <span>{formatCurrency((activeDream.savedAmount || 0) + (parseFloat(dreamTransferAmount) || 0), currencySymbol)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowDreamAddModal(false)}
+                    className="btn-premium-outline flex-1 !py-2 text-xs font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isTransferring || !parseFloat(dreamTransferAmount)}
+                    onClick={handleExecuteDreamTransfer}
+                    className="btn-premium flex-1 !py-2 text-xs font-black shadow-lg shadow-pink-500/20 bg-pink-600 hover:bg-pink-700 text-white"
+                  >
+                    {isTransferring ? 'Transferring...' : 'Confirm Transfer'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* DREAM WITHDRAW / MOVE MONEY MODAL */}
+        <AnimatePresence>
+          {showDreamWithdrawModal && activeDream && (
+            <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white dark:bg-theme-card max-w-md w-full p-6 rounded-2xl shadow-2xl border border-[#f0ece6] dark:border-theme-border-soft space-y-4"
+              >
+                <div className="flex items-center justify-between pb-3 border-b border-[#f0ece6] dark:border-theme-border-soft">
+                  <h3 className="text-sm font-black text-[#1c1917] dark:text-theme-primary flex items-center gap-2">
+                    <ArrowUpRight className="w-4 h-4 text-theme-accent" />
+                    Move Money from Dream
+                  </h3>
+                  <button onClick={() => setShowDreamWithdrawModal(false)} className="p-1 text-theme-muted hover:text-theme-primary">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-[#faf8f5] dark:bg-theme-surface/70 border border-[#f0ece6] dark:border-theme-border-soft space-y-1 text-xs">
+                  <div className="flex justify-between font-bold">
+                    <span className="text-theme-muted">Available in Dream:</span>
+                    <span className="text-pink-600 font-black">{formatCurrency(activeDream.savedAmount || 0, currencySymbol)}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-2xs font-bold text-theme-muted uppercase block mb-1.5">
+                      Return to Account
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setDreamWithdrawDest('phonepe')}
+                        className={`p-3 rounded-xl border text-center transition-all ${
+                          dreamWithdrawDest === 'phonepe'
+                            ? 'bg-indigo-500/10 border-indigo-500 text-indigo-600 font-black'
+                            : 'bg-white dark:bg-theme-surface border-[#f0ece6] dark:border-theme-border-soft text-theme-muted'
+                        }`}
+                      >
+                        <Smartphone className="w-4 h-4 mx-auto mb-1" />
+                        <div className="text-xs">PhonePe</div>
+                        <div className="text-[10px] text-theme-muted">Online Personal</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDreamWithdrawDest('my_cash')}
+                        className={`p-3 rounded-xl border text-center transition-all ${
+                          dreamWithdrawDest === 'my_cash'
+                            ? 'bg-amber-500/10 border-amber-500 text-amber-600 font-black'
+                            : 'bg-white dark:bg-theme-surface border-[#f0ece6] dark:border-theme-border-soft text-theme-muted'
+                        }`}
+                      >
+                        <Coins className="w-4 h-4 mx-auto mb-1" />
+                        <div className="text-xs">My Cash</div>
+                        <div className="text-[10px] text-theme-muted">Physical Cash</div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-2xs font-bold text-theme-muted uppercase block mb-1">
+                      Amount to Move ({currencySymbol}) *
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="0.00"
+                      min="1"
+                      max={activeDream.savedAmount || 0}
+                      value={dreamTransferAmount}
+                      onChange={(e) => setDreamTransferAmount(e.target.value)}
+                      className="input-premium w-full text-base font-black text-[#1c1917] dark:text-theme-primary"
+                    />
+                  </div>
+
+                  {parseFloat(dreamTransferAmount) > 0 && (
+                    <div className="p-3 rounded-xl bg-theme-surface/70 border border-[#f0ece6] dark:border-theme-border-soft text-2xs space-y-1">
+                      <div className="font-bold text-theme-muted uppercase text-[10px]">Preview:</div>
+                      <div className="flex justify-between text-theme-muted">
+                        <span>From My Dream:</span>
+                        <span className="font-bold text-rose-500">-{formatCurrency(parseFloat(dreamTransferAmount) || 0, currencySymbol)}</span>
+                      </div>
+                      <div className="flex justify-between text-theme-muted">
+                        <span>To {dreamWithdrawDest === 'phonepe' ? 'PhonePe' : 'My Cash'}:</span>
+                        <span className="font-bold text-emerald-600">+{formatCurrency(parseFloat(dreamTransferAmount) || 0, currencySymbol)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowDreamWithdrawModal(false)}
+                    className="btn-premium-outline flex-1 !py-2 text-xs font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isTransferring || !parseFloat(dreamTransferAmount)}
+                    onClick={handleExecuteDreamWithdraw}
+                    className="btn-premium flex-1 !py-2 text-xs font-black shadow-lg shadow-theme-accent/20"
+                  >
+                    {isTransferring ? 'Moving...' : 'Confirm Move'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* DREAM CREATE GOAL MODAL */}
+        <AnimatePresence>
+          {showDreamCreateModal && (
+            <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white dark:bg-theme-card max-w-md w-full p-6 rounded-2xl shadow-2xl border border-[#f0ece6] dark:border-theme-border-soft space-y-4"
+              >
+                <div className="flex items-center justify-between pb-3 border-b border-[#f0ece6] dark:border-theme-border-soft">
+                  <h3 className="text-sm font-black text-[#1c1917] dark:text-theme-primary flex items-center gap-2">
+                    <Target className="w-4 h-4 text-pink-500" />
+                    New Dream Goal
+                  </h3>
+                  <button onClick={() => setShowDreamCreateModal(false)} className="p-1 text-theme-muted hover:text-theme-primary">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-2xs font-bold text-theme-muted uppercase block mb-1">Dream Name *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. New Laptop, Camera Kit, Trip"
+                      value={dreamGoalName}
+                      onChange={(e) => setDreamGoalName(e.target.value)}
+                      className="input-premium w-full text-xs font-bold text-[#1c1917] dark:text-theme-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-2xs font-bold text-theme-muted uppercase block mb-1">Target Amount ({currencySymbol}) *</label>
+                    <input
+                      type="number"
+                      placeholder="50000"
+                      min="1"
+                      value={dreamGoalTarget}
+                      onChange={(e) => setDreamGoalTarget(e.target.value)}
+                      className="input-premium w-full text-xs font-black text-[#1c1917] dark:text-theme-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-2xs font-bold text-theme-muted uppercase block mb-1">Target Date (Optional)</label>
+                    <input
+                      type="date"
+                      value={dreamGoalDate}
+                      onChange={(e) => setDreamGoalDate(e.target.value)}
+                      className="input-premium w-full text-xs font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowDreamCreateModal(false)}
+                    className="btn-premium-outline flex-1 !py-2 text-xs font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCreateDreamGoal}
+                    className="btn-premium flex-1 !py-2 text-xs font-black bg-pink-600 hover:bg-pink-700 text-white"
+                  >
+                    Save Goal
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </PullToRefresh>
     </AnimatedPage>
   );
