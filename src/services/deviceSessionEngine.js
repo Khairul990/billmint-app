@@ -1,4 +1,5 @@
-import { auth, db, firebaseReady } from './firebaseConfig.js';
+import { auth, db, app, firebaseReady } from './firebaseConfig.js';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import {
   collection,
   doc,
@@ -9,8 +10,7 @@ import {
   limit,
   serverTimestamp,
   setDoc,
-  updateDoc,
-  where
+  updateDoc
 } from 'firebase/firestore';
 
 const DEVICE_ID_KEY = 'billqyro_device_id_v1';
@@ -84,12 +84,20 @@ const describeDevice = () => {
   };
 };
 
+const getFunctionsClient = () => (firebaseReady && app ? getFunctions(app) : null);
+
+const callSecurityFunction = async (name, data) => {
+  const functions = getFunctionsClient();
+  if (!functions) throw new Error('Security verification unavailable offline.');
+  return httpsCallable(functions, name)(data);
+};
+
 export const deviceSessionEngine = {
   HEARTBEAT_MS,
   STALE_MS,
-
   getDeviceId,
   getSessionId: getOrCreateSessionId,
+  getSessionSecret: getOrCreateSessionSecret,
 
   async registerCurrentSession({ requireApproval = false } = {}) {
     if (!firebaseReady || !auth?.currentUser) return null;
@@ -124,7 +132,7 @@ export const deviceSessionEngine = {
     const ref = doc(db, 'users', uid, 'sessions', sessionId);
     try {
       const snap = await getDoc(ref);
-      if (!snap.exists() || snap.data().status === 'revoked' || snap.data().status === 'blocked') return false;
+      if (!snap.exists() || ['revoked', 'blocked'].includes(snap.data().status)) return false;
       await updateDoc(ref, { lastActiveAt: serverTimestamp(), lastSeenAt: serverTimestamp() });
       return true;
     } catch {
@@ -167,21 +175,31 @@ export const deviceSessionEngine = {
 
   async revokeSession(sessionId) {
     if (!firebaseReady || !auth?.currentUser || !sessionId || sessionId === getOrCreateSessionId()) return false;
-    await updateDoc(doc(db, 'users', auth.currentUser.uid, 'sessions', sessionId), {
-      status: 'revoked',
-      revokedAt: serverTimestamp(),
-      revokedBySessionId: getOrCreateSessionId()
+    await callSecurityFunction('revokeDeviceSession', {
+      targetSessionId: sessionId,
+      callerSessionId: getOrCreateSessionId(),
+      callerSessionSecret: getOrCreateSessionSecret()
+    });
+    return true;
+  },
+
+  async approveSession(sessionId) {
+    if (!firebaseReady || !auth?.currentUser || !sessionId || sessionId === getOrCreateSessionId()) return false;
+    await callSecurityFunction('approveDeviceSession', {
+      targetSessionId: sessionId,
+      callerSessionId: getOrCreateSessionId(),
+      callerSessionSecret: getOrCreateSessionSecret()
     });
     return true;
   },
 
   async logoutOtherSessions() {
     if (!firebaseReady || !auth?.currentUser) return 0;
-    const current = getOrCreateSessionId();
-    const sessions = await this.listSessions();
-    const targets = sessions.filter((s) => s.id !== current && !['revoked', 'blocked'].includes(s.status));
-    await Promise.all(targets.map((s) => this.revokeSession(s.id)));
-    return targets.length;
+    const result = await callSecurityFunction('logoutOtherDeviceSessions', {
+      callerSessionId: getOrCreateSessionId(),
+      callerSessionSecret: getOrCreateSessionSecret()
+    });
+    return Number(result?.data?.count || 0);
   },
 
   async setNewDeviceApproval(enabled) {
