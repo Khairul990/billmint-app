@@ -30,7 +30,7 @@ import {
 import InvoicePreview from '../components/InvoicePreview';
 // Removed unused import: getPublicInvoice
 import { downloadInvoicePDF } from '../utils/pdfUtils';
-import { calculateCanonicalInvoiceFinancials } from '../utils/invoiceMath';
+import { calculateCanonicalInvoiceFinancials, roundTo2 } from '../utils/invoiceMath';
 import DynamicQRCode from '../components/DynamicQRCode';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../utils/invoiceUtils';

@@ -284,6 +284,7 @@ export const calculateCanonicalInvoiceFinancials = (inv) => {
     amountPaid,
     balanceDue,
     currentBillDue: balanceDue,
+    customerTotalDue: allocation.customerTotalDue,
     allocatedToOldDue: allocation.allocatedToOldDue,
     remainingOldDue: allocation.remainingOldDue,
     allocatedToCurrentInvoice: allocation.allocatedToCurrentInvoice,

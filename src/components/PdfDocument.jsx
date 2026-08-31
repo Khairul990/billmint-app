@@ -1,6 +1,7 @@
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { formatCurrency } from '../utils/invoiceUtils';
+import { roundTo2 } from '../utils/invoiceMath';
 import { t } from '../utils/i18n';
 import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
 import { PdfTemplateLayouts } from './invoice-templates/pdf-layouts/PdfTemplateLayouts';

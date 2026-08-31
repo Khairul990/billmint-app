@@ -1,6 +1,7 @@
 import React from 'react';
 import DynamicQRCode from './DynamicQRCode';
 import { formatCurrency } from '../utils/invoiceUtils';
+import { roundTo2 } from '../utils/invoiceMath';
 import { getInvoiceColumns, getItemValue } from '../utils/invoiceSchema';
 import { ShieldCheck, Calendar, Hash, FileText, Phone, Mail, Globe, MapPin, Building2, Receipt, CheckCircle2, Zap, Scissors, Briefcase, QrCode, Stethoscope, Wrench, GraduationCap, Sparkles } from 'lucide-react';
 import { getCategoryWording } from '../config/businessPresets';

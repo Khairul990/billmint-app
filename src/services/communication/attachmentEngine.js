@@ -10,7 +10,7 @@ import React from 'react';
 import { pdf } from '@react-pdf/renderer';
 import QRCode from 'qrcode';
 import PdfDocument from '../../components/PdfDocument';
-import { calculateCanonicalInvoiceFinancials } from '../../utils/invoiceMath';
+import { calculateCanonicalInvoiceFinancials, roundTo2 } from '../../utils/invoiceMath';
 
 /**
  * Build the payment QR code base64 (same logic as the main PDF downloader).
