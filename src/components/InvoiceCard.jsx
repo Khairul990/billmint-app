@@ -27,6 +27,7 @@ import {
   GraduationCap,
   Wrench,
   Package
+} from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { 
   calculateCanonicalInvoiceFinancials, 
