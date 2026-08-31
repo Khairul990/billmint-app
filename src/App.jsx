@@ -287,10 +287,32 @@ function App() {
   const [userRole, setUserRole] = useState(() => localStorage.getItem('billqyro_user_role') || 'user');
   const [userPermissions, setUserPermissions] = useState(null);
   const [workspaceVerified, setWorkspaceVerified] = useState(false);
-  const [collectionContext, setCollectionContext] = useState({ initialCustomer: null, initialInvoice: null });
+  const [collectionContext, setCollectionContext] = useState({ 
+    initialCustomer: null, 
+    initialInvoice: null,
+    initialStaff: null,
+    initialVendor: null,
+    initialPaymentType: null,
+    initialTab: 'record'
+  });
 
-  const handleOpenCollectionCenter = useCallback(({ customer = null, invoice = null } = {}) => {
-    setCollectionContext({ initialCustomer: customer, initialInvoice: invoice });
+  const handleOpenCollectionCenter = useCallback(({ 
+    customer = null, 
+    invoice = null,
+    staff = null,
+    vendor = null,
+    paymentType = null,
+    type = null,
+    tab = 'record'
+  } = {}) => {
+    setCollectionContext({ 
+      initialCustomer: customer, 
+      initialInvoice: invoice,
+      initialStaff: staff,
+      initialVendor: vendor,
+      initialPaymentType: paymentType || type,
+      initialTab: tab
+    });
     setCurrentTab('collection-center');
   }, []);
 
@@ -1657,9 +1679,15 @@ function App() {
           <CollectionCenter 
             invoices={activeInvoices}
             customers={activeCustomers}
+            staffs={activeStaffs}
+            expenses={activeExpenses}
             pendingPayments={pendingPayments}
             initialCustomer={collectionContext?.initialCustomer}
             initialInvoice={collectionContext?.initialInvoice}
+            initialStaff={collectionContext?.initialStaff}
+            initialVendor={collectionContext?.initialVendor}
+            initialPaymentType={collectionContext?.initialPaymentType}
+            initialTab={collectionContext?.initialTab || (currentTab === 'pending-payments' ? 'requests' : 'record')}
             currencySymbol={activeSettings?.currency || '₹'}
             businessSettings={activeSettings}
             activeWsId={activeWorkspaceId}
@@ -1688,7 +1716,10 @@ function App() {
         return (
           <StaffLedger 
             staffs={activeStaffs} 
-            invoices={activeInvoices} 
+            invoices={activeInvoices}
+            onRecordStaffPayment={handleOpenCollectionCenter}
+            onOpenCollection={handleOpenCollectionCenter}
+            setCurrentTab={setCurrentTab}
           />
         );
       case 'due':
@@ -1892,6 +1923,8 @@ function App() {
             invoices={activeInvoices}
             currentTab={currentTab}
             setCurrentTab={setCurrentTab}
+            onRecordVendorPayment={handleOpenCollectionCenter}
+            onOpenCollection={handleOpenCollectionCenter}
           />
         );
       case 'premium-upgrade':

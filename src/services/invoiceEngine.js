@@ -163,81 +163,18 @@ export const invoiceEngine = {
   },
 
   async markAsPaid(invoiceId, paymentData = {}) {
-    const invoices = await dbGetInvoices(true);
-    const idx = invoices.findIndex(inv => inv.id === invoiceId);
-    if (idx === -1) throw new Error('Invoice not found');
-    const invoice = { ...invoices[idx] };
-    if (!invoice.paymentHistory) invoice.paymentHistory = [];
-    if (!invoice.paymentProofs) invoice.paymentProofs = [];
-    
-    const paymentAmount = paymentData.amount !== undefined ? parseFloat(paymentData.amount) : (parseFloat(invoice.grandTotal || invoice.total) || 0);
-    if (isNaN(paymentAmount) || !isFinite(paymentAmount) || paymentAmount <= 0) {
-      throw new Error('Payment amount must be greater than zero.');
-    }
-    const roundedPaymentAmount = Math.round(paymentAmount * 100) / 100;
-
-    const paymentEntry = {
-      id: paymentData.id || ('pmt_' + Date.now() + Math.random().toString(36).substr(2, 9)),
-      amount: roundedPaymentAmount,
-      method: paymentData.method || invoice.paymentMethod || 'Manual',
-      transactionId: paymentData.transactionId || '',
-      date: paymentData.date || new Date().toISOString(),
-      note: paymentData.notes || paymentData.note || ''
-    };
-
-    // Idempotent duplicate check
-    const existingIndex = invoice.paymentHistory.findIndex(p => p.id === paymentEntry.id);
-    if (existingIndex >= 0) {
-      invoice.paymentHistory[existingIndex] = paymentEntry;
-    } else {
-      invoice.paymentHistory.push(paymentEntry);
-    }
-
-    const totalPaid = Math.round(invoice.paymentHistory.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) * 100) / 100;
-    invoice.paidAmount = totalPaid;
-    invoice.amountPaid = totalPaid;
-    invoice.grandTotal = Math.round((parseFloat(invoice.grandTotal || invoice.total) || 0) * 100) / 100;
-    invoice.balanceDue = Math.max(0, Math.round((invoice.grandTotal - totalPaid) * 100) / 100);
-    invoice.paymentStatus = getInvoicePaymentStatus(invoice);
-    if (invoice.status !== 'Cancelled' && invoice.status !== 'Void') {
-      invoice.status = invoice.paymentStatus;
-    }
-
-    const result = await dbSaveInvoice(invoice);
-    logAudit('payment_recorded', 'invoice', invoice.id, { oldPaid: invoices[idx].paidAmount ?? invoices[idx].amountPaid }, { newPaid: totalPaid });
-
-    // Invalidate PDF cache
-    try {
-      const { invalidateInvoicePdfCache } = await import('../utils/pdfCacheEngine.js');
-      await invalidateInvoicePdfCache(invoice.id);
-    } catch (e) { /* non-blocking */ }
-
-    // Additive: mirror payment into Internal Bank ledger (idempotent, failure-isolated).
-    try {
-      const { bankEngine } = await import('./bankEngine.js');
-      await bankEngine.autoPostPayment({
-        id: paymentEntry.id,
-        amount: paymentEntry.amount,
-        method: paymentEntry.method,
-        date: paymentEntry.date,
-        invoiceId: invoice.id,
-        invoiceNumber: invoice.invoiceNumber,
-        customerId: invoice.customer?.id || invoice.customerId || null,
-        customerName: invoice.customer?.name || invoice.customerName || '',
-        note: paymentEntry.note
-      });
-    } catch (e) {
-      console.warn('[BANK] auto-post payment skipped (non-blocking):', e);
-    }
-
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('billqyro_invoice_updated', { detail: result }));
-      window.dispatchEvent(new Event('billqyro_bank_updated'));
-      window.dispatchEvent(new Event('billqyro_sync'));
-      window.dispatchEvent(new CustomEvent('billqyro:data-updated', { detail: { collectionName: 'invoices', doc: result } }));
-    }
-
-    return result;
+    const { paymentEngine } = await import('./paymentEngine.js');
+    const result = await paymentEngine.recordCustomerPayment({
+      invoiceId,
+      amount: paymentData.amount,
+      paymentMethod: paymentData.method || paymentData.paymentMethod || 'Cash',
+      paymentDate: paymentData.date || null,
+      reference: paymentData.transactionId || paymentData.reference || '',
+      note: paymentData.notes || paymentData.note || '',
+      source: paymentData.source || 'invoice_engine',
+      proofId: paymentData.proofId || null
+    });
+    return result.invoice;
   },
 
   async recordPayment(invoiceId, paymentData = {}) {

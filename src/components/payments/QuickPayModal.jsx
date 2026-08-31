@@ -85,17 +85,17 @@ const QuickPayModal = ({
 
     setIsSubmitting(true);
     try {
-      const pmtId = `pmt_${invoice.id}_${Date.now()}`;
-      const payload = {
-        id: pmtId,
+      const { paymentEngine } = await import('../../services/paymentEngine');
+      const result = await paymentEngine.recordCustomerPayment({
+        invoiceId: invoice.id,
         amount: roundTo2(numericAmount),
-        method: paymentMethod,
-        date: paymentDate || new Date().toISOString(),
-        notes: paymentNotes.trim(),
-        transactionId: transactionId.trim()
-      };
-
-      const updated = await invoiceEngine.recordPayment(invoice.id, payload);
+        paymentMethod: paymentMethod,
+        paymentDate: paymentDate || new Date().toISOString(),
+        reference: transactionId.trim(),
+        note: paymentNotes.trim(),
+        source: 'quick_pay_modal'
+      });
+      const updated = result.invoice;
       
       triggerPaymentSuccessFeedback();
       triggerVoiceFeedback("Payment recorded successfully!");

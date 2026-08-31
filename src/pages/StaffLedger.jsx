@@ -1,18 +1,53 @@
-import React, { useState, useMemo } from 'react';
-import { Users, CreditCard, Clock, Wallet, Search, Plus, CheckCircle2, X, AlertCircle } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Users, CreditCard, Clock, Wallet, Search, Plus, CheckCircle2, X, AlertCircle, ArrowUpRight } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { bankEngine } from '../services/bankEngine';
+import { paymentEngine } from '../services/paymentEngine';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const StaffLedger = ({ staffs = [], invoices = [], bankTransactions = [] }) => {
+const StaffLedger = ({ 
+  staffs = [], 
+  invoices = [], 
+  bankTransactions = [],
+  onRecordStaffPayment = null,
+  onOpenCollection = null,
+  setCurrentTab = null
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [liveBankTx, setLiveBankTx] = useState([]);
   const [selectedStaffForPay, setSelectedStaffForPay] = useState(null);
   const [payType, setPayType] = useState('Salary / Wages'); // 'Salary / Wages' | 'Staff Advance'
   const [payAmount, setPayAmount] = useState('');
   const [payAccount, setPayAccount] = useState('Cash');
   const [payNote, setPayNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Load bank ledger reactively
+  useEffect(() => {
+    let mounted = true;
+    const loadLedger = async () => {
+      try {
+        const state = await bankEngine.getState();
+        if (mounted && Array.isArray(state?.ledger)) {
+          setLiveBankTx(state.ledger);
+        }
+      } catch (e) {
+        console.warn('StaffLedger bank load notice:', e);
+      }
+    };
+    loadLedger();
+    const handleUpdate = () => loadLedger();
+    window.addEventListener('billqyro_bank_updated', handleUpdate);
+    return () => {
+      mounted = false;
+      window.removeEventListener('billqyro_bank_updated', handleUpdate);
+    };
+  }, []);
+
+  const combinedBankTransactions = useMemo(() => {
+    return liveBankTx.length > 0 ? liveBankTx : bankTransactions;
+  }, [liveBankTx, bankTransactions]);
   
   const staffLedgers = useMemo(() => {
     return staffs.map(staff => {
@@ -22,17 +57,18 @@ const StaffLedger = ({ staffs = [], invoices = [], bankTransactions = [] }) => {
         totalEarned += (inv.total || inv.grandTotal || 0);
       });
 
-      const staffPayments = bankTransactions.filter(tx => tx.staffId === staff.id);
+      const staffPayments = combinedBankTransactions.filter(tx => tx.staffId === staff.id && !tx.reversed);
       let totalPaid = 0;
       let totalAdvance = 0;
 
       staffPayments.forEach(tx => {
         const cat = (tx.category || '').toLowerCase();
-        if ((cat.includes('staff payment') || cat.includes('salary')) && tx.direction !== 'IN') {
-          totalPaid += (tx.amountRupees || (tx.amountPaise ? tx.amountPaise / 100 : 0));
+        const amt = tx.amountRupees !== undefined ? tx.amountRupees : (tx.amountPaise ? tx.amountPaise / 100 : 0);
+        if ((cat.includes('staff payment') || cat.includes('salary') || cat.includes('wages')) && tx.type !== 'moneyIn') {
+          totalPaid += amt;
         }
-        if (cat.includes('staff advance') && tx.direction !== 'IN') {
-          totalAdvance += (tx.amountRupees || (tx.amountPaise ? tx.amountPaise / 100 : 0));
+        if (cat.includes('staff advance') && tx.type !== 'moneyIn') {
+          totalAdvance += amt;
         }
       });
 
@@ -46,7 +82,7 @@ const StaffLedger = ({ staffs = [], invoices = [], bankTransactions = [] }) => {
         remainingPayable
       };
     });
-  }, [staffs, invoices, bankTransactions]);
+  }, [staffs, invoices, combinedBankTransactions]);
 
   const filteredStaff = staffLedgers.filter(s => 
     (s.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -54,6 +90,21 @@ const StaffLedger = ({ staffs = [], invoices = [], bankTransactions = [] }) => {
   );
 
   const handleOpenPay = (staff, defaultType = 'Salary / Wages') => {
+    // If routing shortcut is provided, route directly to Money & Payment Center
+    if (onRecordStaffPayment) {
+      onRecordStaffPayment({ staff, type: defaultType, paymentType: defaultType });
+      return;
+    }
+    if (onOpenCollection) {
+      onOpenCollection({ staff, type: defaultType, paymentType: defaultType });
+      return;
+    }
+    if (setCurrentTab) {
+      setCurrentTab('collection-center');
+      return;
+    }
+
+    // Fallback modal using canonical paymentEngine
     setSelectedStaffForPay(staff);
     setPayType(defaultType);
     setPayAmount(defaultType === 'Salary / Wages' ? (staff.remainingPayable || '') : '');
@@ -71,22 +122,19 @@ const StaffLedger = ({ staffs = [], invoices = [], bankTransactions = [] }) => {
 
     setIsSubmitting(true);
     try {
-      await bankEngine.addTransaction({
-        type: 'moneyOut',
-        amountRupees: amount,
-        category: payType,
-        title: `${payType}: ${selectedStaffForPay.name}`,
-        account: payAccount,
+      await paymentEngine.recordStaffPayment({
         staffId: selectedStaffForPay.id,
-        note: payNote || `${payType} recorded for ${selectedStaffForPay.name}`,
-        date: new Date()
+        staffName: selectedStaffForPay.name,
+        amount,
+        paymentType: payType,
+        paymentMethod: payAccount,
+        note: payNote || `${payType} recorded for ${selectedStaffForPay.name}`
       });
-      toast.success(`${payType} of ₹${amount} recorded.`);
+      toast.success(`${payType} of ₹${amount} recorded successfully.`);
       setSelectedStaffForPay(null);
-      window.dispatchEvent(new Event('billqyro_bank_updated'));
     } catch (err) {
       console.error(err);
-      toast.error('Failed to record staff payout.');
+      toast.error(err.message || 'Failed to record staff payout.');
     } finally {
       setIsSubmitting(false);
     }
