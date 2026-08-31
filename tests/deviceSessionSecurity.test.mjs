@@ -51,6 +51,11 @@ const tests = [
     assert.match(auth, /registerCurrentSession/);
     assert.match(auth, /getNewDeviceApproval/);
   }],
+  ['new device is blocked until approval', () => {
+    assert.match(auth, /NEW_DEVICE_APPROVAL_REQUIRED/);
+    assert.match(auth, /signOut\(auth\)/);
+    assert.match(service, /status: pending|status:.*pending/);
+  }],
   ['security panel exposes device management actions', () => {
     assert.match(panel, /Where You're Logged In/);
     assert.match(panel, /Log Out All Other Devices/);
