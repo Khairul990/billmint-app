@@ -411,7 +411,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
               {(financials.amountPaid > 0 || financials.previousDue > 0) ? 'Balance Due' : 'Grand Total'}
             </span>
             <span className="text-lg font-black text-theme-accent dark:text-theme-accent tabular-nums">
-              {formatCurrency(financials.balanceDue, currencySymbol, regionalPrefs.numberFormat)}
+              {formatCurrency(financials.customerTotalDue ?? (financials.previousDue > 0 ? (financials.remainingOldDue + financials.currentBillDue) : financials.balanceDue), currencySymbol, regionalPrefs.numberFormat)}
             </span>
           </div>
         </div>

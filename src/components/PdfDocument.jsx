@@ -610,12 +610,12 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
               </View>
             )}
 
-            <View style={styles.grandTotalRow}>
-              <Text style={[styles.grandTotalLabel, { color: tPrimary }]}>
+            <View style={[styles.summaryRow, styles.balanceDueRow, { borderTopColor: tAccent }]} wrap={false}>
+              <Text style={[styles.balanceDueLabel, { color: tPrimary }]}>
                 {(financials.amountPaid > 0 || financials.previousDue > 0) ? 'Balance Due' : 'Grand Total'}
               </Text>
-              <Text style={[styles.grandTotalValue, { color: tAccent, textAlign: 'right' }]}>
-                {formatCurrency(financials.balanceDue, currencySymbol, regionalPrefs.numberFormat)}
+              <Text style={[styles.balanceDueValue, { color: tAccent }]}>
+                {formatCurrency(financials.customerTotalDue ?? (financials.previousDue > 0 ? (financials.remainingOldDue + financials.currentBillDue) : financials.balanceDue), currencySymbol, regionalPrefs.numberFormat)}
               </Text>
             </View>
           </View>

@@ -109,7 +109,7 @@ export const PdfTotalsSummary = ({
 
       <View style={[s.row, s.justifyBetween, s.bold, badgeStyle ? badgeStyle : { fontSize: 12, borderTopWidth: 2, borderTopColor: accentColor, paddingTop: 6, marginTop: 4 }]}>
         <Text style={{ color: badgeStyle?.color || accentColor }}>{(fin.amountPaid > 0 || fin.previousDue > 0) ? 'BALANCE DUE' : 'TOTAL DUE'}</Text>
-        <Text style={{ color: badgeStyle?.color || accentColor, textAlign: 'right' }}>{formatCurrency(fin.balanceDue)}</Text>
+        <Text style={{ color: badgeStyle?.color || accentColor, textAlign: 'right' }}>{formatCurrency(fin.customerTotalDue ?? (fin.previousDue > 0 ? (fin.remainingOldDue + fin.currentBillDue) : fin.balanceDue))}</Text>
       </View>
     </View>
   );
