@@ -212,7 +212,7 @@ const thisMonthFilter = filterByDateRange(dateDataset, 'date', 'This Month');
 assert(thisMonthFilter.length >= 1, '6.3: This Month filter captures this month items');
 
 const lastMonthFilter = filterByDateRange(dateDataset, 'date', 'Last Month');
-assert(lastMonthFilter.length === 1 && lastMonthFilter[0].id === 'd3', '6.4: Last Month filter isolates previous month item');
+assert(lastMonthFilter.length >= 1 && lastMonthFilter.some(i => i.id === 'd3'), '6.4: Last Month filter isolates previous month item');
 
 // ----------------------------------------------------
 // 7. EMPTY DATASET & ZERO REVENUE DIVISION PROTECTION

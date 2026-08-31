@@ -148,8 +148,10 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         return 'Reports & Analytics';
       case 'due-ledger':
         return 'Due Ledger';
+      case 'collection-center':
+      case 'payments':
       case 'pending-payments':
-        return 'Payment Proofs';
+        return 'Payment Collection Center';
       case 'backup-restore':
         return 'Backup & Restore';
       case 'help-center':
@@ -749,12 +751,12 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   <span className="text-[10px] font-black tracking-wider text-theme-muted uppercase px-2 block mb-1.5">Finance</span>
                   <div className="space-y-1">
                     <button
-                      onClick={() => { setCurrentTab('pending-payments'); setIsMobileDrawerOpen(false); }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${currentTab === 'pending-payments' ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                      onClick={() => { setCurrentTab('collection-center'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${['collection-center', 'payments', 'pending-payments'].includes(currentTab) ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
                     >
                       <div className="flex items-center gap-2.5">
                         <CreditCard className="w-4 h-4" />
-                        <span>Payments & Proofs</span>
+                        <span>Payment Center</span>
                       </div>
                       {pendingPaymentsCount > 0 && (
                         <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold">{pendingPaymentsCount}</span>

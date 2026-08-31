@@ -430,6 +430,18 @@ const InvoiceCard = ({
                     </button>
                   )}
 
+                  {balanceDue > 0 && onRecordPayment && (
+                    <button
+                      onClick={() => onRecordPayment(invoice)}
+                      title="Collect Payment"
+                      aria-label="Collect Payment"
+                      className="px-2.5 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                    >
+                      <CreditCard className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <span className="hidden sm:inline">Collect</span>
+                    </button>
+                  )}
+
                   <button
                     onClick={() => onEdit(invoice)}
                     title="Edit Invoice"

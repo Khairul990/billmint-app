@@ -181,10 +181,10 @@ const MoreMenu = ({
         )}
         {isFeatureEnabled('payment') && (
           <SettingsItem 
-            icon={Bell} 
-            title="Payment Proofs" 
-            description="Review collected payments" 
-            onClick={() => setCurrentTab('pending-payments')} 
+            icon={CreditCard} 
+            title="Collection Center" 
+            description="Collect payments & review proofs" 
+            onClick={() => setCurrentTab('collection-center')} 
             alertCount={pendingPaymentsCount}
           />
         )}

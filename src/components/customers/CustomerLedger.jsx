@@ -25,13 +25,16 @@ import { toast } from 'react-hot-toast';
  * Customer 360° / Customer Ledger Modal
  * Compact, responsive, and uses the canonical computeCustomerLedger calculation.
  */
-const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymbol = '₹', onCreateBill, onPaymentRecorded }) => {
-  const [updatingInvoiceId, setUpdatingInvoiceId] = useState(null);
-  const [paymentAmount, setPaymentAmount] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('Cash');
-  const [paymentNote, setPaymentNote] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-
+const CustomerLedger = ({ 
+  isOpen, 
+  onClose, 
+  customer, 
+  invoices = [], 
+  currencySymbol = '₹', 
+  onCreateBill, 
+  onPaymentRecorded,
+  onOpenCollection 
+}) => {
   if (!isOpen || !customer) return null;
 
   // 1. Canonical Customer Ledger Calculation with Credit Intelligence & Aging
@@ -52,35 +55,6 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
       maximumFractionDigits: 2
     }).format(amount || 0);
     return `${currencySymbol}${formattedNum}`;
-  };
-
-  const handleUpdatePayment = async (inv) => {
-    const payVal = parseFloat(paymentAmount);
-    if (!payVal || isNaN(payVal) || payVal <= 0) {
-      toast.error('Please enter a valid payment amount.');
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const updatedInvoice = await invoiceEngine.markAsPaid(inv.id, {
-        amount: payVal,
-        method: paymentMethod,
-        note: paymentNote
-      });
-      if (onPaymentRecorded && updatedInvoice) {
-        onPaymentRecorded(updatedInvoice);
-      }
-      setUpdatingInvoiceId(null);
-      setPaymentAmount('');
-      setPaymentNote('');
-      toast.success('Payment recorded successfully!');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to record payment.');
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   const generateWhatsAppReminder = () => {
@@ -294,73 +268,18 @@ const CustomerLedger = ({ isOpen, onClose, customer, invoices = [], currencySymb
                           </div>
                         </div>
 
-                        {/* Inline Payment Form */}
+                        {/* Collection Center Action Shortcut */}
                         {!isPaid && (
                           <div className="mt-2.5 pt-2.5 border-t border-theme-border-soft">
-                            {updatingInvoiceId === inv.id ? (
-                              <div className="space-y-2 bg-theme-app p-2.5 rounded-xl border border-theme-border-soft">
-                                <div className="grid grid-cols-2 gap-2">
-                                  <div>
-                                    <label className="text-[9px] font-bold text-theme-muted uppercase block mb-1">Amount</label>
-                                    <input
-                                      type="number"
-                                      value={paymentAmount}
-                                      onChange={e => setPaymentAmount(e.target.value)}
-                                      className="w-full px-2.5 py-1.5 bg-theme-surface border border-theme-border-soft rounded-lg text-xs font-bold text-theme-primary focus:border-theme-accent focus:outline-none"
-                                      placeholder={`Max ${formatCurrency(due)}`}
-                                      max={due}
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="text-[9px] font-bold text-theme-muted uppercase block mb-1">Method</label>
-                                    <select
-                                      value={paymentMethod}
-                                      onChange={e => setPaymentMethod(e.target.value)}
-                                      className="w-full px-2 py-1.5 bg-theme-surface border border-theme-border-soft rounded-lg text-xs font-bold text-theme-primary focus:border-theme-accent focus:outline-none"
-                                    >
-                                      <option value="Cash">Cash</option>
-                                      <option value="UPI / QR">UPI / QR</option>
-                                      <option value="Bank Transfer">Bank Transfer</option>
-                                      <option value="Credit Card">Credit Card</option>
-                                    </select>
-                                  </div>
-                                </div>
-                                <input
-                                  type="text"
-                                  value={paymentNote}
-                                  onChange={e => setPaymentNote(e.target.value)}
-                                  placeholder="Note (optional / Txn ID)"
-                                  className="w-full px-2.5 py-1.5 bg-theme-surface border border-theme-border-soft rounded-lg text-xs font-medium text-theme-primary focus:border-theme-accent focus:outline-none"
-                                />
-                                <div className="flex gap-2 justify-end pt-1">
-                                  <button
-                                    onClick={() => setUpdatingInvoiceId(null)}
-                                    className="px-2.5 py-1 rounded-lg text-xs font-bold text-theme-muted hover:bg-theme-surface transition-colors cursor-pointer"
-                                    disabled={isSaving}
-                                  >
-                                    Cancel
-                                  </button>
-                                  <button
-                                    onClick={() => handleUpdatePayment(inv)}
-                                    disabled={!paymentAmount || isSaving}
-                                    className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow-xs disabled:opacity-50 flex items-center gap-1 transition-all cursor-pointer"
-                                  >
-                                    {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                                    Record
-                                  </button>
-                                </div>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => {
-                                  setUpdatingInvoiceId(inv.id);
-                                  setPaymentAmount(due.toString());
-                                }}
-                                className="w-full py-1.5 bg-theme-app hover:bg-emerald-50 dark:hover:bg-emerald-950/20 border border-theme-border-soft hover:border-emerald-300 text-emerald-700 dark:text-emerald-400 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                              >
-                                <Banknote className="w-3.5 h-3.5" /> Record Payment
-                              </button>
-                            )}
+                            <button
+                              onClick={() => {
+                                onClose();
+                                onOpenCollection?.({ customer, invoice: inv });
+                              }}
+                              className="w-full py-2 bg-theme-app hover:bg-emerald-50 dark:hover:bg-emerald-950/20 border border-theme-border-soft hover:border-emerald-300 text-emerald-700 dark:text-emerald-400 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                            >
+                              <Banknote className="w-3.5 h-3.5" /> Collect Payment in Collection Center
+                            </button>
                           </div>
                         )}
                       </div>

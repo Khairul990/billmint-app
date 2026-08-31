@@ -65,7 +65,7 @@ const BottomNav = ({ currentTab, setCurrentTab, pendingPaymentsCount = 0, busine
           const Icon = tab.icon;
           const isActive = 
             currentTab === tab.id || 
-            (tab.id === 'due' && ['due-ledger', 'pending-payments'].includes(currentTab)) ||
+            (tab.id === 'due' && ['due', 'due-ledger', 'pending-payments', 'payments', 'collection-center'].includes(currentTab)) ||
             (tab.id === 'more' && ['more', 'expenses', 'products', 'subscription', 'admin-panel', 'settings', 'help-center', 'estimates', 'pdf-templates', 'live-link-templates', 'marketplace', 'backup-restore', 'reports', 'quick-tools', 'cash-management'].includes(currentTab));
           
           return (

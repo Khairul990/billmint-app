@@ -120,6 +120,7 @@ const Dashboard = ({
   isAppInstalled = false,
   onInstallApp,
   onSaveCustomer,
+  onRecordPayment,
   subscription = {},
   onQuickBillOpen,
   pendingPaymentsCount = 0,
@@ -721,7 +722,7 @@ const Dashboard = ({
 
                 {/* 3. Record Payment */}
                 <button
-                  onClick={() => setCurrentTab('due-ledger')}
+                  onClick={() => (onRecordPayment ? onRecordPayment() : setCurrentTab('collection-center'))}
                   className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-white dark:bg-theme-card hover:bg-[#faf5ef] dark:hover:bg-theme-surface-elevated border border-[#f0ece6] dark:border-theme-border-soft text-[#1c1917] dark:text-theme-primary text-xs font-bold shadow-xs transition-all cursor-pointer"
                 >
                   <CreditCard className="w-4 h-4 text-[#c2410c]" />

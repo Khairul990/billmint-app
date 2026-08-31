@@ -131,7 +131,7 @@ const Sidebar = ({
       id: 'finance',
       label: 'FINANCE',
       items: [
-        { id: 'pending-payments', label: 'Payments', icon: CreditCard, featureId: 'payment', badge: pendingPaymentsCount },
+        { id: 'collection-center', label: 'Payments', icon: CreditCard, featureId: 'payment', badge: pendingPaymentsCount },
         { id: 'due-ledger', label: 'Collections', icon: BookOpen, featureId: 'treasury' },
         { id: 'expenses', label: t('expenses') || 'Expenses', icon: TrendingDown, featureId: 'treasury.moneyOut' },
         { id: 'outsource', label: 'Outsource & Vendors', icon: Briefcase, featureId: 'outsource' },
@@ -269,7 +269,9 @@ const Sidebar = ({
             )}
             {section.items.map((item) => {
               const Icon = item.icon;
-              const isActive = currentTab === item.id || (item.id === 'invoices' && currentTab === 'create-invoice');
+              const isActive = currentTab === item.id || 
+                (item.id === 'invoices' && currentTab === 'create-invoice') ||
+                (item.id === 'collection-center' && ['collection-center', 'payments', 'pending-payments'].includes(currentTab));
 
               return (
                 <button

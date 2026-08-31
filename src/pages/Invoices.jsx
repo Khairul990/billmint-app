@@ -80,7 +80,10 @@ const Invoices = ({
   onDownloadPDF, 
   onDownloadImage, 
   setCurrentTab,
-  businessSettings 
+  businessSettings,
+  onPaymentRecorded,
+  onRecordPayment,
+  onOpenCollection
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -954,10 +957,7 @@ const Invoices = ({
                   isSelected={selectedInvoiceIds.includes(invoice.id)}
                   onToggleSelect={handleToggleSelect}
                   onView={(inv) => setViewingInvoice(inv)}
-                  onRecordPayment={(inv) => {
-                    setRecordingPaymentInvoice(inv);
-                    setPaymentAmount(getInvoiceBalanceDue(inv).toString());
-                  }}
+                  onRecordPayment={(inv) => onOpenCollection ? onOpenCollection({ invoice: inv }) : (onRecordPayment ? onRecordPayment({ invoice: inv }) : setRecordingPaymentInvoice(inv))}
                   onEdit={(inv) => {
                     onEditInvoice(inv);
                     setCurrentTab('create-invoice');

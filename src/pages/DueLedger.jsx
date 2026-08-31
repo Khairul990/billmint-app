@@ -140,7 +140,7 @@ const DueSection = React.memo(({
 
 DueSection.displayName = 'DueSection';
 
-const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentRecorded }) => {
+const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentRecorded, onOpenCollection }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [recordingPaymentBill, setRecordingPaymentBill] = useState(null);
@@ -240,12 +240,12 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
   const allFilteredEmpty = filteredToday.length === 0 && filteredThisWeek.length === 0 && filteredOlder.length === 0;
 
   const handleMarkPaid = useCallback((bill) => {
-    setRecordingPaymentBill(bill);
-    setPaymentAmount(bill.dueAmount.toString());
-    setPaymentMethod('Cash');
-    setPaymentDate(new Date().toISOString().split('T')[0]);
-    setPaymentNotes('');
-  }, []);
+    if (onOpenCollection) {
+      onOpenCollection({ invoice: bill, customer: bill.customer || { name: bill.customerName, phone: bill.customerPhone } });
+    } else {
+      setRecordingPaymentBill(bill);
+    }
+  }, [onOpenCollection]);
 
   const handleSubmitPayment = async (e) => {
     e?.preventDefault?.();
@@ -540,6 +540,7 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
         invoices={invoices}
         currencySymbol={currencySymbol}
         onPaymentRecorded={onPaymentRecorded}
+        onOpenCollection={onOpenCollection}
       />
 
       <style dangerouslySetInnerHTML={{__html: `

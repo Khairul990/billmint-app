@@ -67,6 +67,7 @@ const Expenses = React.lazy(() => import('./pages/Expenses'));
 const MoreMenu = React.lazy(() => import('./pages/MoreMenu'));
 const PublicInvoice = React.lazy(() => import('./pages/PublicInvoice'));
 const PendingPayments = React.lazy(() => import('./pages/PendingPayments'));
+const CollectionCenter = React.lazy(() => import('./pages/CollectionCenter'));
 const DueLedger = React.lazy(() => import('./pages/DueLedger'));
 const StaffLedger = React.lazy(() => import('./pages/StaffLedger'));
 const TemplateMarketplace = React.lazy(() => import('./pages/TemplateMarketplace'));
@@ -286,6 +287,12 @@ function App() {
   const [userRole, setUserRole] = useState(() => localStorage.getItem('billqyro_user_role') || 'user');
   const [userPermissions, setUserPermissions] = useState(null);
   const [workspaceVerified, setWorkspaceVerified] = useState(false);
+  const [collectionContext, setCollectionContext] = useState({ initialCustomer: null, initialInvoice: null });
+
+  const handleOpenCollectionCenter = useCallback(({ customer = null, invoice = null } = {}) => {
+    setCollectionContext({ initialCustomer: customer, initialInvoice: invoice });
+    setCurrentTab('collection-center');
+  }, []);
 
   // Capacitor Android Back Button Handler
   useEffect(() => {
@@ -1638,15 +1645,28 @@ function App() {
             revenueStatus={revenueStatus}
             onSaveCustomer={handleSaveCustomer}
             onPaymentRecorded={handlePaymentRecorded}
+            onRecordPayment={handleOpenCollectionCenter}
             permissions={userPermissions}
             workspaceVerified={workspaceVerified}
           />
         );
+      case 'collection-center':
+      case 'payments':
       case 'pending-payments':
         return (
-          <PendingPayments 
-            setCurrentTab={setCurrentTab}
+          <CollectionCenter 
+            invoices={activeInvoices}
+            customers={activeCustomers}
             pendingPayments={pendingPayments}
+            initialCustomer={collectionContext?.initialCustomer}
+            initialInvoice={collectionContext?.initialInvoice}
+            currencySymbol={activeSettings?.currency || '₹'}
+            businessSettings={activeSettings}
+            activeWsId={activeWorkspaceId}
+            onPaymentSuccess={() => {
+              setTriggerSync(prev => prev + 1);
+            }}
+            setCurrentTab={setCurrentTab}
           />
         );
       case 'help-center':
@@ -1680,6 +1700,8 @@ function App() {
             invoices={activeInvoices} 
             businessSettings={activeSettings}
             onPaymentRecorded={handlePaymentRecorded}
+            onRecordPayment={handleOpenCollectionCenter}
+            onOpenCollection={handleOpenCollectionCenter}
           />
         );
       case 'bank':
@@ -1714,6 +1736,8 @@ function App() {
             setCurrentTab={setCurrentTab}
             businessSettings={activeSettings}
             onPaymentRecorded={handlePaymentRecorded}
+            onRecordPayment={handleOpenCollectionCenter}
+            onOpenCollection={handleOpenCollectionCenter}
           />
         );
       case 'estimates':
@@ -1798,6 +1822,8 @@ function App() {
             businessSettings={activeSettings}
             setCurrentTab={setCurrentTab}
             onPaymentRecorded={handlePaymentRecorded}
+            onOpenCollection={handleOpenCollectionCenter}
+            onRecordPayment={handleOpenCollectionCenter}
             onCreateBill={(cust) => {
               setEditingInvoice({ customerName: cust.name });
               setCurrentTab('create-invoice');
