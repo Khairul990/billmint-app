@@ -261,93 +261,98 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             <div className="flex items-center gap-2 shrink-0 pr-1">
               <div id="studio-header-actions-portal" className="flex items-center"></div>
               
-              {/* Notification Hub */}
-              <div className="relative" ref={notificationMenuRef}>
-                <button 
-                  onClick={() => setIsNotificationMenuOpen(prev => !prev)}
-                  title="Notifications"
-                  aria-label="Notifications"
-                  className="w-8 h-8 rounded-xl bg-theme-surface hover:bg-theme-surface-elevated border border-theme-border-soft flex items-center justify-center text-theme-secondary hover:text-theme-primary transition-colors relative"
-                >
-                  <Bell className="w-3.5 h-3.5" />
-                  {notifications.filter(n => !n.read).length > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
+              {/* Executive Command Cluster */}
+              <div className="p-1 bg-theme-surface/80 dark:bg-theme-surface/60 backdrop-blur-md rounded-2xl border border-theme-border-soft flex items-center gap-1 shadow-2xs">
+                {/* 1. Notification Hub */}
+                <div className="relative" ref={notificationMenuRef}>
+                  <button 
+                    onClick={() => setIsNotificationMenuOpen(prev => !prev)}
+                    title="Notifications"
+                    aria-label="Notifications"
+                    className="w-8 h-8 rounded-xl hover:bg-theme-surface-elevated flex items-center justify-center text-theme-secondary hover:text-theme-primary transition-all relative cursor-pointer"
+                  >
+                    <Bell className="w-4 h-4" />
+                    {notifications.filter(n => !n.read).length > 0 && (
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-theme-surface animate-pulse"></span>
+                    )}
+                  </button>
+                  
+                  {isNotificationMenuOpen && (
+                    <div className="absolute top-10 right-0 w-80 bg-theme-card rounded-2xl shadow-xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
+                      <div className="p-3.5 border-b border-theme-border-soft flex justify-between items-center bg-theme-surface/50">
+                        <h3 className="text-xs font-bold text-theme-primary">Notifications</h3>
+                        {notifications.filter(n => !n.read).length > 0 && (
+                          <button onClick={clearAllNotifications} className="text-[10px] font-bold text-theme-muted hover:text-theme-primary underline cursor-pointer">Clear All</button>
+                        )}
+                      </div>
+                      <div className="max-h-80 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                        {notifications.length === 0 ? (
+                          <p className="text-xs text-theme-muted text-center py-4 font-medium">No new notifications</p>
+                        ) : (
+                          notifications.map((notif) => (
+                            <div 
+                              key={notif.id} 
+                              onClick={() => {
+                                markNotificationAsRead(notif.id);
+                                setIsNotificationMenuOpen(false);
+                              }}
+                              className={`p-2.5 hover:bg-theme-surface rounded-xl transition-colors cursor-pointer flex gap-2.5 ${notif.read ? 'opacity-60' : ''}`}
+                            >
+                              <div className="w-7 h-7 rounded-lg bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+                                <Bell className="w-3.5 h-3.5" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold text-theme-primary truncate">{notif.title}</p>
+                                <p className="text-[10px] text-theme-muted mt-0.5 line-clamp-2">{notif.message}</p>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
                   )}
-                </button>
-                
-                {isNotificationMenuOpen && (
-                  <div className="absolute top-10 right-0 w-80 bg-theme-card rounded-2xl shadow-xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
-                    <div className="p-3.5 border-b border-theme-border-soft flex justify-between items-center bg-theme-surface/50">
-                      <h3 className="text-xs font-bold text-theme-primary">Notifications</h3>
-                      {notifications.filter(n => !n.read).length > 0 && (
-                        <button onClick={clearAllNotifications} className="text-[10px] font-bold text-theme-muted hover:text-theme-primary underline">Clear All</button>
-                      )}
-                    </div>
-                    <div className="max-h-80 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-                      {notifications.length === 0 ? (
-                        <p className="text-xs text-theme-muted text-center py-4 font-medium">No new notifications</p>
-                      ) : (
-                        notifications.map((notif) => (
-                          <div 
-                            key={notif.id} 
-                            onClick={() => {
-                              markNotificationAsRead(notif.id);
-                              setIsNotificationMenuOpen(false);
-                            }}
-                            className={`p-2.5 hover:bg-theme-surface rounded-xl transition-colors cursor-pointer flex gap-2.5 ${notif.read ? 'opacity-60' : ''}`}
-                          >
-                            <div className="w-7 h-7 rounded-lg bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
-                              <Bell className="w-3.5 h-3.5" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold text-theme-primary truncate">{notif.title}</p>
-                              <p className="text-[10px] text-theme-muted mt-0.5 line-clamp-2">{notif.message}</p>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
+                </div>
 
-              {/* Theme Switcher */}
-              <AnimatedThemeToggler
-                className="w-8 h-8 rounded-xl bg-theme-surface hover:bg-theme-surface-elevated border border-theme-border-soft flex items-center justify-center text-theme-secondary hover:text-theme-primary transition-colors cursor-pointer"
-                variant="circle"
-                theme={isDarkMode ? "dark" : "light"}
-                onThemeChange={(newTheme) => {
-                  const newDarkMode = newTheme === "dark";
-                  if (newDarkMode !== isDarkMode) {
-                    toggleTheme();
-                  }
-                }}
-                title={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
-              />
+                {/* 2. Theme Switcher */}
+                <AnimatedThemeToggler
+                  className="w-8 h-8 rounded-xl hover:bg-theme-surface-elevated flex items-center justify-center text-theme-secondary hover:text-theme-primary transition-all cursor-pointer"
+                  variant="circle"
+                  theme={isDarkMode ? "dark" : "light"}
+                  onThemeChange={(newTheme) => {
+                    const newDarkMode = newTheme === "dark";
+                    if (newDarkMode !== isDarkMode) {
+                      toggleTheme();
+                    }
+                  }}
+                  title={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
+                />
 
-              {/* Settings Action */}
-              <button
-                onClick={() => setCurrentTab('settings')}
-                className="w-8 h-8 rounded-xl bg-theme-surface hover:bg-theme-surface-elevated border border-theme-border-soft flex items-center justify-center text-theme-secondary hover:text-theme-primary transition-colors"
-                title="Business Settings"
-                aria-label="Settings"
-              >
-                <SettingsIcon className="w-3.5 h-3.5" />
-              </button>
-
-              {/* User Avatar Menu */}
-              <div className="relative flex items-center" ref={accountMenuRef}>
+                {/* 3. Settings Action */}
                 <button
-                  onClick={() => setIsAccountMenuOpen(prev => !prev)}
-                  className="w-8 h-8 rounded-xl bg-theme-accent text-white flex items-center justify-center font-black text-xs shadow-sm hover:opacity-90 transition-opacity overflow-hidden border border-theme-border-soft"
-                  title="Account Settings"
+                  onClick={() => setCurrentTab('settings')}
+                  className="w-8 h-8 rounded-xl hover:bg-theme-surface-elevated flex items-center justify-center text-theme-secondary hover:text-theme-primary transition-all cursor-pointer"
+                  title="Business Settings"
+                  aria-label="Settings"
                 >
-                  {businessSettings?.logoUrl ? (
-                    <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                  ) : (
-                    <span>{businessSettings?.businessName?.charAt(0) || 'B'}</span>
-                  )}
+                  <SettingsIcon className="w-4 h-4" />
                 </button>
+
+                {/* Separator */}
+                <div className="w-px h-5 bg-theme-border-soft mx-0.5" />
+
+                {/* 4. User Avatar Menu */}
+                <div className="relative flex items-center" ref={accountMenuRef}>
+                  <button
+                    onClick={() => setIsAccountMenuOpen(prev => !prev)}
+                    className="w-8 h-8 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center font-black text-xs shadow-2xs hover:opacity-90 active:scale-95 transition-all overflow-hidden border border-white/15 cursor-pointer"
+                    title="Account Settings"
+                  >
+                    {businessSettings?.logoUrl ? (
+                      <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{businessSettings?.businessName?.charAt(0) || 'B'}</span>
+                    )}
+                  </button>
 
                 {isAccountMenuOpen && (
                   <div className="absolute top-12 right-0 w-64 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-y-auto max-h-[65vh] py-2 flex flex-col custom-scrollbar">
@@ -446,6 +451,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                       </div>
                     </div>
                 )}
+                </div>
               </div>
             </div>
           </div>
@@ -500,32 +506,35 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 </span>
               </div>
             </div>
-            {/* Row 2: Search + Notification + Theme + Profile */}
-            <div className="flex items-center justify-end gap-1.5 px-4 pb-2 pt-0">
+            {/* Row 2: Search + Notification + Theme + Settings + Profile (Unified Executive Cluster) */}
+            <div className="flex items-center justify-between px-3 pb-2 pt-0 gap-2">
               <button
                 onClick={() => document.querySelector('[data-search-input]')?.focus()}
                 title="Search"
                 aria-label="Search"
-                className="w-9 h-9 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary active:scale-95 transition-all"
+                className="h-9 px-3 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center gap-2 text-theme-muted text-xs flex-1 active:scale-95 transition-all"
               >
-                <Search className="w-[18px] h-[18px]" />
+                <Search className="w-4 h-4" />
+                <span className="truncate">Search...</span>
               </button>
-              <div className="relative" ref={mobileNotificationMenuRef}>
-                <button
-                  onClick={() => setIsNotificationMenuOpen(prev => !prev)}
-                  title="Notifications"
-                  aria-label="Notifications"
-                  className="w-9 h-9 rounded-xl bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-primary active:scale-95 transition-all"
-                >
-                  <Bell className="w-[18px] h-[18px]" />
-                  {pendingPaymentsCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-theme-card">
-                      {pendingPaymentsCount}
-                    </span>
-                  )}
-                </button>
-                {isNotificationMenuOpen && (
-                    <div className="absolute top-12 right-0 w-72 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
+
+              <div className="p-1 bg-theme-surface/80 dark:bg-theme-surface/60 backdrop-blur-md rounded-2xl border border-theme-border-soft flex items-center gap-1 shrink-0 shadow-2xs">
+                <div className="relative" ref={mobileNotificationMenuRef}>
+                  <button
+                    onClick={() => setIsNotificationMenuOpen(prev => !prev)}
+                    title="Notifications"
+                    aria-label="Notifications"
+                    className="w-7 h-7 rounded-xl hover:bg-theme-surface flex items-center justify-center text-theme-primary active:scale-95 transition-all relative"
+                  >
+                    <Bell className="w-4 h-4" />
+                    {pendingPaymentsCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-rose-500 text-white text-[7px] font-bold rounded-full flex items-center justify-center border border-theme-card">
+                        {pendingPaymentsCount}
+                      </span>
+                    )}
+                  </button>
+                  {isNotificationMenuOpen && (
+                    <div className="absolute top-10 right-0 w-72 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
                       <div className="p-3 border-b border-theme-border-soft flex justify-between items-center">
                         <p className="text-xs font-bold text-theme-primary">Notifications</p>
                         {notifications.filter(n => !n.read).length > 0 && (
@@ -554,52 +563,66 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                         )}
                       </div>
                     </div>
-                )}
-              </div>
-              <AnimatedThemeToggler
-                className="rounded-full bg-theme-surface border border-theme-border-soft flex items-center text-theme-primary active:scale-95 transition-all"
-                variant="circle"
-                theme={isDarkMode ? "dark" : "light"}
-                onThemeChange={(newTheme) => {
-                  const newDarkMode = newTheme === "dark";
-                  if (newDarkMode !== isDarkMode) toggleTheme();
-                }}
-                title={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
-                aria-label={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
-              />
-              <div className="relative" ref={mobileAccountMenuRef}>
-                <button
-                  onClick={() => setIsAccountMenuOpen(prev => !prev)}
-                title="Account"
-                aria-label="Account"
-                className="w-9 h-9 rounded-xl bg-[image:var(--accent-gradient)] text-theme-button-text flex items-center justify-center active:scale-95 transition-transform overflow-hidden border border-white/10 shadow-sm"
-              >
-                {businessSettings?.logoUrl ? (
-                  <img src={businessSettings.logoUrl} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="font-black text-sm">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
-                )}
-              </button>
-              {isAccountMenuOpen && (
-                <div className="absolute top-12 right-0 w-64 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-y-auto max-h-[65vh] py-2 flex flex-col custom-scrollbar">
-                  <div className="px-3 pb-3 space-y-1 border-b border-theme-border-soft">
-                    <button onClick={() => { setCurrentTab('dashboard'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
-                      <User className="w-4 h-4 text-theme-muted" /> Profile
-                    </button>
-                    <button onClick={() => { setCurrentTab('settings'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
-                      <SettingsIcon className="w-4 h-4 text-theme-muted" /> Business Settings
-                    </button>
-                    <button onClick={() => { setCurrentTab('more'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
-                      <Briefcase className="w-4 h-4 text-theme-muted" /> Workspace Manager
-                    </button>
-                  </div>
-                  <div className="p-2">
-                    <button onClick={() => { setIsAccountMenuOpen(false); if(onLogout) onLogout(); }} className="w-full flex items-center justify-center gap-2 p-3 text-sm font-bold text-theme-danger hover:bg-theme-danger/10 rounded-xl transition-colors cursor-pointer">
-                      <LogOut className="w-4 h-4" /> Log Out
-                    </button>
-                  </div>
+                  )}
                 </div>
-              )}
+
+                <AnimatedThemeToggler
+                  className="w-7 h-7 rounded-xl hover:bg-theme-surface flex items-center justify-center text-theme-primary active:scale-95 transition-all"
+                  variant="circle"
+                  theme={isDarkMode ? "dark" : "light"}
+                  onThemeChange={(newTheme) => {
+                    const newDarkMode = newTheme === "dark";
+                    if (newDarkMode !== isDarkMode) toggleTheme();
+                  }}
+                  title={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
+                  aria-label={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
+                />
+
+                <button
+                  onClick={() => setCurrentTab('settings')}
+                  className="w-7 h-7 rounded-xl hover:bg-theme-surface flex items-center justify-center text-theme-primary active:scale-95 transition-all"
+                  title="Settings"
+                  aria-label="Settings"
+                >
+                  <SettingsIcon className="w-4 h-4" />
+                </button>
+
+                <div className="w-px h-4 bg-theme-border-soft mx-0.5" />
+
+                <div className="relative" ref={mobileAccountMenuRef}>
+                  <button
+                    onClick={() => setIsAccountMenuOpen(prev => !prev)}
+                    title="Account"
+                    aria-label="Account"
+                    className="w-7 h-7 rounded-xl bg-[image:var(--accent-gradient)] text-theme-button-text flex items-center justify-center active:scale-95 transition-transform overflow-hidden border border-white/15 shadow-2xs"
+                  >
+                    {businessSettings?.logoUrl ? (
+                      <img src={businessSettings.logoUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="font-black text-xs">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
+                    )}
+                  </button>
+                  {isAccountMenuOpen && (
+                    <div className="absolute top-10 right-0 w-64 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-y-auto max-h-[65vh] py-2 flex flex-col custom-scrollbar">
+                      <div className="px-3 pb-3 space-y-1 border-b border-theme-border-soft">
+                        <button onClick={() => { setCurrentTab('dashboard'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
+                          <User className="w-4 h-4 text-theme-muted" /> Profile
+                        </button>
+                        <button onClick={() => { setCurrentTab('settings'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
+                          <SettingsIcon className="w-4 h-4 text-theme-muted" /> Business Settings
+                        </button>
+                        <button onClick={() => { setCurrentTab('more'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
+                          <Briefcase className="w-4 h-4 text-theme-muted" /> Workspace Manager
+                        </button>
+                      </div>
+                      <div className="p-2">
+                        <button onClick={() => { setIsAccountMenuOpen(false); if(onLogout) onLogout(); }} className="w-full flex items-center justify-center gap-2 p-3 text-sm font-bold text-theme-danger hover:bg-theme-danger/10 rounded-xl transition-colors cursor-pointer">
+                          <LogOut className="w-4 h-4" /> Log Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
