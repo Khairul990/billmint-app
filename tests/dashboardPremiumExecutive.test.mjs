@@ -23,19 +23,19 @@ console.log('======================================================\n');
 const dashboardCode = fs.readFileSync(path.join(rootDir, 'src/pages/Dashboard.jsx'), 'utf8');
 
 // ----------------------------------------------------------------------------
-// TEST A: Revenue hero appears before secondary dashboard sections in JSX
+// TEST A: Business Command Center sections exist in proper hierarchy
 // ----------------------------------------------------------------------------
-const revenueHeroIndex = dashboardCode.indexOf('Revenue & Collection Trend');
-const moneySnapshotIndex = dashboardCode.indexOf('Universal Money & Collection Center');
-const receivablesIndex = dashboardCode.indexOf('Receivables & Due Intelligence');
-const recentInvoicesIndex = dashboardCode.indexOf('Recent Invoices');
+const businessMoneyIndex = dashboardCode.indexOf('BUSINESS MONEY');
+const revenueHeroIndex = dashboardCode.indexOf('Revenue & Collection');
+const receivablesIndex = dashboardCode.indexOf('Money Still to Collect') !== -1 ? dashboardCode.indexOf('Money Still to Collect') : dashboardCode.indexOf('Receivables');
+const recentInvoicesIndex = dashboardCode.indexOf('Recent Invoices') !== -1 ? dashboardCode.indexOf('Recent Invoices') : dashboardCode.indexOf('Recent Bills');
 
-assert.ok(revenueHeroIndex !== -1, 'Revenue & Collection Trend must exist in Dashboard.jsx');
-assert.ok(moneySnapshotIndex !== -1, 'Money Snapshot must exist in Dashboard.jsx');
-assert.ok(revenueHeroIndex < moneySnapshotIndex, 'Revenue & Collection Trend must appear before Money Snapshot');
-assert.ok(moneySnapshotIndex < receivablesIndex, 'Money Snapshot must appear before Receivables');
+assert.ok(revenueHeroIndex !== -1, 'Revenue & Collection section must exist in Dashboard.jsx');
+assert.ok(businessMoneyIndex !== -1, 'Business Money section must exist in Dashboard.jsx');
+assert.ok(businessMoneyIndex < revenueHeroIndex, 'Business Money must appear before Revenue Hero');
+assert.ok(revenueHeroIndex < receivablesIndex, 'Revenue Hero must appear before Receivables');
 assert.ok(receivablesIndex < recentInvoicesIndex, 'Receivables must appear before Recent Invoices');
-console.log('  ✅ PASS: TEST A: Revenue Hero is the first major financial section in visual hierarchy');
+console.log('  ✅ PASS: TEST A: Business Command Center hierarchy validated');
 
 // ----------------------------------------------------------------------------
 // TEST B & C: Invoiced & Collected values from real invoices & confirmed payments
