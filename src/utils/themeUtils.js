@@ -36,9 +36,82 @@ export const ALL_THEME_COLORS = {
   'violet-slate': { L: '#F7F8FA', D: '#2B0D1E', S: '#FFFFFF', SD: '#2B0D1E', C: '#FCFCFD', CD: '#4C1935', T: '#1E1218', TD: '#F9FAFB', M: '#6B708B', MD: '#A0A5BB', A: '#2B0D1E', AD: '#8A8FA3', B: '#D3D6E2', BD: 'rgba(138,143,163,0.15)', BF: '#4C1935', BFD: '#8A8FA3', BT: '#2B0D1E', BTD: '#A5AACC', H: '#1E1218', HD: '#4C1935', TH: '#FFFFFF', THD: '#4C1935', TB: '#F7F8FA', TBD: '#2B0D1E' }
 };
 
-export const getThemePreviewColors = (preset, forceMode = null) => {
-  const isDark = forceMode === 'dark' ? true : forceMode === 'light' ? false : document.documentElement.classList.contains('dark');
+export const getThemeTokens = (preset, forceMode = null) => {
+  const isDark = forceMode === 'dark' ? true : forceMode === 'light' ? false : (typeof document !== 'undefined' && document.documentElement?.classList?.contains('dark'));
   const c = ALL_THEME_COLORS[preset] || ALL_THEME_COLORS['obsidian-gold'];
+
+  const luxuryAccents = {
+    'brand-premium': { light: '#D4AF7A', dark: '#E6C99B', companion: '#FAF7F2' },
+    'obsidian-gold': { light: '#D4AF7A', dark: '#E6C99B', companion: '#FAF7F2' },
+    'arctic-teal': { light: '#009E7F', dark: '#34E8B0', companion: '#F4FFFD' },
+    'sapphire-noir': { light: '#2563EB', dark: '#60A5FA', companion: '#F8FAFC' },
+    'rose-platinum': { light: '#D4AF7A', dark: '#F5C6D2', companion: '#FFF7FA' },
+    'carbon-violet': { light: '#C4A0FF', dark: '#D8B4FE', companion: '#FAF7FF' },
+    'graphite-copper': { light: '#D4AF7A', dark: '#EAA880', companion: '#FFF8F2' },
+    'arctic-diamond': { light: '#93C5FD', dark: '#BFDBFE', companion: '#F3F7FC' },
+    'emerald-royal': { light: '#D4AF37', dark: '#F4D03F', companion: '#F0FDF4' },
+    'midnight-ruby': { light: '#E74C3C', dark: '#FCA5A5', companion: '#FFF1F2' },
+    'titanium-blue': { light: '#60A5FA', dark: '#93C5FD', companion: '#F8FAFC' },
+    'pink-blossom': { light: '#D4AF7A', dark: '#F9A8D4', companion: '#FFF1F2' },
+    'ocean-waves': { light: '#38BDF8', dark: '#7DD3FC', companion: '#F0F9FF' },
+    'lush-green': { light: '#4ADE80', dark: '#86EFAC', companion: '#F0FDF4' },
+    'sunset-orange': { light: '#D4AF7A', dark: '#FDBA74', companion: '#FFF7ED' },
+    'midnight-blue': { light: '#5B8FC4', dark: '#93C5FD', companion: '#F8FAFC' },
+    'royal-purple': { light: '#C084FC', dark: '#D8B4FE', companion: '#FAF5FF' },
+    'crimson-red': { light: '#EF4444', dark: '#FCA5A5', companion: '#FEF2F2' },
+    'slate-gray': { light: '#94A3B8', dark: '#CBD5E1', companion: '#F8FAFC' },
+    'warm-amber': { light: '#D4AF7A', dark: '#FCD34D', companion: '#FFFBEB' },
+    'cyber-teal': { light: '#2DD4BF', dark: '#5EEAD4', companion: '#F0FDFA' },
+    'soft-lavender': { light: '#DDD6FE', dark: '#E9D5FF', companion: '#FAF5FF' },
+    'ocean-deep': { light: '#3B82F6', dark: '#60A5FA', companion: '#EFF6FF' },
+    'forest-pine': { light: '#059669', dark: '#34D399', companion: '#ECFDF5' },
+    'cherry-blossom': { light: '#D4AF7A', dark: '#FDA4AF', companion: '#FFF1F2' },
+    'gold-coast': { light: '#F59E0B', dark: '#FCD34D', companion: '#FFFBEB' },
+    'obsidian-black': { light: '#D4AF7A', dark: '#E5E5E5', companion: '#F8FAFC' },
+    'wine-ash': { light: '#D4A3C0', dark: '#F2C7E0', companion: '#FCFAFB' },
+    'sunlit-yellow': { light: '#FFC72C', dark: '#FFD459', companion: '#FFFEFA' },
+    'turquoise': { light: '#99E1D9', dark: '#B9F5EE', companion: '#FAFEFD' },
+    'midnight-blue-premium': { light: '#4A81E8', dark: '#6E9DF0', companion: '#F8FAFC' },
+    'jet-black': { light: '#D4AF7A', dark: '#FFFFFF', companion: '#FAFAFA' },
+    'orchid': { light: '#E5BDDF', dark: '#F7D7F3', companion: '#FEFAFD' },
+    'blush-onyx': { light: '#D4AF7A', dark: '#FFC2D7', companion: '#FDFBFB' },
+    'violet-slate': { light: '#8A8FA3', dark: '#A5AACC', companion: '#FCFCFD' }
+  };
+
+  const lux = luxuryAccents[preset] || { light: '#D4AF7A', dark: '#E6C99B', companion: '#FAF7F2' };
+
+  return {
+    primary: isDark ? (c.BFD || c.AD) : (c.BF || c.A),
+    secondary: isDark ? (c.BTD || lux.dark) : (c.BT || lux.light),
+    accent: isDark ? c.AD : c.A,
+    luxuryAccent: isDark ? lux.dark : lux.light,
+    luxuryCompanion: lux.companion,
+    surface: isDark ? c.SD : c.S,
+    card: isDark ? c.CD : c.C,
+    cardHover: isDark ? '#1a2230' : '#f8f6f2',
+    background: isDark ? c.D : c.L,
+    border: isDark ? c.BD : c.B,
+    text: isDark ? c.TD : c.T,
+    mutedText: isDark ? c.MD : c.M,
+    subtleText: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)',
+    icon: isDark ? c.AD : c.A,
+    success: '#10B981',
+    warning: '#F59E0B',
+    danger: '#EF4444',
+    info: '#3B82F6',
+    focus: isDark ? c.AD : c.A,
+    glow: isDark ? 'rgba(212,175,122,0.25)' : 'rgba(200,30,92,0.15)',
+    tintBg: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+    tintSurface: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+    tintBorder: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+    tintHover: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'
+  };
+};
+
+export const getThemePreviewColors = (preset, forceMode = null) => {
+  const isDark = forceMode === 'dark' ? true : forceMode === 'light' ? false : (typeof document !== 'undefined' && document.documentElement?.classList?.contains('dark'));
+  const c = ALL_THEME_COLORS[preset] || ALL_THEME_COLORS['obsidian-gold'];
+  const tokens = getThemeTokens(preset, forceMode);
   return {
     background: isDark ? c.D : c.L,
     sidebar: isDark ? c.SD : c.S,
@@ -51,7 +124,9 @@ export const getThemePreviewColors = (preset, forceMode = null) => {
     btnTo: isDark ? c.BTD : c.BT,
     headerColor: isDark ? c.HD : c.H,
     tableHeaderBg: isDark ? c.THD : c.TH,
-    totalBg: isDark ? c.TBD : c.TB
+    totalBg: isDark ? c.TBD : c.TB,
+    luxuryAccent: tokens.luxuryAccent,
+    luxuryCompanion: tokens.luxuryCompanion
   };
 };
 

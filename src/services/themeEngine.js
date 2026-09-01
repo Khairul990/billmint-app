@@ -52,6 +52,11 @@ export const themeEngine = {
         root.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${brandColor}, ${this.shadeColor(brandColor, -20)})`);
         root.style.setProperty('--chart-primary', brandColor);
         root.style.setProperty('--sidebar-active', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
+        root.style.setProperty('--luxury-accent', this.shadeColor(brandColor, darkMode ? 20 : -10));
+        root.style.setProperty('--theme-tint-bg', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.04 : 0.02})`);
+        root.style.setProperty('--theme-tint-surface', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.06 : 0.03})`);
+        root.style.setProperty('--theme-tint-border', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.12 : 0.08})`);
+        root.style.setProperty('--theme-tint-hover', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.10 : 0.05})`);
       }
     } else {
       root.style.removeProperty('--accent');
@@ -62,6 +67,11 @@ export const themeEngine = {
       root.style.removeProperty('--accent-gradient');
       root.style.removeProperty('--chart-primary');
       root.style.removeProperty('--sidebar-active');
+      root.style.removeProperty('--luxury-accent');
+      root.style.removeProperty('--theme-tint-bg');
+      root.style.removeProperty('--theme-tint-surface');
+      root.style.removeProperty('--theme-tint-border');
+      root.style.removeProperty('--theme-tint-hover');
       root.setAttribute('data-theme', themeId);
     }
 
