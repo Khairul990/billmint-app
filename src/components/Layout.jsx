@@ -269,35 +269,35 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div id="studio-header-actions-portal" className="flex items-center"></div>
               
               {/* Executive Command Cluster */}
-              <div className="p-1 bg-white/90 dark:bg-theme-card/90 backdrop-blur-xl rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft flex items-center gap-1.5 shadow-sm">
+              <div className="h-10 px-2 py-1 bg-theme-surface/90 dark:bg-theme-card/90 rounded-2xl border border-theme-border-soft flex items-center gap-1.5 shadow-2xs shrink-0 relative">
                 {/* 1. Live Real-Time Clock Pill */}
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#faf8f5] dark:bg-theme-surface border border-[#f0ece6] dark:border-theme-border-soft/60">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                  <Clock className="w-3.5 h-3.5 text-[#c2410c] dark:text-theme-accent shrink-0" />
-                  <span className="text-xs font-black text-[#1c1917] dark:text-theme-primary font-numbers tracking-tight">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-theme-app/90 dark:bg-theme-surface border border-theme-border-soft/60 shrink-0 select-none">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <Clock className="w-3 h-3 text-theme-accent shrink-0" />
+                  <span className="text-xs font-black text-theme-primary font-numbers tracking-tight">
                     {timeNow.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                   </span>
                 </div>
 
                 {/* Separator */}
-                <div className="w-px h-5 bg-[#f0ece6] dark:bg-theme-border-soft mx-0.5" />
+                <div className="w-px h-4 bg-theme-border-soft mx-0.5 shrink-0" />
 
                 {/* 2. Notification Hub */}
-                <div className="relative" ref={notificationMenuRef}>
+                <div className="relative shrink-0" ref={notificationMenuRef}>
                   <button 
                     onClick={() => setIsNotificationMenuOpen(prev => !prev)}
                     title="Notifications"
                     aria-label="Notifications"
-                    className="w-9 h-9 rounded-xl hover:bg-[#faf5ef] dark:hover:bg-theme-surface flex items-center justify-center text-[#78716c] dark:text-theme-muted hover:text-[#c2410c] dark:hover:text-theme-accent transition-all relative cursor-pointer group active:scale-95"
+                    className="w-8 h-8 rounded-xl hover:bg-theme-surface-elevated flex items-center justify-center text-theme-secondary hover:text-theme-primary transition-all relative cursor-pointer group active:scale-95"
                   >
                     <Bell className="w-4 h-4 transition-transform group-hover:scale-110" />
                     {notifications.filter(n => !n.read).length > 0 && (
-                      <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-theme-card animate-pulse"></span>
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-theme-card animate-pulse"></span>
                     )}
                   </button>
                   
                   {isNotificationMenuOpen && (
-                    <div className="absolute top-11 right-0 w-80 bg-theme-card rounded-2xl shadow-xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
+                    <div className="absolute top-full mt-2 right-0 w-80 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
                       <div className="p-3.5 border-b border-theme-border-soft flex justify-between items-center bg-theme-surface/50">
                         <h3 className="text-xs font-bold text-theme-primary">Notifications</h3>
                         {notifications.filter(n => !n.read).length > 0 && (
@@ -332,9 +332,9 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   )}
                 </div>
 
-                {/* 2. Theme Switcher */}
+                {/* 3. Theme Switcher */}
                 <AnimatedThemeToggler
-                  className="w-9 h-9 rounded-xl hover:bg-[#faf5ef] dark:hover:bg-theme-surface flex items-center justify-center text-[#78716c] dark:text-theme-muted hover:text-[#c2410c] dark:hover:text-theme-accent transition-all cursor-pointer active:scale-95"
+                  className="w-8 h-8 rounded-xl hover:bg-theme-surface-elevated flex items-center justify-center text-theme-secondary hover:text-theme-primary transition-all cursor-pointer active:scale-95 shrink-0"
                   variant="circle"
                   theme={isDarkMode ? "dark" : "light"}
                   onThemeChange={(newTheme) => {
@@ -346,10 +346,10 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   title={`Switch to ${!isDarkMode ? 'Dark' : 'Light'} Mode`}
                 />
 
-                {/* 3. Settings Action */}
+                {/* 4. Settings Action */}
                 <button
                   onClick={() => setCurrentTab('settings')}
-                  className="w-9 h-9 rounded-xl hover:bg-[#faf5ef] dark:hover:bg-theme-surface flex items-center justify-center text-[#78716c] dark:text-theme-muted hover:text-[#c2410c] dark:hover:text-theme-accent transition-all cursor-pointer group active:scale-95"
+                  className="w-8 h-8 rounded-xl hover:bg-theme-surface-elevated flex items-center justify-center text-theme-secondary hover:text-theme-primary transition-all cursor-pointer group active:scale-95 shrink-0"
                   title="Business Settings"
                   aria-label="Settings"
                 >
@@ -357,31 +357,31 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 </button>
 
                 {/* Separator */}
-                <div className="w-px h-5 bg-[#f0ece6] dark:bg-theme-border-soft mx-0.5" />
+                <div className="w-px h-4 bg-theme-border-soft mx-0.5 shrink-0" />
 
-                {/* 4. User Avatar Menu */}
-                <div className="relative flex items-center" ref={accountMenuRef}>
+                {/* 5. User Avatar Menu */}
+                <div className="relative shrink-0 flex items-center" ref={accountMenuRef}>
                   <button
                     onClick={() => setIsAccountMenuOpen(prev => !prev)}
-                    className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#c2410c] to-[#ea580c] p-0.5 shadow-2xs hover:scale-105 active:scale-95 transition-all overflow-hidden flex items-center justify-center cursor-pointer border border-[#c2410c]/20"
+                    className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#c2410c] to-[#ea580c] p-0.5 shadow-2xs hover:scale-105 active:scale-95 transition-all overflow-hidden flex items-center justify-center cursor-pointer border border-[#c2410c]/20"
                     title="Account Settings"
                   >
                     {businessSettings?.logoUrl ? (
-                      <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover rounded-[9px] bg-white" />
+                      <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover rounded-[7px] bg-white" />
                     ) : (
                       <span className="text-white font-black text-xs">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
                     )}
                   </button>
 
-                {isAccountMenuOpen && (
-                  <div className="absolute top-12 right-0 w-64 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-y-auto max-h-[65vh] py-2 flex flex-col custom-scrollbar">
+                  {isAccountMenuOpen && (
+                    <div className="absolute top-full mt-2 right-0 w-72 bg-theme-card rounded-2xl shadow-2xl border border-theme-border-soft z-50 overflow-y-auto max-h-[75vh] py-2 flex flex-col custom-scrollbar">
                       
-                      <div className="p-5 bg-theme-surface/50 border-b border-theme-border-soft flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-theme-card shadow-sm border border-theme-border-soft flex items-center justify-center overflow-hidden shrink-0">
+                      <div className="p-4 bg-theme-surface/50 border-b border-theme-border-soft flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-theme-card shadow-sm border border-theme-border-soft flex items-center justify-center overflow-hidden shrink-0">
                           {businessSettings?.logoUrl ? (
                             <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
                           ) : (
-                            <span className="font-black text-xl text-theme-primary">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
+                            <span className="font-black text-lg text-theme-primary">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
                           )}
                         </div>
                         <div className="overflow-hidden">
@@ -394,51 +394,51 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                         </div>
                       </div>
                       
-                      <div className="p-4">
-                        <div className="bg-[image:var(--accent-gradient)] rounded-xl p-4 shadow-sm relative overflow-hidden text-white">
+                      <div className="p-3">
+                        <div className="bg-[image:var(--accent-gradient)] rounded-xl p-3.5 shadow-sm relative overflow-hidden text-white">
                           
                           <div className="relative z-10 flex items-start justify-between">
                             <div>
                               <div className="flex items-center gap-1 mb-1">
-                                <Sparkles className="w-4 h-4 text-amber-300" />
+                                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                                 <span className="text-xs font-black uppercase tracking-wider">{subscription?.status === 'premium' ? 'Premium Plan' : 'Free Plan'}</span>
                               </div>
                               <p className="text-[10px] font-bold text-white/80">
                                 Workspace: {businessSettings?.businessWorkspaces?.find(w => w.id === activeWorkspaceId)?.name || 'Default'}
                               </p>
                             </div>
-                            <span className="bg-white/20 px-2 py-1 rounded text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm border border-white/10">
+                            <span className="bg-white/20 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm border border-white/10">
                               Active
                             </span>
                           </div>
                           
-                          <div className="mt-4 flex items-center gap-2 text-[10px] font-semibold text-white/90">
+                          <div className="mt-3 flex items-center gap-1.5 text-[10px] font-semibold text-white/90">
                             <ShieldCheck className="w-3.5 h-3.5" />
                             Cloud Sync Connected
                           </div>
                         </div>
                       </div>
 
-                      <div className="px-3 pb-3 space-y-1 border-b border-theme-border-soft">
-                        <button onClick={() => { setCurrentTab('dashboard'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
+                      <div className="px-2 pb-2 space-y-0.5 border-b border-theme-border-soft">
+                        <button onClick={() => { setCurrentTab('dashboard'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
                           <User className="w-4 h-4 text-theme-muted" /> Profile
                         </button>
-                        <button onClick={() => { setCurrentTab('settings'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
+                        <button onClick={() => { setCurrentTab('settings'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
                           <SettingsIcon className="w-4 h-4 text-theme-muted" /> Business Settings
                         </button>
-                        <button onClick={() => { setCurrentTab('more'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
+                        <button onClick={() => { setCurrentTab('more'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
                           <Briefcase className="w-4 h-4 text-theme-muted" /> Workspace Manager
                         </button>
-                        <button onClick={() => { setCurrentTab('system-health'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
+                        <button onClick={() => { setCurrentTab('system-health'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
                           <Activity className="w-4 h-4 text-theme-muted" /> Storage & Health
                         </button>
-                        <button onClick={() => { setCurrentTab('help-center'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
+                        <button onClick={() => { setCurrentTab('help-center'); setIsAccountMenuOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-theme-primary hover:bg-theme-surface rounded-xl transition-colors cursor-pointer">
                           <HelpCircle className="w-4 h-4 text-theme-muted" /> Help Center
                         </button>
                       </div>
 
-                      <div className="p-4 bg-theme-surface/30">
-                        <div className="flex items-center gap-2 mb-2">
+                      <div className="p-3 bg-theme-surface/30">
+                        <div className="flex items-center gap-2 mb-1.5">
                           <span className="text-xs font-black text-theme-primary">What's New</span>
                           <span className="text-[9px] font-bold text-theme-accent bg-theme-accent-light px-2 py-0.5 rounded-full">v2.0</span>
                         </div>
@@ -448,28 +448,27 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                           <li>Live Invoice Link</li>
                           <li>Mobile Improvements</li>
                         </ul>
-                        <p className="text-[9px] text-theme-muted/70 mt-3 font-semibold">Last Updated: Just now</p>
                       </div>
 
                       <div className="p-2 border-t border-theme-border-soft">
                         {isAuthenticated ? (
                           <button
                             onClick={() => { setIsAccountMenuOpen(false); if(onLogout) onLogout(); }}
-                            className="w-full flex items-center justify-center gap-2 p-3 text-sm font-bold text-theme-danger hover:bg-theme-danger/10 rounded-xl transition-colors cursor-pointer"
+                            className="w-full flex items-center justify-center gap-2 p-2.5 text-xs font-bold text-theme-danger hover:bg-theme-danger/10 rounded-xl transition-colors cursor-pointer"
                           >
                             <LogOut className="w-4 h-4" /> Log Out
                           </button>
                         ) : (
                           <button
                             onClick={() => { setCurrentTab('login'); setIsAccountMenuOpen(false); }}
-                            className="w-full flex items-center justify-center gap-2 p-3 text-sm font-bold text-theme-accent hover:bg-theme-accent-light rounded-xl transition-colors cursor-pointer"
+                            className="w-full flex items-center justify-center gap-2 p-2.5 text-xs font-bold text-theme-accent hover:bg-theme-accent-light rounded-xl transition-colors cursor-pointer"
                           >
                             <User className="w-4 h-4" /> Log In
                           </button>
                         )}
                       </div>
                     </div>
-                )}
+                  )}
                 </div>
               </div>
             </div>
