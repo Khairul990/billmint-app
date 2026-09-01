@@ -220,6 +220,27 @@ export const AnimatedThemeToggler = ({
     }
   }, [shape, fromCenter, duration, isDark, isControlled, onThemeChange])
 
+  const isSwitch = variant === "switch";
+
+  if (!isSwitch) {
+    return (
+      <button
+        type="button"
+        ref={buttonRef}
+        onClick={toggleTheme}
+        className={`relative inline-flex items-center justify-center cursor-pointer transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-accent active:scale-95 ${className}`}
+        {...props}
+      >
+        {children}
+        <div className="relative flex items-center justify-center w-full h-full">
+          <Sun className={`w-4 h-4 text-amber-500 transition-all duration-500 transform ${isDark ? 'scale-0 rotate-90 opacity-0 absolute' : 'scale-100 rotate-0 opacity-100'}`} />
+          <Moon className={`w-4 h-4 text-indigo-400 dark:text-theme-accent transition-all duration-500 transform ${isDark ? 'scale-100 rotate-0 opacity-100' : 'scale-0 -rotate-90 opacity-0 absolute'}`} />
+        </div>
+        <span className="sr-only">Toggle theme</span>
+      </button>
+    )
+  }
+
   return (
     <button
       type="button"

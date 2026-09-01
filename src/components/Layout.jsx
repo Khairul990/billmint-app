@@ -262,23 +262,23 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div id="studio-header-actions-portal" className="flex items-center"></div>
               
               {/* Executive Command Cluster */}
-              <div className="p-1 bg-theme-surface/80 dark:bg-theme-surface/60 backdrop-blur-md rounded-2xl border border-theme-border-soft flex items-center gap-1 shadow-2xs">
+              <div className="p-1 bg-white/90 dark:bg-theme-card/90 backdrop-blur-xl rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft flex items-center gap-1 shadow-sm">
                 {/* 1. Notification Hub */}
                 <div className="relative" ref={notificationMenuRef}>
                   <button 
                     onClick={() => setIsNotificationMenuOpen(prev => !prev)}
                     title="Notifications"
                     aria-label="Notifications"
-                    className="w-8 h-8 rounded-xl hover:bg-theme-surface-elevated flex items-center justify-center text-theme-secondary hover:text-theme-primary transition-all relative cursor-pointer"
+                    className="w-9 h-9 rounded-xl hover:bg-[#faf5ef] dark:hover:bg-theme-surface flex items-center justify-center text-[#78716c] dark:text-theme-muted hover:text-[#c2410c] dark:hover:text-theme-accent transition-all relative cursor-pointer group active:scale-95"
                   >
-                    <Bell className="w-4 h-4" />
+                    <Bell className="w-4 h-4 transition-transform group-hover:scale-110" />
                     {notifications.filter(n => !n.read).length > 0 && (
-                      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-theme-surface animate-pulse"></span>
+                      <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-theme-card animate-pulse"></span>
                     )}
                   </button>
                   
                   {isNotificationMenuOpen && (
-                    <div className="absolute top-10 right-0 w-80 bg-theme-card rounded-2xl shadow-xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
+                    <div className="absolute top-11 right-0 w-80 bg-theme-card rounded-2xl shadow-xl border border-theme-border-soft z-50 overflow-hidden flex flex-col">
                       <div className="p-3.5 border-b border-theme-border-soft flex justify-between items-center bg-theme-surface/50">
                         <h3 className="text-xs font-bold text-theme-primary">Notifications</h3>
                         {notifications.filter(n => !n.read).length > 0 && (
@@ -315,7 +315,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
                 {/* 2. Theme Switcher */}
                 <AnimatedThemeToggler
-                  className="w-8 h-8 rounded-xl hover:bg-theme-surface-elevated flex items-center justify-center text-theme-secondary hover:text-theme-primary transition-all cursor-pointer"
+                  className="w-9 h-9 rounded-xl hover:bg-[#faf5ef] dark:hover:bg-theme-surface flex items-center justify-center text-[#78716c] dark:text-theme-muted hover:text-[#c2410c] dark:hover:text-theme-accent transition-all cursor-pointer active:scale-95"
                   variant="circle"
                   theme={isDarkMode ? "dark" : "light"}
                   onThemeChange={(newTheme) => {
@@ -330,27 +330,27 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 {/* 3. Settings Action */}
                 <button
                   onClick={() => setCurrentTab('settings')}
-                  className="w-8 h-8 rounded-xl hover:bg-theme-surface-elevated flex items-center justify-center text-theme-secondary hover:text-theme-primary transition-all cursor-pointer"
+                  className="w-9 h-9 rounded-xl hover:bg-[#faf5ef] dark:hover:bg-theme-surface flex items-center justify-center text-[#78716c] dark:text-theme-muted hover:text-[#c2410c] dark:hover:text-theme-accent transition-all cursor-pointer group active:scale-95"
                   title="Business Settings"
                   aria-label="Settings"
                 >
-                  <SettingsIcon className="w-4 h-4" />
+                  <SettingsIcon className="w-4 h-4 transition-transform group-hover:rotate-45 duration-300" />
                 </button>
 
                 {/* Separator */}
-                <div className="w-px h-5 bg-theme-border-soft mx-0.5" />
+                <div className="w-px h-5 bg-[#f0ece6] dark:bg-theme-border-soft mx-0.5" />
 
                 {/* 4. User Avatar Menu */}
                 <div className="relative flex items-center" ref={accountMenuRef}>
                   <button
                     onClick={() => setIsAccountMenuOpen(prev => !prev)}
-                    className="w-8 h-8 rounded-xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center font-black text-xs shadow-2xs hover:opacity-90 active:scale-95 transition-all overflow-hidden border border-white/15 cursor-pointer"
+                    className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#c2410c] to-[#ea580c] p-0.5 shadow-2xs hover:scale-105 active:scale-95 transition-all overflow-hidden flex items-center justify-center cursor-pointer border border-[#c2410c]/20"
                     title="Account Settings"
                   >
                     {businessSettings?.logoUrl ? (
-                      <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                      <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover rounded-[9px] bg-white" />
                     ) : (
-                      <span>{businessSettings?.businessName?.charAt(0) || 'B'}</span>
+                      <span className="text-white font-black text-xs">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
                     )}
                   </button>
 
@@ -518,13 +518,13 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 <span className="truncate">Search...</span>
               </button>
 
-              <div className="p-1 bg-theme-surface/80 dark:bg-theme-surface/60 backdrop-blur-md rounded-2xl border border-theme-border-soft flex items-center gap-1 shrink-0 shadow-2xs">
+              <div className="p-1 bg-white/90 dark:bg-theme-card/90 backdrop-blur-xl rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft flex items-center gap-1 shrink-0 shadow-sm">
                 <div className="relative" ref={mobileNotificationMenuRef}>
                   <button
                     onClick={() => setIsNotificationMenuOpen(prev => !prev)}
                     title="Notifications"
                     aria-label="Notifications"
-                    className="w-7 h-7 rounded-xl hover:bg-theme-surface flex items-center justify-center text-theme-primary active:scale-95 transition-all relative"
+                    className="w-8 h-8 rounded-xl hover:bg-[#faf5ef] dark:hover:bg-theme-surface flex items-center justify-center text-[#78716c] dark:text-theme-muted active:scale-95 transition-all relative"
                   >
                     <Bell className="w-4 h-4" />
                     {pendingPaymentsCount > 0 && (
@@ -567,7 +567,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 </div>
 
                 <AnimatedThemeToggler
-                  className="w-7 h-7 rounded-xl hover:bg-theme-surface flex items-center justify-center text-theme-primary active:scale-95 transition-all"
+                  className="w-8 h-8 rounded-xl hover:bg-[#faf5ef] dark:hover:bg-theme-surface flex items-center justify-center text-[#78716c] dark:text-theme-muted active:scale-95 transition-all"
                   variant="circle"
                   theme={isDarkMode ? "dark" : "light"}
                   onThemeChange={(newTheme) => {
@@ -580,26 +580,26 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
 
                 <button
                   onClick={() => setCurrentTab('settings')}
-                  className="w-7 h-7 rounded-xl hover:bg-theme-surface flex items-center justify-center text-theme-primary active:scale-95 transition-all"
+                  className="w-8 h-8 rounded-xl hover:bg-[#faf5ef] dark:hover:bg-theme-surface flex items-center justify-center text-[#78716c] dark:text-theme-muted active:scale-95 transition-all"
                   title="Settings"
                   aria-label="Settings"
                 >
                   <SettingsIcon className="w-4 h-4" />
                 </button>
 
-                <div className="w-px h-4 bg-theme-border-soft mx-0.5" />
+                <div className="w-px h-4 bg-[#f0ece6] dark:bg-theme-border-soft mx-0.5" />
 
                 <div className="relative" ref={mobileAccountMenuRef}>
                   <button
                     onClick={() => setIsAccountMenuOpen(prev => !prev)}
                     title="Account"
                     aria-label="Account"
-                    className="w-7 h-7 rounded-xl bg-[image:var(--accent-gradient)] text-theme-button-text flex items-center justify-center active:scale-95 transition-transform overflow-hidden border border-white/15 shadow-2xs"
+                    className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#c2410c] to-[#ea580c] p-0.5 shadow-2xs hover:scale-105 active:scale-95 transition-all overflow-hidden flex items-center justify-center cursor-pointer border border-[#c2410c]/20"
                   >
                     {businessSettings?.logoUrl ? (
-                      <img src={businessSettings.logoUrl} alt="" className="w-full h-full object-cover" />
+                      <img src={businessSettings.logoUrl} alt="" className="w-full h-full object-cover rounded-[8px] bg-white" />
                     ) : (
-                      <span className="font-black text-xs">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
+                      <span className="font-black text-xs text-white">{businessSettings?.businessName?.charAt(0) || 'B'}</span>
                     )}
                   </button>
                   {isAccountMenuOpen && (
