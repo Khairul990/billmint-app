@@ -952,28 +952,29 @@ const Dashboard = ({
               {/* ========================================================================= */}
               {/* 1. EXECUTIVE HEADER & REAL-TIME BUSINESS HEALTH COCKPIT */}
               {/* ========================================================================= */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#f0ece6] dark:border-theme-border-soft/60">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#faf5ef] dark:bg-theme-surface text-[#c2410c] dark:text-theme-accent border border-[#f0ece6] dark:border-theme-border-soft">
+              <div className="p-4 sm:p-5 lg:p-6 rounded-3xl bg-white dark:bg-theme-card border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#faf5ef] dark:bg-theme-surface text-[#c2410c] dark:text-theme-accent border border-[#f0ece6] dark:border-theme-border-soft flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#c2410c] dark:bg-theme-accent" />
                       {workspaceName}
                     </span>
                     <span className="text-2xs text-[#a8a29e] dark:text-theme-muted font-bold">
                       Executive Business Command Center
                     </span>
                   </div>
-                  <h1 className="text-xl sm:text-2xl font-black text-[#1c1917] dark:text-theme-primary tracking-tight flex items-center gap-2 mt-1">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#1c1917] dark:text-theme-primary tracking-tight flex items-center gap-2 mt-1.5 truncate">
                     <span>{greeting.text},</span>
-                    <span className="text-[#c2410c] dark:text-theme-accent">{ownerName}</span>
+                    <span className="text-[#c2410c] dark:text-theme-accent truncate">{ownerName}</span>
                     <span>👋</span>
                   </h1>
-                  <p className="text-xs text-[#78716c] dark:text-theme-muted font-medium mt-0.5">
+                  <p className="text-xs sm:text-sm text-[#78716c] dark:text-theme-muted font-medium mt-0.5">
                     Real-time revenue intelligence, collection flow, and financial command.
                   </p>
                 </div>
 
                 {/* Right Header Controls */}
-                <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap">
+                <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap shrink-0">
                   {/* Business Health Indicator */}
                   <div className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-bold shadow-2xs ${
                     metrics.businessHealth.color === 'emerald'
@@ -989,7 +990,7 @@ const Dashboard = ({
                   </div>
 
                   {/* Clock Pill */}
-                  <div className="flex items-center gap-2.5 bg-white dark:bg-theme-card px-4 py-2 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs">
+                  <div className="flex items-center gap-2.5 bg-[#faf8f5] dark:bg-theme-surface px-4 py-2 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-2xs">
                     <Clock className="w-3.5 h-3.5 text-[#c2410c] dark:text-theme-accent" />
                     <div className="leading-tight">
                       <span className="text-xs font-black text-[#1c1917] dark:text-theme-primary font-numbers">
@@ -1001,7 +1002,7 @@ const Dashboard = ({
                   {/* Refresh Button */}
                   <button
                     onClick={handleRefresh}
-                    className="p-2 rounded-2xl bg-white dark:bg-theme-card hover:bg-[#faf5ef] dark:hover:bg-theme-surface border border-[#f0ece6] dark:border-theme-border-soft text-[#78716c] hover:text-[#c2410c] transition-colors shadow-xs cursor-pointer"
+                    className="p-2.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface hover:bg-[#f5f0ea] dark:hover:bg-theme-surface/80 border border-[#f0ece6] dark:border-theme-border-soft text-[#78716c] hover:text-[#c2410c] transition-colors shadow-2xs cursor-pointer"
                     title="Sync Latest Data"
                   >
                     <RefreshCw className="w-4 h-4" />
