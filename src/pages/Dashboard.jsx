@@ -11,12 +11,17 @@ import {
   Calendar, PieChart as PieIcon, ArrowUpDown, Sparkles, CircleDot,
   CheckCircle2, DollarSign, ArrowUp, ArrowDown, HelpCircle,
   ShoppingBag, Shield, Check, Flame, Award, Lightbulb, Zap, UserPlus,
-  Heart, Coins, Smartphone, Moon, Target, X, Send, Filter, CheckCheck
+  Heart, Coins, Smartphone, Moon, Target, X, Send, Filter, CheckCheck,
+  ExternalLink, Edit3, Banknote, Landmark, Percent, PieChart, ShieldQuestion,
+  UserCheck, UserX, UserMinus, ArrowLeftRight
 } from 'lucide-react';
 import { paymentEngine } from '../services/paymentEngine';
 import { bankEngine } from '../services/bankEngine';
 import { toast } from 'react-hot-toast';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar, Cell } from 'recharts';
+import { 
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, 
+  CartesianGrid, BarChart, Bar, Cell, Pie, Cell as PieCell
+} from 'recharts';
 import { formatCurrency } from '../utils/invoiceUtils';
 import PullToRefresh from '../components/PullToRefresh';
 import { invoiceEngine } from '../services/invoiceEngine';
@@ -150,6 +155,9 @@ const Dashboard = ({
   const [timeNow, setTimeNow] = useState(new Date());
   const [, setTriggerSync] = useState(0);
 
+  // Sub-sections active filter or view toggle
+  const [activeTabSection, setActiveTabSection] = useState('all'); // 'all' | 'financials' | 'receivables' | 'customers' | 'expenses'
+
   // Live Bank Ledger & Personal Financial Buckets
   const [liveBankLedger, setLiveBankLedger] = useState([]);
   const [showDreamAddModal, setShowDreamAddModal] = useState(false);
@@ -281,7 +289,7 @@ const Dashboard = ({
       invoices: scopedInvoices,
       bankLedger: liveBankLedger,
       workspaceId: activeWsId
-    }).slice(0, 7);
+    }).slice(0, 8);
   }, [scopedInvoices, liveBankLedger, activeWsId]);
 
   const handleExecuteDreamTransfer = async () => {
@@ -702,6 +710,7 @@ const Dashboard = ({
     const fullyPaidCount = all.filter(c => c.totalDue <= 0 && c.totalBilled > 0).length;
     const withDueCount = topDebtors.length;
     const avgInvoiceValue = scopedInvoices.length > 0 ? roundTo2(metrics.totalRevenue / scopedInvoices.length) : 0;
+    const avgPaymentValue = metrics.totalPaymentsCount > 0 ? roundTo2(metrics.totalCollected / metrics.totalPaymentsCount) : 0;
 
     return {
       topDebtors,
@@ -710,9 +719,10 @@ const Dashboard = ({
       activeCustomersCount: all.length,
       withDueCount,
       fullyPaidCount,
-      avgInvoiceValue
+      avgInvoiceValue,
+      avgPaymentValue
     };
-  }, [scopedInvoices, scopedCustomers, metrics.totalRevenue]);
+  }, [scopedInvoices, scopedCustomers, metrics.totalRevenue, metrics.totalPaymentsCount, metrics.totalCollected]);
 
   // ==========================================================================
   // CANONICAL CHART DATA GENERATION (Revenue & Collected Trend)
@@ -826,7 +836,7 @@ const Dashboard = ({
                       {workspaceName}
                     </span>
                     <span className="text-2xs text-[#a8a29e] dark:text-theme-muted font-bold">
-                      Central Command
+                      Central Business Command Center
                     </span>
                   </div>
                   <h1 className="text-xl sm:text-2xl font-black text-[#1c1917] dark:text-theme-primary tracking-tight flex items-center gap-2 mt-1">
@@ -925,7 +935,7 @@ const Dashboard = ({
                   <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs">
                     {metrics.revenueGrowthPercent !== null ? (
                       <span className={`font-bold ${metrics.revenueGrowthPercent >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        {metrics.revenueGrowthPercent >= 0 ? `+${metrics.revenueGrowthPercent}%` : `${metrics.revenueGrowthPercent}%`}
+                        {metrics.revenueGrowthPercent >= 0 ? `+${metrics.revenueGrowthPercent}%` : `${metrics.revenueGrowthPercent}%`} vs last mo
                       </span>
                     ) : (
                       <span className="text-theme-muted">This Month</span>
@@ -1447,7 +1457,7 @@ const Dashboard = ({
                     onClick={() => setCurrentTab('due-ledger')}
                     className="text-xs font-bold text-[#c2410c] hover:underline flex items-center gap-1"
                   >
-                    <span>View Due Ledger</span>
+                    <span>View All Due</span>
                     <span>→</span>
                   </button>
                 </div>
