@@ -989,23 +989,14 @@ const Dashboard = ({
                     <span>Business Health: {metrics.businessHealth.label}</span>
                   </div>
 
-                  {/* Clock Pill */}
-                  <div className="flex items-center gap-2.5 bg-[#faf8f5] dark:bg-theme-surface px-4 py-2 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-2xs">
-                    <Clock className="w-3.5 h-3.5 text-[#c2410c] dark:text-theme-accent" />
-                    <div className="leading-tight">
-                      <span className="text-xs font-black text-[#1c1917] dark:text-theme-primary font-numbers">
-                        {timeNow.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
-                      </span>
-                    </div>
-                  </div>
-
                   {/* Refresh Button */}
                   <button
                     onClick={handleRefresh}
-                    className="p-2.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface hover:bg-[#f5f0ea] dark:hover:bg-theme-surface/80 border border-[#f0ece6] dark:border-theme-border-soft text-[#78716c] hover:text-[#c2410c] transition-colors shadow-2xs cursor-pointer"
+                    className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface hover:bg-[#f5f0ea] dark:hover:bg-theme-surface/80 border border-[#f0ece6] dark:border-theme-border-soft text-[#78716c] hover:text-[#c2410c] text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95 group"
                     title="Sync Latest Data"
                   >
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCw className="w-3.5 h-3.5 transition-transform group-hover:rotate-180 duration-500" />
+                    <span>Sync</span>
                   </button>
                 </div>
               </div>

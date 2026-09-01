@@ -4,6 +4,7 @@ import PremiumClock from './PremiumClock';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import { 
+  Clock,
   Search, 
   Bell, 
   Settings as SettingsIcon, 
@@ -45,6 +46,7 @@ import { useTheme } from '../context/ThemeContext';
 
 const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncSource, syncStatus }) => {
   const { isDarkMode } = useTheme();
+  const [timeNow, setTimeNow] = useState(new Date());
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
@@ -55,6 +57,11 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   const accountMenuRef = React.useRef(null);
   const mobileNotificationMenuRef = React.useRef(null);
   const mobileAccountMenuRef = React.useRef(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => setTimeNow(new Date()), 30_000);
+    return () => clearInterval(timer);
+  }, []);
 
   useOnClickOutside(notificationMenuRef, () => setIsNotificationMenuOpen(false));
   useOnClickOutside(accountMenuRef, () => setIsAccountMenuOpen(false));
@@ -262,8 +269,20 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div id="studio-header-actions-portal" className="flex items-center"></div>
               
               {/* Executive Command Cluster */}
-              <div className="p-1 bg-white/90 dark:bg-theme-card/90 backdrop-blur-xl rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft flex items-center gap-1 shadow-sm">
-                {/* 1. Notification Hub */}
+              <div className="p-1 bg-white/90 dark:bg-theme-card/90 backdrop-blur-xl rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft flex items-center gap-1.5 shadow-sm">
+                {/* 1. Live Real-Time Clock Pill */}
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#faf8f5] dark:bg-theme-surface border border-[#f0ece6] dark:border-theme-border-soft/60">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <Clock className="w-3.5 h-3.5 text-[#c2410c] dark:text-theme-accent shrink-0" />
+                  <span className="text-xs font-black text-[#1c1917] dark:text-theme-primary font-numbers tracking-tight">
+                    {timeNow.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                  </span>
+                </div>
+
+                {/* Separator */}
+                <div className="w-px h-5 bg-[#f0ece6] dark:bg-theme-border-soft mx-0.5" />
+
+                {/* 2. Notification Hub */}
                 <div className="relative" ref={notificationMenuRef}>
                   <button 
                     onClick={() => setIsNotificationMenuOpen(prev => !prev)}
@@ -519,6 +538,14 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               </button>
 
               <div className="p-1 bg-white/90 dark:bg-theme-card/90 backdrop-blur-xl rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft flex items-center gap-1 shrink-0 shadow-sm">
+                {/* Mobile Clock Badge */}
+                <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-[#faf8f5] dark:bg-theme-surface text-[10px] font-black text-[#1c1917] dark:text-theme-primary font-numbers">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>{timeNow.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
+                </div>
+
+                <div className="w-px h-4 bg-[#f0ece6] dark:bg-theme-border-soft mx-0.5" />
+
                 <div className="relative" ref={mobileNotificationMenuRef}>
                   <button
                     onClick={() => setIsNotificationMenuOpen(prev => !prev)}
