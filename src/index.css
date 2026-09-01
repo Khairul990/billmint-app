@@ -2351,3 +2351,50 @@ button:active {
     scroll-behavior: auto !important;
   }
 }
+
+/* =========================================================================
+   PHASE 20: SOFT GLASS LUXURY CARD SYSTEM
+   ========================================================================= */
+.luxury-glass-card {
+  background: var(--surface, #ffffff);
+  background: color-mix(in srgb, var(--surface, #ffffff) 93%, var(--theme-tint-surface, transparent) 7%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-soft, rgba(0,0,0,0.08));
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 1px 3px 0 rgba(0, 0, 0, 0.02), inset 0 1px 1px 0 rgba(255, 255, 255, 0.85);
+  transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease, transform 200ms ease;
+}
+.dark .luxury-glass-card {
+  background: var(--card-bg, #1a1a1a);
+  background: color-mix(in srgb, var(--card-bg, #1a1a1a) 90%, var(--theme-tint-surface, transparent) 10%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-soft, rgba(255,255,255,0.08));
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+}
+
+.luxury-glass-card:hover {
+  border-color: var(--theme-tint-border, var(--border-strong, rgba(0,0,0,0.14)));
+  box-shadow: 0 8px 28px -4px rgba(0, 0, 0, 0.05), 0 2px 6px 0 rgba(0, 0, 0, 0.025), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
+}
+.dark .luxury-glass-card:hover {
+  border-color: var(--theme-tint-border, var(--border-strong, rgba(255,255,255,0.15)));
+  box-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+.luxury-glass-subcard {
+  background: var(--theme-tint-bg, rgba(0,0,0,0.02));
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--border-soft, rgba(0,0,0,0.06));
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.6);
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+.dark .luxury-glass-subcard {
+  background: var(--theme-tint-bg, rgba(255,255,255,0.03));
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--border-soft, rgba(255,255,255,0.06));
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+}
+
