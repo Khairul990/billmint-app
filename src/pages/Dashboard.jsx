@@ -119,18 +119,21 @@ const getLocalCalendarDate = (dateInput = new Date()) => {
 const PremiumChartTooltip = ({ active, payload, label, currencySymbol }) => {
   if (!active || !payload || !payload.length) return null;
 
-  const invoiced = payload.find(p => p.dataKey === 'invoiced')?.value || 0;
-  const collected = payload.find(p => p.dataKey === 'collected')?.value || 0;
-  const outstanding = Math.max(0, invoiced - collected);
-  const rate = invoiced > 0 ? Math.round((collected / invoiced) * 100) : (collected > 0 ? 100 : 0);
+  const data = payload[0]?.payload || {};
+  const invoiced = data.invoiced || 0;
+  const collected = data.collected || 0;
+  const prevDueCollected = data.prevDueCollected || 0;
+  const currentBillCollected = data.currentBillCollected !== undefined ? data.currentBillCollected : Math.max(0, collected - prevDueCollected);
+  const outstanding = Math.max(0, invoiced - currentBillCollected);
+  const rate = invoiced > 0 ? Math.round((currentBillCollected / invoiced) * 100) : (collected > 0 ? 100 : 0);
 
   return (
-    <div className="bg-white dark:bg-theme-card p-3 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xl space-y-2 text-xs min-w-[170px]">
+    <div className="bg-white dark:bg-theme-card p-3.5 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xl space-y-2 text-xs min-w-[200px]">
       <div className="font-bold text-[#1c1917] dark:text-theme-primary pb-1.5 border-b border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between">
         <span>{label}</span>
-        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{rate}% Collected</span>
+        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{rate}% Realized</span>
       </div>
-      <div className="space-y-1 text-2xs">
+      <div className="space-y-1.5 text-2xs">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1 text-[#c2410c] dark:text-theme-accent font-semibold">
             <span className="w-2 h-2 rounded-full bg-[#c2410c]" /> Invoiced:
@@ -141,14 +144,24 @@ const PremiumChartTooltip = ({ active, payload, label, currencySymbol }) => {
         </div>
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" /> Collected:
+            <span className="w-2 h-2 rounded-full bg-emerald-500" /> Total Collected:
           </span>
           <span className="font-black text-emerald-600 dark:text-emerald-400 font-numbers">
             {formatCurrency(collected, currencySymbol)}
           </span>
         </div>
+        {prevDueCollected > 0 && (
+          <div className="flex items-center justify-between pl-3 text-amber-600 dark:text-amber-400 text-[10px]">
+            <span>↳ Previous Due:</span>
+            <span className="font-bold font-numbers">{formatCurrency(prevDueCollected, currencySymbol)}</span>
+          </div>
+        )}
+        <div className="flex items-center justify-between pl-3 text-emerald-700 dark:text-emerald-300 text-[10px]">
+          <span>↳ Current Bills:</span>
+          <span className="font-bold font-numbers">{formatCurrency(currentBillCollected, currencySymbol)}</span>
+        </div>
         <div className="flex items-center justify-between pt-1 border-t border-[#f5f2ed] dark:border-theme-border-soft/40">
-          <span className="text-[#ea580c] dark:text-amber-500 font-semibold">Outstanding:</span>
+          <span className="text-[#ea580c] dark:text-amber-500 font-semibold">Period Outstanding:</span>
           <span className="font-black text-[#ea580c] dark:text-amber-500 font-numbers">
             {formatCurrency(outstanding, currencySymbol)}
           </span>
@@ -780,7 +793,7 @@ const Dashboard = ({
         const d = new Date(currentYear, m, 1);
         const dateKey = `${currentYear}-${String(m + 1).padStart(2, '0')}`;
         const label = d.toLocaleDateString('en-US', { month: 'short' });
-        days.push({ dateKey, label, invoiced: 0, collected: 0, isMonthKey: true });
+        days.push({ dateKey, label, invoiced: 0, collected: 0, prevDueCollected: 0, currentBillCollected: 0, isMonthKey: true });
       }
     } else {
       let countDays = 7;
@@ -798,7 +811,7 @@ const Dashboard = ({
           const d = new Date(prevYear, prevMonth, i);
           const dateKey = getLocalCalendarDate(d);
           const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-          days.push({ dateKey, label, invoiced: 0, collected: 0 });
+          days.push({ dateKey, label, invoiced: 0, collected: 0, prevDueCollected: 0, currentBillCollected: 0 });
         }
       } else {
         for (let i = countDays - 1; i >= 0; i--) {
@@ -806,7 +819,7 @@ const Dashboard = ({
           d.setDate(d.getDate() - i);
           const dateKey = getLocalCalendarDate(d);
           const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-          days.push({ dateKey, label, invoiced: 0, collected: 0 });
+          days.push({ dateKey, label, invoiced: 0, collected: 0, prevDueCollected: 0, currentBillCollected: 0 });
         }
       }
     }
@@ -816,6 +829,7 @@ const Dashboard = ({
     scopedInvoices.forEach(inv => {
       const invDate = getLocalCalendarDate(inv.date) || getLocalCalendarDate(inv.createdAt);
       const val = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
+      const prevDue = roundTo2(parseFloat(inv.previousDue || inv.prevDue) || 0);
 
       const targetKey = chartTimeframe === 'this_year' ? invDate?.substring(0, 7) : invDate;
 
@@ -823,20 +837,38 @@ const Dashboard = ({
         dayMap.get(targetKey).invoiced = roundTo2(dayMap.get(targetKey).invoiced + val);
       }
 
+      let runningOldDue = prevDue;
+
       // Exact payments on their real payment dates
-      if (Array.isArray(inv.paymentHistory)) {
+      if (Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0) {
         inv.paymentHistory.forEach(p => {
           const pAmt = roundTo2(parseFloat(p.amount) || 0);
           const pDate = getLocalCalendarDate(p.date) || invDate;
           const pTargetKey = chartTimeframe === 'this_year' ? pDate?.substring(0, 7) : pDate;
+          
           if (pAmt > 0 && pTargetKey && dayMap.has(pTargetKey)) {
-            dayMap.get(pTargetKey).collected = roundTo2(dayMap.get(pTargetKey).collected + pAmt);
+            const entry = dayMap.get(pTargetKey);
+            entry.collected = roundTo2(entry.collected + pAmt);
+
+            const toOldDue = roundTo2(Math.min(pAmt, runningOldDue));
+            runningOldDue = roundTo2(Math.max(0, runningOldDue - toOldDue));
+            const toCurrent = roundTo2(Math.max(0, pAmt - toOldDue));
+
+            entry.prevDueCollected = roundTo2((entry.prevDueCollected || 0) + toOldDue);
+            entry.currentBillCollected = roundTo2((entry.currentBillCollected || 0) + toCurrent);
           }
         });
       } else {
         const paid = getInvoicePaidTotal(inv);
         if (paid > 0 && targetKey && dayMap.has(targetKey)) {
-          dayMap.get(targetKey).collected = roundTo2(dayMap.get(targetKey).collected + paid);
+          const entry = dayMap.get(targetKey);
+          entry.collected = roundTo2(entry.collected + paid);
+
+          const toOldDue = roundTo2(Math.min(paid, runningOldDue));
+          const toCurrent = roundTo2(Math.max(0, paid - toOldDue));
+
+          entry.prevDueCollected = roundTo2((entry.prevDueCollected || 0) + toOldDue);
+          entry.currentBillCollected = roundTo2((entry.currentBillCollected || 0) + toCurrent);
         }
       }
     });
@@ -848,20 +880,33 @@ const Dashboard = ({
   const heroKPIs = useMemo(() => {
     let invoiced = 0;
     let collected = 0;
+    let prevDueCollected = 0;
+    let currentBillCollected = 0;
+
     chartSeries.forEach(d => {
       invoiced += d.invoiced || 0;
       collected += d.collected || 0;
+      prevDueCollected += d.prevDueCollected || 0;
+      currentBillCollected += d.currentBillCollected || 0;
     });
+
     invoiced = roundTo2(invoiced);
     collected = roundTo2(collected);
-    const outstanding = Math.max(0, roundTo2(invoiced - collected));
-    const collectionRate = invoiced > 0 ? Math.round((collected / invoiced) * 10000) / 100 : (metrics.collectionRate || 0);
+    prevDueCollected = roundTo2(prevDueCollected);
+    currentBillCollected = roundTo2(currentBillCollected);
+
+    const outstanding = Math.max(0, roundTo2(invoiced - currentBillCollected));
+    const overallCollectionRate = invoiced > 0 ? Math.round((collected / invoiced) * 10000) / 100 : (metrics.collectionRate || 0);
+    const currentRealizationRate = invoiced > 0 ? Math.min(100, Math.round((currentBillCollected / invoiced) * 10000) / 100) : (metrics.collectionRate || 0);
 
     return {
       invoiced,
       collected,
+      prevDueCollected,
+      currentBillCollected,
       outstanding,
-      collectionRate
+      collectionRate: overallCollectionRate,
+      currentRealizationRate
     };
   }, [chartSeries, metrics.collectionRate]);
 
@@ -1025,9 +1070,9 @@ const Dashboard = ({
                         <AnimatedNumber value={formatCurrency(heroKPIs.collected, currencySymbol)} />
                       </p>
                     </div>
-                    <div className="mt-2 pt-1.5 border-t border-emerald-500/20 flex items-center justify-between text-2xs text-emerald-700 dark:text-emerald-300 font-medium">
-                      <span>Confirmed Funds</span>
-                      <span className="font-bold text-emerald-600">Money In</span>
+                    <div className="mt-2 pt-1.5 border-t border-emerald-500/20 flex items-center justify-between text-[10px] text-emerald-700 dark:text-emerald-300 font-medium truncate">
+                      <span>{heroKPIs.prevDueCollected > 0 ? `${formatCurrency(heroKPIs.prevDueCollected, currencySymbol)} Old • ` : ''}{formatCurrency(heroKPIs.currentBillCollected, currencySymbol)} Curr</span>
+                      <span className="font-bold text-emerald-600 shrink-0">Money In</span>
                     </div>
                   </div>
 
@@ -1041,9 +1086,9 @@ const Dashboard = ({
                         <AnimatedNumber value={formatCurrency(heroKPIs.outstanding, currencySymbol)} />
                       </p>
                     </div>
-                    <div className="mt-2 pt-1.5 border-t border-[#f0ece6] dark:border-theme-border-soft/40 flex items-center justify-between text-2xs text-theme-muted font-medium">
-                      <span>Pending Collection</span>
-                      <span className="font-bold text-[#ea580c]">Receivable</span>
+                    <div className="mt-2 pt-1.5 border-t border-[#f0ece6] dark:border-theme-border-soft/40 flex items-center justify-between text-[10px] text-theme-muted font-medium truncate">
+                      <span>{metrics.previousDueTotal > 0 ? `${formatCurrency(metrics.previousDueTotal, currencySymbol)} Old • ` : ''}{formatCurrency(metrics.currentDueTotal, currencySymbol)} Curr</span>
+                      <span className="font-bold text-[#ea580c] shrink-0">Due</span>
                     </div>
                   </div>
 
@@ -1057,8 +1102,8 @@ const Dashboard = ({
                         <AnimatedNumber value={`${heroKPIs.collectionRate}%`} />
                       </p>
                     </div>
-                    <div className="mt-2 pt-1.5 border-t border-indigo-500/20 flex items-center justify-between text-2xs text-indigo-700 dark:text-indigo-300 font-medium">
-                      <span>Efficiency Ratio</span>
+                    <div className="mt-2 pt-1.5 border-t border-indigo-500/20 flex items-center justify-between text-[10px] text-indigo-700 dark:text-indigo-300 font-medium">
+                      <span>{heroKPIs.currentRealizationRate}% Realized</span>
                       <span className="font-bold text-indigo-600">{heroKPIs.collectionRate >= 70 ? 'High' : 'Active'}</span>
                     </div>
                   </div>
