@@ -1084,7 +1084,7 @@ class PaymentEngine {
         return;
       }
 
-      const amt = roundTo2(b.amountRupees !== undefined ? b.amountRupees : (b.amountPaise ? b.amountPaise / 100 : 0));
+      const amt = roundTo2(b.amountRupees !== undefined ? b.amountRupees : (b.amountPaise ? b.amountPaise / 100 : (b.amount !== undefined ? b.amount : 0)));
       if (amt <= 0) return;
 
       const catLower = (b.category || '').toLowerCase();
@@ -1327,7 +1327,7 @@ class PaymentEngine {
         return;
       }
 
-      const amtRupees = roundTo2(b.amountRupees !== undefined ? b.amountRupees : (b.amountPaise ? b.amountPaise / 100 : 0));
+      const amtRupees = roundTo2(b.amountRupees !== undefined ? b.amountRupees : (b.amountPaise ? b.amountPaise / 100 : (b.amount !== undefined ? b.amount : 0)));
       if (amtRupees <= 0) return;
 
       const catLower = (b.category || '').toLowerCase();

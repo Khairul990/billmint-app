@@ -1022,5 +1022,10 @@ export const calculateAgingDistribution = (invoices = [], asOfDate = new Date())
     overdueCount: result.overdueCount
   });
 
+  result.days1to7 = 0;
+  result.days8to30 = result.overdue0to30;
+  result.days31to60 = result.overdue31to60;
+  result.days60plus = roundTo2(result.overdue61to90 + result.overdue90Plus);
+
   return result;
 };

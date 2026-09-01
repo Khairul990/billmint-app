@@ -20,7 +20,7 @@ import { bankEngine } from '../services/bankEngine';
 import { toast } from 'react-hot-toast';
 import { 
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, 
-  CartesianGrid, BarChart, Bar, Cell, Pie, Cell as PieCell
+  CartesianGrid, BarChart, Bar, Cell
 } from 'recharts';
 import { formatCurrency } from '../utils/invoiceUtils';
 import PullToRefresh from '../components/PullToRefresh';
@@ -115,6 +115,49 @@ const getLocalCalendarDate = (dateInput = new Date()) => {
   return `${y}-${m}-${day}`;
 };
 
+// Premium Custom Chart Tooltip
+const PremiumChartTooltip = ({ active, payload, label, currencySymbol }) => {
+  if (!active || !payload || !payload.length) return null;
+
+  const invoiced = payload.find(p => p.dataKey === 'invoiced')?.value || 0;
+  const collected = payload.find(p => p.dataKey === 'collected')?.value || 0;
+  const outstanding = Math.max(0, invoiced - collected);
+  const rate = invoiced > 0 ? Math.round((collected / invoiced) * 100) : (collected > 0 ? 100 : 0);
+
+  return (
+    <div className="bg-white dark:bg-theme-card p-3 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xl space-y-2 text-xs min-w-[170px]">
+      <div className="font-bold text-[#1c1917] dark:text-theme-primary pb-1.5 border-b border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between">
+        <span>{label}</span>
+        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{rate}% Collected</span>
+      </div>
+      <div className="space-y-1 text-2xs">
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-1 text-[#c2410c] dark:text-theme-accent font-semibold">
+            <span className="w-2 h-2 rounded-full bg-[#c2410c]" /> Invoiced:
+          </span>
+          <span className="font-black text-[#1c1917] dark:text-theme-primary font-numbers">
+            {formatCurrency(invoiced, currencySymbol)}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" /> Collected:
+          </span>
+          <span className="font-black text-emerald-600 dark:text-emerald-400 font-numbers">
+            {formatCurrency(collected, currencySymbol)}
+          </span>
+        </div>
+        <div className="flex items-center justify-between pt-1 border-t border-[#f5f2ed] dark:border-theme-border-soft/40">
+          <span className="text-[#ea580c] dark:text-amber-500 font-semibold">Outstanding:</span>
+          <span className="font-black text-[#ea580c] dark:text-amber-500 font-numbers">
+            {formatCurrency(outstanding, currencySymbol)}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard = ({
   invoices = [],
   customers = [],
@@ -150,13 +193,10 @@ const Dashboard = ({
   const [quickPayInvoice, setQuickPayInvoice] = useState(null);
   const [activeAnnouncement, setActiveAnnouncement] = useState(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [chartTimeframe, setChartTimeframe] = useState('7d');
+  const [chartTimeframe, setChartTimeframe] = useState('7d'); // '7d' | '30d' | 'this_month' | 'prev_month' | 'this_year'
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [timeNow, setTimeNow] = useState(new Date());
   const [, setTriggerSync] = useState(0);
-
-  // Sub-sections active filter or view toggle
-  const [activeTabSection, setActiveTabSection] = useState('all'); // 'all' | 'financials' | 'receivables' | 'customers' | 'expenses'
 
   // Live Bank Ledger & Personal Financial Buckets
   const [liveBankLedger, setLiveBankLedger] = useState([]);
@@ -399,10 +439,6 @@ const Dashboard = ({
     const yesterdayDate = new Date(now);
     yesterdayDate.setDate(yesterdayDate.getDate() - 1);
     const yesterdayStr = getLocalCalendarDate(yesterdayDate);
-
-    // This week cutoff (last 7 days)
-    const sevenDaysAgo = new Date(now);
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     // Current & Prev Month prefixes
     const currentMonthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -680,7 +716,6 @@ const Dashboard = ({
       const paid = getInvoicePaidTotal(inv);
       const due = getInvoiceBalanceDue(inv);
       const prevDue = roundTo2(parseFloat(inv.previousDue || inv.prevDue) || 0);
-      const invDate = inv.date || inv.createdAt;
 
       if (!customerMap.has(cId)) {
         customerMap.set(cId, {
@@ -693,8 +728,7 @@ const Dashboard = ({
           previousDue: 0,
           currentDue: 0,
           invoicesCount: 0,
-          oldestDueDate: null,
-          lastPaymentDate: null
+          oldestDueDate: null
         });
       }
 
@@ -740,30 +774,40 @@ const Dashboard = ({
     const now = new Date();
     const days = [];
 
-    let countDays = 7;
-    if (chartTimeframe === '30d') countDays = 30;
-    else if (chartTimeframe === 'this_month') countDays = Math.max(1, now.getDate());
-    else if (chartTimeframe === 'prev_month') {
-      const prevMonthLastDay = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
-      countDays = prevMonthLastDay;
-    }
-
-    if (chartTimeframe === 'prev_month') {
-      const prevYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
-      const prevMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
-      for (let i = 1; i <= countDays; i++) {
-        const d = new Date(prevYear, prevMonth, i);
-        const dateKey = getLocalCalendarDate(d);
-        const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        days.push({ dateKey, label, invoiced: 0, collected: 0 });
+    if (chartTimeframe === 'this_year') {
+      const currentYear = now.getFullYear();
+      for (let m = 0; m <= now.getMonth(); m++) {
+        const d = new Date(currentYear, m, 1);
+        const dateKey = `${currentYear}-${String(m + 1).padStart(2, '0')}`;
+        const label = d.toLocaleDateString('en-US', { month: 'short' });
+        days.push({ dateKey, label, invoiced: 0, collected: 0, isMonthKey: true });
       }
     } else {
-      for (let i = countDays - 1; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        const dateKey = getLocalCalendarDate(d);
-        const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        days.push({ dateKey, label, invoiced: 0, collected: 0 });
+      let countDays = 7;
+      if (chartTimeframe === '30d') countDays = 30;
+      else if (chartTimeframe === 'this_month') countDays = Math.max(1, now.getDate());
+      else if (chartTimeframe === 'prev_month') {
+        const prevMonthLastDay = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+        countDays = prevMonthLastDay;
+      }
+
+      if (chartTimeframe === 'prev_month') {
+        const prevYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+        const prevMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
+        for (let i = 1; i <= countDays; i++) {
+          const d = new Date(prevYear, prevMonth, i);
+          const dateKey = getLocalCalendarDate(d);
+          const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          days.push({ dateKey, label, invoiced: 0, collected: 0 });
+        }
+      } else {
+        for (let i = countDays - 1; i >= 0; i--) {
+          const d = new Date(now);
+          d.setDate(d.getDate() - i);
+          const dateKey = getLocalCalendarDate(d);
+          const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          days.push({ dateKey, label, invoiced: 0, collected: 0 });
+        }
       }
     }
 
@@ -773,8 +817,10 @@ const Dashboard = ({
       const invDate = getLocalCalendarDate(inv.date) || getLocalCalendarDate(inv.createdAt);
       const val = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
 
-      if (dayMap.has(invDate)) {
-        dayMap.get(invDate).invoiced = roundTo2(dayMap.get(invDate).invoiced + val);
+      const targetKey = chartTimeframe === 'this_year' ? invDate?.substring(0, 7) : invDate;
+
+      if (targetKey && dayMap.has(targetKey)) {
+        dayMap.get(targetKey).invoiced = roundTo2(dayMap.get(targetKey).invoiced + val);
       }
 
       // Exact payments on their real payment dates
@@ -782,20 +828,42 @@ const Dashboard = ({
         inv.paymentHistory.forEach(p => {
           const pAmt = roundTo2(parseFloat(p.amount) || 0);
           const pDate = getLocalCalendarDate(p.date) || invDate;
-          if (pAmt > 0 && dayMap.has(pDate)) {
-            dayMap.get(pDate).collected = roundTo2(dayMap.get(pDate).collected + pAmt);
+          const pTargetKey = chartTimeframe === 'this_year' ? pDate?.substring(0, 7) : pDate;
+          if (pAmt > 0 && pTargetKey && dayMap.has(pTargetKey)) {
+            dayMap.get(pTargetKey).collected = roundTo2(dayMap.get(pTargetKey).collected + pAmt);
           }
         });
       } else {
         const paid = getInvoicePaidTotal(inv);
-        if (paid > 0 && dayMap.has(invDate)) {
-          dayMap.get(invDate).collected = roundTo2(dayMap.get(invDate).collected + paid);
+        if (paid > 0 && targetKey && dayMap.has(targetKey)) {
+          dayMap.get(targetKey).collected = roundTo2(dayMap.get(targetKey).collected + paid);
         }
       }
     });
 
     return days;
   }, [scopedInvoices, chartTimeframe]);
+
+  // Selected Timeframe Hero Summary Metrics
+  const heroKPIs = useMemo(() => {
+    let invoiced = 0;
+    let collected = 0;
+    chartSeries.forEach(d => {
+      invoiced += d.invoiced || 0;
+      collected += d.collected || 0;
+    });
+    invoiced = roundTo2(invoiced);
+    collected = roundTo2(collected);
+    const outstanding = Math.max(0, roundTo2(invoiced - collected));
+    const collectionRate = invoiced > 0 ? Math.round((collected / invoiced) * 10000) / 100 : (metrics.collectionRate || 0);
+
+    return {
+      invoiced,
+      collected,
+      outstanding,
+      collectionRate
+    };
+  }, [chartSeries, metrics.collectionRate]);
 
   const recentInvoicesList = useMemo(() => {
     return [...scopedInvoices]
@@ -817,7 +885,8 @@ const Dashboard = ({
     '7d': 'Last 7 Days',
     '30d': 'Last 30 Days',
     'this_month': 'This Month',
-    'prev_month': 'Previous Month'
+    'prev_month': 'Previous Month',
+    'this_year': 'This Year'
   };
 
   return (
@@ -836,16 +905,16 @@ const Dashboard = ({
             <div className="w-full max-w-[1720px] mx-auto px-3 sm:px-5 lg:px-7 pt-4 space-y-6">
 
               {/* ========================================================================= */}
-              {/* 1. EXECUTIVE HEADER & REAL-TIME SYSTEM STATUS PILL */}
+              {/* 1. EXECUTIVE HEADER & REAL-TIME BUSINESS HEALTH COCKPIT */}
               {/* ========================================================================= */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1 border-b border-[#f0ece6] dark:border-theme-border-soft/60">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#f0ece6] dark:border-theme-border-soft/60">
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#faf5ef] dark:bg-theme-surface text-[#c2410c] dark:text-theme-accent border border-[#f0ece6] dark:border-theme-border-soft">
                       {workspaceName}
                     </span>
                     <span className="text-2xs text-[#a8a29e] dark:text-theme-muted font-bold">
-                      Central Business Command Center
+                      Executive Business Command Center
                     </span>
                   </div>
                   <h1 className="text-xl sm:text-2xl font-black text-[#1c1917] dark:text-theme-primary tracking-tight flex items-center gap-2 mt-1">
@@ -854,11 +923,11 @@ const Dashboard = ({
                     <span>👋</span>
                   </h1>
                   <p className="text-xs text-[#78716c] dark:text-theme-muted font-medium mt-0.5">
-                    Unified business intelligence and money command center for today.
+                    Real-time revenue intelligence, collection flow, and financial command.
                   </p>
                 </div>
 
-                {/* Right Header Status Bar */}
+                {/* Right Header Controls */}
                 <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap">
                   {/* Business Health Indicator */}
                   <div className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-bold shadow-2xs ${
@@ -896,116 +965,141 @@ const Dashboard = ({
               </div>
 
               {/* ========================================================================= */}
-              {/* 2. EXECUTIVE OVERVIEW (TODAY & MONTH-TO-DATE FINANCIALS) */}
+              {/* 2. HERO SECTION: REVENUE & COLLECTION TREND (VISUAL FOCUS) */}
               {/* ========================================================================= */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                {/* 1. Today's Sales */}
-                <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+              <div className="bg-white dark:bg-theme-card p-5 sm:p-6 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-5">
+                {/* Header & Timeframe Switcher */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#f5f2ed] dark:border-theme-border-soft/60">
                   <div>
-                    <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
-                      TODAY'S SALES
-                    </span>
-                    <p className="text-lg sm:text-xl font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-1">
-                      <AnimatedNumber value={formatCurrency(metrics.todaysSales, currencySymbol)} />
+                    <h2 className="text-sm sm:text-base font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
+                      Revenue & Collection Trend
+                    </h2>
+                    <p className="text-xs text-[#78716c] dark:text-theme-muted font-medium mt-0.5">
+                      Track invoiced revenue and actual collections over time.
                     </p>
                   </div>
-                  <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs text-[#78716c]">
-                    <span>Today's Invoiced Volume</span>
-                    <span className="font-bold text-[#c2410c]">{metrics.todaysInvoicesCount} inv</span>
+
+                  {/* Timeframe Controls */}
+                  <div className="flex items-center gap-1.5 self-start sm:self-auto flex-wrap">
+                    {Object.entries(timeframeLabels).map(([k, lbl]) => (
+                      <button
+                        key={k}
+                        onClick={() => setChartTimeframe(k)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          chartTimeframe === k
+                            ? 'bg-[#c2410c] text-white shadow-xs'
+                            : 'bg-[#faf8f5] dark:bg-theme-surface text-[#78716c] dark:text-theme-muted hover:text-[#1c1917] border border-[#f0ece6] dark:border-theme-border-soft'
+                        }`}
+                      >
+                        {lbl}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* 2. Today's Collected */}
-                <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
-                  <div>
-                    <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
-                      TODAY'S COLLECTED
-                    </span>
-                    <p className="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-numbers mt-1">
-                      <AnimatedNumber value={formatCurrency(metrics.todaysCollected, currencySymbol)} />
-                    </p>
-                  </div>
-                  <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs text-[#78716c]">
-                    <span>{metrics.todaysPaymentCount} payments</span>
-                    <span className="font-bold text-emerald-600">Money In</span>
-                  </div>
-                </div>
-
-                {/* 3. This Month Revenue */}
-                <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
-                  <div>
-                    <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block" data-title="Month Revenue">
-                      TOTAL REVENUE (THIS MONTH)
-                    </span>
-                    <p className="text-lg sm:text-xl font-black text-[#c2410c] dark:text-theme-accent font-numbers mt-1">
-                      <AnimatedNumber value={formatCurrency(metrics.thisMonthRevenue, currencySymbol)} />
-                    </p>
-                  </div>
-                  <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs">
-                    {metrics.revenueGrowthPercent !== null ? (
-                      <span className={`font-bold ${metrics.revenueGrowthPercent >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        {metrics.revenueGrowthPercent >= 0 ? `+${metrics.revenueGrowthPercent}%` : `${metrics.revenueGrowthPercent}%`} vs last mo
+                {/* Hero 4 KPI Summary Cards for Selected Timeframe */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  {/* KPI 1: TOTAL INVOICED */}
+                  <div className="p-3.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed] dark:border-theme-border-soft/60 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                        TOTAL INVOICED
                       </span>
-                    ) : (
-                      <span className="text-theme-muted">This Month</span>
-                    )}
-                    <span className="text-theme-muted font-medium">Billed</span>
+                      <p className="text-lg sm:text-xl font-black text-[#c2410c] dark:text-theme-accent font-numbers mt-1">
+                        <AnimatedNumber value={formatCurrency(heroKPIs.invoiced, currencySymbol)} />
+                      </p>
+                    </div>
+                    <div className="mt-2 pt-1.5 border-t border-[#f0ece6] dark:border-theme-border-soft/40 flex items-center justify-between text-2xs text-theme-muted font-medium">
+                      <span>Billed Volume</span>
+                      <span className="font-bold text-[#c2410c]">{timeframeLabels[chartTimeframe]}</span>
+                    </div>
+                  </div>
+
+                  {/* KPI 2: TOTAL COLLECTED */}
+                  <div className="p-3.5 rounded-2xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[9px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">
+                        TOTAL COLLECTED
+                      </span>
+                      <p className="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-numbers mt-1">
+                        <AnimatedNumber value={formatCurrency(heroKPIs.collected, currencySymbol)} />
+                      </p>
+                    </div>
+                    <div className="mt-2 pt-1.5 border-t border-emerald-500/20 flex items-center justify-between text-2xs text-emerald-700 dark:text-emerald-300 font-medium">
+                      <span>Confirmed Funds</span>
+                      <span className="font-bold text-emerald-600">Money In</span>
+                    </div>
+                  </div>
+
+                  {/* KPI 3: OUTSTANDING */}
+                  <div className="p-3.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed] dark:border-theme-border-soft/60 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                        OUTSTANDING
+                      </span>
+                      <p className="text-lg sm:text-xl font-black text-[#ea580c] dark:text-amber-500 font-numbers mt-1">
+                        <AnimatedNumber value={formatCurrency(heroKPIs.outstanding, currencySymbol)} />
+                      </p>
+                    </div>
+                    <div className="mt-2 pt-1.5 border-t border-[#f0ece6] dark:border-theme-border-soft/40 flex items-center justify-between text-2xs text-theme-muted font-medium">
+                      <span>Pending Collection</span>
+                      <span className="font-bold text-[#ea580c]">Receivable</span>
+                    </div>
+                  </div>
+
+                  {/* KPI 4: COLLECTION RATE */}
+                  <div className="p-3.5 rounded-2xl bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[9px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-wider block">
+                        COLLECTION RATE
+                      </span>
+                      <p className="text-lg sm:text-xl font-black text-indigo-600 dark:text-indigo-400 font-numbers mt-1">
+                        <AnimatedNumber value={`${heroKPIs.collectionRate}%`} />
+                      </p>
+                    </div>
+                    <div className="mt-2 pt-1.5 border-t border-indigo-500/20 flex items-center justify-between text-2xs text-indigo-700 dark:text-indigo-300 font-medium">
+                      <span>Efficiency Ratio</span>
+                      <span className="font-bold text-indigo-600">{heroKPIs.collectionRate >= 70 ? 'High' : 'Active'}</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* 4. This Month Collected */}
-                <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
-                  <div>
-                    <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
-                      MONTH COLLECTED
+                {/* Main Hero AreaChart */}
+                <div className="h-64 sm:h-72 w-full pt-2">
+                  <div className="flex items-center gap-4 mb-2 text-2xs font-bold">
+                    <span className="flex items-center gap-1.5 text-[#c2410c] dark:text-theme-accent">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#c2410c]" /> INVOICED (Created Invoices)
                     </span>
-                    <p className="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-numbers mt-1">
-                      <AnimatedNumber value={formatCurrency(metrics.thisMonthCollected, currencySymbol)} />
-                    </p>
+                    <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> COLLECTED (Confirmed Payments)
+                    </span>
                   </div>
-                  <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs">
-                    <span className="text-emerald-600 font-bold">{metrics.collectionRate}% Rate</span>
-                    <span className="text-theme-muted font-medium">Realized</span>
-                  </div>
-                </div>
 
-                {/* 5. Total Outstanding */}
-                <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
-                  <div>
-                    <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
-                      TOTAL OUTSTANDING
-                    </span>
-                    <p className="text-lg sm:text-xl font-black text-[#ea580c] dark:text-amber-500 font-numbers mt-1">
-                      <AnimatedNumber value={formatCurrency(metrics.totalOutstanding, currencySymbol)} />
-                    </p>
-                  </div>
-                  <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs">
-                    <span className="text-rose-600 font-bold">{metrics.overdueCount} Overdue</span>
-                    <span className="text-theme-muted font-medium">Receivable</span>
-                  </div>
-                </div>
-
-                {/* 6. Net Cash Position (Month) */}
-                <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
-                  <div>
-                    <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
-                      MONTH NET CASH
-                    </span>
-                    <p className={`text-lg sm:text-xl font-black font-numbers mt-1 ${
-                      metrics.thisMonthNetCash >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-                    }`}>
-                      <AnimatedNumber value={formatCurrency(metrics.thisMonthNetCash, currencySymbol)} />
-                    </p>
-                  </div>
-                  <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs text-[#78716c]">
-                    <span>Exp: {formatCurrency(metrics.thisMonthExpenses, currencySymbol)}</span>
-                    <span className="font-bold">Net Flow</span>
-                  </div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartSeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="heroInvoicedGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#c2410c" stopOpacity={0.28} />
+                          <stop offset="95%" stopColor="#c2410c" stopOpacity={0.0} />
+                        </linearGradient>
+                        <linearGradient id="heroCollectedGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.28} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0ece6" opacity={0.6} />
+                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#a8a29e' }} dy={4} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#a8a29e' }} />
+                      <Tooltip content={<PremiumChartTooltip currencySymbol={currencySymbol} />} />
+                      <Area type="monotone" dataKey="invoiced" name="invoiced" stroke="#c2410c" strokeWidth={2.4} fill="url(#heroInvoicedGrad)" />
+                      <Area type="monotone" dataKey="collected" name="collected" stroke="#10b981" strokeWidth={2.2} fill="url(#heroCollectedGrad)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
 
               {/* ========================================================================= */}
-              {/* 3. QUICK COMMAND ACTION BAR */}
+              {/* 3. QUICK COMMAND BAR & ACTION SHORTCUTS */}
               {/* ========================================================================= */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                 {/* 1. Create Invoice */}
@@ -1059,74 +1153,7 @@ const Dashboard = ({
               </div>
 
               {/* ========================================================================= */}
-              {/* 4. ACTION REQUIRED INTELLIGENCE CENTER */}
-              {/* ========================================================================= */}
-              {(metrics.overdueCount > 0 || pendingPaymentsCount > 0 || metrics.dueTodayInvoicesCount > 0) ? (
-                <div className="p-4 bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-transparent border border-rose-500/20 dark:border-rose-500/30 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-2xs">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-2xl bg-rose-500/20 text-rose-600 flex items-center justify-center shrink-0">
-                      <AlertCircle className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-black text-[#1c1917] dark:text-theme-primary uppercase tracking-wider flex items-center gap-2">
-                        <span>Action Required</span>
-                        <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black">
-                          Immediate
-                        </span>
-                      </h4>
-                      <p className="text-xs text-[#78716c] dark:text-theme-muted font-medium flex items-center gap-3 flex-wrap mt-1">
-                        {metrics.overdueCount > 0 && (
-                          <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
-                            🔴 {metrics.overdueCount} Overdue ({formatCurrency(metrics.overdueAmount, currencySymbol)})
-                          </span>
-                        )}
-                        {metrics.dueTodayInvoicesCount > 0 && (
-                          <span className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                            🟠 {metrics.dueTodayInvoicesCount} Due Today ({formatCurrency(metrics.dueTodayAmount, currencySymbol)})
-                          </span>
-                        )}
-                        {pendingPaymentsCount > 0 && (
-                          <span className="font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
-                            🟡 {pendingPaymentsCount} Payment Proofs Pending
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 self-end md:self-auto">
-                    {pendingPaymentsCount > 0 && (
-                      <button
-                        onClick={() => setCurrentTab('pending-payments')}
-                        className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer"
-                      >
-                        Verify Proofs ({pendingPaymentsCount})
-                      </button>
-                    )}
-                    <button
-                      onClick={() => setCurrentTab('due-ledger')}
-                      className="px-3.5 py-2 bg-white dark:bg-theme-surface text-xs font-bold text-[#c2410c] dark:text-theme-accent border border-[#f0ece6] dark:border-theme-border-soft hover:bg-[#faf5ef] rounded-xl transition-all cursor-pointer shadow-2xs"
-                    >
-                      Follow Up Dues →
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-3.5 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span className="font-bold text-emerald-800 dark:text-emerald-300">
-                      All caught up! Zero overdue invoices and no pending payment verifications.
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-bold text-emerald-600 hidden sm:inline font-numbers">
-                    {metrics.collectionRate}% Collection Efficiency
-                  </span>
-                </div>
-              )}
-
-              {/* ========================================================================= */}
-              {/* 5. UNIVERSAL MONEY SNAPSHOT (BUSINESS VS PERSONAL VS DREAM) */}
+              {/* 4. UNIVERSAL MONEY SNAPSHOT (BUSINESS VS PERSONAL VS DREAM) */}
               {/* ========================================================================= */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -1317,142 +1344,7 @@ const Dashboard = ({
               </div>
 
               {/* ========================================================================= */}
-              {/* 6. SALES INTELLIGENCE & INVOICED VS COLLECTED TREND CHART */}
-              {/* ========================================================================= */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                {/* LEFT: INVOICED VS COLLECTED AREA CHART (8 COLS) */}
-                <div className="lg:col-span-8 bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                      <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
-                        Revenue & Collection Trend
-                      </h3>
-                      <div className="flex items-center gap-3 mt-1 text-[10px] font-bold">
-                        <span className="flex items-center gap-1 text-[#c2410c] dark:text-theme-accent">
-                          <span className="w-2 h-2 rounded-full bg-[#c2410c]" /> Invoiced Volume
-                        </span>
-                        <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500" /> Collected Funds
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Timeframe selector */}
-                    <div className="relative self-start sm:self-auto">
-                      <button
-                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#faf8f5] dark:bg-theme-surface border border-[#f0ece6] dark:border-theme-border-soft text-xs font-bold text-[#44403c] dark:text-theme-secondary hover:border-[#c2410c] transition-colors cursor-pointer shadow-2xs"
-                      >
-                        <span>{timeframeLabels[chartTimeframe]}</span>
-                        <ChevronDown className="w-3 h-3 text-[#78716c]" />
-                      </button>
-
-                      {isDropdownOpen && (
-                        <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-theme-card rounded-xl border border-[#f0ece6] dark:border-theme-border-soft shadow-lg py-1 z-30">
-                          {Object.entries(timeframeLabels).map(([k, lbl]) => (
-                            <button
-                              key={k}
-                              onClick={() => {
-                                setChartTimeframe(k);
-                                setIsDropdownOpen(false);
-                              }}
-                              className={`w-full text-left px-3 py-1.5 text-xs font-semibold transition-colors ${chartTimeframe === k ? 'text-[#c2410c] bg-[#faf5ef] font-bold' : 'text-[#44403c] hover:bg-[#faf5ef]'}`}
-                            >
-                              {lbl}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="h-56 w-full pt-2">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartSeries} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="terracottaGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#c2410c" stopOpacity={0.28} />
-                            <stop offset="95%" stopColor="#c2410c" stopOpacity={0.0} />
-                          </linearGradient>
-                          <linearGradient id="emeraldGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0ece6" opacity={0.6} />
-                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#a8a29e' }} dy={4} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#a8a29e' }} />
-                        <Tooltip
-                          contentStyle={{ background: '#ffffff', border: '1px solid #f0ece6', borderRadius: '12px', fontSize: '11px', color: '#1c1917', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-                          formatter={(val, name) => [
-                            formatCurrency(val, currencySymbol), 
-                            name === 'invoiced' ? 'Invoiced' : 'Collected'
-                          ]}
-                        />
-                        <Area type="monotone" dataKey="invoiced" name="invoiced" stroke="#c2410c" strokeWidth={2.2} fill="url(#terracottaGrad)" />
-                        <Area type="monotone" dataKey="collected" name="collected" stroke="#10b981" strokeWidth={2} fill="url(#emeraldGrad)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                {/* RIGHT: SALES PERIODS & RATIOS SUMMARY (4 COLS) */}
-                <div className="lg:col-span-4 bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between space-y-4">
-                  <div>
-                    <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight pb-3 border-b border-[#f5f2ed]">
-                      Sales Volume Periods
-                    </h3>
-
-                    <div className="space-y-3 pt-3 text-xs">
-                      <div className="flex items-center justify-between">
-                        <span className="text-theme-muted font-medium">Today's Sales</span>
-                        <span className="font-black text-[#1c1917] dark:text-theme-primary font-numbers">
-                          {formatCurrency(metrics.todaysSales, currencySymbol)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-theme-muted font-medium">Yesterday's Sales</span>
-                        <span className="font-bold text-[#44403c] dark:text-theme-secondary font-numbers">
-                          {formatCurrency(metrics.yesterdaySales, currencySymbol)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-theme-muted font-medium">Last 7 Days</span>
-                        <span className="font-bold text-[#44403c] dark:text-theme-secondary font-numbers">
-                          {formatCurrency(metrics.last7DaysSales, currencySymbol)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-theme-muted font-medium">Last 30 Days</span>
-                        <span className="font-bold text-[#44403c] dark:text-theme-secondary font-numbers">
-                          {formatCurrency(metrics.last30DaysSales, currencySymbol)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between pt-2 border-t border-[#f5f2ed]">
-                        <span className="text-xs font-bold text-[#1c1917] dark:text-theme-primary">All-Time Total</span>
-                        <span className="font-black text-[#c2410c] font-numbers text-sm">
-                          {formatCurrency(metrics.totalRevenue, currencySymbol)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-[#faf8f5] dark:bg-theme-surface/60 rounded-2xl border border-[#f5f2ed] flex items-center justify-between text-xs">
-                    <div>
-                      <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">Average Ticket Size</span>
-                      <span className="font-black text-[#1c1917] dark:text-theme-primary font-numbers">
-                        {formatCurrency(customerAnalytics.avgInvoiceValue, currencySymbol)}
-                      </span>
-                    </div>
-                    <span className="text-2xs font-bold text-[#c2410c] bg-[#faf5ef] px-2.5 py-1 rounded-full border border-[#f0ece6]">
-                      {scopedInvoices.length} Invoices
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* ========================================================================= */}
-              {/* 7. RECEIVABLES, AGING DISTRIBUTION & PREVIOUS DUE INTELLIGENCE */}
+              {/* 5. RECEIVABLES & DUE INTELLIGENCE */}
               {/* ========================================================================= */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -1464,7 +1356,7 @@ const Dashboard = ({
                   </div>
                   <button
                     onClick={() => setCurrentTab('due-ledger')}
-                    className="text-xs font-bold text-[#c2410c] hover:underline flex items-center gap-1"
+                    className="text-xs font-bold text-[#c2410c] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <span>View All Due</span>
                     <span>→</span>
@@ -1604,11 +1496,116 @@ const Dashboard = ({
               </div>
 
               {/* ========================================================================= */}
-              {/* 8. INVOICE CENTER & CUSTOMER INTELLIGENCE */}
+              {/* 6. SALES & INVOICE INTELLIGENCE */}
               {/* ========================================================================= */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-                {/* LEFT: RECENT INVOICES TABLE (8 COLS) */}
-                <div className="lg:col-span-8 bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
+              <div className="space-y-4">
+                {/* Executive Sales Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                  {/* Today's Sales */}
+                  <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+                    <div>
+                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                        TODAY'S SALES
+                      </span>
+                      <p className="text-lg sm:text-xl font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-1">
+                        <AnimatedNumber value={formatCurrency(metrics.todaysSales, currencySymbol)} />
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs text-[#78716c]">
+                      <span>Today's Invoiced Volume</span>
+                      <span className="font-bold text-[#c2410c]">{metrics.todaysInvoicesCount} inv</span>
+                    </div>
+                  </div>
+
+                  {/* Today's Collected */}
+                  <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+                    <div>
+                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                        TODAY'S COLLECTED
+                      </span>
+                      <p className="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-numbers mt-1">
+                        <AnimatedNumber value={formatCurrency(metrics.todaysCollected, currencySymbol)} />
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs text-[#78716c]">
+                      <span>{metrics.todaysPaymentCount} payments</span>
+                      <span className="font-bold text-emerald-600">Money In</span>
+                    </div>
+                  </div>
+
+                  {/* Month Revenue */}
+                  <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+                    <div>
+                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block" data-title="Month Revenue">
+                        TOTAL REVENUE (THIS MONTH)
+                      </span>
+                      <p className="text-lg sm:text-xl font-black text-[#c2410c] dark:text-theme-accent font-numbers mt-1">
+                        <AnimatedNumber value={formatCurrency(metrics.thisMonthRevenue, currencySymbol)} />
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs">
+                      {metrics.revenueGrowthPercent !== null ? (
+                        <span className={`font-bold ${metrics.revenueGrowthPercent >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {metrics.revenueGrowthPercent >= 0 ? `+${metrics.revenueGrowthPercent}%` : `${metrics.revenueGrowthPercent}%`} vs last mo
+                        </span>
+                      ) : (
+                        <span className="text-theme-muted">This Month</span>
+                      )}
+                      <span className="text-theme-muted font-medium">Billed</span>
+                    </div>
+                  </div>
+
+                  {/* Month Collected */}
+                  <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+                    <div>
+                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                        MONTH COLLECTED
+                      </span>
+                      <p className="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-numbers mt-1">
+                        <AnimatedNumber value={formatCurrency(metrics.thisMonthCollected, currencySymbol)} />
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs">
+                      <span className="text-emerald-600 font-bold">{metrics.collectionRate}% Rate</span>
+                      <span className="text-theme-muted font-medium">Realized</span>
+                    </div>
+                  </div>
+
+                  {/* Total Invoices Count */}
+                  <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+                    <div>
+                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                        TOTAL INVOICES
+                      </span>
+                      <p className="text-lg sm:text-xl font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-1">
+                        <AnimatedNumber value={scopedInvoices.length} />
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs text-[#78716c]">
+                      <span>{metrics.paidInvoicesCount} Paid</span>
+                      <span className="font-bold text-amber-600">{metrics.unpaidInvoicesCount} Due</span>
+                    </div>
+                  </div>
+
+                  {/* Average Ticket Size */}
+                  <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+                    <div>
+                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                        AVERAGE INVOICE
+                      </span>
+                      <p className="text-lg sm:text-xl font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-1">
+                        <AnimatedNumber value={formatCurrency(customerAnalytics.avgInvoiceValue, currencySymbol)} />
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs text-[#78716c]">
+                      <span>Ticket Size</span>
+                      <span className="font-bold">Avg</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Invoices Table */}
+                <div className="bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
@@ -1628,7 +1625,7 @@ const Dashboard = ({
                   </div>
 
                   {recentInvoicesList.length === 0 ? (
-                    <div className="py-16 text-center text-xs text-[#a8a29e]">
+                    <div className="py-12 text-center text-xs text-[#a8a29e]">
                       <FileText className="w-8 h-8 mx-auto text-[#d6d3d1] mb-2" />
                       <p>No invoices created yet.</p>
                       <button
@@ -1750,61 +1747,10 @@ const Dashboard = ({
                     </div>
                   )}
                 </div>
-
-                {/* RIGHT: CUSTOMER INTELLIGENCE (4 COLS) */}
-                <div className="lg:col-span-4 bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f2ed]">
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-[#c2410c]" />
-                      <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
-                        Customer Intelligence
-                      </h3>
-                    </div>
-                    <span className="text-2xs font-bold text-theme-muted">
-                      {customerAnalytics.totalCustomersCount} Total
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-3 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed]">
-                      <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">Fully Settled</span>
-                      <span className="text-base font-black text-emerald-600 font-numbers mt-0.5 block">
-                        {customerAnalytics.fullyPaidCount}
-                      </span>
-                    </div>
-                    <div className="p-3 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed]">
-                      <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">With Due Balance</span>
-                      <span className="text-base font-black text-amber-600 font-numbers mt-0.5 block">
-                        {customerAnalytics.withDueCount}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-[10px] font-bold text-[#a8a29e] uppercase tracking-wider mb-2">
-                      Top Customers by Revenue
-                    </h4>
-                    <div className="space-y-2">
-                      {customerAnalytics.topRevenue.map((c, i) => (
-                        <div key={c.id} className="flex items-center justify-between text-xs p-2 rounded-xl bg-[#faf8f5] dark:bg-theme-surface/40 border border-[#f5f2ed]">
-                          <div className="flex items-center gap-2 truncate">
-                            <span className="w-4 h-4 rounded-full bg-[#c2410c]/10 text-[#c2410c] text-[9px] font-black flex items-center justify-center shrink-0">
-                              {i + 1}
-                            </span>
-                            <span className="font-bold text-[#1c1917] dark:text-theme-primary truncate">{c.name}</span>
-                          </div>
-                          <span className="font-black text-[#1c1917] dark:text-theme-primary font-numbers">
-                            {formatCurrency(c.totalBilled, currencySymbol)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
               </div>
 
               {/* ========================================================================= */}
-              {/* 9. CASH FLOW & EXPENSE BREAKDOWN */}
+              {/* 7. EXPENSE & CASH FLOW INTELLIGENCE */}
               {/* ========================================================================= */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 {/* LEFT: CASH FLOW BAR & PAYMENT METHODS (6 COLS) */}
@@ -1884,7 +1830,7 @@ const Dashboard = ({
                     </div>
                     <button
                       onClick={() => setCurrentTab('expenses')}
-                      className="text-xs font-bold text-[#c2410c] hover:underline"
+                      className="text-xs font-bold text-[#c2410c] hover:underline cursor-pointer"
                     >
                       All Expenses →
                     </button>
@@ -1928,7 +1874,133 @@ const Dashboard = ({
               </div>
 
               {/* ========================================================================= */}
-              {/* 10. UNIFIED LIVE ACTIVITY TIMELINE */}
+              {/* 8. CUSTOMER INTELLIGENCE */}
+              {/* ========================================================================= */}
+              <div className="bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-[#f5f2ed]">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-[#c2410c]" />
+                    <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
+                      Customer Intelligence
+                    </h3>
+                  </div>
+                  <span className="text-2xs font-bold text-theme-muted">
+                    {customerAnalytics.totalCustomersCount} Total Registered
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-3.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed]">
+                    <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">Fully Settled</span>
+                    <span className="text-lg font-black text-emerald-600 font-numbers mt-0.5 block">
+                      {customerAnalytics.fullyPaidCount} Customers
+                    </span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed]">
+                    <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">With Due Balance</span>
+                    <span className="text-lg font-black text-amber-600 font-numbers mt-0.5 block">
+                      {customerAnalytics.withDueCount} Customers
+                    </span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed]">
+                    <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">Average Payment Value</span>
+                    <span className="text-lg font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-0.5 block">
+                      {formatCurrency(customerAnalytics.avgPaymentValue, currencySymbol)}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-[10px] font-bold text-[#a8a29e] uppercase tracking-wider mb-2">
+                    Top Customers by Revenue
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+                    {customerAnalytics.topRevenue.map((c, i) => (
+                      <div key={c.id} className="flex items-center justify-between text-xs p-2.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/40 border border-[#f5f2ed]">
+                        <div className="flex items-center gap-2 truncate">
+                          <span className="w-4 h-4 rounded-full bg-[#c2410c]/10 text-[#c2410c] text-[9px] font-black flex items-center justify-center shrink-0">
+                            {i + 1}
+                          </span>
+                          <span className="font-bold text-[#1c1917] dark:text-theme-primary truncate">{c.name}</span>
+                        </div>
+                        <span className="font-black text-[#1c1917] dark:text-theme-primary font-numbers">
+                          {formatCurrency(c.totalBilled, currencySymbol)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* ========================================================================= */}
+              {/* 9. ACTION REQUIRED (NEEDS YOUR ATTENTION) */}
+              {/* ========================================================================= */}
+              {(metrics.overdueCount > 0 || pendingPaymentsCount > 0 || metrics.dueTodayInvoicesCount > 0) ? (
+                <div className="p-4 bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-transparent border border-rose-500/20 dark:border-rose-500/30 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-2xl bg-rose-500/20 text-rose-600 flex items-center justify-center shrink-0">
+                      <AlertCircle className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-[#1c1917] dark:text-theme-primary uppercase tracking-wider flex items-center gap-2">
+                        <span>Needs Your Attention</span>
+                        <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black">
+                          Immediate
+                        </span>
+                      </h4>
+                      <p className="text-xs text-[#78716c] dark:text-theme-muted font-medium flex items-center gap-3 flex-wrap mt-1">
+                        {metrics.overdueCount > 0 && (
+                          <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                            🔴 {metrics.overdueCount} Overdue ({formatCurrency(metrics.overdueAmount, currencySymbol)})
+                          </span>
+                        )}
+                        {metrics.dueTodayInvoicesCount > 0 && (
+                          <span className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                            🟠 {metrics.dueTodayInvoicesCount} Due Today ({formatCurrency(metrics.dueTodayAmount, currencySymbol)})
+                          </span>
+                        )}
+                        {pendingPaymentsCount > 0 && (
+                          <span className="font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                            🟡 {pendingPaymentsCount} Payment Proofs Pending
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 self-end md:self-auto">
+                    {pendingPaymentsCount > 0 && (
+                      <button
+                        onClick={() => setCurrentTab('pending-payments')}
+                        className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer"
+                      >
+                        Verify Proofs ({pendingPaymentsCount})
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setCurrentTab('due-ledger')}
+                      className="px-3.5 py-2 bg-white dark:bg-theme-surface text-xs font-bold text-[#c2410c] dark:text-theme-accent border border-[#f0ece6] dark:border-theme-border-soft hover:bg-[#faf5ef] rounded-xl transition-all cursor-pointer shadow-2xs"
+                    >
+                      Follow Up Dues →
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3.5 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span className="font-bold text-emerald-800 dark:text-emerald-300">
+                      Everything looks good! Zero overdue invoices and all collections are up to date.
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-600 hidden sm:inline font-numbers">
+                    {metrics.collectionRate}% Collection Efficiency
+                  </span>
+                </div>
+              )}
+
+              {/* ========================================================================= */}
+              {/* 10. RECENT CONFIRMED FINANCIAL ACTIVITY */}
               {/* ========================================================================= */}
               <div className="bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-[#f5f2ed]">
@@ -1940,7 +2012,7 @@ const Dashboard = ({
                   </div>
                   <button
                     onClick={() => setCurrentTab('collection-center')}
-                    className="text-xs font-bold text-[#c2410c] hover:underline"
+                    className="text-xs font-bold text-[#c2410c] hover:underline cursor-pointer"
                   >
                     View Money Center →
                   </button>
