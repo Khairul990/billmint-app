@@ -116,22 +116,22 @@ body, body *, ::before, ::after {
    (from design-reference/billqyro-redesign.html)
    ========================================= */
 :root {
-  --bg-gradient: radial-gradient(1200px at 10% 10%, #FFF7ED 0%, #FAF5FF 40%, #F1F5F9 100%);
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-card: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.8);
-  --glass-subtle: rgba(226, 232, 240, 0.8);
-  --glass-shadow: 0 16px 32px rgba(0, 0, 0, 0.06);
+  --bg-gradient: radial-gradient(1200px 600px at 10% 0%, color-mix(in srgb, var(--accent, #c2410c) 7%, var(--app-bg, #FAF7F2)) 0%, var(--app-bg, #FAF7F2) 60%, color-mix(in srgb, var(--luxury-companion, var(--app-bg, #FAF7F2)) 80%, #ffffff 20%) 100%);
+  --glass-bg: color-mix(in srgb, var(--surface, #ffffff) 65%, color-mix(in srgb, var(--luxury-companion, var(--app-bg, #faf7f2)) 80%, var(--accent, #c2410c) 20%) 35%);
+  --glass-card: color-mix(in srgb, var(--surface, #ffffff) 65%, color-mix(in srgb, var(--luxury-companion, var(--app-bg, #faf7f2)) 80%, var(--accent, #c2410c) 20%) 35%);
+  --glass-border: color-mix(in srgb, var(--border-soft, rgba(0,0,0,0.08)) 75%, var(--accent, #c2410c) 25%);
+  --glass-subtle: color-mix(in srgb, var(--border-soft, rgba(0,0,0,0.04)) 85%, var(--accent, #c2410c) 15%);
+  --glass-shadow: 0 16px 32px rgba(0, 0, 0, 0.04);
   --accent-hover: #966D09;
   --text-main: #0F172A;
 }
 .dark {
-  --bg-gradient: radial-gradient(1200px at 10% 10%, #0F172A 0%, #090D16 50%, #030712 100%);
-  --glass-bg: rgba(15, 23, 42, 0.75);
-  --glass-card: rgba(21, 29, 45, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-subtle: rgba(255, 255, 255, 0.05);
-  --glass-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+  --bg-gradient: radial-gradient(1200px 600px at 10% 0%, color-mix(in srgb, var(--accent, #c2410c) 12%, var(--app-bg, #0B1118)) 0%, var(--app-bg, #0B1118) 60%, color-mix(in srgb, var(--card-bg, #111827) 80%, #000000 20%) 100%);
+  --glass-bg: color-mix(in srgb, var(--card-bg, #1a1a1a) 82%, color-mix(in srgb, var(--app-bg, #121212) 75%, var(--accent, #c2410c) 25%) 18%);
+  --glass-card: color-mix(in srgb, var(--card-bg, #1a1a1a) 82%, color-mix(in srgb, var(--app-bg, #121212) 75%, var(--accent, #c2410c) 25%) 18%);
+  --glass-border: color-mix(in srgb, var(--border-soft, rgba(255,255,255,0.08)) 70%, var(--accent, #c2410c) 30%);
+  --glass-subtle: color-mix(in srgb, var(--border-soft, rgba(255,255,255,0.04)) 80%, var(--accent, #c2410c) 20%);
+  --glass-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
   --accent-hover: #B8860B;
   --text-main: #F8FAFC;
 }
@@ -2353,48 +2353,59 @@ button:active {
 }
 
 /* =========================================================================
-   PHASE 20: SOFT GLASS LUXURY CARD SYSTEM
+   PHASE 21: PREMIUM THEME-AWARE GLASS SURFACE 2.0
    ========================================================================= */
 .luxury-glass-card {
-  background: var(--surface, #ffffff);
-  background: color-mix(in srgb, var(--surface, #ffffff) 93%, var(--theme-tint-surface, transparent) 7%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--border-soft, rgba(0,0,0,0.08));
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 1px 3px 0 rgba(0, 0, 0, 0.02), inset 0 1px 1px 0 rgba(255, 255, 255, 0.85);
+  background: color-mix(in srgb, var(--surface, #ffffff) 65%, color-mix(in srgb, var(--luxury-companion, var(--app-bg, #faf7f2)) 80%, var(--accent, #c2410c) 20%) 35%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--border-soft, rgba(0,0,0,0.08)) 75%, var(--accent, #c2410c) 25%);
+  box-shadow: 
+    0 4px 20px -2px color-mix(in srgb, rgba(0, 0, 0, 0.04) 90%, var(--accent, #c2410c) 10%),
+    0 1px 3px 0 rgba(0, 0, 0, 0.02),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
   transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease, transform 200ms ease;
 }
+
 .dark .luxury-glass-card {
-  background: var(--card-bg, #1a1a1a);
-  background: color-mix(in srgb, var(--card-bg, #1a1a1a) 90%, var(--theme-tint-surface, transparent) 10%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--border-soft, rgba(255,255,255,0.08));
-  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+  background: color-mix(in srgb, var(--card-bg, #1a1a1a) 82%, color-mix(in srgb, var(--app-bg, #121212) 75%, var(--accent, #c2410c) 25%) 18%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--border-soft, rgba(255,255,255,0.08)) 70%, var(--accent, #c2410c) 30%);
+  box-shadow: 
+    0 8px 30px -4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
 }
 
 .luxury-glass-card:hover {
-  border-color: var(--theme-tint-border, var(--border-strong, rgba(0,0,0,0.14)));
-  box-shadow: 0 8px 28px -4px rgba(0, 0, 0, 0.05), 0 2px 6px 0 rgba(0, 0, 0, 0.025), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
+  border-color: color-mix(in srgb, var(--theme-tint-border, var(--border-strong, rgba(0,0,0,0.15))) 65%, var(--accent, #c2410c) 35%);
+  box-shadow: 
+    0 8px 28px -4px color-mix(in srgb, rgba(0, 0, 0, 0.06) 85%, var(--accent, #c2410c) 15%),
+    0 2px 6px 0 rgba(0, 0, 0, 0.025),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
 }
+
 .dark .luxury-glass-card:hover {
-  border-color: var(--theme-tint-border, var(--border-strong, rgba(255,255,255,0.15)));
-  box-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  border-color: color-mix(in srgb, var(--theme-tint-border, var(--border-strong, rgba(255,255,255,0.15))) 65%, var(--accent, #c2410c) 35%);
+  box-shadow: 
+    0 12px 36px -6px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
 }
 
 .luxury-glass-subcard {
-  background: var(--theme-tint-bg, rgba(0,0,0,0.02));
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid var(--border-soft, rgba(0,0,0,0.06));
-  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.6);
+  background: color-mix(in srgb, var(--app-bg, #faf7f2) 65%, color-mix(in srgb, var(--surface, #ffffff) 85%, var(--accent, #c2410c) 15%) 35%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid color-mix(in srgb, var(--border-soft, rgba(0,0,0,0.06)) 80%, var(--accent, #c2410c) 20%);
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.75);
   transition: border-color 180ms ease, background-color 180ms ease;
 }
+
 .dark .luxury-glass-subcard {
-  background: var(--theme-tint-bg, rgba(255,255,255,0.03));
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid var(--border-soft, rgba(255,255,255,0.06));
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--app-bg, #0d1117) 65%, color-mix(in srgb, var(--card-bg, #1a1a1a) 80%, var(--accent, #c2410c) 20%) 35%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid color-mix(in srgb, var(--border-soft, rgba(255,255,255,0.06)) 75%, var(--accent, #c2410c) 25%);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
 

@@ -937,9 +937,15 @@ const Dashboard = ({
   return (
     <AnimatedPage>
       <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
-        <div className="w-full bg-transparent dark:bg-theme-app text-theme-primary pb-8 font-sans selection:bg-theme-accent/20">
+        <div className="w-full relative min-h-screen bg-theme-tint-bg dark:bg-theme-app text-theme-primary pb-8 font-sans selection:bg-theme-accent/20 overflow-hidden">
+          {/* Subtle Ambient Theme Atmosphere (Level 1) */}
+          <div className="absolute inset-0 pointer-events-none -z-0 opacity-40 dark:opacity-25 overflow-hidden">
+            <div className="absolute -top-24 -left-24 w-[500px] h-[500px] rounded-full blur-3xl bg-theme-accent/10" />
+            <div className="absolute top-48 -right-24 w-[450px] h-[450px] rounded-full blur-3xl bg-theme-accent/8" />
+          </div>
+
           {(isInitialLoad || isLoading) ? (
-            <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 pt-4 space-y-6">
+            <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 pt-4 space-y-6 relative z-10">
               <KPISkeleton count={4} />
               <div className="grid lg:grid-cols-2 gap-6 mt-6">
                 <ChartSkeleton />
@@ -947,7 +953,7 @@ const Dashboard = ({
               </div>
             </div>
           ) : (
-            <div className="w-full max-w-[1720px] mx-auto px-3 sm:px-5 lg:px-7 pt-4 space-y-6">
+            <div className="w-full max-w-[1720px] mx-auto px-3 sm:px-5 lg:px-7 pt-4 space-y-6 relative z-10">
 
               {/* ========================================================================= */}
               {/* 1. EXECUTIVE HEADER & REAL-TIME BUSINESS HEALTH COCKPIT */}
