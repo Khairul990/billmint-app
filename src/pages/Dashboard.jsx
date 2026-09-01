@@ -937,7 +937,7 @@ const Dashboard = ({
   return (
     <AnimatedPage>
       <PullToRefresh onRefresh={handleRefresh} isLoading={isLoading}>
-        <div className="min-h-screen bg-[#fcfbfa] dark:bg-theme-app text-[#1c1917] dark:text-theme-primary pb-24 font-sans selection:bg-[#c2410c]/20">
+        <div className="w-full bg-transparent dark:bg-theme-app text-theme-primary pb-8 font-sans selection:bg-theme-accent/20">
           {(isInitialLoad || isLoading) ? (
             <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 pt-4 space-y-6">
               <KPISkeleton count={4} />
