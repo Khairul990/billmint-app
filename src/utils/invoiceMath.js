@@ -148,30 +148,34 @@ export const getInvoicePaymentStatus = (inv) => {
 /**
  * CANONICAL PAYMENT ALLOCATION ENGINE
  * Deterministically allocates an incoming payment when settling customer liabilities:
- * Priority 1: Settle Previous / Old Due first.
- * Priority 2: Any remaining payment is allocated toward Current Invoice.
+ * Priority 1: Settle Earlier Balance (Previous / Old Due) first.
+ * Priority 2: Any remaining payment is allocated toward This Bill (Current Invoice).
  */
 export const allocatePayment = (paymentAmount = 0, oldDue = 0, currentInvoiceTotal = 0) => {
   const payVal = roundTo2(parseFloat(paymentAmount) || 0);
   const previousDueVal = roundTo2(parseFloat(oldDue) || 0);
   const currentTotalVal = roundTo2(parseFloat(currentInvoiceTotal) || 0);
 
+  // Step 1: Earlier Balance Paid = MIN(payment, Earlier Balance)
   const allocatedToOldDue = roundTo2(Math.min(payVal, previousDueVal));
   const remainingOldDue = roundTo2(Math.max(0, previousDueVal - allocatedToOldDue));
 
+  // Step 2: Remaining Payment = payment - Earlier Balance Paid
   const unallocatedPayment = roundTo2(Math.max(0, payVal - allocatedToOldDue));
+  // Step 3: This Bill Paid = MIN(Remaining Payment, This Bill Remaining)
   const allocatedToCurrentInvoice = roundTo2(Math.min(unallocatedPayment, currentTotalVal));
   const remainingCurrentInvoiceDue = roundTo2(Math.max(0, currentTotalVal - allocatedToCurrentInvoice));
 
   const totalReceivable = roundTo2(previousDueVal + currentTotalVal);
   const customerTotalDue = roundTo2(remainingOldDue + remainingCurrentInvoiceDue);
 
-  let currentInvoicePaymentStatus = 'Unpaid';
-  if (allocatedToCurrentInvoice >= currentTotalVal && currentTotalVal > 0) {
-    currentInvoicePaymentStatus = 'Paid';
-  } else if (allocatedToCurrentInvoice > 0) {
-    currentInvoicePaymentStatus = 'Partial';
-  }
+  const currentInvoicePaymentStatus = remainingCurrentInvoiceDue === 0 
+    ? 'Paid' 
+    : (allocatedToCurrentInvoice > 0 ? 'Partial' : 'Unpaid');
+
+  const customerPaymentStatus = customerTotalDue === 0 
+    ? 'Paid' 
+    : (payVal > 0 ? 'Partial' : 'Unpaid');
 
   return {
     paymentAmount: payVal,
@@ -184,8 +188,19 @@ export const allocatePayment = (paymentAmount = 0, oldDue = 0, currentInvoiceTot
     remainingCurrentInvoiceDue,
     customerTotalDue,
     currentInvoicePaymentStatus,
+    paymentStatus: customerPaymentStatus,
     isCurrentInvoicePaid: currentInvoicePaymentStatus === 'Paid',
-    isSettled: customerTotalDue === 0
+    isSettled: customerTotalDue === 0,
+    // Canonical user-preferred semantic aliases
+    earlierBalance: previousDueVal,
+    thisBill: currentTotalVal,
+    totalAmountDue: totalReceivable,
+    amountPaid: payVal,
+    amountStillDue: customerTotalDue,
+    earlierBalancePaid: allocatedToOldDue,
+    earlierBalanceRemaining: remainingOldDue,
+    thisBillPaid: allocatedToCurrentInvoice,
+    thisBillRemaining: remainingCurrentInvoiceDue
   };
 };
 
@@ -216,7 +231,9 @@ export const allocateMultiplePayments = (payments = [], oldDue = 0, currentInvoi
       ...(typeof p === 'object' ? p : { amount: amt }),
       amount: amt,
       allocatedToOldDue: toOldDue,
-      allocatedToCurrentInvoice: toCurrent
+      allocatedToCurrentInvoice: toCurrent,
+      earlierBalancePaid: toOldDue,
+      thisBillPaid: toCurrent
     };
   });
 
@@ -244,11 +261,20 @@ export const calculateCanonicalInvoiceFinancials = (inv) => {
       amountPaid: 0,
       balanceDue: 0,
       currentBillDue: 0,
+      customerTotalDue: 0,
       allocatedToOldDue: 0,
       remainingOldDue: 0,
       allocatedToCurrentInvoice: 0,
       paymentStatus: 'Unpaid',
-      isFullyPaid: false
+      isFullyPaid: false,
+      earlierBalance: 0,
+      thisBill: 0,
+      totalAmountDue: 0,
+      amountStillDue: 0,
+      earlierBalancePaid: 0,
+      earlierBalanceRemaining: 0,
+      thisBillPaid: 0,
+      thisBillRemaining: 0
     };
   }
 
@@ -277,19 +303,24 @@ export const calculateCanonicalInvoiceFinancials = (inv) => {
   const amountPaid = getInvoicePaidTotal(inv);
   const allocation = allocatePayment(amountPaid, previousDue, currentInvoiceTotal);
   const balanceDue = allocation.remainingCurrentInvoiceDue;
+  const customerTotalDue = allocation.customerTotalDue;
 
   let paymentStatus;
   if (inv.status === 'Cancelled' || inv.status === 'Void') {
     paymentStatus = inv.status;
   } else if (amountPaid === 0 && (inv.paymentStatus === 'Pending Verification' || (Array.isArray(inv.paymentProofs) && inv.paymentProofs.some(p => p.status === 'Pending Verification' || p.status === 'pending')))) {
     paymentStatus = 'Pending Verification';
-  } else if (balanceDue === 0 && currentInvoiceTotal > 0) {
+  } else if (customerTotalDue === 0 && (currentInvoiceTotal > 0 || previousDue > 0)) {
     paymentStatus = 'Paid';
-  } else if (amountPaid > 0 && balanceDue > 0) {
+  } else if (balanceDue === 0 && currentInvoiceTotal > 0 && allocation.remainingOldDue === 0) {
+    paymentStatus = 'Paid';
+  } else if (amountPaid > 0 && customerTotalDue > 0) {
     paymentStatus = 'Partially Paid';
   } else {
     paymentStatus = 'Unpaid';
   }
+
+  const isFullyPaid = customerTotalDue === 0 && (currentInvoiceTotal > 0 || previousDue > 0);
 
   return {
     subtotal,
@@ -303,12 +334,21 @@ export const calculateCanonicalInvoiceFinancials = (inv) => {
     amountPaid,
     balanceDue,
     currentBillDue: balanceDue,
-    customerTotalDue: allocation.customerTotalDue,
+    customerTotalDue,
     allocatedToOldDue: allocation.allocatedToOldDue,
     remainingOldDue: allocation.remainingOldDue,
     allocatedToCurrentInvoice: allocation.allocatedToCurrentInvoice,
     paymentStatus,
-    isFullyPaid: balanceDue === 0 && currentInvoiceTotal > 0
+    isFullyPaid,
+    // Canonical user-preferred semantic aliases
+    earlierBalance: previousDue,
+    thisBill: currentInvoiceTotal,
+    totalAmountDue: totalReceivable,
+    amountStillDue: customerTotalDue,
+    earlierBalancePaid: allocation.allocatedToOldDue,
+    earlierBalanceRemaining: allocation.remainingOldDue,
+    thisBillPaid: allocation.allocatedToCurrentInvoice,
+    thisBillRemaining: allocation.remainingCurrentInvoiceDue
   };
 };
 
@@ -328,11 +368,13 @@ export const normalizeInvoiceFinancials = (inv) => {
     shipping: canonical.shipping,
     grandTotal: canonical.currentInvoiceTotal,
     oldDue: canonical.previousDue,
+    previousDue: canonical.previousDue,
     totalDue: canonical.totalReceivable,
     totalReceivable: canonical.totalReceivable,
     amountPaid: canonical.amountPaid,
     paidAmount: canonical.amountPaid,
     balanceDue: canonical.balanceDue,
+    customerTotalDue: canonical.customerTotalDue,
     paymentStatus: canonical.paymentStatus
   };
 };
@@ -797,17 +839,16 @@ export const computeCustomerLedger = (customer, invoices = [], excludeInvoiceId 
   const openingDue = roundTo2(parseFloat(customer.previousDue ?? customer.openingDue ?? customer.openingBalance) || 0);
   let totalBilled = 0;
   let totalPaid = 0;
-  let totalDue = openingDue;
   const paymentHistory = [];
 
-  customerInvoices.forEach(inv => {
-    const grandTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
-    const paid = getInvoicePaidTotal(inv);
-    const due = Math.max(0, roundTo2(grandTotal - paid));
+  const enrichedCustomerInvoices = customerInvoices.map(inv => {
+    const fin = calculateCanonicalInvoiceFinancials(inv);
+    const grandTotal = fin.currentInvoiceTotal;
+    const paid = fin.amountPaid;
+    const due = fin.previousDue > 0 ? fin.customerTotalDue : fin.balanceDue;
 
     totalBilled += grandTotal;
     totalPaid += paid;
-    totalDue += due;
 
     if (Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0) {
       inv.paymentHistory.forEach(p => {
@@ -827,13 +868,30 @@ export const computeCustomerLedger = (customer, invoices = [], excludeInvoiceId 
         notes: inv.paymentNote || ''
       });
     }
+
+    return {
+      ...inv,
+      canonicalFinancials: fin,
+      grandTotal: fin.currentInvoiceTotal,
+      currentInvoiceTotal: fin.currentInvoiceTotal,
+      thisBill: fin.currentInvoiceTotal,
+      previousDue: fin.previousDue,
+      earlierBalance: fin.previousDue,
+      amountPaid: fin.amountPaid,
+      paidAmount: fin.amountPaid,
+      balanceDue: fin.balanceDue,
+      customerTotalDue: fin.customerTotalDue,
+      amountStillDue: fin.customerTotalDue,
+      paymentStatus: fin.paymentStatus,
+      due
+    };
   });
 
   totalBilled = roundTo2(totalBilled);
   totalPaid = roundTo2(totalPaid);
-  totalDue = roundTo2(totalDue);
+  const totalDue = roundTo2(Math.max(0, openingDue + totalBilled - totalPaid));
 
-  const sortedInvoices = [...customerInvoices].sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+  const sortedInvoices = [...enrichedCustomerInvoices].sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
   const sortedPayments = [...paymentHistory].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
   // Compute Customer Aging & Collection Priority

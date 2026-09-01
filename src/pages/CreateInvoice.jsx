@@ -1139,7 +1139,7 @@ const CreateInvoice = ({
                 <div className="pt-3 border-t border-theme-border-soft/60 space-y-2.5">
                   <div className="flex justify-between items-center text-sm font-semibold text-theme-muted">
                     <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
-                      <span>Previous / Old Due</span>
+                      <span>Earlier Balance</span>
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-theme-muted font-mono font-bold">+</span>
@@ -1148,21 +1148,30 @@ const CreateInvoice = ({
                         className="w-24 px-2.5 py-1 bg-theme-surface border border-amber-500/30 rounded-lg text-sm text-right font-black text-amber-600 dark:text-amber-400 focus:outline-none focus:border-theme-accent transition-colors tabular-nums"
                         value={oldDue} 
                         onChange={(e) => setOldDue(e.target.value)} 
-                        title="Customer prior outstanding due"
+                        title="Customer prior unpaid balance"
                       />
                     </div>
                   </div>
 
                   <div className="flex justify-between items-center text-sm font-bold text-theme-primary">
-                    <span>Current Invoice Total</span>
+                    <span>This Bill</span>
                     <span className="tabular-nums font-black text-theme-primary">
                       <span className="text-xs text-theme-muted font-mono font-bold mr-1">+</span>
                       {formatCurrency(totals.grandTotal)}
                     </span>
                   </div>
 
+                  {totals.oldDue > 0 && (
+                    <div className="flex justify-between items-center text-xs font-bold text-theme-primary border-t border-dashed border-theme-border-soft pt-1.5">
+                      <span>Total Amount Due</span>
+                      <span className="tabular-nums font-black text-theme-primary">
+                        {formatCurrency(totals.totalDue)}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-center text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                    <span>Amount Paid Now</span>
+                    <span>Amount Paid</span>
                     <span className="font-black tabular-nums">
                       <span className="text-xs text-emerald-500 font-mono font-bold mr-1">-</span>
                       {formatCurrency(totals.paidVal)}
@@ -1172,11 +1181,11 @@ const CreateInvoice = ({
                   {totals.oldDue > 0 && totals.paidVal > 0 && (
                     <div className="p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft space-y-1 text-2xs font-semibold">
                       <div className="flex justify-between text-amber-700 dark:text-amber-300">
-                        <span>Paid toward Old Due:</span>
+                        <span>Earlier Balance Paid:</span>
                         <span className="font-bold">{formatCurrency(totals.allocatedToOldDue)} {totals.remainingOldDue > 0 ? `(${formatCurrency(totals.remainingOldDue)} left)` : '(Cleared)'}</span>
                       </div>
                       <div className="flex justify-between text-theme-primary">
-                        <span>Paid toward Current Bill:</span>
+                        <span>This Bill Paid:</span>
                         <span className="font-bold">{formatCurrency(totals.allocatedToCurrentInvoice)} {totals.currentBillDue > 0 ? `(${formatCurrency(totals.currentBillDue)} left)` : '(Cleared)'}</span>
                       </div>
                     </div>
@@ -1185,7 +1194,7 @@ const CreateInvoice = ({
                   <div className="pt-3 mt-1 border-t-2 border-dashed border-theme-border-soft flex flex-col gap-2">
                     <div className="flex justify-between items-center">
                       <div>
-                        <span className="text-sm font-black text-theme-primary block tracking-tight">Remaining Balance Due</span>
+                        <span className="text-sm font-black text-theme-primary block tracking-tight">Amount Still Due</span>
                         <span className="text-[10px] text-theme-muted font-bold font-mono">
                           {formatCurrency(totals.oldDue)} + {formatCurrency(totals.grandTotal)} - {formatCurrency(totals.paidVal)} = {formatCurrency(totals.balanceDue)}
                         </span>

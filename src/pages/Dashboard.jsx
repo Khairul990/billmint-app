@@ -505,9 +505,10 @@ const Dashboard = ({
     let largestSinglePayment = 0;
 
     scopedInvoices.forEach(inv => {
-      const invTotal = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
-      const invPaid = getInvoicePaidTotal(inv);
-      const invDue = getInvoiceBalanceDue(inv);
+      const fin = calculateCanonicalInvoiceFinancials(inv);
+      const invTotal = fin.currentInvoiceTotal;
+      const invPaid = fin.amountPaid;
+      const invDue = fin.previousDue > 0 ? fin.customerTotalDue : fin.balanceDue;
       const invDateStr = getLocalCalendarDate(inv.date) || getLocalCalendarDate(inv.createdAt);
       
       const isTodayInv = invDateStr === todayStr;
@@ -520,17 +521,17 @@ const Dashboard = ({
       totalOutstanding += invDue;
 
       // Status classification
-      const status = getInvoicePaymentStatus(inv);
+      const status = fin.paymentStatus;
       if (status === 'Paid') paidInvoicesCount++;
-      else if (status === 'Partial') partialInvoicesCount++;
+      else if (status === 'Partially Paid' || status === 'Partial') partialInvoicesCount++;
       else unpaidInvoicesCount++;
 
-      // Previous Due extraction (canonical)
-      const prevDueAmt = roundTo2(parseFloat(inv.previousDue || inv.prevDue) || 0);
+      // Previous Due / Earlier Balance extraction (canonical)
+      const prevDueAmt = fin.previousDue;
       if (prevDueAmt > 0) {
         previousDueTotal += prevDueAmt;
       }
-      currentDueTotal += Math.max(0, invDue - prevDueAmt);
+      currentDueTotal += fin.balanceDue;
 
       if (isTodayInv) {
         todaysSales += invTotal;

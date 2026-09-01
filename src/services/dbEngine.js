@@ -195,15 +195,20 @@ export const getDeviceId = () => {
   return id;
 };
 
-const stampRecord = (record, userId) => {
+export const stampRecord = (record, userId) => {
   const now = new Date().toISOString();
+  const clean = { ...(record || {}) };
+  delete clean.password;
+  delete clean.apiKey;
+  delete clean.secret;
+  
   return {
-    ...record,
-    __version: getNextVersion(record),
+    ...clean,
+    __version: getNextVersion(clean),
     updatedAt: now,
     updatedByDeviceId: getDeviceId(),
     source: 'localUserAction',
-    userId: userId || record.userId || getRealUserId() || 'local-user',
+    userId: userId || clean.userId || getRealUserId() || 'local-user',
   };
 };
 
@@ -1061,7 +1066,7 @@ export const updateLocalCache = (key, items) => {
   }
 };
 
-const DEFAULT_SETTINGS = {
+export const DEFAULT_SETTINGS = {
   themePreset: 'light',
   themeColor: 'light',
   darkMode: false,
@@ -1105,7 +1110,8 @@ const DEFAULT_SETTINGS = {
   address: '',
   gstNumber: '',
   currency: '₹',
-  defaultTax: 18,
+  defaultTax: 0,
+  defaultTaxRate: 0,
   adminPasscode: '', // Must be set via admin settings
   adminEmail: getAdminEmail(), // Admin Email for auto-unlock
   defaultBillingTemplate: '',
@@ -1461,7 +1467,8 @@ export const resetToDemoData = () => {
     dateFormat: 'DD/MM/YYYY',
     numberFormat: 'Indian',
     language: 'English',
-    defaultTax: 18,
+    defaultTax: 0,
+    defaultTaxRate: 0,
     adminPasscode: '',
     adminEmail: getAdminEmail(),
     paymentQrEnabled: true,
@@ -3815,15 +3822,22 @@ export const syncFromFirestore = async (force = false) => {
 
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
     
+    const activeInvoices = await getInvoices();
+    const activeCustomers = await getCustomers();
+    const activeProducts = await getProducts();
+    const activeExpenses = await getExpenses();
+    const activeStaff = await getStaff();
+    const activeStudents = await getStudents();
+
     return {
-      settings: JSON.parse(localStorage.getItem(KEYS.SETTINGS)),
-      customers: JSON.parse(localStorage.getItem(KEYS.CUSTOMERS)) || [],
-      staff: JSON.parse(localStorage.getItem(KEYS.STAFF)) || [],
-      products: JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [],
-      invoices: JSON.parse(localStorage.getItem(KEYS.INVOICES)) || [],
-      expenses: JSON.parse(localStorage.getItem(KEYS.EXPENSES)) || [],
-      students: JSON.parse(localStorage.getItem(KEYS.STUDENTS)) || [],
-      subscription: JSON.parse(localStorage.getItem(KEYS.SUBSCRIPTION))
+      settings: getSettings() || JSON.parse(localStorage.getItem(KEYS.SETTINGS) || 'null'),
+      customers: activeCustomers,
+      staff: activeStaff,
+      products: activeProducts,
+      invoices: activeInvoices,
+      expenses: activeExpenses,
+      students: activeStudents,
+      subscription: JSON.parse(localStorage.getItem(KEYS.SUBSCRIPTION) || 'null') || DEFAULT_SUBSCRIPTION
     };
   } catch (error) {
     console.error("Error syncing from Firestore:", error);

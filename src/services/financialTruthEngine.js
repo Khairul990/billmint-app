@@ -45,7 +45,14 @@ export const allocateCustomerPayment = (paymentAmount = 0, previousDue = 0, curr
     allocatedToCurrentInvoice,
     remainingCurrentDue,
     totalCollected,
-    remainingTotalDue
+    remainingTotalDue,
+    // Canonical user-preferred semantic aliases
+    earlierBalancePaid: allocatedToOldDue,
+    earlierBalanceRemaining: remainingOldDue,
+    thisBillPaid: allocatedToCurrentInvoice,
+    thisBillRemaining: remainingCurrentDue,
+    amountPaid: totalCollected,
+    amountStillDue: remainingTotalDue
   };
 };
 
@@ -140,7 +147,7 @@ export const reconcileFinancialState = ({
 
   scopedBankLedger.forEach(b => {
     // Avoid double counting invoice payments logged in bank ledger
-    if (b.source === 'invoice_payment' && (seenInvoicePaymentTxIds.has(b.sourceRefId) || seenInvoicePaymentTxIds.has(b.id))) {
+    if (b.source === 'invoice_payment' || b.invoiceId || (seenInvoicePaymentTxIds.has(b.sourceRefId) || seenInvoicePaymentTxIds.has(b.id))) {
       return;
     }
 
@@ -188,6 +195,11 @@ export const reconcileFinancialState = ({
     // Owner Salary
     if (catLower === 'my salary' || srcLower === 'owner_salary' || (b.type === 'salary' && !catLower.includes('staff'))) {
       ownerSalary = roundTo2(ownerSalary + amt);
+      if (destLoc === 'phonepe') {
+        phonePeInflow = roundTo2(phonePeInflow + amt);
+      } else if (destLoc === 'my_cash') {
+        myCashInflow = roundTo2(myCashInflow + amt);
+      }
       return;
     }
 

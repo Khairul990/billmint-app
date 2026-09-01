@@ -136,6 +136,8 @@ class PaymentEngine {
       source,
       allocatedToOldDue: allocation.allocatedToOldDue,
       allocatedToCurrentInvoice: allocation.allocatedToCurrentInvoice,
+      earlierBalancePaid: allocation.allocatedToOldDue,
+      thisBillPaid: allocation.allocatedToCurrentInvoice,
       customerId: customerId || invoice.customer?.id || invoice.customerId || null,
       customerName: invoice.customer?.name || invoice.customerName || 'Walk-in Customer',
       invoiceId: invoice.id,

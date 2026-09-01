@@ -197,7 +197,7 @@ const SettingsStudioV2 = ({
 
   // Invoice states
   const [invoicePrefix, setInvoicePrefix] = useState('INV-');
-  const [defaultTax, setDefaultTax] = useState(18);
+  const [defaultTax, setDefaultTax] = useState(0);
   const [defaultNotes, setDefaultNotes] = useState('');
   const [terms, setTerms] = useState('');
   const [pdfFooter, setPdfFooter] = useState('');
@@ -288,7 +288,7 @@ const SettingsStudioV2 = ({
       setDateFormat(settings.dateFormat || 'DD/MM/YYYY');
       setNumberFormat(settings.numberFormat || 'Indian');
       setInvoicePrefix(settings.invoicePrefix || 'INV-');
-      setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 18);
+      setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 0);
       setDefaultNotes(settings.defaultNotes || '');
       setTerms(settings.terms || '');
       setPdfFooter(settings.pdfFooter || '');
@@ -564,7 +564,7 @@ const SettingsStudioV2 = ({
     setDateFormat(settings.dateFormat || 'DD/MM/YYYY');
     setNumberFormat(settings.numberFormat || 'Indian');
     setInvoicePrefix(settings.invoicePrefix || 'INV-');
-    setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 18);
+    setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 0);
     setDefaultNotes(settings.defaultNotes || '');
     setTerms(settings.terms || '');
     setPdfFooter(settings.pdfFooter || '');
@@ -663,7 +663,7 @@ const SettingsStudioV2 = ({
   const handleCountryAutoConfigure = (selectedCountry) => {
     if (!window.confirm('Changing country will update defaults. Proceed?')) return;
     setCountry(selectedCountry);
-    if (selectedCountry === 'India') { setCurrency('\u20B9'); setCurrencyCode('INR'); setTaxLabel('GST'); setPaymentMethod('UPI'); setDateFormat('DD/MM/YYYY'); setNumberFormat('Indian'); setDefaultTax(18); }
+    if (selectedCountry === 'India') { setCurrency('₹'); setCurrencyCode('INR'); setTaxLabel('GST'); setPaymentMethod('UPI'); setDateFormat('DD/MM/YYYY'); setNumberFormat('Indian'); setDefaultTax(0); }
     else if (selectedCountry === 'Bangladesh') { setCurrency('\u09F3'); setCurrencyCode('BDT'); setTaxLabel('VAT'); setPaymentMethod('bKash'); setDateFormat('DD/MM/YYYY'); setNumberFormat('Standard'); setDefaultTax(0); }
     else { setCurrency('$'); setCurrencyCode('USD'); setTaxLabel('Tax'); setPaymentMethod('Manual'); setDateFormat('DD/MM/YYYY'); setNumberFormat('Standard'); setDefaultTax(0); }
   };

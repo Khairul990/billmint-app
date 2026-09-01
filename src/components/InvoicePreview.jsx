@@ -380,21 +380,21 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
           )}
           {(financials.previousDue > 0 || financials.amountPaid > 0) && (
             <div className={`flex justify-between items-center border-t pt-1.5 text-theme-primary dark:text-theme-secondary font-bold ${templateId === 'classic-elegant' ? 'border-emerald-800/30' : 'border-theme-border-soft'}`}>
-              <span>Current Invoice</span>
+              <span>This Bill</span>
               <span className="font-extrabold tabular-nums">{formatCurrency(financials.currentInvoiceTotal, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
 
           {((businessSettings?.invoiceBuilderSettings?.showOldDue) || financials.previousDue > 0) && (
             <div className="flex justify-between text-amber-600 dark:text-amber-400 font-bold">
-              <span>Previous / Old Due</span>
+              <span>Earlier Balance</span>
               <span className="tabular-nums">+{formatCurrency(financials.previousDue, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
 
           {((businessSettings?.invoiceBuilderSettings?.showOldDue) || financials.previousDue > 0) && (
             <div className="flex justify-between items-center text-theme-primary dark:text-theme-primary font-bold text-xs pt-1 border-t border-dashed border-theme-border-soft">
-              <span>Total Receivable</span>
+              <span>Total Amount Due</span>
               <span className="font-black tabular-nums">{formatCurrency(financials.totalReceivable, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
@@ -408,7 +408,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
           
           <div className={`flex justify-between items-center border-t pt-2 text-theme-primary dark:text-theme-primary ${templateId === 'classic-elegant' ? 'border-emerald-800/50' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
             <span className="text-sm font-extrabold text-theme-primary dark:text-theme-secondary">
-              {(financials.amountPaid > 0 || financials.previousDue > 0) ? 'Balance Due' : 'Grand Total'}
+              {(financials.amountPaid > 0 || financials.previousDue > 0) ? 'Amount Still Due' : 'Grand Total'}
             </span>
             <span className="text-lg font-black text-theme-accent dark:text-theme-accent tabular-nums">
               {formatCurrency(financials.customerTotalDue ?? (financials.previousDue > 0 ? (financials.remainingOldDue + financials.currentBillDue) : financials.balanceDue), currencySymbol, regionalPrefs.numberFormat)}

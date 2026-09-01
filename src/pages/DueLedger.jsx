@@ -11,7 +11,8 @@ import {
   getInvoiceDaysOverdue, 
   getInvoiceAgingBucket, 
   calculateCollectionPriority, 
-  calculateAgingDistribution 
+  calculateAgingDistribution,
+  calculateCanonicalInvoiceFinancials
 } from '../utils/invoiceMath';
 import { invoiceEngine } from '../services/invoiceEngine';
 import { shareOnWhatsApp } from '../services/invoiceShareService2';
@@ -35,7 +36,7 @@ const getUrgencyBadge = (bill) => {
 };
 
 const getStatusBadge = (bill) => {
-  if (bill.status === 'partial') return { label: 'Partial', class: 'badge-warning' };
+  if (bill.status === 'partial' || bill.paymentStatus === 'Partially Paid' || bill.paymentStatus === 'Partial') return { label: 'Partial', class: 'badge-warning' };
   return { label: 'Unpaid', class: 'badge-danger' };
 };
 
@@ -156,20 +157,23 @@ const DueCenter = ({ customers = [], invoices = [], businessSettings, onPaymentR
     return invoices
       .filter(inv => {
         if (!inv || inv.isDeleted || inv.status === 'Cancelled' || inv.status === 'Void') return false;
-        const due = getInvoiceBalanceDue(inv);
+        const fin = calculateCanonicalInvoiceFinancials(inv);
+        const due = fin.previousDue > 0 ? fin.customerTotalDue : fin.balanceDue;
         return due > 0;
       })
       .map(inv => {
-        const grandTotal = Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
-        const paidAmount = getInvoicePaidTotal(inv);
-        const dueAmount = getInvoiceBalanceDue(inv);
+        const fin = calculateCanonicalInvoiceFinancials(inv);
+        const dueAmount = fin.previousDue > 0 ? fin.customerTotalDue : fin.balanceDue;
         return {
           ...inv,
-          grandTotal,
-          paidAmount,
-          amountPaid: paidAmount,
+          grandTotal: fin.currentInvoiceTotal,
+          paidAmount: fin.amountPaid,
+          amountPaid: fin.amountPaid,
           dueAmount,
           balanceDue: dueAmount,
+          customerTotalDue: fin.customerTotalDue,
+          previousDue: fin.previousDue,
+          earlierBalance: fin.previousDue,
           dueDate: new Date(inv.dueDate || inv.createdAt)
         };
       })

@@ -137,20 +137,28 @@ const CustomerLedger = ({
                 <span className="block text-sm sm:text-base font-black text-theme-primary tabular-nums">{formatCurrency(totalBilled)}</span>
               </div>
               <div className="bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40 rounded-2xl p-3 text-center shadow-xs">
-                <span className="block text-[10px] uppercase font-black tracking-wider text-emerald-600 dark:text-emerald-400 mb-0.5">Total Paid</span>
+                <span className="block text-[10px] uppercase font-black tracking-wider text-emerald-600 dark:text-emerald-400 mb-0.5">Amount Paid</span>
                 <span className="block text-sm sm:text-base font-black text-emerald-700 dark:text-emerald-300 tabular-nums">{formatCurrency(totalPaid)}</span>
               </div>
               <div className="bg-rose-50/60 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 rounded-2xl p-3 text-center shadow-xs">
-                <span className="block text-[10px] uppercase font-black tracking-wider text-rose-600 dark:text-rose-400 mb-0.5">Balance Due</span>
+                <span className="block text-[10px] uppercase font-black tracking-wider text-rose-600 dark:text-rose-400 mb-0.5">Amount Still Due</span>
                 <span className="block text-sm sm:text-base font-black text-rose-700 dark:text-rose-300 tabular-nums">{formatCurrency(totalDue)}</span>
               </div>
             </div>
+
+            {/* Opening Earlier Balance Note if exists */}
+            {parseFloat(customer.previousDue ?? customer.openingDue ?? customer.openingBalance) > 0 && (
+              <div className="flex items-center justify-between text-xs font-bold bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 rounded-xl px-3 py-2 text-amber-800 dark:text-amber-300">
+                <span>Manual Earlier Balance:</span>
+                <span className="tabular-nums font-black">{formatCurrency(parseFloat(customer.previousDue ?? customer.openingDue ?? customer.openingBalance))}</span>
+              </div>
+            )}
 
             {/* Credit Aging Distribution Card */}
             {totalDue > 0 && aging && (
               <div className="bg-theme-app/70 border border-theme-border-soft rounded-2xl p-3 space-y-2 shadow-xs">
                 <div className="flex items-center justify-between text-[11px] font-bold text-theme-muted border-b border-theme-border-soft/60 pb-1.5">
-                  <span className="uppercase tracking-wider">Credit Aging Breakdown</span>
+                  <span className="uppercase tracking-wider">Payment Delay Breakdown</span>
                   {oldestDueDate && (
                     <span className="text-[10px] text-theme-muted font-normal">
                       Oldest: {new Date(oldestDueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -232,10 +240,18 @@ const CustomerLedger = ({
               ) : (
                 <div className="space-y-2">
                   {customerInvoices.map((inv) => {
-                    const grandTotal = parseFloat(inv.grandTotal || inv.total) || 0;
-                    const paid = inv.paymentStatus === 'Paid' ? grandTotal : (parseFloat(inv.amountPaid ?? inv.paidAmount) || 0);
-                    const due = Math.max(0, grandTotal - paid);
-                    const isPaid = due === 0;
+                    const fin = inv.canonicalFinancials || {
+                      currentInvoiceTotal: parseFloat(inv.grandTotal || inv.total) || 0,
+                      previousDue: parseFloat(inv.oldDue || inv.previousDue) || 0,
+                      totalReceivable: (parseFloat(inv.grandTotal || inv.total) || 0) + (parseFloat(inv.oldDue || inv.previousDue) || 0),
+                      amountPaid: parseFloat(inv.amountPaid ?? inv.paidAmount) || 0,
+                      customerTotalDue: inv.due ?? 0,
+                      paymentStatus: inv.paymentStatus || 'Unpaid'
+                    };
+                    const thisBill = fin.currentInvoiceTotal;
+                    const earlierBal = fin.previousDue;
+                    const totalDueOnInv = fin.previousDue > 0 ? fin.customerTotalDue : fin.balanceDue;
+                    const isPaid = totalDueOnInv === 0;
 
                     return (
                       <div key={inv.id} className="bg-theme-card border border-theme-border-soft rounded-2xl p-3.5 shadow-xs hover:border-theme-accent/30 transition-all">
@@ -246,23 +262,30 @@ const CustomerLedger = ({
                               <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
                                 isPaid 
                                   ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400' 
-                                  : 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400'
+                                  : fin.amountPaid > 0 
+                                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400'
+                                  : 'bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400'
                               }`}>
-                                {inv.paymentStatus || (isPaid ? 'Paid' : 'Unpaid')}
+                                {fin.paymentStatus || (isPaid ? 'Paid' : 'Unpaid')}
                               </span>
                             </div>
                             <span className="text-[10px] font-bold text-theme-muted flex items-center gap-1 mt-1">
                               <Calendar className="w-3 h-3" /> {new Date(inv.date || inv.createdAt).toLocaleDateString()}
                             </span>
+                            {earlierBal > 0 && (
+                              <span className="text-[10px] font-bold text-amber-600 block mt-0.5">
+                                Earlier Balance: +{formatCurrency(earlierBal)}
+                              </span>
+                            )}
                           </div>
                           
                           <div className="text-right">
                             <span className="text-xs sm:text-sm font-black text-theme-primary block tabular-nums">
-                              {formatCurrency(grandTotal)}
+                              {formatCurrency(thisBill)}
                             </span>
                             {!isPaid && (
                               <span className="text-[10px] font-extrabold text-rose-500 tabular-nums">
-                                Due: {formatCurrency(due)}
+                                Due: {formatCurrency(totalDueOnInv)}
                               </span>
                             )}
                           </div>

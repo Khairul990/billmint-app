@@ -1744,15 +1744,15 @@ const CollectionCenter = ({
                     {/* Allocation Preview for Customer Payment */}
                     {selectedTxType === 'customer_payment' && selectedInvoice && parseFloat(amountInput) > 0 && (
                       <div className="p-3 rounded-xl bg-theme-surface/70 border border-theme-border-soft space-y-1.5 text-2xs">
-                        <div className="font-bold text-theme-muted uppercase text-[10px]">Allocation Breakdown:</div>
+                        <div className="font-bold text-theme-muted uppercase text-[10px]">Payment Waterfall Breakdown:</div>
                         <div className="flex justify-between">
-                          <span className="text-theme-muted">To Previous Due:</span>
+                          <span className="text-theme-muted">To Earlier Balance:</span>
                           <span className="font-mono font-bold text-amber-600">
                             {formatCurrency(liveAllocation.allocatedToOldDue, currencySymbol)}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-theme-muted">To Current Invoice:</span>
+                          <span className="text-theme-muted">To This Bill:</span>
                           <span className="font-mono font-bold text-emerald-600">
                             {formatCurrency(liveAllocation.allocatedToCurrentInvoice, currencySymbol)}
                           </span>

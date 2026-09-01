@@ -24,7 +24,8 @@ import {
   filterByDateRange,
   filterByWorkspace,
   getInvoicePaidTotal,
-  getInvoiceBalanceDue
+  getInvoiceBalanceDue,
+  calculateCanonicalInvoiceFinancials
 } from '../utils/financialCalculations';
 import { reportEngine } from '../services/reportEngine';
 
@@ -109,18 +110,20 @@ const Reports = ({
 
       return true;
     }).map(inv => {
-      const grandTotal = Math.round((parseFloat(inv.grandTotal || inv.total) || 0) * 100) / 100;
-      const paid = getInvoicePaidTotal(inv);
-      const due = getInvoiceBalanceDue(inv);
+      const fin = calculateCanonicalInvoiceFinancials(inv);
+      const grandTotal = fin.currentInvoiceTotal;
+      const paid = fin.amountPaid;
+      const due = fin.previousDue > 0 ? fin.customerTotalDue : fin.balanceDue;
 
       return {
         ...inv,
         parsedType: inv.documentType || (inv.billType === 'Estimate' ? 'Estimate' : 'Invoice'),
         parsedDate: new Date(inv.date || inv.createdAt),
         parsedTotal: grandTotal,
+        parsedEarlierBalance: fin.previousDue,
         parsedPaid: paid,
         parsedDue: due,
-        parsedStatus: inv.paymentStatus || 'Unpaid'
+        parsedStatus: fin.paymentStatus
       };
     }).sort((a, b) => b.parsedDate - a.parsedDate);
   }, [dateFilteredInvoices, docType, paymentStatus]);

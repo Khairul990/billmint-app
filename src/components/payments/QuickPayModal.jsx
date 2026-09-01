@@ -160,27 +160,27 @@ const QuickPayModal = ({
             {/* Financial Overview Cards */}
             <div className="bg-theme-app/60 border border-theme-border-soft rounded-2xl p-3.5 space-y-2.5 shadow-xs font-numbers">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-theme-muted font-bold">Current Invoice</span>
+                <span className="text-theme-muted font-bold">This Bill</span>
                 <span className="font-black text-theme-primary">{formatCurrency(fin.currentInvoiceTotal, currencySymbol)}</span>
               </div>
 
               {previousDue > 0 && (
                 <div className="flex items-center justify-between text-xs text-amber-600 dark:text-amber-400">
-                  <span className="font-bold">+ Previous / Old Due</span>
+                  <span className="font-bold">+ Earlier Balance</span>
                   <span className="font-black">+{formatCurrency(previousDue, currencySymbol)}</span>
                 </div>
               )}
 
               {fin.amountPaid > 0 && (
                 <div className="flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400">
-                  <span className="font-bold">- Already Paid</span>
+                  <span className="font-bold">- Amount Paid</span>
                   <span className="font-black">-{formatCurrency(fin.amountPaid, currencySymbol)}</span>
                 </div>
               )}
 
               <div className="border-t border-theme-border-soft/60 pt-2 flex items-center justify-between">
                 <span className="text-xs font-black uppercase text-theme-primary">
-                  {previousDue > 0 ? 'Total Customer Due' : 'Balance Due'}
+                  {(previousDue > 0 || fin.amountPaid > 0) ? 'Amount Still Due' : 'Total Amount Due'}
                 </span>
                 <span className="text-base font-black text-rose-600 dark:text-rose-400 tabular-nums">
                   {formatCurrency(customerTotalDue, currencySymbol)}
@@ -201,7 +201,7 @@ const QuickPayModal = ({
                       : 'bg-theme-card border-theme-border-soft hover:bg-theme-surface text-theme-primary font-bold'
                   }`}
                 >
-                  <span className="text-[10px] text-theme-muted block font-semibold uppercase">Current Invoice</span>
+                  <span className="text-[10px] text-theme-muted block font-semibold uppercase">This Bill Balance</span>
                   <span className="text-xs font-numbers block mt-0.5">{formatCurrency(currentBillBalance, currencySymbol)}</span>
                 </button>
 
@@ -215,7 +215,7 @@ const QuickPayModal = ({
                         : 'bg-theme-card border-theme-border-soft hover:bg-theme-surface text-theme-primary font-bold'
                     }`}
                   >
-                    <span className="text-[10px] text-theme-muted block font-semibold uppercase">Total Customer Due</span>
+                    <span className="text-[10px] text-theme-muted block font-semibold uppercase">Total Amount Due</span>
                     <span className="text-xs font-numbers block mt-0.5 text-rose-600">{formatCurrency(customerTotalDue, currencySymbol)}</span>
                   </button>
                 )}

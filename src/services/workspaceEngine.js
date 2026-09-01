@@ -98,15 +98,30 @@ export const workspaceEngine = {
     return 'user';
   },
 
-  async createWorkspace(name, userId) {
+  async createWorkspace(name, userId, type = 'default') {
     const uid = userId || getRealUserId() || 'local-user';
     const wsId = 'ws_' + Date.now();
     const settings = getSettings() || {};
     settings.activeWorkspaceId = wsId;
     settings.businessName = name;
+    
+    const newWs = {
+      id: wsId,
+      name,
+      type,
+      enabledModules: ['billing', 'customers', 'products', 'dueLedger', 'reports'],
+      createdAt: Date.now()
+    };
+    const currentWsList = Array.isArray(settings.businessWorkspaces) ? settings.businessWorkspaces : [];
+    settings.businessWorkspaces = [...currentWsList, newWs];
+
     saveSettings(settings);
+    if (uid) {
+      localStorage.setItem(`billqyro_${uid}_last_workspace`, wsId);
+    }
     logAudit('workspace_created', 'workspace', wsId, null, { name, userId: uid });
     window.dispatchEvent(new CustomEvent('billqyro_workspace_changed', { detail: { workspaceId: wsId } }));
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
     return wsId;
   }
 };

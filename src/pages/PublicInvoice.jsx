@@ -810,19 +810,19 @@ const PublicInvoice = ({ initialInvoice }) => {
                   )}
                   {(canonical.previousDue > 0 || canonical.amountPaid > 0) && (
                     <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft font-bold">
-                      <span className="text-theme-muted">Current Invoice</span>
+                      <span className="text-theme-muted">This Bill</span>
                       <span className="text-theme-primary tabular-nums">{formatVal(canonical.currentInvoiceTotal)}</span>
                     </div>
                   )}
                   {canonical.previousDue > 0 && (
                     <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft text-amber-600 font-bold">
-                      <span>Previous / Old Due</span>
+                      <span>Earlier Balance</span>
                       <span className="tabular-nums">+{formatVal(canonical.previousDue)}</span>
                     </div>
                   )}
                   {canonical.previousDue > 0 && (
                     <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-dashed border-theme-border-soft font-bold">
-                      <span className="text-theme-primary">Total Receivable</span>
+                      <span className="text-theme-primary">Total Amount Due</span>
                       <span className="text-theme-primary tabular-nums">{formatVal(canonical.totalReceivable)}</span>
                     </div>
                   )}
@@ -834,9 +834,11 @@ const PublicInvoice = ({ initialInvoice }) => {
                   )}
                   <div className="flex justify-between items-center py-2 md:py-2.5 px-3 md:px-3.5 bg-theme-accent/5 border border-theme-accent/20 rounded-xl text-xs md:text-sm">
                     <span className="font-extrabold text-theme-primary">
-                      {(canonical.amountPaid > 0 || canonical.previousDue > 0) ? 'Balance Due' : 'Grand Total'}
+                      {(canonical.amountPaid > 0 || canonical.previousDue > 0) ? 'Amount Still Due' : 'Grand Total'}
                     </span>
-                    <span className="font-black text-theme-accent text-sm md:text-base tabular-nums">{formatVal(canonical.balanceDue)}</span>
+                    <span className="font-black text-theme-accent text-sm md:text-base tabular-nums">
+                      {formatVal(canonical.previousDue > 0 ? (canonical.customerTotalDue ?? (canonical.remainingOldDue + canonical.currentBillDue)) : canonical.balanceDue)}
+                    </span>
                   </div>
                 </div>
               </div>

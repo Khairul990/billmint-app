@@ -64,21 +64,21 @@ export const HtmlTotalsSummary = ({
 
       {(fin.previousDue > 0 || fin.amountPaid > 0) && (
         <div className={`flex justify-between pt-1 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'} font-bold`}>
-          <span className={labelColor}>Current Bill:</span>
+          <span className={labelColor}>This Bill:</span>
           <span className={`${valColor} tabular-nums`}>{fmt(fin.currentInvoiceTotal)}</span>
         </div>
       )}
 
       {showOldDue && (
         <div className="flex justify-between text-amber-600 font-bold">
-          <span>Previous / Old Due:</span>
+          <span>Earlier Balance:</span>
           <span className="tabular-nums">+{fmt(fin.previousDue)}</span>
         </div>
       )}
 
       {showOldDue && (
         <div className={`flex justify-between pt-1 border-t border-dashed ${isDark ? 'border-gray-700' : 'border-gray-200'} font-bold`}>
-          <span className={labelColor}>Total Receivable:</span>
+          <span className={labelColor}>Total Amount Due:</span>
           <span className={`${valColor} tabular-nums`}>{fmt(fin.totalReceivable)}</span>
         </div>
       )}
@@ -93,11 +93,11 @@ export const HtmlTotalsSummary = ({
       {fin.previousDue > 0 && fin.amountPaid > 0 && (
         <div className="p-1.5 rounded bg-gray-50 dark:bg-gray-800 text-[10px] space-y-0.5 border border-gray-200 dark:border-gray-700">
           <div className="flex justify-between text-amber-600 dark:text-amber-400 font-medium">
-            <span>Paid to Old Due:</span>
+            <span>Earlier Balance Paid:</span>
             <span className="font-bold">{fmt(fin.allocatedToOldDue)} {fin.remainingOldDue > 0 ? `(${fmt(fin.remainingOldDue)} left)` : '(Cleared)'}</span>
           </div>
           <div className="flex justify-between text-gray-700 dark:text-gray-300 font-medium">
-            <span>Paid to Current Bill:</span>
+            <span>This Bill Paid:</span>
             <span className="font-bold">{fmt(fin.allocatedToCurrentInvoice)} {fin.currentBillDue > 0 ? `(${fmt(fin.currentBillDue)} left)` : '(Cleared)'}</span>
           </div>
         </div>
@@ -105,10 +105,10 @@ export const HtmlTotalsSummary = ({
 
       <div className={`flex justify-between items-center ${badgeClass ? badgeClass : `pt-2 border-t-2 ${isDark ? 'border-gray-700' : 'border-gray-900'} font-extrabold text-sm`}`}>
         <span className={accentClass}>
-          {fin.previousDue > 0 ? 'Net Outstanding Due:' : fin.amountPaid > 0 ? 'Balance Due:' : 'Total Payable:'}
+          {(fin.previousDue > 0 || fin.amountPaid > 0) ? 'Amount Still Due:' : 'Total Amount Due:'}
         </span>
         <span className={`${accentClass} tabular-nums font-black`}>
-          {fmt(customerNetDue)}
+          {fmt(fin.customerTotalDue ?? (fin.previousDue > 0 ? (fin.remainingOldDue + fin.currentBillDue) : fin.balanceDue))}
         </span>
       </div>
     </div>

@@ -584,21 +584,21 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
 
             {(financials.previousDue > 0 || financials.amountPaid > 0) && (
               <View style={styles.totalRow}>
-                <Text style={styles.metaText}>Current Invoice</Text>
+                <Text style={styles.metaText}>This Bill</Text>
                 <Text style={{ fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(financials.currentInvoiceTotal, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
             {((businessSettings?.invoiceBuilderSettings?.showOldDue) || financials.previousDue > 0) && (
               <View style={styles.totalRow}>
-                <Text style={{ fontSize: 8.5, color: '#d97706' }}>Previous / Old Due</Text>
+                <Text style={{ fontSize: 8.5, color: '#d97706' }}>Earlier Balance</Text>
                 <Text style={{ fontSize: 8.5, color: '#d97706', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>+{formatCurrency(financials.previousDue, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
 
             {((businessSettings?.invoiceBuilderSettings?.showOldDue) || financials.previousDue > 0) && (
               <View style={styles.totalRow}>
-                <Text style={styles.metaText}>Total Receivable</Text>
+                <Text style={styles.metaText}>Total Amount Due</Text>
                 <Text style={{ fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(financials.totalReceivable, currencySymbol, regionalPrefs.numberFormat)}</Text>
               </View>
             )}
@@ -612,7 +612,7 @@ const PdfDocument = ({ invoice, businessSettings, qrCodeBase64, safeLogoBase64, 
 
             <View style={[styles.summaryRow, styles.balanceDueRow, { borderTopColor: tAccent }]} wrap={false}>
               <Text style={[styles.balanceDueLabel, { color: tPrimary }]}>
-                {(financials.amountPaid > 0 || financials.previousDue > 0) ? 'Balance Due' : 'Grand Total'}
+                {(financials.amountPaid > 0 || financials.previousDue > 0) ? 'Amount Still Due' : 'Grand Total'}
               </Text>
               <Text style={[styles.balanceDueValue, { color: tAccent }]}>
                 {formatCurrency(financials.customerTotalDue ?? (financials.previousDue > 0 ? (financials.remainingOldDue + financials.currentBillDue) : financials.balanceDue), currencySymbol, regionalPrefs.numberFormat)}
